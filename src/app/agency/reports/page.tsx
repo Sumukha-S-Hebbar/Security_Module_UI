@@ -56,8 +56,8 @@ export default function AgencyReportsPage() {
     return supervisors.find((s) => s.id === guard.supervisorId) || null;
   };
 
-  const getOpenIncidentsCount = (site: Site): number => {
-    return site.incidents?.filter((incident) => !incident.resolved).length || 0;
+  const getIncidentsCount = (site: Site): number => {
+    return site.incidents?.length || 0;
   };
 
   const handleDownloadReport = (site: Site) => {
@@ -144,14 +144,14 @@ export default function AgencyReportsPage() {
                   <TableHead>Site</TableHead>
                   <TableHead>Supervisor</TableHead>
                   <TableHead>Assigned Guards</TableHead>
-                  <TableHead>Open Incidents</TableHead>
+                  <TableHead>Number of Incidents</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {sites.map((site) => {
                   const supervisor = getSupervisorForSite(site.id);
-                  const openIncidents = getOpenIncidentsCount(site);
+                  const incidentsCount = getIncidentsCount(site);
                   return (
                     <TableRow key={site.id}>
                       <TableCell>
@@ -163,11 +163,7 @@ export default function AgencyReportsPage() {
                       <TableCell>{supervisor?.name || 'Unassigned'}</TableCell>
                       <TableCell>{site.guards.length}</TableCell>
                       <TableCell>
-                        {openIncidents > 0 ? (
-                          <Badge variant="destructive">{openIncidents}</Badge>
-                        ) : (
-                          <Badge variant="secondary">0</Badge>
-                        )}
+                        <Badge variant="secondary">{incidentsCount}</Badge>
                       </TableCell>
                       <TableCell className="text-right">
                         <Button
