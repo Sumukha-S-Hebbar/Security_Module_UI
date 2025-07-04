@@ -12,7 +12,7 @@ export function ComplianceWatchlist({ guards }: { guards: Guard[] }) {
           <CardTitle>Selfie Misses Watchlist</CardTitle>
         </div>
         <CardDescription>
-          Guards with missed selfie requests. Analysis powered by AI.
+          Guards with missed selfie requests.
         </CardDescription>
       </CardHeader>
       <div className="p-6 pt-0 grid gap-4 md:grid-cols-2">
