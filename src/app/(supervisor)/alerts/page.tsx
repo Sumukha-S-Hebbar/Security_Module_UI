@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { alerts, guards } from '@/lib/data';
+import { alerts as initialAlerts, guards } from '@/lib/data';
 import {
   Table,
   TableBody,
@@ -31,16 +31,27 @@ import {
   LogOut,
   Phone,
   Eye,
+  ShieldAlert,
+  CheckCircle,
 } from 'lucide-react';
 import type { Alert } from '@/types';
 
 export default function AlertsPage() {
+  const [alerts, setAlerts] = useState<Alert[]>(initialAlerts);
   const [selectedAlert, setSelectedAlert] = useState<Alert | null>(null);
 
   const emergencyAlerts = alerts.filter((alert) => alert.type === 'Emergency');
   const otherAlerts = alerts.filter((alert) => alert.type !== 'Emergency');
 
   const getGuardByName = (name: string) => guards.find((g) => g.name === name);
+
+  const handleStatusChange = (alertId: string, status: Alert['status']) => {
+    setAlerts((prevAlerts) =>
+      prevAlerts.map((alert) =>
+        alert.id === alertId ? { ...alert, status } : alert
+      )
+    );
+  };
 
   const alertTypeDisplay = (type: Alert['type']) => {
     switch (type) {
@@ -104,6 +115,7 @@ export default function AlertsPage() {
                   <TableHead>Guard</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Details</TableHead>
+                  <TableHead>Actions</TableHead>
                   <TableHead>Contact</TableHead>
                 </TableRow>
               </TableHeader>
@@ -132,6 +144,35 @@ export default function AlertsPage() {
                             No Media
                           </span>
                         )}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() =>
+                              handleStatusChange(alert.id, 'Investigating')
+                            }
+                            disabled={
+                              alert.status === 'Investigating' ||
+                              alert.status === 'Resolved'
+                            }
+                          >
+                            <ShieldAlert className="mr-2 h-4 w-4" />
+                            Investigating
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() =>
+                              handleStatusChange(alert.id, 'Resolved')
+                            }
+                            disabled={alert.status === 'Resolved'}
+                          >
+                            <CheckCircle className="mr-2 h-4 w-4" />
+                            Resolved
+                          </Button>
+                        </div>
                       </TableCell>
                       <TableCell>
                         {guardDetails ? (
