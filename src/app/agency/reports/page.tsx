@@ -7,6 +7,7 @@ import type { DateRange } from 'react-day-picker';
 
 import { cn } from '@/lib/utils';
 import { sites, guards } from '@/lib/data';
+import type { Site, Incident } from '@/types';
 import { useToast } from '@/hooks/use-toast';
 
 import { Button } from '@/components/ui/button';
@@ -32,37 +33,87 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+
+type GeneratedSiteReport = {
+  site: Site;
+  dateRange: DateRange;
+  incidents: Incident[];
+};
 
 export default function AgencyReportsPage() {
   const [siteId, setSiteId] = useState<string>('');
   const [guardId, setGuardId] = useState<string>('');
   const [siteDate, setSiteDate] = useState<DateRange | undefined>();
   const [guardDate, setGuardDate] = useState<DateRange | undefined>();
+  const [generatedSiteReport, setGeneratedSiteReport] =
+    useState<GeneratedSiteReport | null>(null);
   const { toast } = useToast();
 
   const handleGenerateReport = (type: 'site' | 'guard') => {
-    const entityId = type === 'site' ? siteId : guardId;
-    const entityName =
-      type === 'site'
-        ? sites.find((s) => s.id === entityId)?.name
-        : guards.find((g) => g.id === entityId)?.name;
-    const dateRange = type === 'site' ? siteDate : guardDate;
+    if (type === 'site') {
+      if (!siteId || !siteDate?.from || !siteDate?.to) {
+        toast({
+          variant: 'destructive',
+          title: 'Missing Information',
+          description:
+            'Please select a site and a date range to generate a report.',
+        });
+        setGeneratedSiteReport(null);
+        return;
+      }
 
-    if (!entityId || !dateRange?.from || !dateRange?.to) {
-      toast({
-        variant: 'destructive',
-        title: 'Missing Information',
-        description:
-          'Please select a target and a date range to generate a report.',
+      const site = sites.find((s) => s.id === siteId);
+      if (!site) return;
+
+      // In a real app, you would filter incidents by date range.
+      const siteIncidents = site.incidents || [];
+
+      setGeneratedSiteReport({
+        site: site,
+        dateRange: siteDate,
+        incidents: siteIncidents,
       });
-      return;
-    }
 
+      toast({
+        title: 'Report Generated',
+        description: `Site report for ${site.name} is now available below.`,
+      });
+    } else {
+      // Guard report generation logic
+      const entityName = guards.find((g) => g.id === guardId)?.name;
+
+      if (!guardId || !guardDate?.from || !guardDate?.to) {
+        toast({
+          variant: 'destructive',
+          title: 'Missing Information',
+          description:
+            'Please select a guard and a date range to generate a report.',
+        });
+        return;
+      }
+      toast({
+        title: 'Report Generation Not Implemented',
+        description: `Generating guard reports is not yet available.`,
+      });
+    }
+  };
+
+  const handleDownload = () => {
+    if (!generatedSiteReport) return;
     toast({
-      title: 'Report Generation Started',
-      description: `Generating ${type} report for ${entityName}. This will be available in the "Recent Reports" section shortly.`,
+      title: 'Download Started',
+      description: `Downloading report for ${generatedSiteReport.site.name}.`,
     });
-    // In a real app, this would trigger a background job and update the list below.
+    // In a real app, this would trigger a file download.
   };
 
   return (
@@ -216,17 +267,115 @@ export default function AgencyReportsPage() {
         </Card>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Recent Reports</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center text-muted-foreground py-8">
-            <p>Your generated reports will appear here.</p>
-            <p className="text-xs">No reports generated yet.</p>
-          </div>
-        </CardContent>
-      </Card>
+      {generatedSiteReport ? (
+        <Card>
+          <CardHeader className="flex flex-row items-start justify-between gap-4">
+            <div>
+              <CardTitle>
+                Site Report: {generatedSiteReport.site.name}
+              </CardTitle>
+              <CardDescription>
+                {generatedSiteReport.dateRange.from &&
+                  format(generatedSiteReport.dateRange.from, 'LLL dd, y')}{' '}
+                -{' '}
+                {generatedSiteReport.dateRange.to &&
+                  format(generatedSiteReport.dateRange.to, 'LLL dd, y')}
+              </CardDescription>
+            </div>
+            <Button onClick={handleDownload} className="flex-shrink-0">
+              <FileDown className="mr-2 h-4 w-4" />
+              Download Report
+            </Button>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div>
+              <h3 className="text-lg font-semibold mb-2">Site Details</h3>
+              <div className="text-sm border rounded-lg p-4 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2">
+                <p>
+                  <span className="font-medium text-muted-foreground">
+                    Site ID:
+                  </span>{' '}
+                  {generatedSiteReport.site.id}
+                </p>
+                <p>
+                  <span className="font-medium text-muted-foreground">
+                    Address:
+                  </span>{' '}
+                  {generatedSiteReport.site.address}
+                </p>
+                <p>
+                  <span className="font-medium text-muted-foreground">
+                    TowerCo:
+                  </span>{' '}
+                  {generatedSiteReport.site.towerco}
+                </p>
+                <p>
+                  <span className="font-medium text-muted-foreground">
+                    Assigned Guards:
+                  </span>{' '}
+                  {generatedSiteReport.site.guards.length}
+                </p>
+              </div>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold mb-2">Incidents Log</h3>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Incident ID</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Details</TableHead>
+                    <TableHead>Status</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {generatedSiteReport.incidents.length > 0 ? (
+                    generatedSiteReport.incidents.map((incident) => (
+                      <TableRow key={incident.id}>
+                        <TableCell>{incident.id}</TableCell>
+                        <TableCell>{incident.date}</TableCell>
+                        <TableCell>{incident.type}</TableCell>
+                        <TableCell>{incident.details}</TableCell>
+                        <TableCell>
+                          <Badge
+                            variant={incident.resolved ? 'secondary' : 'destructive'}
+                          >
+                            {incident.resolved ? 'Resolved' : 'Open'}
+                          </Badge>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell
+                        colSpan={5}
+                        className="text-center text-muted-foreground h-24"
+                      >
+                        No incidents recorded for this site.
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
+      ) : (
+        <Card>
+          <CardHeader>
+            <CardTitle>Generated Reports</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-center text-muted-foreground py-8">
+              <p>Your generated reports will appear here.</p>
+              <p className="text-xs">
+                Generate a report above to view details.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
