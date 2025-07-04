@@ -144,34 +144,36 @@ export default function AgencyIncidentsPage() {
                           )}
                         </TableCell>
                         <TableCell>
-                          <div className="flex items-center gap-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() =>
-                                handleStatusChange(alert.id, 'Investigating')
-                              }
-                              disabled={
-                                alert.status === 'Investigating' ||
-                                alert.status === 'Resolved'
-                              }
-                            >
-                              <ShieldAlert className="mr-2 h-4 w-4" />
-                              Investigate
-                            </Button>
-
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() =>
-                                handleStatusChange(alert.id, 'Resolved')
-                              }
-                              disabled={isResolved}
-                            >
-                              <CheckCircle className="mr-2 h-4 w-4" />
-                              Resolved
-                            </Button>
-                          </div>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="outline" size="sm">
+                                Actions <ChevronDown className="ml-2 h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem
+                                onClick={() =>
+                                  handleStatusChange(alert.id, 'Investigating')
+                                }
+                                disabled={
+                                  alert.status === 'Investigating' ||
+                                  alert.status === 'Resolved'
+                                }
+                              >
+                                <ShieldAlert className="mr-2 h-4 w-4" />
+                                Investigate
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() =>
+                                  handleStatusChange(alert.id, 'Resolved')
+                                }
+                                disabled={isResolved}
+                              >
+                                <CheckCircle className="mr-2 h-4 w-4" />
+                                Resolved
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         </TableCell>
                         <TableCell>
                           {guardDetails || supervisorDetails ? (
