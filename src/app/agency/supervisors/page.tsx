@@ -11,7 +11,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Users, Mail, Phone } from 'lucide-react';
+import { Users, Phone } from 'lucide-react';
 import { SupervisorUploader } from './_components/supervisor-uploader';
 
 export default function AgencySupervisorsPage() {
@@ -35,7 +35,7 @@ export default function AgencySupervisorsPage() {
                         <TableHeader>
                             <TableRow>
                                 <TableHead>Supervisor</TableHead>
-                                <TableHead>Contact</TableHead>
+                                <TableHead>Phone Number</TableHead>
                                 <TableHead>Assigned Guards</TableHead>
                                 <TableHead>Actions</TableHead>
                             </TableRow>
@@ -59,10 +59,6 @@ export default function AgencySupervisorsPage() {
                                     </TableCell>
                                     <TableCell>
                                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                            <Mail className="h-4 w-4" />
-                                            <a href={`mailto:${supervisor.email}`} className="hover:underline">{supervisor.email}</a>
-                                        </div>
-                                        <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
                                             <Phone className="h-4 w-4" />
                                             <span>{supervisor.phone}</span>
                                         </div>
