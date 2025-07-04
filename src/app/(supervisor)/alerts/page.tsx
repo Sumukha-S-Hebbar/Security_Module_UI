@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -166,7 +167,7 @@ export default function AlertsPage() {
                             }
                           >
                             <ShieldAlert className="mr-2 h-4 w-4" />
-                            Investigating
+                            Investigate
                           </Button>
 
                           <Button
