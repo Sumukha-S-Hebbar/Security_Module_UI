@@ -33,13 +33,15 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Eye, Phone, ShieldAlert, CheckCircle, ChevronDown } from 'lucide-react';
+import { Eye, Phone, ShieldAlert, CheckCircle, ChevronDown, FileDown } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 export default function AgencyIncidentsPage() {
   const [alerts, setAlerts] = useState<Alert[]>(
     initialAlerts.filter((alert) => alert.type === 'Emergency')
   );
   const [selectedAlert, setSelectedAlert] = useState<Alert | null>(null);
+  const { toast } = useToast();
 
   const getGuardByName = (name: string): Guard | undefined => {
     return guards.find((g) => g.name === name);
@@ -59,6 +61,14 @@ export default function AgencyIncidentsPage() {
         alert.id === alertId ? { ...alert, status } : alert
       )
     );
+  };
+
+  const handleDownloadReport = (alert: Alert) => {
+    toast({
+      title: 'Report Download Started',
+      description: `Downloading report for incident #${alert.id}.`,
+    });
+    // In a real app, this would trigger a file download.
   };
 
   const getStatusBadge = (status: Alert['status']) => {
@@ -103,6 +113,7 @@ export default function AgencyIncidentsPage() {
                   <TableHead>Status</TableHead>
                   <TableHead>Details</TableHead>
                   <TableHead>Actions</TableHead>
+                  <TableHead>Report</TableHead>
                   <TableHead>Contact</TableHead>
                 </TableRow>
               </TableHeader>
@@ -176,6 +187,16 @@ export default function AgencyIncidentsPage() {
                           </DropdownMenu>
                         </TableCell>
                         <TableCell>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleDownloadReport(alert)}
+                          >
+                            <FileDown className="mr-2 h-4 w-4" />
+                            Download Report
+                          </Button>
+                        </TableCell>
+                        <TableCell>
                           {guardDetails || supervisorDetails ? (
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
@@ -214,7 +235,7 @@ export default function AgencyIncidentsPage() {
                 ) : (
                   <TableRow>
                     <TableCell
-                      colSpan={9}
+                      colSpan={10}
                       className="text-center text-muted-foreground"
                     >
                       No emergency incidents found.
