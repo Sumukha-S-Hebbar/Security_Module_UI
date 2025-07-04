@@ -52,8 +52,8 @@ export default function AgencySitesPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Site</TableHead>
                 <TableHead>Site ID</TableHead>
+                <TableHead>Site</TableHead>
                 <TableHead>Supervisor</TableHead>
                 <TableHead>TowerCo</TableHead>
               </TableRow>
@@ -63,6 +63,7 @@ export default function AgencySitesPage() {
                 const supervisor = getSupervisorForSite(site.id);
                 return (
                   <TableRow key={site.id}>
+                    <TableCell>{site.id}</TableCell>
                     <TableCell>
                       <div className="font-medium">{site.name}</div>
                       <div className="text-sm text-muted-foreground flex items-center gap-1">
@@ -70,7 +71,6 @@ export default function AgencySitesPage() {
                         {site.address}
                       </div>
                     </TableCell>
-                    <TableCell>{site.id}</TableCell>
                     <TableCell>{supervisor?.name || 'Unassigned'}</TableCell>
                     <TableCell>{site.towerco}</TableCell>
                   </TableRow>
