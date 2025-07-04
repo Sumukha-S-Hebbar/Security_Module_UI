@@ -14,8 +14,14 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { FileDown, Phone, Mail, MapPin } from 'lucide-react';
-import { securityAgencies, sites, alerts } from '@/lib/data';
+import { FileDown, Phone, Mail, MapPin, Users } from 'lucide-react';
+import {
+  securityAgencies,
+  sites,
+  alerts,
+  guards,
+  supervisors,
+} from '@/lib/data';
 import {
   Table,
   TableBody,
@@ -27,6 +33,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import type { Alert, SecurityAgency } from '@/types';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 export default function ReportsPage() {
   const { toast } = useToast();
@@ -219,17 +226,70 @@ export default function ReportsPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground mb-4">
-                Select a guard and date range for a detailed report.
-              </p>
-              <Button
-                onClick={() =>
-                  handleGenerateReport('Guard Performance', 'Overall')
-                }
-              >
-                <FileDown className="mr-2 h-4 w-4" />
-                Generate Guard Report
-              </Button>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Guard</TableHead>
+                    <TableHead>Site</TableHead>
+                    <TableHead>Agency</TableHead>
+                    <TableHead>Selfie Check-in Accuracy</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {guards.map((guard) => {
+                    const site = sites.find((s) => s.name === guard.site);
+                    const agency = getAgencyById(site?.agencyId);
+                    const selfieAccuracy =
+                      guard.totalSelfieRequests > 0
+                        ? Math.round(
+                            ((guard.totalSelfieRequests -
+                              guard.missedSelfieCount) /
+                              guard.totalSelfieRequests) *
+                              100
+                          )
+                        : 100;
+
+                    return (
+                      <TableRow key={guard.id}>
+                        <TableCell>
+                          <div className="flex items-center gap-3">
+                            <Avatar>
+                              <AvatarImage
+                                src={guard.avatar}
+                                alt={guard.name}
+                              />
+                              <AvatarFallback>
+                                {guard.name.charAt(0)}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <p className="font-medium">{guard.name}</p>
+                              <p className="text-sm text-muted-foreground">
+                                ID: {guard.id}
+                              </p>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>{guard.site}</TableCell>
+                        <TableCell>{agency?.name || 'Unassigned'}</TableCell>
+                        <TableCell>{selfieAccuracy}%</TableCell>
+                        <TableCell className="text-right">
+                          <Button
+                            size="sm"
+                            onClick={() =>
+                              handleGenerateReport(guard.name, 'Guard')
+                            }
+                          >
+                            <FileDown className="mr-2 h-4 w-4" />
+                            Download Report
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
             </CardContent>
           </Card>
         </TabsContent>
@@ -244,17 +304,72 @@ export default function ReportsPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground mb-4">
-                Select a supervisor for an overview of their managed assets.
-              </p>
-              <Button
-                onClick={() =>
-                  handleGenerateReport('Supervisor Activity', 'Overall')
-                }
-              >
-                <FileDown className="mr-2 h-4 w-4" />
-                Generate Supervisor Report
-              </Button>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Supervisor</TableHead>
+                    <TableHead>Agency</TableHead>
+                    <TableHead>Guards Managed</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {supervisors.map((supervisor) => {
+                    const firstGuard = guards.find(
+                      (g) => g.supervisorId === supervisor.id
+                    );
+                    const site = sites.find((s) => s.name === firstGuard?.site);
+                    const agency = getAgencyById(site?.agencyId);
+
+                    return (
+                      <TableRow key={supervisor.id}>
+                        <TableCell>
+                          <div className="flex items-center gap-3">
+                            <Avatar>
+                              <AvatarImage
+                                src={supervisor.avatar}
+                                alt={supervisor.name}
+                              />
+                              <AvatarFallback>
+                                {supervisor.name.charAt(0)}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <p className="font-medium">{supervisor.name}</p>
+                              <p className="text-sm text-muted-foreground">
+                                ID: {supervisor.id}
+                              </p>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>{agency?.name || 'N/A'}</TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Users className="h-4 w-4 text-muted-foreground" />
+                            <span>
+                              {supervisor.assignedGuards.length} Guards
+                            </span>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button
+                            size="sm"
+                            onClick={() =>
+                              handleGenerateReport(
+                                supervisor.name,
+                                'Supervisor'
+                              )
+                            }
+                          >
+                            <FileDown className="mr-2 h-4 w-4" />
+                            Download Report
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
             </CardContent>
           </Card>
         </TabsContent>
