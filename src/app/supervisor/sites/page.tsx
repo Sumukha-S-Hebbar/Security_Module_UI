@@ -9,8 +9,9 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { MapPin, Users, FileDown } from 'lucide-react';
+import { MapPin, Users, FileDown, ShieldAlert } from 'lucide-react';
 import Link from 'next/link';
+import { Badge } from '@/components/ui/badge';
 
 export default function SitesPage() {
   const getGuardById = (id: string) => guards.find((g) => g.id === id);
@@ -34,31 +35,46 @@ export default function SitesPage() {
                 {site.address}
               </CardDescription>
             </CardHeader>
-            <CardContent className="flex-grow">
-              <h4 className="font-semibold flex items-center gap-2 mb-2">
-                <Users className="w-4 h-4" />
-                Assigned Guards
-              </h4>
-              <div className="space-y-2">
-                {site.guards.map((guardId) => {
-                  const guard = getGuardById(guardId);
-                  return guard ? (
-                    <div key={guard.id} className="flex items-center gap-3">
-                      <Avatar>
-                        <AvatarImage src={guard.avatar} alt={guard.name} />
-                        <AvatarFallback>
-                          {guard.name.charAt(0)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <p className="font-medium text-sm">{guard.name}</p>
-                        <p className="text-xs text-muted-foreground">
-                          ID: {guard.id}
-                        </p>
-                      </div>
-                    </div>
-                  ) : null;
-                })}
+            <CardContent className="flex-grow space-y-4">
+              <div>
+                <h4 className="font-semibold flex items-center gap-2 mb-2">
+                  <Users className="w-4 h-4" />
+                  Assigned Guards
+                </h4>
+                <div className="space-y-2">
+                  {site.guards.length > 0 ? (
+                    site.guards.map((guardId) => {
+                      const guard = getGuardById(guardId);
+                      return guard ? (
+                        <div key={guard.id} className="flex items-center gap-3">
+                          <Avatar>
+                            <AvatarImage src={guard.avatar} alt={guard.name} />
+                            <AvatarFallback>
+                              {guard.name.charAt(0)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="font-medium text-sm">{guard.name}</p>
+                            <p className="text-xs text-muted-foreground">
+                              ID: {guard.id}
+                            </p>
+                          </div>
+                        </div>
+                      ) : null;
+                    })
+                  ) : (
+                    <p className="text-sm text-muted-foreground">
+                      No guards assigned.
+                    </p>
+                  )}
+                </div>
+              </div>
+              <div>
+                <h4 className="font-semibold flex items-center gap-2 mb-2">
+                  <ShieldAlert className="w-4 h-4" />
+                  Total Incidents
+                </h4>
+                <Badge variant="secondary">{site.incidents?.length || 0}</Badge>
               </div>
             </CardContent>
             <CardFooter>
