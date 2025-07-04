@@ -165,7 +165,6 @@ export default function TowercoSitesPage() {
                 <TableRow>
                   <TableHead>Site ID</TableHead>
                   <TableHead>Site</TableHead>
-                  <TableHead>TowerCo</TableHead>
                   <TableHead>Assign Agency</TableHead>
                 </TableRow>
               </TableHeader>
@@ -180,7 +179,6 @@ export default function TowercoSitesPage() {
                         {site.address}
                       </div>
                     </TableCell>
-                    <TableCell>{site.towerco}</TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <Select
