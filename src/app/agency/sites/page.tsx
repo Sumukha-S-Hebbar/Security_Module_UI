@@ -1,4 +1,6 @@
+'use client';
 
+import { useState } from 'react';
 import { sites, guards, supervisors } from '@/lib/data';
 import {
   Card,
@@ -16,8 +18,22 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { MapPin } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
 
 export default function AgencySitesPage() {
+  const [selectedSupervisors, setSelectedSupervisors] = useState<{
+    [key: string]: string;
+  }>({});
+  const { toast } = useToast();
+
   const getSupervisorForSite = (siteId: string) => {
     const site = sites.find((s) => s.id === siteId);
     if (!site || site.guards.length === 0) {
@@ -32,10 +48,40 @@ export default function AgencySitesPage() {
     return supervisors.find((s) => s.id === guard.supervisorId);
   };
 
+  // Note: In a real app, this would be derived from a mutable state that changes upon assignment.
+  // For this prototype, we'll keep the static data separation.
   const assignedSites = sites.filter((site) => getSupervisorForSite(site.id));
   const unassignedSites = sites.filter(
     (site) => !getSupervisorForSite(site.id)
   );
+
+  const handleSupervisorSelect = (siteId: string, supervisorId: string) => {
+    setSelectedSupervisors((prev) => ({
+      ...prev,
+      [siteId]: supervisorId,
+    }));
+  };
+
+  const handleAssignSupervisor = (siteId: string) => {
+    const supervisorId = selectedSupervisors[siteId];
+    if (!supervisorId) {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Please select a supervisor first.',
+      });
+      return;
+    }
+    const siteName = unassignedSites.find((s) => s.id === siteId)?.name;
+    const supervisorName = supervisors.find((s) => s.id === supervisorId)?.name;
+
+    toast({
+      title: 'Supervisor Assigned',
+      description: `${supervisorName} has been assigned to ${siteName}. The site will be moved to the assigned list on next refresh.`,
+    });
+    // In a real app, you would make an API call here to update the database
+    // and then refetch the data or update the state locally.
+  };
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6">
@@ -101,6 +147,7 @@ export default function AgencySitesPage() {
                   <TableHead>Site ID</TableHead>
                   <TableHead>Site</TableHead>
                   <TableHead>TowerCo</TableHead>
+                  <TableHead>Assign Supervisor</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -115,6 +162,37 @@ export default function AgencySitesPage() {
                       </div>
                     </TableCell>
                     <TableCell>{site.towerco}</TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Select
+                          value={selectedSupervisors[site.id] || ''}
+                          onValueChange={(value) =>
+                            handleSupervisorSelect(site.id, value)
+                          }
+                        >
+                          <SelectTrigger className="w-[180px]">
+                            <SelectValue placeholder="Select Supervisor" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {supervisors.map((supervisor) => (
+                              <SelectItem
+                                key={supervisor.id}
+                                value={supervisor.id}
+                              >
+                                {supervisor.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <Button
+                          size="sm"
+                          onClick={() => handleAssignSupervisor(site.id)}
+                          disabled={!selectedSupervisors[site.id]}
+                        >
+                          Assign
+                        </Button>
+                      </div>
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
