@@ -36,7 +36,7 @@ export default function HomePage() {
         </p>
       </div>
 
-      <Card className="border-destructive">
+      <Card className="border-destructive bg-destructive/10">
         <CardHeader className="flex flex-row items-center gap-2">
           <AlertTriangle className="w-6 h-6 text-destructive" />
           <CardTitle>Current Emergency Alerts</CardTitle>
