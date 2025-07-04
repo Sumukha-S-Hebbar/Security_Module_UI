@@ -18,6 +18,7 @@ import { Button } from '@/components/ui/button';
 import { AlertTriangle, Phone } from 'lucide-react';
 import type { Guard } from '@/types';
 import { SitesMap } from './_components/sites-map';
+import { AnalyticsDashboard } from './_components/analytics-dashboard';
 
 export default function HomePage() {
   const activeEmergencies = alerts.filter(
@@ -36,6 +37,8 @@ export default function HomePage() {
           Welcome back, Supervisor. Here's what's happening.
         </p>
       </div>
+
+      <AnalyticsDashboard guards={guards} sites={sites} />
 
       <Card className="border-destructive bg-destructive/10">
         <CardHeader className="flex flex-row items-center gap-2">
