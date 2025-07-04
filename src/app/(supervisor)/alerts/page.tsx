@@ -1,4 +1,4 @@
-import { alerts } from '@/lib/data';
+import { alerts, guards } from '@/lib/data';
 import {
   Table,
   TableBody,
@@ -8,13 +8,15 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { AlertTriangle, CameraOff, LogOut } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { AlertTriangle, CameraOff, LogOut, Phone } from 'lucide-react';
 import type { Alert } from '@/types';
 
 export default function AlertsPage() {
   const emergencyAlerts = alerts.filter((alert) => alert.type === 'Emergency');
   const otherAlerts = alerts.filter((alert) => alert.type !== 'Emergency');
+
+  const getGuardByName = (name: string) => guards.find((g) => g.name === name);
 
   const alertTypeDisplay = (type: Alert['type']) => {
     switch (type) {
@@ -68,32 +70,36 @@ export default function AlertsPage() {
                   <TableHead>Date</TableHead>
                   <TableHead>Site</TableHead>
                   <TableHead>Guard</TableHead>
-                  <TableHead>Status</TableHead>
+                  <TableHead>Contact</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {emergencyAlerts.map((alert) => (
-                  <TableRow key={alert.id}>
-                    <TableCell className="font-medium">{alert.id}</TableCell>
-                    <TableCell>{alertTypeDisplay(alert.type)}</TableCell>
-                    <TableCell>{alert.date}</TableCell>
-                    <TableCell>{alert.site}</TableCell>
-                    <TableCell>{alert.guard}</TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={
-                          alert.status === 'Active'
-                            ? 'destructive'
-                            : alert.status === 'Investigating'
-                            ? 'default'
-                            : 'secondary'
-                        }
-                      >
-                        {alert.status}
-                      </Badge>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {emergencyAlerts.map((alert) => {
+                  const guardDetails = getGuardByName(alert.guard);
+                  return (
+                    <TableRow key={alert.id}>
+                      <TableCell className="font-medium">{alert.id}</TableCell>
+                      <TableCell>{alertTypeDisplay(alert.type)}</TableCell>
+                      <TableCell>{alert.date}</TableCell>
+                      <TableCell>{alert.site}</TableCell>
+                      <TableCell>{alert.guard}</TableCell>
+                      <TableCell>
+                        {guardDetails ? (
+                          <Button asChild variant="destructive" size="sm">
+                            <a href={`tel:${guardDetails.phone}`}>
+                              <Phone />
+                              Contact Guard
+                            </a>
+                          </Button>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">
+                            N/A
+                          </span>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           </CardContent>
@@ -114,32 +120,36 @@ export default function AlertsPage() {
                   <TableHead>Date</TableHead>
                   <TableHead>Site</TableHead>
                   <TableHead>Guard</TableHead>
-                  <TableHead>Status</TableHead>
+                  <TableHead>Contact</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {otherAlerts.map((alert) => (
-                  <TableRow key={alert.id}>
-                    <TableCell className="font-medium">{alert.id}</TableCell>
-                    <TableCell>{alertTypeDisplay(alert.type)}</TableCell>
-                    <TableCell>{alert.date}</TableCell>
-                    <TableCell>{alert.site}</TableCell>
-                    <TableCell>{alert.guard}</TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={
-                          alert.status === 'Active'
-                            ? 'destructive'
-                            : alert.status === 'Investigating'
-                            ? 'default'
-                            : 'secondary'
-                        }
-                      >
-                        {alert.status}
-                      </Badge>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {otherAlerts.map((alert) => {
+                  const guardDetails = getGuardByName(alert.guard);
+                  return (
+                    <TableRow key={alert.id}>
+                      <TableCell className="font-medium">{alert.id}</TableCell>
+                      <TableCell>{alertTypeDisplay(alert.type)}</TableCell>
+                      <TableCell>{alert.date}</TableCell>
+                      <TableCell>{alert.site}</TableCell>
+                      <TableCell>{alert.guard}</TableCell>
+                      <TableCell>
+                        {guardDetails ? (
+                          <Button asChild variant="outline" size="sm">
+                            <a href={`tel:${guardDetails.phone}`}>
+                              <Phone />
+                              Contact Guard
+                            </a>
+                          </Button>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">
+                            N/A
+                          </span>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           ) : (
