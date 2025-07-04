@@ -1,4 +1,30 @@
-import type { Guard, Site, Alert } from '@/types';
+import type { Guard, Site, Alert, Supervisor, Incident } from '@/types';
+
+export const supervisors: Supervisor[] = [
+  {
+    id: 'SUP01',
+    name: 'Michael Scott',
+    phone: '555-100-2000',
+    email: 'michael.s@guardlink.com',
+    avatar: 'https://placehold.co/100x100.png',
+    assignedGuards: ['GL001', 'GL002', 'GL003'],
+  },
+  {
+    id: 'SUP02',
+    name: 'Jessica Pearson',
+    phone: '555-100-2001',
+    email: 'jessica.p@guardlink.com',
+    avatar: 'https://placehold.co/100x100.png',
+    assignedGuards: ['GL004', 'GL005'],
+  },
+];
+
+export const incidents: Incident[] = [
+    { id: 'INC001', date: '2024-07-20', type: 'Break-in', details: 'Attempted break-in at west entrance.', resolved: true},
+    { id: 'INC002', date: '2024-07-21', type: 'Fire Alarm', details: 'False alarm triggered by dust.', resolved: true},
+    { id: 'INC003', date: '2024-06-15', type: 'Vandalism', details: 'Graffiti on the north wall.', resolved: false},
+];
+
 
 export const guards: Guard[] = [
   {
@@ -10,6 +36,8 @@ export const guards: Guard[] = [
     avatar: 'https://placehold.co/100x100.png',
     missedSelfieCount: 1,
     totalSelfieRequests: 20,
+    supervisorId: 'SUP01',
+    performance: { perimeterAccuracy: 98, leaveDays: 2 },
   },
   {
     id: 'GL002',
@@ -20,6 +48,8 @@ export const guards: Guard[] = [
     avatar: 'https://placehold.co/100x100.png',
     missedSelfieCount: 0,
     totalSelfieRequests: 25,
+    supervisorId: 'SUP01',
+    performance: { perimeterAccuracy: 99, leaveDays: 0 },
   },
   {
     id: 'GL003',
@@ -30,6 +60,8 @@ export const guards: Guard[] = [
     avatar: 'https://placehold.co/100x100.png',
     missedSelfieCount: 8,
     totalSelfieRequests: 22,
+    supervisorId: 'SUP01',
+    performance: { perimeterAccuracy: 92, leaveDays: 5 },
   },
   {
     id: 'GL004',
@@ -40,6 +72,8 @@ export const guards: Guard[] = [
     avatar: 'https://placehold.co/100x100.png',
     missedSelfieCount: 0,
     totalSelfieRequests: 18,
+    supervisorId: 'SUP02',
+    performance: { perimeterAccuracy: 100, leaveDays: 1 },
   },
   {
     id: 'GL005',
@@ -50,6 +84,8 @@ export const guards: Guard[] = [
     avatar: 'https://placehold.co/100x100.png',
     missedSelfieCount: 0,
     totalSelfieRequests: 10,
+    supervisorId: 'SUP02',
+    performance: { perimeterAccuracy: 100, leaveDays: 0 },
   },
 ];
 
@@ -62,6 +98,8 @@ export const sites: Site[] = [
     reportUrl: '#',
     coords: { x: 25, y: 30 },
     visited: true,
+    towerco: 'TowerCo Alpha',
+    incidents: [incidents[1]],
   },
   {
     id: 'SITE02',
@@ -71,6 +109,8 @@ export const sites: Site[] = [
     reportUrl: '#',
     coords: { x: 55, y: 45 },
     visited: false,
+    towerco: 'TowerCo Beta',
+    incidents: [incidents[0]],
   },
   {
     id: 'SITE03',
@@ -80,6 +120,8 @@ export const sites: Site[] = [
     reportUrl: '#',
     coords: { x: 75, y: 60 },
     visited: false,
+    towerco: 'TowerCo Gamma',
+    incidents: [],
   },
   {
     id: 'SITE04',
@@ -89,6 +131,8 @@ export const sites: Site[] = [
     reportUrl: '#',
     coords: { x: 40, y: 70 },
     visited: true,
+    towerco: 'TowerCo Alpha',
+    incidents: [],
   },
 ];
 

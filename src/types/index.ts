@@ -7,6 +7,11 @@ export type Guard = {
   avatar: string;
   missedSelfieCount: number;
   totalSelfieRequests: number;
+  supervisorId?: string;
+  performance?: {
+    perimeterAccuracy: number;
+    leaveDays: number;
+  };
 };
 
 export type Site = {
@@ -17,6 +22,8 @@ export type Site = {
   reportUrl: string;
   coords: { x: number; y: number }; // As percentages for map placement
   visited: boolean;
+  towerco: string;
+  incidents?: Incident[];
 };
 
 export type Alert = {
@@ -28,4 +35,21 @@ export type Alert = {
   status: 'Active' | 'Resolved' | 'Investigating';
   callDetails?: string;
   images?: string[];
+};
+
+export type Supervisor = {
+  id: string;
+  name: string;
+  phone: string;
+  email: string;
+  avatar: string;
+  assignedGuards: string[]; // Guard IDs
+};
+
+export type Incident = {
+  id: string;
+  date: string;
+  type: 'Break-in' | 'Fire Alarm' | 'Vandalism' | 'Medical';
+  details: string;
+  resolved: boolean;
 };
