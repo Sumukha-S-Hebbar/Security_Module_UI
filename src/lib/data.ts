@@ -61,6 +61,7 @@ export const sites: Site[] = [
     guards: ['GL002', 'GL004'],
     reportUrl: '#',
     coords: { x: 25, y: 30 },
+    visited: true,
   },
   {
     id: 'SITE02',
@@ -69,6 +70,7 @@ export const sites: Site[] = [
     guards: ['GL001'],
     reportUrl: '#',
     coords: { x: 55, y: 45 },
+    visited: false,
   },
   {
     id: 'SITE03',
@@ -77,6 +79,7 @@ export const sites: Site[] = [
     guards: ['GL003'],
     reportUrl: '#',
     coords: { x: 75, y: 60 },
+    visited: false,
   },
   {
     id: 'SITE04',
@@ -85,6 +88,7 @@ export const sites: Site[] = [
     guards: ['GL005'],
     reportUrl: '#',
     coords: { x: 40, y: 70 },
+    visited: true,
   },
 ];
 

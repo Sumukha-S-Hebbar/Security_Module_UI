@@ -10,8 +10,21 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { Map, MapPin } from 'lucide-react';
+import { useState } from 'react';
+import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
 
-export function SitesMap({ sites }: { sites: Site[] }) {
+export function SitesMap({ sites: initialSites }: { sites: Site[] }) {
+  const [sites, setSites] = useState<Site[]>(initialSites);
+
+  const handleMarkAsVisited = (siteId: string) => {
+    setSites((currentSites) =>
+      currentSites.map((site) =>
+        site.id === siteId ? { ...site, visited: true } : site
+      )
+    );
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -40,7 +53,14 @@ export function SitesMap({ sites }: { sites: Site[] }) {
                       top: `${site.coords.y}%`,
                     }}
                   >
-                    <MapPin className="w-8 h-8 text-primary fill-primary/50" />
+                    <MapPin
+                      className={cn(
+                        'w-8 h-8',
+                        site.visited
+                          ? 'text-green-500 fill-green-500/50'
+                          : 'text-destructive fill-destructive/50'
+                      )}
+                    />
                   </div>
                 </TooltipTrigger>
                 <TooltipContent>
@@ -48,6 +68,16 @@ export function SitesMap({ sites }: { sites: Site[] }) {
                   <p className="text-sm text-muted-foreground">
                     {site.address}
                   </p>
+                  {!site.visited && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="mt-2 w-full"
+                      onClick={() => handleMarkAsVisited(site.id)}
+                    >
+                      Mark as Visited
+                    </Button>
+                  )}
                 </TooltipContent>
               </Tooltip>
             ))}
