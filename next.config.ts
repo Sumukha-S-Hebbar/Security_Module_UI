@@ -18,6 +18,17 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  webpack: (config, {isServer}) => {
+    if (!isServer) {
+      // Fixes npm packages that depend on `async_hooks`
+      config.resolve.fallback = {
+        ...(config.resolve.fallback || {}),
+        async_hooks: false,
+      };
+    }
+
+    return config;
+  },
 };
 
 export default nextConfig;
