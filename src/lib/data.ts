@@ -86,7 +86,6 @@ export const guards: Guard[] = [
     avatar: 'https://placehold.co/100x100.png',
     missedSelfieCount: 0,
     totalSelfieRequests: 10,
-    supervisorId: 'SUP02',
     performance: { perimeterAccuracy: 100, leaveDays: 0 },
   },
 ];
