@@ -38,12 +38,21 @@ export default function AgencyGuardsPage() {
                                 <TableHead>Site</TableHead>
                                 <TableHead>Supervisor</TableHead>
                                 <TableHead>Perimeter Accuracy</TableHead>
+                                <TableHead>Selfie Check-in Accuracy</TableHead>
                                 <TableHead>Phone</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {guards.map((guard) => {
                                 const supervisor = getSupervisorById(guard.supervisorId);
+                                const selfieAccuracy =
+                                    guard.totalSelfieRequests > 0
+                                        ? Math.round(
+                                            ((guard.totalSelfieRequests - guard.missedSelfieCount) /
+                                                guard.totalSelfieRequests) *
+                                            100
+                                        )
+                                        : 100;
                                 return (
                                     <TableRow key={guard.id}>
                                         <TableCell>
@@ -63,6 +72,7 @@ export default function AgencyGuardsPage() {
                                         <TableCell>{guard.site}</TableCell>
                                         <TableCell>{supervisor?.name || 'Unassigned'}</TableCell>
                                         <TableCell>{guard.performance?.perimeterAccuracy}%</TableCell>
+                                        <TableCell>{selfieAccuracy}%</TableCell>
                                         <TableCell>{guard.phone}</TableCell>
                                     </TableRow>
                                 )
