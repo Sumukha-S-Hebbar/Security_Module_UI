@@ -25,4 +25,5 @@ export type Alert = {
   guard: string;
   status: 'Active' | 'Resolved' | 'Investigating';
   callDetails?: string;
+  images?: string[];
 };

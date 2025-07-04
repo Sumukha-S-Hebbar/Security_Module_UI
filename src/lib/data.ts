@@ -94,6 +94,7 @@ export const alerts: Alert[] = [
     status: 'Active',
     callDetails:
       'This is John Doe at Downtown Mall, Gate 4. We have a potential break-in situation at the west entrance near the electronics store. Requesting immediate backup. I see two individuals acting suspiciously. The time is approximately 2:30 PM.',
+    images: ['https://placehold.co/600x400.png', 'https://placehold.co/600x400.png'],
   },
   {
     id: 'A005',
@@ -104,6 +105,7 @@ export const alerts: Alert[] = [
     status: 'Active',
     callDetails:
       'Fire alarm activated on the third floor, R&D department. I am proceeding to the location to investigate. All personnel are being evacuated. Time is 2:14 AM. No smoke visible yet.',
+    images: ['https://placehold.co/600x400.png'],
   },
   {
     id: 'A002',

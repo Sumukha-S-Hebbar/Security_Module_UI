@@ -1,3 +1,7 @@
+'use client';
+
+import { useState } from 'react';
+import Image from 'next/image';
 import { alerts, guards } from '@/lib/data';
 import {
   Table,
@@ -7,12 +11,32 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { AlertTriangle, CameraOff, LogOut, Phone } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
+  AlertTriangle,
+  CameraOff,
+  LogOut,
+  Phone,
+  Eye,
+} from 'lucide-react';
 import type { Alert } from '@/types';
 
 export default function AlertsPage() {
+  const [selectedAlert, setSelectedAlert] = useState<Alert | null>(null);
+
   const emergencyAlerts = alerts.filter((alert) => alert.type === 'Emergency');
   const otherAlerts = alerts.filter((alert) => alert.type !== 'Emergency');
 
@@ -20,13 +44,6 @@ export default function AlertsPage() {
 
   const alertTypeDisplay = (type: Alert['type']) => {
     switch (type) {
-      case 'Emergency':
-        return (
-          <div className="flex items-center gap-2 font-medium text-destructive">
-            <AlertTriangle className="h-4 w-4" />
-            <span>Emergency</span>
-          </div>
-        );
       case 'Missed Selfie':
         return (
           <div className="flex items-center gap-2">
@@ -41,23 +58,39 @@ export default function AlertsPage() {
             <span>Guard Out of Premises</span>
           </div>
         );
+      case 'Emergency':
+      default:
+        return null;
+    }
+  };
+
+  const getStatusBadge = (status: Alert['status']) => {
+    switch (status) {
+      case 'Active':
+        return <Badge variant="destructive">Active</Badge>;
+      case 'Investigating':
+        return <Badge variant="default">Investigating</Badge>;
+      case 'Resolved':
+        return <Badge variant="secondary">Resolved</Badge>;
+      default:
+        return <Badge variant="secondary">{status}</Badge>;
     }
   };
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Alerts Log</h1>
-        <p className="text-muted-foreground">
-          A historical record of all system alerts.
-        </p>
-      </div>
+    <>
+      <div className="p-4 sm:p-6 lg:p-8 space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Alerts Log</h1>
+          <p className="text-muted-foreground">
+            A historical record of all system alerts.
+          </p>
+        </div>
 
-      {emergencyAlerts.length > 0 && (
-        <Card className="border-destructive bg-destructive/5">
+        <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-destructive">
-              <AlertTriangle className="h-5 w-5" />
+            <CardTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-destructive" />
               Emergency Alerts
             </CardTitle>
           </CardHeader>
@@ -66,10 +99,11 @@ export default function AlertsPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Alert ID</TableHead>
-                  <TableHead>Type</TableHead>
                   <TableHead>Date</TableHead>
                   <TableHead>Site</TableHead>
                   <TableHead>Guard</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Details</TableHead>
                   <TableHead>Contact</TableHead>
                 </TableRow>
               </TableHeader>
@@ -79,60 +113,26 @@ export default function AlertsPage() {
                   return (
                     <TableRow key={alert.id}>
                       <TableCell className="font-medium">{alert.id}</TableCell>
-                      <TableCell>{alertTypeDisplay(alert.type)}</TableCell>
                       <TableCell>{alert.date}</TableCell>
                       <TableCell>{alert.site}</TableCell>
                       <TableCell>{alert.guard}</TableCell>
+                      <TableCell>{getStatusBadge(alert.status)}</TableCell>
                       <TableCell>
-                        {guardDetails ? (
-                          <Button asChild variant="destructive" size="sm">
-                            <a href={`tel:${guardDetails.phone}`}>
-                              <Phone />
-                              Contact Guard
-                            </a>
+                        {alert.images && alert.images.length > 0 ? (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setSelectedAlert(alert)}
+                          >
+                            <Eye className="mr-2 h-4 w-4" />
+                            View
                           </Button>
                         ) : (
                           <span className="text-xs text-muted-foreground">
-                            N/A
+                            No Media
                           </span>
                         )}
                       </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-      )}
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Guard Alerts</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {otherAlerts.length > 0 ? (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Alert ID</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Site</TableHead>
-                  <TableHead>Guard</TableHead>
-                  <TableHead>Contact</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {otherAlerts.map((alert) => {
-                  const guardDetails = getGuardByName(alert.guard);
-                  return (
-                    <TableRow key={alert.id}>
-                      <TableCell className="font-medium">{alert.id}</TableCell>
-                      <TableCell>{alertTypeDisplay(alert.type)}</TableCell>
-                      <TableCell>{alert.date}</TableCell>
-                      <TableCell>{alert.site}</TableCell>
-                      <TableCell>{alert.guard}</TableCell>
                       <TableCell>
                         {guardDetails ? (
                           <Button asChild variant="outline" size="sm">
@@ -152,13 +152,94 @@ export default function AlertsPage() {
                 })}
               </TableBody>
             </Table>
-          ) : (
-            <p className="text-muted-foreground text-sm">
-              No general alerts found.
-            </p>
-          )}
-        </CardContent>
-      </Card>
-    </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Guard Alerts</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {otherAlerts.length > 0 ? (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Alert ID</TableHead>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Site</TableHead>
+                    <TableHead>Guard</TableHead>
+                    <TableHead>Contact</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {otherAlerts.map((alert) => {
+                    const guardDetails = getGuardByName(alert.guard);
+                    return (
+                      <TableRow key={alert.id}>
+                        <TableCell className="font-medium">
+                          {alert.id}
+                        </TableCell>
+                        <TableCell>{alertTypeDisplay(alert.type)}</TableCell>
+                        <TableCell>{alert.date}</TableCell>
+                        <TableCell>{alert.site}</TableCell>
+                        <TableCell>{alert.guard}</TableCell>
+                        <TableCell>
+                          {guardDetails ? (
+                            <Button asChild variant="outline" size="sm">
+                              <a href={`tel:${guardDetails.phone}`}>
+                                <Phone />
+                                Contact Guard
+                              </a>
+                            </Button>
+                          ) : (
+                            <span className="text-xs text-muted-foreground">
+                              N/A
+                            </span>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            ) : (
+              <p className="text-muted-foreground text-sm">
+                No general alerts found.
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+      {selectedAlert && (
+        <Dialog
+          open={!!selectedAlert}
+          onOpenChange={(isOpen) => !isOpen && setSelectedAlert(null)}
+        >
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Details for Alert #{selectedAlert.id}</DialogTitle>
+            </DialogHeader>
+            <div className="grid gap-4 py-4 grid-cols-1 sm:grid-cols-2">
+              {selectedAlert.images?.map((src, index) => (
+                <div key={index} className="relative aspect-video">
+                  <Image
+                    src={src}
+                    alt={`Emergency detail ${index + 1}`}
+                    fill
+                    className="rounded-md object-cover"
+                    data-ai-hint={
+                      selectedAlert.id === 'A001'
+                        ? 'security camera'
+                        : 'fire alarm'
+                    }
+                  />
+                </div>
+              ))}
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+    </>
   );
 }
