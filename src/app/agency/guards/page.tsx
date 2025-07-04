@@ -38,8 +38,6 @@ export default function AgencyGuardsPage() {
                                 <TableHead>Site</TableHead>
                                 <TableHead>Supervisor</TableHead>
                                 <TableHead>Phone</TableHead>
-                                <TableHead>Perimeter Accuracy</TableHead>
-                                <TableHead>Leave Days</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -64,8 +62,6 @@ export default function AgencyGuardsPage() {
                                         <TableCell>{guard.site}</TableCell>
                                         <TableCell>{supervisor?.name || 'Unassigned'}</TableCell>
                                         <TableCell>{guard.phone}</TableCell>
-                                        <TableCell>{guard.performance?.perimeterAccuracy}%</TableCell>
-                                        <TableCell>{guard.performance?.leaveDays}</TableCell>
                                     </TableRow>
                                 )
                             })}
