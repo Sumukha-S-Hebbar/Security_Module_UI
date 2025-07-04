@@ -12,6 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Users, Mail, Phone } from 'lucide-react';
+import { SupervisorUploader } from './_components/supervisor-uploader';
 
 export default function AgencySupervisorsPage() {
     return (
@@ -22,6 +23,9 @@ export default function AgencySupervisorsPage() {
                     Add, view, and manage supervisors and their assigned guards.
                 </p>
             </div>
+
+            <SupervisorUploader />
+
             <Card>
                 <CardHeader>
                     <CardTitle>All Supervisors</CardTitle>
