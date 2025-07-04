@@ -1,4 +1,6 @@
 
+'use client';
+
 import type { Guard } from '@/types';
 import {
   Table,
@@ -10,8 +12,21 @@ import {
 } from '@/components/ui/table';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
+import { FileDown } from 'lucide-react';
 
 export function GuardProfiles({ guards }: { guards: Guard[] }) {
+  const { toast } = useToast();
+
+  const handleDownloadReport = (guard: Guard) => {
+    toast({
+      title: 'Report Download Started',
+      description: `Downloading report for ${guard.name}.`,
+    });
+    // In a real app, this would trigger a file download.
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -27,6 +42,7 @@ export function GuardProfiles({ guards }: { guards: Guard[] }) {
               <TableHead>Current Location</TableHead>
               <TableHead>Perimeter Accuracy</TableHead>
               <TableHead>Selfie Check-in Accuracy</TableHead>
+              <TableHead className="text-right">Report</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -64,6 +80,16 @@ export function GuardProfiles({ guards }: { guards: Guard[] }) {
                     {guard.performance?.perimeterAccuracy}%
                   </TableCell>
                   <TableCell>{selfieAccuracy}%</TableCell>
+                  <TableCell className="text-right">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDownloadReport(guard)}
+                    >
+                      <FileDown className="mr-2 h-4 w-4" />
+                      Download Report
+                    </Button>
+                  </TableCell>
                 </TableRow>
               );
             })}
