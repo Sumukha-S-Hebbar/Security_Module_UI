@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { alerts as initialAlerts, guards } from '@/lib/data';
+import { alerts as initialAlerts, guards, supervisors } from '@/lib/data';
 import type { Alert, Guard } from '@/types';
 import {
   Table,
@@ -39,6 +39,14 @@ export default function AgencyIncidentsPage() {
     return guards.find((g) => g.name === name);
   };
 
+  const getSupervisorByGuardName = (guardName: string) => {
+    const guard = getGuardByName(guardName);
+    if (!guard || !guard.supervisorId) {
+      return null;
+    }
+    return supervisors.find((s) => s.id === guard.supervisorId);
+  };
+
   const handleStatusChange = (alertId: string, status: Alert['status']) => {
     setAlerts((prevAlerts) =>
       prevAlerts.map((alert) =>
@@ -46,7 +54,7 @@ export default function AgencyIncidentsPage() {
       )
     );
   };
-  
+
   const getStatusBadge = (status: Alert['status']) => {
     switch (status) {
       case 'Active':
@@ -85,6 +93,7 @@ export default function AgencyIncidentsPage() {
                   <TableHead>Date</TableHead>
                   <TableHead>Site</TableHead>
                   <TableHead>Guard</TableHead>
+                  <TableHead>Supervisor</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Details</TableHead>
                   <TableHead>Actions</TableHead>
@@ -95,14 +104,22 @@ export default function AgencyIncidentsPage() {
                 {alerts.length > 0 ? (
                   alerts.map((alert) => {
                     const guardDetails = getGuardByName(alert.guard);
+                    const supervisorDetails = getSupervisorByGuardName(
+                      alert.guard
+                    );
                     const isResolved = alert.status === 'Resolved';
 
                     return (
                       <TableRow key={alert.id}>
-                        <TableCell className="font-medium">{alert.id}</TableCell>
+                        <TableCell className="font-medium">
+                          {alert.id}
+                        </TableCell>
                         <TableCell>{alert.date}</TableCell>
                         <TableCell>{alert.site}</TableCell>
                         <TableCell>{alert.guard}</TableCell>
+                        <TableCell>
+                          {supervisorDetails?.name || 'N/A'}
+                        </TableCell>
                         <TableCell>{getStatusBadge(alert.status)}</TableCell>
                         <TableCell>
                           {alert.images && alert.images.length > 0 ? (
@@ -120,7 +137,7 @@ export default function AgencyIncidentsPage() {
                             </span>
                           )}
                         </TableCell>
-                         <TableCell>
+                        <TableCell>
                           <div className="flex items-center gap-2">
                             <Button
                               variant="outline"
@@ -170,7 +187,7 @@ export default function AgencyIncidentsPage() {
                 ) : (
                   <TableRow>
                     <TableCell
-                      colSpan={8}
+                      colSpan={9}
                       className="text-center text-muted-foreground"
                     >
                       No emergency incidents found.
@@ -212,7 +229,9 @@ export default function AgencyIncidentsPage() {
             {selectedAlert.callDetails && (
               <div className="space-y-2">
                 <h4 className="font-medium">Call Summary</h4>
-                <p className="text-sm text-muted-foreground">{selectedAlert.callDetails}</p>
+                <p className="text-sm text-muted-foreground">
+                  {selectedAlert.callDetails}
+                </p>
               </div>
             )}
           </DialogContent>
