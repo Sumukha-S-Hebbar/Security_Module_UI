@@ -59,9 +59,7 @@ Missed Selfies: {{{missedSelfieCount}}}
 Total Selfie Requests: {{{totalSelfieRequests}}}
 
 Consider that the security guards might have valid reasons to miss the selfie, such as illness, vacation, emergency situation.
-
-Output:
-```,
+`,
 });
 
 const analyzeSelfieComplianceFlow = ai.defineFlow(
