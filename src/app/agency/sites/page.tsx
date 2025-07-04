@@ -32,6 +32,7 @@ export default function AgencySitesPage() {
     return supervisors.find((s) => s.id === guard.supervisorId);
   };
 
+  const assignedSites = sites.filter((site) => getSupervisorForSite(site.id));
   const unassignedSites = sites.filter(
     (site) => !getSupervisorForSite(site.id)
   );
@@ -47,9 +48,9 @@ export default function AgencySitesPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>All Sites</CardTitle>
+          <CardTitle>Assigned Sites</CardTitle>
           <CardDescription>
-            A list of all sites managed by the agency.
+            A list of all sites with an assigned supervisor.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -63,7 +64,7 @@ export default function AgencySitesPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {sites.map((site) => {
+              {assignedSites.map((site) => {
                 const supervisor = getSupervisorForSite(site.id);
                 return (
                   <TableRow key={site.id}>
