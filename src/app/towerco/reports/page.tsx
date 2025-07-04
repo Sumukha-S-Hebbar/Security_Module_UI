@@ -100,7 +100,7 @@ export default function ReportsPage() {
               <CardDescription>
                 Generate reports summarizing supervisor activities and team
                 performance.
-              </-CardDescription>
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground mb-4">
