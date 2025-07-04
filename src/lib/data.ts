@@ -8,6 +8,7 @@ export const supervisors: Supervisor[] = [
     email: 'michael.s@guardlink.com',
     avatar: 'https://placehold.co/100x100.png',
     assignedGuards: ['GL001', 'GL002', 'GL003'],
+    routes: ['Downtown Route', 'Waterfront Route'],
   },
   {
     id: 'SUP02',
@@ -16,6 +17,7 @@ export const supervisors: Supervisor[] = [
     email: 'jessica.p@guardlink.com',
     avatar: 'https://placehold.co/100x100.png',
     assignedGuards: ['GL004', 'GL005'],
+    routes: ['Tech Park Route', 'Cyberdyne Route'],
   },
 ];
 

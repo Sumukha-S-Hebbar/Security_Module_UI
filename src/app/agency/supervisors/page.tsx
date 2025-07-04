@@ -11,7 +11,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Users, Phone } from 'lucide-react';
+import { Users, Phone, Map } from 'lucide-react';
 import { SupervisorUploader } from './_components/supervisor-uploader';
 
 export default function AgencySupervisorsPage() {
@@ -36,7 +36,8 @@ export default function AgencySupervisorsPage() {
                             <TableRow>
                                 <TableHead>Supervisor</TableHead>
                                 <TableHead>Phone Number</TableHead>
-                                <TableHead>Assigned Guards</TableHead>
+                                <TableHead>Guards Under Him</TableHead>
+                                <TableHead>Route</TableHead>
                                 <TableHead>Actions</TableHead>
                             </TableRow>
                         </TableHeader>
@@ -67,6 +68,12 @@ export default function AgencySupervisorsPage() {
                                         <div className="flex items-center gap-2">
                                             <Users className="h-4 w-4 text-muted-foreground" />
                                             <span>{supervisor.assignedGuards.length} Guards</span>
+                                        </div>
+                                    </TableCell>
+                                    <TableCell>
+                                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                            <Map className="h-4 w-4" />
+                                            <span>{supervisor.routes?.join(', ') || 'N/A'}</span>
                                         </div>
                                     </TableCell>
                                     <TableCell>

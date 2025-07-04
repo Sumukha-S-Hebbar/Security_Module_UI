@@ -44,6 +44,7 @@ export type Supervisor = {
   email: string;
   avatar: string;
   assignedGuards: string[]; // Guard IDs
+  routes?: string[];
 };
 
 export type Incident = {
