@@ -7,8 +7,16 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, Users, AlertTriangle, TowerControl } from 'lucide-react';
+import { MapPin } from 'lucide-react';
 
 export default function AgencySitesPage() {
   return (
@@ -20,42 +28,54 @@ export default function AgencySitesPage() {
         </p>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {sites.map((site) => (
-          <Card key={site.id} className="flex flex-col">
-            <CardHeader>
-              <CardTitle>{site.name}</CardTitle>
-              <CardDescription className="flex items-center gap-2 pt-1">
-                <MapPin className="w-4 h-4" />
-                {site.address}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="flex-grow space-y-4">
-              <div className="flex items-center justify-between text-sm">
-                  <div className="font-semibold flex items-center gap-2">
-                      <TowerControl className="w-4 h-4 text-muted-foreground" />
-                      TowerCo
-                  </div>
-                  <Badge variant="secondary">{site.towerco}</Badge>
-              </div>
-              <div className="flex items-center justify-between text-sm">
-                  <div className="font-semibold flex items-center gap-2">
-                      <Users className="w-4 h-4 text-muted-foreground" />
-                      Assigned Guards
-                  </div>
-                  <Badge variant="outline">{site.guards.length}</Badge>
-              </div>
-               <div className="flex items-center justify-between text-sm">
-                  <div className="font-semibold flex items-center gap-2">
-                      <AlertTriangle className="w-4 h-4 text-muted-foreground" />
-                      Open Incidents
-                  </div>
-                  <Badge variant="destructive">{site.incidents?.filter(inc => !inc.resolved).length || 0}</Badge>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>All Sites</CardTitle>
+          <CardDescription>
+            A list of all sites managed by the agency.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Site</TableHead>
+                <TableHead>TowerCo</TableHead>
+                <TableHead>Assigned Guards</TableHead>
+                <TableHead>Open Incidents</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {sites.map((site) => {
+                const openIncidents =
+                  site.incidents?.filter((inc) => !inc.resolved).length || 0;
+                return (
+                  <TableRow key={site.id}>
+                    <TableCell>
+                      <div className="font-medium">{site.name}</div>
+                      <div className="text-sm text-muted-foreground flex items-center gap-1">
+                        <MapPin className="w-3 h-3" />
+                        {site.address}
+                      </div>
+                    </TableCell>
+                    <TableCell>{site.towerco}</TableCell>
+                    <TableCell>
+                      <Badge variant="outline">{site.guards.length}</Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        variant={openIncidents > 0 ? 'destructive' : 'secondary'}
+                      >
+                        {openIncidents}
+                      </Badge>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
     </div>
   );
 }
