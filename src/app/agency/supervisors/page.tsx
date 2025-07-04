@@ -1,5 +1,8 @@
 
+'use client';
+
 import { supervisors } from '@/lib/data';
+import type { Supervisor } from '@/types';
 import {
   Table,
   TableBody,
@@ -11,10 +14,21 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Users, Phone, Map } from 'lucide-react';
+import { Users, Phone, Map, FileDown } from 'lucide-react';
 import { SupervisorUploader } from './_components/supervisor-uploader';
+import { useToast } from '@/hooks/use-toast';
 
 export default function AgencySupervisorsPage() {
+    const { toast } = useToast();
+
+    const handleDownloadReport = (supervisor: Supervisor) => {
+        toast({
+            title: 'Report Download Started',
+            description: `Downloading report for ${supervisor.name}.`,
+        });
+        // In a real app, this would trigger a file download (e.g., CSV or PDF).
+    };
+
     return (
         <div className="p-4 sm:p-6 lg:p-8 space-y-6">
             <div>
@@ -39,6 +53,7 @@ export default function AgencySupervisorsPage() {
                                 <TableHead>Guards Under Him</TableHead>
                                 <TableHead>Route</TableHead>
                                 <TableHead>Actions</TableHead>
+                                <TableHead className="text-right">Report</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -82,6 +97,16 @@ export default function AgencySupervisorsPage() {
                                                 <Phone className="mr-2 h-4 w-4" />
                                                 Contact Supervisor
                                             </a>
+                                        </Button>
+                                    </TableCell>
+                                    <TableCell className="text-right">
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => handleDownloadReport(supervisor)}
+                                        >
+                                            <FileDown className="mr-2 h-4 w-4" />
+                                            Download Report
                                         </Button>
                                     </TableCell>
                                 </TableRow>
