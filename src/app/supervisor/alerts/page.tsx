@@ -27,6 +27,12 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
@@ -39,12 +45,16 @@ import {
   Eye,
   ShieldAlert,
   CheckCircle,
+  ChevronDown,
+  FileDown,
 } from 'lucide-react';
 import type { Alert } from '@/types';
+import { useToast } from '@/hooks/use-toast';
 
 export default function AlertsPage() {
   const [alerts, setAlerts] = useState<Alert[]>(initialAlerts);
   const [selectedAlert, setSelectedAlert] = useState<Alert | null>(null);
+  const { toast } = useToast();
 
   const emergencyAlerts = alerts.filter((alert) => alert.type === 'Emergency');
   const otherAlerts = alerts.filter((alert) => alert.type !== 'Emergency');
@@ -57,6 +67,14 @@ export default function AlertsPage() {
         alert.id === alertId ? { ...alert, status } : alert
       )
     );
+  };
+
+  const handleDownloadReport = (alert: Alert) => {
+    toast({
+      title: 'Report Download Started',
+      description: `Downloading report for incident #${alert.id}.`,
+    });
+    // In a real app, this would trigger a file download.
   };
 
   const alertTypeDisplay = (type: Alert['type']) => {
@@ -122,6 +140,7 @@ export default function AlertsPage() {
                   <TableHead>Status</TableHead>
                   <TableHead>Details</TableHead>
                   <TableHead>Actions</TableHead>
+                  <TableHead>Report</TableHead>
                   <TableHead>Contact</TableHead>
                 </TableRow>
               </TableHeader>
@@ -154,34 +173,46 @@ export default function AlertsPage() {
                         )}
                       </TableCell>
                       <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() =>
-                              handleStatusChange(alert.id, 'Investigating')
-                            }
-                            disabled={
-                              alert.status === 'Investigating' ||
-                              alert.status === 'Resolved'
-                            }
-                          >
-                            <ShieldAlert className="mr-2 h-4 w-4" />
-                            Investigate
-                          </Button>
-
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() =>
-                              handleStatusChange(alert.id, 'Resolved')
-                            }
-                            disabled={isResolved}
-                          >
-                            <CheckCircle className="mr-2 h-4 w-4" />
-                            Resolved
-                          </Button>
-                        </div>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="outline" size="sm">
+                              Actions <ChevronDown className="ml-2 h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              onClick={() =>
+                                handleStatusChange(alert.id, 'Investigating')
+                              }
+                              disabled={
+                                alert.status === 'Investigating' ||
+                                alert.status === 'Resolved'
+                              }
+                            >
+                              <ShieldAlert className="mr-2 h-4 w-4" />
+                              Investigate
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() =>
+                                handleStatusChange(alert.id, 'Resolved')
+                              }
+                              disabled={isResolved}
+                            >
+                              <CheckCircle className="mr-2 h-4 w-4" />
+                              Resolved
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleDownloadReport(alert)}
+                        >
+                          <FileDown className="mr-2 h-4 w-4" />
+                          Download Report
+                        </Button>
                       </TableCell>
                       <TableCell>
                         {guardDetails ? (
