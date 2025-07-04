@@ -80,6 +80,8 @@ export default function TowercoHomePage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Site</TableHead>
+                  <TableHead>Agency</TableHead>
+                  <TableHead>Supervisor</TableHead>
                   <TableHead>Guard</TableHead>
                   <TableHead>Date</TableHead>
                   <TableHead>Contact</TableHead>
@@ -97,6 +99,10 @@ export default function TowercoHomePage() {
                     <TableRow key={alert.id}>
                       <TableCell className="font-medium">
                         {alert.site}
+                      </TableCell>
+                      <TableCell>{agencyDetails?.name || 'N/A'}</TableCell>
+                      <TableCell>
+                        {supervisorDetails?.name || 'N/A'}
                       </TableCell>
                       <TableCell>{alert.guard}</TableCell>
                       <TableCell>{alert.date}</TableCell>
