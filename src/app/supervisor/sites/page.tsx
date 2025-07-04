@@ -1,4 +1,3 @@
-
 import { sites, guards } from '@/lib/data';
 import {
   Card,
@@ -49,7 +48,7 @@ export default function SitesPage() {
                         <AvatarImage src={guard.avatar} alt={guard.name} />
                         <AvatarFallback>
                           {guard.name.charAt(0)}
-                        </Fallback>
+                        </AvatarFallback>
                       </Avatar>
                       <div>
                         <p className="font-medium text-sm">{guard.name}</p>
