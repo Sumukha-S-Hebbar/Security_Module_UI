@@ -30,7 +30,7 @@ export function SitesMap({ sites: initialSites }: { sites: Site[] }) {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Map className="w-6 h-6" />
-          Supervised Sites
+          My Route
         </CardTitle>
       </CardHeader>
       <CardContent>
