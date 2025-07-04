@@ -26,15 +26,15 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import type { Alert } from '@/types';
+import type { Alert, SecurityAgency } from '@/types';
 
 export default function ReportsPage() {
   const { toast } = useToast();
 
-  const handleGenerateReport = (agencyName: string) => {
+  const handleGenerateReport = (name: string, type: string) => {
     toast({
       title: 'Report Generation Started',
-      description: `Generating a detailed report for ${agencyName}.`,
+      description: `Generating a detailed report for ${type} ${name}.`,
     });
     // In a real app, this would trigger a download.
   };
@@ -50,6 +50,10 @@ export default function ReportsPage() {
       default:
         return <Badge variant="secondary">{status}</Badge>;
     }
+  };
+
+  const getAgencyById = (agencyId?: string): SecurityAgency | undefined => {
+    return securityAgencies.find((agency) => agency.id === agencyId);
   };
 
   return (
@@ -105,7 +109,9 @@ export default function ReportsPage() {
                         </div>
                       </div>
                     </div>
-                    <Button onClick={() => handleGenerateReport(agency.name)}>
+                    <Button
+                      onClick={() => handleGenerateReport(agency.name, 'Agency')}
+                    >
                       <FileDown className="mr-2 h-4 w-4" />
                       Generate Report
                     </Button>
@@ -154,17 +160,52 @@ export default function ReportsPage() {
             <CardHeader>
               <CardTitle>Site Activity Reports</CardTitle>
               <CardDescription>
-                Generate reports on individual site activity and incidents.
+                Download reports on individual site activity and incidents.
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground mb-4">
-                Choose a site and a date range to generate a report.
-              </p>
-              <Button>
-                <FileDown className="mr-2 h-4 w-4" />
-                Generate Site Report
-              </Button>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Site</TableHead>
+                    <TableHead>Assigned Agency</TableHead>
+                    <TableHead>Incidents</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {sites.map((site) => {
+                    const agency = getAgencyById(site.agencyId);
+                    const incidentsCount = site.incidents?.length || 0;
+                    return (
+                      <TableRow key={site.id}>
+                        <TableCell>
+                          <div className="font-medium">{site.name}</div>
+                          <div className="text-sm text-muted-foreground flex items-center gap-1">
+                            <MapPin className="w-3 h-3" />
+                            {site.address}
+                          </div>
+                        </TableCell>
+                        <TableCell>{agency?.name || 'Unassigned'}</TableCell>
+                        <TableCell>
+                          <Badge variant="secondary">{incidentsCount}</Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button
+                            size="sm"
+                            onClick={() =>
+                              handleGenerateReport(site.name, 'Site')
+                            }
+                          >
+                            <FileDown className="mr-2 h-4 w-4" />
+                            Download Report
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
             </CardContent>
           </Card>
         </TabsContent>
@@ -181,7 +222,11 @@ export default function ReportsPage() {
               <p className="text-muted-foreground mb-4">
                 Select a guard and date range for a detailed report.
               </p>
-              <Button>
+              <Button
+                onClick={() =>
+                  handleGenerateReport('Guard Performance', 'Overall')
+                }
+              >
                 <FileDown className="mr-2 h-4 w-4" />
                 Generate Guard Report
               </Button>
@@ -202,7 +247,11 @@ export default function ReportsPage() {
               <p className="text-muted-foreground mb-4">
                 Select a supervisor for an overview of their managed assets.
               </p>
-              <Button>
+              <Button
+                onClick={() =>
+                  handleGenerateReport('Supervisor Activity', 'Overall')
+                }
+              >
                 <FileDown className="mr-2 h-4 w-4" />
                 Generate Supervisor Report
               </Button>
