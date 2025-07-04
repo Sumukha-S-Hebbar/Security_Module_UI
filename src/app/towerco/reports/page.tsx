@@ -32,7 +32,7 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import type { Alert, SecurityAgency } from '@/types';
+import type { Alert, SecurityAgency, Guard, Supervisor } from '@/types';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 export default function ReportsPage() {
@@ -63,6 +63,34 @@ export default function ReportsPage() {
     return securityAgencies.find((agency) => agency.id === agencyId);
   };
 
+  const getGuardByName = (name: string): Guard | undefined => {
+    return guards.find((g) => g.name === name);
+  };
+
+  const getSupervisorByGuardName = (
+    guardName: string
+  ): Supervisor | undefined => {
+    const guard = getGuardByName(guardName);
+    if (!guard || !guard.supervisorId) {
+      return undefined;
+    }
+    return supervisors.find((s) => s.id === guard.supervisorId);
+  };
+
+  const getAgencyBySiteName = (
+    siteName: string
+  ): SecurityAgency | undefined => {
+    const site = sites.find((s) => s.name === siteName);
+    if (!site || !site.agencyId) {
+      return undefined;
+    }
+    return securityAgencies.find((a) => a.id === site.agencyId);
+  };
+
+  const emergencyIncidents = alerts.filter(
+    (alert) => alert.type === 'Emergency'
+  );
+
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6">
       <div>
@@ -73,11 +101,12 @@ export default function ReportsPage() {
       </div>
 
       <Tabs defaultValue="agency">
-        <TabsList className="grid w-full grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+        <TabsList className="grid w-full grid-cols-1 sm:grid-cols-2 lg:grid-cols-5">
           <TabsTrigger value="agency">Agency Reports</TabsTrigger>
           <TabsTrigger value="site">Site Reports</TabsTrigger>
           <TabsTrigger value="guard">Guard Reports</TabsTrigger>
           <TabsTrigger value="supervisor">Supervisor Reports</TabsTrigger>
+          <TabsTrigger value="incident">Incident Reports</TabsTrigger>
         </TabsList>
 
         <TabsContent value="agency" className="mt-6 space-y-6">
@@ -381,6 +410,65 @@ export default function ReportsPage() {
                                 supervisor.name,
                                 'Supervisor'
                               )
+                            }
+                          >
+                            <FileDown className="mr-2 h-4 w-4" />
+                            Download Report
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="incident" className="mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Incident Reports</CardTitle>
+              <CardDescription>
+                A log of all emergency incidents reported across sites.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Incident ID</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Site</TableHead>
+                    <TableHead>Agency</TableHead>
+                    <TableHead>Supervisor</TableHead>
+                    <TableHead>Guard</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {emergencyIncidents.map((incident) => {
+                    const agency = getAgencyBySiteName(incident.site);
+                    const supervisor = getSupervisorByGuardName(
+                      incident.guard
+                    );
+                    return (
+                      <TableRow key={incident.id}>
+                        <TableCell>{incident.id}</TableCell>
+                        <TableCell>{incident.date}</TableCell>
+                        <TableCell>{incident.site}</TableCell>
+                        <TableCell>{agency?.name || 'N/A'}</TableCell>
+                        <TableCell>{supervisor?.name || 'N/A'}</TableCell>
+                        <TableCell>{incident.guard}</TableCell>
+                        <TableCell>
+                          {getStatusBadge(incident.status)}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button
+                            size="sm"
+                            onClick={() =>
+                              handleGenerateReport(incident.id, 'Incident')
                             }
                           >
                             <FileDown className="mr-2 h-4 w-4" />
