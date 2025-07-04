@@ -1,4 +1,3 @@
-
 import type { Guard, Site, Alert, Supervisor, Incident, SecurityAgency } from '@/types';
 
 export const supervisors: Supervisor[] = [
@@ -125,6 +124,7 @@ export const sites: Site[] = [
     incidents: [incidents[1]],
     assignedOn: '2024-05-10',
     agencyId: 'AGY01',
+    geofencePerimeter: 500,
   },
   {
     id: 'SITE02',
@@ -138,6 +138,7 @@ export const sites: Site[] = [
     incidents: [incidents[0]],
     assignedOn: '2024-04-20',
     agencyId: 'AGY01',
+    geofencePerimeter: 1000,
   },
   {
     id: 'SITE03',
@@ -151,6 +152,7 @@ export const sites: Site[] = [
     incidents: [],
     assignedOn: '2024-06-01',
     agencyId: 'AGY01',
+    geofencePerimeter: 800,
   },
   {
     id: 'SITE04',
@@ -163,6 +165,7 @@ export const sites: Site[] = [
     towerco: 'TowerCo Alpha',
     incidents: [],
     agencyId: 'AGY02',
+    geofencePerimeter: 1200,
   },
   {
     id: 'SITE05',

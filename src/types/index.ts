@@ -1,4 +1,3 @@
-
 export type Guard = {
   id: string;
   name: string;
@@ -27,6 +26,7 @@ export type Site = {
   incidents?: Incident[];
   assignedOn?: string;
   agencyId?: string;
+  geofencePerimeter?: number;
 };
 
 export type Alert = {

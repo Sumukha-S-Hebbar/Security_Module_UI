@@ -18,7 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { FileDown, MapPin } from 'lucide-react';
+import { FileDown, MapPin, Fence } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -29,9 +29,13 @@ import {
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 
 export default function AgencySitesPage() {
   const [selectedSupervisors, setSelectedSupervisors] = useState<{
+    [key: string]: string;
+  }>({});
+  const [geofencePerimeters, setGeofencePerimeters] = useState<{
     [key: string]: string;
   }>({});
   const { toast } = useToast();
@@ -62,8 +66,17 @@ export default function AgencySitesPage() {
     }));
   };
 
+  const handleGeofenceChange = (siteId: string, value: string) => {
+    setGeofencePerimeters((prev) => ({
+      ...prev,
+      [siteId]: value,
+    }));
+  };
+
   const handleAssignSupervisor = (siteId: string) => {
     const supervisorId = selectedSupervisors[siteId];
+    const perimeter = geofencePerimeters[siteId];
+
     if (!supervisorId) {
       toast({
         variant: 'destructive',
@@ -72,12 +85,20 @@ export default function AgencySitesPage() {
       });
       return;
     }
+    if (!perimeter || Number(perimeter) <= 0) {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Please enter a valid geofence perimeter.',
+      });
+      return;
+    }
     const siteName = unassignedSites.find((s) => s.id === siteId)?.name;
     const supervisorName = supervisors.find((s) => s.id === supervisorId)?.name;
 
     toast({
       title: 'Supervisor Assigned',
-      description: `${supervisorName} has been assigned to ${siteName}. The site will be moved to the assigned list on next refresh.`,
+      description: `${supervisorName} has been assigned to ${siteName} with a ${perimeter}m geofence. The site will be moved to the assigned list on next refresh.`,
     });
     // In a real app, you would make an API call here to update the database
     // and then refetch the data or update the state locally.
@@ -116,6 +137,7 @@ export default function AgencySitesPage() {
                 <TableHead>Supervisor</TableHead>
                 <TableHead>TowerCo</TableHead>
                 <TableHead>Incidents</TableHead>
+                <TableHead>Geofence Perimeter</TableHead>
                 <TableHead>Assigned On Date</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
@@ -138,6 +160,16 @@ export default function AgencySitesPage() {
                     <TableCell>{site.towerco}</TableCell>
                     <TableCell>
                       <Badge variant="secondary">{incidentsCount}</Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Fence className="w-4 h-4 text-muted-foreground" />
+                        <span>
+                          {site.geofencePerimeter
+                            ? `${site.geofencePerimeter}m`
+                            : 'N/A'}
+                        </span>
+                      </div>
                     </TableCell>
                     <TableCell>{site.assignedOn || 'N/A'}</TableCell>
                     <TableCell className="text-right">
@@ -172,7 +204,8 @@ export default function AgencySitesPage() {
                   <TableHead>Site ID</TableHead>
                   <TableHead>Site</TableHead>
                   <TableHead>TowerCo</TableHead>
-                  <TableHead>Assign Supervisor</TableHead>
+                  <TableHead>Geofence (m)</TableHead>
+                  <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -187,6 +220,17 @@ export default function AgencySitesPage() {
                       </div>
                     </TableCell>
                     <TableCell>{site.towerco}</TableCell>
+                    <TableCell>
+                      <Input
+                        type="number"
+                        placeholder="e.g. 500"
+                        className="w-[120px]"
+                        value={geofencePerimeters[site.id] || ''}
+                        onChange={(e) =>
+                          handleGeofenceChange(site.id, e.target.value)
+                        }
+                      />
+                    </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <Select
@@ -212,7 +256,10 @@ export default function AgencySitesPage() {
                         <Button
                           size="sm"
                           onClick={() => handleAssignSupervisor(site.id)}
-                          disabled={!selectedSupervisors[site.id]}
+                          disabled={
+                            !selectedSupervisors[site.id] ||
+                            !geofencePerimeters[site.id]
+                          }
                         >
                           Assign
                         </Button>
