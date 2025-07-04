@@ -1,21 +1,2 @@
-import SupervisorSidebar from '@/components/supervisor/sidebar';
-import {
-  SidebarProvider,
-  Sidebar,
-  SidebarInset,
-} from '@/components/ui/sidebar';
-
-export default function SupervisorLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  return (
-    <SidebarProvider>
-      <Sidebar>
-        <SupervisorSidebar />
-      </Sidebar>
-      <SidebarInset>{children}</SidebarInset>
-    </SidebarProvider>
-  );
-}
+// This file is intentionally left empty to resolve a routing conflict.
+// The active route is defined in a different location.
