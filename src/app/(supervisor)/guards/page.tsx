@@ -28,9 +28,11 @@ export default function GuardsPage() {
         <TabsContent value="profiles" className="mt-6">
           <GuardProfiles guards={guards} />
         </TabsContent>
-        <TabsContent value="requests" className="mt-6 space-y-6">
-          <SelfieRequester guards={guards} />
-          <ComplianceWatchlist guards={guardsWithComplianceIssues} />
+        <TabsContent value="requests" className="mt-6">
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+            <SelfieRequester guards={guards} />
+            <ComplianceWatchlist guards={guardsWithComplianceIssues} />
+          </div>
         </TabsContent>
       </Tabs>
     </div>
