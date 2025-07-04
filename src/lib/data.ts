@@ -10,8 +10,6 @@ export const guards: Guard[] = [
     avatar: 'https://placehold.co/100x100.png',
     missedSelfieCount: 1,
     totalSelfieRequests: 20,
-    leavesTaken: 5,
-    annualLeave: 20,
   },
   {
     id: 'GL002',
@@ -22,8 +20,6 @@ export const guards: Guard[] = [
     avatar: 'https://placehold.co/100x100.png',
     missedSelfieCount: 0,
     totalSelfieRequests: 25,
-    leavesTaken: 10,
-    annualLeave: 20,
   },
   {
     id: 'GL003',
@@ -34,8 +30,6 @@ export const guards: Guard[] = [
     avatar: 'https://placehold.co/100x100.png',
     missedSelfieCount: 8,
     totalSelfieRequests: 22,
-    leavesTaken: 2,
-    annualLeave: 20,
   },
   {
     id: 'GL004',
@@ -46,8 +40,6 @@ export const guards: Guard[] = [
     avatar: 'https://placehold.co/100x100.png',
     missedSelfieCount: 0,
     totalSelfieRequests: 18,
-    leavesTaken: 15,
-    annualLeave: 20,
   },
   {
     id: 'GL005',
@@ -58,8 +50,6 @@ export const guards: Guard[] = [
     avatar: 'https://placehold.co/100x100.png',
     missedSelfieCount: 0,
     totalSelfieRequests: 10,
-    leavesTaken: 18,
-    annualLeave: 20,
   },
 ];
 

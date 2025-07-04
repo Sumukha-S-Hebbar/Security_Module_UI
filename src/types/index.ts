@@ -7,8 +7,6 @@ export type Guard = {
   avatar: string;
   missedSelfieCount: number;
   totalSelfieRequests: number;
-  leavesTaken: number;
-  annualLeave: number;
 };
 
 export type Site = {

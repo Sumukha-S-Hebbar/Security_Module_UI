@@ -3,7 +3,6 @@ import { GuardProfiles } from './_components/guard-profiles';
 import { SelfieRequester } from './_components/selfie-requester';
 import { ComplianceWatchlist } from './_components/compliance-watchlist';
 import { guards } from '@/lib/data';
-import { GuardLeaveTracker } from './_components/guard-leave-tracker';
 
 export default function GuardsPage() {
   const guardsWithComplianceIssues = guards.filter(
@@ -34,7 +33,6 @@ export default function GuardsPage() {
           <SelfieRequester guards={guards} />
         </TabsContent>
         <TabsContent value="compliance" className="mt-6 space-y-6">
-          <GuardLeaveTracker guards={guards} />
           <ComplianceWatchlist guards={guardsWithComplianceIssues} />
         </TabsContent>
       </Tabs>
