@@ -1,5 +1,5 @@
 
-import { sites } from '@/lib/data';
+import { sites, guards, supervisors } from '@/lib/data';
 import {
   Card,
   CardContent,
@@ -18,6 +18,20 @@ import {
 import { MapPin } from 'lucide-react';
 
 export default function AgencySitesPage() {
+  const getSupervisorForSite = (siteId: string) => {
+    const site = sites.find((s) => s.id === siteId);
+    if (!site || site.guards.length === 0) {
+      return null;
+    }
+    // Assumption: all guards at a site have the same supervisor. We'll use the first guard.
+    const guardId = site.guards[0];
+    const guard = guards.find((g) => g.id === guardId);
+    if (!guard || !guard.supervisorId) {
+      return null;
+    }
+    return supervisors.find((s) => s.id === guard.supervisorId);
+  };
+
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6">
       <div>
@@ -39,11 +53,13 @@ export default function AgencySitesPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>Site</TableHead>
+                <TableHead>Supervisor</TableHead>
                 <TableHead>TowerCo</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {sites.map((site) => {
+                const supervisor = getSupervisorForSite(site.id);
                 return (
                   <TableRow key={site.id}>
                     <TableCell>
@@ -53,6 +69,7 @@ export default function AgencySitesPage() {
                         {site.address}
                       </div>
                     </TableCell>
+                    <TableCell>{supervisor?.name || 'Unassigned'}</TableCell>
                     <TableCell>{site.towerco}</TableCell>
                   </TableRow>
                 );
