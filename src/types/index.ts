@@ -19,7 +19,7 @@ export type Site = {
 
 export type Alert = {
   id: string;
-  type: 'Emergency' | 'Missed Selfie' | 'Site Anomaly';
+  type: 'Emergency' | 'Missed Selfie' | 'Guard Out of Premises';
   date: string;
   site: string;
   guard: string;

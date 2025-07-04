@@ -86,7 +86,7 @@ export const alerts: Alert[] = [
   },
   {
     id: 'A003',
-    type: 'Site Anomaly',
+    type: 'Guard Out of Premises',
     date: '2024-07-19 22:00',
     site: 'Tech Park One',
     guard: 'Jane Smith',

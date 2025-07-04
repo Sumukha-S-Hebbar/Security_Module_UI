@@ -9,7 +9,7 @@ import {
 } from '@/components/ui/table';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { AlertTriangle, CameraOff, FileWarning } from 'lucide-react';
+import { AlertTriangle, CameraOff, LogOut } from 'lucide-react';
 import type { Alert } from '@/types';
 
 export default function AlertsPage() {
@@ -32,11 +32,11 @@ export default function AlertsPage() {
             <span>Missed Selfie</span>
           </div>
         );
-      case 'Site Anomaly':
+      case 'Guard Out of Premises':
         return (
           <div className="flex items-center gap-2">
-            <FileWarning className="h-4 w-4 text-muted-foreground" />
-            <span>Site Anomaly</span>
+            <LogOut className="h-4 w-4 text-muted-foreground" />
+            <span>Guard Out of Premises</span>
           </div>
         );
     }
@@ -102,7 +102,7 @@ export default function AlertsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>General Alerts</CardTitle>
+          <CardTitle>Guard Alerts</CardTitle>
         </CardHeader>
         <CardContent>
           {otherAlerts.length > 0 ? (
