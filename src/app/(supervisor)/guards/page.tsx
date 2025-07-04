@@ -21,18 +21,15 @@ export default function GuardsPage() {
       </div>
 
       <Tabs defaultValue="profiles">
-        <TabsList className="grid w-full grid-cols-1 sm:grid-cols-3">
+        <TabsList className="grid w-full grid-cols-1 sm:grid-cols-2">
           <TabsTrigger value="profiles">Guard Profiles</TabsTrigger>
           <TabsTrigger value="requests">Selfie Requests</TabsTrigger>
-          <TabsTrigger value="compliance">Compliance</TabsTrigger>
         </TabsList>
         <TabsContent value="profiles" className="mt-6">
           <GuardProfiles guards={guards} />
         </TabsContent>
-        <TabsContent value="requests" className="mt-6">
+        <TabsContent value="requests" className="mt-6 space-y-6">
           <SelfieRequester guards={guards} />
-        </TabsContent>
-        <TabsContent value="compliance" className="mt-6 space-y-6">
           <ComplianceWatchlist guards={guardsWithComplianceIssues} />
         </TabsContent>
       </Tabs>
