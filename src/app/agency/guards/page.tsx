@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/table';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { GuardUploader } from './_components/guard-uploader';
 
 export default function AgencyGuardsPage() {
     const getSupervisorById = (id?: string) => supervisors.find((s) => s.id === id);
@@ -19,9 +20,12 @@ export default function AgencyGuardsPage() {
             <div>
                 <h1 className="text-3xl font-bold tracking-tight">Security Guard Management</h1>
                 <p className="text-muted-foreground">
-                    View all guard profiles and their assignments.
+                    Add, view, and manage guard profiles and their assignments.
                 </p>
             </div>
+
+            <GuardUploader />
+
             <Card>
                 <CardHeader>
                     <CardTitle>All Security Guards</CardTitle>
