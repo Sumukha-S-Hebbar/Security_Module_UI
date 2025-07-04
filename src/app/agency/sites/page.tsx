@@ -32,6 +32,10 @@ export default function AgencySitesPage() {
     return supervisors.find((s) => s.id === guard.supervisorId);
   };
 
+  const unassignedSites = sites.filter(
+    (site) => !getSupervisorForSite(site.id)
+  );
+
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6">
       <div>
@@ -80,6 +84,43 @@ export default function AgencySitesPage() {
           </Table>
         </CardContent>
       </Card>
+
+      {unassignedSites.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Unassigned Sites</CardTitle>
+            <CardDescription>
+              A list of sites that do not have a supervisor assigned.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Site ID</TableHead>
+                  <TableHead>Site</TableHead>
+                  <TableHead>TowerCo</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {unassignedSites.map((site) => (
+                  <TableRow key={site.id}>
+                    <TableCell>{site.id}</TableCell>
+                    <TableCell>
+                      <div className="font-medium">{site.name}</div>
+                      <div className="text-sm text-muted-foreground flex items-center gap-1">
+                        <MapPin className="w-3 h-3" />
+                        {site.address}
+                      </div>
+                    </TableCell>
+                    <TableCell>{site.towerco}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

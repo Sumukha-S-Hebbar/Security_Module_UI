@@ -136,6 +136,17 @@ export const sites: Site[] = [
     towerco: 'TowerCo Alpha',
     incidents: [],
   },
+  {
+    id: 'SITE05',
+    name: 'Industrial Zone 5',
+    address: '555 Factory Rd, Industry City, TX',
+    guards: [],
+    reportUrl: '#',
+    coords: { x: 15, y: 80 },
+    visited: false,
+    towerco: 'TowerCo Delta',
+    incidents: [],
+  },
 ];
 
 export const alerts: Alert[] = [
