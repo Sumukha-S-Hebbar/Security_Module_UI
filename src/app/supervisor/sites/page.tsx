@@ -9,7 +9,7 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { MapPin, Users, FileText } from 'lucide-react';
+import { MapPin, Users, FileDown } from 'lucide-react';
 import Link from 'next/link';
 
 export default function SitesPage() {
@@ -64,8 +64,8 @@ export default function SitesPage() {
             <CardFooter>
               <Button asChild variant="outline" className="w-full">
                 <Link href={site.reportUrl}>
-                  <FileText className="mr-2 h-4 w-4" />
-                  View Site Report
+                  <FileDown className="mr-2 h-4 w-4" />
+                  Download Site Report
                 </Link>
               </Button>
             </CardFooter>
