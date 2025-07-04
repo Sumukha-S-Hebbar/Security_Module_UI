@@ -26,6 +26,11 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+import {
   AlertTriangle,
   CameraOff,
   LogOut,
@@ -122,6 +127,9 @@ export default function AlertsPage() {
               <TableBody>
                 {emergencyAlerts.map((alert) => {
                   const guardDetails = getGuardByName(alert.guard);
+                  const isResolved = alert.status === 'Resolved';
+                  const hasNoMedia = !alert.images || alert.images.length === 0;
+
                   return (
                     <TableRow key={alert.id}>
                       <TableCell className="font-medium">{alert.id}</TableCell>
@@ -161,17 +169,38 @@ export default function AlertsPage() {
                             <ShieldAlert className="mr-2 h-4 w-4" />
                             Investigating
                           </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() =>
-                              handleStatusChange(alert.id, 'Resolved')
-                            }
-                            disabled={alert.status === 'Resolved'}
-                          >
-                            <CheckCircle className="mr-2 h-4 w-4" />
-                            Resolved
-                          </Button>
+
+                          {hasNoMedia && !isResolved ? (
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <span className="cursor-not-allowed">
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    disabled
+                                  >
+                                    <CheckCircle className="mr-2 h-4 w-4" />
+                                    Resolved
+                                  </Button>
+                                </span>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Cannot resolve alert without media.</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          ) : (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() =>
+                                handleStatusChange(alert.id, 'Resolved')
+                              }
+                              disabled={isResolved}
+                            >
+                              <CheckCircle className="mr-2 h-4 w-4" />
+                              Resolved
+                            </Button>
+                          )}
                         </div>
                       </TableCell>
                       <TableCell>

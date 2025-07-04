@@ -107,6 +107,16 @@ export const alerts: Alert[] = [
       'Fire alarm activated on the third floor, R&D department. I am proceeding to the location to investigate. All personnel are being evacuated. Time is 2:14 AM. No smoke visible yet.',
     images: ['https://placehold.co/600x400.png'],
   },
+   {
+    id: 'A007',
+    type: 'Emergency',
+    date: '2024-07-22 11:00',
+    site: 'Downtown Mall',
+    guard: 'John Doe',
+    status: 'Active',
+    callDetails: 'Unattended package found near the main entrance. I am keeping a safe distance and have cleared the area. Requesting instructions. Time is 11:00 AM.',
+    images: [],
+  },
   {
     id: 'A006',
     type: 'Emergency',
