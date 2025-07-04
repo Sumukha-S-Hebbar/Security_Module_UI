@@ -7,7 +7,7 @@ import {
   Building2,
   Users,
   UserCheck,
-  FileText,
+  ShieldAlert,
   ShieldCheck,
 } from 'lucide-react';
 import {
@@ -24,7 +24,7 @@ const menuItems = [
   { href: '/agency/sites', label: 'Sites', icon: Building2 },
   { href: '/agency/supervisors', label: 'Supervisors', icon: UserCheck },
   { href: '/agency/guards', label: 'Security Guards', icon: Users },
-  { href: '/agency/reports', label: 'Reports', icon: FileText },
+  { href: '/agency/incidents', label: 'Incidents', icon: ShieldAlert },
 ];
 
 export default function AgencySidebar() {
