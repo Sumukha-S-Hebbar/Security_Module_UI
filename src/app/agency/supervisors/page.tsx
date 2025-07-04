@@ -74,7 +74,12 @@ export default function AgencySupervisorsPage() {
                                         </div>
                                     </TableCell>
                                     <TableCell>
-                                        <Button variant="outline" size="sm">View Details</Button>
+                                        <Button asChild variant="outline" size="sm">
+                                            <a href={`tel:${supervisor.phone}`}>
+                                                <Phone className="mr-2 h-4 w-4" />
+                                                Contact Supervisor
+                                            </a>
+                                        </Button>
                                     </TableCell>
                                 </TableRow>
                             ))}
