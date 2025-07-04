@@ -15,7 +15,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
 import { MapPin } from 'lucide-react';
 
 export default function AgencySitesPage() {
@@ -41,14 +40,10 @@ export default function AgencySitesPage() {
               <TableRow>
                 <TableHead>Site</TableHead>
                 <TableHead>TowerCo</TableHead>
-                <TableHead>Assigned Guards</TableHead>
-                <TableHead>Open Incidents</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {sites.map((site) => {
-                const openIncidents =
-                  site.incidents?.filter((inc) => !inc.resolved).length || 0;
                 return (
                   <TableRow key={site.id}>
                     <TableCell>
@@ -59,16 +54,6 @@ export default function AgencySitesPage() {
                       </div>
                     </TableCell>
                     <TableCell>{site.towerco}</TableCell>
-                    <TableCell>
-                      <Badge variant="outline">{site.guards.length}</Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={openIncidents > 0 ? 'destructive' : 'secondary'}
-                      >
-                        {openIncidents}
-                      </Badge>
-                    </TableCell>
                   </TableRow>
                 );
               })}
