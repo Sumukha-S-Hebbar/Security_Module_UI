@@ -65,4 +65,5 @@ export type SecurityAgency = {
   email: string;
   address: string;
   avatar: string;
+  regionServed: string;
 };

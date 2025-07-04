@@ -74,7 +74,7 @@ export function AgencyUploader() {
                     />
                   </FormControl>
                   <FormDescription>
-                    The CSV should contain columns: name, phone, email, address.
+                    The CSV should contain columns: name, phone, email, address, regionServed.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>

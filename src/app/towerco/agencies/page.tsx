@@ -42,6 +42,7 @@ export default function TowercoAgenciesPage() {
                                 <TableHead>Phone</TableHead>
                                 <TableHead>Email</TableHead>
                                 <TableHead>Address</TableHead>
+                                <TableHead>Region Served</TableHead>
                                 <TableHead>Actions</TableHead>
                             </TableRow>
                         </TableHeader>
@@ -77,6 +78,7 @@ export default function TowercoAgenciesPage() {
                                     <TableCell>
                                        {agency.address}
                                     </TableCell>
+                                    <TableCell>{agency.regionServed}</TableCell>
                                     <TableCell>
                                         <Button asChild variant="outline" size="sm">
                                             <a href={`tel:${agency.phone}`}>

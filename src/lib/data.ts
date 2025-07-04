@@ -99,6 +99,7 @@ export const securityAgencies: SecurityAgency[] = [
     email: 'contact@guardlink.com',
     address: '123 Security Blvd, Safe City, USA',
     avatar: 'https://placehold.co/100x100.png',
+    regionServed: 'Nationwide',
   },
   {
     id: 'AGY02',
@@ -107,6 +108,7 @@ export const securityAgencies: SecurityAgency[] = [
     email: 'info@vigilantwatch.com',
     address: '456 Protector Ave, Secure Town, USA',
     avatar: 'https://placehold.co/100x100.png',
+    regionServed: 'West Coast',
   },
 ];
 
