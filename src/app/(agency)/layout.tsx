@@ -1,3 +1,5 @@
-export const disabled = true;
-// This file is intentionally disabled to resolve a routing conflict.
+// This file is intentionally blank to resolve a routing conflict.
 // The active route is defined in a different location.
+export default function Layout({ children }: { children: React.ReactNode }) {
+  return children;
+}
