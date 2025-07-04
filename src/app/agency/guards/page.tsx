@@ -2,6 +2,7 @@
 'use client';
 
 import { useState } from 'react';
+import type { Supervisor } from '@/types';
 import { guards, supervisors } from '@/lib/data';
 import {
   Table,
@@ -68,6 +69,16 @@ export default function AgencyGuardsPage() {
     });
     // In a real app, you would make an API call here to update the database
     // and then refetch the data or update the state locally.
+  };
+
+  const getSupervisorForSite = (siteName: string): Supervisor | undefined => {
+    const assignedGuardAtSite = guards.find(
+      (g) => g.site === siteName && g.supervisorId
+    );
+    if (assignedGuardAtSite?.supervisorId) {
+      return supervisors.find((s) => s.id === assignedGuardAtSite.supervisorId);
+    }
+    return undefined;
   };
 
   return (
@@ -165,59 +176,66 @@ export default function AgencyGuardsPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {unassignedGuards.map((guard) => (
-                  <TableRow key={guard.id}>
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <Avatar>
-                          <AvatarImage src={guard.avatar} alt={guard.name} />
-                          <AvatarFallback>
-                            {guard.name.charAt(0)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <p className="font-medium">{guard.name}</p>
-                          <p className="text-sm text-muted-foreground">
-                            ID: {guard.id}
-                          </p>
+                {unassignedGuards.map((guard) => {
+                  const siteSupervisor = getSupervisorForSite(guard.site);
+                  const availableSupervisors = siteSupervisor
+                    ? [siteSupervisor]
+                    : supervisors;
+
+                  return (
+                    <TableRow key={guard.id}>
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <Avatar>
+                            <AvatarImage src={guard.avatar} alt={guard.name} />
+                            <AvatarFallback>
+                              {guard.name.charAt(0)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="font-medium">{guard.name}</p>
+                            <p className="text-sm text-muted-foreground">
+                              ID: {guard.id}
+                            </p>
+                          </div>
                         </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>{guard.site}</TableCell>
-                    <TableCell>{guard.phone}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Select
-                          value={selectedSupervisors[guard.id] || ''}
-                          onValueChange={(value) =>
-                            handleSupervisorSelect(guard.id, value)
-                          }
-                        >
-                          <SelectTrigger className="w-[180px]">
-                            <SelectValue placeholder="Select Supervisor" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {supervisors.map((supervisor) => (
-                              <SelectItem
-                                key={supervisor.id}
-                                value={supervisor.id}
-                              >
-                                {supervisor.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <Button
-                          size="sm"
-                          onClick={() => handleAssignSupervisor(guard.id)}
-                          disabled={!selectedSupervisors[guard.id]}
-                        >
-                          Assign
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                      </TableCell>
+                      <TableCell>{guard.site}</TableCell>
+                      <TableCell>{guard.phone}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <Select
+                            value={selectedSupervisors[guard.id] || ''}
+                            onValueChange={(value) =>
+                              handleSupervisorSelect(guard.id, value)
+                            }
+                          >
+                            <SelectTrigger className="w-[180px]">
+                              <SelectValue placeholder="Select Supervisor" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {availableSupervisors.map((supervisor) => (
+                                <SelectItem
+                                  key={supervisor.id}
+                                  value={supervisor.id}
+                                >
+                                  {supervisor.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <Button
+                            size="sm"
+                            onClick={() => handleAssignSupervisor(guard.id)}
+                            disabled={!selectedSupervisors[guard.id]}
+                          >
+                            Assign
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           </CardContent>
