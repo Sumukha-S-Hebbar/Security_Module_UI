@@ -28,6 +28,7 @@ import {
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import { Badge } from '@/components/ui/badge';
 
 export default function AgencySitesPage() {
   const [selectedSupervisors, setSelectedSupervisors] = useState<{
@@ -114,6 +115,7 @@ export default function AgencySitesPage() {
                 <TableHead>Site</TableHead>
                 <TableHead>Supervisor</TableHead>
                 <TableHead>TowerCo</TableHead>
+                <TableHead>Incidents</TableHead>
                 <TableHead>Assigned On Date</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
@@ -121,6 +123,7 @@ export default function AgencySitesPage() {
             <TableBody>
               {assignedSites.map((site) => {
                 const supervisor = getSupervisorForSite(site.id);
+                const incidentsCount = site.incidents?.length || 0;
                 return (
                   <TableRow key={site.id}>
                     <TableCell>{site.id}</TableCell>
@@ -133,6 +136,9 @@ export default function AgencySitesPage() {
                     </TableCell>
                     <TableCell>{supervisor?.name || 'Unassigned'}</TableCell>
                     <TableCell>{site.towerco}</TableCell>
+                    <TableCell>
+                      <Badge variant="secondary">{incidentsCount}</Badge>
+                    </TableCell>
                     <TableCell>{site.assignedOn || 'N/A'}</TableCell>
                     <TableCell className="text-right">
                       <Button
@@ -140,7 +146,7 @@ export default function AgencySitesPage() {
                         onClick={() => handleDownloadReport(site)}
                       >
                         <FileDown className="mr-2 h-4 w-4" />
-                        Download
+                        Download Report
                       </Button>
                     </TableCell>
                   </TableRow>
