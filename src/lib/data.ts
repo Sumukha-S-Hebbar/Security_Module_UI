@@ -108,6 +108,16 @@ export const alerts: Alert[] = [
     images: ['https://placehold.co/600x400.png'],
   },
   {
+    id: 'A006',
+    type: 'Emergency',
+    date: '2024-07-19 10:00',
+    site: 'Tech Park One',
+    guard: 'Jane Smith',
+    status: 'Resolved',
+    callDetails: 'False alarm at Building A. A smoke detector was triggered by dust from construction work nearby. Situation is normal. The time is 10:00 AM.',
+    images: [],
+  },
+  {
     id: 'A002',
     type: 'Missed Selfie',
     date: '2024-07-20 08:05',
