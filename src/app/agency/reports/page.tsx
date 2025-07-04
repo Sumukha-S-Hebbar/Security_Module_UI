@@ -34,6 +34,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 export default function AgencyReportsPage() {
   const [date, setDate] = useState<DateRange | undefined>({
@@ -79,64 +80,93 @@ export default function AgencyReportsPage() {
     // In a real app, this would trigger a file download (e.g., CSV or PDF).
   };
 
+  const handleDownloadSupervisorReport = (supervisor: Supervisor) => {
+    if (!date?.from || !date?.to) {
+      toast({
+        variant: 'destructive',
+        title: 'Date Range Required',
+        description: 'Please select a date range to download the report.',
+      });
+      return;
+    }
+    toast({
+      title: 'Report Download Started',
+      description: `Downloading report for ${supervisor.name} from ${format(
+        date.from,
+        'LLL dd, y'
+      )} to ${format(date.to, 'LLL dd, y')}.`,
+    });
+    // In a real app, this would trigger a file download.
+  };
+
+  const getSitesCountForSupervisor = (supervisorId: string): number => {
+    const sitesForSupervisor = new Set<string>();
+    guards
+      .filter((g) => g.supervisorId === supervisorId)
+      .forEach((g) => {
+        sitesForSupervisor.add(g.site);
+      });
+    return sitesForSupervisor.size;
+  };
+
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Reports</h1>
         <p className="text-muted-foreground">
-          Download detailed reports for each site.
+          Download detailed reports for sites and supervisors.
         </p>
+      </div>
+
+      <div className="space-y-2">
+        <Label>Report Date Range</Label>
+        <div>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant={'outline'}
+                className={cn(
+                  'w-full sm:w-[300px] justify-start text-left font-normal',
+                  !date && 'text-muted-foreground'
+                )}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {date?.from ? (
+                  date.to ? (
+                    <>
+                      {format(date.from, 'LLL dd, y')} -{' '}
+                      {format(date.to, 'LLL dd, y')}
+                    </>
+                  ) : (
+                    format(date.from, 'LLL dd, y')
+                  )
+                ) : (
+                  <span>Pick a date range</span>
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                initialFocus
+                mode="range"
+                defaultMonth={date?.from}
+                selected={date}
+                onSelect={setDate}
+                numberOfMonths={2}
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
       </div>
 
       <Card>
         <CardHeader>
           <CardTitle>Site Reports</CardTitle>
           <CardDescription>
-            Select a date range and download a report for any site.
+            Download a detailed report for any site.
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div className="space-y-2">
-              <Label>Report Date Range</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant={'outline'}
-                    className={cn(
-                      'w-full sm:w-[300px] justify-start text-left font-normal',
-                      !date && 'text-muted-foreground'
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {date?.from ? (
-                      date.to ? (
-                        <>
-                          {format(date.from, 'LLL dd, y')} -{' '}
-                          {format(date.to, 'LLL dd, y')}
-                        </>
-                      ) : (
-                        format(date.from, 'LLL dd, y')
-                      )
-                    ) : (
-                      <span>Pick a date range</span>
-                    )}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    initialFocus
-                    mode="range"
-                    defaultMonth={date?.from}
-                    selected={date}
-                    onSelect={setDate}
-                    numberOfMonths={2}
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-          </div>
-
+        <CardContent>
           <div className="border rounded-lg">
             <Table>
               <TableHeader>
@@ -169,6 +199,80 @@ export default function AgencyReportsPage() {
                         <Button
                           size="sm"
                           onClick={() => handleDownloadReport(site)}
+                        >
+                          <FileDown className="mr-2 h-4 w-4" />
+                          Download
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Supervisor Reports</CardTitle>
+          <CardDescription>
+            Download performance reports for each supervisor.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="border rounded-lg">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Supervisor</TableHead>
+                  <TableHead>Assigned Guards</TableHead>
+                  <TableHead>Assigned Sites</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {supervisors.map((supervisor) => {
+                  const assignedSitesCount = getSitesCountForSupervisor(
+                    supervisor.id
+                  );
+                  return (
+                    <TableRow key={supervisor.id}>
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <Avatar>
+                            <AvatarImage
+                              src={supervisor.avatar}
+                              alt={supervisor.name}
+                            />
+                            <AvatarFallback>
+                              {supervisor.name.charAt(0)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="font-medium">{supervisor.name}</p>
+                            <p className="text-sm text-muted-foreground">
+                              {supervisor.email}
+                            </p>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="secondary">
+                          {supervisor.assignedGuards.length} Guards
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="secondary">
+                          {assignedSitesCount} Sites
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          size="sm"
+                          onClick={() =>
+                            handleDownloadSupervisorReport(supervisor)
+                          }
                         >
                           <FileDown className="mr-2 h-4 w-4" />
                           Download
