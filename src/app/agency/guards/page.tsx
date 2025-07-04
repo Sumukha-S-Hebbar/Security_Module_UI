@@ -2,8 +2,8 @@
 'use client';
 
 import { useState } from 'react';
-import type { Supervisor } from '@/types';
-import { guards, supervisors } from '@/lib/data';
+import type { Supervisor, Site } from '@/types';
+import { guards, supervisors, sites } from '@/lib/data';
 import {
   Table,
   TableBody,
@@ -36,6 +36,9 @@ export default function AgencyGuardsPage() {
   const [selectedSupervisors, setSelectedSupervisors] = useState<{
     [key: string]: string;
   }>({});
+  const [selectedSites, setSelectedSites] = useState<{
+    [key: string]: string;
+  }>({});
 
   const getSupervisorById = (id?: string) =>
     supervisors.find((s) => s.id === id);
@@ -48,38 +51,72 @@ export default function AgencyGuardsPage() {
       ...prev,
       [guardId]: supervisorId,
     }));
+    // When supervisor changes, reset the site selection for that guard
+    setSelectedSites((prev) => {
+      const newState = { ...prev };
+      delete newState[guardId];
+      return newState;
+    });
   };
 
-  const handleAssignSupervisor = (guardId: string) => {
+  const handleSiteSelect = (guardId: string, siteId: string) => {
+    setSelectedSites((prev) => ({
+      ...prev,
+      [guardId]: siteId,
+    }));
+  };
+
+  const handleAssign = (guardId: string) => {
     const supervisorId = selectedSupervisors[guardId];
-    if (!supervisorId) {
+    const siteId = selectedSites[guardId];
+    if (!supervisorId || !siteId) {
       toast({
         variant: 'destructive',
         title: 'Error',
-        description: 'Please select a supervisor first.',
+        description: 'Please select a supervisor and a site.',
       });
       return;
     }
     const guardName = guards.find((g) => g.id === guardId)?.name;
     const supervisorName = supervisors.find((s) => s.id === supervisorId)?.name;
+    const siteName = sites.find((s) => s.id === siteId)?.name;
 
     toast({
-      title: 'Supervisor Assigned',
-      description: `${supervisorName} has been assigned to ${guardName}. The guard will be moved to the assigned list on next refresh.`,
+      title: 'Guard Assigned',
+      description: `${guardName} has been assigned to ${siteName} under supervisor ${supervisorName}. The guard will be moved to the assigned list on next refresh.`,
     });
     // In a real app, you would make an API call here to update the database
     // and then refetch the data or update the state locally.
   };
 
-  const getSupervisorForSite = (siteName: string): Supervisor | undefined => {
-    const assignedGuardAtSite = guards.find(
-      (g) => g.site === siteName && g.supervisorId
+  // Determine which sites are managed by which supervisor
+  const siteToSupervisorMap: Record<string, string> = {};
+  sites.forEach((site) => {
+    const firstAssignedGuard = guards.find(
+      (g) => g.supervisorId && g.site === site.name
     );
-    if (assignedGuardAtSite?.supervisorId) {
-      return supervisors.find((s) => s.id === assignedGuardAtSite.supervisorId);
+    if (firstAssignedGuard) {
+      siteToSupervisorMap[site.id] = firstAssignedGuard.supervisorId!;
     }
-    return undefined;
-  };
+  });
+
+  const unassignedSitesList = sites.filter(
+    (site) => !siteToSupervisorMap[site.id]
+  );
+
+  const supervisorToAvailableSitesMap: Record<string, Site[]> =
+    supervisors.reduce(
+      (acc, supervisor) => {
+        const managedSites = sites.filter(
+          (site) => siteToSupervisorMap[site.id] === supervisor.id
+        );
+        acc[supervisor.id] = [...managedSites, ...unassignedSitesList].sort(
+          (a, b) => a.name.localeCompare(b.name)
+        );
+        return acc;
+      },
+      {} as Record<string, Site[]>
+    );
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6">
@@ -162,7 +199,7 @@ export default function AgencyGuardsPage() {
           <CardHeader>
             <CardTitle>Unassigned Security Guards</CardTitle>
             <CardDescription>
-              A list of guards that do not have a supervisor assigned.
+              Assign a supervisor and site to a guard.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -170,17 +207,18 @@ export default function AgencyGuardsPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Guard</TableHead>
-                  <TableHead>Site</TableHead>
                   <TableHead>Phone</TableHead>
                   <TableHead>Assign Supervisor</TableHead>
+                  <TableHead>Assign Site</TableHead>
+                  <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {unassignedGuards.map((guard) => {
-                  const siteSupervisor = getSupervisorForSite(guard.site);
-                  const availableSupervisors = siteSupervisor
-                    ? [siteSupervisor]
-                    : supervisors;
+                  const selectedSupervisorId = selectedSupervisors[guard.id];
+                  const availableSites = selectedSupervisorId
+                    ? supervisorToAvailableSitesMap[selectedSupervisorId]
+                    : [];
 
                   return (
                     <TableRow key={guard.id}>
@@ -200,38 +238,66 @@ export default function AgencyGuardsPage() {
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell>{guard.site}</TableCell>
                       <TableCell>{guard.phone}</TableCell>
                       <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Select
-                            value={selectedSupervisors[guard.id] || ''}
-                            onValueChange={(value) =>
-                              handleSupervisorSelect(guard.id, value)
-                            }
-                          >
-                            <SelectTrigger className="w-[180px]">
-                              <SelectValue placeholder="Select Supervisor" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {availableSupervisors.map((supervisor) => (
-                                <SelectItem
-                                  key={supervisor.id}
-                                  value={supervisor.id}
-                                >
-                                  {supervisor.name}
+                        <Select
+                          value={selectedSupervisors[guard.id] || ''}
+                          onValueChange={(value) =>
+                            handleSupervisorSelect(guard.id, value)
+                          }
+                        >
+                          <SelectTrigger className="w-[180px]">
+                            <SelectValue placeholder="Select Supervisor" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {supervisors.map((supervisor) => (
+                              <SelectItem
+                                key={supervisor.id}
+                                value={supervisor.id}
+                              >
+                                {supervisor.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </TableCell>
+                      <TableCell>
+                        <Select
+                          value={selectedSites[guard.id] || ''}
+                          onValueChange={(value) =>
+                            handleSiteSelect(guard.id, value)
+                          }
+                          disabled={!selectedSupervisorId}
+                        >
+                          <SelectTrigger className="w-[180px]">
+                            <SelectValue placeholder="Select Site" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {availableSites.length > 0 ? (
+                              availableSites.map((site) => (
+                                <SelectItem key={site.id} value={site.id}>
+                                  {site.name}
                                 </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <Button
-                            size="sm"
-                            onClick={() => handleAssignSupervisor(guard.id)}
-                            disabled={!selectedSupervisors[guard.id]}
-                          >
-                            Assign
-                          </Button>
-                        </div>
+                              ))
+                            ) : (
+                              <SelectItem value="no-sites" disabled>
+                                Select supervisor first
+                              </SelectItem>
+                            )}
+                          </SelectContent>
+                        </Select>
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          size="sm"
+                          onClick={() => handleAssign(guard.id)}
+                          disabled={
+                            !selectedSupervisors[guard.id] ||
+                            !selectedSites[guard.id]
+                          }
+                        >
+                          Assign
+                        </Button>
                       </TableCell>
                     </TableRow>
                   );
