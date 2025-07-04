@@ -4,14 +4,11 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { MapPin, Users, FileText, AlertTriangle, TowerControl } from 'lucide-react';
-import Link from 'next/link';
+import { MapPin, Users, AlertTriangle, TowerControl } from 'lucide-react';
 
 export default function AgencySitesPage() {
   return (
@@ -56,14 +53,6 @@ export default function AgencySitesPage() {
                   <Badge variant="destructive">{site.incidents?.filter(inc => !inc.resolved).length || 0}</Badge>
               </div>
             </CardContent>
-            <CardFooter>
-              <Button asChild variant="outline" className="w-full">
-                <Link href="#">
-                  <FileText className="mr-2 h-4 w-4" />
-                  View Full Report
-                </Link>
-              </Button>
-            </CardFooter>
           </Card>
         ))}
       </div>
