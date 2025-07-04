@@ -37,7 +37,7 @@ export function SitesMap({ sites: initialSites }: { sites: Site[] }) {
         <TooltipProvider>
           <div className="relative w-full aspect-[16/9] rounded-lg overflow-hidden">
             <Image
-              src="https://placehold.co/1200x675.png"
+              src="https://placehold.co/1200x675/f0f2f5/f0f2f5.png"
               alt="Map of supervised sites"
               fill
               className="object-cover"
