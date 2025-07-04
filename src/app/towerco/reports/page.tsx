@@ -274,7 +274,9 @@ export default function ReportsPage() {
                         </TableCell>
                         <TableCell>{guard.site}</TableCell>
                         <TableCell>{agency?.name || 'Unassigned'}</TableCell>
-                        <TableCell>{guard.performance?.perimeterAccuracy}%</TableCell>
+                        <TableCell>
+                          {guard.performance?.perimeterAccuracy}%
+                        </TableCell>
                         <TableCell>{selfieAccuracy}%</TableCell>
                         <TableCell className="text-right">
                           <Button
@@ -312,6 +314,7 @@ export default function ReportsPage() {
                     <TableHead>Supervisor</TableHead>
                     <TableHead>Agency</TableHead>
                     <TableHead>Guards Managed</TableHead>
+                    <TableHead>Incidents</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -322,6 +325,20 @@ export default function ReportsPage() {
                     );
                     const site = sites.find((s) => s.name === firstGuard?.site);
                     const agency = getAgencyById(site?.agencyId);
+
+                    const supervisedGuardIds = supervisor.assignedGuards;
+                    const supervisedGuards = guards.filter((g) =>
+                      supervisedGuardIds.includes(g.id)
+                    );
+                    const supervisedSiteNames = [
+                      ...new Set(supervisedGuards.map((g) => g.site)),
+                    ];
+                    const supervisorIncidents = alerts.filter(
+                      (alert) =>
+                        alert.type === 'Emergency' &&
+                        supervisedSiteNames.includes(alert.site)
+                    );
+                    const incidentsCount = supervisorIncidents.length;
 
                     return (
                       <TableRow key={supervisor.id}>
@@ -352,6 +369,9 @@ export default function ReportsPage() {
                               {supervisor.assignedGuards.length} Guards
                             </span>
                           </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="secondary">{incidentsCount}</Badge>
                         </TableCell>
                         <TableCell className="text-right">
                           <Button
