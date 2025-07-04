@@ -30,6 +30,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { FileDown } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
 export default function AgencyGuardsPage() {
   const { toast } = useToast();
@@ -152,6 +153,7 @@ export default function AgencyGuardsPage() {
               <TableRow>
                 <TableHead>Guard</TableHead>
                 <TableHead>Site</TableHead>
+                <TableHead>Incidents at Site</TableHead>
                 <TableHead>Supervisor</TableHead>
                 <TableHead>Perimeter Accuracy</TableHead>
                 <TableHead>Selfie Check-in Accuracy</TableHead>
@@ -162,6 +164,8 @@ export default function AgencyGuardsPage() {
             <TableBody>
               {assignedGuards.map((guard) => {
                 const supervisor = getSupervisorById(guard.supervisorId);
+                const siteDetails = sites.find((s) => s.name === guard.site);
+                const incidentsCount = siteDetails?.incidents?.length || 0;
                 const selfieAccuracy =
                   guard.totalSelfieRequests > 0
                     ? Math.round(
@@ -189,6 +193,9 @@ export default function AgencyGuardsPage() {
                       </div>
                     </TableCell>
                     <TableCell>{guard.site}</TableCell>
+                    <TableCell>
+                      <Badge variant="secondary">{incidentsCount}</Badge>
+                    </TableCell>
                     <TableCell>{supervisor?.name || 'Unassigned'}</TableCell>
                     <TableCell>
                       {guard.performance?.perimeterAccuracy}%
