@@ -101,6 +101,7 @@ export const sites: Site[] = [
     visited: true,
     towerco: 'TowerCo Alpha',
     incidents: [incidents[1]],
+    assignedOn: '2024-05-10',
   },
   {
     id: 'SITE02',
@@ -112,6 +113,7 @@ export const sites: Site[] = [
     visited: false,
     towerco: 'TowerCo Beta',
     incidents: [incidents[0]],
+    assignedOn: '2024-04-20',
   },
   {
     id: 'SITE03',
@@ -123,6 +125,7 @@ export const sites: Site[] = [
     visited: false,
     towerco: 'TowerCo Gamma',
     incidents: [],
+    assignedOn: '2024-06-01',
   },
   {
     id: 'SITE04',

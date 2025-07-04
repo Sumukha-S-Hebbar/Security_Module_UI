@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { sites, guards, supervisors } from '@/lib/data';
+import type { Site } from '@/types';
 import {
   Card,
   CardContent,
@@ -17,7 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { MapPin } from 'lucide-react';
+import { FileDown, MapPin } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -48,8 +49,6 @@ export default function AgencySitesPage() {
     return supervisors.find((s) => s.id === guard.supervisorId);
   };
 
-  // Note: In a real app, this would be derived from a mutable state that changes upon assignment.
-  // For this prototype, we'll keep the static data separation.
   const assignedSites = sites.filter((site) => getSupervisorForSite(site.id));
   const unassignedSites = sites.filter(
     (site) => !getSupervisorForSite(site.id)
@@ -83,6 +82,14 @@ export default function AgencySitesPage() {
     // and then refetch the data or update the state locally.
   };
 
+  const handleDownloadReport = (site: Site) => {
+    toast({
+      title: 'Report Download Started',
+      description: `Downloading report for ${site.name}.`,
+    });
+    // In a real app, this would trigger a file download (e.g., CSV or PDF).
+  };
+
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6">
       <div>
@@ -107,6 +114,8 @@ export default function AgencySitesPage() {
                 <TableHead>Site</TableHead>
                 <TableHead>Supervisor</TableHead>
                 <TableHead>TowerCo</TableHead>
+                <TableHead>Assigned On Date</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -124,6 +133,16 @@ export default function AgencySitesPage() {
                     </TableCell>
                     <TableCell>{supervisor?.name || 'Unassigned'}</TableCell>
                     <TableCell>{site.towerco}</TableCell>
+                    <TableCell>{site.assignedOn || 'N/A'}</TableCell>
+                    <TableCell className="text-right">
+                      <Button
+                        size="sm"
+                        onClick={() => handleDownloadReport(site)}
+                      >
+                        <FileDown className="mr-2 h-4 w-4" />
+                        Download
+                      </Button>
+                    </TableCell>
                   </TableRow>
                 );
               })}

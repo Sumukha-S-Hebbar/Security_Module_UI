@@ -24,6 +24,7 @@ export type Site = {
   visited: boolean;
   towerco: string;
   incidents?: Incident[];
+  assignedOn?: string;
 };
 
 export type Alert = {
