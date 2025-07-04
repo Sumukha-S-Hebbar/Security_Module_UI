@@ -27,7 +27,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Eye, Phone, ShieldAlert, CheckCircle } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Eye, Phone, ShieldAlert, CheckCircle, ChevronDown } from 'lucide-react';
 
 export default function AgencyIncidentsPage() {
   const [alerts, setAlerts] = useState<Alert[]>(
@@ -168,13 +174,32 @@ export default function AgencyIncidentsPage() {
                           </div>
                         </TableCell>
                         <TableCell>
-                          {guardDetails ? (
-                            <Button asChild variant="outline" size="sm">
-                              <a href={`tel:${guardDetails.phone}`}>
-                                <Phone className="mr-2 h-4 w-4" />
-                                Contact Guard
-                              </a>
-                            </Button>
+                          {guardDetails || supervisorDetails ? (
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="outline" size="sm">
+                                  Contact <ChevronDown className="ml-2 h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                {guardDetails && (
+                                  <DropdownMenuItem asChild>
+                                    <a href={`tel:${guardDetails.phone}`}>
+                                      <Phone className="mr-2 h-4 w-4" />
+                                      Contact Guard
+                                    </a>
+                                  </DropdownMenuItem>
+                                )}
+                                {supervisorDetails && (
+                                  <DropdownMenuItem asChild>
+                                    <a href={`tel:${supervisorDetails.phone}`}>
+                                      <Phone className="mr-2 h-4 w-4" />
+                                      Contact Supervisor
+                                    </a>
+                                  </DropdownMenuItem>
+                                )}
+                              </DropdownMenuContent>
+                            </DropdownMenu>
                           ) : (
                             <span className="text-xs text-muted-foreground">
                               N/A
