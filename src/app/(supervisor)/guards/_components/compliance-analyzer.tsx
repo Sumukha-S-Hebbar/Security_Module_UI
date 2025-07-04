@@ -52,7 +52,7 @@ export function ComplianceAnalyzer({ guard }: { guard: Guard }) {
           <div>
             <CardTitle>{guard.name}</CardTitle>
             <CardDescription>
-              {guard.missedSelfieCount} of {guard.totalSelfieRequests} missed ({missedPercentage}%)
+              Missed {guard.missedSelfieCount} selfies out of {guard.totalSelfieRequests} total requests ({missedPercentage}%)
             </CardDescription>
           </div>
         </div>
