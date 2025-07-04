@@ -3,6 +3,7 @@ import { GuardProfiles } from './_components/guard-profiles';
 import { SelfieRequester } from './_components/selfie-requester';
 import { ComplianceWatchlist } from './_components/compliance-watchlist';
 import { guards } from '@/lib/data';
+import { GuardLeaveTracker } from './_components/guard-leave-tracker';
 
 export default function GuardsPage() {
   const guardsWithComplianceIssues = guards.filter(
@@ -24,7 +25,7 @@ export default function GuardsPage() {
         <TabsList className="grid w-full grid-cols-1 sm:grid-cols-3">
           <TabsTrigger value="profiles">Guard Profiles</TabsTrigger>
           <TabsTrigger value="requests">Selfie Requests</TabsTrigger>
-          <TabsTrigger value="compliance">Compliance Watchlist</TabsTrigger>
+          <TabsTrigger value="compliance">Compliance</TabsTrigger>
         </TabsList>
         <TabsContent value="profiles" className="mt-6">
           <GuardProfiles guards={guards} />
@@ -32,7 +33,8 @@ export default function GuardsPage() {
         <TabsContent value="requests" className="mt-6">
           <SelfieRequester guards={guards} />
         </TabsContent>
-        <TabsContent value="compliance" className="mt-6">
+        <TabsContent value="compliance" className="mt-6 space-y-6">
+          <GuardLeaveTracker guards={guards} />
           <ComplianceWatchlist guards={guardsWithComplianceIssues} />
         </TabsContent>
       </Tabs>

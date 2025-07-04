@@ -1,12 +1,16 @@
 import type { Guard } from '@/types';
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ComplianceAnalyzer } from './compliance-analyzer';
+import { CameraOff } from 'lucide-react';
 
 export function ComplianceWatchlist({ guards }: { guards: Guard[] }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Compliance Watchlist</CardTitle>
+        <div className="flex items-center gap-2">
+          <CameraOff className="w-6 h-6 text-muted-foreground" />
+          <CardTitle>Selfie Misses Watchlist</CardTitle>
+        </div>
         <CardDescription>
           Guards with missed selfie requests. Analysis powered by AI.
         </CardDescription>
