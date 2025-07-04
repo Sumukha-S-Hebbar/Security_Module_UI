@@ -1,3 +1,4 @@
+
 export type Guard = {
   id: string;
   name: string;
@@ -25,6 +26,7 @@ export type Site = {
   towerco: string;
   incidents?: Incident[];
   assignedOn?: string;
+  agencyId?: string;
 };
 
 export type Alert = {
@@ -54,4 +56,13 @@ export type Incident = {
   type: 'Break-in' | 'Fire Alarm' | 'Vandalism' | 'Medical';
   details: string;
   resolved: boolean;
+};
+
+export type SecurityAgency = {
+  id: string;
+  name: string;
+  phone: string;
+  email: string;
+  address: string;
+  avatar: string;
 };

@@ -1,4 +1,5 @@
-import type { Guard, Site, Alert, Supervisor, Incident } from '@/types';
+
+import type { Guard, Site, Alert, Supervisor, Incident, SecurityAgency } from '@/types';
 
 export const supervisors: Supervisor[] = [
   {
@@ -90,6 +91,25 @@ export const guards: Guard[] = [
   },
 ];
 
+export const securityAgencies: SecurityAgency[] = [
+  {
+    id: 'AGY01',
+    name: 'GuardLink Security',
+    phone: '555-001-0001',
+    email: 'contact@guardlink.com',
+    address: '123 Security Blvd, Safe City, USA',
+    avatar: 'https://placehold.co/100x100.png',
+  },
+  {
+    id: 'AGY02',
+    name: 'Vigilant Watch',
+    phone: '555-002-0002',
+    email: 'info@vigilantwatch.com',
+    address: '456 Protector Ave, Secure Town, USA',
+    avatar: 'https://placehold.co/100x100.png',
+  },
+];
+
 export const sites: Site[] = [
   {
     id: 'SITE01',
@@ -102,6 +122,7 @@ export const sites: Site[] = [
     towerco: 'TowerCo Alpha',
     incidents: [incidents[1]],
     assignedOn: '2024-05-10',
+    agencyId: 'AGY01',
   },
   {
     id: 'SITE02',
@@ -114,6 +135,7 @@ export const sites: Site[] = [
     towerco: 'TowerCo Beta',
     incidents: [incidents[0]],
     assignedOn: '2024-04-20',
+    agencyId: 'AGY01',
   },
   {
     id: 'SITE03',
@@ -126,6 +148,7 @@ export const sites: Site[] = [
     towerco: 'TowerCo Gamma',
     incidents: [],
     assignedOn: '2024-06-01',
+    agencyId: 'AGY01',
   },
   {
     id: 'SITE04',
@@ -137,6 +160,7 @@ export const sites: Site[] = [
     visited: true,
     towerco: 'TowerCo Alpha',
     incidents: [],
+    agencyId: 'AGY02',
   },
   {
     id: 'SITE05',

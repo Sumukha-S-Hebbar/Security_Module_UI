@@ -22,6 +22,9 @@ export default function RootPage() {
           <Button asChild variant="outline" size="lg">
             <Link href="/agency/home">Agency Portal</Link>
           </Button>
+          <Button asChild variant="outline" size="lg">
+            <Link href="/towerco/home">TOWERCO/MNO Portal</Link>
+          </Button>
         </CardContent>
       </Card>
     </div>
