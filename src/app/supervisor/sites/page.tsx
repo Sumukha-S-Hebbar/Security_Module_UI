@@ -49,7 +49,7 @@ export default function SitesPage() {
                         <AvatarImage src={guard.avatar} alt={guard.name} />
                         <AvatarFallback>
                           {guard.name.charAt(0)}
-                        </AvatarFallback>
+                        </Fallback>
                       </Avatar>
                       <div>
                         <p className="font-medium text-sm">{guard.name}</p>
