@@ -1,8 +1,7 @@
-
 'use client';
 
 import { useState } from 'react';
-import type { Supervisor, Site } from '@/types';
+import type { Supervisor, Site, Guard } from '@/types';
 import { guards, supervisors, sites } from '@/lib/data';
 import {
   Table,
@@ -30,6 +29,7 @@ import {
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import { FileDown } from 'lucide-react';
 
 export default function AgencyGuardsPage() {
   const { toast } = useToast();
@@ -87,6 +87,14 @@ export default function AgencyGuardsPage() {
     });
     // In a real app, you would make an API call here to update the database
     // and then refetch the data or update the state locally.
+  };
+
+  const handleDownloadReport = (guard: Guard) => {
+    toast({
+      title: 'Report Download Started',
+      description: `Downloading report for ${guard.name}.`,
+    });
+    // In a real app, this would trigger a file download.
   };
 
   // Determine which sites are managed by which supervisor
@@ -148,6 +156,7 @@ export default function AgencyGuardsPage() {
                 <TableHead>Perimeter Accuracy</TableHead>
                 <TableHead>Selfie Check-in Accuracy</TableHead>
                 <TableHead>Phone</TableHead>
+                <TableHead className="text-right">Report</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -186,6 +195,16 @@ export default function AgencyGuardsPage() {
                     </TableCell>
                     <TableCell>{selfieAccuracy}%</TableCell>
                     <TableCell>{guard.phone}</TableCell>
+                    <TableCell className="text-right">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleDownloadReport(guard)}
+                      >
+                        <FileDown className="mr-2 h-4 w-4" />
+                        Download Report
+                      </Button>
+                    </TableCell>
                   </TableRow>
                 );
               })}
