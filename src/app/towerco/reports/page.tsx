@@ -1,4 +1,3 @@
-
 'use client';
 
 import {
@@ -233,6 +232,7 @@ export default function ReportsPage() {
                     <TableHead>Guard</TableHead>
                     <TableHead>Site</TableHead>
                     <TableHead>Agency</TableHead>
+                    <TableHead>Perimeter Accuracy</TableHead>
                     <TableHead>Selfie Check-in Accuracy</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
@@ -274,6 +274,7 @@ export default function ReportsPage() {
                         </TableCell>
                         <TableCell>{guard.site}</TableCell>
                         <TableCell>{agency?.name || 'Unassigned'}</TableCell>
+                        <TableCell>{guard.performance?.perimeterAccuracy}%</TableCell>
                         <TableCell>{selfieAccuracy}%</TableCell>
                         <TableCell className="text-right">
                           <Button
