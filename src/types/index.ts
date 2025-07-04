@@ -24,12 +24,5 @@ export type Alert = {
   site: string;
   guard: string;
   status: 'Active' | 'Resolved' | 'Investigating';
-};
-
-export type EmergencyCall = {
-  id: string;
-  guardName: string;
-  siteName: string;
-  time: string;
-  callDetails: string;
+  callDetails?: string;
 };

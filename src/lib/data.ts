@@ -1,4 +1,4 @@
-import type { Guard, Site, Alert, EmergencyCall } from '@/types';
+import type { Guard, Site, Alert } from '@/types';
 
 export const guards: Guard[] = [
   {
@@ -41,6 +41,16 @@ export const guards: Guard[] = [
     missedSelfieCount: 0,
     totalSelfieRequests: 18,
   },
+  {
+    id: 'GL005',
+    name: 'Sarah Connor',
+    site: 'Cyberdyne Systems',
+    phone: '555-867-5309',
+    location: 'R&D Dept',
+    avatar: 'https://placehold.co/100x100.png',
+    missedSelfieCount: 0,
+    totalSelfieRequests: 10,
+  },
 ];
 
 export const sites: Site[] = [
@@ -65,6 +75,13 @@ export const sites: Site[] = [
     guards: ['GL003'],
     reportUrl: '#',
   },
+  {
+    id: 'SITE04',
+    name: 'Cyberdyne Systems',
+    address: '2144 Kramer Street, Sunnyvale, CA',
+    guards: ['GL005'],
+    reportUrl: '#',
+  },
 ];
 
 export const alerts: Alert[] = [
@@ -75,6 +92,18 @@ export const alerts: Alert[] = [
     site: 'Downtown Mall',
     guard: 'John Doe',
     status: 'Active',
+    callDetails:
+      'This is John Doe at Downtown Mall, Gate 4. We have a potential break-in situation at the west entrance near the electronics store. Requesting immediate backup. I see two individuals acting suspiciously. The time is approximately 2:30 PM.',
+  },
+  {
+    id: 'A005',
+    type: 'Emergency',
+    date: '2024-07-21 02:14',
+    site: 'Cyberdyne Systems',
+    guard: 'Sarah Connor',
+    status: 'Active',
+    callDetails:
+      'Fire alarm activated on the third floor, R&D department. I am proceeding to the location to investigate. All personnel are being evacuated. Time is 2:14 AM. No smoke visible yet.',
   },
   {
     id: 'A002',
@@ -99,24 +128,5 @@ export const alerts: Alert[] = [
     site: 'City Waterfront',
     guard: 'Mike Johnson',
     status: 'Resolved',
-  },
-];
-
-export const emergencyCalls: EmergencyCall[] = [
-  {
-    id: 'EC001',
-    guardName: 'John Doe',
-    siteName: 'Downtown Mall',
-    time: '14:30',
-    callDetails:
-      'This is John Doe at Downtown Mall, Gate 4. We have a potential break-in situation at the west entrance near the electronics store. Requesting immediate backup. I see two individuals acting suspiciously. The time is approximately 2:30 PM.',
-  },
-  {
-    id: 'EC002',
-    guardName: 'Sarah Connor',
-    siteName: 'Cyberdyne Systems',
-    time: '02:14',
-    callDetails:
-      'Fire alarm activated on the third floor, R&D department. I am proceeding to the location to investigate. All personnel are being evacuated. Time is 2:14 AM. No smoke visible yet.',
   },
 ];

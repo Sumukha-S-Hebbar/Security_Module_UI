@@ -1,9 +1,13 @@
-import { emergencyCalls } from '@/lib/data';
+import { alerts } from '@/lib/data';
 import { EmergencyCallSummarizer } from './_components/emergency-call-summarizer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertTriangle } from 'lucide-react';
 
 export default function HomePage() {
+  const activeEmergencies = alerts.filter(
+    (alert) => alert.type === 'Emergency' && alert.status === 'Active'
+  );
+
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6">
       <div>
@@ -19,9 +23,9 @@ export default function HomePage() {
           <CardTitle>Current Emergency Alerts</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {emergencyCalls.length > 0 ? (
-            emergencyCalls.map((call) => (
-              <EmergencyCallSummarizer key={call.id} call={call} />
+          {activeEmergencies.length > 0 ? (
+            activeEmergencies.map((alert) => (
+              <EmergencyCallSummarizer key={alert.id} alert={alert} />
             ))
           ) : (
             <p className="text-muted-foreground">
