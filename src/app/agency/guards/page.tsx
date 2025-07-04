@@ -37,6 +37,7 @@ export default function AgencyGuardsPage() {
                                 <TableHead>Guard</TableHead>
                                 <TableHead>Site</TableHead>
                                 <TableHead>Supervisor</TableHead>
+                                <TableHead>Perimeter Accuracy</TableHead>
                                 <TableHead>Phone</TableHead>
                             </TableRow>
                         </TableHeader>
@@ -61,6 +62,7 @@ export default function AgencyGuardsPage() {
                                         </TableCell>
                                         <TableCell>{guard.site}</TableCell>
                                         <TableCell>{supervisor?.name || 'Unassigned'}</TableCell>
+                                        <TableCell>{guard.performance?.perimeterAccuracy}%</TableCell>
                                         <TableCell>{guard.phone}</TableCell>
                                     </TableRow>
                                 )
