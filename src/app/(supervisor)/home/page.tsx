@@ -1,5 +1,5 @@
 
-import { alerts, guards } from '@/lib/data';
+import { alerts, guards, sites } from '@/lib/data';
 import {
   Card,
   CardContent,
@@ -17,6 +17,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { AlertTriangle, Phone } from 'lucide-react';
 import type { Guard } from '@/types';
+import { SitesMap } from './_components/sites-map';
 
 export default function HomePage() {
   const activeEmergencies = alerts.filter(
@@ -88,6 +89,8 @@ export default function HomePage() {
           )}
         </CardContent>
       </Card>
+      
+      <SitesMap sites={sites} />
     </div>
   );
 }

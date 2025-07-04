@@ -15,6 +15,7 @@ export type Site = {
   address: string;
   guards: string[]; // Guard IDs
   reportUrl: string;
+  coords: { x: number; y: number }; // As percentages for map placement
 };
 
 export type Alert = {

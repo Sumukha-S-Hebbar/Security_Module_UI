@@ -60,6 +60,7 @@ export const sites: Site[] = [
     address: '123 Innovation Drive, Silicon Valley, CA',
     guards: ['GL002', 'GL004'],
     reportUrl: '#',
+    coords: { x: 25, y: 30 },
   },
   {
     id: 'SITE02',
@@ -67,6 +68,7 @@ export const sites: Site[] = [
     address: '456 Market Street, Metro City, NY',
     guards: ['GL001'],
     reportUrl: '#',
+    coords: { x: 55, y: 45 },
   },
   {
     id: 'SITE03',
@@ -74,6 +76,7 @@ export const sites: Site[] = [
     address: '789 Ocean Avenue, Bay City, FL',
     guards: ['GL003'],
     reportUrl: '#',
+    coords: { x: 75, y: 60 },
   },
   {
     id: 'SITE04',
@@ -81,6 +84,7 @@ export const sites: Site[] = [
     address: '2144 Kramer Street, Sunnyvale, CA',
     guards: ['GL005'],
     reportUrl: '#',
+    coords: { x: 40, y: 70 },
   },
 ];
 
