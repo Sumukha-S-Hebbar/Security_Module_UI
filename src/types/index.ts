@@ -1,3 +1,4 @@
+
 export type Guard = {
   id: string;
   name: string;
@@ -7,7 +8,6 @@ export type Guard = {
   avatar: string;
   missedSelfieCount: number;
   totalSelfieRequests: number;
-  patrollingOfficerId?: string;
   performance?: {
     perimeterAccuracy: number;
     leaveDays: number;
@@ -26,6 +26,7 @@ export type Site = {
   incidents?: Incident[];
   assignedOn?: string;
   agencyId?: string;
+  patrollingOfficerId?: string;
   geofencePerimeter?: number;
 };
 
@@ -46,7 +47,6 @@ export type PatrollingOfficer = {
   phone: string;
   email: string;
   avatar: string;
-  assignedGuards: string[]; // Guard IDs
   routes?: string[];
 };
 

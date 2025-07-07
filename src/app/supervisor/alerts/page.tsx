@@ -1,9 +1,9 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import Image from 'next/image';
-import { alerts as initialAlerts, guards } from '@/lib/data';
+import { alerts as initialAlerts, guards, sites } from '@/lib/data';
 import {
   Table,
   TableBody,
@@ -51,15 +51,23 @@ import {
 import type { Alert } from '@/types';
 import { useToast } from '@/hooks/use-toast';
 
+const LOGGED_IN_SUPERVISOR_ID = 'PO01'; // Simulate logged-in Patrolling Officer
+
 export default function AlertsPage() {
   const [alerts, setAlerts] = useState<Alert[]>(initialAlerts);
   const [selectedAlert, setSelectedAlert] = useState<Alert | null>(null);
   const { toast } = useToast();
 
-  const emergencyAlerts = alerts.filter((alert) => alert.type === 'Emergency');
-  const otherAlerts = alerts.filter((alert) => alert.type !== 'Emergency');
+  const supervisorSites = useMemo(() => sites.filter(s => s.patrollingOfficerId === LOGGED_IN_SUPERVISOR_ID), []);
+  const supervisorSiteNames = useMemo(() => new Set(supervisorSites.map(s => s.name)), [supervisorSites]);
+  const supervisorGuards = useMemo(() => guards.filter(g => supervisorSiteNames.has(g.site)), [supervisorSiteNames]);
+  const supervisorAlerts = useMemo(() => alerts.filter(a => supervisorSiteNames.has(a.site)), [supervisorSiteNames, alerts]);
 
-  const getGuardByName = (name: string) => guards.find((g) => g.name === name);
+
+  const emergencyAlerts = supervisorAlerts.filter((alert) => alert.type === 'Emergency');
+  const otherAlerts = supervisorAlerts.filter((alert) => alert.type !== 'Emergency');
+
+  const getGuardByName = (name: string) => supervisorGuards.find((g) => g.name === name);
 
   const handleStatusChange = (alertId: string, status: Alert['status']) => {
     setAlerts((prevAlerts) =>

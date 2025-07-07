@@ -1,8 +1,9 @@
+
 'use client';
 
 import { useMemo } from 'react';
 import { alerts, guards, sites, patrollingOfficers } from '@/lib/data';
-import type { Guard, PatrollingOfficer } from '@/types';
+import type { Guard, PatrollingOfficer, Site } from '@/types';
 import { AgencyAnalyticsDashboard } from './_components/agency-analytics-dashboard';
 import {
   Card,
@@ -40,9 +41,10 @@ export default function AgencyHomePage() {
   
   const agencyGuards = useMemo(() => guards.filter(guard => agencySiteNames.has(guard.site)), [agencySiteNames]);
   
-  const agencyPatrollingOfficerIds = useMemo(() => new Set(agencyGuards.map(guard => guard.patrollingOfficerId).filter(Boolean)), [agencyGuards]);
-  
-  const agencyPatrollingOfficers = useMemo(() => patrollingOfficers.filter(po => agencyPatrollingOfficerIds.has(po.id)), [agencyPatrollingOfficerIds]);
+  const agencyPatrollingOfficers = useMemo(() => {
+    const poIds = new Set(agencySites.map(s => s.patrollingOfficerId).filter(Boolean));
+    return patrollingOfficers.filter(po => poIds.has(po.id));
+  }, [agencySites]);
 
   const activeEmergencies = useMemo(() => agencyAlerts.filter(
     (alert) => alert.type === 'Emergency' && alert.status === 'Active'
@@ -56,10 +58,12 @@ export default function AgencyHomePage() {
     guardName: string
   ): PatrollingOfficer | undefined => {
     const guard = getGuardByName(guardName);
-    if (!guard || !guard.patrollingOfficerId) {
+    if (!guard) return undefined;
+    const site = agencySites.find(s => s.name === guard.site);
+    if (!site || !site.patrollingOfficerId) {
       return undefined;
     }
-    return agencyPatrollingOfficers.find((s) => s.id === guard.patrollingOfficerId);
+    return agencyPatrollingOfficers.find((s) => s.id === site.patrollingOfficerId);
   };
 
   return (

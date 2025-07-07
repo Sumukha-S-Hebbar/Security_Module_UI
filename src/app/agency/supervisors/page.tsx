@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useMemo } from 'react';
@@ -56,8 +57,20 @@ export default function AgencyPatrollingOfficersPage() {
     const agencySites = useMemo(() => sites.filter(site => site.agencyId === LOGGED_IN_AGENCY_ID), []);
     const agencySiteNames = useMemo(() => new Set(agencySites.map(s => s.name)), [agencySites]);
     const agencyGuards = useMemo(() => guards.filter(g => agencySiteNames.has(g.site)), [agencySiteNames]);
-    const agencyPatrollingOfficerIds = useMemo(() => new Set(agencyGuards.map(g => g.patrollingOfficerId).filter(Boolean)), [agencyGuards]);
-    const agencyPatrollingOfficers = useMemo(() => patrollingOfficers.filter(po => agencyPatrollingOfficerIds.has(po.id)), [agencyPatrollingOfficerIds]);
+    const agencyPatrollingOfficers = useMemo(() => {
+        const poIds = new Set(agencySites.map(s => s.patrollingOfficerId).filter(Boolean));
+        return patrollingOfficers.filter(po => poIds.has(po.id));
+    }, [agencySites]);
+
+    const getAssignedGuardsCount = (patrollingOfficerId: string) => {
+        const sitesForPO = agencySites.filter(s => s.patrollingOfficerId === patrollingOfficerId);
+        const siteNamesForPO = new Set(sitesForPO.map(s => s.name));
+        return agencyGuards.filter(g => siteNamesForPO.has(g.site)).length;
+    };
+
+    const getAssignedSitesForPO = (patrollingOfficerId: string) => {
+        return agencySites.filter(s => s.patrollingOfficerId === patrollingOfficerId).map(s => s.name);
+    }
 
     const uploadForm = useForm<z.infer<typeof uploadFormSchema>>({
         resolver: zodResolver(uploadFormSchema),
@@ -272,7 +285,10 @@ export default function AgencyPatrollingOfficersPage() {
                 <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-6">
                         {filteredPatrollingOfficers.length > 0 ? (
-                            filteredPatrollingOfficers.map((patrollingOfficer) => (
+                            filteredPatrollingOfficers.map((patrollingOfficer) => {
+                                const assignedGuardsCount = getAssignedGuardsCount(patrollingOfficer.id);
+                                const assignedSites = getAssignedSitesForPO(patrollingOfficer.id);
+                                return (
                                 <Card key={patrollingOfficer.id} className="flex flex-col">
                                 <CardHeader>
                                     <div className="flex items-center gap-4">
@@ -299,11 +315,11 @@ export default function AgencyPatrollingOfficersPage() {
                                     </div>
                                     <div className="flex items-center gap-2 text-muted-foreground">
                                         <Users className="h-4 w-4 flex-shrink-0" />
-                                        <span>{patrollingOfficer.assignedGuards.length} Guards</span>
+                                        <span>{assignedGuardsCount} Guards</span>
                                     </div>
                                     <div className="flex items-center gap-2 text-muted-foreground">
                                         <Map className="h-4 w-4 flex-shrink-0" />
-                                        <span>{patrollingOfficer.routes?.join(', ') || 'N/A'}</span>
+                                        <span className="truncate" title={assignedSites.join(', ')}>{assignedSites.join(', ') || 'No sites assigned'}</span>
                                     </div>
                                 </CardContent>
                                 <CardFooter className="grid grid-cols-2 gap-2">
@@ -323,7 +339,7 @@ export default function AgencyPatrollingOfficersPage() {
                                     </Button>
                                 </CardFooter>
                                 </Card>
-                            ))
+                            )})
                         ) : (
                             <div className="col-span-full text-center text-muted-foreground py-10">
                                 No patrolling officers found.

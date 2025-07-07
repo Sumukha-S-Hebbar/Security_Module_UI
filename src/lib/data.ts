@@ -1,3 +1,4 @@
+
 import type { Guard, Site, Alert, PatrollingOfficer, Incident, SecurityAgency } from '@/types';
 
 export const patrollingOfficers: PatrollingOfficer[] = [
@@ -7,7 +8,6 @@ export const patrollingOfficers: PatrollingOfficer[] = [
     phone: '555-100-2000',
     email: 'michael.s@guardlink.com',
     avatar: 'https://placehold.co/100x100.png',
-    assignedGuards: ['GL002'],
     routes: ['Downtown Route', 'Waterfront Route'],
   },
   {
@@ -16,7 +16,6 @@ export const patrollingOfficers: PatrollingOfficer[] = [
     phone: '555-100-2001',
     email: 'jessica.p@guardlink.com',
     avatar: 'https://placehold.co/100x100.png',
-    assignedGuards: ['GL004', 'GL005', 'GL006'],
     routes: ['Tech Park Route', 'Cyberdyne Route'],
   },
   {
@@ -25,7 +24,6 @@ export const patrollingOfficers: PatrollingOfficer[] = [
     phone: '555-100-2002',
     email: 'harvey.s@guardlink.com',
     avatar: 'https://placehold.co/100x100.png',
-    assignedGuards: ['GL007', 'GL008'],
     routes: ['Industrial Zone Route'],
   },
 ];
@@ -60,7 +58,6 @@ export const guards: Guard[] = [
     avatar: 'https://placehold.co/100x100.png',
     missedSelfieCount: 0,
     totalSelfieRequests: 25,
-    patrollingOfficerId: 'PO01',
     performance: { perimeterAccuracy: 99, leaveDays: 0 },
   },
   {
@@ -83,7 +80,6 @@ export const guards: Guard[] = [
     avatar: 'https://placehold.co/100x100.png',
     missedSelfieCount: 0,
     totalSelfieRequests: 18,
-    patrollingOfficerId: 'PO02',
     performance: { perimeterAccuracy: 100, leaveDays: 1 },
   },
   {
@@ -95,7 +91,6 @@ export const guards: Guard[] = [
     avatar: 'https://placehold.co/100x100.png',
     missedSelfieCount: 0,
     totalSelfieRequests: 10,
-    patrollingOfficerId: 'PO02',
     performance: { perimeterAccuracy: 100, leaveDays: 0 },
   },
   {
@@ -107,7 +102,6 @@ export const guards: Guard[] = [
     avatar: 'https://placehold.co/100x100.png',
     missedSelfieCount: 3,
     totalSelfieRequests: 15,
-    patrollingOfficerId: 'PO02',
     performance: { perimeterAccuracy: 95, leaveDays: 3 },
   },
   {
@@ -119,7 +113,6 @@ export const guards: Guard[] = [
     avatar: 'https://placehold.co/100x100.png',
     missedSelfieCount: 2,
     totalSelfieRequests: 30,
-    patrollingOfficerId: 'PO03',
     performance: { perimeterAccuracy: 97, leaveDays: 1 },
   },
   {
@@ -131,8 +124,29 @@ export const guards: Guard[] = [
     avatar: 'https://placehold.co/100x100.png',
     missedSelfieCount: 5,
     totalSelfieRequests: 28,
-    patrollingOfficerId: 'PO03',
     performance: { perimeterAccuracy: 94, leaveDays: 4 },
+  },
+  {
+    id: 'GL009',
+    name: 'Alex Ray',
+    site: 'North Point Relay',
+    phone: '555-222-3333',
+    location: 'Main Tower',
+    avatar: 'https://placehold.co/100x100.png',
+    missedSelfieCount: 1,
+    totalSelfieRequests: 15,
+    performance: { perimeterAccuracy: 99, leaveDays: 0 },
+  },
+  {
+    id: 'GL010',
+    name: 'Maria Garcia',
+    site: 'East Valley Repeater',
+    phone: '555-666-7777',
+    location: 'Substation A',
+    avatar: 'https://placehold.co/100x100.png',
+    missedSelfieCount: 0,
+    totalSelfieRequests: 20,
+    performance: { perimeterAccuracy: 100, leaveDays: 2 },
   },
 ];
 
@@ -185,6 +199,7 @@ export const sites: Site[] = [
     incidents: [incidents[1]],
     assignedOn: '2024-05-10',
     agencyId: 'AGY01',
+    patrollingOfficerId: 'PO02',
     geofencePerimeter: 500,
   },
   {
@@ -199,6 +214,7 @@ export const sites: Site[] = [
     incidents: [incidents[0]],
     assignedOn: '2024-04-20',
     agencyId: 'AGY01',
+    patrollingOfficerId: 'PO01',
     geofencePerimeter: 1000,
   },
   {
@@ -213,6 +229,7 @@ export const sites: Site[] = [
     incidents: [],
     assignedOn: '2024-06-01',
     agencyId: 'AGY01',
+    patrollingOfficerId: 'PO01',
     geofencePerimeter: 800,
   },
   {
@@ -226,6 +243,7 @@ export const sites: Site[] = [
     towerco: 'TowerCo Alpha',
     incidents: [incidents[4]],
     agencyId: 'AGY02',
+    patrollingOfficerId: 'PO02',
     geofencePerimeter: 1200,
   },
   {
@@ -239,6 +257,7 @@ export const sites: Site[] = [
     towerco: 'TowerCo Delta',
     incidents: [],
     agencyId: 'AGY03',
+    patrollingOfficerId: 'PO03',
     assignedOn: '2024-07-01',
     geofencePerimeter: 1500,
   },
@@ -253,6 +272,7 @@ export const sites: Site[] = [
     towerco: 'TowerCo Delta',
     incidents: [],
     agencyId: 'AGY03',
+    patrollingOfficerId: 'PO03',
     assignedOn: '2024-07-05',
     geofencePerimeter: 2000,
   },
@@ -267,12 +287,13 @@ export const sites: Site[] = [
     towerco: 'TowerCo Beta',
     incidents: [],
     agencyId: 'AGY01',
+    patrollingOfficerId: 'PO01',
   },
   {
     id: 'SITE08',
     name: 'North Point Relay',
     address: '555 Summit Rd, Alpine, CA',
-    guards: [],
+    guards: ['GL009'],
     reportUrl: '#',
     coords: { x: 30, y: 15 },
     visited: false,
@@ -284,12 +305,13 @@ export const sites: Site[] = [
     id: 'SITE09',
     name: 'East Valley Repeater',
     address: '800 Valley View, Sunrise, CA',
-    guards: [],
+    guards: ['GL010'],
     reportUrl: '#',
     coords: { x: 45, y: 25 },
     visited: false,
     towerco: 'TowerCo Alpha',
     incidents: [],
+    agencyId: 'AGY01',
   },
   {
     id: 'SITE10',

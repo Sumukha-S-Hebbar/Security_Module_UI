@@ -1,12 +1,19 @@
 
+import { useMemo } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { GuardProfiles } from './_components/guard-profiles';
 import { SelfieRequester } from './_components/selfie-requester';
 import { ComplianceWatchlist } from './_components/compliance-watchlist';
-import { guards } from '@/lib/data';
+import { guards, sites } from '@/lib/data';
+
+const LOGGED_IN_SUPERVISOR_ID = 'PO01'; // Simulate logged-in Patrolling Officer
 
 export default function GuardsPage() {
-  const guardsWithComplianceIssues = guards.filter(
+  const supervisorSites = useMemo(() => sites.filter(s => s.patrollingOfficerId === LOGGED_IN_SUPERVISOR_ID), []);
+  const supervisorSiteNames = useMemo(() => new Set(supervisorSites.map(s => s.name)), [supervisorSites]);
+  const supervisorGuards = useMemo(() => guards.filter(g => supervisorSiteNames.has(g.site)), [supervisorSiteNames]);
+
+  const guardsWithComplianceIssues = supervisorGuards.filter(
     (g) => g.missedSelfieCount > 0
   );
 
@@ -27,11 +34,11 @@ export default function GuardsPage() {
           <TabsTrigger value="requests">Selfie Requests</TabsTrigger>
         </TabsList>
         <TabsContent value="profiles" className="mt-6">
-          <GuardProfiles guards={guards} />
+          <GuardProfiles guards={supervisorGuards} />
         </TabsContent>
         <TabsContent value="requests" className="mt-6">
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-            <SelfieRequester guards={guards} />
+            <SelfieRequester guards={supervisorGuards} />
             <ComplianceWatchlist guards={guardsWithComplianceIssues} />
           </div>
         </TabsContent>

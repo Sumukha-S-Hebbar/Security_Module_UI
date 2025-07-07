@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useMemo, useCallback } from 'react';
@@ -78,46 +79,38 @@ export default function AgencySitesPage() {
     () => guards.filter((g) => agencySiteNames.has(g.site)),
     [agencySiteNames]
   );
-  const agencyPatrollingOfficerIds = useMemo(
-    () => new Set(agencyGuards.map((g) => g.patrollingOfficerId).filter(Boolean)),
-    [agencyGuards]
-  );
-  const agencyPatrollingOfficers = useMemo(
-    () =>
-      patrollingOfficers.filter((po) =>
-        agencyPatrollingOfficerIds.has(po.id)
-      ),
-    [agencyPatrollingOfficerIds]
-  );
+  const agencyPatrollingOfficers = useMemo(() => {
+      const poIds = new Set(agencySites.map(s => s.patrollingOfficerId).filter(Boolean));
+      return patrollingOfficers.filter(po => poIds.has(po.id));
+  }, [agencySites]);
 
   const unassignedGuards = useMemo(
-    () => agencyGuards.filter((g) => !g.patrollingOfficerId),
-    [agencyGuards]
+    () => guards.filter(guard => {
+        const site = sites.find(s => s.name === guard.site);
+        return !site?.patrollingOfficerId;
+    }),
+    []
   );
 
   const getPatrollingOfficerForSite = useCallback(
     (siteId: string) => {
       const site = agencySites.find((s) => s.id === siteId);
-      if (!site) return null;
-      const guardAtSite = agencyGuards.find(
-        (g) => g.site === site.name && g.patrollingOfficerId
-      );
-      if (!guardAtSite) return null;
-      return agencyPatrollingOfficers.find(
-        (s) => s.id === guardAtSite.patrollingOfficerId
+      if (!site || !site.patrollingOfficerId) return null;
+      return patrollingOfficers.find(
+        (s) => s.id === site.patrollingOfficerId
       );
     },
-    [agencySites, agencyGuards, agencyPatrollingOfficers]
+    [agencySites]
   );
 
   const assignedSites = useMemo(
-    () => agencySites.filter((site) => getPatrollingOfficerForSite(site.id)),
-    [agencySites, getPatrollingOfficerForSite]
+    () => agencySites.filter((site) => site.patrollingOfficerId),
+    [agencySites]
   );
   const unassignedSites = useMemo(
     () =>
-      agencySites.filter((site) => !getPatrollingOfficerForSite(site.id)),
-    [agencySites, getPatrollingOfficerForSite]
+      agencySites.filter((site) => !site.patrollingOfficerId),
+    [agencySites]
   );
 
   const assignedSitesPatrollingOfficers = useMemo(() => {

@@ -1,4 +1,5 @@
 
+import { useMemo } from 'react';
 import { alerts, guards, sites } from '@/lib/data';
 import {
   Card,
@@ -20,13 +21,20 @@ import type { Guard } from '@/types';
 import { SitesMap } from './_components/sites-map';
 import { AnalyticsDashboard } from './_components/analytics-dashboard';
 
+const LOGGED_IN_SUPERVISOR_ID = 'PO01'; // Simulate logged-in Patrolling Officer
+
 export default function HomePage() {
-  const activeEmergencies = alerts.filter(
+  const supervisorSites = useMemo(() => sites.filter(s => s.patrollingOfficerId === LOGGED_IN_SUPERVISOR_ID), []);
+  const supervisorSiteNames = useMemo(() => new Set(supervisorSites.map(s => s.name)), [supervisorSites]);
+  const supervisorGuards = useMemo(() => guards.filter(g => supervisorSiteNames.has(g.site)), [supervisorSiteNames]);
+  const supervisorAlerts = useMemo(() => alerts.filter(a => supervisorSiteNames.has(a.site)), [supervisorSiteNames]);
+
+  const activeEmergencies = supervisorAlerts.filter(
     (alert) => alert.type === 'Emergency' && alert.status === 'Active'
   );
 
   const getGuardByName = (name: string): Guard | undefined => {
-    return guards.find((g) => g.name === name);
+    return supervisorGuards.find((g) => g.name === name);
   };
 
   return (
@@ -38,7 +46,7 @@ export default function HomePage() {
         </p>
       </div>
 
-      <AnalyticsDashboard guards={guards} sites={sites} />
+      <AnalyticsDashboard guards={supervisorGuards} sites={supervisorSites} />
 
       <Card className="border-destructive bg-destructive/10">
         <CardHeader className="flex flex-row items-center gap-2">
@@ -93,7 +101,7 @@ export default function HomePage() {
         </CardContent>
       </Card>
       
-      <SitesMap sites={sites} />
+      <SitesMap sites={supervisorSites} />
     </div>
   );
 }

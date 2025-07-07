@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useMemo } from 'react';
@@ -32,7 +33,7 @@ import {
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { FileDown, Upload, Loader2, Search, Building, UserCheck } from 'lucide-react';
+import { FileDown, Upload, Loader2, Search, Building, UserCheck, Info } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -44,6 +45,7 @@ import {
 } from '@/components/ui/dialog';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import Link from 'next/link';
 
 const uploadFormSchema = z.object({
   csvFile: z
@@ -56,8 +58,6 @@ const LOGGED_IN_AGENCY_ID = 'AGY01'; // Simulate logged-in agency
 
 export default function AgencyGuardsPage() {
   const { toast } = useToast();
-  const [selectedPatrollingOfficers, setSelectedPatrollingOfficers] = useState<{ [key: string]: string; }>({});
-  const [selectedSites, setSelectedSites] = useState<{ [key: string]: string; }>({});
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -69,11 +69,19 @@ export default function AgencyGuardsPage() {
 
   const agencyGuards = useMemo(() => guards.filter(guard => agencySiteNames.has(guard.site)), [agencySiteNames]);
 
-  const assignedGuards = useMemo(() => agencyGuards.filter((guard) => guard.patrollingOfficerId), [agencyGuards]);
-  const unassignedGuards = useMemo(() => agencyGuards.filter((guard) => !guard.patrollingOfficerId), [agencyGuards]);
+  const agencyPatrollingOfficers = useMemo(() => {
+    const poIds = new Set(agencySites.map(s => s.patrollingOfficerId).filter(Boolean));
+    return patrollingOfficers.filter(po => poIds.has(po.id));
+  }, [agencySites]);
+
+  const getPatrollingOfficerForGuard = (guard: Guard): PatrollingOfficer | undefined => {
+    const site = agencySites.find(s => s.name === guard.site);
+    if (!site || !site.patrollingOfficerId) return undefined;
+    return agencyPatrollingOfficers.find(po => po.id === site.patrollingOfficerId);
+  };
   
-  const agencyPatrollingOfficerIds = useMemo(() => new Set(agencyGuards.map(g => g.patrollingOfficerId).filter(Boolean)), [agencyGuards]);
-  const agencyPatrollingOfficers = useMemo(() => patrollingOfficers.filter(po => agencyPatrollingOfficerIds.has(po.id)), [agencyPatrollingOfficerIds]);
+  const assignedGuards = useMemo(() => agencyGuards.filter((guard) => getPatrollingOfficerForGuard(guard)), [agencyGuards, agencySites]);
+  const unassignedGuards = useMemo(() => agencyGuards.filter((guard) => !getPatrollingOfficerForGuard(guard)), [agencyGuards, agencySites]);
 
   const uploadForm = useForm<z.infer<typeof uploadFormSchema>>({
     resolver: zodResolver(uploadFormSchema),
@@ -94,63 +102,21 @@ export default function AgencyGuardsPage() {
     setIsUploadDialogOpen(false);
   }
 
-  const getPatrollingOfficerById = (id?: string) => agencyPatrollingOfficers.find((s) => s.id === id);
-
-  const handlePatrollingOfficerSelect = (guardId: string, patrollingOfficerId: string) => {
-    setSelectedPatrollingOfficers((prev) => ({ ...prev, [guardId]: patrollingOfficerId }));
-    setSelectedSites((prev) => {
-      const newState = { ...prev };
-      delete newState[guardId];
-      return newState;
-    });
-  };
-
-  const handleSiteSelect = (guardId: string, siteId: string) => {
-    setSelectedSites((prev) => ({ ...prev, [guardId]: siteId }));
-  };
-
-  const handleAssign = (guardId: string) => {
-    const patrollingOfficerId = selectedPatrollingOfficers[guardId];
-    const siteId = selectedSites[guardId];
-    if (!patrollingOfficerId || !siteId) {
-      toast({ variant: 'destructive', title: 'Error', description: 'Please select a patrolling officer and a site.' });
-      return;
-    }
-    const guardName = agencyGuards.find((g) => g.id === guardId)?.name;
-    const patrollingOfficerName = agencyPatrollingOfficers.find((s) => s.id === patrollingOfficerId)?.name;
-    const siteName = agencySites.find((s) => s.id === siteId)?.name;
-    toast({
-      title: 'Guard Assigned',
-      description: `${guardName} has been assigned to ${siteName} under patrolling officer ${patrollingOfficerName}. The guard will be moved to the assigned list on next refresh.`,
-    });
-  };
-
   const handleDownloadReport = (guard: Guard) => {
     toast({ title: 'Report Download Started', description: `Downloading report for ${guard.name}.` });
   };
-  
-  const siteToPatrollingOfficerMap: Record<string, string> = {};
-  agencySites.forEach((site) => {
-    const firstAssignedGuard = agencyGuards.find((g) => g.patrollingOfficerId && g.site === site.name);
-    if (firstAssignedGuard) siteToPatrollingOfficerMap[site.id] = firstAssignedGuard.patrollingOfficerId!;
-  });
-  const unassignedSitesList = agencySites.filter((site) => !siteToPatrollingOfficerMap[site.id]);
-  const patrollingOfficerToAvailableSitesMap: Record<string, Site[]> = agencyPatrollingOfficers.reduce((acc, patrollingOfficer) => {
-    const managedSites = agencySites.filter((site) => siteToPatrollingOfficerMap[site.id] === patrollingOfficer.id);
-    acc[patrollingOfficer.id] = [...managedSites, ...unassignedSitesList].sort((a, b) => a.name.localeCompare(b.name));
-    return acc;
-  }, {} as Record<string, Site[]>);
 
   const filteredAssignedGuards = useMemo(() => {
     return assignedGuards.filter((guard) => {
       const searchLower = searchQuery.toLowerCase();
+      const patrollingOfficer = getPatrollingOfficerForGuard(guard);
       const matchesSearch =
         guard.name.toLowerCase().includes(searchLower) ||
         guard.id.toLowerCase().includes(searchLower) ||
         guard.site.toLowerCase().includes(searchLower);
 
       const matchesSite = selectedSiteFilter === 'all' || guard.site === selectedSiteFilter;
-      const matchesPatrollingOfficer = selectedPatrollingOfficerFilter === 'all' || guard.patrollingOfficerId === selectedPatrollingOfficerFilter;
+      const matchesPatrollingOfficer = selectedPatrollingOfficerFilter === 'all' || patrollingOfficer?.id === selectedPatrollingOfficerFilter;
 
       return matchesSearch && matchesSite && matchesPatrollingOfficer;
     });
@@ -158,7 +124,7 @@ export default function AgencyGuardsPage() {
 
   const uniqueSites = useMemo(() => [...new Set(assignedGuards.map(g => g.site))], [assignedGuards]);
   const uniquePatrollingOfficers = useMemo(() => {
-    const poIds = new Set(assignedGuards.map(g => g.patrollingOfficerId));
+    const poIds = new Set(assignedGuards.map(g => getPatrollingOfficerForGuard(g)?.id).filter(Boolean));
     return agencyPatrollingOfficers.filter(po => poIds.has(po.id));
   }, [assignedGuards, agencyPatrollingOfficers]);
 
@@ -175,7 +141,7 @@ export default function AgencyGuardsPage() {
           <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
                   <CardTitle>Assigned Security Guards</CardTitle>
-                  <CardDescription>A list of all guards with an assigned patrolling officer.</CardDescription>
+                  <CardDescription>A list of all guards on sites with an assigned patrolling officer.</CardDescription>
               </div>
               <div className="flex items-center gap-2">
                     <Dialog open={isUploadDialogOpen} onOpenChange={setIsUploadDialogOpen}>
@@ -211,7 +177,7 @@ export default function AgencyGuardsPage() {
                                               />
                                               </FormControl>
                                               <FormDescription>
-                                              The CSV should contain columns: name, phone, site, patrollingOfficerId.
+                                              The CSV should contain columns: name, phone, site.
                                               </FormDescription>
                                               <FormMessage />
                                           </FormItem>
@@ -282,7 +248,7 @@ export default function AgencyGuardsPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-6">
             {filteredAssignedGuards.length > 0 ? (
               filteredAssignedGuards.map((guard) => {
-                const patrollingOfficer = getPatrollingOfficerById(guard.patrollingOfficerId);
+                const patrollingOfficer = getPatrollingOfficerForGuard(guard);
                 const selfieAccuracy = guard.totalSelfieRequests > 0 ? Math.round(((guard.totalSelfieRequests - guard.missedSelfieCount) / guard.totalSelfieRequests) * 100) : 100;
 
                 return (
@@ -337,23 +303,27 @@ export default function AgencyGuardsPage() {
         <Card>
           <CardHeader>
             <CardTitle>Unassigned Security Guards</CardTitle>
-            <CardDescription>Assign a patrolling officer and site to a guard.</CardDescription>
+            <CardDescription>
+              Guards on sites without an assigned patrolling officer.
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            <Table>
+             <div className="p-4 bg-secondary text-secondary-foreground rounded-md flex items-center gap-3 text-sm">
+              <Info className="h-5 w-5"/>
+              <div>
+                To assign a patrolling officer, go to the <Button variant="link" asChild className="p-0 h-auto"><Link href="/agency/sites">Sites page</Link></Button> and assign one to the respective site.
+              </div>
+            </div>
+            <Table className="mt-4">
               <TableHeader>
                 <TableRow>
                   <TableHead>Guard</TableHead>
                   <TableHead>Phone</TableHead>
-                  <TableHead>Assign Patrolling Officer</TableHead>
-                  <TableHead>Assign Site</TableHead>
-                  <TableHead className='text-right'>Actions</TableHead>
+                  <TableHead>Site</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {unassignedGuards.map((guard) => {
-                  const selectedPatrollingOfficerId = selectedPatrollingOfficers[guard.id];
-                  const availableSites = selectedPatrollingOfficerId ? patrollingOfficerToAvailableSitesMap[selectedPatrollingOfficerId] : [];
                   return (
                     <TableRow key={guard.id}>
                       <TableCell>
@@ -369,23 +339,7 @@ export default function AgencyGuardsPage() {
                         </div>
                       </TableCell>
                       <TableCell>{guard.phone}</TableCell>
-                      <TableCell>
-                        <Select value={selectedPatrollingOfficers[guard.id] || ''} onValueChange={(value) => handlePatrollingOfficerSelect(guard.id, value)}>
-                          <SelectTrigger className="w-[180px]"><SelectValue placeholder="Select Patrolling Officer" /></SelectTrigger>
-                          <SelectContent>{agencyPatrollingOfficers.map((patrollingOfficer) => (<SelectItem key={patrollingOfficer.id} value={patrollingOfficer.id}>{patrollingOfficer.name}</SelectItem>))}</SelectContent>
-                        </Select>
-                      </TableCell>
-                      <TableCell>
-                        <Select value={selectedSites[guard.id] || ''} onValueChange={(value) => handleSiteSelect(guard.id, value)} disabled={!selectedPatrollingOfficerId}>
-                          <SelectTrigger className="w-[180px]"><SelectValue placeholder="Select Site" /></SelectTrigger>
-                          <SelectContent>
-                            {availableSites.length > 0 ? (availableSites.map((site) => (<SelectItem key={site.id} value={site.id}>{site.name}</SelectItem>))) : (<SelectItem value="no-sites" disabled>Select patrolling officer first</SelectItem>)}
-                          </SelectContent>
-                        </Select>
-                      </TableCell>
-                      <TableCell className='text-right'>
-                        <Button size="sm" onClick={() => handleAssign(guard.id)} disabled={!selectedPatrollingOfficers[guard.id] || !selectedSites[guard.id]}>Assign</Button>
-                      </TableCell>
+                      <TableCell>{guard.site}</TableCell>
                     </TableRow>
                   );
                 })}

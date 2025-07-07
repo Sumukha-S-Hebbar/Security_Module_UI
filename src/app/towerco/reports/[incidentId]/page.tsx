@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useParams } from 'next/navigation';
@@ -39,7 +40,7 @@ export default function IncidentReportPage() {
   const site = sites.find((s) => s.name === incident.site);
   const agency = site ? securityAgencies.find((a) => a.id === site.agencyId) : undefined;
   const guard = guards.find((g) => g.name === incident.guard);
-  const patrollingOfficer = guard ? patrollingOfficers.find((p) => p.id === guard.patrollingOfficerId) : undefined;
+  const patrollingOfficer = site ? patrollingOfficers.find((p) => p.id === site.patrollingOfficerId) : undefined;
 
   const handleDownloadReport = () => {
     toast({

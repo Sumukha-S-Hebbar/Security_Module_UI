@@ -1,3 +1,5 @@
+
+import { useMemo } from 'react';
 import { sites, guards } from '@/lib/data';
 import {
   Card,
@@ -13,8 +15,15 @@ import { MapPin, Users, FileDown, ShieldAlert } from 'lucide-react';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 
+const LOGGED_IN_SUPERVISOR_ID = 'PO01'; // Simulate logged-in Patrolling Officer
+
 export default function SitesPage() {
-  const getGuardById = (id: string) => guards.find((g) => g.id === id);
+
+  const supervisorSites = useMemo(() => sites.filter(s => s.patrollingOfficerId === LOGGED_IN_SUPERVISOR_ID), []);
+  const supervisorSiteNames = useMemo(() => new Set(supervisorSites.map(s => s.name)), [supervisorSites]);
+  const supervisorGuards = useMemo(() => guards.filter(g => supervisorSiteNames.has(g.site)), [supervisorSiteNames]);
+
+  const getGuardById = (id: string) => supervisorGuards.find((g) => g.id === id);
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6">
@@ -26,7 +35,7 @@ export default function SitesPage() {
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {sites.map((site) => (
+        {supervisorSites.map((site) => (
           <Card key={site.id} className="flex flex-col">
             <CardHeader>
               <CardTitle>{site.name}</CardTitle>

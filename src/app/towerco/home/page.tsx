@@ -62,10 +62,12 @@ export default function TowercoHomePage() {
     guardName: string
   ): PatrollingOfficer | undefined => {
     const guard = getGuardByName(guardName);
-    if (!guard || !guard.patrollingOfficerId) {
+    if (!guard) return undefined;
+    const site = sites.find(s => s.name === guard.site);
+    if (!site || !site.patrollingOfficerId) {
       return undefined;
     }
-    return patrollingOfficers.find((s) => s.id === guard.patrollingOfficerId);
+    return patrollingOfficers.find((s) => s.id === site.patrollingOfficerId);
   };
 
   const getAgencyBySiteName = (

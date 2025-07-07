@@ -92,7 +92,7 @@ export default function AgencyReportPage() {
     agencySiteNames.includes(guard.site)
   );
   const agencyPatrollingOfficerIds = new Set(
-    agencyGuards.map((g) => g.patrollingOfficerId).filter(Boolean)
+    agencySites.map((s) => s.patrollingOfficerId).filter(Boolean)
   );
   const totalWorkforce = agencyGuards.length + agencyPatrollingOfficerIds.size;
 
