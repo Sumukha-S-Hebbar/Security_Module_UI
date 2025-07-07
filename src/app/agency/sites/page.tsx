@@ -188,7 +188,7 @@ export default function AgencySitesPage() {
       return;
     }
     const siteName = unassignedSites.find((s) => s.id === siteId)?.name;
-    const patrollingOfficerName = agencyPatrollingOfficers.find(
+    const patrollingOfficerName = patrollingOfficers.find(
       (s) => s.id === patrollingOfficerId
     )?.name;
 
@@ -432,7 +432,7 @@ export default function AgencySitesPage() {
                           <SelectValue placeholder="Select Patrolling Officer" />
                         </SelectTrigger>
                         <SelectContent>
-                          {agencyPatrollingOfficers.map((patrollingOfficer) => (
+                          {patrollingOfficers.map((patrollingOfficer) => (
                             <SelectItem
                               key={patrollingOfficer.id}
                               value={patrollingOfficer.id}
