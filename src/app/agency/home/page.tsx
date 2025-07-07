@@ -24,6 +24,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { AlertTriangle, ChevronDown, Phone } from 'lucide-react';
+import { IncidentStatusBreakdown } from './_components/incident-status-breakdown';
+import { AgencyIncidentChart } from './_components/agency-incident-chart';
 
 export default function AgencyHomePage() {
   const activeEmergencies = alerts.filter(
@@ -131,6 +133,10 @@ export default function AgencyHomePage() {
         sites={sites}
         patrollingOfficers={patrollingOfficers}
       />
+
+      <IncidentStatusBreakdown alerts={alerts} />
+
+      <AgencyIncidentChart alerts={alerts} />
     </div>
   );
 }
