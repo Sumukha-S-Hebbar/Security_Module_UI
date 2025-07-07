@@ -2,6 +2,7 @@
 'use client';
 
 import { useState, useMemo, useCallback } from 'react';
+import Link from 'next/link';
 import { sites, guards, patrollingOfficers, alerts } from '@/lib/data';
 import type { Site, PatrollingOfficer } from '@/types';
 import {
@@ -36,6 +37,7 @@ import {
   UserCheck,
   ShieldAlert,
   Users,
+  Eye,
 } from 'lucide-react';
 import {
   Select,
@@ -85,7 +87,7 @@ export default function AgencySitesPage() {
   );
   
   const unassignedGuards = useMemo(
-    () => guards.filter(guard => agencySiteNames.has(guard.site) && !guard.patrollingOfficerId),
+    () => guards.filter(guard => agencySiteNames.has(guard.site) && !guards.find(g => g.id === guard.id)?.patrollingOfficerId),
     [agencySiteNames]
   );
   
@@ -426,12 +428,17 @@ export default function AgencySitesPage() {
                         <span>{incidentsCount} Incidents</span>
                       </div>
                     </CardContent>
-                    <CardFooter>
+                    <CardFooter className="grid grid-cols-2 gap-2">
+                        <Button asChild variant="outline" size="sm">
+                            <Link href={`/agency/sites/${site.id}`}>
+                                <Eye className="mr-2 h-4 w-4" />
+                                View Report
+                            </Link>
+                        </Button>
                       <Button
                         size="sm"
                         variant="outline"
                         onClick={() => handleDownloadReport(site)}
-                        className="w-full"
                       >
                         <FileDown className="mr-2 h-4 w-4" />
                         Download Report
