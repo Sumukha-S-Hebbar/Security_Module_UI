@@ -61,6 +61,17 @@ export default function IncidentReportPage() {
         return <Badge variant="secondary">{status}</Badge>;
     }
   };
+  
+  const getHintForIncident = (incident: Alert) => {
+    const details = incident.callDetails?.toLowerCase() || '';
+    if (details.includes('break-in')) {
+      return 'security camera';
+    }
+    if (details.includes('fire')) {
+      return 'fire alarm';
+    }
+    return 'incident evidence';
+  };
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6">
@@ -118,7 +129,7 @@ export default function IncidentReportPage() {
                                 alt={`Incident evidence ${index + 1}`}
                                 fill
                                 className="rounded-md object-cover"
-                                data-ai-hint="security camera"
+                                data-ai-hint={getHintForIncident(incident)}
                             />
                             </div>
                         ))}
