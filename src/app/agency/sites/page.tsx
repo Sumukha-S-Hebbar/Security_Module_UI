@@ -127,30 +127,30 @@ export default function AgencySitesPage() {
   }, [assignedSites, getPatrollingOfficerForSite]);
   
   const countries = useMemo(() => {
-    if (!assignedSites) return [];
-    return [...new Set(assignedSites.map((site) => site.country))].sort();
-  }, [assignedSites]);
+    if (!agencySites) return [];
+    return [...new Set(agencySites.map((site) => site.country))].sort();
+  }, [agencySites]);
 
   const states = useMemo(() => {
-    if (selectedCountry === 'all' || !assignedSites) {
+    if (selectedCountry === 'all' || !agencySites) {
       return [];
     }
     return [
       ...new Set(
-        assignedSites
+        agencySites
           .filter((site) => site.country === selectedCountry)
           .map((site) => site.state)
       ),
     ].sort();
-  }, [selectedCountry, assignedSites]);
+  }, [selectedCountry, agencySites]);
 
   const cities = useMemo(() => {
-    if (selectedState === 'all' || selectedCountry === 'all' || !assignedSites) {
+    if (selectedState === 'all' || selectedCountry === 'all' || !agencySites) {
       return [];
     }
     return [
       ...new Set(
-        assignedSites
+        agencySites
           .filter(
             (site) =>
               site.country === selectedCountry && site.state === selectedState
@@ -158,7 +158,7 @@ export default function AgencySitesPage() {
           .map((site) => site.city)
       ),
     ].sort();
-  }, [selectedCountry, selectedState, assignedSites]);
+  }, [selectedCountry, selectedState, agencySites]);
   
   const handleCountryChange = (country: string) => {
     setSelectedCountry(country);
@@ -277,12 +277,17 @@ export default function AgencySitesPage() {
   const filteredUnassignedSites = useMemo(() => {
     return unassignedSites.filter((site) => {
       const searchLower = searchQuery.toLowerCase();
-      return (
+      const matchesSearch =
         site.name.toLowerCase().includes(searchLower) ||
-        site.address.toLowerCase().includes(searchLower)
-      );
+        site.address.toLowerCase().includes(searchLower);
+
+      const matchesCountry = selectedCountry === 'all' || site.country === selectedCountry;
+      const matchesState = selectedState === 'all' || site.state === selectedState;
+      const matchesCity = selectedCity === 'all' || site.city === selectedCity;
+
+      return matchesSearch && matchesCountry && matchesState && matchesCity;
     });
-  }, [searchQuery, unassignedSites]);
+  }, [searchQuery, unassignedSites, selectedCountry, selectedState, selectedCity]);
 
   const siteIncidentsCount = useMemo(() => {
     const counts: { [siteName: string]: number } = {};
@@ -555,7 +560,7 @@ export default function AgencySitesPage() {
               ) : (
                 <TableRow>
                     <TableCell colSpan={5} className="text-center text-muted-foreground">
-                        No unassigned sites found for the current search.
+                        No unassigned sites found for the current filter.
                     </TableCell>
                 </TableRow>
               )}
