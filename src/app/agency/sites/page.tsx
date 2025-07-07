@@ -190,6 +190,16 @@ export default function AgencySitesPage() {
     assignedSites,
     getPatrollingOfficerForSite,
   ]);
+  
+  const filteredUnassignedSites = useMemo(() => {
+    return unassignedSites.filter((site) => {
+      const searchLower = searchQuery.toLowerCase();
+      return (
+        site.name.toLowerCase().includes(searchLower) ||
+        site.address.toLowerCase().includes(searchLower)
+      );
+    });
+  }, [searchQuery, unassignedSites]);
 
   const siteIncidentsCount = useMemo(() => {
     const counts: { [siteName: string]: number } = {};
@@ -213,40 +223,41 @@ export default function AgencySitesPage() {
         </p>
       </div>
 
+      <div className="flex flex-wrap items-center gap-2">
+        <div className="relative flex-1 md:grow-0">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            type="search"
+            placeholder="Search sites..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[320px]"
+          />
+        </div>
+        <Select
+          value={selectedPatrollingOfficerFilter}
+          onValueChange={setSelectedPatrollingOfficerFilter}
+        >
+          <SelectTrigger className="w-full sm:w-[220px]">
+            <SelectValue placeholder="Filter by Patrolling Officer" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Patrolling Officers</SelectItem>
+            {assignedSitesPatrollingOfficers.map((po) => (
+              <SelectItem key={po.id} value={po.id}>
+                {po.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
       <Card>
         <CardHeader>
           <CardTitle>Assigned Sites</CardTitle>
           <CardDescription>
             A list of all sites with an assigned patrolling officer.
           </CardDescription>
-          <div className="flex flex-wrap items-center gap-2 pt-4">
-            <div className="relative flex-1 md:grow-0">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                type="search"
-                placeholder="Search sites..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[320px]"
-              />
-            </div>
-            <Select
-              value={selectedPatrollingOfficerFilter}
-              onValueChange={setSelectedPatrollingOfficerFilter}
-            >
-              <SelectTrigger className="w-full sm:w-[220px]">
-                <SelectValue placeholder="Filter by Patrolling Officer" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Patrolling Officers</SelectItem>
-                {assignedSitesPatrollingOfficers.map((po) => (
-                  <SelectItem key={po.id} value={po.id}>
-                    {po.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-6">
@@ -324,7 +335,8 @@ export default function AgencySitesPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {unassignedSites.map((site) => (
+                {filteredUnassignedSites.length > 0 ? (
+                  filteredUnassignedSites.map((site) => (
                   <TableRow key={site.id}>
                     <TableCell>
                       <div className="font-medium">{site.name}</div>
@@ -379,7 +391,14 @@ export default function AgencySitesPage() {
                       </Button>
                     </TableCell>
                   </TableRow>
-                ))}
+                ))
+              ) : (
+                <TableRow>
+                    <TableCell colSpan={4} className="text-center text-muted-foreground">
+                        No unassigned sites found for the current search.
+                    </TableCell>
+                </TableRow>
+              )}
               </TableBody>
             </Table>
           </CardContent>
