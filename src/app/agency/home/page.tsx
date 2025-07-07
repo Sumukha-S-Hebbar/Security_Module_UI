@@ -28,6 +28,7 @@ import { Button } from '@/components/ui/button';
 import { AlertTriangle, ChevronDown, Phone } from 'lucide-react';
 import { IncidentStatusBreakdown } from './_components/incident-status-breakdown';
 import { AgencyIncidentChart } from './_components/agency-incident-chart';
+import { GuardPerformanceBreakdown } from './_components/guard-performance-breakdown';
 
 const LOGGED_IN_AGENCY_ID = 'AGY01'; // Simulate logged-in agency
 
@@ -149,7 +150,10 @@ export default function AgencyHomePage() {
         patrollingOfficers={agencyPatrollingOfficers}
       />
 
-      <IncidentStatusBreakdown alerts={agencyAlerts} />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <IncidentStatusBreakdown alerts={agencyAlerts} />
+        <GuardPerformanceBreakdown guards={agencyGuards} />
+      </div>
 
       <AgencyIncidentChart alerts={agencyAlerts} />
     </div>
