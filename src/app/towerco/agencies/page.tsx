@@ -1,6 +1,11 @@
 
 'use client';
 
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import { useToast } from '@/hooks/use-toast';
 import { securityAgencies } from '@/lib/data';
 import type { SecurityAgency } from '@/types';
 import {
@@ -14,10 +19,51 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Phone, Mail } from 'lucide-react';
-import { AgencyUploader } from './_components/agency-uploader';
+import { Phone, Mail, Upload, Loader2 } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+
+const formSchema = z.object({
+  csvFile: z
+    .any()
+    .refine((files) => files?.length === 1, 'CSV file is required.')
+    .refine((files) => files?.[0]?.type === 'text/csv', 'Only .csv files are accepted.'),
+});
 
 export default function TowercoAgenciesPage() {
+    const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const { toast } = useToast();
+
+    const form = useForm<z.infer<typeof formSchema>>({
+        resolver: zodResolver(formSchema),
+    });
+
+    async function onUploadSubmit(values: z.infer<typeof formSchema>) {
+        setIsLoading(true);
+        console.log('Uploaded file:', values.csvFile[0]);
+
+        await new Promise((resolve) => setTimeout(resolve, 1500));
+
+        toast({
+            title: 'Upload Successful',
+            description: `File "${values.csvFile[0].name}" has been uploaded. Agency profiles would be processed.`,
+        });
+
+        form.reset({ csvFile: undefined });
+        setIsLoading(false);
+        setIsUploadDialogOpen(false);
+    }
+
     return (
         <div className="p-4 sm:p-6 lg:p-8 space-y-6">
             <div>
@@ -27,12 +73,73 @@ export default function TowercoAgenciesPage() {
                 </p>
             </div>
 
-            <AgencyUploader />
-
             <Card>
                 <CardHeader>
-                    <CardTitle>All Security Agencies</CardTitle>
-                    <CardDescription>A list of all security service providers.</CardDescription>
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <CardTitle>All Security Agencies</CardTitle>
+                            <CardDescription>A list of all security service providers.</CardDescription>
+                        </div>
+                        <Dialog open={isUploadDialogOpen} onOpenChange={setIsUploadDialogOpen}>
+                            <DialogTrigger asChild>
+                                <Button>
+                                    <Upload className="mr-2 h-4 w-4" />
+                                    Upload CSV
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                                <DialogHeader>
+                                <DialogTitle>Upload Agency Profiles</DialogTitle>
+                                <DialogDescription>
+                                    Upload a CSV file to add multiple security agency profiles at once.
+                                </DialogDescription>
+                                </DialogHeader>
+                                <Form {...form}>
+                                    <form onSubmit={form.handleSubmit(onUploadSubmit)}>
+                                        <div className="grid gap-4 py-4">
+                                            <FormField
+                                                control={form.control}
+                                                name="csvFile"
+                                                render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Agency CSV File</FormLabel>
+                                                    <FormControl>
+                                                    <Input
+                                                        id="csvFile-agency-input"
+                                                        type="file"
+                                                        accept=".csv"
+                                                        disabled={isLoading}
+                                                        onChange={(e) => field.onChange(e.target.files)}
+                                                    />
+                                                    </FormControl>
+                                                    <FormDescription>
+                                                    The CSV should contain columns: name, phone, email, address, regionServed.
+                                                    </FormDescription>
+                                                    <FormMessage />
+                                                </FormItem>
+                                                )}
+                                            />
+                                        </div>
+                                        <DialogFooter>
+                                            <Button type="submit" disabled={isLoading}>
+                                            {isLoading ? (
+                                                <>
+                                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                Uploading...
+                                                </>
+                                            ) : (
+                                                <>
+                                                <Upload className="mr-2 h-4 w-4" />
+                                                Upload CSV
+                                                </>
+                                            )}
+                                            </Button>
+                                        </DialogFooter>
+                                    </form>
+                                </Form>
+                            </DialogContent>
+                        </Dialog>
+                    </div>
                 </CardHeader>
                 <CardContent>
                     <Table>
