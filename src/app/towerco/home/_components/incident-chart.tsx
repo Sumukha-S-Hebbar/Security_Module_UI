@@ -26,13 +26,13 @@ import {
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 
 const chartConfig = {
+  total: {
+    label: 'Total Incidents',
+    color: 'hsl(var(--destructive))',
+  },
   resolved: {
     label: 'Resolved',
     color: 'hsl(var(--chart-2))',
-  },
-  active: {
-    label: 'Active',
-    color: 'hsl(var(--destructive))',
   },
 } satisfies ChartConfig;
 
@@ -63,8 +63,8 @@ export function IncidentChart({
       'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
       'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
     ];
-    const monthlyData: { month: string; active: number; resolved: number }[] = months.map(
-      (month) => ({ month, active: 0, resolved: 0 })
+    const monthlyData: { month: string; total: number; resolved: number }[] = months.map(
+      (month) => ({ month, total: 0, resolved: 0 })
     );
 
     const siteToAgencyMap = new Map<string, string | undefined>();
@@ -82,10 +82,9 @@ export function IncidentChart({
 
       if (yearMatch && companyMatch && alert.type === 'Emergency') {
         const monthIndex = alertDate.getMonth();
+        monthlyData[monthIndex].total += 1;
         if (alert.status === 'Resolved') {
           monthlyData[monthIndex].resolved += 1;
-        } else {
-          monthlyData[monthIndex].active += 1;
         }
       }
     });
@@ -99,7 +98,7 @@ export function IncidentChart({
         <div>
           <CardTitle>Incidents Occurred</CardTitle>
           <CardDescription>
-            Breakdown of active and resolved emergency incidents per month.
+            Total vs. resolved emergency incidents per month.
           </CardDescription>
         </div>
         <div className="flex items-center gap-2">
@@ -152,8 +151,8 @@ export function IncidentChart({
               cursor={false}
               content={<ChartTooltipContent />}
             />
-            <Bar dataKey="resolved" fill="var(--color-resolved)" stackId="a" />
-            <Bar dataKey="active" fill="var(--color-active)" radius={4} stackId="a" />
+            <Bar dataKey="total" fill="var(--color-total)" radius={4} />
+            <Bar dataKey="resolved" fill="var(--color-resolved)" radius={4} />
           </BarChart>
         </ChartContainer>
       </CardContent>
