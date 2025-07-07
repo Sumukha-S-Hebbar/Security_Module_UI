@@ -254,8 +254,13 @@ export default function AgencyReportPage() {
               </TableHeader>
               <TableBody>
                 {agencySites.map((site) => {
-                  const resolvedCount =
-                    site.incidents?.filter((i) => i.resolved).length || 0;
+                  const siteIncidents = alerts.filter(
+                    (alert) =>
+                      alert.site === site.name && alert.type === 'Emergency'
+                  );
+                  const resolvedCount = siteIncidents.filter(
+                    (alert) => alert.status === 'Resolved'
+                  ).length;
                   return (
                     <TableRow key={site.id}>
                       <TableCell>
@@ -279,7 +284,7 @@ export default function AgencyReportPage() {
                       </TableCell>
                       <TableCell className="text-center">
                         <Badge variant="secondary">
-                          {site.incidents?.length || 0}
+                          {siteIncidents.length}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-center">
