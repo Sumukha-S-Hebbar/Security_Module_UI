@@ -244,37 +244,47 @@ export default function AgencyReportPage() {
                   <TableHead>Assigned On</TableHead>
                   <TableHead>Assignment Duration</TableHead>
                   <TableHead className="text-center">Incidents</TableHead>
+                  <TableHead className="text-center">Resolved</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {agencySites.map((site) => (
-                  <TableRow key={site.id}>
-                    <TableCell>
-                      <div className="font-medium">{site.name}</div>
-                      <div className="text-sm text-muted-foreground flex items-center gap-1">
-                        <MapPin className="w-3 h-3" />
-                        {site.address}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {site.assignedOn
-                        ? new Date(site.assignedOn).toLocaleDateString()
-                        : 'N/A'}
-                    </TableCell>
-                    <TableCell>
-                      {site.assignedOn
-                        ? formatDistanceToNow(new Date(site.assignedOn), {
-                            addSuffix: true,
-                          })
-                        : 'N/A'}
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <Badge variant="secondary">
-                        {site.incidents?.length || 0}
-                      </Badge>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {agencySites.map((site) => {
+                  const resolvedCount =
+                    site.incidents?.filter((i) => i.resolved).length || 0;
+                  return (
+                    <TableRow key={site.id}>
+                      <TableCell>
+                        <div className="font-medium">{site.name}</div>
+                        <div className="text-sm text-muted-foreground flex items-center gap-1">
+                          <MapPin className="w-3 h-3" />
+                          {site.address}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {site.assignedOn
+                          ? new Date(site.assignedOn).toLocaleDateString()
+                          : 'N/A'}
+                      </TableCell>
+                      <TableCell>
+                        {site.assignedOn
+                          ? formatDistanceToNow(new Date(site.assignedOn), {
+                              addSuffix: true,
+                            })
+                          : 'N/A'}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <Badge variant="secondary">
+                          {site.incidents?.length || 0}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <Badge className="bg-chart-2 text-primary-foreground hover:bg-chart-2/90">
+                          {resolvedCount}
+                        </Badge>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           ) : (
