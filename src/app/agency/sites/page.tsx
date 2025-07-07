@@ -42,16 +42,16 @@ export default function AgencySitesPage() {
 
   const getPatrollingOfficerForSite = (siteId: string) => {
     const site = sites.find((s) => s.id === siteId);
-    if (!site || site.guards.length === 0) {
-      return null;
-    }
-    // Assumption: all guards at a site have the same patrolling officer. We'll use the first guard.
-    const guardId = site.guards[0];
-    const guard = guards.find((g) => g.id === guardId);
-    if (!guard || !guard.patrollingOfficerId) {
-      return null;
-    }
-    return patrollingOfficers.find((s) => s.id === guard.patrollingOfficerId);
+    // In an agency portal, we should consider sites assigned to this agency.
+    // Assuming all sites in `sites` data are for the agency.
+    if (!site) return null;
+
+    // Use a more robust way to find the PO for a site.
+    // For this mock, we assume the first guard's PO is the site's PO.
+    const guardAtSite = guards.find(g => g.site === site.name && g.patrollingOfficerId);
+    if (!guardAtSite) return null;
+
+    return patrollingOfficers.find((s) => s.id === guardAtSite.patrollingOfficerId);
   };
 
   const assignedSites = sites.filter((site) => getPatrollingOfficerForSite(site.id));
@@ -132,23 +132,20 @@ export default function AgencySitesPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Site ID</TableHead>
                 <TableHead>Site</TableHead>
                 <TableHead>Patrolling Officer</TableHead>
-                <TableHead>TowerCo</TableHead>
                 <TableHead>Incidents</TableHead>
                 <TableHead>Geofence Perimeter</TableHead>
-                <TableHead>Assigned On Date</TableHead>
+                <TableHead>TowerCo</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {assignedSites.map((site) => {
+              {assignedSites.length > 0 ? assignedSites.map((site) => {
                 const patrollingOfficer = getPatrollingOfficerForSite(site.id);
                 const incidentsCount = site.incidents?.length || 0;
                 return (
                   <TableRow key={site.id}>
-                    <TableCell>{site.id}</TableCell>
                     <TableCell>
                       <div className="font-medium">{site.name}</div>
                       <div className="text-sm text-muted-foreground flex items-center gap-1">
@@ -157,7 +154,6 @@ export default function AgencySitesPage() {
                       </div>
                     </TableCell>
                     <TableCell>{patrollingOfficer?.name}</TableCell>
-                    <TableCell>{site.towerco}</TableCell>
                     <TableCell>
                       <Badge variant="secondary">{incidentsCount}</Badge>
                     </TableCell>
@@ -171,10 +167,11 @@ export default function AgencySitesPage() {
                         </span>
                       </div>
                     </TableCell>
-                    <TableCell>{site.assignedOn || 'N/A'}</TableCell>
+                    <TableCell>{site.towerco}</TableCell>
                     <TableCell className="text-right">
                       <Button
                         size="sm"
+                        variant="outline"
                         onClick={() => handleDownloadReport(site)}
                       >
                         <FileDown className="mr-2 h-4 w-4" />
@@ -183,7 +180,16 @@ export default function AgencySitesPage() {
                     </TableCell>
                   </TableRow>
                 );
-              })}
+              }) : (
+                <TableRow>
+                    <TableCell
+                      colSpan={6}
+                      className="text-center text-muted-foreground"
+                    >
+                      No sites with assigned patrolling officers found.
+                    </TableCell>
+                  </TableRow>
+              )}
             </TableBody>
           </Table>
         </CardContent>
@@ -201,17 +207,15 @@ export default function AgencySitesPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Site ID</TableHead>
                   <TableHead>Site</TableHead>
-                  <TableHead>TowerCo</TableHead>
                   <TableHead>Geofence (m)</TableHead>
-                  <TableHead>Actions</TableHead>
+                  <TableHead>Assign Patrolling Officer</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {unassignedSites.map((site) => (
                   <TableRow key={site.id}>
-                    <TableCell>{site.id}</TableCell>
                     <TableCell>
                       <div className="font-medium">{site.name}</div>
                       <div className="text-sm text-muted-foreground flex items-center gap-1">
@@ -219,7 +223,6 @@ export default function AgencySitesPage() {
                         {site.address}
                       </div>
                     </TableCell>
-                    <TableCell>{site.towerco}</TableCell>
                     <TableCell>
                       <Input
                         type="number"
@@ -232,7 +235,6 @@ export default function AgencySitesPage() {
                       />
                     </TableCell>
                     <TableCell>
-                      <div className="flex items-center gap-2">
                         <Select
                           value={selectedPatrollingOfficers[site.id] || ''}
                           onValueChange={(value) =>
@@ -253,6 +255,8 @@ export default function AgencySitesPage() {
                             ))}
                           </SelectContent>
                         </Select>
+                    </TableCell>
+                    <TableCell className="text-right">
                         <Button
                           size="sm"
                           onClick={() => handleAssignPatrollingOfficer(site.id)}
@@ -263,7 +267,6 @@ export default function AgencySitesPage() {
                         >
                           Assign
                         </Button>
-                      </div>
                     </TableCell>
                   </TableRow>
                 ))}

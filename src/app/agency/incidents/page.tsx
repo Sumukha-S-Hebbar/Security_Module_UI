@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import Image from 'next/image';
 import { alerts as initialAlerts, guards, patrollingOfficers } from '@/lib/data';
 import type { Alert, Guard } from '@/types';
@@ -33,8 +33,16 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Eye, Phone, ShieldAlert, CheckCircle, ChevronDown, FileDown } from 'lucide-react';
+import { Eye, Phone, ShieldAlert, CheckCircle, ChevronDown, FileDown, Search } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 export default function AgencyIncidentsPage() {
   const [alerts, setAlerts] = useState<Alert[]>(
@@ -42,6 +50,23 @@ export default function AgencyIncidentsPage() {
   );
   const [selectedAlert, setSelectedAlert] = useState<Alert | null>(null);
   const { toast } = useToast();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedStatus, setSelectedStatus] = useState('all');
+
+  const filteredIncidents = useMemo(() => {
+    return alerts.filter((incident) => {
+      const searchLower = searchQuery.toLowerCase();
+      const matchesSearch =
+        incident.id.toLowerCase().includes(searchLower) ||
+        incident.site.toLowerCase().includes(searchLower) ||
+        incident.guard.toLowerCase().includes(searchLower);
+
+      const matchesStatus =
+        selectedStatus === 'all' || incident.status.toLowerCase() === selectedStatus;
+
+      return matchesSearch && matchesStatus;
+    });
+  }, [searchQuery, selectedStatus, alerts]);
 
   const getGuardByName = (name: string): Guard | undefined => {
     return guards.find((g) => g.name === name);
@@ -100,6 +125,29 @@ export default function AgencyIncidentsPage() {
             <CardDescription>
               Review and manage all high-priority alerts.
             </CardDescription>
+            <div className="flex flex-wrap items-center gap-2 pt-4">
+              <div className="relative flex-1 md:grow-0">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  type="search"
+                  placeholder="Search incidents..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[320px]"
+                />
+              </div>
+              <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+                <SelectTrigger className="w-full sm:w-[180px]">
+                  <SelectValue placeholder="Filter by status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Statuses</SelectItem>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="investigating">Investigating</SelectItem>
+                  <SelectItem value="resolved">Resolved</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </CardHeader>
           <CardContent>
             <Table>
@@ -118,8 +166,8 @@ export default function AgencyIncidentsPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {alerts.length > 0 ? (
-                  alerts.map((alert) => {
+                {filteredIncidents.length > 0 ? (
+                  filteredIncidents.map((alert) => {
                     const guardDetails = getGuardByName(alert.guard);
                     const patrollingOfficerDetails = getPatrollingOfficerByGuardName(
                       alert.guard
@@ -135,7 +183,7 @@ export default function AgencyIncidentsPage() {
                         <TableCell>{alert.site}</TableCell>
                         <TableCell>{alert.guard}</TableCell>
                         <TableCell>
-                          {patrollingOfficerDetails?.name}
+                          {patrollingOfficerDetails?.name || 'N/A'}
                         </TableCell>
                         <TableCell>{getStatusBadge(alert.status)}</TableCell>
                         <TableCell>
@@ -238,7 +286,7 @@ export default function AgencyIncidentsPage() {
                       colSpan={10}
                       className="text-center text-muted-foreground"
                     >
-                      No emergency incidents found.
+                      No emergency incidents found for the current filters.
                     </TableCell>
                   </TableRow>
                 )}

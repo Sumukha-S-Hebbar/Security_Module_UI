@@ -1,33 +1,105 @@
-
 'use client';
 
+import { useState, useMemo } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
 import { patrollingOfficers } from '@/lib/data';
 import type { PatrollingOfficer } from '@/types';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardFooter
+} from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Users, Phone, Map, FileDown } from 'lucide-react';
-import { PatrollingOfficerUploader } from './_components/supervisor-uploader';
+import { Users, Phone, Map, FileDown, Upload, PlusCircle, Loader2, Search, Mail } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+
+const uploadFormSchema = z.object({
+  csvFile: z
+    .any()
+    .refine((files) => files?.length === 1, 'CSV file is required.')
+    .refine((files) => files?.[0]?.type === 'text/csv', 'Only .csv files are accepted.'),
+});
+
+const addPatrollingOfficerFormSchema = z.object({
+    name: z.string().min(1, { message: 'Patrolling Officer name is required.' }),
+    phone: z.string().min(1, { message: 'Phone is required.' }),
+    email: z.string().email({ message: 'Valid email is required.' }),
+});
 
 export default function AgencyPatrollingOfficersPage() {
     const { toast } = useToast();
+    const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
+    const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+    const [isUploading, setIsUploading] = useState(false);
+    const [isAdding, setIsAdding] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
+
+    const uploadForm = useForm<z.infer<typeof uploadFormSchema>>({
+        resolver: zodResolver(uploadFormSchema),
+    });
+
+    const addForm = useForm<z.infer<typeof addPatrollingOfficerFormSchema>>({
+        resolver: zodResolver(addPatrollingOfficerFormSchema),
+        defaultValues: { name: '', phone: '', email: '' }
+    });
+
+    async function onUploadSubmit(values: z.infer<typeof uploadFormSchema>) {
+        setIsUploading(true);
+        console.log('Uploaded file:', values.csvFile[0]);
+        await new Promise((resolve) => setTimeout(resolve, 1500));
+        toast({
+            title: 'Upload Successful',
+            description: `File "${values.csvFile[0].name}" has been uploaded. Patrolling officer profiles would be processed.`,
+        });
+        uploadForm.reset({ csvFile: undefined });
+        setIsUploading(false);
+        setIsUploadDialogOpen(false);
+    }
+
+    async function onAddSubmit(values: z.infer<typeof addPatrollingOfficerFormSchema>) {
+        setIsAdding(true);
+        console.log('New patrolling officer data:', values);
+        await new Promise((resolve) => setTimeout(resolve, 1500));
+        toast({
+            title: 'Patrolling Officer Added',
+            description: `Patrolling officer "${values.name}" has been created successfully.`,
+        });
+        addForm.reset();
+        setIsAdding(false);
+        setIsAddDialogOpen(false);
+    }
 
     const handleDownloadReport = (patrollingOfficer: PatrollingOfficer) => {
         toast({
             title: 'Report Download Started',
             description: `Downloading report for ${patrollingOfficer.name}.`,
         });
-        // In a real app, this would trigger a file download (e.g., CSV or PDF).
     };
+
+    const filteredPatrollingOfficers = useMemo(() => {
+        return patrollingOfficers.filter((po) =>
+            po.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            po.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            po.phone.includes(searchQuery)
+        );
+    }, [searchQuery]);
 
     return (
         <div className="p-4 sm:p-6 lg:p-8 space-y-6">
@@ -38,81 +110,218 @@ export default function AgencyPatrollingOfficersPage() {
                 </p>
             </div>
 
-            <PatrollingOfficerUploader />
-
             <Card>
                 <CardHeader>
-                    <CardTitle>All Patrolling Officers</CardTitle>
+                    <div className="flex flex-wrap items-center justify-between gap-4">
+                        <div>
+                            <CardTitle>All Patrolling Officers</CardTitle>
+                            <CardDescription>A list of all patrolling officers in your agency.</CardDescription>
+                        </div>
+                        <div className="flex items-center gap-2">
+                             <Dialog open={isUploadDialogOpen} onOpenChange={setIsUploadDialogOpen}>
+                                <DialogTrigger asChild>
+                                    <Button>
+                                        <Upload className="mr-2 h-4 w-4" />
+                                        Upload CSV
+                                    </Button>
+                                </DialogTrigger>
+                                <DialogContent>
+                                    <DialogHeader>
+                                    <DialogTitle>Upload Patrolling Officer Profiles</DialogTitle>
+                                    <DialogDescription>
+                                        Upload a CSV file to add multiple patrolling officer profiles at once.
+                                    </DialogDescription>
+                                    </DialogHeader>
+                                    <Form {...uploadForm}>
+                                        <form onSubmit={uploadForm.handleSubmit(onUploadSubmit)}>
+                                            <div className="grid gap-4 py-4">
+                                                <FormField
+                                                    control={uploadForm.control}
+                                                    name="csvFile"
+                                                    render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>Patrolling Officer CSV File</FormLabel>
+                                                        <FormControl>
+                                                        <Input
+                                                            type="file"
+                                                            accept=".csv"
+                                                            disabled={isUploading}
+                                                            onChange={(e) => field.onChange(e.target.files)}
+                                                        />
+                                                        </FormControl>
+                                                        <FormDescription>
+                                                        The CSV should contain columns: name, phone, email.
+                                                        </FormDescription>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                    )}
+                                                />
+                                            </div>
+                                            <DialogFooter>
+                                                <Button type="submit" disabled={isUploading}>
+                                                {isUploading ? (
+                                                    <>
+                                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                    Uploading...
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                    <Upload className="mr-2 h-4 w-4" />
+                                                    Upload CSV
+                                                    </>
+                                                )}
+                                                </Button>
+                                            </DialogFooter>
+                                        </form>
+                                    </Form>
+                                </DialogContent>
+                            </Dialog>
+
+                            <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+                                <DialogTrigger asChild>
+                                    <Button variant="outline">
+                                        <PlusCircle className="mr-2 h-4 w-4" />
+                                        Add Patrolling Officer
+                                    </Button>
+                                </DialogTrigger>
+                                <DialogContent>
+                                    <DialogHeader>
+                                        <DialogTitle>Add a New Patrolling Officer</DialogTitle>
+                                        <DialogDescription>
+                                            Fill in the details below to add a new patrolling officer.
+                                        </DialogDescription>
+                                    </DialogHeader>
+                                    <Form {...addForm}>
+                                        <form onSubmit={addForm.handleSubmit(onAddSubmit)} className="space-y-4">
+                                            <FormField
+                                                control={addForm.control}
+                                                name="name"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>Full Name</FormLabel>
+                                                        <FormControl>
+                                                            <Input placeholder="e.g., Michael Scott" {...field} />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                            <FormField
+                                                control={addForm.control}
+                                                name="phone"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>Phone</FormLabel>
+                                                        <FormControl>
+                                                            <Input placeholder="e.g., 555-100-2000" {...field} />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                            <FormField
+                                                control={addForm.control}
+                                                name="email"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>Email</FormLabel>
+                                                        <FormControl>
+                                                            <Input placeholder="e.g., michael.s@guardlink.com" {...field} />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                            <DialogFooter>
+                                                <Button type="submit" disabled={isAdding}>
+                                                {isAdding ? (
+                                                    <>
+                                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                    Adding...
+                                                    </>
+                                                ) : (
+                                                    "Add Patrolling Officer"
+                                                )}
+                                                </Button>
+                                            </DialogFooter>
+                                        </form>
+                                    </Form>
+                                </DialogContent>
+                            </Dialog>
+                        </div>
+                    </div>
+                    <div className="relative pt-4">
+                        <Search className="absolute left-2.5 top-6.5 h-4 w-4 text-muted-foreground" />
+                        <Input
+                        type="search"
+                        placeholder="Search patrolling officers..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[320px]"
+                        />
+                    </div>
                 </CardHeader>
                 <CardContent>
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Patrolling Officer</TableHead>
-                                <TableHead>Phone Number</TableHead>
-                                <TableHead>Guards Under Him</TableHead>
-                                <TableHead>Route</TableHead>
-                                <TableHead>Actions</TableHead>
-                                <TableHead className="text-right">Report</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {patrollingOfficers.map((patrollingOfficer) => (
-                                <TableRow key={patrollingOfficer.id}>
-                                    <TableCell>
-                                        <div className="flex items-center gap-3">
-                                            <Avatar>
-                                                <AvatarImage src={patrollingOfficer.avatar} alt={patrollingOfficer.name} />
-                                                <AvatarFallback>{patrollingOfficer.name.charAt(0)}</AvatarFallback>
-                                            </Avatar>
-                                            <div>
-                                                <p className="font-medium">{patrollingOfficer.name}</p>
-                                                <p className="text-sm text-muted-foreground">
-                                                    ID: {patrollingOfficer.id}
-                                                </p>
-                                            </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-6">
+                        {filteredPatrollingOfficers.length > 0 ? (
+                            filteredPatrollingOfficers.map((patrollingOfficer) => (
+                                <Card key={patrollingOfficer.id} className="flex flex-col">
+                                <CardHeader>
+                                    <div className="flex items-center gap-4">
+                                        <Avatar className="h-12 w-12">
+                                            <AvatarImage src={patrollingOfficer.avatar} alt={patrollingOfficer.name} />
+                                            <AvatarFallback>{patrollingOfficer.name.charAt(0)}</AvatarFallback>
+                                        </Avatar>
+                                        <div>
+                                            <CardTitle className="text-lg">{patrollingOfficer.name}</CardTitle>
+                                            <CardDescription>ID: {patrollingOfficer.id}</CardDescription>
                                         </div>
-                                    </TableCell>
-                                    <TableCell>
-                                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                            <Phone className="h-4 w-4" />
-                                            <span>{patrollingOfficer.phone}</span>
-                                        </div>
-                                    </TableCell>
-                                    <TableCell>
-                                        <div className="flex items-center gap-2">
-                                            <Users className="h-4 w-4 text-muted-foreground" />
-                                            <span>{patrollingOfficer.assignedGuards.length} Guards</span>
-                                        </div>
-                                    </TableCell>
-                                    <TableCell>
-                                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                            <Map className="h-4 w-4" />
-                                            <span>{patrollingOfficer.routes?.join(', ') || 'N/A'}</span>
-                                        </div>
-                                    </TableCell>
-                                    <TableCell>
-                                        <Button asChild variant="outline" size="sm">
-                                            <a href={`tel:${patrollingOfficer.phone}`}>
-                                                <Phone className="mr-2 h-4 w-4" />
-                                                Contact Patrolling Officer
-                                            </a>
-                                        </Button>
-                                    </TableCell>
-                                    <TableCell className="text-right">
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={() => handleDownloadReport(patrollingOfficer)}
-                                        >
-                                            <FileDown className="mr-2 h-4 w-4" />
-                                            Download Report
-                                        </Button>
-                                    </TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
+                                    </div>
+                                </CardHeader>
+                                <CardContent className="flex-grow space-y-2 text-sm">
+                                    <div className="flex items-center gap-2 text-muted-foreground">
+                                        <Phone className="h-4 w-4 flex-shrink-0" />
+                                        <span>{patrollingOfficer.phone}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2 text-muted-foreground">
+                                        <Mail className="h-4 w-4 flex-shrink-0" />
+                                        <a href={`mailto:${patrollingOfficer.email}`} className="truncate hover:underline">
+                                            {patrollingOfficer.email}
+                                        </a>
+                                    </div>
+                                    <div className="flex items-center gap-2 text-muted-foreground">
+                                        <Users className="h-4 w-4 flex-shrink-0" />
+                                        <span>{patrollingOfficer.assignedGuards.length} Guards</span>
+                                    </div>
+                                    <div className="flex items-center gap-2 text-muted-foreground">
+                                        <Map className="h-4 w-4 flex-shrink-0" />
+                                        <span>{patrollingOfficer.routes?.join(', ') || 'N/A'}</span>
+                                    </div>
+                                </CardContent>
+                                <CardFooter className="grid grid-cols-2 gap-2">
+                                    <Button asChild variant="outline" size="sm">
+                                        <a href={`tel:${patrollingOfficer.phone}`}>
+                                            <Phone className="mr-2 h-4 w-4" />
+                                            Contact
+                                        </a>
+                                    </Button>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => handleDownloadReport(patrollingOfficer)}
+                                    >
+                                        <FileDown className="mr-2 h-4 w-4" />
+                                        Report
+                                    </Button>
+                                </CardFooter>
+                                </Card>
+                            ))
+                        ) : (
+                            <div className="col-span-full text-center text-muted-foreground py-10">
+                                No patrolling officers found.
+                            </div>
+                        )}
+                    </div>
                 </CardContent>
             </Card>
         </div>
