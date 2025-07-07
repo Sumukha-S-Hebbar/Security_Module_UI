@@ -12,12 +12,16 @@ export type Guard = {
     perimeterAccuracy: number;
     leaveDays: number;
   };
+  patrollingOfficerId?: string;
 };
 
 export type Site = {
   id: string;
   name: string;
   address: string;
+  city: string;
+  state: string;
+  country: string;
   guards: string[]; // Guard IDs
   reportUrl: string;
   coords: { x: number; y: number }; // As percentages for map placement
