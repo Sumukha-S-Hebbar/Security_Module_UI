@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { sites, guards, patrollingOfficers } from '@/lib/data';
 import type { Site } from '@/types';
 import {
@@ -31,6 +31,8 @@ import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 
+const LOGGED_IN_AGENCY_ID = 'AGY01'; // Simulate logged-in agency
+
 export default function AgencySitesPage() {
   const [selectedPatrollingOfficers, setSelectedPatrollingOfficers] = useState<{
     [key: string]: string;
@@ -40,22 +42,22 @@ export default function AgencySitesPage() {
   }>({});
   const { toast } = useToast();
 
+  const agencySites = useMemo(() => sites.filter(site => site.agencyId === LOGGED_IN_AGENCY_ID), []);
+  const agencySiteNames = useMemo(() => new Set(agencySites.map(s => s.name)), [agencySites]);
+  const agencyGuards = useMemo(() => guards.filter(g => agencySiteNames.has(g.site)), [agencySiteNames]);
+  const agencyPatrollingOfficerIds = useMemo(() => new Set(agencyGuards.map(g => g.patrollingOfficerId).filter(Boolean)), [agencyGuards]);
+  const agencyPatrollingOfficers = useMemo(() => patrollingOfficers.filter(po => agencyPatrollingOfficerIds.has(po.id)), [agencyPatrollingOfficerIds]);
+
   const getPatrollingOfficerForSite = (siteId: string) => {
-    const site = sites.find((s) => s.id === siteId);
-    // In an agency portal, we should consider sites assigned to this agency.
-    // Assuming all sites in `sites` data are for the agency.
+    const site = agencySites.find((s) => s.id === siteId);
     if (!site) return null;
-
-    // Use a more robust way to find the PO for a site.
-    // For this mock, we assume the first guard's PO is the site's PO.
-    const guardAtSite = guards.find(g => g.site === site.name && g.patrollingOfficerId);
+    const guardAtSite = agencyGuards.find(g => g.site === site.name && g.patrollingOfficerId);
     if (!guardAtSite) return null;
-
-    return patrollingOfficers.find((s) => s.id === guardAtSite.patrollingOfficerId);
+    return agencyPatrollingOfficers.find((s) => s.id === guardAtSite.patrollingOfficerId);
   };
 
-  const assignedSites = sites.filter((site) => getPatrollingOfficerForSite(site.id));
-  const unassignedSites = sites.filter(
+  const assignedSites = agencySites.filter((site) => getPatrollingOfficerForSite(site.id));
+  const unassignedSites = agencySites.filter(
     (site) => !getPatrollingOfficerForSite(site.id)
   );
 
@@ -94,7 +96,7 @@ export default function AgencySitesPage() {
       return;
     }
     const siteName = unassignedSites.find((s) => s.id === siteId)?.name;
-    const patrollingOfficerName = patrollingOfficers.find((s) => s.id === patrollingOfficerId)?.name;
+    const patrollingOfficerName = agencyPatrollingOfficers.find((s) => s.id === patrollingOfficerId)?.name;
 
     toast({
       title: 'Patrolling Officer Assigned',
@@ -245,7 +247,7 @@ export default function AgencySitesPage() {
                             <SelectValue placeholder="Select Patrolling Officer" />
                           </SelectTrigger>
                           <SelectContent>
-                            {patrollingOfficers.map((patrollingOfficer) => (
+                            {agencyPatrollingOfficers.map((patrollingOfficer) => (
                               <SelectItem
                                 key={patrollingOfficer.id}
                                 value={patrollingOfficer.id}

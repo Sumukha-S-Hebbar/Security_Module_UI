@@ -4,7 +4,7 @@ import { useState, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { patrollingOfficers } from '@/lib/data';
+import { patrollingOfficers, guards, sites } from '@/lib/data';
 import type { PatrollingOfficer } from '@/types';
 import {
   Card,
@@ -30,6 +30,8 @@ import {
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 
+const LOGGED_IN_AGENCY_ID = 'AGY01'; // Simulate logged-in agency
+
 const uploadFormSchema = z.object({
   csvFile: z
     .any()
@@ -50,6 +52,12 @@ export default function AgencyPatrollingOfficersPage() {
     const [isUploading, setIsUploading] = useState(false);
     const [isAdding, setIsAdding] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
+
+    const agencySites = useMemo(() => sites.filter(site => site.agencyId === LOGGED_IN_AGENCY_ID), []);
+    const agencySiteNames = useMemo(() => new Set(agencySites.map(s => s.name)), [agencySites]);
+    const agencyGuards = useMemo(() => guards.filter(g => agencySiteNames.has(g.site)), [agencySiteNames]);
+    const agencyPatrollingOfficerIds = useMemo(() => new Set(agencyGuards.map(g => g.patrollingOfficerId).filter(Boolean)), [agencyGuards]);
+    const agencyPatrollingOfficers = useMemo(() => patrollingOfficers.filter(po => agencyPatrollingOfficerIds.has(po.id)), [agencyPatrollingOfficerIds]);
 
     const uploadForm = useForm<z.infer<typeof uploadFormSchema>>({
         resolver: zodResolver(uploadFormSchema),
@@ -94,12 +102,12 @@ export default function AgencyPatrollingOfficersPage() {
     };
 
     const filteredPatrollingOfficers = useMemo(() => {
-        return patrollingOfficers.filter((po) =>
+        return agencyPatrollingOfficers.filter((po) =>
             po.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
             po.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
             po.phone.includes(searchQuery)
         );
-    }, [searchQuery]);
+    }, [searchQuery, agencyPatrollingOfficers]);
 
     return (
         <div className="p-4 sm:p-6 lg:p-8 space-y-6">

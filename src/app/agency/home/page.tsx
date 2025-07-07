@@ -1,4 +1,6 @@
+'use client';
 
+import { useMemo } from 'react';
 import { alerts, guards, sites, patrollingOfficers } from '@/lib/data';
 import type { Guard, PatrollingOfficer } from '@/types';
 import { AgencyAnalyticsDashboard } from './_components/agency-analytics-dashboard';
@@ -27,13 +29,26 @@ import { AlertTriangle, ChevronDown, Phone } from 'lucide-react';
 import { IncidentStatusBreakdown } from './_components/incident-status-breakdown';
 import { AgencyIncidentChart } from './_components/agency-incident-chart';
 
+const LOGGED_IN_AGENCY_ID = 'AGY01'; // Simulate logged-in agency
+
 export default function AgencyHomePage() {
-  const activeEmergencies = alerts.filter(
+  const agencySites = useMemo(() => sites.filter(site => site.agencyId === LOGGED_IN_AGENCY_ID), []);
+  const agencySiteNames = useMemo(() => new Set(agencySites.map(site => site.name)), [agencySites]);
+
+  const agencyAlerts = useMemo(() => alerts.filter(alert => agencySiteNames.has(alert.site)), [agencySiteNames]);
+  
+  const agencyGuards = useMemo(() => guards.filter(guard => agencySiteNames.has(guard.site)), [agencySiteNames]);
+  
+  const agencyPatrollingOfficerIds = useMemo(() => new Set(agencyGuards.map(guard => guard.patrollingOfficerId).filter(Boolean)), [agencyGuards]);
+  
+  const agencyPatrollingOfficers = useMemo(() => patrollingOfficers.filter(po => agencyPatrollingOfficerIds.has(po.id)), [agencyPatrollingOfficerIds]);
+
+  const activeEmergencies = useMemo(() => agencyAlerts.filter(
     (alert) => alert.type === 'Emergency' && alert.status === 'Active'
-  );
+  ), [agencyAlerts]);
 
   const getGuardByName = (name: string): Guard | undefined => {
-    return guards.find((g) => g.name === name);
+    return agencyGuards.find((g) => g.name === name);
   };
 
   const getPatrollingOfficerByGuardName = (
@@ -43,7 +58,7 @@ export default function AgencyHomePage() {
     if (!guard || !guard.patrollingOfficerId) {
       return undefined;
     }
-    return patrollingOfficers.find((s) => s.id === guard.patrollingOfficerId);
+    return agencyPatrollingOfficers.find((s) => s.id === guard.patrollingOfficerId);
   };
 
   return (
@@ -129,14 +144,14 @@ export default function AgencyHomePage() {
       </Card>
 
       <AgencyAnalyticsDashboard
-        guards={guards}
-        sites={sites}
-        patrollingOfficers={patrollingOfficers}
+        guards={agencyGuards}
+        sites={agencySites}
+        patrollingOfficers={agencyPatrollingOfficers}
       />
 
-      <IncidentStatusBreakdown alerts={alerts} />
+      <IncidentStatusBreakdown alerts={agencyAlerts} />
 
-      <AgencyIncidentChart alerts={alerts} />
+      <AgencyIncidentChart alerts={agencyAlerts} />
     </div>
   );
 }

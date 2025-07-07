@@ -33,7 +33,6 @@ import {
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { FileDown, Upload, Loader2, Search, Building, UserCheck } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
 import {
   Dialog,
   DialogContent,
@@ -53,6 +52,8 @@ const uploadFormSchema = z.object({
     .refine((files) => files?.[0]?.type === 'text/csv', 'Only .csv files are accepted.'),
 });
 
+const LOGGED_IN_AGENCY_ID = 'AGY01'; // Simulate logged-in agency
+
 export default function AgencyGuardsPage() {
   const { toast } = useToast();
   const [selectedPatrollingOfficers, setSelectedPatrollingOfficers] = useState<{ [key: string]: string; }>({});
@@ -63,9 +64,17 @@ export default function AgencyGuardsPage() {
   const [selectedSiteFilter, setSelectedSiteFilter] = useState('all');
   const [selectedPatrollingOfficerFilter, setSelectedPatrollingOfficerFilter] = useState('all');
 
-  const assignedGuards = useMemo(() => guards.filter((guard) => guard.patrollingOfficerId), []);
-  const unassignedGuards = useMemo(() => guards.filter((guard) => !guard.patrollingOfficerId), []);
+  const agencySites = useMemo(() => sites.filter(site => site.agencyId === LOGGED_IN_AGENCY_ID), []);
+  const agencySiteNames = useMemo(() => new Set(agencySites.map(site => site.name)), [agencySites]);
+
+  const agencyGuards = useMemo(() => guards.filter(guard => agencySiteNames.has(guard.site)), [agencySiteNames]);
+
+  const assignedGuards = useMemo(() => agencyGuards.filter((guard) => guard.patrollingOfficerId), [agencyGuards]);
+  const unassignedGuards = useMemo(() => agencyGuards.filter((guard) => !guard.patrollingOfficerId), [agencyGuards]);
   
+  const agencyPatrollingOfficerIds = useMemo(() => new Set(agencyGuards.map(g => g.patrollingOfficerId).filter(Boolean)), [agencyGuards]);
+  const agencyPatrollingOfficers = useMemo(() => patrollingOfficers.filter(po => agencyPatrollingOfficerIds.has(po.id)), [agencyPatrollingOfficerIds]);
+
   const uploadForm = useForm<z.infer<typeof uploadFormSchema>>({
     resolver: zodResolver(uploadFormSchema),
   });
@@ -85,7 +94,7 @@ export default function AgencyGuardsPage() {
     setIsUploadDialogOpen(false);
   }
 
-  const getPatrollingOfficerById = (id?: string) => patrollingOfficers.find((s) => s.id === id);
+  const getPatrollingOfficerById = (id?: string) => agencyPatrollingOfficers.find((s) => s.id === id);
 
   const handlePatrollingOfficerSelect = (guardId: string, patrollingOfficerId: string) => {
     setSelectedPatrollingOfficers((prev) => ({ ...prev, [guardId]: patrollingOfficerId }));
@@ -107,9 +116,9 @@ export default function AgencyGuardsPage() {
       toast({ variant: 'destructive', title: 'Error', description: 'Please select a patrolling officer and a site.' });
       return;
     }
-    const guardName = guards.find((g) => g.id === guardId)?.name;
-    const patrollingOfficerName = patrollingOfficers.find((s) => s.id === patrollingOfficerId)?.name;
-    const siteName = sites.find((s) => s.id === siteId)?.name;
+    const guardName = agencyGuards.find((g) => g.id === guardId)?.name;
+    const patrollingOfficerName = agencyPatrollingOfficers.find((s) => s.id === patrollingOfficerId)?.name;
+    const siteName = agencySites.find((s) => s.id === siteId)?.name;
     toast({
       title: 'Guard Assigned',
       description: `${guardName} has been assigned to ${siteName} under patrolling officer ${patrollingOfficerName}. The guard will be moved to the assigned list on next refresh.`,
@@ -121,13 +130,13 @@ export default function AgencyGuardsPage() {
   };
   
   const siteToPatrollingOfficerMap: Record<string, string> = {};
-  sites.forEach((site) => {
-    const firstAssignedGuard = guards.find((g) => g.patrollingOfficerId && g.site === site.name);
+  agencySites.forEach((site) => {
+    const firstAssignedGuard = agencyGuards.find((g) => g.patrollingOfficerId && g.site === site.name);
     if (firstAssignedGuard) siteToPatrollingOfficerMap[site.id] = firstAssignedGuard.patrollingOfficerId!;
   });
-  const unassignedSitesList = sites.filter((site) => !siteToPatrollingOfficerMap[site.id]);
-  const patrollingOfficerToAvailableSitesMap: Record<string, Site[]> = patrollingOfficers.reduce((acc, patrollingOfficer) => {
-    const managedSites = sites.filter((site) => siteToPatrollingOfficerMap[site.id] === patrollingOfficer.id);
+  const unassignedSitesList = agencySites.filter((site) => !siteToPatrollingOfficerMap[site.id]);
+  const patrollingOfficerToAvailableSitesMap: Record<string, Site[]> = agencyPatrollingOfficers.reduce((acc, patrollingOfficer) => {
+    const managedSites = agencySites.filter((site) => siteToPatrollingOfficerMap[site.id] === patrollingOfficer.id);
     acc[patrollingOfficer.id] = [...managedSites, ...unassignedSitesList].sort((a, b) => a.name.localeCompare(b.name));
     return acc;
   }, {} as Record<string, Site[]>);
@@ -150,8 +159,8 @@ export default function AgencyGuardsPage() {
   const uniqueSites = useMemo(() => [...new Set(assignedGuards.map(g => g.site))], [assignedGuards]);
   const uniquePatrollingOfficers = useMemo(() => {
     const poIds = new Set(assignedGuards.map(g => g.patrollingOfficerId));
-    return patrollingOfficers.filter(po => poIds.has(po.id));
-  }, [assignedGuards]);
+    return agencyPatrollingOfficers.filter(po => poIds.has(po.id));
+  }, [assignedGuards, agencyPatrollingOfficers]);
 
 
   return (
@@ -363,7 +372,7 @@ export default function AgencyGuardsPage() {
                       <TableCell>
                         <Select value={selectedPatrollingOfficers[guard.id] || ''} onValueChange={(value) => handlePatrollingOfficerSelect(guard.id, value)}>
                           <SelectTrigger className="w-[180px]"><SelectValue placeholder="Select Patrolling Officer" /></SelectTrigger>
-                          <SelectContent>{patrollingOfficers.map((patrollingOfficer) => (<SelectItem key={patrollingOfficer.id} value={patrollingOfficer.id}>{patrollingOfficer.name}</SelectItem>))}</SelectContent>
+                          <SelectContent>{agencyPatrollingOfficers.map((patrollingOfficer) => (<SelectItem key={patrollingOfficer.id} value={patrollingOfficer.id}>{patrollingOfficer.name}</SelectItem>))}</SelectContent>
                         </Select>
                       </TableCell>
                       <TableCell>

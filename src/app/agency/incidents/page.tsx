@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import Image from 'next/image';
-import { alerts as initialAlerts, guards, patrollingOfficers } from '@/lib/data';
+import { alerts as initialAlerts, guards, patrollingOfficers, sites } from '@/lib/data';
 import type { Alert, Guard } from '@/types';
 import {
   Table,
@@ -44,9 +44,14 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
+const LOGGED_IN_AGENCY_ID = 'AGY01'; // Simulate logged-in agency
+
 export default function AgencyIncidentsPage() {
+  const agencySites = useMemo(() => sites.filter(site => site.agencyId === LOGGED_IN_AGENCY_ID), []);
+  const agencySiteNames = useMemo(() => new Set(agencySites.map(site => site.name)), [agencySites]);
+
   const [alerts, setAlerts] = useState<Alert[]>(
-    initialAlerts.filter((alert) => alert.type === 'Emergency')
+    initialAlerts.filter((alert) => alert.type === 'Emergency' && agencySiteNames.has(alert.site))
   );
   const [selectedAlert, setSelectedAlert] = useState<Alert | null>(null);
   const { toast } = useToast();
