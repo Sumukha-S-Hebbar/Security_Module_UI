@@ -159,6 +159,7 @@ export default function TowercoAgenciesPage() {
             const searchLower = searchQuery.toLowerCase();
             const matchesSearch =
                 agency.name.toLowerCase().includes(searchLower) ||
+                agency.id.toLowerCase().includes(searchLower) ||
                 agency.email.toLowerCase().includes(searchLower) ||
                 agency.city.toLowerCase().includes(searchLower) ||
                 agency.state.toLowerCase().includes(searchLower) ||
