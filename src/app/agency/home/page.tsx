@@ -131,29 +131,6 @@ export default function AgencyHomePage() {
         sites={sites}
         patrollingOfficers={patrollingOfficers}
       />
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Activity</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground">
-              Recent activity feed will be displayed here.
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Unassigned Assets</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground">
-              Lists of unassigned guards and sites will be shown here.
-            </p>
-          </CardContent>
-        </Card>
-      </div>
     </div>
   );
 }
