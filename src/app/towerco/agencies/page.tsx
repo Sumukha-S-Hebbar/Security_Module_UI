@@ -7,19 +7,10 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useToast } from '@/hooks/use-toast';
 import { securityAgencies } from '@/lib/data';
-import type { SecurityAgency } from '@/types';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Phone, Mail, Upload, Loader2, PlusCircle, Search } from 'lucide-react';
+import { Phone, Mail, Upload, Loader2, PlusCircle, Search, MapPin } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -433,68 +424,54 @@ export default function TowercoAgenciesPage() {
                     </div>
                 </CardHeader>
                 <CardContent>
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Agency</TableHead>
-                                <TableHead>Phone</TableHead>
-                                <TableHead>Email</TableHead>
-                                <TableHead>Region Served</TableHead>
-                                <TableHead>Actions</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {filteredAgencies.length > 0 ? (
-                                filteredAgencies.map((agency) => (
-                                    <TableRow key={agency.id}>
-                                        <TableCell>
-                                            <div className="flex items-center gap-3">
-                                                <Avatar>
-                                                    <AvatarImage src={agency.avatar} alt={agency.name} />
-                                                    <AvatarFallback>{agency.name.charAt(0)}</AvatarFallback>
-                                                </Avatar>
-                                                <div>
-                                                    <p className="font-medium">{agency.name}</p>
-                                                    <p className="text-sm text-muted-foreground">
-                                                        ID: {agency.id}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </TableCell>
-                                        <TableCell>
-                                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                                <Phone className="h-4 w-4" />
-                                                <span>{agency.phone}</span>
-                                            </div>
-                                        </TableCell>
-                                        <TableCell>
-                                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                                <Mail className="h-4 w-4" />
-                                                <span>{agency.email}</span>
-                                            </div>
-                                        </TableCell>
-                                        <TableCell>
-                                        {`${agency.city}, ${agency.state}, ${agency.country}`}
-                                        </TableCell>
-                                        <TableCell>
-                                            <Button asChild variant="outline" size="sm">
-                                                <a href={`tel:${agency.phone}`}>
-                                                    <Phone className="mr-2 h-4 w-4" />
-                                                    Contact Agency
-                                                </a>
-                                            </Button>
-                                        </TableCell>
-                                    </TableRow>
-                                ))
-                            ) : (
-                                <TableRow>
-                                    <TableCell colSpan={5} className="h-24 text-center">
-                                    No agencies found.
-                                    </TableCell>
-                                </TableRow>
-                            )}
-                        </TableBody>
-                    </Table>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-6">
+                        {filteredAgencies.length > 0 ? (
+                        filteredAgencies.map((agency) => (
+                            <Card key={agency.id} className="flex flex-col">
+                            <CardHeader>
+                                <div className="flex items-center gap-4">
+                                <Avatar className="h-12 w-12">
+                                    <AvatarImage src={agency.avatar} alt={agency.name} />
+                                    <AvatarFallback>{agency.name.charAt(0)}</AvatarFallback>
+                                </Avatar>
+                                <div>
+                                    <CardTitle className="text-lg">{agency.name}</CardTitle>
+                                    <CardDescription>ID: {agency.id}</CardDescription>
+                                </div>
+                                </div>
+                            </CardHeader>
+                            <CardContent className="flex-grow space-y-2 text-sm">
+                                <div className="flex items-center gap-2 text-muted-foreground">
+                                <Mail className="h-4 w-4 flex-shrink-0" />
+                                <a href={`mailto:${agency.email}`} className="truncate hover:underline">
+                                    {agency.email}
+                                </a>
+                                </div>
+                                <div className="flex items-center gap-2 text-muted-foreground">
+                                <Phone className="h-4 w-4 flex-shrink-0" />
+                                <span>{agency.phone}</span>
+                                </div>
+                                <div className="flex items-center gap-2 text-muted-foreground">
+                                <MapPin className="h-4 w-4 flex-shrink-0" />
+                                <span>{`${agency.city}, ${agency.state}, ${agency.country}`}</span>
+                                </div>
+                            </CardContent>
+                            <CardFooter>
+                                <Button asChild variant="outline" size="sm" className="w-full">
+                                <a href={`tel:${agency.phone}`}>
+                                    <Phone className="mr-2 h-4 w-4" />
+                                    Contact Agency
+                                </a>
+                                </Button>
+                            </CardFooter>
+                            </Card>
+                        ))
+                        ) : (
+                            <div className="col-span-full text-center text-muted-foreground py-10">
+                                No agencies found.
+                            </div>
+                        )}
+                    </div>
                 </CardContent>
             </Card>
         </div>
