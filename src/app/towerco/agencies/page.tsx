@@ -61,12 +61,6 @@ export default function TowercoAgenciesPage() {
     const [selectedState, setSelectedState] = useState('all');
     const [selectedCity, setSelectedCity] = useState('all');
 
-    const towercoAgencies = useMemo(() => {
-        const towercoSites = sites.filter(site => site.towerco === LOGGED_IN_TOWERCO);
-        const agencyIds = new Set(towercoSites.map(site => site.agencyId).filter(Boolean));
-        return securityAgencies.filter(agency => agencyIds.has(agency.id));
-    }, []);
-
     const uploadForm = useForm<z.infer<typeof uploadFormSchema>>({
         resolver: zodResolver(uploadFormSchema),
     });
@@ -124,29 +118,29 @@ export default function TowercoAgenciesPage() {
     };
 
     const countries = useMemo(() => {
-        const allCountries = towercoAgencies.map((agency) => agency.country);
+        const allCountries = securityAgencies.map((agency) => agency.country);
         return [...new Set(allCountries)];
-    }, [towercoAgencies]);
+    }, []);
 
     const states = useMemo(() => {
         if (selectedCountry === 'all') {
             return [];
         }
-        const allStates = towercoAgencies
+        const allStates = securityAgencies
             .filter((agency) => agency.country === selectedCountry)
             .map((agency) => agency.state);
         return [...new Set(allStates)];
-    }, [selectedCountry, towercoAgencies]);
+    }, [selectedCountry]);
 
     const cities = useMemo(() => {
         if (selectedState === 'all' || selectedCountry === 'all') {
             return [];
         }
-        const allCities = towercoAgencies
+        const allCities = securityAgencies
             .filter((agency) => agency.country === selectedCountry && agency.state === selectedState)
             .map((agency) => agency.city);
         return [...new Set(allCities)];
-    }, [selectedCountry, selectedState, towercoAgencies]);
+    }, [selectedCountry, selectedState]);
 
     const handleCountryChange = (country: string) => {
         setSelectedCountry(country);
@@ -161,7 +155,7 @@ export default function TowercoAgenciesPage() {
 
 
     const filteredAgencies = useMemo(() => {
-        return towercoAgencies.filter((agency) => {
+        return securityAgencies.filter((agency) => {
             const searchLower = searchQuery.toLowerCase();
             const matchesSearch =
                 agency.name.toLowerCase().includes(searchLower) ||
@@ -181,14 +175,14 @@ export default function TowercoAgenciesPage() {
 
             return matchesSearch && matchesCountry && matchesState && matchesCity;
         });
-    }, [searchQuery, selectedCountry, selectedState, selectedCity, towercoAgencies]);
+    }, [searchQuery, selectedCountry, selectedState, selectedCity]);
 
     return (
         <div className="p-4 sm:p-6 lg:p-8 space-y-6">
             <div>
                 <h1 className="text-3xl font-bold tracking-tight">Security Agency Management</h1>
                 <p className="text-muted-foreground">
-                    Add, view, and manage contracted security agencies for {LOGGED_IN_TOWERCO}.
+                    Add, view, and manage security agencies.
                 </p>
             </div>
 
