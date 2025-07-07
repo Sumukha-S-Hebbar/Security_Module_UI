@@ -2,6 +2,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -10,7 +11,7 @@ import { securityAgencies } from '@/lib/data';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Phone, Mail, Upload, Loader2, PlusCircle, Search, MapPin } from 'lucide-react';
+import { Phone, Mail, Upload, Loader2, PlusCircle, Search, MapPin, Eye, FileDown } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -106,6 +107,13 @@ export default function TowercoAgenciesPage() {
         setIsAddingAgency(false);
         setIsAddAgencyDialogOpen(false);
     }
+
+    const handleDownloadReport = (agencyName: string) => {
+        toast({
+            title: 'Report Download Started',
+            description: `Downloading report for agency ${agencyName}. This is a mock action.`,
+        });
+    };
 
     const countries = useMemo(() => {
         const allCountries = securityAgencies.map((agency) => agency.country);
@@ -456,12 +464,20 @@ export default function TowercoAgenciesPage() {
                                 <span>{`${agency.city}, ${agency.state}, ${agency.country}`}</span>
                                 </div>
                             </CardContent>
-                            <CardFooter>
-                                <Button asChild variant="outline" size="sm" className="w-full">
-                                <a href={`tel:${agency.phone}`}>
-                                    <Phone className="mr-2 h-4 w-4" />
-                                    Contact Agency
-                                </a>
+                            <CardFooter className="grid grid-cols-2 gap-2">
+                                <Button asChild variant="outline" size="sm">
+                                    <Link href="/towerco/reports">
+                                        <Eye className="mr-2 h-4 w-4" />
+                                        View Report
+                                    </Link>
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handleDownloadReport(agency.name)}
+                                >
+                                    <FileDown className="mr-2 h-4 w-4" />
+                                    Download Report
                                 </Button>
                             </CardFooter>
                             </Card>
