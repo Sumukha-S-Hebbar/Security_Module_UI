@@ -21,7 +21,7 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { AlertTriangle, Eye, FileDown, Search, Calendar as CalendarIcon } from 'lucide-react';
+import { AlertTriangle, Eye, FileDown, Search, Calendar as CalendarIcon, CheckCircle, ChevronDown, ShieldAlert } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 import {
@@ -40,11 +40,18 @@ import {
 import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 const LOGGED_IN_AGENCY_ID = 'AGY01'; // Simulate logged-in agency
 
 export default function AgencyIncidentsPage() {
   const { toast } = useToast();
+  const [alerts, setAlerts] = useState(initialAlerts);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
@@ -53,9 +60,9 @@ export default function AgencyIncidentsPage() {
   const agencySites = useMemo(() => sites.filter(site => site.agencyId === LOGGED_IN_AGENCY_ID), []);
   const agencySiteNames = useMemo(() => new Set(agencySites.map(site => site.name)), [agencySites]);
 
-  const agencyAlerts = useMemo(() => initialAlerts.filter(
+  const agencyAlerts = useMemo(() => alerts.filter(
     (alert) => alert.type === 'Emergency' && agencySiteNames.has(alert.site)
-  ), [agencySiteNames]);
+  ), [agencySiteNames, alerts]);
 
   const activeIncidents = useMemo(() => agencyAlerts.filter(incident => incident.status === 'Active'), [agencyAlerts]);
 
@@ -82,6 +89,18 @@ export default function AgencyIncidentsPage() {
       return matchesSearch && matchesStatus && matchesDate && matchesMonth;
     });
   }, [searchQuery, selectedStatus, selectedDate, selectedMonth, agencyAlerts]);
+
+  const handleStatusChange = (incidentId: string, status: Alert['status']) => {
+    setAlerts((prevAlerts) =>
+      prevAlerts.map((incident) =>
+        incident.id === incidentId ? { ...incident, status } : incident
+      )
+    );
+    toast({
+      title: 'Status Updated',
+      description: `Incident #${incidentId} status changed to ${status}.`,
+    });
+  };
 
   const getStatusBadge = (status: Alert['status']) => {
     switch (status) {
@@ -144,12 +163,14 @@ export default function AgencyIncidentsPage() {
                             <TableHead>Guard</TableHead>
                             <TableHead>Patrolling Officer</TableHead>
                             <TableHead>Report</TableHead>
-                            <TableHead className="text-right">Actions</TableHead>
+                            <TableHead>Actions</TableHead>
+                            <TableHead className="text-right">Download</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {activeIncidents.map((incident) => {
                              const patrollingOfficer = getPatrollingOfficerByGuardName(incident.guard);
+                             const isResolved = incident.status === 'Resolved';
                              return (
                                  <TableRow key={incident.id}>
                                      <TableCell className="font-medium">
@@ -168,6 +189,35 @@ export default function AgencyIncidentsPage() {
                                                 View Report
                                             </Link>
                                         </Button>
+                                     </TableCell>
+                                     <TableCell>
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                                <Button variant="outline" size="sm">
+                                                Actions <ChevronDown className="ml-2 h-4 w-4" />
+                                                </Button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent align="end">
+                                                <DropdownMenuItem
+                                                onClick={() =>
+                                                    handleStatusChange(incident.id, 'Under Review')
+                                                }
+                                                disabled={
+                                                    incident.status === 'Under Review' || isResolved
+                                                }
+                                                >
+                                                <ShieldAlert className="mr-2 h-4 w-4" />
+                                                Start Review
+                                                </DropdownMenuItem>
+                                                <DropdownMenuItem
+                                                onClick={() => handleStatusChange(incident.id, 'Resolved')}
+                                                disabled={isResolved}
+                                                >
+                                                <CheckCircle className="mr-2 h-4 w-4" />
+                                                Mark as Resolved
+                                                </DropdownMenuItem>
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
                                      </TableCell>
                                      <TableCell className="text-right">
                                         <Button
@@ -274,13 +324,15 @@ export default function AgencyIncidentsPage() {
                 <TableHead>Patrolling Officer</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Report</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead>Actions</TableHead>
+                <TableHead className="text-right">Download</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredIncidents.length > 0 ? (
                 filteredIncidents.map((incident) => {
                   const patrollingOfficer = getPatrollingOfficerByGuardName(incident.guard);
+                  const isResolved = incident.status === 'Resolved';
                   return (
                     <TableRow key={incident.id}>
                       <TableCell className="font-medium">
@@ -301,6 +353,35 @@ export default function AgencyIncidentsPage() {
                           </Link>
                         </Button>
                       </TableCell>
+                      <TableCell>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="outline" size="sm" disabled={isResolved}>
+                                Actions <ChevronDown className="ml-2 h-4 w-4" />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                                <DropdownMenuItem
+                                onClick={() =>
+                                    handleStatusChange(incident.id, 'Under Review')
+                                }
+                                disabled={
+                                    incident.status === 'Under Review' || isResolved
+                                }
+                                >
+                                <ShieldAlert className="mr-2 h-4 w-4" />
+                                Start Review
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                onClick={() => handleStatusChange(incident.id, 'Resolved')}
+                                disabled={isResolved}
+                                >
+                                <CheckCircle className="mr-2 h-4 w-4" />
+                                Mark as Resolved
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
                       <TableCell className="text-right">
                         <Button
                           variant="outline"
@@ -317,7 +398,7 @@ export default function AgencyIncidentsPage() {
               ) : (
                 <TableRow>
                   <TableCell
-                    colSpan={8}
+                    colSpan={9}
                     className="text-center text-muted-foreground"
                   >
                     No incidents found for the current filter.
