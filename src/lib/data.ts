@@ -268,6 +268,7 @@ export const sites: Site[] = [
     visited: false,
     towerco: 'TowerCo Beta',
     incidents: [],
+    agencyId: 'AGY01',
   },
   {
     id: 'SITE08',
@@ -279,6 +280,7 @@ export const sites: Site[] = [
     visited: false,
     towerco: 'TowerCo Alpha',
     incidents: [],
+    agencyId: 'AGY01',
   },
   {
     id: 'SITE09',
