@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -14,7 +15,18 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { FileDown, Phone, Mail, MapPin, Users } from 'lucide-react';
+import {
+  FileDown,
+  Phone,
+  Mail,
+  MapPin,
+  Users,
+  Building2,
+  Calendar,
+  Clock,
+  ShieldAlert,
+  CheckCircle,
+} from 'lucide-react';
 import {
   securityAgencies,
   sites,
@@ -34,6 +46,7 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import type { Alert, SecurityAgency, Guard, PatrollingOfficer } from '@/types';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { formatDistanceToNow } from 'date-fns';
 
 export default function ReportsPage() {
   const { toast } = useToast();
@@ -105,7 +118,9 @@ export default function ReportsPage() {
           <TabsTrigger value="agency">Agency Reports</TabsTrigger>
           <TabsTrigger value="site">Site Reports</TabsTrigger>
           <TabsTrigger value="guard">Guard Reports</TabsTrigger>
-          <TabsTrigger value="patrolling-officer">Patrolling Officer Reports</TabsTrigger>
+          <TabsTrigger value="patrolling-officer">
+            Patrolling Officer Reports
+          </TabsTrigger>
           <TabsTrigger value="incident">Incident Reports</TabsTrigger>
         </TabsList>
 
@@ -115,11 +130,34 @@ export default function ReportsPage() {
               (site) => site.agencyId === agency.id
             );
             const agencySiteNames = agencySites.map((site) => site.name);
+
             const agencyIncidents = alerts.filter(
               (alert) =>
                 agencySiteNames.includes(alert.site) &&
                 alert.type === 'Emergency'
             );
+            const totalIncidents = agencyIncidents.length;
+            const resolvedIncidents = agencyIncidents.filter(
+              (a) => a.status === 'Resolved'
+            ).length;
+
+            const agencyGuards = guards.filter((guard) =>
+              agencySiteNames.includes(guard.site)
+            );
+            const agencyPatrollingOfficerIds = new Set(
+              agencyGuards.map((g) => g.patrollingOfficerId).filter(Boolean)
+            );
+            const totalWorkforce =
+              agencyGuards.length + agencyPatrollingOfficerIds.size;
+
+            const assignmentDates = agencySites
+              .map((s) => s.assignedOn)
+              .filter((d): d is string => !!d)
+              .map((d) => new Date(d));
+            const firstAssignedDate =
+              assignmentDates.length > 0
+                ? new Date(Math.min(...assignmentDates.map((d) => d.getTime())))
+                : null;
 
             return (
               <Card key={agency.id}>
@@ -127,9 +165,7 @@ export default function ReportsPage() {
                   <div className="flex flex-wrap justify-between items-start gap-4">
                     <div>
                       <CardTitle>{agency.name}</CardTitle>
-                      <CardDescription>
-                        Performance and incident report
-                      </CardDescription>
+                      <CardDescription>ID: {agency.id}</CardDescription>
                       <div className="text-sm text-muted-foreground mt-2 space-y-1">
                         <div className="flex items-center gap-2">
                           <Phone className="h-4 w-4" />
@@ -141,7 +177,7 @@ export default function ReportsPage() {
                         </div>
                         <div className="flex items-center gap-2">
                           <MapPin className="h-4 w-4" />
-                          <span>{agency.address}</span>
+                          <span>{`${agency.city}, ${agency.state}, ${agency.country}`}</span>
                         </div>
                       </div>
                     </div>
@@ -154,37 +190,81 @@ export default function ReportsPage() {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <h4 className="font-semibold mb-2">Recent Incidents</h4>
-                  {agencyIncidents.length > 0 ? (
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Incident ID</TableHead>
-                          <TableHead>Site</TableHead>
-                          <TableHead>Date</TableHead>
-                          <TableHead>Guard</TableHead>
-                          <TableHead>Status</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {agencyIncidents.map((incident) => (
-                          <TableRow key={incident.id}>
-                            <TableCell>{incident.id}</TableCell>
-                            <TableCell>{incident.site}</TableCell>
-                            <TableCell>{incident.date}</TableCell>
-                            <TableCell>{incident.guard}</TableCell>
-                            <TableCell>
-                              {getStatusBadge(incident.status)}
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  ) : (
-                    <p className="text-sm text-muted-foreground text-center py-4">
-                      No recent emergency incidents reported for this agency.
-                    </p>
-                  )}
+                  <div className="pt-4 border-t">
+                    <h4 className="font-semibold mb-4 text-base">
+                      Agency Overview
+                    </h4>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-6 text-sm">
+                      <div className="flex items-center gap-3">
+                        <Building2 className="h-6 w-6 text-muted-foreground flex-shrink-0" />
+                        <div>
+                          <p className="font-bold text-base">
+                            {agencySites.length}
+                          </p>
+                          <p className="text-muted-foreground">Sites Assigned</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <Users className="h-6 w-6 text-muted-foreground flex-shrink-0" />
+                        <div>
+                          <p className="font-bold text-base">
+                            {totalWorkforce}
+                          </p>
+                          <p className="text-muted-foreground">
+                            Total Workforce
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <ShieldAlert className="h-6 w-6 text-muted-foreground flex-shrink-0" />
+                        <div>
+                          <p className="font-bold text-base">{totalIncidents}</p>
+                          <p className="text-muted-foreground">
+                            Total Incidents
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <CheckCircle className="h-6 w-6 text-muted-foreground flex-shrink-0" />
+                        <div>
+                          <p className="font-bold text-base">
+                            {resolvedIncidents}
+                          </p>
+                          <p className="text-muted-foreground">
+                            Incidents Resolved
+                          </p>
+                        </div>
+                      </div>
+                      {firstAssignedDate && (
+                        <>
+                          <div className="flex items-center gap-3">
+                            <Calendar className="h-6 w-6 text-muted-foreground flex-shrink-0" />
+                            <div>
+                              <p className="font-bold text-base">
+                                {firstAssignedDate.toLocaleDateString()}
+                              </p>
+                              <p className="text-muted-foreground">
+                                First Assignment
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <Clock className="h-6 w-6 text-muted-foreground flex-shrink-0" />
+                            <div>
+                              <p className="font-bold text-base">
+                                {formatDistanceToNow(firstAssignedDate, {
+                                  addSuffix: true,
+                                })}
+                              </p>
+                              <p className="text-muted-foreground">
+                                Assignment Duration
+                              </p>
+                            </div>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
             );
