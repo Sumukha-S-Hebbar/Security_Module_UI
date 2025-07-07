@@ -90,7 +90,8 @@ export default function TowercoSitesPage() {
   const [isAddingSite, setIsAddingSite] = useState(false);
   const { toast } = useToast();
 
-  const [searchQuery, setSearchQuery] = useState('');
+  const [assignedSearchQuery, setAssignedSearchQuery] = useState('');
+  const [unassignedSearchQuery, setUnassignedSearchQuery] = useState('');
   const [selectedAgency, setSelectedAgency] = useState('all');
   const [assignments, setAssignments] = useState<{ [siteId: string]: string }>(
     {}
@@ -185,7 +186,7 @@ export default function TowercoSitesPage() {
 
   const filteredAssignedSites = useMemo(() => {
     return assignedSites.filter((site) => {
-      const searchLower = searchQuery.toLowerCase();
+      const searchLower = assignedSearchQuery.toLowerCase();
       const matchesSearch =
         site.name.toLowerCase().includes(searchLower) ||
         site.address.toLowerCase().includes(searchLower);
@@ -195,7 +196,18 @@ export default function TowercoSitesPage() {
 
       return matchesSearch && matchesAgency;
     });
-  }, [searchQuery, selectedAgency, assignedSites]);
+  }, [assignedSearchQuery, selectedAgency, assignedSites]);
+
+  const filteredUnassignedSites = useMemo(() => {
+    return unassignedSites.filter((site) => {
+      const searchLower = unassignedSearchQuery.toLowerCase();
+      return (
+        site.name.toLowerCase().includes(searchLower) ||
+        site.address.toLowerCase().includes(searchLower)
+      );
+    });
+  }, [unassignedSearchQuery, unassignedSites]);
+
 
   const getAgencyName = (agencyId?: string) => {
     return (
@@ -366,9 +378,9 @@ export default function TowercoSitesPage() {
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
                 type="search"
-                placeholder="Search sites..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search assigned sites..."
+                value={assignedSearchQuery}
+                onChange={(e) => setAssignedSearchQuery(e.target.value)}
                 className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[320px]"
               />
             </div>
@@ -443,7 +455,7 @@ export default function TowercoSitesPage() {
               ))
             ) : (
               <div className="col-span-full text-center text-muted-foreground py-10">
-                No assigned sites found.
+                No assigned sites found for the current filter.
               </div>
             )}
           </div>
@@ -457,6 +469,18 @@ export default function TowercoSitesPage() {
             <CardDescription>
               Sites that need a security agency to be assigned.
             </CardDescription>
+            <div className="flex flex-wrap items-center gap-2 pt-4">
+                <div className="relative flex-1 md:grow-0">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                    type="search"
+                    placeholder="Search unassigned sites..."
+                    value={unassignedSearchQuery}
+                    onChange={(e) => setUnassignedSearchQuery(e.target.value)}
+                    className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[320px]"
+                />
+                </div>
+            </div>
           </CardHeader>
           <CardContent>
             <Table>
@@ -469,44 +493,52 @@ export default function TowercoSitesPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {unassignedSites.map((site) => (
-                  <TableRow key={site.id}>
-                    <TableCell>
-                      <div className="font-medium">{site.name}</div>
-                      <div className="text-sm text-muted-foreground">
-                        ID: {site.id}
-                      </div>
-                    </TableCell>
-                    <TableCell>{site.address}</TableCell>
-                    <TableCell>
-                      <Select
-                        onValueChange={(value) =>
-                          handleAssignmentChange(site.id, value)
-                        }
-                      >
-                        <SelectTrigger className="w-[200px]">
-                          <SelectValue placeholder="Select an agency" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {securityAgencies.map((agency) => (
-                            <SelectItem key={agency.id} value={agency.id}>
-                              {agency.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button
-                        size="sm"
-                        onClick={() => handleAssignAgency(site.id)}
-                        disabled={!assignments[site.id]}
-                      >
-                        Assign Agency
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {filteredUnassignedSites.length > 0 ? (
+                  filteredUnassignedSites.map((site) => (
+                    <TableRow key={site.id}>
+                      <TableCell>
+                        <div className="font-medium">{site.name}</div>
+                        <div className="text-sm text-muted-foreground">
+                          ID: {site.id}
+                        </div>
+                      </TableCell>
+                      <TableCell>{site.address}</TableCell>
+                      <TableCell>
+                        <Select
+                          onValueChange={(value) =>
+                            handleAssignmentChange(site.id, value)
+                          }
+                        >
+                          <SelectTrigger className="w-[200px]">
+                            <SelectValue placeholder="Select an agency" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {securityAgencies.map((agency) => (
+                              <SelectItem key={agency.id} value={agency.id}>
+                                {agency.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          size="sm"
+                          onClick={() => handleAssignAgency(site.id)}
+                          disabled={!assignments[site.id]}
+                        >
+                          Assign Agency
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                    <TableRow>
+                        <TableCell colSpan={4} className="text-center text-muted-foreground">
+                            No unassigned sites found for the current filter.
+                        </TableCell>
+                    </TableRow>
+                )}
               </TableBody>
             </Table>
           </CardContent>
