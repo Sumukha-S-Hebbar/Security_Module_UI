@@ -16,7 +16,6 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-  CardFooter
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -35,6 +34,15 @@ import {
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
 
 export default function AgencyReportPage() {
   const params = useParams();
@@ -217,6 +225,63 @@ export default function AgencyReportPage() {
                     )}
                 </div>
             </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Assigned Sites</CardTitle>
+          <CardDescription>
+            A detailed list of all sites assigned to {agency.name}.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {agencySites.length > 0 ? (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Site</TableHead>
+                  <TableHead>Assigned On</TableHead>
+                  <TableHead>Assignment Duration</TableHead>
+                  <TableHead className="text-center">Incidents</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {agencySites.map((site) => (
+                  <TableRow key={site.id}>
+                    <TableCell>
+                      <div className="font-medium">{site.name}</div>
+                      <div className="text-sm text-muted-foreground flex items-center gap-1">
+                        <MapPin className="w-3 h-3" />
+                        {site.address}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      {site.assignedOn
+                        ? new Date(site.assignedOn).toLocaleDateString()
+                        : 'N/A'}
+                    </TableCell>
+                    <TableCell>
+                      {site.assignedOn
+                        ? formatDistanceToNow(new Date(site.assignedOn), {
+                            addSuffix: true,
+                          })
+                        : 'N/A'}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <Badge variant="secondary">
+                        {site.incidents?.length || 0}
+                      </Badge>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          ) : (
+            <p className="text-muted-foreground text-center py-4">
+              No sites are currently assigned to this agency.
+            </p>
+          )}
         </CardContent>
       </Card>
     </div>
