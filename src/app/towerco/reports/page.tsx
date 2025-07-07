@@ -34,9 +34,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Eye, FileDown, Search } from 'lucide-react';
+import { Eye, FileDown, Search, Calendar as CalendarIcon } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
 
 const LOGGED_IN_TOWERCO = 'TowerCo Alpha'; // Simulate logged-in user
 
@@ -44,6 +52,8 @@ export default function TowercoIncidentsPage() {
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedAgency, setSelectedAgency] = useState('all');
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>();
+  const [selectedMonth, setSelectedMonth] = useState('all');
 
   const towercoSites = useMemo(
     () => sites.filter((site) => site.towerco === LOGGED_IN_TOWERCO),
@@ -91,9 +101,18 @@ export default function TowercoIncidentsPage() {
       const matchesAgency =
         selectedAgency === 'all' || incidentAgencyId === selectedAgency;
 
-      return matchesSearch && matchesAgency;
+      const incidentDate = new Date(incident.date);
+      const matchesDate =
+        !selectedDate ||
+        format(incidentDate, 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd');
+
+      const matchesMonth =
+        selectedMonth === 'all' ||
+        incidentDate.getMonth() === parseInt(selectedMonth) - 1;
+
+      return matchesSearch && matchesAgency && matchesDate && matchesMonth;
     });
-  }, [searchQuery, selectedAgency, towercoAlerts, siteToAgencyMap]);
+  }, [searchQuery, selectedAgency, selectedDate, selectedMonth, towercoAlerts, siteToAgencyMap]);
 
   const getStatusBadge = (status: Alert['status']) => {
     switch (status) {
@@ -179,6 +198,47 @@ export default function TowercoIncidentsPage() {
                 ))}
               </SelectContent>
             </Select>
+            <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+              <SelectTrigger className="w-full sm:w-[180px]">
+                <SelectValue placeholder="Filter by month" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Months</SelectItem>
+                {Array.from({ length: 12 }, (_, i) => (
+                  <SelectItem key={i + 1} value={(i + 1).toString()}>
+                    {new Date(0, i).toLocaleString('default', {
+                      month: 'long',
+                    })}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant={'outline'}
+                  className={cn(
+                    'w-full sm:w-[240px] justify-start text-left font-normal',
+                    !selectedDate && 'text-muted-foreground'
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {selectedDate ? (
+                    format(selectedDate, 'PPP')
+                  ) : (
+                    <span>Pick a date</span>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={selectedDate}
+                  onSelect={setSelectedDate}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
           </div>
         </CardHeader>
         <CardContent>
@@ -208,7 +268,7 @@ export default function TowercoIncidentsPage() {
                       <TableCell className="font-medium">
                         {incident.id}
                       </TableCell>
-                      <TableCell>{incident.date}</TableCell>
+                      <TableCell>{new Date(incident.date).toLocaleDateString()}</TableCell>
                       <TableCell>{incident.site}</TableCell>
                       <TableCell>{agency?.name || 'N/A'}</TableCell>
                       <TableCell>
