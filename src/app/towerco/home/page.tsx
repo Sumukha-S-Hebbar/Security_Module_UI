@@ -66,7 +66,7 @@ export default function TowercoHomePage() {
       <Card className="border-destructive bg-destructive/10">
         <CardHeader className="flex flex-row items-center gap-2">
           <AlertTriangle className="w-6 h-6 text-destructive" />
-          <CardTitle>Current Emergency Alerts</CardTitle>
+          <CardTitle>Active Emergency Alerts</CardTitle>
         </CardHeader>
         <CardContent>
           {activeEmergencies.length > 0 ? (
