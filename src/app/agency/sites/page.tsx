@@ -1,14 +1,15 @@
 'use client';
 
-import { useState, useMemo } from 'react';
-import { sites, guards, patrollingOfficers } from '@/lib/data';
-import type { Site } from '@/types';
+import { useState, useMemo, useCallback } from 'react';
+import { sites, guards, patrollingOfficers, alerts } from '@/lib/data';
+import type { Site, PatrollingOfficer } from '@/types';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
+  CardFooter,
 } from '@/components/ui/card';
 import {
   Table,
@@ -18,7 +19,14 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { FileDown, MapPin, Fence } from 'lucide-react';
+import {
+  FileDown,
+  MapPin,
+  Fence,
+  Search,
+  UserCheck,
+  ShieldAlert,
+} from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -28,7 +36,6 @@ import {
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 
 const LOGGED_IN_AGENCY_ID = 'AGY01'; // Simulate logged-in agency
@@ -41,27 +48,76 @@ export default function AgencySitesPage() {
     [key: string]: string;
   }>({});
   const { toast } = useToast();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [
+    selectedPatrollingOfficerFilter,
+    setSelectedPatrollingOfficerFilter,
+  ] = useState('all');
 
-  const agencySites = useMemo(() => sites.filter(site => site.agencyId === LOGGED_IN_AGENCY_ID), []);
-  const agencySiteNames = useMemo(() => new Set(agencySites.map(s => s.name)), [agencySites]);
-  const agencyGuards = useMemo(() => guards.filter(g => agencySiteNames.has(g.site)), [agencySiteNames]);
-  const agencyPatrollingOfficerIds = useMemo(() => new Set(agencyGuards.map(g => g.patrollingOfficerId).filter(Boolean)), [agencyGuards]);
-  const agencyPatrollingOfficers = useMemo(() => patrollingOfficers.filter(po => agencyPatrollingOfficerIds.has(po.id)), [agencyPatrollingOfficerIds]);
-
-  const getPatrollingOfficerForSite = (siteId: string) => {
-    const site = agencySites.find((s) => s.id === siteId);
-    if (!site) return null;
-    const guardAtSite = agencyGuards.find(g => g.site === site.name && g.patrollingOfficerId);
-    if (!guardAtSite) return null;
-    return agencyPatrollingOfficers.find((s) => s.id === guardAtSite.patrollingOfficerId);
-  };
-
-  const assignedSites = agencySites.filter((site) => getPatrollingOfficerForSite(site.id));
-  const unassignedSites = agencySites.filter(
-    (site) => !getPatrollingOfficerForSite(site.id)
+  const agencySites = useMemo(
+    () => sites.filter((site) => site.agencyId === LOGGED_IN_AGENCY_ID),
+    []
+  );
+  const agencySiteNames = useMemo(
+    () => new Set(agencySites.map((s) => s.name)),
+    [agencySites]
+  );
+  const agencyGuards = useMemo(
+    () => guards.filter((g) => agencySiteNames.has(g.site)),
+    [agencySiteNames]
+  );
+  const agencyPatrollingOfficerIds = useMemo(
+    () => new Set(agencyGuards.map((g) => g.patrollingOfficerId).filter(Boolean)),
+    [agencyGuards]
+  );
+  const agencyPatrollingOfficers = useMemo(
+    () =>
+      patrollingOfficers.filter((po) =>
+        agencyPatrollingOfficerIds.has(po.id)
+      ),
+    [agencyPatrollingOfficerIds]
   );
 
-  const handlePatrollingOfficerSelect = (siteId: string, patrollingOfficerId: string) => {
+  const getPatrollingOfficerForSite = useCallback(
+    (siteId: string) => {
+      const site = agencySites.find((s) => s.id === siteId);
+      if (!site) return null;
+      const guardAtSite = agencyGuards.find(
+        (g) => g.site === site.name && g.patrollingOfficerId
+      );
+      if (!guardAtSite) return null;
+      return agencyPatrollingOfficers.find(
+        (s) => s.id === guardAtSite.patrollingOfficerId
+      );
+    },
+    [agencySites, agencyGuards, agencyPatrollingOfficers]
+  );
+
+  const assignedSites = useMemo(
+    () => agencySites.filter((site) => getPatrollingOfficerForSite(site.id)),
+    [agencySites, getPatrollingOfficerForSite]
+  );
+  const unassignedSites = useMemo(
+    () =>
+      agencySites.filter((site) => !getPatrollingOfficerForSite(site.id)),
+    [agencySites, getPatrollingOfficerForSite]
+  );
+
+  const assignedSitesPatrollingOfficers = useMemo(() => {
+    const officers = new Map<string, PatrollingOfficer>();
+    assignedSites.forEach((site) => {
+      const po = getPatrollingOfficerForSite(site.id);
+      if (po && !officers.has(po.id)) {
+        officers.set(po.id, po);
+      }
+    });
+    return Array.from(officers.values());
+  }, [assignedSites, getPatrollingOfficerForSite]);
+
+  const handlePatrollingOfficerSelect = (
+    siteId: string,
+    patrollingOfficerId: string
+  ) => {
     setSelectedPatrollingOfficers((prev) => ({
       ...prev,
       [siteId]: patrollingOfficerId,
@@ -96,14 +152,14 @@ export default function AgencySitesPage() {
       return;
     }
     const siteName = unassignedSites.find((s) => s.id === siteId)?.name;
-    const patrollingOfficerName = agencyPatrollingOfficers.find((s) => s.id === patrollingOfficerId)?.name;
+    const patrollingOfficerName = agencyPatrollingOfficers.find(
+      (s) => s.id === patrollingOfficerId
+    )?.name;
 
     toast({
       title: 'Patrolling Officer Assigned',
       description: `${patrollingOfficerName} has been assigned to ${siteName} with a ${perimeter}m geofence. The site will be moved to the assigned list on next refresh.`,
     });
-    // In a real app, you would make an API call here to update the database
-    // and then refetch the data or update the state locally.
   };
 
   const handleDownloadReport = (site: Site) => {
@@ -111,8 +167,42 @@ export default function AgencySitesPage() {
       title: 'Report Download Started',
       description: `Downloading report for ${site.name}.`,
     });
-    // In a real app, this would trigger a file download (e.g., CSV or PDF).
   };
+
+  const filteredAssignedSites = useMemo(() => {
+    return assignedSites.filter((site) => {
+      const searchLower = searchQuery.toLowerCase();
+      const matchesSearch =
+        site.name.toLowerCase().includes(searchLower) ||
+        site.address.toLowerCase().includes(searchLower);
+
+      const patrollingOfficer = getPatrollingOfficerForSite(site.id);
+      const matchesPatrollingOfficer =
+        selectedPatrollingOfficerFilter === 'all' ||
+        (patrollingOfficer &&
+          patrollingOfficer.id === selectedPatrollingOfficerFilter);
+
+      return matchesSearch && matchesPatrollingOfficer;
+    });
+  }, [
+    searchQuery,
+    selectedPatrollingOfficerFilter,
+    assignedSites,
+    getPatrollingOfficerForSite,
+  ]);
+
+  const siteIncidentsCount = useMemo(() => {
+    const counts: { [siteName: string]: number } = {};
+    alerts.forEach((alert) => {
+      if (alert.type === 'Emergency' && agencySiteNames.has(alert.site)) {
+        if (!counts[alert.site]) {
+          counts[alert.site] = 0;
+        }
+        counts[alert.site]++;
+      }
+    });
+    return counts;
+  }, [agencySiteNames]);
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6">
@@ -129,71 +219,89 @@ export default function AgencySitesPage() {
           <CardDescription>
             A list of all sites with an assigned patrolling officer.
           </CardDescription>
+          <div className="flex flex-wrap items-center gap-2 pt-4">
+            <div className="relative flex-1 md:grow-0">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="search"
+                placeholder="Search sites..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[320px]"
+              />
+            </div>
+            <Select
+              value={selectedPatrollingOfficerFilter}
+              onValueChange={setSelectedPatrollingOfficerFilter}
+            >
+              <SelectTrigger className="w-full sm:w-[220px]">
+                <SelectValue placeholder="Filter by Patrolling Officer" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Patrolling Officers</SelectItem>
+                {assignedSitesPatrollingOfficers.map((po) => (
+                  <SelectItem key={po.id} value={po.id}>
+                    {po.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Site</TableHead>
-                <TableHead>Patrolling Officer</TableHead>
-                <TableHead>Incidents</TableHead>
-                <TableHead>Geofence Perimeter</TableHead>
-                <TableHead>TowerCo</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {assignedSites.length > 0 ? assignedSites.map((site) => {
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-6">
+            {filteredAssignedSites.length > 0 ? (
+              filteredAssignedSites.map((site) => {
                 const patrollingOfficer = getPatrollingOfficerForSite(site.id);
-                const incidentsCount = site.incidents?.length || 0;
+                const incidentsCount = siteIncidentsCount[site.name] || 0;
                 return (
-                  <TableRow key={site.id}>
-                    <TableCell>
-                      <div className="font-medium">{site.name}</div>
-                      <div className="text-sm text-muted-foreground flex items-center gap-1">
-                        <MapPin className="w-3 h-3" />
-                        {site.address}
+                  <Card key={site.id} className="flex flex-col">
+                    <CardHeader>
+                      <CardTitle className="text-lg">{site.name}</CardTitle>
+                      <CardDescription>ID: {site.id}</CardDescription>
+                    </CardHeader>
+                    <CardContent className="flex-grow space-y-2 text-sm">
+                      <div className="flex items-start gap-2 text-muted-foreground">
+                        <MapPin className="h-4 w-4 flex-shrink-0 mt-1" />
+                        <span>{site.address}</span>
                       </div>
-                    </TableCell>
-                    <TableCell>{patrollingOfficer?.name}</TableCell>
-                    <TableCell>
-                      <Badge variant="secondary">{incidentsCount}</Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Fence className="w-4 h-4 text-muted-foreground" />
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <UserCheck className="h-4 w-4 flex-shrink-0" />
+                        <span>{patrollingOfficer?.name || 'N/A'}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <Fence className="h-4 w-4 flex-shrink-0" />
                         <span>
                           {site.geofencePerimeter
                             ? `${site.geofencePerimeter}m`
                             : 'N/A'}
                         </span>
                       </div>
-                    </TableCell>
-                    <TableCell>{site.towerco}</TableCell>
-                    <TableCell className="text-right">
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <ShieldAlert className="h-4 w-4 flex-shrink-0" />
+                        <span>{incidentsCount} Incidents</span>
+                      </div>
+                    </CardContent>
+                    <CardFooter>
                       <Button
                         size="sm"
                         variant="outline"
                         onClick={() => handleDownloadReport(site)}
+                        className="w-full"
                       >
                         <FileDown className="mr-2 h-4 w-4" />
                         Download Report
                       </Button>
-                    </TableCell>
-                  </TableRow>
+                    </CardFooter>
+                  </Card>
                 );
-              }) : (
-                <TableRow>
-                    <TableCell
-                      colSpan={6}
-                      className="text-center text-muted-foreground"
-                    >
-                      No sites with assigned patrolling officers found.
-                    </TableCell>
-                  </TableRow>
-              )}
-            </TableBody>
-          </Table>
+              })
+            ) : (
+              <div className="col-span-full text-center text-muted-foreground py-10">
+                No assigned sites found for the current filter.
+              </div>
+            )}
+          </div>
         </CardContent>
       </Card>
 
@@ -237,38 +345,38 @@ export default function AgencySitesPage() {
                       />
                     </TableCell>
                     <TableCell>
-                        <Select
-                          value={selectedPatrollingOfficers[site.id] || ''}
-                          onValueChange={(value) =>
-                            handlePatrollingOfficerSelect(site.id, value)
-                          }
-                        >
-                          <SelectTrigger className="w-[180px]">
-                            <SelectValue placeholder="Select Patrolling Officer" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {agencyPatrollingOfficers.map((patrollingOfficer) => (
-                              <SelectItem
-                                key={patrollingOfficer.id}
-                                value={patrollingOfficer.id}
-                              >
-                                {patrollingOfficer.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                      <Select
+                        value={selectedPatrollingOfficers[site.id] || ''}
+                        onValueChange={(value) =>
+                          handlePatrollingOfficerSelect(site.id, value)
+                        }
+                      >
+                        <SelectTrigger className="w-[180px]">
+                          <SelectValue placeholder="Select Patrolling Officer" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {agencyPatrollingOfficers.map((patrollingOfficer) => (
+                            <SelectItem
+                              key={patrollingOfficer.id}
+                              value={patrollingOfficer.id}
+                            >
+                              {patrollingOfficer.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </TableCell>
                     <TableCell className="text-right">
-                        <Button
-                          size="sm"
-                          onClick={() => handleAssignPatrollingOfficer(site.id)}
-                          disabled={
-                            !selectedPatrollingOfficers[site.id] ||
-                            !geofencePerimeters[site.id]
-                          }
-                        >
-                          Assign
-                        </Button>
+                      <Button
+                        size="sm"
+                        onClick={() => handleAssignPatrollingOfficer(site.id)}
+                        disabled={
+                          !selectedPatrollingOfficers[site.id] ||
+                          !geofencePerimeters[site.id]
+                        }
+                      >
+                        Assign
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))}
