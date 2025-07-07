@@ -8,7 +8,7 @@ import {
   Building2,
   Shield,
   Briefcase,
-  BarChart,
+  ShieldAlert,
 } from 'lucide-react';
 import {
   SidebarHeader,
@@ -23,7 +23,7 @@ const menuItems = [
   { href: '/towerco/home', label: 'Home', icon: Home },
   { href: '/towerco/agencies', label: 'Security Agencies', icon: Briefcase },
   { href: '/towerco/sites', label: 'Sites', icon: Building2 },
-  { href: '/towerco/reports', label: 'Reports', icon: BarChart },
+  { href: '/towerco/reports', label: 'Incidents', icon: ShieldAlert },
 ];
 
 export default function TowercoSidebar() {
