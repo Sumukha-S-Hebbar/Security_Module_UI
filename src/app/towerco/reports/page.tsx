@@ -1,4 +1,3 @@
-
 'use client';
 
 import {
@@ -25,10 +24,15 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Eye, FileDown } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import Link from 'next/link';
 
 const LOGGED_IN_TOWERCO = 'TowerCo Alpha'; // Simulate logged-in user
 
 export default function TowercoIncidentsPage() {
+  const { toast } = useToast();
   const towercoSites = sites.filter(
     (site) => site.towerco === LOGGED_IN_TOWERCO
   );
@@ -50,7 +54,7 @@ export default function TowercoIncidentsPage() {
         return <Badge variant="secondary">{status}</Badge>;
     }
   };
-  
+
   const getGuardByName = (name: string): Guard | undefined => {
     return guards.find((g) => g.name === name);
   };
@@ -73,6 +77,14 @@ export default function TowercoIncidentsPage() {
       return undefined;
     }
     return securityAgencies.find((a) => a.id === site.agencyId);
+  };
+
+  const handleDownloadReport = (incident: Alert) => {
+    toast({
+      title: 'Report Download Started',
+      description: `Downloading report for incident #${incident.id}.`,
+    });
+    // In a real app, this would trigger a file download.
   };
 
   return (
@@ -101,6 +113,8 @@ export default function TowercoIncidentsPage() {
                 <TableHead>Patrolling Officer</TableHead>
                 <TableHead>Guard</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead>Report</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -117,12 +131,30 @@ export default function TowercoIncidentsPage() {
                       <TableCell>{patrollingOfficer?.name || 'N/A'}</TableCell>
                       <TableCell>{incident.guard}</TableCell>
                       <TableCell>{getStatusBadge(incident.status)}</TableCell>
+                       <TableCell>
+                        <Button asChild variant="outline" size="sm">
+                            <Link href={`/towerco/reports/${incident.id}`}>
+                                <Eye className="mr-2 h-4 w-4" />
+                                View Report
+                            </Link>
+                        </Button>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleDownloadReport(incident)}
+                        >
+                          <FileDown className="mr-2 h-4 w-4" />
+                          Download
+                        </Button>
+                      </TableCell>
                     </TableRow>
                   );
                 })
               ) : (
                 <TableRow>
-                    <TableCell colSpan={7} className="text-center text-muted-foreground">
+                    <TableCell colSpan={9} className="text-center text-muted-foreground">
                         No incidents found.
                     </TableCell>
                 </TableRow>
