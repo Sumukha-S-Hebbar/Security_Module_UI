@@ -63,12 +63,6 @@ export default function TowercoHomePage() {
         </p>
       </div>
 
-      <TowercoAnalyticsDashboard
-        sites={sites}
-        agencies={securityAgencies}
-        alerts={activeEmergencies}
-      />
-
       <Card className="border-destructive bg-destructive/10">
         <CardHeader className="flex flex-row items-center gap-2">
           <AlertTriangle className="w-6 h-6 text-destructive" />
@@ -153,6 +147,12 @@ export default function TowercoHomePage() {
           )}
         </CardContent>
       </Card>
+
+      <TowercoAnalyticsDashboard
+        sites={sites}
+        agencies={securityAgencies}
+        alerts={activeEmergencies}
+      />
     </div>
   );
 }
