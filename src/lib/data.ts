@@ -296,20 +296,20 @@ export const sites: Site[] = [
 export const alerts: Alert[] = [
   // 2024 Data
   // Jan
-  { id: 'A240101', type: 'Emergency', date: '2024-01-15 10:00', site: 'Tech Park One', guard: 'Jane Smith', status: 'Resolved', callDetails: 'Power outage in Building B.'},
+  { id: 'A240101', type: 'Emergency', date: '2024-01-15 10:00', site: 'Tech Park One', guard: 'Jane Smith', status: 'Resolved', callDetails: 'Power outage in Building B.', images: ['https://placehold.co/600x400.png']},
   // Feb
   { id: 'A240201', type: 'Emergency', date: '2024-02-10 18:30', site: 'Downtown Mall', guard: 'John Doe', status: 'Resolved', callDetails: 'Suspicious person reported near the food court.' },
   { id: 'A240202', type: 'Missed Selfie', date: '2024-02-20 09:00', site: 'City Waterfront', guard: 'Mike Johnson', status: 'Resolved'},
   // Mar
-  { id: 'A240301', type: 'Emergency', date: '2024-03-05 21:00', site: 'Cyberdyne Systems', guard: 'Sarah Connor', status: 'Resolved', callDetails: 'Unauthorized access attempt at main gate.' },
+  { id: 'A240301', type: 'Emergency', date: '2024-03-05 21:00', site: 'Cyberdyne Systems', guard: 'Sarah Connor', status: 'Resolved', callDetails: 'Unauthorized access attempt at main gate.', images: ['https://placehold.co/600x400.png'] },
   { id: 'A240302', type: 'Emergency', date: '2024-03-25 14:00', site: 'Industrial Zone 5', guard: 'David Brown', status: 'Investigating', callDetails: 'Fence breach detected on the western perimeter.' },
   // Apr
-  { id: 'A240401', type: 'Emergency', date: '2024-04-01 11:20', site: 'Cyberdyne Systems', guard: 'Kyle Reese', status: 'Resolved', callDetails: 'Medical emergency, employee fainted.' },
+  { id: 'A240401', type: 'Emergency', date: '2024-04-01 11:20', site: 'Cyberdyne Systems', guard: 'Kyle Reese', status: 'Resolved', callDetails: 'Medical emergency, employee fainted.', images: ['https://placehold.co/600x400.png'] },
   // May
   { id: 'A240501', type: 'Emergency', date: '2024-05-12 03:00', site: 'Downtown Mall', guard: 'John Doe', status: 'Resolved', callDetails: 'Shoplifting incident at a retail store.' },
   { id: 'A240502', type: 'Guard Out of Premises', date: '2024-05-22 16:00', site: 'Industrial Zone 7', guard: 'Chris Green', status: 'Resolved'},
   // Jun
-  { id: 'A240601', type: 'Emergency', date: '2024-06-18 17:45', site: 'Tech Park One', guard: 'Emily Williams', status: 'Resolved', callDetails: 'Minor traffic accident in the parking lot.'},
+  { id: 'A240601', type: 'Emergency', date: '2024-06-18 17:45', site: 'Tech Park One', guard: 'Emily Williams', status: 'Resolved', callDetails: 'Minor traffic accident in the parking lot.', images: ['https://placehold.co/600x400.png']},
   // Jul
   {
     id: 'A001',
