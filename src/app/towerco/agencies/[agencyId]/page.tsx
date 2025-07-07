@@ -1,0 +1,224 @@
+
+'use client';
+
+import { useParams } from 'next/navigation';
+import Link from 'next/link';
+import {
+  securityAgencies,
+  sites,
+  alerts,
+  guards,
+  patrollingOfficers,
+} from '@/lib/data';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  CardFooter
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import {
+  Phone,
+  Mail,
+  MapPin,
+  Users,
+  Building2,
+  Calendar,
+  Clock,
+  ShieldAlert,
+  CheckCircle,
+  FileDown,
+  ArrowLeft,
+} from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
+import { useToast } from '@/hooks/use-toast';
+
+export default function AgencyReportPage() {
+  const params = useParams();
+  const { toast } = useToast();
+  const agencyId = params.agencyId as string;
+
+  const agency = securityAgencies.find((a) => a.id === agencyId);
+
+  if (!agency) {
+    return (
+      <div className="p-4 sm:p-6 lg:p-8">
+        <Card>
+          <CardContent className="pt-6">
+            <p>Agency not found.</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  const handleGenerateReport = (name: string, type: string) => {
+    toast({
+      title: 'Report Generation Started',
+      description: `Generating a detailed report for ${type} ${name}.`,
+    });
+    // In a real app, this would trigger a download.
+  };
+
+  const agencySites = sites.filter((site) => site.agencyId === agency.id);
+  const agencySiteNames = agencySites.map((site) => site.name);
+
+  const agencyIncidents = alerts.filter(
+    (alert) =>
+      agencySiteNames.includes(alert.site) && alert.type === 'Emergency'
+  );
+  const totalIncidents = agencyIncidents.length;
+  const resolvedIncidents = agencyIncidents.filter(
+    (a) => a.status === 'Resolved'
+  ).length;
+
+  const agencyGuards = guards.filter((guard) =>
+    agencySiteNames.includes(guard.site)
+  );
+  const agencyPatrollingOfficerIds = new Set(
+    agencyGuards.map((g) => g.patrollingOfficerId).filter(Boolean)
+  );
+  const totalWorkforce = agencyGuards.length + agencyPatrollingOfficerIds.size;
+
+  const assignmentDates = agencySites
+    .map((s) => s.assignedOn)
+    .filter((d): d is string => !!d)
+    .map((d) => new Date(d));
+  const firstAssignedDate =
+    assignmentDates.length > 0
+      ? new Date(Math.min(...assignmentDates.map((d) => d.getTime())))
+      : null;
+
+
+  return (
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6">
+       <div className="flex items-center gap-4">
+        <Button asChild variant="outline" size="icon">
+          <Link href="/towerco/agencies">
+            <ArrowLeft className="h-4 w-4" />
+            <span className="sr-only">Back to Agencies</span>
+          </Link>
+        </Button>
+        <div>
+            <h1 className="text-3xl font-bold tracking-tight">Agency Report</h1>
+            <p className="text-muted-foreground">Detailed overview for {agency.name}.</p>
+        </div>
+      </div>
+      <Card>
+        <CardHeader>
+          <div className="flex flex-wrap justify-between items-start gap-4">
+            <div className="flex items-center gap-4">
+                <Avatar className="h-16 w-16">
+                    <AvatarImage src={agency.avatar} alt={agency.name} />
+                    <AvatarFallback>{agency.name.charAt(0)}</AvatarFallback>
+                </Avatar>
+                <div>
+                  <CardTitle className="text-2xl">{agency.name}</CardTitle>
+                  <CardDescription>ID: {agency.id}</CardDescription>
+                </div>
+            </div>
+            <Button onClick={() => handleGenerateReport(agency.name, 'Agency')}>
+              <FileDown className="mr-2 h-4 w-4" />
+              Download Full Report
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-6">
+            <div className="text-sm text-muted-foreground mt-2 space-y-2">
+                <div className="flex items-center gap-2">
+                    <Mail className="h-4 w-4" />
+                    <span>{agency.email}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                    <Phone className="h-4 w-4" />
+                    <span>{agency.phone}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                    <MapPin className="h-4 w-4" />
+                    <span>{`${agency.city}, ${agency.state}, ${agency.country}`}</span>
+                </div>
+            </div>
+
+            <div className="pt-4 border-t">
+                <h4 className="font-semibold mb-4 text-lg">
+                    Operational Overview
+                </h4>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-6 text-sm">
+                    <div className="flex items-center gap-3">
+                    <Building2 className="h-8 w-8 text-primary" />
+                    <div>
+                        <p className="font-bold text-lg">
+                        {agencySites.length}
+                        </p>
+                        <p className="text-muted-foreground">Sites Assigned</p>
+                    </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                    <Users className="h-8 w-8 text-primary" />
+                    <div>
+                        <p className="font-bold text-lg">
+                        {totalWorkforce}
+                        </p>
+                        <p className="text-muted-foreground">
+                        Total Workforce
+                        </p>
+                    </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                    <ShieldAlert className="h-8 w-8 text-primary" />
+                    <div>
+                        <p className="font-bold text-lg">{totalIncidents}</p>
+                        <p className="text-muted-foreground">
+                        Total Incidents
+                        </p>
+                    </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                    <CheckCircle className="h-8 w-8 text-primary" />
+                    <div>
+                        <p className="font-bold text-lg">
+                        {resolvedIncidents}
+                        </p>
+                        <p className="text-muted-foreground">
+                        Incidents Resolved
+                        </p>
+                    </div>
+                    </div>
+                    {firstAssignedDate && (
+                    <>
+                        <div className="flex items-center gap-3">
+                        <Calendar className="h-8 w-8 text-primary" />
+                        <div>
+                            <p className="font-bold text-lg">
+                            {firstAssignedDate.toLocaleDateString()}
+                            </p>
+                            <p className="text-muted-foreground">
+                            First Assignment
+                            </p>
+                        </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                        <Clock className="h-8 w-8 text-primary" />
+                        <div>
+                            <p className="font-bold text-lg">
+                            {formatDistanceToNow(firstAssignedDate, {
+                                addSuffix: true,
+                            })}
+                            </p>
+                            <p className="text-muted-foreground">
+                            Assignment Duration
+                            </p>
+                        </div>
+                        </div>
+                    </>
+                    )}
+                </div>
+            </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}

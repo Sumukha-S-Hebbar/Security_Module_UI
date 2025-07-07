@@ -466,9 +466,9 @@ export default function TowercoAgenciesPage() {
                             </CardContent>
                             <CardFooter className="grid grid-cols-2 gap-2">
                                 <Button asChild variant="outline" size="sm">
-                                    <Link href="/towerco/reports">
+                                    <Link href={`/towerco/agencies/${agency.id}`}>
                                         <Eye className="mr-2 h-4 w-4" />
-                                        View Report
+                                        View Details
                                     </Link>
                                 </Button>
                                 <Button
