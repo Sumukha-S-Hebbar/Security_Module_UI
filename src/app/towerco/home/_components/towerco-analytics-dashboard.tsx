@@ -22,7 +22,7 @@ export function TowercoAnalyticsDashboard({
         <CardContent>
           <div className="text-2xl font-bold">{sites.length}</div>
           <p className="text-xs text-muted-foreground">
-            Total number of managed sites
+            All sites, including newly created ones.
           </p>
         </CardContent>
       </Card>
