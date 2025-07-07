@@ -53,16 +53,10 @@ export default function AgencyHomePage() {
         </p>
       </div>
 
-      <AgencyAnalyticsDashboard
-        guards={guards}
-        sites={sites}
-        patrollingOfficers={patrollingOfficers}
-      />
-
       <Card className="border-destructive bg-destructive/10">
         <CardHeader className="flex flex-row items-center gap-2">
           <AlertTriangle className="w-6 h-6 text-destructive" />
-          <CardTitle>Current Emergency Alerts</CardTitle>
+          <CardTitle>Active Emergency Alerts</CardTitle>
         </CardHeader>
         <CardContent>
           {activeEmergencies.length > 0 ? (
@@ -131,6 +125,12 @@ export default function AgencyHomePage() {
           )}
         </CardContent>
       </Card>
+
+      <AgencyAnalyticsDashboard
+        guards={guards}
+        sites={sites}
+        patrollingOfficers={patrollingOfficers}
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
