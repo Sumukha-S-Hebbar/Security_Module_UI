@@ -135,7 +135,7 @@ export default function AgencyIncidentsPage() {
                         <TableCell>{alert.site}</TableCell>
                         <TableCell>{alert.guard}</TableCell>
                         <TableCell>
-                          {patrollingOfficerDetails?.name || 'N/A'}
+                          {patrollingOfficerDetails?.name}
                         </TableCell>
                         <TableCell>{getStatusBadge(alert.status)}</TableCell>
                         <TableCell>

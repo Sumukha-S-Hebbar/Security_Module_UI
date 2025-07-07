@@ -96,7 +96,7 @@ export default function TowercoHomePage() {
                       </TableCell>
                       <TableCell>{agencyDetails?.name || 'N/A'}</TableCell>
                       <TableCell>
-                        {patrollingOfficerDetails?.name || 'N/A'}
+                        {patrollingOfficerDetails?.name}
                       </TableCell>
                       <TableCell>{alert.guard}</TableCell>
                       <TableCell>{alert.date}</TableCell>

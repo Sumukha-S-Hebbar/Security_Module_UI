@@ -89,7 +89,7 @@ export default function AgencyHomePage() {
                       </TableCell>
                       <TableCell>{alert.guard}</TableCell>
                       <TableCell>
-                        {patrollingOfficerDetails?.name || 'N/A'}
+                        {patrollingOfficerDetails?.name}
                       </TableCell>
                       <TableCell>{alert.date}</TableCell>
                       <TableCell>

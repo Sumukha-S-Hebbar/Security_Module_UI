@@ -105,7 +105,7 @@ export default function ReportsPage() {
           <TabsTrigger value="agency">Agency Reports</TabsTrigger>
           <TabsTrigger value="site">Site Reports</TabsTrigger>
           <TabsTrigger value="guard">Guard Reports</TabsTrigger>
-          <TabsTrigger value="supervisor">Patrolling Officer Reports</TabsTrigger>
+          <TabsTrigger value="patrolling-officer">Patrolling Officer Reports</TabsTrigger>
           <TabsTrigger value="incident">Incident Reports</TabsTrigger>
         </TabsList>
 
@@ -327,7 +327,7 @@ export default function ReportsPage() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="supervisor" className="mt-6">
+        <TabsContent value="patrolling-officer" className="mt-6">
           <Card>
             <CardHeader>
               <CardTitle>Patrolling Officer Activity Reports</CardTitle>
@@ -459,7 +459,7 @@ export default function ReportsPage() {
                         <TableCell>{incident.date}</TableCell>
                         <TableCell>{incident.site}</TableCell>
                         <TableCell>{agency?.name || 'N/A'}</TableCell>
-                        <TableCell>{patrollingOfficer?.name || 'N/A'}</TableCell>
+                        <TableCell>{patrollingOfficer?.name}</TableCell>
                         <TableCell>{incident.guard}</TableCell>
                         <TableCell>
                           {getStatusBadge(incident.status)}

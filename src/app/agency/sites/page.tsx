@@ -156,7 +156,7 @@ export default function AgencySitesPage() {
                         {site.address}
                       </div>
                     </TableCell>
-                    <TableCell>{patrollingOfficer?.name || 'Unassigned'}</TableCell>
+                    <TableCell>{patrollingOfficer?.name}</TableCell>
                     <TableCell>{site.towerco}</TableCell>
                     <TableCell>
                       <Badge variant="secondary">{incidentsCount}</Badge>

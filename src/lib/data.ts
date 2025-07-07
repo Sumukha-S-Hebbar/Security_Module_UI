@@ -50,7 +50,7 @@ export const guards: Guard[] = [
     avatar: 'https://placehold.co/100x100.png',
     missedSelfieCount: 0,
     totalSelfieRequests: 25,
-    patrollingOfficerId: 'SUP01',
+    patrollingOfficerId: 'SUP02',
     performance: { perimeterAccuracy: 99, leaveDays: 0 },
   },
   {
@@ -86,6 +86,7 @@ export const guards: Guard[] = [
     avatar: 'https://placehold.co/100x100.png',
     missedSelfieCount: 0,
     totalSelfieRequests: 10,
+    patrollingOfficerId: 'SUP02',
     performance: { perimeterAccuracy: 100, leaveDays: 0 },
   },
 ];
