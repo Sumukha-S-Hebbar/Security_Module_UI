@@ -19,7 +19,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Phone, Mail, Upload, Loader2 } from 'lucide-react';
+import { Phone, Mail, Upload, Loader2, PlusCircle } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -32,24 +32,41 @@ import {
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 
-const formSchema = z.object({
+const uploadFormSchema = z.object({
   csvFile: z
     .any()
     .refine((files) => files?.length === 1, 'CSV file is required.')
     .refine((files) => files?.[0]?.type === 'text/csv', 'Only .csv files are accepted.'),
 });
 
+const addSiteFormSchema = z.object({
+    name: z.string().min(1, { message: 'Site name is required.' }),
+    address: z.string().min(1, { message: 'Address is required.' }),
+    towerco: z.string().min(1, { message: 'TOWERCO is required.' }),
+});
+
 export default function TowercoAgenciesPage() {
     const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
+    const [isAddSiteDialogOpen, setIsAddSiteDialogOpen] = useState(false);
+    const [isUploading, setIsUploading] = useState(false);
+    const [isAddingSite, setIsAddingSite] = useState(false);
     const { toast } = useToast();
 
-    const form = useForm<z.infer<typeof formSchema>>({
-        resolver: zodResolver(formSchema),
+    const uploadForm = useForm<z.infer<typeof uploadFormSchema>>({
+        resolver: zodResolver(uploadFormSchema),
     });
 
-    async function onUploadSubmit(values: z.infer<typeof formSchema>) {
-        setIsLoading(true);
+    const addSiteForm = useForm<z.infer<typeof addSiteFormSchema>>({
+        resolver: zodResolver(addSiteFormSchema),
+        defaultValues: {
+            name: '',
+            address: '',
+            towerco: '',
+        }
+    });
+
+    async function onUploadSubmit(values: z.infer<typeof uploadFormSchema>) {
+        setIsUploading(true);
         console.log('Uploaded file:', values.csvFile[0]);
 
         await new Promise((resolve) => setTimeout(resolve, 1500));
@@ -59,9 +76,25 @@ export default function TowercoAgenciesPage() {
             description: `File "${values.csvFile[0].name}" has been uploaded. Agency profiles would be processed.`,
         });
 
-        form.reset({ csvFile: undefined });
-        setIsLoading(false);
+        uploadForm.reset({ csvFile: undefined });
+        setIsUploading(false);
         setIsUploadDialogOpen(false);
+    }
+
+    async function onAddSiteSubmit(values: z.infer<typeof addSiteFormSchema>) {
+        setIsAddingSite(true);
+        console.log('New site data:', values);
+
+        await new Promise((resolve) => setTimeout(resolve, 1500));
+
+        toast({
+            title: 'Site Added',
+            description: `Site "${values.name}" has been created successfully.`,
+        });
+
+        addSiteForm.reset();
+        setIsAddingSite(false);
+        setIsAddSiteDialogOpen(false);
     }
 
     return (
@@ -80,65 +113,139 @@ export default function TowercoAgenciesPage() {
                             <CardTitle>All Security Agencies</CardTitle>
                             <CardDescription>A list of all security service providers.</CardDescription>
                         </div>
-                        <Dialog open={isUploadDialogOpen} onOpenChange={setIsUploadDialogOpen}>
-                            <DialogTrigger asChild>
-                                <Button>
-                                    <Upload className="mr-2 h-4 w-4" />
-                                    Upload CSV
-                                </Button>
-                            </DialogTrigger>
-                            <DialogContent>
-                                <DialogHeader>
-                                <DialogTitle>Upload Agency Profiles</DialogTitle>
-                                <DialogDescription>
-                                    Upload a CSV file to add multiple security agency profiles at once.
-                                </DialogDescription>
-                                </DialogHeader>
-                                <Form {...form}>
-                                    <form onSubmit={form.handleSubmit(onUploadSubmit)}>
-                                        <div className="grid gap-4 py-4">
+                        <div className="flex items-center gap-2">
+                             <Dialog open={isUploadDialogOpen} onOpenChange={setIsUploadDialogOpen}>
+                                <DialogTrigger asChild>
+                                    <Button>
+                                        <Upload className="mr-2 h-4 w-4" />
+                                        Upload CSV
+                                    </Button>
+                                </DialogTrigger>
+                                <DialogContent>
+                                    <DialogHeader>
+                                    <DialogTitle>Upload Agency Profiles</DialogTitle>
+                                    <DialogDescription>
+                                        Upload a CSV file to add multiple security agency profiles at once.
+                                    </DialogDescription>
+                                    </DialogHeader>
+                                    <Form {...uploadForm}>
+                                        <form onSubmit={uploadForm.handleSubmit(onUploadSubmit)}>
+                                            <div className="grid gap-4 py-4">
+                                                <FormField
+                                                    control={uploadForm.control}
+                                                    name="csvFile"
+                                                    render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>Agency CSV File</FormLabel>
+                                                        <FormControl>
+                                                        <Input
+                                                            id="csvFile-agency-input"
+                                                            type="file"
+                                                            accept=".csv"
+                                                            disabled={isUploading}
+                                                            onChange={(e) => field.onChange(e.target.files)}
+                                                        />
+                                                        </FormControl>
+                                                        <FormDescription>
+                                                        The CSV should contain columns: name, phone, email, address, regionServed.
+                                                        </FormDescription>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                    )}
+                                                />
+                                            </div>
+                                            <DialogFooter>
+                                                <Button type="submit" disabled={isUploading}>
+                                                {isUploading ? (
+                                                    <>
+                                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                    Uploading...
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                    <Upload className="mr-2 h-4 w-4" />
+                                                    Upload CSV
+                                                    </>
+                                                )}
+                                                </Button>
+                                            </DialogFooter>
+                                        </form>
+                                    </Form>
+                                </DialogContent>
+                            </Dialog>
+
+                             <Dialog open={isAddSiteDialogOpen} onOpenChange={setIsAddSiteDialogOpen}>
+                                <DialogTrigger asChild>
+                                    <Button variant="outline">
+                                        <PlusCircle className="mr-2 h-4 w-4" />
+                                        Add Site
+                                    </Button>
+                                </DialogTrigger>
+                                <DialogContent>
+                                    <DialogHeader>
+                                        <DialogTitle>Add a New Site</DialogTitle>
+                                        <DialogDescription>
+                                            Fill in the details below to add a new site profile.
+                                        </DialogDescription>
+                                    </DialogHeader>
+                                    <Form {...addSiteForm}>
+                                        <form onSubmit={addSiteForm.handleSubmit(onAddSiteSubmit)} className="space-y-4">
                                             <FormField
-                                                control={form.control}
-                                                name="csvFile"
+                                                control={addSiteForm.control}
+                                                name="name"
                                                 render={({ field }) => (
-                                                <FormItem>
-                                                    <FormLabel>Agency CSV File</FormLabel>
-                                                    <FormControl>
-                                                    <Input
-                                                        id="csvFile-agency-input"
-                                                        type="file"
-                                                        accept=".csv"
-                                                        disabled={isLoading}
-                                                        onChange={(e) => field.onChange(e.target.files)}
-                                                    />
-                                                    </FormControl>
-                                                    <FormDescription>
-                                                    The CSV should contain columns: name, phone, email, address, regionServed.
-                                                    </FormDescription>
-                                                    <FormMessage />
-                                                </FormItem>
+                                                    <FormItem>
+                                                        <FormLabel>Site Name</FormLabel>
+                                                        <FormControl>
+                                                            <Input placeholder="e.g., Downtown Tower" {...field} />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
                                                 )}
                                             />
-                                        </div>
-                                        <DialogFooter>
-                                            <Button type="submit" disabled={isLoading}>
-                                            {isLoading ? (
-                                                <>
-                                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                                Uploading...
-                                                </>
-                                            ) : (
-                                                <>
-                                                <Upload className="mr-2 h-4 w-4" />
-                                                Upload CSV
-                                                </>
-                                            )}
-                                            </Button>
-                                        </DialogFooter>
-                                    </form>
-                                </Form>
-                            </DialogContent>
-                        </Dialog>
+                                            <FormField
+                                                control={addSiteForm.control}
+                                                name="address"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>Address</FormLabel>
+                                                        <FormControl>
+                                                            <Input placeholder="e.g., 123 Main St, Metro City" {...field} />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                            <FormField
+                                                control={addSiteForm.control}
+                                                name="towerco"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>TOWERCO/MNO</FormLabel>
+                                                        <FormControl>
+                                                            <Input placeholder="e.g., TowerCo Alpha" {...field} />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                            <DialogFooter>
+                                                <Button type="submit" disabled={isAddingSite}>
+                                                {isAddingSite ? (
+                                                    <>
+                                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                    Adding Site...
+                                                    </>
+                                                ) : (
+                                                    "Add Site"
+                                                )}
+                                                </Button>
+                                            </DialogFooter>
+                                        </form>
+                                    </Form>
+                                </DialogContent>
+                            </Dialog>
+                        </div>
                     </div>
                 </CardHeader>
                 <CardContent>
