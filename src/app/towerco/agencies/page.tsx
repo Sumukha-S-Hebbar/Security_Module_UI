@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useMemo } from 'react';
@@ -59,7 +58,9 @@ export default function TowercoAgenciesPage() {
     const [isAddingSite, setIsAddingSite] = useState(false);
     const { toast } = useToast();
     const [searchQuery, setSearchQuery] = useState('');
-    const [selectedRegion, setSelectedRegion] = useState('all');
+    const [selectedCountry, setSelectedCountry] = useState('all');
+    const [selectedState, setSelectedState] = useState('all');
+    const [selectedCity, setSelectedCity] = useState('all');
 
     const uploadForm = useForm<z.infer<typeof uploadFormSchema>>({
         resolver: zodResolver(uploadFormSchema),
@@ -106,10 +107,42 @@ export default function TowercoAgenciesPage() {
         setIsAddSiteDialogOpen(false);
     }
 
-    const regions = useMemo(() => {
-        const allRegions = securityAgencies.map((agency) => agency.regionServed);
-        return [...new Set(allRegions)];
+    const countries = useMemo(() => {
+        const allCountries = securityAgencies.map((agency) => agency.country);
+        return [...new Set(allCountries)];
     }, []);
+
+    const states = useMemo(() => {
+        if (selectedCountry === 'all') {
+            return [];
+        }
+        const allStates = securityAgencies
+            .filter((agency) => agency.country === selectedCountry)
+            .map((agency) => agency.state);
+        return [...new Set(allStates)];
+    }, [selectedCountry]);
+
+    const cities = useMemo(() => {
+        if (selectedState === 'all' || selectedCountry === 'all') {
+            return [];
+        }
+        const allCities = securityAgencies
+            .filter((agency) => agency.country === selectedCountry && agency.state === selectedState)
+            .map((agency) => agency.city);
+        return [...new Set(allCities)];
+    }, [selectedCountry, selectedState]);
+
+    const handleCountryChange = (country: string) => {
+        setSelectedCountry(country);
+        setSelectedState('all');
+        setSelectedCity('all');
+    };
+
+    const handleStateChange = (state: string) => {
+        setSelectedState(state);
+        setSelectedCity('all');
+    };
+
 
     const filteredAgencies = useMemo(() => {
         return securityAgencies.filter((agency) => {
@@ -119,12 +152,18 @@ export default function TowercoAgenciesPage() {
                 agency.email.toLowerCase().includes(searchLower) ||
                 agency.address.toLowerCase().includes(searchLower);
 
-            const matchesRegion =
-                selectedRegion === 'all' || agency.regionServed === selectedRegion;
+            const matchesCountry =
+                selectedCountry === 'all' || agency.country === selectedCountry;
 
-            return matchesSearch && matchesRegion;
+            const matchesState =
+                selectedState === 'all' || agency.state === selectedState;
+            
+            const matchesCity =
+                selectedCity === 'all' || agency.city === selectedCity;
+
+            return matchesSearch && matchesCountry && matchesState && matchesCity;
         });
-    }, [searchQuery, selectedRegion]);
+    }, [searchQuery, selectedCountry, selectedState, selectedCity]);
 
     return (
         <div className="p-4 sm:p-6 lg:p-8 space-y-6">
@@ -176,7 +215,7 @@ export default function TowercoAgenciesPage() {
                                                         />
                                                         </FormControl>
                                                         <FormDescription>
-                                                        The CSV should contain columns: name, phone, email, address, regionServed.
+                                                        The CSV should contain columns: name, phone, email, address, city, state, country.
                                                         </FormDescription>
                                                         <FormMessage />
                                                     </FormItem>
@@ -276,7 +315,7 @@ export default function TowercoAgenciesPage() {
                             </Dialog>
                         </div>
                     </div>
-                    <div className="flex items-center gap-2 pt-4">
+                    <div className="flex flex-wrap items-center gap-2 pt-4">
                         <div className="relative flex-1 md:grow-0">
                           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                           <Input
@@ -287,15 +326,41 @@ export default function TowercoAgenciesPage() {
                             className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[320px]"
                           />
                         </div>
-                        <Select value={selectedRegion} onValueChange={setSelectedRegion}>
-                            <SelectTrigger className="w-[180px]">
-                                <SelectValue placeholder="Filter by region" />
+                        <Select value={selectedCountry} onValueChange={handleCountryChange}>
+                            <SelectTrigger className="w-full sm:w-[180px]">
+                                <SelectValue placeholder="Filter by country" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="all">All Regions</SelectItem>
-                                {regions.map((region) => (
-                                    <SelectItem key={region} value={region}>
-                                        {region}
+                                <SelectItem value="all">All Countries</SelectItem>
+                                {countries.map((country) => (
+                                    <SelectItem key={country} value={country}>
+                                        {country}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                         <Select value={selectedState} onValueChange={handleStateChange} disabled={selectedCountry === 'all'}>
+                            <SelectTrigger className="w-full sm:w-[180px]">
+                                <SelectValue placeholder="Filter by state" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">All States</SelectItem>
+                                {states.map((state) => (
+                                    <SelectItem key={state} value={state}>
+                                        {state}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                         <Select value={selectedCity} onValueChange={setSelectedCity} disabled={selectedState === 'all' || selectedCountry === 'all'}>
+                            <SelectTrigger className="w-full sm:w-[180px]">
+                                <SelectValue placeholder="Filter by city" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">All Cities</SelectItem>
+                                {cities.map((city) => (
+                                    <SelectItem key={city} value={city}>
+                                        {city}
                                     </SelectItem>
                                 ))}
                             </SelectContent>
@@ -310,7 +375,6 @@ export default function TowercoAgenciesPage() {
                                 <TableHead>Phone</TableHead>
                                 <TableHead>Email</TableHead>
                                 <TableHead>Address</TableHead>
-                                <TableHead>Region Served</TableHead>
                                 <TableHead>Actions</TableHead>
                             </TableRow>
                         </TableHeader>
@@ -347,7 +411,6 @@ export default function TowercoAgenciesPage() {
                                         <TableCell>
                                         {agency.address}
                                         </TableCell>
-                                        <TableCell>{agency.regionServed}</TableCell>
                                         <TableCell>
                                             <Button asChild variant="outline" size="sm">
                                                 <a href={`tel:${agency.phone}`}>
@@ -360,7 +423,7 @@ export default function TowercoAgenciesPage() {
                                 ))
                             ) : (
                                 <TableRow>
-                                    <TableCell colSpan={6} className="h-24 text-center">
+                                    <TableCell colSpan={5} className="h-24 text-center">
                                     No agencies found.
                                     </TableCell>
                                 </TableRow>
