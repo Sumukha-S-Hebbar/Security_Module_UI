@@ -176,6 +176,7 @@ export default function AgencySiteReportPage() {
                       <TableHead>Date</TableHead>
                       <TableHead>Guard</TableHead>
                       <TableHead>Status</TableHead>
+                      <TableHead>Details</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -185,6 +186,7 @@ export default function AgencySiteReportPage() {
                         <TableCell>{new Date(incident.date).toLocaleDateString()}</TableCell>
                         <TableCell>{incident.guard}</TableCell>
                         <TableCell>{getStatusBadge(incident.status)}</TableCell>
+                        <TableCell className="max-w-xs truncate">{incident.callDetails}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
