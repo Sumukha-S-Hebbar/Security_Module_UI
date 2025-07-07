@@ -1,5 +1,11 @@
 
-import { alerts, guards, sites, securityAgencies, patrollingOfficers } from '@/lib/data';
+import {
+  alerts,
+  guards,
+  sites,
+  securityAgencies,
+  patrollingOfficers,
+} from '@/lib/data';
 import type { Guard, PatrollingOfficer, SecurityAgency } from '@/types';
 import {
   Card,
@@ -24,6 +30,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { SiteStatusBreakdown } from './_components/site-status-breakdown';
 
 export default function TowercoHomePage() {
   const activeEmergencies = alerts.filter(
@@ -153,6 +160,8 @@ export default function TowercoHomePage() {
         agencies={securityAgencies}
         alerts={activeEmergencies}
       />
+
+      <SiteStatusBreakdown sites={sites} />
     </div>
   );
 }
