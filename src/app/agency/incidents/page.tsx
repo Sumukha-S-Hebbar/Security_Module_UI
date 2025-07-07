@@ -21,7 +21,7 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Eye, FileDown, Search, Calendar as CalendarIcon } from 'lucide-react';
+import { AlertTriangle, Eye, FileDown, Search, Calendar as CalendarIcon } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 import {
@@ -56,6 +56,8 @@ export default function AgencyIncidentsPage() {
   const agencyAlerts = useMemo(() => initialAlerts.filter(
     (alert) => alert.type === 'Emergency' && agencySiteNames.has(alert.site)
   ), [agencySiteNames]);
+
+  const activeIncidents = useMemo(() => agencyAlerts.filter(incident => incident.status === 'Active'), [agencyAlerts]);
 
   const filteredIncidents = useMemo(() => {
     return agencyAlerts.filter((incident) => {
@@ -125,6 +127,71 @@ export default function AgencyIncidentsPage() {
           A log of all emergency incidents reported across your sites.
         </p>
       </div>
+
+      <Card className="border-destructive bg-destructive/10">
+        <CardHeader className="flex flex-row items-center gap-2">
+            <AlertTriangle className="w-6 h-6 text-destructive" />
+            <CardTitle>Active Incidents</CardTitle>
+        </CardHeader>
+        <CardContent>
+            {activeIncidents.length > 0 ? (
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>Incident ID</TableHead>
+                            <TableHead>Date</TableHead>
+                            <TableHead>Site</TableHead>
+                            <TableHead>Guard</TableHead>
+                            <TableHead>Patrolling Officer</TableHead>
+                            <TableHead>Report</TableHead>
+                            <TableHead className="text-right">Actions</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {activeIncidents.map((incident) => {
+                             const patrollingOfficer = getPatrollingOfficerByGuardName(incident.guard);
+                             return (
+                                 <TableRow key={incident.id}>
+                                     <TableCell className="font-medium">
+                                        {incident.id}
+                                     </TableCell>
+                                     <TableCell>{new Date(incident.date).toLocaleDateString()}</TableCell>
+                                     <TableCell>{incident.site}</TableCell>
+                                     <TableCell>{incident.guard}</TableCell>
+                                     <TableCell>
+                                        {patrollingOfficer?.name || 'N/A'}
+                                     </TableCell>
+                                     <TableCell>
+                                        <Button asChild variant="outline" size="sm">
+                                            <Link href={`/agency/incidents/${incident.id}`}>
+                                                <Eye className="mr-2 h-4 w-4" />
+                                                View Report
+                                            </Link>
+                                        </Button>
+                                     </TableCell>
+                                     <TableCell className="text-right">
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => handleDownloadReport(incident)}
+                                        >
+                                            <FileDown className="mr-2 h-4 w-4" />
+                                            Download
+                                        </Button>
+                                     </TableCell>
+                                 </TableRow>
+                             );
+                        })}
+                    </TableBody>
+                </Table>
+            ) : (
+                <p className="text-muted-foreground text-center py-4">
+                    No active incidents.
+                </p>
+            )}
+        </CardContent>
+      </Card>
+
       <Card>
         <CardHeader>
           <CardTitle>Incident Log</CardTitle>
