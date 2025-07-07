@@ -20,12 +20,21 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
   FileDown,
   MapPin,
   Fence,
   Search,
   UserCheck,
   ShieldAlert,
+  Users,
 } from 'lucide-react';
 import {
   Select,
@@ -46,6 +55,9 @@ export default function AgencySitesPage() {
   }>({});
   const [geofencePerimeters, setGeofencePerimeters] = useState<{
     [key: string]: string;
+  }>({});
+  const [selectedGuards, setSelectedGuards] = useState<{
+    [key: string]: string[];
   }>({});
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
@@ -76,6 +88,11 @@ export default function AgencySitesPage() {
         agencyPatrollingOfficerIds.has(po.id)
       ),
     [agencyPatrollingOfficerIds]
+  );
+
+  const unassignedGuards = useMemo(
+    () => agencyGuards.filter((g) => !g.patrollingOfficerId),
+    [agencyGuards]
   );
 
   const getPatrollingOfficerForSite = useCallback(
@@ -131,15 +148,34 @@ export default function AgencySitesPage() {
     }));
   };
 
-  const handleAssignPatrollingOfficer = (siteId: string) => {
+  const handleGuardSelect = (siteId: string, guardId: string) => {
+    setSelectedGuards((prev) => {
+      const currentSelection = prev[siteId] || [];
+      const newSelection = currentSelection.includes(guardId)
+        ? currentSelection.filter((id) => id !== guardId)
+        : [...currentSelection, guardId];
+      return { ...prev, [siteId]: newSelection };
+    });
+  };
+
+  const handleAssign = (siteId: string) => {
     const patrollingOfficerId = selectedPatrollingOfficers[siteId];
     const perimeter = geofencePerimeters[siteId];
+    const guardIds = selectedGuards[siteId] || [];
 
     if (!patrollingOfficerId) {
       toast({
         variant: 'destructive',
         title: 'Error',
-        description: 'Please select a patrolling officer first.',
+        description: 'Please select a patrolling officer.',
+      });
+      return;
+    }
+    if (guardIds.length === 0) {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Please select at least one guard.',
       });
       return;
     }
@@ -157,8 +193,8 @@ export default function AgencySitesPage() {
     )?.name;
 
     toast({
-      title: 'Patrolling Officer Assigned',
-      description: `${patrollingOfficerName} has been assigned to ${siteName} with a ${perimeter}m geofence. The site will be moved to the assigned list on next refresh.`,
+      title: 'Site Assigned',
+      description: `${patrollingOfficerName} and ${guardIds.length} guard(s) have been assigned to ${siteName} with a ${perimeter}m geofence. The site will be moved to the assigned list on next refresh.`,
     });
   };
 
@@ -212,7 +248,7 @@ export default function AgencySitesPage() {
       }
     });
     return counts;
-  }, [agencySiteNames]);
+  }, [agencySiteNames, alerts]);
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6">
@@ -330,6 +366,7 @@ export default function AgencySitesPage() {
                 <TableRow>
                   <TableHead>Site</TableHead>
                   <TableHead>Geofence (m)</TableHead>
+                  <TableHead>Assign Guards</TableHead>
                   <TableHead>Assign Patrolling Officer</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
@@ -357,6 +394,34 @@ export default function AgencySitesPage() {
                       />
                     </TableCell>
                     <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="outline" className="w-[180px]">
+                            <Users className="mr-2 h-4 w-4" />
+                            Select Guards ({selectedGuards[site.id]?.length || 0})
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className="w-64">
+                          <DropdownMenuLabel>Available Guards</DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          {unassignedGuards.length > 0 ? (
+                            unassignedGuards.map((guard) => (
+                              <DropdownMenuCheckboxItem
+                                key={guard.id}
+                                checked={selectedGuards[site.id]?.includes(guard.id)}
+                                onSelect={(e) => e.preventDefault()}
+                                onCheckedChange={() => handleGuardSelect(site.id, guard.id)}
+                              >
+                                {guard.name}
+                              </DropdownMenuCheckboxItem>
+                            ))
+                          ) : (
+                            <div className="px-2 py-1.5 text-sm text-muted-foreground">No unassigned guards</div>
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                    <TableCell>
                       <Select
                         value={selectedPatrollingOfficers[site.id] || ''}
                         onValueChange={(value) =>
@@ -381,10 +446,11 @@ export default function AgencySitesPage() {
                     <TableCell className="text-right">
                       <Button
                         size="sm"
-                        onClick={() => handleAssignPatrollingOfficer(site.id)}
+                        onClick={() => handleAssign(site.id)}
                         disabled={
                           !selectedPatrollingOfficers[site.id] ||
-                          !geofencePerimeters[site.id]
+                          !geofencePerimeters[site.id] ||
+                          !selectedGuards[site.id]?.length
                         }
                       >
                         Assign
@@ -394,7 +460,7 @@ export default function AgencySitesPage() {
                 ))
               ) : (
                 <TableRow>
-                    <TableCell colSpan={4} className="text-center text-muted-foreground">
+                    <TableCell colSpan={5} className="text-center text-muted-foreground">
                         No unassigned sites found for the current search.
                     </TableCell>
                 </TableRow>
