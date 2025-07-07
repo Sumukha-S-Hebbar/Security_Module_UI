@@ -64,6 +64,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import Link from 'next/link';
 
 const LOGGED_IN_TOWERCO = 'TowerCo Alpha'; // Simulate logged-in user
 
@@ -423,19 +424,11 @@ export default function TowercoSitesPage() {
                     </div>
                   </CardContent>
                   <CardFooter className="grid grid-cols-2 gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() =>
-                        toast({
-                          title: 'Feature Coming Soon',
-                          description:
-                            'Detailed site reports will be available here.',
-                        })
-                      }
-                    >
-                      <Eye className="mr-2 h-4 w-4" />
-                      View Report
+                    <Button asChild variant="outline" size="sm">
+                      <Link href={`/towerco/sites/${site.id}`}>
+                        <Eye className="mr-2 h-4 w-4" />
+                        View Report
+                      </Link>
                     </Button>
                     <Button
                       variant="outline"
