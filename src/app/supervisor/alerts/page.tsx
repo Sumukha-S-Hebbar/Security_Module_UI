@@ -103,8 +103,8 @@ export default function AlertsPage() {
     switch (status) {
       case 'Active':
         return <Badge variant="destructive">Active</Badge>;
-      case 'Investigating':
-        return <Badge variant="default">Investigating</Badge>;
+      case 'Under Review':
+        return <Badge variant="default">Under Review</Badge>;
       case 'Resolved':
         return <Badge variant="secondary">Resolved</Badge>;
       default:
@@ -182,15 +182,15 @@ export default function AlertsPage() {
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem
                               onClick={() =>
-                                handleStatusChange(alert.id, 'Investigating')
+                                handleStatusChange(alert.id, 'Under Review')
                               }
                               disabled={
-                                alert.status === 'Investigating' ||
+                                alert.status === 'Under Review' ||
                                 alert.status === 'Resolved'
                               }
                             >
                               <ShieldAlert className="mr-2 h-4 w-4" />
-                              Investigate
+                              Start Review
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               onClick={() =>

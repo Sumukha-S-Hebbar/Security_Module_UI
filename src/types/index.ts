@@ -35,7 +35,7 @@ export type Alert = {
   date: string;
   site: string;
   guard: string;
-  status: 'Active' | 'Resolved' | 'Investigating';
+  status: 'Active' | 'Resolved' | 'Under Review';
   callDetails?: string;
   images?: string[];
 };

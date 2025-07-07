@@ -62,7 +62,7 @@ export default function AgencyIncidentsPage() {
         incident.guard.toLowerCase().includes(searchLower);
 
       const matchesStatus =
-        selectedStatus === 'all' || incident.status.toLowerCase() === selectedStatus;
+        selectedStatus === 'all' || incident.status.toLowerCase().replace(' ', '-') === selectedStatus;
 
       return matchesSearch && matchesStatus;
     });
@@ -100,8 +100,8 @@ export default function AgencyIncidentsPage() {
     switch (status) {
       case 'Active':
         return <Badge variant="destructive">Active</Badge>;
-      case 'Investigating':
-        return <Badge variant="default">Investigating</Badge>;
+      case 'Under Review':
+        return <Badge variant="default">Under Review</Badge>;
       case 'Resolved':
         return <Badge variant="secondary">Resolved</Badge>;
       default:
@@ -143,7 +143,7 @@ export default function AgencyIncidentsPage() {
                 <SelectContent>
                   <SelectItem value="all">All Statuses</SelectItem>
                   <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="investigating">Investigating</SelectItem>
+                  <SelectItem value="under-review">Under Review</SelectItem>
                   <SelectItem value="resolved">Resolved</SelectItem>
                 </SelectContent>
               </Select>
@@ -212,15 +212,15 @@ export default function AgencyIncidentsPage() {
                             <DropdownMenuContent align="end">
                               <DropdownMenuItem
                                 onClick={() =>
-                                  handleStatusChange(alert.id, 'Investigating')
+                                  handleStatusChange(alert.id, 'Under Review')
                                 }
                                 disabled={
-                                  alert.status === 'Investigating' ||
+                                  alert.status === 'Under Review' ||
                                   alert.status === 'Resolved'
                                 }
                               >
                                 <ShieldAlert className="mr-2 h-4 w-4" />
-                                Investigate
+                                Start Review
                               </DropdownMenuItem>
                               <DropdownMenuItem
                                 onClick={() =>

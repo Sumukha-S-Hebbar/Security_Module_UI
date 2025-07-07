@@ -118,8 +118,8 @@ export default function TowercoIncidentsPage() {
     switch (status) {
       case 'Active':
         return <Badge variant="destructive">Active</Badge>;
-      case 'Investigating':
-        return <Badge variant="default">Investigating</Badge>;
+      case 'Under Review':
+        return <Badge variant="default">Under Review</Badge>;
       case 'Resolved':
         return <Badge variant="secondary">Resolved</Badge>;
       default:

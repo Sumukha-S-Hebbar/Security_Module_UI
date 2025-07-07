@@ -302,7 +302,7 @@ export const alerts: Alert[] = [
   { id: 'A240202', type: 'Missed Selfie', date: '2024-02-20 09:00', site: 'City Waterfront', guard: 'Mike Johnson', status: 'Resolved'},
   // Mar
   { id: 'A240301', type: 'Emergency', date: '2024-03-05 21:00', site: 'Cyberdyne Systems', guard: 'Sarah Connor', status: 'Resolved', callDetails: 'Unauthorized access attempt at main gate.', images: ['https://placehold.co/600x400.png'] },
-  { id: 'A240302', type: 'Emergency', date: '2024-03-25 14:00', site: 'Industrial Zone 5', guard: 'David Brown', status: 'Investigating', callDetails: 'Fence breach detected on the western perimeter.' },
+  { id: 'A240302', type: 'Emergency', date: '2024-03-25 14:00', site: 'Industrial Zone 5', guard: 'David Brown', status: 'Under Review', callDetails: 'Fence breach detected on the western perimeter.' },
   // Apr
   { id: 'A240401', type: 'Emergency', date: '2024-04-01 11:20', site: 'Cyberdyne Systems', guard: 'Kyle Reese', status: 'Resolved', callDetails: 'Medical emergency, employee fainted.', images: ['https://placehold.co/600x400.png'] },
   // May
@@ -349,7 +349,7 @@ export const alerts: Alert[] = [
     date: '2024-07-20 08:05',
     site: 'City Waterfront',
     guard: 'Mike Johnson',
-    status: 'Investigating',
+    status: 'Under Review',
   },
   {
     id: 'A003',

@@ -1,4 +1,3 @@
-
 'use client';
 
 import type { Alert } from '@/types';
@@ -9,8 +8,8 @@ export function IncidentStatusBreakdown({ alerts }: { alerts: Alert[] }) {
   const activeIncidents = alerts.filter(
     (alert) => alert.type === 'Emergency' && alert.status === 'Active'
   ).length;
-  const investigatingIncidents = alerts.filter(
-    (alert) => alert.type === 'Emergency' && alert.status === 'Investigating'
+  const underReviewIncidents = alerts.filter(
+    (alert) => alert.type === 'Emergency' && alert.status === 'Under Review'
   ).length;
   const resolvedIncidents = alerts.filter(
     (alert) => alert.type === 'Emergency' && alert.status === 'Resolved'
@@ -18,8 +17,8 @@ export function IncidentStatusBreakdown({ alerts }: { alerts: Alert[] }) {
 
   const activePercentage =
     totalIncidents > 0 ? (activeIncidents / totalIncidents) * 100 : 0;
-  const investigatingPercentage =
-    totalIncidents > 0 ? (investigatingIncidents / totalIncidents) * 100 : 0;
+  const underReviewPercentage =
+    totalIncidents > 0 ? (underReviewIncidents / totalIncidents) * 100 : 0;
   const resolvedPercentage =
     totalIncidents > 0 ? (resolvedIncidents / totalIncidents) * 100 : 0;
     
@@ -42,8 +41,8 @@ export function IncidentStatusBreakdown({ alerts }: { alerts: Alert[] }) {
           />
           <div
             className="bg-primary"
-            style={{ width: `${investigatingPercentage}%` }}
-            title={`Investigating: ${investigatingIncidents} (${investigatingPercentage.toFixed(
+            style={{ width: `${underReviewPercentage}%` }}
+            title={`Under Review: ${underReviewIncidents} (${underReviewPercentage.toFixed(
               1
             )}%)`}
           />
@@ -62,7 +61,7 @@ export function IncidentStatusBreakdown({ alerts }: { alerts: Alert[] }) {
           </div>
           <div className="flex items-center gap-2">
             <span className="h-3 w-3 rounded-full bg-primary" />
-            <span>Investigating ({investigatingIncidents})</span>
+            <span>Under Review ({underReviewIncidents})</span>
           </div>
           <div className="flex items-center gap-2">
             <span className="h-3 w-3 rounded-full bg-chart-2" />
