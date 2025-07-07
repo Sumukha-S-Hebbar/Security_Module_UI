@@ -7,7 +7,7 @@ export const patrollingOfficers: PatrollingOfficer[] = [
     phone: '555-100-2000',
     email: 'michael.s@guardlink.com',
     avatar: 'https://placehold.co/100x100.png',
-    assignedGuards: ['GL001', 'GL002', 'GL003'],
+    assignedGuards: ['GL002'],
     routes: ['Downtown Route', 'Waterfront Route'],
   },
   {
@@ -49,7 +49,6 @@ export const guards: Guard[] = [
     avatar: 'https://placehold.co/100x100.png',
     missedSelfieCount: 1,
     totalSelfieRequests: 20,
-    patrollingOfficerId: 'PO01',
     performance: { perimeterAccuracy: 98, leaveDays: 2 },
   },
   {
@@ -73,7 +72,6 @@ export const guards: Guard[] = [
     avatar: 'https://placehold.co/100x100.png',
     missedSelfieCount: 8,
     totalSelfieRequests: 22,
-    patrollingOfficerId: 'PO01',
     performance: { perimeterAccuracy: 92, leaveDays: 5 },
   },
   {
@@ -293,6 +291,18 @@ export const sites: Site[] = [
     towerco: 'TowerCo Alpha',
     incidents: [],
   },
+  {
+    id: 'SITE10',
+    name: 'South Ridge Tower',
+    address: '900 Ridge Line, Crestwood, CA',
+    guards: [],
+    reportUrl: '#',
+    coords: { x: 35, y: 35 },
+    visited: false,
+    towerco: 'TowerCo Alpha',
+    incidents: [],
+    agencyId: 'AGY01',
+  },
 ];
 
 export const alerts: Alert[] = [
@@ -333,7 +343,7 @@ export const alerts: Alert[] = [
     status: 'Active',
     callDetails:
       'Fire alarm activated on the third floor, R&D department. I am proceeding to the location to investigate. All personnel are being evacuated. Time is 2:14 AM. No smoke visible yet.',
-    images: ['https://placehold.co/600x400.png'],
+    images: ['https://placehold.co/600x400.png', 'https://placehold.co/600x400.png'],
   },
   {
     id: 'A006',
@@ -343,7 +353,7 @@ export const alerts: Alert[] = [
     guard: 'Jane Smith',
     status: 'Resolved',
     callDetails: 'False alarm at Building A. A smoke detector was triggered by dust from construction work nearby. Situation is normal. The time is 10:00 AM.',
-    images: ['https://placehold.co/600x400.png'],
+    images: ['https://placehold.co/600x400.png', 'https://placehold.co/600x400.png'],
   },
   {
     id: 'A002',
