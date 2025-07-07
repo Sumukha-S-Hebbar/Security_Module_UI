@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -19,7 +19,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Phone, Mail, Upload, Loader2, PlusCircle } from 'lucide-react';
+import { Phone, Mail, Upload, Loader2, PlusCircle, Search } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -31,6 +31,13 @@ import {
 } from '@/components/ui/dialog';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 const uploadFormSchema = z.object({
   csvFile: z
@@ -51,6 +58,8 @@ export default function TowercoAgenciesPage() {
     const [isUploading, setIsUploading] = useState(false);
     const [isAddingSite, setIsAddingSite] = useState(false);
     const { toast } = useToast();
+    const [searchQuery, setSearchQuery] = useState('');
+    const [selectedRegion, setSelectedRegion] = useState('all');
 
     const uploadForm = useForm<z.infer<typeof uploadFormSchema>>({
         resolver: zodResolver(uploadFormSchema),
@@ -97,6 +106,26 @@ export default function TowercoAgenciesPage() {
         setIsAddSiteDialogOpen(false);
     }
 
+    const regions = useMemo(() => {
+        const allRegions = securityAgencies.map((agency) => agency.regionServed);
+        return [...new Set(allRegions)];
+    }, []);
+
+    const filteredAgencies = useMemo(() => {
+        return securityAgencies.filter((agency) => {
+            const searchLower = searchQuery.toLowerCase();
+            const matchesSearch =
+                agency.name.toLowerCase().includes(searchLower) ||
+                agency.email.toLowerCase().includes(searchLower) ||
+                agency.address.toLowerCase().includes(searchLower);
+
+            const matchesRegion =
+                selectedRegion === 'all' || agency.regionServed === selectedRegion;
+
+            return matchesSearch && matchesRegion;
+        });
+    }, [searchQuery, selectedRegion]);
+
     return (
         <div className="p-4 sm:p-6 lg:p-8 space-y-6">
             <div>
@@ -108,7 +137,7 @@ export default function TowercoAgenciesPage() {
 
             <Card>
                 <CardHeader>
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-wrap items-center justify-between gap-4">
                         <div>
                             <CardTitle>All Security Agencies</CardTitle>
                             <CardDescription>A list of all security service providers.</CardDescription>
@@ -247,6 +276,31 @@ export default function TowercoAgenciesPage() {
                             </Dialog>
                         </div>
                     </div>
+                    <div className="flex items-center gap-2 pt-4">
+                        <div className="relative flex-1 md:grow-0">
+                          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                          <Input
+                            type="search"
+                            placeholder="Search agencies..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[320px]"
+                          />
+                        </div>
+                        <Select value={selectedRegion} onValueChange={setSelectedRegion}>
+                            <SelectTrigger className="w-[180px]">
+                                <SelectValue placeholder="Filter by region" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">All Regions</SelectItem>
+                                {regions.map((region) => (
+                                    <SelectItem key={region} value={region}>
+                                        {region}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
                 </CardHeader>
                 <CardContent>
                     <Table>
@@ -261,48 +315,56 @@ export default function TowercoAgenciesPage() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {securityAgencies.map((agency) => (
-                                <TableRow key={agency.id}>
-                                    <TableCell>
-                                        <div className="flex items-center gap-3">
-                                            <Avatar>
-                                                <AvatarImage src={agency.avatar} alt={agency.name} />
-                                                <AvatarFallback>{agency.name.charAt(0)}</AvatarFallback>
-                                            </Avatar>
-                                            <div>
-                                                <p className="font-medium">{agency.name}</p>
-                                                <p className="text-sm text-muted-foreground">
-                                                    ID: {agency.id}
-                                                </p>
+                            {filteredAgencies.length > 0 ? (
+                                filteredAgencies.map((agency) => (
+                                    <TableRow key={agency.id}>
+                                        <TableCell>
+                                            <div className="flex items-center gap-3">
+                                                <Avatar>
+                                                    <AvatarImage src={agency.avatar} alt={agency.name} />
+                                                    <AvatarFallback>{agency.name.charAt(0)}</AvatarFallback>
+                                                </Avatar>
+                                                <div>
+                                                    <p className="font-medium">{agency.name}</p>
+                                                    <p className="text-sm text-muted-foreground">
+                                                        ID: {agency.id}
+                                                    </p>
+                                                </div>
                                             </div>
-                                        </div>
-                                    </TableCell>
-                                    <TableCell>
-                                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                            <Phone className="h-4 w-4" />
-                                            <span>{agency.phone}</span>
-                                        </div>
-                                    </TableCell>
-                                    <TableCell>
-                                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                            <Mail className="h-4 w-4" />
-                                            <span>{agency.email}</span>
-                                        </div>
-                                    </TableCell>
-                                    <TableCell>
-                                       {agency.address}
-                                    </TableCell>
-                                    <TableCell>{agency.regionServed}</TableCell>
-                                    <TableCell>
-                                        <Button asChild variant="outline" size="sm">
-                                            <a href={`tel:${agency.phone}`}>
-                                                <Phone className="mr-2 h-4 w-4" />
-                                                Contact Agency
-                                            </a>
-                                        </Button>
+                                        </TableCell>
+                                        <TableCell>
+                                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                                <Phone className="h-4 w-4" />
+                                                <span>{agency.phone}</span>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell>
+                                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                                <Mail className="h-4 w-4" />
+                                                <span>{agency.email}</span>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell>
+                                        {agency.address}
+                                        </TableCell>
+                                        <TableCell>{agency.regionServed}</TableCell>
+                                        <TableCell>
+                                            <Button asChild variant="outline" size="sm">
+                                                <a href={`tel:${agency.phone}`}>
+                                                    <Phone className="mr-2 h-4 w-4" />
+                                                    Contact Agency
+                                                </a>
+                                            </Button>
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                            ) : (
+                                <TableRow>
+                                    <TableCell colSpan={6} className="h-24 text-center">
+                                    No agencies found.
                                     </TableCell>
                                 </TableRow>
-                            ))}
+                            )}
                         </TableBody>
                     </Table>
                 </CardContent>
