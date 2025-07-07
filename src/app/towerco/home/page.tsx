@@ -33,9 +33,25 @@ import {
 import { SiteStatusBreakdown } from './_components/site-status-breakdown';
 import { IncidentChart } from './_components/incident-chart';
 
+const LOGGED_IN_TOWERCO = 'TowerCo Alpha'; // Simulate logged-in user
+
 export default function TowercoHomePage() {
-  const activeEmergencies = alerts.filter(
+  // Filter data for the logged-in towerco
+  const towercoSites = sites.filter(
+    (site) => site.towerco === LOGGED_IN_TOWERCO
+  );
+  const towercoSiteNames = new Set(towercoSites.map((site) => site.name));
+  const towercoAlerts = alerts.filter((alert) =>
+    towercoSiteNames.has(alert.site)
+  );
+  const activeEmergencies = towercoAlerts.filter(
     (alert) => alert.type === 'Emergency' && alert.status === 'Active'
+  );
+  const towercoSiteAgencyIds = new Set(
+    towercoSites.map((site) => site.agencyId).filter(Boolean)
+  );
+  const towercoAgencies = securityAgencies.filter((agency) =>
+    towercoSiteAgencyIds.has(agency.id)
   );
 
   const getGuardByName = (name: string): Guard | undefined => {
@@ -157,17 +173,17 @@ export default function TowercoHomePage() {
       </Card>
 
       <TowercoAnalyticsDashboard
-        sites={sites}
-        agencies={securityAgencies}
+        sites={towercoSites}
+        agencies={towercoAgencies}
         alerts={activeEmergencies}
       />
 
-      <SiteStatusBreakdown sites={sites} />
+      <SiteStatusBreakdown sites={towercoSites} />
 
       <IncidentChart
-        alerts={alerts}
-        sites={sites}
-        securityAgencies={securityAgencies}
+        alerts={towercoAlerts}
+        sites={towercoSites}
+        securityAgencies={towercoAgencies}
       />
     </div>
   );

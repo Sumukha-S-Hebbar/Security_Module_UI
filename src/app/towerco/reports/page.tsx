@@ -45,8 +45,25 @@ import type { Alert, SecurityAgency, Guard, PatrollingOfficer } from '@/types';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Link from 'next/link';
 
+const LOGGED_IN_TOWERCO = 'TowerCo Alpha'; // Simulate logged-in user
+
 export default function ReportsPage() {
   const { toast } = useToast();
+
+  // Filter all data for the logged-in TOWERCO
+  const towercoSites = sites.filter(site => site.towerco === LOGGED_IN_TOWERCO);
+  const towercoSiteNames = new Set(towercoSites.map(site => site.name));
+  const towercoSiteAgencyIds = new Set(towercoSites.map(site => site.agencyId).filter(Boolean));
+
+  const towercoAgencies = securityAgencies.filter(agency => towercoSiteAgencyIds.has(agency.id));
+  const towercoGuards = guards.filter(guard => towercoSiteNames.has(guard.site));
+  const towercoGuardPatrollingOfficerIds = new Set(towercoGuards.map(g => g.patrollingOfficerId).filter(Boolean));
+  const towercoPatrollingOfficers = patrollingOfficers.filter(s => towercoGuardPatrollingOfficerIds.has(s.id));
+  const towercoAlerts = alerts.filter(alert => towercoSiteNames.has(alert.site));
+
+  const emergencyIncidents = towercoAlerts.filter(
+    (alert) => alert.type === 'Emergency'
+  );
 
   const handleGenerateReport = (name: string, type: string) => {
     toast({
@@ -97,16 +114,12 @@ export default function ReportsPage() {
     return securityAgencies.find((a) => a.id === site.agencyId);
   };
 
-  const emergencyIncidents = alerts.filter(
-    (alert) => alert.type === 'Emergency'
-  );
-
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Reports</h1>
         <p className="text-muted-foreground">
-          Generate and download detailed reports for your assets.
+          Generate and download detailed reports for your assets on {LOGGED_IN_TOWERCO}.
         </p>
       </div>
 
@@ -140,8 +153,8 @@ export default function ReportsPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {securityAgencies.map((agency) => {
-                    const agencySites = sites.filter(
+                  {towercoAgencies.map((agency) => {
+                    const agencySites = towercoSites.filter(
                       (site) => site.agencyId === agency.id
                     );
                     return (
@@ -216,7 +229,7 @@ export default function ReportsPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {sites.map((site) => {
+                  {towercoSites.map((site) => {
                     const agency = getAgencyById(site.agencyId);
                     const incidentsCount = site.incidents?.length || 0;
                     return (
@@ -273,7 +286,7 @@ export default function ReportsPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {guards.map((guard) => {
+                  {towercoGuards.map((guard) => {
                     const site = sites.find((s) => s.name === guard.site);
                     const agency = getAgencyById(site?.agencyId);
                     const selfieAccuracy =
@@ -354,13 +367,7 @@ export default function ReportsPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {patrollingOfficers.map((patrollingOfficer) => {
-                    const firstGuard = guards.find(
-                      (g) => g.patrollingOfficerId === patrollingOfficer.id
-                    );
-                    const site = sites.find((s) => s.name === firstGuard?.site);
-                    const agency = getAgencyById(site?.agencyId);
-
+                  {towercoPatrollingOfficers.map((patrollingOfficer) => {
                     const supervisedGuardIds = patrollingOfficer.assignedGuards;
                     const supervisedGuards = guards.filter((g) =>
                       supervisedGuardIds.includes(g.id)
@@ -368,7 +375,13 @@ export default function ReportsPage() {
                     const supervisedSiteNames = [
                       ...new Set(supervisedGuards.map((g) => g.site)),
                     ];
-                    const supervisorIncidents = alerts.filter(
+                    const firstGuard = towercoGuards.find(
+                      (g) => g.patrollingOfficerId === patrollingOfficer.id
+                    );
+                    const site = towercoSites.find((s) => s.name === firstGuard?.site);
+                    const agency = getAgencyById(site?.agencyId);
+
+                    const supervisorIncidents = towercoAlerts.filter(
                       (alert) =>
                         alert.type === 'Emergency' &&
                         supervisedSiteNames.includes(alert.site)

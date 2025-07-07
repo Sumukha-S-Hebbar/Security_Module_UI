@@ -57,6 +57,8 @@ import {
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 
+const LOGGED_IN_TOWERCO = 'TowerCo Alpha'; // Simulate logged-in user
+
 const uploadFormSchema = z.object({
   csvFile: z
     .any()
@@ -70,7 +72,6 @@ const uploadFormSchema = z.object({
 const addSiteFormSchema = z.object({
   name: z.string().min(1, 'Site name is required.'),
   address: z.string().min(1, 'Address is required.'),
-  towerco: z.string().min(1, 'TowerCo is required.'),
 });
 
 export default function TowercoSitesPage() {
@@ -82,7 +83,11 @@ export default function TowercoSitesPage() {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedAgency, setSelectedAgency] = useState('all');
-  const [selectedTowerCo, setSelectedTowerCo] = useState('all');
+
+  const towercoSites = useMemo(
+    () => sites.filter((site) => site.towerco === LOGGED_IN_TOWERCO),
+    []
+  );
 
   const uploadForm = useForm<z.infer<typeof uploadFormSchema>>({
     resolver: zodResolver(uploadFormSchema),
@@ -90,7 +95,7 @@ export default function TowercoSitesPage() {
 
   const addSiteForm = useForm<z.infer<typeof addSiteFormSchema>>({
     resolver: zodResolver(addSiteFormSchema),
-    defaultValues: { name: '', address: '', towerco: '' },
+    defaultValues: { name: '', address: '' },
   });
 
   async function onUploadSubmit(values: z.infer<typeof uploadFormSchema>) {
@@ -108,7 +113,7 @@ export default function TowercoSitesPage() {
 
   async function onAddSiteSubmit(values: z.infer<typeof addSiteFormSchema>) {
     setIsAddingSite(true);
-    console.log('New site data:', values);
+    console.log('New site data:', { ...values, towerco: LOGGED_IN_TOWERCO });
     await new Promise((resolve) => setTimeout(resolve, 1500));
     toast({
       title: 'Site Added',
@@ -127,31 +132,25 @@ export default function TowercoSitesPage() {
   };
 
   const agencies = useMemo(() => {
-    return securityAgencies;
-  }, []);
-
-  const towerCos = useMemo(() => {
-    const allTowerCos = sites.map((site) => site.towerco);
-    return [...new Set(allTowerCos)];
-  }, []);
+    const agencyIds = new Set(
+      towercoSites.map((s) => s.agencyId).filter(Boolean)
+    );
+    return securityAgencies.filter((a) => agencyIds.has(a.id));
+  }, [towercoSites]);
 
   const filteredSites = useMemo(() => {
-    return sites.filter((site) => {
+    return towercoSites.filter((site) => {
       const searchLower = searchQuery.toLowerCase();
       const matchesSearch =
         site.name.toLowerCase().includes(searchLower) ||
-        site.address.toLowerCase().includes(searchLower) ||
-        site.towerco.toLowerCase().includes(searchLower);
+        site.address.toLowerCase().includes(searchLower);
 
       const matchesAgency =
         selectedAgency === 'all' || site.agencyId === selectedAgency;
 
-      const matchesTowerCo =
-        selectedTowerCo === 'all' || site.towerco === selectedTowerCo;
-
-      return matchesSearch && matchesAgency && matchesTowerCo;
+      return matchesSearch && matchesAgency;
     });
-  }, [searchQuery, selectedAgency, selectedTowerCo]);
+  }, [searchQuery, selectedAgency, towercoSites]);
 
   const getAgencyName = (agencyId?: string) => {
     return agencies.find((a) => a.id === agencyId)?.name || 'Unassigned';
@@ -171,7 +170,9 @@ export default function TowercoSitesPage() {
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
               <CardTitle>All Sites</CardTitle>
-              <CardDescription>A list of all your sites.</CardDescription>
+              <CardDescription>
+                A list of all your sites for {LOGGED_IN_TOWERCO}.
+              </CardDescription>
             </div>
             <div className="flex items-center gap-2">
               <Dialog
@@ -212,8 +213,8 @@ export default function TowercoSitesPage() {
                                 />
                               </FormControl>
                               <FormDescription>
-                                The CSV should contain columns: name, address,
-                                towerco.
+                                The CSV should contain columns: name, address.
+                                The TowerCo will be set to {LOGGED_IN_TOWERCO}.
                               </FormDescription>
                               <FormMessage />
                             </FormItem>
@@ -253,7 +254,8 @@ export default function TowercoSitesPage() {
                   <DialogHeader>
                     <DialogTitle>Add a New Site</DialogTitle>
                     <DialogDescription>
-                      Fill in the details below to add a new site profile.
+                      Fill in the details below to add a new site for{' '}
+                      {LOGGED_IN_TOWERCO}.
                     </DialogDescription>
                   </DialogHeader>
                   <Form {...addSiteForm}>
@@ -268,7 +270,10 @@ export default function TowercoSitesPage() {
                           <FormItem>
                             <FormLabel>Site Name</FormLabel>
                             <FormControl>
-                              <Input placeholder="e.g., North Tower" {...field} />
+                              <Input
+                                placeholder="e.g., North Tower"
+                                {...field}
+                              />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -283,22 +288,6 @@ export default function TowercoSitesPage() {
                             <FormControl>
                               <Input
                                 placeholder="e.g., 123 Main St, Anytown, USA"
-                                {...field}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={addSiteForm.control}
-                        name="towerco"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>TowerCo</FormLabel>
-                            <FormControl>
-                              <Input
-                                placeholder="e.g., TowerCo Alpha"
                                 {...field}
                               />
                             </FormControl>
@@ -344,22 +333,6 @@ export default function TowercoSitesPage() {
                 {agencies.map((agency) => (
                   <SelectItem key={agency.id} value={agency.id}>
                     {agency.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select
-              value={selectedTowerCo}
-              onValueChange={setSelectedTowerCo}
-            >
-              <SelectTrigger className="w-full sm:w-[180px]">
-                <SelectValue placeholder="Filter by TowerCo" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All TowerCos</SelectItem>
-                {towerCos.map((towerco) => (
-                  <SelectItem key={towerco} value={towerco}>
-                    {towerco}
                   </SelectItem>
                 ))}
               </SelectContent>

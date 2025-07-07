@@ -44,6 +44,8 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 
+const LOGGED_IN_TOWERCO = 'TowerCo Alpha'; // Simulate logged-in user
+
 export default function AgencyReportPage() {
   const params = useParams();
   const { toast } = useToast();
@@ -71,7 +73,10 @@ export default function AgencyReportPage() {
     // In a real app, this would trigger a download.
   };
 
-  const agencySites = sites.filter((site) => site.agencyId === agency.id);
+  const agencySites = sites.filter(
+    (site) =>
+      site.agencyId === agency.id && site.towerco === LOGGED_IN_TOWERCO
+  );
   const agencySiteNames = agencySites.map((site) => site.name);
 
   const agencyIncidents = alerts.filter(
@@ -112,7 +117,7 @@ export default function AgencyReportPage() {
         </Button>
         <div>
             <h1 className="text-3xl font-bold tracking-tight">Agency Report</h1>
-            <p className="text-muted-foreground">Detailed overview for {agency.name}.</p>
+            <p className="text-muted-foreground">Detailed overview for {agency.name} on {LOGGED_IN_TOWERCO}.</p>
         </div>
       </div>
       <Card>

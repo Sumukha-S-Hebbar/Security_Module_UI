@@ -7,7 +7,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useToast } from '@/hooks/use-toast';
-import { securityAgencies } from '@/lib/data';
+import { securityAgencies, sites } from '@/lib/data';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -30,6 +30,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+
+const LOGGED_IN_TOWERCO = 'TowerCo Alpha'; // Simulate logged-in user
 
 const uploadFormSchema = z.object({
   csvFile: z
@@ -58,6 +60,12 @@ export default function TowercoAgenciesPage() {
     const [selectedCountry, setSelectedCountry] = useState('all');
     const [selectedState, setSelectedState] = useState('all');
     const [selectedCity, setSelectedCity] = useState('all');
+
+    const towercoAgencies = useMemo(() => {
+        const towercoSites = sites.filter(site => site.towerco === LOGGED_IN_TOWERCO);
+        const agencyIds = new Set(towercoSites.map(site => site.agencyId).filter(Boolean));
+        return securityAgencies.filter(agency => agencyIds.has(agency.id));
+    }, []);
 
     const uploadForm = useForm<z.infer<typeof uploadFormSchema>>({
         resolver: zodResolver(uploadFormSchema),
@@ -116,29 +124,29 @@ export default function TowercoAgenciesPage() {
     };
 
     const countries = useMemo(() => {
-        const allCountries = securityAgencies.map((agency) => agency.country);
+        const allCountries = towercoAgencies.map((agency) => agency.country);
         return [...new Set(allCountries)];
-    }, []);
+    }, [towercoAgencies]);
 
     const states = useMemo(() => {
         if (selectedCountry === 'all') {
             return [];
         }
-        const allStates = securityAgencies
+        const allStates = towercoAgencies
             .filter((agency) => agency.country === selectedCountry)
             .map((agency) => agency.state);
         return [...new Set(allStates)];
-    }, [selectedCountry]);
+    }, [selectedCountry, towercoAgencies]);
 
     const cities = useMemo(() => {
         if (selectedState === 'all' || selectedCountry === 'all') {
             return [];
         }
-        const allCities = securityAgencies
+        const allCities = towercoAgencies
             .filter((agency) => agency.country === selectedCountry && agency.state === selectedState)
             .map((agency) => agency.city);
         return [...new Set(allCities)];
-    }, [selectedCountry, selectedState]);
+    }, [selectedCountry, selectedState, towercoAgencies]);
 
     const handleCountryChange = (country: string) => {
         setSelectedCountry(country);
@@ -153,7 +161,7 @@ export default function TowercoAgenciesPage() {
 
 
     const filteredAgencies = useMemo(() => {
-        return securityAgencies.filter((agency) => {
+        return towercoAgencies.filter((agency) => {
             const searchLower = searchQuery.toLowerCase();
             const matchesSearch =
                 agency.name.toLowerCase().includes(searchLower) ||
@@ -173,14 +181,14 @@ export default function TowercoAgenciesPage() {
 
             return matchesSearch && matchesCountry && matchesState && matchesCity;
         });
-    }, [searchQuery, selectedCountry, selectedState, selectedCity]);
+    }, [searchQuery, selectedCountry, selectedState, selectedCity, towercoAgencies]);
 
     return (
         <div className="p-4 sm:p-6 lg:p-8 space-y-6">
             <div>
                 <h1 className="text-3xl font-bold tracking-tight">Security Agency Management</h1>
                 <p className="text-muted-foreground">
-                    Add, view, and manage contracted security agencies.
+                    Add, view, and manage contracted security agencies for {LOGGED_IN_TOWERCO}.
                 </p>
             </div>
 
