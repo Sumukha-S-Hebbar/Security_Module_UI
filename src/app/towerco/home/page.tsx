@@ -31,6 +31,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { SiteStatusBreakdown } from './_components/site-status-breakdown';
+import { IncidentChart } from './_components/incident-chart';
 
 export default function TowercoHomePage() {
   const activeEmergencies = alerts.filter(
@@ -162,6 +163,8 @@ export default function TowercoHomePage() {
       />
 
       <SiteStatusBreakdown sites={sites} />
+
+      <IncidentChart alerts={alerts} />
     </div>
   );
 }
