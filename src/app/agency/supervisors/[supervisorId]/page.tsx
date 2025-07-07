@@ -210,6 +210,7 @@ export default function AgencyPatrollingOfficerReportPage() {
                   <TableHead>Site</TableHead>
                   <TableHead>Guard</TableHead>
                   <TableHead>Status</TableHead>
+                  <TableHead>Details</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -220,6 +221,7 @@ export default function AgencyPatrollingOfficerReportPage() {
                     <TableCell>{incident.site}</TableCell>
                     <TableCell>{incident.guard}</TableCell>
                     <TableCell>{getStatusBadge(incident.status)}</TableCell>
+                    <TableCell className="max-w-xs truncate">{incident.callDetails}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
