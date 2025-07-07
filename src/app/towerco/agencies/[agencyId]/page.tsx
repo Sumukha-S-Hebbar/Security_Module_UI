@@ -10,6 +10,7 @@ import {
   guards,
   patrollingOfficers,
 } from '@/lib/data';
+import type { Alert } from '@/types';
 import {
   Card,
   CardContent,
@@ -77,11 +78,11 @@ export default function AgencyReportPage() {
     (site) =>
       site.agencyId === agency.id && site.towerco === LOGGED_IN_TOWERCO
   );
-  const agencySiteNames = agencySites.map((site) => site.name);
+  const agencySiteNames = new Set(agencySites.map((site) => site.name));
 
   const agencyIncidents = alerts.filter(
     (alert) =>
-      agencySiteNames.includes(alert.site) && alert.type === 'Emergency'
+      agencySiteNames.has(alert.site) && alert.type === 'Emergency'
   );
   const totalIncidents = agencyIncidents.length;
   const resolvedIncidents = agencyIncidents.filter(
@@ -89,7 +90,7 @@ export default function AgencyReportPage() {
   ).length;
 
   const agencyGuards = guards.filter((guard) =>
-    agencySiteNames.includes(guard.site)
+    agencySiteNames.has(guard.site)
   );
   const agencyPatrollingOfficerIds = new Set(
     agencySites.map((s) => s.patrollingOfficerId).filter(Boolean)
@@ -104,6 +105,19 @@ export default function AgencyReportPage() {
     assignmentDates.length > 0
       ? new Date(Math.min(...assignmentDates.map((d) => d.getTime())))
       : null;
+      
+  const getStatusBadge = (status: Alert['status']) => {
+    switch (status) {
+      case 'Active':
+        return <Badge variant="destructive">Active</Badge>;
+      case 'Under Review':
+        return <Badge variant="default">Under Review</Badge>;
+      case 'Resolved':
+        return <Badge variant="secondary">Resolved</Badge>;
+      default:
+        return <Badge variant="secondary">{status}</Badge>;
+    }
+  };
 
 
   return (
@@ -300,6 +314,44 @@ export default function AgencyReportPage() {
           ) : (
             <p className="text-muted-foreground text-center py-4">
               No sites are currently assigned to this agency.
+            </p>
+          )}
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader>
+          <CardTitle>Recent Incidents</CardTitle>
+          <CardDescription>
+            A log of emergency incidents at sites managed by {agency.name}.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {agencyIncidents.length > 0 ? (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Incident ID</TableHead>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Site</TableHead>
+                  <TableHead>Guard</TableHead>
+                  <TableHead>Status</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {agencyIncidents.map((incident) => (
+                  <TableRow key={incident.id}>
+                    <TableCell>{incident.id}</TableCell>
+                    <TableCell>{new Date(incident.date).toLocaleDateString()}</TableCell>
+                    <TableCell>{incident.site}</TableCell>
+                    <TableCell>{incident.guard}</TableCell>
+                    <TableCell>{getStatusBadge(incident.status)}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          ) : (
+            <p className="text-muted-foreground text-center py-4">
+              No recent incidents for this agency's sites.
             </p>
           )}
         </CardContent>
