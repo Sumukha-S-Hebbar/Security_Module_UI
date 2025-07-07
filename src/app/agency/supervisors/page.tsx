@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Users, Phone, Map, FileDown, Upload, PlusCircle, Loader2, Search, Mail } from 'lucide-react';
+import { Users, Phone, Map, FileDown, Upload, PlusCircle, Loader2, Search, Mail, Eye } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import {
   Dialog,
@@ -30,6 +30,7 @@ import {
 } from '@/components/ui/dialog';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import Link from 'next/link';
 
 const LOGGED_IN_AGENCY_ID = 'AGY01'; // Simulate logged-in agency
 
@@ -55,8 +56,7 @@ export default function AgencyPatrollingOfficersPage() {
     const [searchQuery, setSearchQuery] = useState('');
 
     const agencySites = useMemo(() => sites.filter(site => site.agencyId === LOGGED_IN_AGENCY_ID), []);
-    const agencySiteNames = useMemo(() => new Set(agencySites.map(s => s.name)), [agencySites]);
-    const agencyGuards = useMemo(() => guards.filter(g => agencySiteNames.has(g.site)), [agencySiteNames]);
+    
     const agencyPatrollingOfficers = useMemo(() => {
         const poIds = new Set(agencySites.map(s => s.patrollingOfficerId).filter(Boolean));
         return patrollingOfficers.filter(po => poIds.has(po.id));
@@ -65,7 +65,7 @@ export default function AgencyPatrollingOfficersPage() {
     const getAssignedGuardsCount = (patrollingOfficerId: string) => {
         const sitesForPO = agencySites.filter(s => s.patrollingOfficerId === patrollingOfficerId);
         const siteNamesForPO = new Set(sitesForPO.map(s => s.name));
-        return agencyGuards.filter(g => siteNamesForPO.has(g.site)).length;
+        return guards.filter(g => siteNamesForPO.has(g.site)).length;
     };
 
     const getAssignedSitesForPO = (patrollingOfficerId: string) => {
@@ -305,7 +305,7 @@ export default function AgencyPatrollingOfficersPage() {
                                 <CardContent className="flex-grow space-y-2 text-sm">
                                     <div className="flex items-center gap-2 text-muted-foreground">
                                         <Phone className="h-4 w-4 flex-shrink-0" />
-                                        <span>{patrollingOfficer.phone}</span>
+                                        <a href={`tel:${patrollingOfficer.phone}`} className="hover:underline">{patrollingOfficer.phone}</a>
                                     </div>
                                     <div className="flex items-center gap-2 text-muted-foreground">
                                         <Mail className="h-4 w-4 flex-shrink-0" />
@@ -324,10 +324,10 @@ export default function AgencyPatrollingOfficersPage() {
                                 </CardContent>
                                 <CardFooter className="grid grid-cols-2 gap-2">
                                     <Button asChild variant="outline" size="sm">
-                                        <a href={`tel:${patrollingOfficer.phone}`}>
-                                            <Phone className="mr-2 h-4 w-4" />
-                                            Contact
-                                        </a>
+                                        <Link href={`/agency/supervisors/${patrollingOfficer.id}`}>
+                                            <Eye className="mr-2 h-4 w-4" />
+                                            View Report
+                                        </Link>
                                     </Button>
                                     <Button
                                         variant="outline"
@@ -335,7 +335,7 @@ export default function AgencyPatrollingOfficersPage() {
                                         onClick={() => handleDownloadReport(patrollingOfficer)}
                                     >
                                         <FileDown className="mr-2 h-4 w-4" />
-                                        Report
+                                        Download Report
                                     </Button>
                                 </CardFooter>
                                 </Card>
