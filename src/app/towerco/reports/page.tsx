@@ -20,7 +20,7 @@ import {
   sites,
   alerts,
   guards,
-  supervisors,
+  patrollingOfficers,
 } from '@/lib/data';
 import {
   Table,
@@ -32,7 +32,7 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import type { Alert, SecurityAgency, Guard, Supervisor } from '@/types';
+import type { Alert, SecurityAgency, Guard, PatrollingOfficer } from '@/types';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 export default function ReportsPage() {
@@ -67,14 +67,14 @@ export default function ReportsPage() {
     return guards.find((g) => g.name === name);
   };
 
-  const getSupervisorByGuardName = (
+  const getPatrollingOfficerByGuardName = (
     guardName: string
-  ): Supervisor | undefined => {
+  ): PatrollingOfficer | undefined => {
     const guard = getGuardByName(guardName);
-    if (!guard || !guard.supervisorId) {
+    if (!guard || !guard.patrollingOfficerId) {
       return undefined;
     }
-    return supervisors.find((s) => s.id === guard.supervisorId);
+    return patrollingOfficers.find((s) => s.id === guard.patrollingOfficerId);
   };
 
   const getAgencyBySiteName = (
@@ -105,7 +105,7 @@ export default function ReportsPage() {
           <TabsTrigger value="agency">Agency Reports</TabsTrigger>
           <TabsTrigger value="site">Site Reports</TabsTrigger>
           <TabsTrigger value="guard">Guard Reports</TabsTrigger>
-          <TabsTrigger value="supervisor">Supervisor Reports</TabsTrigger>
+          <TabsTrigger value="supervisor">Patrolling Officer Reports</TabsTrigger>
           <TabsTrigger value="incident">Incident Reports</TabsTrigger>
         </TabsList>
 
@@ -330,9 +330,9 @@ export default function ReportsPage() {
         <TabsContent value="supervisor" className="mt-6">
           <Card>
             <CardHeader>
-              <CardTitle>Supervisor Activity Reports</CardTitle>
+              <CardTitle>Patrolling Officer Activity Reports</CardTitle>
               <CardDescription>
-                Generate reports summarizing supervisor activities and team
+                Generate reports summarizing patrolling officer activities and team
                 performance.
               </CardDescription>
             </CardHeader>
@@ -340,7 +340,7 @@ export default function ReportsPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Supervisor</TableHead>
+                    <TableHead>Patrolling Officer</TableHead>
                     <TableHead>Agency</TableHead>
                     <TableHead>Guards Managed</TableHead>
                     <TableHead>Incidents</TableHead>
@@ -348,14 +348,14 @@ export default function ReportsPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {supervisors.map((supervisor) => {
+                  {patrollingOfficers.map((patrollingOfficer) => {
                     const firstGuard = guards.find(
-                      (g) => g.supervisorId === supervisor.id
+                      (g) => g.patrollingOfficerId === patrollingOfficer.id
                     );
                     const site = sites.find((s) => s.name === firstGuard?.site);
                     const agency = getAgencyById(site?.agencyId);
 
-                    const supervisedGuardIds = supervisor.assignedGuards;
+                    const supervisedGuardIds = patrollingOfficer.assignedGuards;
                     const supervisedGuards = guards.filter((g) =>
                       supervisedGuardIds.includes(g.id)
                     );
@@ -370,22 +370,22 @@ export default function ReportsPage() {
                     const incidentsCount = supervisorIncidents.length;
 
                     return (
-                      <TableRow key={supervisor.id}>
+                      <TableRow key={patrollingOfficer.id}>
                         <TableCell>
                           <div className="flex items-center gap-3">
                             <Avatar>
                               <AvatarImage
-                                src={supervisor.avatar}
-                                alt={supervisor.name}
+                                src={patrollingOfficer.avatar}
+                                alt={patrollingOfficer.name}
                               />
                               <AvatarFallback>
-                                {supervisor.name.charAt(0)}
+                                {patrollingOfficer.name.charAt(0)}
                               </AvatarFallback>
                             </Avatar>
                             <div>
-                              <p className="font-medium">{supervisor.name}</p>
+                              <p className="font-medium">{patrollingOfficer.name}</p>
                               <p className="text-sm text-muted-foreground">
-                                ID: {supervisor.id}
+                                ID: {patrollingOfficer.id}
                               </p>
                             </div>
                           </div>
@@ -395,7 +395,7 @@ export default function ReportsPage() {
                           <div className="flex items-center gap-2">
                             <Users className="h-4 w-4 text-muted-foreground" />
                             <span>
-                              {supervisor.assignedGuards.length} Guards
+                              {patrollingOfficer.assignedGuards.length} Guards
                             </span>
                           </div>
                         </TableCell>
@@ -407,8 +407,8 @@ export default function ReportsPage() {
                             size="sm"
                             onClick={() =>
                               handleGenerateReport(
-                                supervisor.name,
-                                'Supervisor'
+                                patrollingOfficer.name,
+                                'Patrolling Officer'
                               )
                             }
                           >
@@ -441,7 +441,7 @@ export default function ReportsPage() {
                     <TableHead>Date</TableHead>
                     <TableHead>Site</TableHead>
                     <TableHead>Agency</TableHead>
-                    <TableHead>Supervisor</TableHead>
+                    <TableHead>Patrolling Officer</TableHead>
                     <TableHead>Guard</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
@@ -450,7 +450,7 @@ export default function ReportsPage() {
                 <TableBody>
                   {emergencyIncidents.map((incident) => {
                     const agency = getAgencyBySiteName(incident.site);
-                    const supervisor = getSupervisorByGuardName(
+                    const patrollingOfficer = getPatrollingOfficerByGuardName(
                       incident.guard
                     );
                     return (
@@ -459,7 +459,7 @@ export default function ReportsPage() {
                         <TableCell>{incident.date}</TableCell>
                         <TableCell>{incident.site}</TableCell>
                         <TableCell>{agency?.name || 'N/A'}</TableCell>
-                        <TableCell>{supervisor?.name || 'N/A'}</TableCell>
+                        <TableCell>{patrollingOfficer?.name || 'N/A'}</TableCell>
                         <TableCell>{incident.guard}</TableCell>
                         <TableCell>
                           {getStatusBadge(incident.status)}

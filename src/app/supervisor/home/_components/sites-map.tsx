@@ -39,7 +39,7 @@ export function SitesMap({ sites: initialSites }: { sites: Site[] }) {
           <div className="relative w-full aspect-[16/9] rounded-lg overflow-hidden">
             <Image
               src="https://placehold.co/1200x675/f0f2f5/f0f2f5.png"
-              alt="Map of supervised sites"
+              alt="Map of patrolled sites"
               fill
               className="object-cover"
               data-ai-hint="world map"

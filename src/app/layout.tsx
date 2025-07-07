@@ -6,8 +6,8 @@ import { Toaster } from '@/components/ui/toaster';
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 
 export const metadata: Metadata = {
-  title: 'GuardLink Supervisor',
-  description: 'Supervisor dashboard for GuardLink security management.',
+  title: 'GuardLink Patrolling Officer',
+  description: 'Patrolling officer dashboard for GuardLink security management.',
 };
 
 export default function RootLayout({

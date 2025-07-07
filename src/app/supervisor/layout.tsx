@@ -1,12 +1,12 @@
 
-import SupervisorSidebar from '@/components/supervisor/sidebar';
+import PatrollingOfficerSidebar from '@/components/supervisor/sidebar';
 import {
   SidebarProvider,
   Sidebar,
   SidebarInset,
 } from '@/components/ui/sidebar';
 
-export default function SupervisorLayout({
+export default function PatrollingOfficerLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -14,7 +14,7 @@ export default function SupervisorLayout({
   return (
     <SidebarProvider>
       <Sidebar>
-        <SupervisorSidebar />
+        <PatrollingOfficerSidebar />
       </Sidebar>
       <SidebarInset>{children}</SidebarInset>
     </SidebarProvider>

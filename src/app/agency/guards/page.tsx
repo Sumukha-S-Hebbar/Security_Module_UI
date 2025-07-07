@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import type { Supervisor, Site, Guard } from '@/types';
-import { guards, supervisors, sites } from '@/lib/data';
+import type { PatrollingOfficer, Site, Guard } from '@/types';
+import { guards, patrollingOfficers, sites } from '@/lib/data';
 import {
   Table,
   TableBody,
@@ -34,25 +34,25 @@ import { Badge } from '@/components/ui/badge';
 
 export default function AgencyGuardsPage() {
   const { toast } = useToast();
-  const [selectedSupervisors, setSelectedSupervisors] = useState<{
+  const [selectedPatrollingOfficers, setSelectedPatrollingOfficers] = useState<{
     [key: string]: string;
   }>({});
   const [selectedSites, setSelectedSites] = useState<{
     [key: string]: string;
   }>({});
 
-  const getSupervisorById = (id?: string) =>
-    supervisors.find((s) => s.id === id);
+  const getPatrollingOfficerById = (id?: string) =>
+    patrollingOfficers.find((s) => s.id === id);
 
-  const assignedGuards = guards.filter((guard) => guard.supervisorId);
-  const unassignedGuards = guards.filter((guard) => !guard.supervisorId);
+  const assignedGuards = guards.filter((guard) => guard.patrollingOfficerId);
+  const unassignedGuards = guards.filter((guard) => !guard.patrollingOfficerId);
 
-  const handleSupervisorSelect = (guardId: string, supervisorId: string) => {
-    setSelectedSupervisors((prev) => ({
+  const handlePatrollingOfficerSelect = (guardId: string, patrollingOfficerId: string) => {
+    setSelectedPatrollingOfficers((prev) => ({
       ...prev,
-      [guardId]: supervisorId,
+      [guardId]: patrollingOfficerId,
     }));
-    // When supervisor changes, reset the site selection for that guard
+    // When patrolling officer changes, reset the site selection for that guard
     setSelectedSites((prev) => {
       const newState = { ...prev };
       delete newState[guardId];
@@ -68,23 +68,23 @@ export default function AgencyGuardsPage() {
   };
 
   const handleAssign = (guardId: string) => {
-    const supervisorId = selectedSupervisors[guardId];
+    const patrollingOfficerId = selectedPatrollingOfficers[guardId];
     const siteId = selectedSites[guardId];
-    if (!supervisorId || !siteId) {
+    if (!patrollingOfficerId || !siteId) {
       toast({
         variant: 'destructive',
         title: 'Error',
-        description: 'Please select a supervisor and a site.',
+        description: 'Please select a patrolling officer and a site.',
       });
       return;
     }
     const guardName = guards.find((g) => g.id === guardId)?.name;
-    const supervisorName = supervisors.find((s) => s.id === supervisorId)?.name;
+    const patrollingOfficerName = patrollingOfficers.find((s) => s.id === patrollingOfficerId)?.name;
     const siteName = sites.find((s) => s.id === siteId)?.name;
 
     toast({
       title: 'Guard Assigned',
-      description: `${guardName} has been assigned to ${siteName} under supervisor ${supervisorName}. The guard will be moved to the assigned list on next refresh.`,
+      description: `${guardName} has been assigned to ${siteName} under patrolling officer ${patrollingOfficerName}. The guard will be moved to the assigned list on next refresh.`,
     });
     // In a real app, you would make an API call here to update the database
     // and then refetch the data or update the state locally.
@@ -98,28 +98,28 @@ export default function AgencyGuardsPage() {
     // In a real app, this would trigger a file download.
   };
 
-  // Determine which sites are managed by which supervisor
-  const siteToSupervisorMap: Record<string, string> = {};
+  // Determine which sites are managed by which patrolling officer
+  const siteToPatrollingOfficerMap: Record<string, string> = {};
   sites.forEach((site) => {
     const firstAssignedGuard = guards.find(
-      (g) => g.supervisorId && g.site === site.name
+      (g) => g.patrollingOfficerId && g.site === site.name
     );
     if (firstAssignedGuard) {
-      siteToSupervisorMap[site.id] = firstAssignedGuard.supervisorId!;
+      siteToPatrollingOfficerMap[site.id] = firstAssignedGuard.patrollingOfficerId!;
     }
   });
 
   const unassignedSitesList = sites.filter(
-    (site) => !siteToSupervisorMap[site.id]
+    (site) => !siteToPatrollingOfficerMap[site.id]
   );
 
-  const supervisorToAvailableSitesMap: Record<string, Site[]> =
-    supervisors.reduce(
-      (acc, supervisor) => {
+  const patrollingOfficerToAvailableSitesMap: Record<string, Site[]> =
+    patrollingOfficers.reduce(
+      (acc, patrollingOfficer) => {
         const managedSites = sites.filter(
-          (site) => siteToSupervisorMap[site.id] === supervisor.id
+          (site) => siteToPatrollingOfficerMap[site.id] === patrollingOfficer.id
         );
-        acc[supervisor.id] = [...managedSites, ...unassignedSitesList].sort(
+        acc[patrollingOfficer.id] = [...managedSites, ...unassignedSitesList].sort(
           (a, b) => a.name.localeCompare(b.name)
         );
         return acc;
@@ -144,7 +144,7 @@ export default function AgencyGuardsPage() {
         <CardHeader>
           <CardTitle>Assigned Security Guards</CardTitle>
           <CardDescription>
-            A list of all guards with an assigned supervisor.
+            A list of all guards with an assigned patrolling officer.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -154,7 +154,7 @@ export default function AgencyGuardsPage() {
                 <TableHead>Guard</TableHead>
                 <TableHead>Site</TableHead>
                 <TableHead>Incidents at Site</TableHead>
-                <TableHead>Supervisor</TableHead>
+                <TableHead>Patrolling Officer</TableHead>
                 <TableHead>Perimeter Accuracy</TableHead>
                 <TableHead>Selfie Check-in Accuracy</TableHead>
                 <TableHead>Phone</TableHead>
@@ -163,7 +163,7 @@ export default function AgencyGuardsPage() {
             </TableHeader>
             <TableBody>
               {assignedGuards.map((guard) => {
-                const supervisor = getSupervisorById(guard.supervisorId);
+                const patrollingOfficer = getPatrollingOfficerById(guard.patrollingOfficerId);
                 const siteDetails = sites.find((s) => s.name === guard.site);
                 const incidentsCount = siteDetails?.incidents?.length || 0;
                 const selfieAccuracy =
@@ -196,7 +196,7 @@ export default function AgencyGuardsPage() {
                     <TableCell>
                       <Badge variant="secondary">{incidentsCount}</Badge>
                     </TableCell>
-                    <TableCell>{supervisor?.name || 'Unassigned'}</TableCell>
+                    <TableCell>{patrollingOfficer?.name || 'Unassigned'}</TableCell>
                     <TableCell>
                       {guard.performance?.perimeterAccuracy}%
                     </TableCell>
@@ -225,7 +225,7 @@ export default function AgencyGuardsPage() {
           <CardHeader>
             <CardTitle>Unassigned Security Guards</CardTitle>
             <CardDescription>
-              Assign a supervisor and site to a guard.
+              Assign a patrolling officer and site to a guard.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -234,16 +234,16 @@ export default function AgencyGuardsPage() {
                 <TableRow>
                   <TableHead>Guard</TableHead>
                   <TableHead>Phone</TableHead>
-                  <TableHead>Assign Supervisor</TableHead>
+                  <TableHead>Assign Patrolling Officer</TableHead>
                   <TableHead>Assign Site</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {unassignedGuards.map((guard) => {
-                  const selectedSupervisorId = selectedSupervisors[guard.id];
-                  const availableSites = selectedSupervisorId
-                    ? supervisorToAvailableSitesMap[selectedSupervisorId]
+                  const selectedPatrollingOfficerId = selectedPatrollingOfficers[guard.id];
+                  const availableSites = selectedPatrollingOfficerId
+                    ? patrollingOfficerToAvailableSitesMap[selectedPatrollingOfficerId]
                     : [];
 
                   return (
@@ -267,21 +267,21 @@ export default function AgencyGuardsPage() {
                       <TableCell>{guard.phone}</TableCell>
                       <TableCell>
                         <Select
-                          value={selectedSupervisors[guard.id] || ''}
+                          value={selectedPatrollingOfficers[guard.id] || ''}
                           onValueChange={(value) =>
-                            handleSupervisorSelect(guard.id, value)
+                            handlePatrollingOfficerSelect(guard.id, value)
                           }
                         >
                           <SelectTrigger className="w-[180px]">
-                            <SelectValue placeholder="Select Supervisor" />
+                            <SelectValue placeholder="Select Patrolling Officer" />
                           </SelectTrigger>
                           <SelectContent>
-                            {supervisors.map((supervisor) => (
+                            {patrollingOfficers.map((patrollingOfficer) => (
                               <SelectItem
-                                key={supervisor.id}
-                                value={supervisor.id}
+                                key={patrollingOfficer.id}
+                                value={patrollingOfficer.id}
                               >
-                                {supervisor.name}
+                                {patrollingOfficer.name}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -293,7 +293,7 @@ export default function AgencyGuardsPage() {
                           onValueChange={(value) =>
                             handleSiteSelect(guard.id, value)
                           }
-                          disabled={!selectedSupervisorId}
+                          disabled={!selectedPatrollingOfficerId}
                         >
                           <SelectTrigger className="w-[180px]">
                             <SelectValue placeholder="Select Site" />
@@ -307,7 +307,7 @@ export default function AgencyGuardsPage() {
                               ))
                             ) : (
                               <SelectItem value="no-sites" disabled>
-                                Select supervisor first
+                                Select patrolling officer first
                               </SelectItem>
                             )}
                           </SelectContent>
@@ -318,7 +318,7 @@ export default function AgencyGuardsPage() {
                           size="sm"
                           onClick={() => handleAssign(guard.id)}
                           disabled={
-                            !selectedSupervisors[guard.id] ||
+                            !selectedPatrollingOfficers[guard.id] ||
                             !selectedSites[guard.id]
                           }
                         >

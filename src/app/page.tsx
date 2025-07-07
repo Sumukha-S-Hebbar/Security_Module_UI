@@ -17,7 +17,7 @@ export default function RootPage() {
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           <Button asChild size="lg">
-            <Link href="/supervisor/home">Supervisor Portal</Link>
+            <Link href="/supervisor/home">Patrolling Officer Portal</Link>
           </Button>
           <Button asChild variant="outline" size="lg">
             <Link href="/agency/home">Agency Portal</Link>

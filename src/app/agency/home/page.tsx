@@ -1,6 +1,6 @@
 
-import { alerts, guards, sites, supervisors } from '@/lib/data';
-import type { Guard, Supervisor } from '@/types';
+import { alerts, guards, sites, patrollingOfficers } from '@/lib/data';
+import type { Guard, PatrollingOfficer } from '@/types';
 import { AgencyAnalyticsDashboard } from './_components/agency-analytics-dashboard';
 import {
   Card,
@@ -34,14 +34,14 @@ export default function AgencyHomePage() {
     return guards.find((g) => g.name === name);
   };
 
-  const getSupervisorByGuardName = (
+  const getPatrollingOfficerByGuardName = (
     guardName: string
-  ): Supervisor | undefined => {
+  ): PatrollingOfficer | undefined => {
     const guard = getGuardByName(guardName);
-    if (!guard || !guard.supervisorId) {
+    if (!guard || !guard.patrollingOfficerId) {
       return undefined;
     }
-    return supervisors.find((s) => s.id === guard.supervisorId);
+    return patrollingOfficers.find((s) => s.id === guard.patrollingOfficerId);
   };
 
   return (
@@ -56,7 +56,7 @@ export default function AgencyHomePage() {
       <AgencyAnalyticsDashboard
         guards={guards}
         sites={sites}
-        supervisors={supervisors}
+        patrollingOfficers={patrollingOfficers}
       />
 
       <Card className="border-destructive bg-destructive/10">
@@ -71,7 +71,7 @@ export default function AgencyHomePage() {
                 <TableRow>
                   <TableHead>Site</TableHead>
                   <TableHead>Guard</TableHead>
-                  <TableHead>Supervisor</TableHead>
+                  <TableHead>Patrolling Officer</TableHead>
                   <TableHead>Date</TableHead>
                   <TableHead>Contact</TableHead>
                 </TableRow>
@@ -79,7 +79,7 @@ export default function AgencyHomePage() {
               <TableBody>
                 {activeEmergencies.map((alert) => {
                   const guardDetails = getGuardByName(alert.guard);
-                  const supervisorDetails = getSupervisorByGuardName(
+                  const patrollingOfficerDetails = getPatrollingOfficerByGuardName(
                     alert.guard
                   );
                   return (
@@ -89,7 +89,7 @@ export default function AgencyHomePage() {
                       </TableCell>
                       <TableCell>{alert.guard}</TableCell>
                       <TableCell>
-                        {supervisorDetails?.name || 'N/A'}
+                        {patrollingOfficerDetails?.name || 'N/A'}
                       </TableCell>
                       <TableCell>{alert.date}</TableCell>
                       <TableCell>
@@ -108,11 +108,11 @@ export default function AgencyHomePage() {
                                 </a>
                               </DropdownMenuItem>
                             )}
-                            {supervisorDetails && (
+                            {patrollingOfficerDetails && (
                               <DropdownMenuItem asChild>
-                                <a href={`tel:${supervisorDetails.phone}`}>
+                                <a href={`tel:${patrollingOfficerDetails.phone}`}>
                                   <Phone className="mr-2 h-4 w-4" />
-                                  Contact Supervisor
+                                  Contact Patrolling Officer
                                 </a>
                               </DropdownMenuItem>
                             )}

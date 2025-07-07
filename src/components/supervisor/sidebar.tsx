@@ -26,7 +26,7 @@ const menuItems = [
   { href: '/supervisor/sites', label: 'Sites', icon: Building2 },
 ];
 
-export default function SupervisorSidebar() {
+export default function PatrollingOfficerSidebar() {
   const pathname = usePathname();
 
   return (

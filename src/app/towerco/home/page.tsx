@@ -1,6 +1,6 @@
 
-import { alerts, guards, sites, securityAgencies, supervisors } from '@/lib/data';
-import type { Guard, Supervisor, SecurityAgency } from '@/types';
+import { alerts, guards, sites, securityAgencies, patrollingOfficers } from '@/lib/data';
+import type { Guard, PatrollingOfficer, SecurityAgency } from '@/types';
 import {
   Card,
   CardContent,
@@ -34,14 +34,14 @@ export default function TowercoHomePage() {
     return guards.find((g) => g.name === name);
   };
 
-  const getSupervisorByGuardName = (
+  const getPatrollingOfficerByGuardName = (
     guardName: string
-  ): Supervisor | undefined => {
+  ): PatrollingOfficer | undefined => {
     const guard = getGuardByName(guardName);
-    if (!guard || !guard.supervisorId) {
+    if (!guard || !guard.patrollingOfficerId) {
       return undefined;
     }
-    return supervisors.find((s) => s.id === guard.supervisorId);
+    return patrollingOfficers.find((s) => s.id === guard.patrollingOfficerId);
   };
 
   const getAgencyBySiteName = (
@@ -75,7 +75,7 @@ export default function TowercoHomePage() {
                 <TableRow>
                   <TableHead>Site</TableHead>
                   <TableHead>Agency</TableHead>
-                  <TableHead>Supervisor</TableHead>
+                  <TableHead>Patrolling Officer</TableHead>
                   <TableHead>Guard</TableHead>
                   <TableHead>Date</TableHead>
                   <TableHead>Contact</TableHead>
@@ -84,7 +84,7 @@ export default function TowercoHomePage() {
               <TableBody>
                 {activeEmergencies.map((alert) => {
                   const guardDetails = getGuardByName(alert.guard);
-                  const supervisorDetails = getSupervisorByGuardName(
+                  const patrollingOfficerDetails = getPatrollingOfficerByGuardName(
                     alert.guard
                   );
                   const agencyDetails = getAgencyBySiteName(alert.site);
@@ -96,7 +96,7 @@ export default function TowercoHomePage() {
                       </TableCell>
                       <TableCell>{agencyDetails?.name || 'N/A'}</TableCell>
                       <TableCell>
-                        {supervisorDetails?.name || 'N/A'}
+                        {patrollingOfficerDetails?.name || 'N/A'}
                       </TableCell>
                       <TableCell>{alert.guard}</TableCell>
                       <TableCell>{alert.date}</TableCell>
@@ -116,11 +116,11 @@ export default function TowercoHomePage() {
                                 </a>
                               </DropdownMenuItem>
                             )}
-                            {supervisorDetails && (
+                            {patrollingOfficerDetails && (
                               <DropdownMenuItem asChild>
-                                <a href={`tel:${supervisorDetails.phone}`}>
+                                <a href={`tel:${patrollingOfficerDetails.phone}`}>
                                   <Phone className="mr-2 h-4 w-4" />
-                                  Contact Supervisor
+                                  Contact Patrolling Officer
                                 </a>
                               </DropdownMenuItem>
                             )}

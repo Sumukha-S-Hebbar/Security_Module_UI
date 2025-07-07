@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { sites, guards, supervisors } from '@/lib/data';
+import { sites, guards, patrollingOfficers } from '@/lib/data';
 import type { Site } from '@/types';
 import {
   Card,
@@ -32,7 +32,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 
 export default function AgencySitesPage() {
-  const [selectedSupervisors, setSelectedSupervisors] = useState<{
+  const [selectedPatrollingOfficers, setSelectedPatrollingOfficers] = useState<{
     [key: string]: string;
   }>({});
   const [geofencePerimeters, setGeofencePerimeters] = useState<{
@@ -40,29 +40,29 @@ export default function AgencySitesPage() {
   }>({});
   const { toast } = useToast();
 
-  const getSupervisorForSite = (siteId: string) => {
+  const getPatrollingOfficerForSite = (siteId: string) => {
     const site = sites.find((s) => s.id === siteId);
     if (!site || site.guards.length === 0) {
       return null;
     }
-    // Assumption: all guards at a site have the same supervisor. We'll use the first guard.
+    // Assumption: all guards at a site have the same patrolling officer. We'll use the first guard.
     const guardId = site.guards[0];
     const guard = guards.find((g) => g.id === guardId);
-    if (!guard || !guard.supervisorId) {
+    if (!guard || !guard.patrollingOfficerId) {
       return null;
     }
-    return supervisors.find((s) => s.id === guard.supervisorId);
+    return patrollingOfficers.find((s) => s.id === guard.patrollingOfficerId);
   };
 
-  const assignedSites = sites.filter((site) => getSupervisorForSite(site.id));
+  const assignedSites = sites.filter((site) => getPatrollingOfficerForSite(site.id));
   const unassignedSites = sites.filter(
-    (site) => !getSupervisorForSite(site.id)
+    (site) => !getPatrollingOfficerForSite(site.id)
   );
 
-  const handleSupervisorSelect = (siteId: string, supervisorId: string) => {
-    setSelectedSupervisors((prev) => ({
+  const handlePatrollingOfficerSelect = (siteId: string, patrollingOfficerId: string) => {
+    setSelectedPatrollingOfficers((prev) => ({
       ...prev,
-      [siteId]: supervisorId,
+      [siteId]: patrollingOfficerId,
     }));
   };
 
@@ -73,15 +73,15 @@ export default function AgencySitesPage() {
     }));
   };
 
-  const handleAssignSupervisor = (siteId: string) => {
-    const supervisorId = selectedSupervisors[siteId];
+  const handleAssignPatrollingOfficer = (siteId: string) => {
+    const patrollingOfficerId = selectedPatrollingOfficers[siteId];
     const perimeter = geofencePerimeters[siteId];
 
-    if (!supervisorId) {
+    if (!patrollingOfficerId) {
       toast({
         variant: 'destructive',
         title: 'Error',
-        description: 'Please select a supervisor first.',
+        description: 'Please select a patrolling officer first.',
       });
       return;
     }
@@ -94,11 +94,11 @@ export default function AgencySitesPage() {
       return;
     }
     const siteName = unassignedSites.find((s) => s.id === siteId)?.name;
-    const supervisorName = supervisors.find((s) => s.id === supervisorId)?.name;
+    const patrollingOfficerName = patrollingOfficers.find((s) => s.id === patrollingOfficerId)?.name;
 
     toast({
-      title: 'Supervisor Assigned',
-      description: `${supervisorName} has been assigned to ${siteName} with a ${perimeter}m geofence. The site will be moved to the assigned list on next refresh.`,
+      title: 'Patrolling Officer Assigned',
+      description: `${patrollingOfficerName} has been assigned to ${siteName} with a ${perimeter}m geofence. The site will be moved to the assigned list on next refresh.`,
     });
     // In a real app, you would make an API call here to update the database
     // and then refetch the data or update the state locally.
@@ -125,7 +125,7 @@ export default function AgencySitesPage() {
         <CardHeader>
           <CardTitle>Assigned Sites</CardTitle>
           <CardDescription>
-            A list of all sites with an assigned supervisor.
+            A list of all sites with an assigned patrolling officer.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -134,7 +134,7 @@ export default function AgencySitesPage() {
               <TableRow>
                 <TableHead>Site ID</TableHead>
                 <TableHead>Site</TableHead>
-                <TableHead>Supervisor</TableHead>
+                <TableHead>Patrolling Officer</TableHead>
                 <TableHead>TowerCo</TableHead>
                 <TableHead>Incidents</TableHead>
                 <TableHead>Geofence Perimeter</TableHead>
@@ -144,7 +144,7 @@ export default function AgencySitesPage() {
             </TableHeader>
             <TableBody>
               {assignedSites.map((site) => {
-                const supervisor = getSupervisorForSite(site.id);
+                const patrollingOfficer = getPatrollingOfficerForSite(site.id);
                 const incidentsCount = site.incidents?.length || 0;
                 return (
                   <TableRow key={site.id}>
@@ -156,7 +156,7 @@ export default function AgencySitesPage() {
                         {site.address}
                       </div>
                     </TableCell>
-                    <TableCell>{supervisor?.name || 'Unassigned'}</TableCell>
+                    <TableCell>{patrollingOfficer?.name || 'Unassigned'}</TableCell>
                     <TableCell>{site.towerco}</TableCell>
                     <TableCell>
                       <Badge variant="secondary">{incidentsCount}</Badge>
@@ -194,7 +194,7 @@ export default function AgencySitesPage() {
           <CardHeader>
             <CardTitle>Unassigned Sites</CardTitle>
             <CardDescription>
-              A list of sites that do not have a supervisor assigned.
+              A list of sites that do not have a patrolling officer assigned.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -234,30 +234,30 @@ export default function AgencySitesPage() {
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <Select
-                          value={selectedSupervisors[site.id] || ''}
+                          value={selectedPatrollingOfficers[site.id] || ''}
                           onValueChange={(value) =>
-                            handleSupervisorSelect(site.id, value)
+                            handlePatrollingOfficerSelect(site.id, value)
                           }
                         >
                           <SelectTrigger className="w-[180px]">
-                            <SelectValue placeholder="Select Supervisor" />
+                            <SelectValue placeholder="Select Patrolling Officer" />
                           </SelectTrigger>
                           <SelectContent>
-                            {supervisors.map((supervisor) => (
+                            {patrollingOfficers.map((patrollingOfficer) => (
                               <SelectItem
-                                key={supervisor.id}
-                                value={supervisor.id}
+                                key={patrollingOfficer.id}
+                                value={patrollingOfficer.id}
                               >
-                                {supervisor.name}
+                                {patrollingOfficer.name}
                               </SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
                         <Button
                           size="sm"
-                          onClick={() => handleAssignSupervisor(site.id)}
+                          onClick={() => handleAssignPatrollingOfficer(site.id)}
                           disabled={
-                            !selectedSupervisors[site.id] ||
+                            !selectedPatrollingOfficers[site.id] ||
                             !geofencePerimeters[site.id]
                           }
                         >

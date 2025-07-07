@@ -1,6 +1,6 @@
-import type { Guard, Site, Alert, Supervisor, Incident, SecurityAgency } from '@/types';
+import type { Guard, Site, Alert, PatrollingOfficer, Incident, SecurityAgency } from '@/types';
 
-export const supervisors: Supervisor[] = [
+export const patrollingOfficers: PatrollingOfficer[] = [
   {
     id: 'SUP01',
     name: 'Michael Scott',
@@ -38,7 +38,7 @@ export const guards: Guard[] = [
     avatar: 'https://placehold.co/100x100.png',
     missedSelfieCount: 1,
     totalSelfieRequests: 20,
-    supervisorId: 'SUP01',
+    patrollingOfficerId: 'SUP01',
     performance: { perimeterAccuracy: 98, leaveDays: 2 },
   },
   {
@@ -50,7 +50,7 @@ export const guards: Guard[] = [
     avatar: 'https://placehold.co/100x100.png',
     missedSelfieCount: 0,
     totalSelfieRequests: 25,
-    supervisorId: 'SUP01',
+    patrollingOfficerId: 'SUP01',
     performance: { perimeterAccuracy: 99, leaveDays: 0 },
   },
   {
@@ -62,7 +62,7 @@ export const guards: Guard[] = [
     avatar: 'https://placehold.co/100x100.png',
     missedSelfieCount: 8,
     totalSelfieRequests: 22,
-    supervisorId: 'SUP01',
+    patrollingOfficerId: 'SUP01',
     performance: { perimeterAccuracy: 92, leaveDays: 5 },
   },
   {
@@ -74,7 +74,7 @@ export const guards: Guard[] = [
     avatar: 'https://placehold.co/100x100.png',
     missedSelfieCount: 0,
     totalSelfieRequests: 18,
-    supervisorId: 'SUP02',
+    patrollingOfficerId: 'SUP02',
     performance: { perimeterAccuracy: 100, leaveDays: 1 },
   },
   {

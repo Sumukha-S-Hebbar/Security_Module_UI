@@ -77,7 +77,7 @@ export function GuardUploader() {
                     />
                   </FormControl>
                   <FormDescription>
-                    The CSV should contain columns: name, phone, site, supervisorId.
+                    The CSV should contain columns: name, phone, site, patrollingOfficerId.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>

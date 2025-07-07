@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { alerts as initialAlerts, guards, supervisors } from '@/lib/data';
+import { alerts as initialAlerts, guards, patrollingOfficers } from '@/lib/data';
 import type { Alert, Guard } from '@/types';
 import {
   Table,
@@ -47,12 +47,12 @@ export default function AgencyIncidentsPage() {
     return guards.find((g) => g.name === name);
   };
 
-  const getSupervisorByGuardName = (guardName: string) => {
+  const getPatrollingOfficerByGuardName = (guardName: string) => {
     const guard = getGuardByName(guardName);
-    if (!guard || !guard.supervisorId) {
+    if (!guard || !guard.patrollingOfficerId) {
       return null;
     }
-    return supervisors.find((s) => s.id === guard.supervisorId);
+    return patrollingOfficers.find((s) => s.id === guard.patrollingOfficerId);
   };
 
   const handleStatusChange = (alertId: string, status: Alert['status']) => {
@@ -109,7 +109,7 @@ export default function AgencyIncidentsPage() {
                   <TableHead>Date</TableHead>
                   <TableHead>Site</TableHead>
                   <TableHead>Guard</TableHead>
-                  <TableHead>Supervisor</TableHead>
+                  <TableHead>Patrolling Officer</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Details</TableHead>
                   <TableHead>Actions</TableHead>
@@ -121,7 +121,7 @@ export default function AgencyIncidentsPage() {
                 {alerts.length > 0 ? (
                   alerts.map((alert) => {
                     const guardDetails = getGuardByName(alert.guard);
-                    const supervisorDetails = getSupervisorByGuardName(
+                    const patrollingOfficerDetails = getPatrollingOfficerByGuardName(
                       alert.guard
                     );
                     const isResolved = alert.status === 'Resolved';
@@ -135,7 +135,7 @@ export default function AgencyIncidentsPage() {
                         <TableCell>{alert.site}</TableCell>
                         <TableCell>{alert.guard}</TableCell>
                         <TableCell>
-                          {supervisorDetails?.name || 'N/A'}
+                          {patrollingOfficerDetails?.name || 'N/A'}
                         </TableCell>
                         <TableCell>{getStatusBadge(alert.status)}</TableCell>
                         <TableCell>
@@ -197,7 +197,7 @@ export default function AgencyIncidentsPage() {
                           </Button>
                         </TableCell>
                         <TableCell>
-                          {guardDetails || supervisorDetails ? (
+                          {guardDetails || patrollingOfficerDetails ? (
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
                                 <Button variant="outline" size="sm">
@@ -213,11 +213,11 @@ export default function AgencyIncidentsPage() {
                                     </a>
                                   </DropdownMenuItem>
                                 )}
-                                {supervisorDetails && (
+                                {patrollingOfficerDetails && (
                                   <DropdownMenuItem asChild>
-                                    <a href={`tel:${supervisorDetails.phone}`}>
+                                    <a href={`tel:${patrollingOfficerDetails.phone}`}>
                                       <Phone className="mr-2 h-4 w-4" />
-                                      Contact Supervisor
+                                      Contact Patrolling Officer
                                     </a>
                                   </DropdownMenuItem>
                                 )}

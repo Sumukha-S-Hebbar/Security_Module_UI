@@ -18,7 +18,7 @@ const formSchema = z.object({
     .refine((files) => files?.[0]?.type === 'text/csv', 'Only .csv files are accepted.'),
 });
 
-export function SupervisorUploader() {
+export function PatrollingOfficerUploader() {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
@@ -37,7 +37,7 @@ export function SupervisorUploader() {
 
     toast({
       title: 'Upload Successful',
-      description: `File "${values.csvFile[0].name}" has been uploaded. Supervisor profiles would be processed.`,
+      description: `File "${values.csvFile[0].name}" has been uploaded. Patrolling officer profiles would be processed.`,
     });
 
     form.reset({ csvFile: undefined });
@@ -53,9 +53,9 @@ export function SupervisorUploader() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Upload Supervisor Profiles</CardTitle>
+        <CardTitle>Upload Patrolling Officer Profiles</CardTitle>
         <CardDescription>
-          Upload a CSV file to add multiple supervisor profiles at once.
+          Upload a CSV file to add multiple patrolling officer profiles at once.
         </CardDescription>
       </CardHeader>
       <Form {...form}>
@@ -66,7 +66,7 @@ export function SupervisorUploader() {
               name="csvFile"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Supervisor CSV File</FormLabel>
+                  <FormLabel>Patrolling Officer CSV File</FormLabel>
                   <FormControl>
                     <Input
                       id="csvFile-input"

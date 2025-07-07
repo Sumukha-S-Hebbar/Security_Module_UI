@@ -22,7 +22,7 @@ import { cn } from '@/lib/utils';
 const menuItems = [
   { href: '/agency/home', label: 'Home', icon: Home },
   { href: '/agency/sites', label: 'Sites', icon: Building2 },
-  { href: '/agency/supervisors', label: 'Supervisors', icon: UserCheck },
+  { href: '/agency/supervisors', label: 'Patrolling Officers', icon: UserCheck },
   { href: '/agency/guards', label: 'Security Guards', icon: Users },
   { href: '/agency/incidents', label: 'Incidents', icon: ShieldAlert },
 ];

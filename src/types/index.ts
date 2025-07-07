@@ -7,7 +7,7 @@ export type Guard = {
   avatar: string;
   missedSelfieCount: number;
   totalSelfieRequests: number;
-  supervisorId?: string;
+  patrollingOfficerId?: string;
   performance?: {
     perimeterAccuracy: number;
     leaveDays: number;
@@ -40,7 +40,7 @@ export type Alert = {
   images?: string[];
 };
 
-export type Supervisor = {
+export type PatrollingOfficer = {
   id: string;
   name: string;
   phone: string;

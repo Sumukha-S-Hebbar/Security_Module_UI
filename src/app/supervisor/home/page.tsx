@@ -34,7 +34,7 @@ export default function HomePage() {
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Home Dashboard</h1>
         <p className="text-muted-foreground">
-          Welcome back, Supervisor. Here's what's happening.
+          Welcome back, Patrolling Officer. Here's what's happening.
         </p>
       </div>
 

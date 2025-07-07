@@ -30,7 +30,7 @@ const AnalyzeSelfieComplianceOutputSchema = z.object({
     .boolean()
     .describe('Whether a compliance issue has been identified.'),
   analysis: z.string().describe('The analysis of the selfie compliance.'),
-  recommendations: z.string().describe('Recommendations for the supervisor.'),
+  recommendations: z.string().describe('Recommendations for the patrolling officer.'),
 });
 export type AnalyzeSelfieComplianceOutput = z.infer<
   typeof AnalyzeSelfieComplianceOutputSchema
@@ -46,13 +46,13 @@ const analyzeSelfieCompliancePrompt = ai.definePrompt({
   name: 'analyzeSelfieCompliancePrompt',
   input: {schema: AnalyzeSelfieComplianceInputSchema},
   output: {schema: AnalyzeSelfieComplianceOutputSchema},
-  prompt: `You are an AI assistant helping supervisors analyze security guard selfie compliance.
+  prompt: `You are an AI assistant helping patrolling officers analyze security guard selfie compliance.
 
 You will receive the guard's ID, the number of missed selfies, and the total number of selfie requests.
 
 Based on this information, determine if there is a compliance issue. If the missedSelfieCount is more than 20% of the totalSelfieRequests, then complianceIssueIdentified should be true.
 
-Provide a brief analysis of the situation and recommendations for the supervisor on how to address the issue.
+Provide a brief analysis of the situation and recommendations for the patrolling officer on how to address the issue.
 
 Guard ID: {{{guardId}}}
 Missed Selfies: {{{missedSelfieCount}}}

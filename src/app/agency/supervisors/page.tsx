@@ -1,8 +1,8 @@
 
 'use client';
 
-import { supervisors } from '@/lib/data';
-import type { Supervisor } from '@/types';
+import { patrollingOfficers } from '@/lib/data';
+import type { PatrollingOfficer } from '@/types';
 import {
   Table,
   TableBody,
@@ -15,16 +15,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Users, Phone, Map, FileDown } from 'lucide-react';
-import { SupervisorUploader } from './_components/supervisor-uploader';
+import { PatrollingOfficerUploader } from './_components/supervisor-uploader';
 import { useToast } from '@/hooks/use-toast';
 
-export default function AgencySupervisorsPage() {
+export default function AgencyPatrollingOfficersPage() {
     const { toast } = useToast();
 
-    const handleDownloadReport = (supervisor: Supervisor) => {
+    const handleDownloadReport = (patrollingOfficer: PatrollingOfficer) => {
         toast({
             title: 'Report Download Started',
-            description: `Downloading report for ${supervisor.name}.`,
+            description: `Downloading report for ${patrollingOfficer.name}.`,
         });
         // In a real app, this would trigger a file download (e.g., CSV or PDF).
     };
@@ -32,23 +32,23 @@ export default function AgencySupervisorsPage() {
     return (
         <div className="p-4 sm:p-6 lg:p-8 space-y-6">
             <div>
-                <h1 className="text-3xl font-bold tracking-tight">Supervisor Management</h1>
+                <h1 className="text-3xl font-bold tracking-tight">Patrolling Officer Management</h1>
                 <p className="text-muted-foreground">
-                    Add, view, and manage supervisors and their assigned guards.
+                    Add, view, and manage patrolling officers and their assigned guards.
                 </p>
             </div>
 
-            <SupervisorUploader />
+            <PatrollingOfficerUploader />
 
             <Card>
                 <CardHeader>
-                    <CardTitle>All Supervisors</CardTitle>
+                    <CardTitle>All Patrolling Officers</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead>Supervisor</TableHead>
+                                <TableHead>Patrolling Officer</TableHead>
                                 <TableHead>Phone Number</TableHead>
                                 <TableHead>Guards Under Him</TableHead>
                                 <TableHead>Route</TableHead>
@@ -57,18 +57,18 @@ export default function AgencySupervisorsPage() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {supervisors.map((supervisor) => (
-                                <TableRow key={supervisor.id}>
+                            {patrollingOfficers.map((patrollingOfficer) => (
+                                <TableRow key={patrollingOfficer.id}>
                                     <TableCell>
                                         <div className="flex items-center gap-3">
                                             <Avatar>
-                                                <AvatarImage src={supervisor.avatar} alt={supervisor.name} />
-                                                <AvatarFallback>{supervisor.name.charAt(0)}</AvatarFallback>
+                                                <AvatarImage src={patrollingOfficer.avatar} alt={patrollingOfficer.name} />
+                                                <AvatarFallback>{patrollingOfficer.name.charAt(0)}</AvatarFallback>
                                             </Avatar>
                                             <div>
-                                                <p className="font-medium">{supervisor.name}</p>
+                                                <p className="font-medium">{patrollingOfficer.name}</p>
                                                 <p className="text-sm text-muted-foreground">
-                                                    ID: {supervisor.id}
+                                                    ID: {patrollingOfficer.id}
                                                 </p>
                                             </div>
                                         </div>
@@ -76,26 +76,26 @@ export default function AgencySupervisorsPage() {
                                     <TableCell>
                                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                             <Phone className="h-4 w-4" />
-                                            <span>{supervisor.phone}</span>
+                                            <span>{patrollingOfficer.phone}</span>
                                         </div>
                                     </TableCell>
                                     <TableCell>
                                         <div className="flex items-center gap-2">
                                             <Users className="h-4 w-4 text-muted-foreground" />
-                                            <span>{supervisor.assignedGuards.length} Guards</span>
+                                            <span>{patrollingOfficer.assignedGuards.length} Guards</span>
                                         </div>
                                     </TableCell>
                                     <TableCell>
                                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                             <Map className="h-4 w-4" />
-                                            <span>{supervisor.routes?.join(', ') || 'N/A'}</span>
+                                            <span>{patrollingOfficer.routes?.join(', ') || 'N/A'}</span>
                                         </div>
                                     </TableCell>
                                     <TableCell>
                                         <Button asChild variant="outline" size="sm">
-                                            <a href={`tel:${supervisor.phone}`}>
+                                            <a href={`tel:${patrollingOfficer.phone}`}>
                                                 <Phone className="mr-2 h-4 w-4" />
-                                                Contact Supervisor
+                                                Contact Patrolling Officer
                                             </a>
                                         </Button>
                                     </TableCell>
@@ -103,7 +103,7 @@ export default function AgencySupervisorsPage() {
                                         <Button
                                             variant="outline"
                                             size="sm"
-                                            onClick={() => handleDownloadReport(supervisor)}
+                                            onClick={() => handleDownloadReport(patrollingOfficer)}
                                         >
                                             <FileDown className="mr-2 h-4 w-4" />
                                             Download Report
