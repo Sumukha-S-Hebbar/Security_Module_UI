@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useMemo } from 'react';
@@ -32,7 +33,7 @@ import {
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { FileDown, Upload, Loader2, Search, Building, UserCheck, Info } from 'lucide-react';
+import { FileDown, Upload, Loader2, Search, Building, UserCheck, Info, Eye } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -298,8 +299,14 @@ export default function AgencyGuardsPage() {
                             <span>Selfie Accuracy: {selfieAccuracy}%</span>
                           </div>
                         </CardContent>
-                        <CardFooter>
-                          <Button variant="outline" size="sm" onClick={() => handleDownloadReport(guard)} className="w-full">
+                        <CardFooter className="grid grid-cols-2 gap-2">
+                           <Button asChild variant="outline" size="sm">
+                              <Link href={`/agency/guards/${guard.id}`}>
+                                  <Eye className="mr-2 h-4 w-4" />
+                                  View Report
+                              </Link>
+                          </Button>
+                          <Button variant="outline" size="sm" onClick={() => handleDownloadReport(guard)}>
                               <FileDown className="mr-2 h-4 w-4" />
                               Download Report
                           </Button>
@@ -333,6 +340,7 @@ export default function AgencyGuardsPage() {
                       <TableHead>Guard</TableHead>
                       <TableHead>Phone</TableHead>
                       <TableHead>Site</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -353,11 +361,19 @@ export default function AgencyGuardsPage() {
                           </TableCell>
                           <TableCell>{guard.phone}</TableCell>
                           <TableCell>{guard.site}</TableCell>
+                          <TableCell className="text-right">
+                              <Button asChild variant="outline" size="sm">
+                                  <Link href={`/agency/guards/${guard.id}`}>
+                                      <Eye className="mr-2 h-4 w-4" />
+                                      View Report
+                                  </Link>
+                              </Button>
+                          </TableCell>
                         </TableRow>
                       ))
                     ) : (
                       <TableRow>
-                        <TableCell colSpan={3} className="text-center text-muted-foreground">
+                        <TableCell colSpan={4} className="text-center text-muted-foreground">
                           No unassigned guards found for the current filter.
                         </TableCell>
                       </TableRow>
@@ -372,3 +388,5 @@ export default function AgencyGuardsPage() {
     </div>
   );
 }
+
+    
