@@ -150,7 +150,9 @@ export default function TowercoAgenciesPage() {
             const matchesSearch =
                 agency.name.toLowerCase().includes(searchLower) ||
                 agency.email.toLowerCase().includes(searchLower) ||
-                agency.address.toLowerCase().includes(searchLower);
+                agency.city.toLowerCase().includes(searchLower) ||
+                agency.state.toLowerCase().includes(searchLower) ||
+                agency.country.toLowerCase().includes(searchLower);
 
             const matchesCountry =
                 selectedCountry === 'all' || agency.country === selectedCountry;
