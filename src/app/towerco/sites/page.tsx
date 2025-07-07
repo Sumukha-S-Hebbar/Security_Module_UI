@@ -90,9 +90,19 @@ export default function TowercoSitesPage() {
   const [isAddingSite, setIsAddingSite] = useState(false);
   const { toast } = useToast();
 
+  // State for Assigned Sites filters
   const [assignedSearchQuery, setAssignedSearchQuery] = useState('');
-  const [unassignedSearchQuery, setUnassignedSearchQuery] = useState('');
   const [selectedAgency, setSelectedAgency] = useState('all');
+  const [assignedSelectedCountry, setAssignedSelectedCountry] = useState('all');
+  const [assignedSelectedState, setAssignedSelectedState] = useState('all');
+  const [assignedSelectedCity, setAssignedSelectedCity] = useState('all');
+
+  // State for Unassigned Sites filters
+  const [unassignedSearchQuery, setUnassignedSearchQuery] = useState('');
+  const [unassignedSelectedCountry, setUnassignedSelectedCountry] = useState('all');
+  const [unassignedSelectedState, setUnassignedSelectedState] = useState('all');
+  const [unassignedSelectedCity, setUnassignedSelectedCity] = useState('all');
+  
   const [assignments, setAssignments] = useState<{ [siteId: string]: string }>(
     {}
   );
@@ -184,6 +194,49 @@ export default function TowercoSitesPage() {
     return securityAgencies.filter((a) => agencyIds.has(a.id));
   }, [assignedSites]);
 
+  // Location filters data for ASSIGNED sites
+  const assignedCountries = useMemo(() => [...new Set(assignedSites.map((site) => site.country))].sort(), [assignedSites]);
+  const assignedStates = useMemo(() => {
+    if (assignedSelectedCountry === 'all') return [];
+    return [...new Set(assignedSites.filter((site) => site.country === assignedSelectedCountry).map((site) => site.state))].sort();
+  }, [assignedSelectedCountry, assignedSites]);
+  const assignedCities = useMemo(() => {
+    if (assignedSelectedState === 'all' || assignedSelectedCountry === 'all') return [];
+    return [...new Set(assignedSites.filter((site) => site.country === assignedSelectedCountry && site.state === assignedSelectedState).map((site) => site.city))].sort();
+  }, [assignedSelectedCountry, assignedSelectedState, assignedSites]);
+
+  // Location filters data for UNASSIGNED sites
+  const unassignedCountries = useMemo(() => [...new Set(unassignedSites.map((site) => site.country))].sort(), [unassignedSites]);
+  const unassignedStates = useMemo(() => {
+    if (unassignedSelectedCountry === 'all') return [];
+    return [...new Set(unassignedSites.filter((site) => site.country === unassignedSelectedCountry).map((site) => site.state))].sort();
+  }, [unassignedSelectedCountry, unassignedSites]);
+  const unassignedCities = useMemo(() => {
+    if (unassignedSelectedState === 'all' || unassignedSelectedCountry === 'all') return [];
+    return [...new Set(unassignedSites.filter((site) => site.country === unassignedSelectedCountry && site.state === unassignedSelectedState).map((site) => site.city))].sort();
+  }, [unassignedSelectedCountry, unassignedSelectedState, unassignedSites]);
+
+
+  const handleAssignedCountryChange = (country: string) => {
+    setAssignedSelectedCountry(country);
+    setAssignedSelectedState('all');
+    setAssignedSelectedCity('all');
+  };
+  const handleAssignedStateChange = (state: string) => {
+    setAssignedSelectedState(state);
+    setAssignedSelectedCity('all');
+  };
+
+  const handleUnassignedCountryChange = (country: string) => {
+    setUnassignedSelectedCountry(country);
+    setUnassignedSelectedState('all');
+    setUnassignedSelectedCity('all');
+  };
+  const handleUnassignedStateChange = (state: string) => {
+    setUnassignedSelectedState(state);
+    setUnassignedSelectedCity('all');
+  };
+
   const filteredAssignedSites = useMemo(() => {
     return assignedSites.filter((site) => {
       const searchLower = assignedSearchQuery.toLowerCase();
@@ -194,19 +247,35 @@ export default function TowercoSitesPage() {
       const matchesAgency =
         selectedAgency === 'all' || site.agencyId === selectedAgency;
 
-      return matchesSearch && matchesAgency;
+      const matchesCountry = assignedSelectedCountry === 'all' || site.country === assignedSelectedCountry;
+      const matchesState = assignedSelectedState === 'all' || site.state === assignedSelectedState;
+      const matchesCity = assignedSelectedCity === 'all' || site.city === assignedSelectedCity;
+
+      return matchesSearch && matchesAgency && matchesCountry && matchesState && matchesCity;
     });
-  }, [assignedSearchQuery, selectedAgency, assignedSites]);
+  }, [
+    assignedSearchQuery,
+    selectedAgency,
+    assignedSites,
+    assignedSelectedCountry,
+    assignedSelectedState,
+    assignedSelectedCity,
+  ]);
 
   const filteredUnassignedSites = useMemo(() => {
     return unassignedSites.filter((site) => {
       const searchLower = unassignedSearchQuery.toLowerCase();
-      return (
+      const matchesSearch =
         site.name.toLowerCase().includes(searchLower) ||
-        site.address.toLowerCase().includes(searchLower)
-      );
+        site.address.toLowerCase().includes(searchLower);
+      
+      const matchesCountry = unassignedSelectedCountry === 'all' || site.country === unassignedSelectedCountry;
+      const matchesState = unassignedSelectedState === 'all' || site.state === unassignedSelectedState;
+      const matchesCity = unassignedSelectedCity === 'all' || site.city === unassignedSelectedCity;
+
+      return matchesSearch && matchesCountry && matchesState && matchesCity;
     });
-  }, [unassignedSearchQuery, unassignedSites]);
+  }, [unassignedSearchQuery, unassignedSites, unassignedSelectedCountry, unassignedSelectedState, unassignedSelectedCity]);
 
 
   const getAgencyName = (agencyId?: string) => {
@@ -397,6 +466,53 @@ export default function TowercoSitesPage() {
                 ))}
               </SelectContent>
             </Select>
+            <Select value={assignedSelectedCountry} onValueChange={handleAssignedCountryChange}>
+              <SelectTrigger className="w-full sm:w-[180px]">
+                <SelectValue placeholder="Filter by country" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Countries</SelectItem>
+                {assignedCountries.map((country) => (
+                  <SelectItem key={country} value={country}>
+                    {country}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select
+              value={assignedSelectedState}
+              onValueChange={handleAssignedStateChange}
+              disabled={assignedSelectedCountry === 'all'}
+            >
+              <SelectTrigger className="w-full sm:w-[180px]">
+                <SelectValue placeholder="Filter by state" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All States</SelectItem>
+                {assignedStates.map((state) => (
+                  <SelectItem key={state} value={state}>
+                    {state}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select
+              value={assignedSelectedCity}
+              onValueChange={setAssignedSelectedCity}
+              disabled={assignedSelectedState === 'all' || assignedSelectedCountry === 'all'}
+            >
+              <SelectTrigger className="w-full sm:w-[180px]">
+                <SelectValue placeholder="Filter by city" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Cities</SelectItem>
+                {assignedCities.map((city) => (
+                  <SelectItem key={city} value={city}>
+                    {city}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </CardHeader>
         <CardContent>
@@ -480,6 +596,53 @@ export default function TowercoSitesPage() {
                     className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[320px]"
                 />
                 </div>
+                <Select value={unassignedSelectedCountry} onValueChange={handleUnassignedCountryChange}>
+                  <SelectTrigger className="w-full sm:w-[180px]">
+                    <SelectValue placeholder="Filter by country" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Countries</SelectItem>
+                    {unassignedCountries.map((country) => (
+                      <SelectItem key={country} value={country}>
+                        {country}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select
+                  value={unassignedSelectedState}
+                  onValueChange={handleUnassignedStateChange}
+                  disabled={unassignedSelectedCountry === 'all'}
+                >
+                  <SelectTrigger className="w-full sm:w-[180px]">
+                    <SelectValue placeholder="Filter by state" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All States</SelectItem>
+                    {unassignedStates.map((state) => (
+                      <SelectItem key={state} value={state}>
+                        {state}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select
+                  value={unassignedSelectedCity}
+                  onValueChange={setUnassignedSelectedCity}
+                  disabled={unassignedSelectedState === 'all' || unassignedSelectedCountry === 'all'}
+                >
+                  <SelectTrigger className="w-full sm:w-[180px]">
+                    <SelectValue placeholder="Filter by city" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Cities</SelectItem>
+                    {unassignedCities.map((city) => (
+                      <SelectItem key={city} value={city}>
+                        {city}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
             </div>
           </CardHeader>
           <CardContent>
