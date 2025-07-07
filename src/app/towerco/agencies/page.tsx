@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useMemo } from 'react';
@@ -376,7 +377,7 @@ export default function TowercoAgenciesPage() {
                                 <TableHead>Agency</TableHead>
                                 <TableHead>Phone</TableHead>
                                 <TableHead>Email</TableHead>
-                                <TableHead>Address</TableHead>
+                                <TableHead>Region Served</TableHead>
                                 <TableHead>Actions</TableHead>
                             </TableRow>
                         </TableHeader>
@@ -411,7 +412,7 @@ export default function TowercoAgenciesPage() {
                                             </div>
                                         </TableCell>
                                         <TableCell>
-                                        {agency.address}
+                                        {`${agency.city}, ${agency.state}, ${agency.country}`}
                                         </TableCell>
                                         <TableCell>
                                             <Button asChild variant="outline" size="sm">
