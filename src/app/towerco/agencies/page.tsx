@@ -46,17 +46,21 @@ const uploadFormSchema = z.object({
     .refine((files) => files?.[0]?.type === 'text/csv', 'Only .csv files are accepted.'),
 });
 
-const addSiteFormSchema = z.object({
-    name: z.string().min(1, { message: 'Site name is required.' }),
+const addAgencyFormSchema = z.object({
+    name: z.string().min(1, { message: 'Agency name is required.' }),
+    phone: z.string().min(1, { message: 'Phone is required.' }),
+    email: z.string().email({ message: 'Valid email is required.' }),
     address: z.string().min(1, { message: 'Address is required.' }),
-    towerco: z.string().min(1, { message: 'TOWERCO is required.' }),
+    city: z.string().min(1, { message: 'City is required.' }),
+    state: z.string().min(1, { message: 'State is required.' }),
+    country: z.string().min(1, { message: 'Country is required.' }),
 });
 
 export default function TowercoAgenciesPage() {
     const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
-    const [isAddSiteDialogOpen, setIsAddSiteDialogOpen] = useState(false);
+    const [isAddAgencyDialogOpen, setIsAddAgencyDialogOpen] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
-    const [isAddingSite, setIsAddingSite] = useState(false);
+    const [isAddingAgency, setIsAddingAgency] = useState(false);
     const { toast } = useToast();
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCountry, setSelectedCountry] = useState('all');
@@ -67,12 +71,16 @@ export default function TowercoAgenciesPage() {
         resolver: zodResolver(uploadFormSchema),
     });
 
-    const addSiteForm = useForm<z.infer<typeof addSiteFormSchema>>({
-        resolver: zodResolver(addSiteFormSchema),
+    const addAgencyForm = useForm<z.infer<typeof addAgencyFormSchema>>({
+        resolver: zodResolver(addAgencyFormSchema),
         defaultValues: {
             name: '',
+            phone: '',
+            email: '',
             address: '',
-            towerco: '',
+            city: '',
+            state: '',
+            country: '',
         }
     });
 
@@ -92,20 +100,20 @@ export default function TowercoAgenciesPage() {
         setIsUploadDialogOpen(false);
     }
 
-    async function onAddSiteSubmit(values: z.infer<typeof addSiteFormSchema>) {
-        setIsAddingSite(true);
-        console.log('New site data:', values);
+    async function onAddAgencySubmit(values: z.infer<typeof addAgencyFormSchema>) {
+        setIsAddingAgency(true);
+        console.log('New agency data:', values);
 
         await new Promise((resolve) => setTimeout(resolve, 1500));
 
         toast({
-            title: 'Site Added',
-            description: `Site "${values.name}" has been created successfully.`,
+            title: 'Agency Added',
+            description: `Agency "${values.name}" has been created successfully.`,
         });
 
-        addSiteForm.reset();
-        setIsAddingSite(false);
-        setIsAddSiteDialogOpen(false);
+        addAgencyForm.reset();
+        setIsAddingAgency(false);
+        setIsAddAgencyDialogOpen(false);
     }
 
     const countries = useMemo(() => {
@@ -245,70 +253,124 @@ export default function TowercoAgenciesPage() {
                                 </DialogContent>
                             </Dialog>
 
-                             <Dialog open={isAddSiteDialogOpen} onOpenChange={setIsAddSiteDialogOpen}>
+                            <Dialog open={isAddAgencyDialogOpen} onOpenChange={setIsAddAgencyDialogOpen}>
                                 <DialogTrigger asChild>
                                     <Button variant="outline">
                                         <PlusCircle className="mr-2 h-4 w-4" />
-                                        Add Site
+                                        Add Agency
                                     </Button>
                                 </DialogTrigger>
                                 <DialogContent>
                                     <DialogHeader>
-                                        <DialogTitle>Add a New Site</DialogTitle>
+                                        <DialogTitle>Add a New Agency</DialogTitle>
                                         <DialogDescription>
-                                            Fill in the details below to add a new site profile.
+                                            Fill in the details below to add a new security agency profile.
                                         </DialogDescription>
                                     </DialogHeader>
-                                    <Form {...addSiteForm}>
-                                        <form onSubmit={addSiteForm.handleSubmit(onAddSiteSubmit)} className="space-y-4">
+                                    <Form {...addAgencyForm}>
+                                        <form onSubmit={addAgencyForm.handleSubmit(onAddAgencySubmit)} className="space-y-4">
                                             <FormField
-                                                control={addSiteForm.control}
+                                                control={addAgencyForm.control}
                                                 name="name"
                                                 render={({ field }) => (
                                                     <FormItem>
-                                                        <FormLabel>Site Name</FormLabel>
+                                                        <FormLabel>Agency Name</FormLabel>
                                                         <FormControl>
-                                                            <Input placeholder="e.g., Downtown Tower" {...field} />
+                                                            <Input placeholder="e.g., SecureGuard Inc." {...field} />
                                                         </FormControl>
                                                         <FormMessage />
                                                     </FormItem>
                                                 )}
                                             />
                                             <FormField
-                                                control={addSiteForm.control}
+                                                control={addAgencyForm.control}
+                                                name="phone"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>Phone</FormLabel>
+                                                        <FormControl>
+                                                            <Input placeholder="e.g., 555-123-4567" {...field} />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                            <FormField
+                                                control={addAgencyForm.control}
+                                                name="email"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>Email</FormLabel>
+                                                        <FormControl>
+                                                            <Input placeholder="e.g., contact@secureguard.com" {...field} />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                            <FormField
+                                                control={addAgencyForm.control}
                                                 name="address"
                                                 render={({ field }) => (
                                                     <FormItem>
                                                         <FormLabel>Address</FormLabel>
                                                         <FormControl>
-                                                            <Input placeholder="e.g., 123 Main St, Metro City" {...field} />
+                                                            <Input placeholder="e.g., 123 Security Blvd" {...field} />
                                                         </FormControl>
                                                         <FormMessage />
                                                     </FormItem>
                                                 )}
                                             />
-                                            <FormField
-                                                control={addSiteForm.control}
-                                                name="towerco"
-                                                render={({ field }) => (
-                                                    <FormItem>
-                                                        <FormLabel>TOWERCO/MNO</FormLabel>
-                                                        <FormControl>
-                                                            <Input placeholder="e.g., TowerCo Alpha" {...field} />
-                                                        </FormControl>
-                                                        <FormMessage />
-                                                    </FormItem>
-                                                )}
-                                            />
+                                            <div className="grid grid-cols-3 gap-4">
+                                                <FormField
+                                                    control={addAgencyForm.control}
+                                                    name="city"
+                                                    render={({ field }) => (
+                                                        <FormItem>
+                                                            <FormLabel>City</FormLabel>
+                                                            <FormControl>
+                                                                <Input placeholder="e.g., Metroplex" {...field} />
+                                                            </FormControl>
+                                                            <FormMessage />
+                                                        </FormItem>
+                                                    )}
+                                                />
+                                                <FormField
+                                                    control={addAgencyForm.control}
+                                                    name="state"
+                                                    render={({ field }) => (
+                                                        <FormItem>
+                                                            <FormLabel>State</FormLabel>
+                                                            <FormControl>
+                                                                <Input placeholder="e.g., NY" {...field} />
+                                                            </FormControl>
+                                                            <FormMessage />
+                                                        </FormItem>
+                                                    )}
+                                                />
+                                                <FormField
+                                                    control={addAgencyForm.control}
+                                                    name="country"
+                                                    render={({ field }) => (
+                                                        <FormItem>
+                                                            <FormLabel>Country</FormLabel>
+                                                            <FormControl>
+                                                                <Input placeholder="e.g., USA" {...field} />
+                                                            </FormControl>
+                                                            <FormMessage />
+                                                        </FormItem>
+                                                    )}
+                                                />
+                                            </div>
                                             <DialogFooter>
-                                                <Button type="submit" disabled={isAddingSite}>
-                                                {isAddingSite ? (
+                                                <Button type="submit" disabled={isAddingAgency}>
+                                                {isAddingAgency ? (
                                                     <>
                                                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                                    Adding Site...
+                                                    Adding Agency...
                                                     </>
                                                 ) : (
-                                                    "Add Site"
+                                                    "Add Agency"
                                                 )}
                                                 </Button>
                                             </DialogFooter>
