@@ -468,7 +468,7 @@ export default function TowercoAgenciesPage() {
                                 <Button asChild variant="outline" size="sm">
                                     <Link href={`/towerco/agencies/${agency.id}`}>
                                         <Eye className="mr-2 h-4 w-4" />
-                                        View Details
+                                        View Report
                                     </Link>
                                 </Button>
                                 <Button
