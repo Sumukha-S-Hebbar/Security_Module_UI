@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useMemo } from 'react';
 import {
   alerts,
   guards,
@@ -25,7 +26,15 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Eye, FileDown } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Eye, FileDown, Search } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 
@@ -33,14 +42,58 @@ const LOGGED_IN_TOWERCO = 'TowerCo Alpha'; // Simulate logged-in user
 
 export default function TowercoIncidentsPage() {
   const { toast } = useToast();
-  const towercoSites = sites.filter(
-    (site) => site.towerco === LOGGED_IN_TOWERCO
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedAgency, setSelectedAgency] = useState('all');
+
+  const towercoSites = useMemo(
+    () => sites.filter((site) => site.towerco === LOGGED_IN_TOWERCO),
+    []
   );
-  const towercoSiteNames = new Set(towercoSites.map((site) => site.name));
-  const towercoAlerts = alerts.filter(
-    (alert) =>
-      towercoSiteNames.has(alert.site) && alert.type === 'Emergency'
+
+  const towercoSiteNames = useMemo(
+    () => new Set(towercoSites.map((site) => site.name)),
+    [towercoSites]
   );
+
+  const towercoAlerts = useMemo(
+    () =>
+      alerts.filter(
+        (alert) =>
+          towercoSiteNames.has(alert.site) && alert.type === 'Emergency'
+      ),
+    [towercoSiteNames]
+  );
+
+  const agenciesOnSites = useMemo(() => {
+    const agencyIds = new Set(
+      towercoSites.map((s) => s.agencyId).filter(Boolean)
+    );
+    return securityAgencies.filter((a) => agencyIds.has(a.id));
+  }, [towercoSites]);
+
+  const siteToAgencyMap = useMemo(() => {
+    const map = new Map<string, string | undefined>();
+    towercoSites.forEach((site) => {
+      map.set(site.name, site.agencyId);
+    });
+    return map;
+  }, [towercoSites]);
+
+  const filteredIncidents = useMemo(() => {
+    return towercoAlerts.filter((incident) => {
+      const searchLower = searchQuery.toLowerCase();
+      const matchesSearch =
+        incident.id.toLowerCase().includes(searchLower) ||
+        incident.site.toLowerCase().includes(searchLower) ||
+        incident.guard.toLowerCase().includes(searchLower);
+
+      const incidentAgencyId = siteToAgencyMap.get(incident.site);
+      const matchesAgency =
+        selectedAgency === 'all' || incidentAgencyId === selectedAgency;
+
+      return matchesSearch && matchesAgency;
+    });
+  }, [searchQuery, selectedAgency, towercoAlerts, siteToAgencyMap]);
 
   const getStatusBadge = (status: Alert['status']) => {
     switch (status) {
@@ -92,7 +145,8 @@ export default function TowercoIncidentsPage() {
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Incidents</h1>
         <p className="text-muted-foreground">
-          A log of all emergency incidents for sites managed by {LOGGED_IN_TOWERCO}.
+          A log of all emergency incidents for sites managed by{' '}
+          {LOGGED_IN_TOWERCO}.
         </p>
       </div>
       <Card>
@@ -101,6 +155,31 @@ export default function TowercoIncidentsPage() {
           <CardDescription>
             Review and monitor all high-priority alerts.
           </CardDescription>
+          <div className="flex flex-wrap items-center gap-2 pt-4">
+            <div className="relative flex-1 md:grow-0">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="search"
+                placeholder="Search incidents..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[320px]"
+              />
+            </div>
+            <Select value={selectedAgency} onValueChange={setSelectedAgency}>
+              <SelectTrigger className="w-full sm:w-[180px]">
+                <SelectValue placeholder="Filter by agency" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Agencies</SelectItem>
+                {agenciesOnSites.map((agency) => (
+                  <SelectItem key={agency.id} value={agency.id}>
+                    {agency.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </CardHeader>
         <CardContent>
           <Table>
@@ -118,25 +197,31 @@ export default function TowercoIncidentsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {towercoAlerts.length > 0 ? (
-                towercoAlerts.map((incident) => {
+              {filteredIncidents.length > 0 ? (
+                filteredIncidents.map((incident) => {
                   const agency = getAgencyBySiteName(incident.site);
-                  const patrollingOfficer = getPatrollingOfficerByGuardName(incident.guard);
+                  const patrollingOfficer = getPatrollingOfficerByGuardName(
+                    incident.guard
+                  );
                   return (
                     <TableRow key={incident.id}>
-                      <TableCell className="font-medium">{incident.id}</TableCell>
+                      <TableCell className="font-medium">
+                        {incident.id}
+                      </TableCell>
                       <TableCell>{incident.date}</TableCell>
                       <TableCell>{incident.site}</TableCell>
                       <TableCell>{agency?.name || 'N/A'}</TableCell>
-                      <TableCell>{patrollingOfficer?.name || 'N/A'}</TableCell>
+                      <TableCell>
+                        {patrollingOfficer?.name || 'N/A'}
+                      </TableCell>
                       <TableCell>{incident.guard}</TableCell>
                       <TableCell>{getStatusBadge(incident.status)}</TableCell>
-                       <TableCell>
+                      <TableCell>
                         <Button asChild variant="outline" size="sm">
-                            <Link href={`/towerco/reports/${incident.id}`}>
-                                <Eye className="mr-2 h-4 w-4" />
-                                View Report
-                            </Link>
+                          <Link href={`/towerco/reports/${incident.id}`}>
+                            <Eye className="mr-2 h-4 w-4" />
+                            View Report
+                          </Link>
                         </Button>
                       </TableCell>
                       <TableCell className="text-right">
@@ -154,9 +239,12 @@ export default function TowercoIncidentsPage() {
                 })
               ) : (
                 <TableRow>
-                    <TableCell colSpan={9} className="text-center text-muted-foreground">
-                        No incidents found.
-                    </TableCell>
+                  <TableCell
+                    colSpan={9}
+                    className="text-center text-muted-foreground"
+                  >
+                    No incidents found for the current filter.
+                  </TableCell>
                 </TableRow>
               )}
             </TableBody>
