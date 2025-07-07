@@ -61,14 +61,19 @@ export default function AgencySitesPage() {
     [key: string]: string[];
   }>({});
   const { toast } = useToast();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [
-    selectedPatrollingOfficerFilter,
-    setSelectedPatrollingOfficerFilter,
-  ] = useState('all');
-  const [selectedCountry, setSelectedCountry] = useState('all');
-  const [selectedState, setSelectedState] = useState('all');
-  const [selectedCity, setSelectedCity] = useState('all');
+  
+  // State for Assigned Sites filters
+  const [assignedSearchQuery, setAssignedSearchQuery] = useState('');
+  const [selectedPatrollingOfficerFilter, setSelectedPatrollingOfficerFilter] = useState('all');
+  const [assignedSelectedCountry, setAssignedSelectedCountry] = useState('all');
+  const [assignedSelectedState, setAssignedSelectedState] = useState('all');
+  const [assignedSelectedCity, setAssignedSelectedCity] = useState('all');
+
+  // State for Unassigned Sites filters
+  const [unassignedSearchQuery, setUnassignedSearchQuery] = useState('');
+  const [unassignedSelectedCountry, setUnassignedSelectedCountry] = useState('all');
+  const [unassignedSelectedState, setUnassignedSelectedState] = useState('all');
+  const [unassignedSelectedCity, setUnassignedSelectedCity] = useState('all');
 
   const agencySites = useMemo(
     () => sites.filter((site) => site.agencyId === LOGGED_IN_AGENCY_ID),
@@ -84,14 +89,9 @@ export default function AgencySitesPage() {
     [agencySiteNames]
   );
   
-  const agencyPatrollingOfficers = useMemo(() => {
-    const poIds = new Set(agencySites.map(s => s.patrollingOfficerId).filter(Boolean));
-    return patrollingOfficers.filter(po => poIds.has(po.id));
-  }, [agencySites]);
-
   const allAgencyPatrollingOfficers = useMemo(() => {
     // In a real app, this might be a separate API call for all officers in the agency
-    return patrollingOfficers;
+    return patrollingOfficers.filter(po => po); // Simplified for demo
   }, []);
 
   const getPatrollingOfficerForSite = useCallback(
@@ -126,50 +126,49 @@ export default function AgencySitesPage() {
     return Array.from(officers.values());
   }, [assignedSites, getPatrollingOfficerForSite]);
   
-  const countries = useMemo(() => {
-    if (!agencySites) return [];
-    return [...new Set(agencySites.map((site) => site.country))].sort();
-  }, [agencySites]);
+  // Location filters data for ASSIGNED sites
+  const assignedCountries = useMemo(() => [...new Set(assignedSites.map((site) => site.country))].sort(), [assignedSites]);
+  const assignedStates = useMemo(() => {
+    if (assignedSelectedCountry === 'all') return [];
+    return [...new Set(assignedSites.filter((site) => site.country === assignedSelectedCountry).map((site) => site.state))].sort();
+  }, [assignedSelectedCountry, assignedSites]);
+  const assignedCities = useMemo(() => {
+    if (assignedSelectedState === 'all' || assignedSelectedCountry === 'all') return [];
+    return [...new Set(assignedSites.filter((site) => site.country === assignedSelectedCountry && site.state === assignedSelectedState).map((site) => site.city))].sort();
+  }, [assignedSelectedCountry, assignedSelectedState, assignedSites]);
 
-  const states = useMemo(() => {
-    if (selectedCountry === 'all' || !agencySites) {
-      return [];
-    }
-    return [
-      ...new Set(
-        agencySites
-          .filter((site) => site.country === selectedCountry)
-          .map((site) => site.state)
-      ),
-    ].sort();
-  }, [selectedCountry, agencySites]);
+  // Location filters data for UNASSIGNED sites
+  const unassignedCountries = useMemo(() => [...new Set(unassignedSites.map((site) => site.country))].sort(), [unassignedSites]);
+  const unassignedStates = useMemo(() => {
+    if (unassignedSelectedCountry === 'all') return [];
+    return [...new Set(unassignedSites.filter((site) => site.country === unassignedSelectedCountry).map((site) => site.state))].sort();
+  }, [unassignedSelectedCountry, unassignedSites]);
+  const unassignedCities = useMemo(() => {
+    if (unassignedSelectedState === 'all' || unassignedSelectedCountry === 'all') return [];
+    return [...new Set(unassignedSites.filter((site) => site.country === unassignedSelectedCountry && site.state === unassignedSelectedState).map((site) => site.city))].sort();
+  }, [unassignedSelectedCountry, unassignedSelectedState, unassignedSites]);
 
-  const cities = useMemo(() => {
-    if (selectedState === 'all' || selectedCountry === 'all' || !agencySites) {
-      return [];
-    }
-    return [
-      ...new Set(
-        agencySites
-          .filter(
-            (site) =>
-              site.country === selectedCountry && site.state === selectedState
-          )
-          .map((site) => site.city)
-      ),
-    ].sort();
-  }, [selectedCountry, selectedState, agencySites]);
-  
-  const handleCountryChange = (country: string) => {
-    setSelectedCountry(country);
-    setSelectedState('all');
-    setSelectedCity('all');
+
+  const handleAssignedCountryChange = (country: string) => {
+    setAssignedSelectedCountry(country);
+    setAssignedSelectedState('all');
+    setAssignedSelectedCity('all');
+  };
+  const handleAssignedStateChange = (state: string) => {
+    setAssignedSelectedState(state);
+    setAssignedSelectedCity('all');
   };
 
-  const handleStateChange = (state: string) => {
-    setSelectedState(state);
-    setSelectedCity('all');
+  const handleUnassignedCountryChange = (country: string) => {
+    setUnassignedSelectedCountry(country);
+    setUnassignedSelectedState('all');
+    setUnassignedSelectedCity('all');
   };
+  const handleUnassignedStateChange = (state: string) => {
+    setUnassignedSelectedState(state);
+    setUnassignedSelectedCity('all');
+  };
+
 
   const handlePatrollingOfficerSelect = (
     siteId: string,
@@ -247,7 +246,7 @@ export default function AgencySitesPage() {
 
   const filteredAssignedSites = useMemo(() => {
     return assignedSites.filter((site) => {
-      const searchLower = searchQuery.toLowerCase();
+      const searchLower = assignedSearchQuery.toLowerCase();
       const matchesSearch =
         site.name.toLowerCase().includes(searchLower) ||
         site.address.toLowerCase().includes(searchLower);
@@ -258,36 +257,36 @@ export default function AgencySitesPage() {
         (patrollingOfficer &&
           patrollingOfficer.id === selectedPatrollingOfficerFilter);
 
-      const matchesCountry = selectedCountry === 'all' || site.country === selectedCountry;
-      const matchesState = selectedState === 'all' || site.state === selectedState;
-      const matchesCity = selectedCity === 'all' || site.city === selectedCity;
+      const matchesCountry = assignedSelectedCountry === 'all' || site.country === assignedSelectedCountry;
+      const matchesState = assignedSelectedState === 'all' || site.state === assignedSelectedState;
+      const matchesCity = assignedSelectedCity === 'all' || site.city === assignedSelectedCity;
 
       return matchesSearch && matchesPatrollingOfficer && matchesCountry && matchesState && matchesCity;
     });
   }, [
-    searchQuery,
+    assignedSearchQuery,
     selectedPatrollingOfficerFilter,
     assignedSites,
     getPatrollingOfficerForSite,
-    selectedCountry,
-    selectedState,
-    selectedCity,
+    assignedSelectedCountry,
+    assignedSelectedState,
+    assignedSelectedCity,
   ]);
   
   const filteredUnassignedSites = useMemo(() => {
     return unassignedSites.filter((site) => {
-      const searchLower = searchQuery.toLowerCase();
+      const searchLower = unassignedSearchQuery.toLowerCase();
       const matchesSearch =
         site.name.toLowerCase().includes(searchLower) ||
         site.address.toLowerCase().includes(searchLower);
 
-      const matchesCountry = selectedCountry === 'all' || site.country === selectedCountry;
-      const matchesState = selectedState === 'all' || site.state === selectedState;
-      const matchesCity = selectedCity === 'all' || site.city === selectedCity;
+      const matchesCountry = unassignedSelectedCountry === 'all' || site.country === unassignedSelectedCountry;
+      const matchesState = unassignedSelectedState === 'all' || site.state === unassignedSelectedState;
+      const matchesCity = unassignedSelectedCity === 'all' || site.city === unassignedSelectedCity;
 
       return matchesSearch && matchesCountry && matchesState && matchesCity;
     });
-  }, [searchQuery, unassignedSites, selectedCountry, selectedState, selectedCity]);
+  }, [unassignedSearchQuery, unassignedSites, unassignedSelectedCountry, unassignedSelectedState, unassignedSelectedCity]);
 
   const siteIncidentsCount = useMemo(() => {
     const counts: { [siteName: string]: number } = {};
@@ -311,88 +310,87 @@ export default function AgencySitesPage() {
         </p>
       </div>
 
-      <div className="flex flex-wrap items-center gap-2">
-        <div className="relative flex-1 md:grow-0">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            type="search"
-            placeholder="Search sites..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[320px]"
-          />
-        </div>
-        <Select
-          value={selectedPatrollingOfficerFilter}
-          onValueChange={setSelectedPatrollingOfficerFilter}
-        >
-          <SelectTrigger className="w-full sm:w-[220px]">
-            <SelectValue placeholder="Filter by Patrolling Officer" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Patrolling Officers</SelectItem>
-            {assignedSitesPatrollingOfficers.map((po) => (
-              <SelectItem key={po.id} value={po.id}>
-                {po.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Select value={selectedCountry} onValueChange={handleCountryChange}>
-          <SelectTrigger className="w-full sm:w-[180px]">
-            <SelectValue placeholder="Filter by country" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Countries</SelectItem>
-            {countries.map((country) => (
-              <SelectItem key={country} value={country}>
-                {country}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Select
-          value={selectedState}
-          onValueChange={handleStateChange}
-          disabled={selectedCountry === 'all'}
-        >
-          <SelectTrigger className="w-full sm:w-[180px]">
-            <SelectValue placeholder="Filter by state" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All States</SelectItem>
-            {states.map((state) => (
-              <SelectItem key={state} value={state}>
-                {state}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Select
-          value={selectedCity}
-          onValueChange={setSelectedCity}
-          disabled={selectedState === 'all' || selectedCountry === 'all'}
-        >
-          <SelectTrigger className="w-full sm:w-[180px]">
-            <SelectValue placeholder="Filter by city" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Cities</SelectItem>
-            {cities.map((city) => (
-              <SelectItem key={city} value={city}>
-                {city}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
       <Card>
         <CardHeader>
           <CardTitle>Assigned Sites</CardTitle>
           <CardDescription>
             A list of all sites with an assigned patrolling officer.
           </CardDescription>
+          <div className="flex flex-wrap items-center gap-2 pt-4">
+            <div className="relative flex-1 md:grow-0">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="search"
+                placeholder="Search assigned sites..."
+                value={assignedSearchQuery}
+                onChange={(e) => setAssignedSearchQuery(e.target.value)}
+                className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[320px]"
+              />
+            </div>
+            <Select
+              value={selectedPatrollingOfficerFilter}
+              onValueChange={setSelectedPatrollingOfficerFilter}
+            >
+              <SelectTrigger className="w-full sm:w-[220px]">
+                <SelectValue placeholder="Filter by Patrolling Officer" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Patrolling Officers</SelectItem>
+                {assignedSitesPatrollingOfficers.map((po) => (
+                  <SelectItem key={po.id} value={po.id}>
+                    {po.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={assignedSelectedCountry} onValueChange={handleAssignedCountryChange}>
+              <SelectTrigger className="w-full sm:w-[180px]">
+                <SelectValue placeholder="Filter by country" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Countries</SelectItem>
+                {assignedCountries.map((country) => (
+                  <SelectItem key={country} value={country}>
+                    {country}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select
+              value={assignedSelectedState}
+              onValueChange={handleAssignedStateChange}
+              disabled={assignedSelectedCountry === 'all'}
+            >
+              <SelectTrigger className="w-full sm:w-[180px]">
+                <SelectValue placeholder="Filter by state" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All States</SelectItem>
+                {assignedStates.map((state) => (
+                  <SelectItem key={state} value={state}>
+                    {state}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select
+              value={assignedSelectedCity}
+              onValueChange={setAssignedSelectedCity}
+              disabled={assignedSelectedState === 'all' || assignedSelectedCountry === 'all'}
+            >
+              <SelectTrigger className="w-full sm:w-[180px]">
+                <SelectValue placeholder="Filter by city" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Cities</SelectItem>
+                {assignedCities.map((city) => (
+                  <SelectItem key={city} value={city}>
+                    {city}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-6">
@@ -458,6 +456,65 @@ export default function AgencySitesPage() {
             <CardDescription>
               A list of sites that do not have a patrolling officer assigned.
             </CardDescription>
+            <div className="flex flex-wrap items-center gap-2 pt-4">
+                <div className="relative flex-1 md:grow-0">
+                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    type="search"
+                    placeholder="Search unassigned sites..."
+                    value={unassignedSearchQuery}
+                    onChange={(e) => setUnassignedSearchQuery(e.target.value)}
+                    className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[320px]"
+                  />
+                </div>
+                <Select value={unassignedSelectedCountry} onValueChange={handleUnassignedCountryChange}>
+                  <SelectTrigger className="w-full sm:w-[180px]">
+                    <SelectValue placeholder="Filter by country" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Countries</SelectItem>
+                    {unassignedCountries.map((country) => (
+                      <SelectItem key={country} value={country}>
+                        {country}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select
+                  value={unassignedSelectedState}
+                  onValueChange={handleUnassignedStateChange}
+                  disabled={unassignedSelectedCountry === 'all'}
+                >
+                  <SelectTrigger className="w-full sm:w-[180px]">
+                    <SelectValue placeholder="Filter by state" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All States</SelectItem>
+                    {unassignedStates.map((state) => (
+                      <SelectItem key={state} value={state}>
+                        {state}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select
+                  value={unassignedSelectedCity}
+                  onValueChange={setUnassignedSelectedCity}
+                  disabled={unassignedSelectedState === 'all' || unassignedSelectedCountry === 'all'}
+                >
+                  <SelectTrigger className="w-full sm:w-[180px]">
+                    <SelectValue placeholder="Filter by city" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Cities</SelectItem>
+                    {unassignedCities.map((city) => (
+                      <SelectItem key={city} value={city}>
+                        {city}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+            </div>
           </CardHeader>
           <CardContent>
             <Table>
