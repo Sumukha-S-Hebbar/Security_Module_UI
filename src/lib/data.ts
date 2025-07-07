@@ -2,7 +2,7 @@ import type { Guard, Site, Alert, PatrollingOfficer, Incident, SecurityAgency } 
 
 export const patrollingOfficers: PatrollingOfficer[] = [
   {
-    id: 'SUP01',
+    id: 'PO01',
     name: 'Michael Scott',
     phone: '555-100-2000',
     email: 'michael.s@guardlink.com',
@@ -11,13 +11,22 @@ export const patrollingOfficers: PatrollingOfficer[] = [
     routes: ['Downtown Route', 'Waterfront Route'],
   },
   {
-    id: 'SUP02',
+    id: 'PO02',
     name: 'Jessica Pearson',
     phone: '555-100-2001',
     email: 'jessica.p@guardlink.com',
     avatar: 'https://placehold.co/100x100.png',
-    assignedGuards: ['GL004', 'GL005'],
+    assignedGuards: ['GL004', 'GL005', 'GL006'],
     routes: ['Tech Park Route', 'Cyberdyne Route'],
+  },
+  {
+    id: 'PO03',
+    name: 'Harvey Specter',
+    phone: '555-100-2002',
+    email: 'harvey.s@guardlink.com',
+    avatar: 'https://placehold.co/100x100.png',
+    assignedGuards: [],
+    routes: ['Industrial Zone Route'],
   },
 ];
 
@@ -25,6 +34,8 @@ export const incidents: Incident[] = [
     { id: 'INC001', date: '2024-07-20', type: 'Break-in', details: 'Attempted break-in at west entrance.', resolved: true},
     { id: 'INC002', date: '2024-07-21', type: 'Fire Alarm', details: 'False alarm triggered by dust.', resolved: true},
     { id: 'INC003', date: '2024-06-15', type: 'Vandalism', details: 'Graffiti on the north wall.', resolved: false},
+    { id: 'INC004', date: '2024-05-10', type: 'Medical', details: 'Guard reported feeling unwell.', resolved: true},
+    { id: 'INC005', date: '2024-04-01', type: 'Break-in', details: 'Successful break-in, items stolen.', resolved: false},
 ];
 
 
@@ -38,7 +49,7 @@ export const guards: Guard[] = [
     avatar: 'https://placehold.co/100x100.png',
     missedSelfieCount: 1,
     totalSelfieRequests: 20,
-    patrollingOfficerId: 'SUP01',
+    patrollingOfficerId: 'PO01',
     performance: { perimeterAccuracy: 98, leaveDays: 2 },
   },
   {
@@ -50,7 +61,7 @@ export const guards: Guard[] = [
     avatar: 'https://placehold.co/100x100.png',
     missedSelfieCount: 0,
     totalSelfieRequests: 25,
-    patrollingOfficerId: 'SUP02',
+    patrollingOfficerId: 'PO01',
     performance: { perimeterAccuracy: 99, leaveDays: 0 },
   },
   {
@@ -62,7 +73,7 @@ export const guards: Guard[] = [
     avatar: 'https://placehold.co/100x100.png',
     missedSelfieCount: 8,
     totalSelfieRequests: 22,
-    patrollingOfficerId: 'SUP01',
+    patrollingOfficerId: 'PO01',
     performance: { perimeterAccuracy: 92, leaveDays: 5 },
   },
   {
@@ -74,7 +85,7 @@ export const guards: Guard[] = [
     avatar: 'https://placehold.co/100x100.png',
     missedSelfieCount: 0,
     totalSelfieRequests: 18,
-    patrollingOfficerId: 'SUP02',
+    patrollingOfficerId: 'PO02',
     performance: { perimeterAccuracy: 100, leaveDays: 1 },
   },
   {
@@ -86,8 +97,42 @@ export const guards: Guard[] = [
     avatar: 'https://placehold.co/100x100.png',
     missedSelfieCount: 0,
     totalSelfieRequests: 10,
-    patrollingOfficerId: 'SUP02',
+    patrollingOfficerId: 'PO02',
     performance: { perimeterAccuracy: 100, leaveDays: 0 },
+  },
+  {
+    id: 'GL006',
+    name: 'Kyle Reese',
+    site: 'Cyberdyne Systems',
+    phone: '555-867-5310',
+    location: 'Mainframe Access',
+    avatar: 'https://placehold.co/100x100.png',
+    missedSelfieCount: 3,
+    totalSelfieRequests: 15,
+    patrollingOfficerId: 'PO02',
+    performance: { perimeterAccuracy: 95, leaveDays: 3 },
+  },
+  {
+    id: 'GL007',
+    name: 'David Brown',
+    site: 'Industrial Zone 5',
+    phone: '555-111-2222',
+    location: 'Warehouse 3',
+    avatar: 'https://placehold.co/100x100.png',
+    missedSelfieCount: 2,
+    totalSelfieRequests: 30,
+    performance: { perimeterAccuracy: 97, leaveDays: 1 },
+  },
+  {
+    id: 'GL008',
+    name: 'Chris Green',
+    site: 'Industrial Zone 7',
+    phone: '555-444-5555',
+    location: 'Perimeter Fence West',
+    avatar: 'https://placehold.co/100x100.png',
+    missedSelfieCount: 5,
+    totalSelfieRequests: 28,
+    performance: { perimeterAccuracy: 94, leaveDays: 4 },
   },
 ];
 
@@ -109,6 +154,15 @@ export const securityAgencies: SecurityAgency[] = [
     address: '456 Protector Ave, Secure Town, USA',
     avatar: 'https://placehold.co/100x100.png',
     regionServed: 'West Coast',
+  },
+  {
+    id: 'AGY03',
+    name: 'Aegis Protection',
+    phone: '555-003-0003',
+    email: 'support@aegispro.com',
+    address: '789 Guardian Way, Metroplex, USA',
+    avatar: 'https://placehold.co/100x100.png',
+    regionServed: 'East Coast',
   },
 ];
 
@@ -159,12 +213,12 @@ export const sites: Site[] = [
     id: 'SITE04',
     name: 'Cyberdyne Systems',
     address: '2144 Kramer Street, Sunnyvale, CA',
-    guards: ['GL005'],
+    guards: ['GL005', 'GL006'],
     reportUrl: '#',
     coords: { x: 40, y: 70 },
     visited: true,
     towerco: 'TowerCo Alpha',
-    incidents: [],
+    incidents: [incidents[4]],
     agencyId: 'AGY02',
     geofencePerimeter: 1200,
   },
@@ -178,10 +232,55 @@ export const sites: Site[] = [
     visited: false,
     towerco: 'TowerCo Delta',
     incidents: [],
+    agencyId: 'AGY03',
+    assignedOn: '2024-07-01',
+    geofencePerimeter: 1500,
+  },
+  {
+    id: 'SITE06',
+    name: 'Industrial Zone 7',
+    address: '777 Assembly Lane, Industry City, TX',
+    guards: [],
+    reportUrl: '#',
+    coords: { x: 20, y: 85 },
+    visited: true,
+    towerco: 'TowerCo Delta',
+    incidents: [],
+    agencyId: 'AGY03',
+    assignedOn: '2024-07-05',
+    geofencePerimeter: 2000,
+  },
+  {
+    id: 'SITE07',
+    name: 'Metro Transit Hub',
+    address: '101 Central Station, Metro City, NY',
+    guards: [],
+    reportUrl: '#',
+    coords: { x: 60, y: 50 },
+    visited: false,
+    towerco: 'TowerCo Beta',
+    incidents: [],
   },
 ];
 
 export const alerts: Alert[] = [
+  // 2024 Data
+  // Jan
+  { id: 'A240101', type: 'Emergency', date: '2024-01-15 10:00', site: 'Tech Park One', guard: 'Jane Smith', status: 'Resolved', callDetails: 'Power outage in Building B.'},
+  // Feb
+  { id: 'A240201', type: 'Emergency', date: '2024-02-10 18:30', site: 'Downtown Mall', guard: 'John Doe', status: 'Resolved', callDetails: 'Suspicious person reported near the food court.' },
+  { id: 'A240202', type: 'Missed Selfie', date: '2024-02-20 09:00', site: 'City Waterfront', guard: 'Mike Johnson', status: 'Resolved'},
+  // Mar
+  { id: 'A240301', type: 'Emergency', date: '2024-03-05 21:00', site: 'Cyberdyne Systems', guard: 'Sarah Connor', status: 'Resolved', callDetails: 'Unauthorized access attempt at main gate.' },
+  { id: 'A240302', type: 'Emergency', date: '2024-03-25 14:00', site: 'Industrial Zone 5', guard: 'David Brown', status: 'Investigating', callDetails: 'Fence breach detected on the western perimeter.' },
+  // Apr
+  { id: 'A240401', type: 'Emergency', date: '2024-04-01 11:20', site: 'Cyberdyne Systems', guard: 'Kyle Reese', status: 'Resolved', callDetails: 'Medical emergency, employee fainted.' },
+  // May
+  { id: 'A240501', type: 'Emergency', date: '2024-05-12 03:00', site: 'Downtown Mall', guard: 'John Doe', status: 'Resolved', callDetails: 'Shoplifting incident at a retail store.' },
+  { id: 'A240502', type: 'Guard Out of Premises', date: '2024-05-22 16:00', site: 'Industrial Zone 7', guard: 'Chris Green', status: 'Resolved'},
+  // Jun
+  { id: 'A240601', type: 'Emergency', date: '2024-06-18 17:45', site: 'Tech Park One', guard: 'Emily Williams', status: 'Resolved', callDetails: 'Minor traffic accident in the parking lot.'},
+  // Jul
   {
     id: 'A001',
     type: 'Emergency',
@@ -238,4 +337,9 @@ export const alerts: Alert[] = [
     guard: 'Mike Johnson',
     status: 'Resolved',
   },
+
+  // 2023 Data
+  { id: 'A230801', type: 'Emergency', date: '2023-08-01 12:00', site: 'Downtown Mall', guard: 'John Doe', status: 'Resolved', callDetails: 'Lost child reported, found safe.'},
+  { id: 'A231001', type: 'Emergency', date: '2023-10-15 19:00', site: 'Tech Park One', guard: 'Jane Smith', status: 'Resolved', callDetails: 'Car alarm going off in parking garage.' },
+  { id: 'A231101', type: 'Emergency', date: '2023-11-20 16:30', site: 'City Waterfront', guard: 'Mike Johnson', status: 'Resolved', callDetails: 'Public disturbance on the pier.' },
 ];
