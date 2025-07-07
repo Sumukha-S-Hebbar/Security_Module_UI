@@ -56,6 +56,14 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 
 const LOGGED_IN_TOWERCO = 'TowerCo Alpha'; // Simulate logged-in user
 
@@ -83,10 +91,23 @@ export default function TowercoSitesPage() {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedAgency, setSelectedAgency] = useState('all');
+  const [assignments, setAssignments] = useState<{ [siteId: string]: string }>(
+    {}
+  );
 
   const towercoSites = useMemo(
     () => sites.filter((site) => site.towerco === LOGGED_IN_TOWERCO),
     []
+  );
+
+  const assignedSites = useMemo(
+    () => towercoSites.filter((site) => site.agencyId),
+    [towercoSites]
+  );
+
+  const unassignedSites = useMemo(
+    () => towercoSites.filter((site) => !site.agencyId),
+    [towercoSites]
   );
 
   const uploadForm = useForm<z.infer<typeof uploadFormSchema>>({
@@ -131,15 +152,38 @@ export default function TowercoSitesPage() {
     });
   };
 
-  const agencies = useMemo(() => {
+  const handleAssignmentChange = (siteId: string, agencyId: string) => {
+    setAssignments((prev) => ({ ...prev, [siteId]: agencyId }));
+  };
+
+  const handleAssignAgency = (siteId: string) => {
+    const agencyId = assignments[siteId];
+    if (!agencyId) {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Please select an agency to assign.',
+      });
+      return;
+    }
+    const siteName = sites.find((s) => s.id === siteId)?.name;
+    const agencyName = securityAgencies.find((a) => a.id === agencyId)?.name;
+    toast({
+      title: 'Agency Assigned',
+      description: `${agencyName} has been assigned to site ${siteName}. This change will be reflected on the next refresh.`,
+    });
+    // In a real app, this would be an API call.
+  };
+
+  const agenciesOnSites = useMemo(() => {
     const agencyIds = new Set(
-      towercoSites.map((s) => s.agencyId).filter(Boolean)
+      assignedSites.map((s) => s.agencyId).filter(Boolean)
     );
     return securityAgencies.filter((a) => agencyIds.has(a.id));
-  }, [towercoSites]);
+  }, [assignedSites]);
 
-  const filteredSites = useMemo(() => {
-    return towercoSites.filter((site) => {
+  const filteredAssignedSites = useMemo(() => {
+    return assignedSites.filter((site) => {
       const searchLower = searchQuery.toLowerCase();
       const matchesSearch =
         site.name.toLowerCase().includes(searchLower) ||
@@ -150,10 +194,12 @@ export default function TowercoSitesPage() {
 
       return matchesSearch && matchesAgency;
     });
-  }, [searchQuery, selectedAgency, towercoSites]);
+  }, [searchQuery, selectedAgency, assignedSites]);
 
   const getAgencyName = (agencyId?: string) => {
-    return agencies.find((a) => a.id === agencyId)?.name || 'Unassigned';
+    return (
+      securityAgencies.find((a) => a.id === agencyId)?.name || 'Unassigned'
+    );
   };
 
   return (
@@ -169,9 +215,10 @@ export default function TowercoSitesPage() {
         <CardHeader>
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
-              <CardTitle>All Sites</CardTitle>
+              <CardTitle>Assigned Sites</CardTitle>
               <CardDescription>
-                A list of all your sites for {LOGGED_IN_TOWERCO}.
+                A list of all your sites with an assigned security agency for{' '}
+                {LOGGED_IN_TOWERCO}.
               </CardDescription>
             </div>
             <div className="flex items-center gap-2">
@@ -330,7 +377,7 @@ export default function TowercoSitesPage() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Agencies</SelectItem>
-                {agencies.map((agency) => (
+                {agenciesOnSites.map((agency) => (
                   <SelectItem key={agency.id} value={agency.id}>
                     {agency.name}
                   </SelectItem>
@@ -341,8 +388,8 @@ export default function TowercoSitesPage() {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-6">
-            {filteredSites.length > 0 ? (
-              filteredSites.map((site) => (
+            {filteredAssignedSites.length > 0 ? (
+              filteredAssignedSites.map((site) => (
                 <Card key={site.id} className="flex flex-col">
                   <CardHeader>
                     <div className="flex items-start justify-between">
@@ -403,12 +450,75 @@ export default function TowercoSitesPage() {
               ))
             ) : (
               <div className="col-span-full text-center text-muted-foreground py-10">
-                No sites found.
+                No assigned sites found.
               </div>
             )}
           </div>
         </CardContent>
       </Card>
+
+      {unassignedSites.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Unassigned Sites</CardTitle>
+            <CardDescription>
+              Sites that need a security agency to be assigned.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Site</TableHead>
+                  <TableHead>Address</TableHead>
+                  <TableHead>Assign Agency</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {unassignedSites.map((site) => (
+                  <TableRow key={site.id}>
+                    <TableCell>
+                      <div className="font-medium">{site.name}</div>
+                      <div className="text-sm text-muted-foreground">
+                        ID: {site.id}
+                      </div>
+                    </TableCell>
+                    <TableCell>{site.address}</TableCell>
+                    <TableCell>
+                      <Select
+                        onValueChange={(value) =>
+                          handleAssignmentChange(site.id, value)
+                        }
+                      >
+                        <SelectTrigger className="w-[200px]">
+                          <SelectValue placeholder="Select an agency" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {securityAgencies.map((agency) => (
+                            <SelectItem key={agency.id} value={agency.id}>
+                              {agency.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button
+                        size="sm"
+                        onClick={() => handleAssignAgency(site.id)}
+                        disabled={!assignments[site.id]}
+                      >
+                        Assign Agency
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

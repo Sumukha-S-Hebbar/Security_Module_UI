@@ -269,6 +269,28 @@ export const sites: Site[] = [
     towerco: 'TowerCo Beta',
     incidents: [],
   },
+  {
+    id: 'SITE08',
+    name: 'North Point Relay',
+    address: '555 Summit Rd, Alpine, CA',
+    guards: [],
+    reportUrl: '#',
+    coords: { x: 30, y: 15 },
+    visited: false,
+    towerco: 'TowerCo Alpha',
+    incidents: [],
+  },
+  {
+    id: 'SITE09',
+    name: 'East Valley Repeater',
+    address: '800 Valley View, Sunrise, CA',
+    guards: [],
+    reportUrl: '#',
+    coords: { x: 45, y: 25 },
+    visited: false,
+    towerco: 'TowerCo Alpha',
+    incidents: [],
+  },
 ];
 
 export const alerts: Alert[] = [
