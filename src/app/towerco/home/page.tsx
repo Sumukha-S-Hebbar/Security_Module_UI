@@ -164,7 +164,11 @@ export default function TowercoHomePage() {
 
       <SiteStatusBreakdown sites={sites} />
 
-      <IncidentChart alerts={alerts} />
+      <IncidentChart
+        alerts={alerts}
+        sites={sites}
+        securityAgencies={securityAgencies}
+      />
     </div>
   );
 }

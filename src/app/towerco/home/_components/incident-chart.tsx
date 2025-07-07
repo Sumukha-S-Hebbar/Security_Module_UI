@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import type { Alert } from '@/types';
+import type { Alert, Site, SecurityAgency } from '@/types';
 import {
   Card,
   CardContent,
@@ -31,7 +31,15 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-export function IncidentChart({ alerts }: { alerts: Alert[] }) {
+export function IncidentChart({
+  alerts,
+  sites,
+  securityAgencies,
+}: {
+  alerts: Alert[];
+  sites: Site[];
+  securityAgencies: SecurityAgency[];
+}) {
   // Get unique years from the alerts data
   const availableYears = useMemo(() => {
     const years = new Set(
@@ -43,6 +51,7 @@ export function IncidentChart({ alerts }: { alerts: Alert[] }) {
   const [selectedYear, setSelectedYear] = useState<string>(
     availableYears[0] || new Date().getFullYear().toString()
   );
+  const [selectedCompany, setSelectedCompany] = useState<string>('all');
 
   const monthlyIncidentData = useMemo(() => {
     const months = [
@@ -53,16 +62,27 @@ export function IncidentChart({ alerts }: { alerts: Alert[] }) {
       (month) => ({ month, incidents: 0 })
     );
 
+    const siteToAgencyMap = new Map<string, string | undefined>();
+    sites.forEach((site) => {
+      siteToAgencyMap.set(site.name, site.agencyId);
+    });
+
     alerts.forEach((alert) => {
       const alertDate = new Date(alert.date);
-      if (alertDate.getFullYear().toString() === selectedYear && alert.type === 'Emergency') {
+      const alertAgencyId = siteToAgencyMap.get(alert.site);
+
+      const yearMatch = alertDate.getFullYear().toString() === selectedYear;
+      const companyMatch =
+        selectedCompany === 'all' || alertAgencyId === selectedCompany;
+
+      if (yearMatch && companyMatch && alert.type === 'Emergency') {
         const monthIndex = alertDate.getMonth();
         monthlyData[monthIndex].incidents += 1;
       }
     });
 
     return monthlyData;
-  }, [alerts, selectedYear]);
+  }, [alerts, sites, selectedYear, selectedCompany]);
 
   return (
     <Card>
@@ -70,21 +90,36 @@ export function IncidentChart({ alerts }: { alerts: Alert[] }) {
         <div>
           <CardTitle>Incidents Occurred</CardTitle>
           <CardDescription>
-            Total emergency incidents per month for the selected year.
+            Total emergency incidents per month for the selected filters.
           </CardDescription>
         </div>
-        <Select value={selectedYear} onValueChange={setSelectedYear}>
-          <SelectTrigger className="w-[120px]">
-            <SelectValue placeholder="Select Year" />
-          </SelectTrigger>
-          <SelectContent>
-            {availableYears.map((year) => (
-              <SelectItem key={year} value={year}>
-                {year}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="flex items-center gap-2">
+          <Select value={selectedCompany} onValueChange={setSelectedCompany}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Select Company" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Companies</SelectItem>
+              {securityAgencies.map((agency) => (
+                <SelectItem key={agency.id} value={agency.id}>
+                  {agency.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={selectedYear} onValueChange={setSelectedYear}>
+            <SelectTrigger className="w-[120px]">
+              <SelectValue placeholder="Select Year" />
+            </SelectTrigger>
+            <SelectContent>
+              {availableYears.map((year) => (
+                <SelectItem key={year} value={year}>
+                  {year}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig} className="h-[250px] w-full">
