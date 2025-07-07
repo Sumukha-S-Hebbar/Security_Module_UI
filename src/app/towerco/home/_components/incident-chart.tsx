@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useMemo } from 'react';
@@ -25,8 +26,12 @@ import {
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 
 const chartConfig = {
-  incidents: {
-    label: 'Incidents',
+  resolved: {
+    label: 'Resolved',
+    color: 'hsl(var(--chart-2))',
+  },
+  active: {
+    label: 'Active',
     color: 'hsl(var(--destructive))',
   },
 } satisfies ChartConfig;
@@ -58,8 +63,8 @@ export function IncidentChart({
       'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
       'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
     ];
-    const monthlyData: { month: string; incidents: number }[] = months.map(
-      (month) => ({ month, incidents: 0 })
+    const monthlyData: { month: string; active: number; resolved: number }[] = months.map(
+      (month) => ({ month, active: 0, resolved: 0 })
     );
 
     const siteToAgencyMap = new Map<string, string | undefined>();
@@ -77,7 +82,11 @@ export function IncidentChart({
 
       if (yearMatch && companyMatch && alert.type === 'Emergency') {
         const monthIndex = alertDate.getMonth();
-        monthlyData[monthIndex].incidents += 1;
+        if (alert.status === 'Resolved') {
+          monthlyData[monthIndex].resolved += 1;
+        } else {
+          monthlyData[monthIndex].active += 1;
+        }
       }
     });
 
@@ -90,7 +99,7 @@ export function IncidentChart({
         <div>
           <CardTitle>Incidents Occurred</CardTitle>
           <CardDescription>
-            Total emergency incidents per month for the selected filters.
+            Breakdown of active and resolved emergency incidents per month.
           </CardDescription>
         </div>
         <div className="flex items-center gap-2">
@@ -143,7 +152,8 @@ export function IncidentChart({
               cursor={false}
               content={<ChartTooltipContent />}
             />
-            <Bar dataKey="incidents" fill="var(--color-incidents)" radius={4} />
+            <Bar dataKey="resolved" fill="var(--color-resolved)" stackId="a" />
+            <Bar dataKey="active" fill="var(--color-active)" radius={4} stackId="a" />
           </BarChart>
         </ChartContainer>
       </CardContent>
