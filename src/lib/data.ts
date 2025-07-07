@@ -264,6 +264,7 @@ export const sites: Site[] = [
     agencyId: 'AGY02',
     patrollingOfficerId: 'PO02',
     geofencePerimeter: 1200,
+    assignedOn: '2024-03-15',
   },
   {
     id: 'SITE05',
@@ -316,6 +317,7 @@ export const sites: Site[] = [
     incidents: [],
     agencyId: 'AGY01',
     patrollingOfficerId: 'PO01',
+    assignedOn: '2024-05-20',
   },
   {
     id: 'SITE08',
@@ -331,6 +333,7 @@ export const sites: Site[] = [
     towerco: 'TowerCo Alpha',
     incidents: [],
     agencyId: 'AGY01',
+    assignedOn: '2024-06-10',
   },
   {
     id: 'SITE09',
@@ -346,6 +349,7 @@ export const sites: Site[] = [
     towerco: 'TowerCo Alpha',
     incidents: [],
     agencyId: 'AGY01',
+    assignedOn: '2024-06-11',
   },
   {
     id: 'SITE10',
@@ -361,6 +365,7 @@ export const sites: Site[] = [
     towerco: 'TowerCo Alpha',
     incidents: [],
     agencyId: 'AGY01',
+    assignedOn: '2024-06-12',
   },
   {
     id: 'SITE11',
