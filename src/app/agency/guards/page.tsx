@@ -275,7 +275,7 @@ export default function AgencyGuardsPage() {
                       { name: 'Compliance', value: compliance },
                       { name: 'Remaining', value: 100 - compliance },
                     ];
-                    const COLORS = ['hsl(var(--primary))', 'hsl(var(--muted))'];
+                    const COLORS = ['hsl(var(--chart-2))', 'hsl(var(--muted))'];
 
                     return (
                       <Card key={guard.id} className="flex flex-col">
@@ -300,7 +300,6 @@ export default function AgencyGuardsPage() {
                                                 cy="50%"
                                                 innerRadius="60%"
                                                 outerRadius="80%"
-                                                fill="#8884d8"
                                                 paddingAngle={0}
                                                 dataKey="value"
                                                 stroke="none"
@@ -422,5 +421,3 @@ export default function AgencyGuardsPage() {
     </div>
   );
 }
-
-    
