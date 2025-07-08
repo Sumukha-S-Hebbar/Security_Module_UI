@@ -25,6 +25,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { ArrowLeft, FileDown, Phone, MapPin, UserCheck, ShieldCheck } from 'lucide-react';
+import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { useToast } from '@/hooks/use-toast';
 
 export default function AgencyGuardReportPage() {
@@ -71,6 +72,14 @@ export default function AgencyGuardReportPage() {
   };
   
   const selfieAccuracy = guard.totalSelfieRequests > 0 ? Math.round(((guard.totalSelfieRequests - guard.missedSelfieCount) / guard.totalSelfieRequests) * 100) : 100;
+  const perimeterAccuracy = guard.performance?.perimeterAccuracy || 0;
+  const compliance = Math.round((perimeterAccuracy + selfieAccuracy) / 2);
+  const complianceData = [
+    { name: 'Compliance', value: compliance },
+    { name: 'Remaining', value: 100 - compliance },
+  ];
+  const COLORS = ['hsl(var(--chart-2))', 'hsl(var(--muted))'];
+
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6">
@@ -142,29 +151,57 @@ export default function AgencyGuardReportPage() {
           <CardHeader>
               <CardTitle className="flex items-center gap-2"><ShieldCheck className="h-5 w-5"/>Performance Metrics</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <div className="flex justify-between items-center mb-1">
-                <h4 className="font-medium flex items-center gap-2 text-sm">
-                    Perimeter Accuracy
-                </h4>
-                <span className="font-bold text-muted-foreground">{guard.performance?.perimeterAccuracy}%</span>
+           <CardContent className="space-y-6">
+              <div className="flex flex-col items-center gap-2 pt-4">
+                  <div className="w-32 h-32 relative">
+                      <ResponsiveContainer width="100%" height="100%">
+                          <PieChart>
+                              <Pie
+                                  data={complianceData}
+                                  cx="50%"
+                                  cy="50%"
+                                  innerRadius="70%"
+                                  outerRadius="85%"
+                                  paddingAngle={0}
+                                  dataKey="value"
+                                  stroke="none"
+                              >
+                                  {complianceData.map((entry, index) => (
+                                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                  ))}
+                              </Pie>
+                          </PieChart>
+                      </ResponsiveContainer>
+                      <div className="absolute inset-0 flex items-center justify-center">
+                          <span className="text-3xl font-bold text-foreground">{compliance}%</span>
+                      </div>
+                  </div>
+                  <p className="font-medium text-lg text-center">Overall Compliance</p>
               </div>
-              <Progress value={guard.performance?.perimeterAccuracy} className="h-2" />
-            </div>
-            <div>
-              <div className="flex justify-between items-center mb-1">
-                <h4 className="font-medium flex items-center gap-2 text-sm">
-                    Selfie Check-in Accuracy
-                </h4>
-                <span className="font-bold text-muted-foreground">{selfieAccuracy.toFixed(1)}%</span>
+              <div className="space-y-4 pt-6 border-t">
+                  <div>
+                    <div className="flex justify-between items-center mb-1">
+                      <h4 className="font-medium flex items-center gap-2 text-sm">
+                          Perimeter Accuracy
+                      </h4>
+                      <span className="font-bold text-muted-foreground">{perimeterAccuracy}%</span>
+                    </div>
+                    <Progress value={perimeterAccuracy} className="h-2" />
+                  </div>
+                  <div>
+                    <div className="flex justify-between items-center mb-1">
+                      <h4 className="font-medium flex items-center gap-2 text-sm">
+                          Selfie Check-in Accuracy
+                      </h4>
+                      <span className="font-bold text-muted-foreground">{selfieAccuracy}%</span>
+                    </div>
+                    <Progress value={selfieAccuracy} className="h-2" />
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                      <p>Total Selfie Requests: {guard.totalSelfieRequests}</p>
+                      <p>Missed Selfies: {guard.missedSelfieCount}</p>
+                  </div>
               </div>
-              <Progress value={selfieAccuracy} className="h-2" />
-            </div>
-             <div className="text-sm text-muted-foreground">
-                <p>Total Selfie Requests: {guard.totalSelfieRequests}</p>
-                <p>Missed Selfies: {guard.missedSelfieCount}</p>
-             </div>
           </CardContent>
         </Card>
         
@@ -223,5 +260,3 @@ export default function AgencyGuardReportPage() {
     </div>
   );
 }
-
-    

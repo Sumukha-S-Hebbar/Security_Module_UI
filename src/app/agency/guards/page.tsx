@@ -291,15 +291,15 @@ export default function AgencyGuardsPage() {
                                         <CardDescription>ID: {guard.id}</CardDescription>
                                     </div>
                                 </div>
-                                <div className="w-16 h-16 relative">
+                                <div className="w-20 h-20 relative">
                                     <ResponsiveContainer width="100%" height="100%">
                                         <PieChart>
                                             <Pie
                                                 data={complianceData}
                                                 cx="50%"
                                                 cy="50%"
-                                                innerRadius="60%"
-                                                outerRadius="80%"
+                                                innerRadius="70%"
+                                                outerRadius="85%"
                                                 paddingAngle={0}
                                                 dataKey="value"
                                                 stroke="none"
@@ -311,7 +311,7 @@ export default function AgencyGuardsPage() {
                                         </PieChart>
                                     </ResponsiveContainer>
                                     <div className="absolute inset-0 flex items-center justify-center">
-                                        <span className="text-lg font-bold text-foreground">{compliance}%</span>
+                                        <span className="text-xl font-bold text-foreground">{compliance}%</span>
                                     </div>
                                 </div>
                             </div>
