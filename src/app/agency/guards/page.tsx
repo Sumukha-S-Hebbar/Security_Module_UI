@@ -46,6 +46,7 @@ import {
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import Link from 'next/link';
+import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 
 const uploadFormSchema = z.object({
   csvFile: z
@@ -268,18 +269,51 @@ export default function AgencyGuardsPage() {
                   filteredAssignedGuards.map((guard) => {
                     const patrollingOfficer = getPatrollingOfficerForGuard(guard);
                     const selfieAccuracy = guard.totalSelfieRequests > 0 ? Math.round(((guard.totalSelfieRequests - guard.missedSelfieCount) / guard.totalSelfieRequests) * 100) : 100;
+                    const perimeterAccuracy = guard.performance?.perimeterAccuracy || 0;
+                    const compliance = Math.round((perimeterAccuracy + selfieAccuracy) / 2);
+                    const complianceData = [
+                      { name: 'Compliance', value: compliance },
+                      { name: 'Remaining', value: 100 - compliance },
+                    ];
+                    const COLORS = ['hsl(var(--primary))', 'hsl(var(--muted))'];
 
                     return (
                       <Card key={guard.id} className="flex flex-col">
                         <CardHeader>
-                            <div className="flex items-center gap-4">
-                                <Avatar className="h-12 w-12">
-                                    <AvatarImage src={guard.avatar} alt={guard.name} />
-                                    <AvatarFallback>{guard.name.charAt(0)}</AvatarFallback>
-                                </Avatar>
-                                <div>
-                                    <CardTitle className="text-lg">{guard.name}</CardTitle>
-                                    <CardDescription>ID: {guard.id}</CardDescription>
+                            <div className="flex items-start justify-between gap-4">
+                                <div className="flex items-center gap-4">
+                                    <Avatar className="h-12 w-12">
+                                        <AvatarImage src={guard.avatar} alt={guard.name} />
+                                        <AvatarFallback>{guard.name.charAt(0)}</AvatarFallback>
+                                    </Avatar>
+                                    <div>
+                                        <CardTitle className="text-lg">{guard.name}</CardTitle>
+                                        <CardDescription>ID: {guard.id}</CardDescription>
+                                    </div>
+                                </div>
+                                <div className="w-16 h-16 relative">
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <PieChart>
+                                            <Pie
+                                                data={complianceData}
+                                                cx="50%"
+                                                cy="50%"
+                                                innerRadius="60%"
+                                                outerRadius="80%"
+                                                fill="#8884d8"
+                                                paddingAngle={0}
+                                                dataKey="value"
+                                                stroke="none"
+                                            >
+                                                {complianceData.map((entry, index) => (
+                                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                                ))}
+                                            </Pie>
+                                        </PieChart>
+                                    </ResponsiveContainer>
+                                    <div className="absolute inset-0 flex items-center justify-center">
+                                        <span className="text-lg font-bold text-foreground">{compliance}%</span>
+                                    </div>
                                 </div>
                             </div>
                         </CardHeader>
@@ -293,7 +327,7 @@ export default function AgencyGuardsPage() {
                             <span>{patrollingOfficer?.name || 'N/A'}</span>
                           </div>
                           <div className="flex items-center gap-2 text-muted-foreground">
-                            <span>Perimeter Accuracy: {guard.performance?.perimeterAccuracy}%</span>
+                            <span>Perimeter Accuracy: {perimeterAccuracy}%</span>
                           </div>
                           <div className="flex items-center gap-2 text-muted-foreground">
                             <span>Selfie Accuracy: {selfieAccuracy}%</span>
