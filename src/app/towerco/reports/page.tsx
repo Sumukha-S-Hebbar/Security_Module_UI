@@ -1,10 +1,9 @@
-
 'use client';
 
 import { useState, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import {
-  alerts,
+  alerts as initialAlerts,
   guards,
   sites,
   securityAgencies,
@@ -36,7 +35,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Eye, FileDown, Search, Calendar as CalendarIcon } from 'lucide-react';
+import { Eye, FileDown, Search, Calendar as CalendarIcon, ShieldAlert, CheckCircle, ChevronDown } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 import {
@@ -47,6 +46,12 @@ import {
 import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 const LOGGED_IN_TOWERCO = 'TowerCo Alpha'; // Simulate logged-in user
 
@@ -55,6 +60,7 @@ export default function TowercoIncidentsPage() {
   const searchParams = useSearchParams();
   const monthFromQuery = searchParams.get('month');
   
+  const [alerts, setAlerts] = useState(initialAlerts);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedAgency, setSelectedAgency] = useState('all');
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
@@ -76,7 +82,7 @@ export default function TowercoIncidentsPage() {
         (alert) =>
           towercoSiteNames.has(alert.site) && alert.type === 'Emergency'
       ),
-    [towercoSiteNames]
+    [towercoSiteNames, alerts]
   );
 
   const agenciesOnSites = useMemo(() => {
@@ -119,6 +125,18 @@ export default function TowercoIncidentsPage() {
     });
   }, [searchQuery, selectedAgency, selectedDate, selectedMonth, towercoAlerts, siteToAgencyMap]);
 
+  const handleStatusChange = (incidentId: string, status: Alert['status']) => {
+    setAlerts((prevAlerts) =>
+      prevAlerts.map((incident) =>
+        incident.id === incidentId ? { ...incident, status } : incident
+      )
+    );
+    toast({
+      title: 'Status Updated',
+      description: `Incident #${incidentId} status changed to ${status}.`,
+    });
+  };
+  
   const getStatusBadge = (status: Alert['status']) => {
     switch (status) {
       case 'Active':
@@ -260,7 +278,8 @@ export default function TowercoIncidentsPage() {
                 <TableHead>Guard</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Report</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead>Actions</TableHead>
+                <TableHead className="text-right">Download</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -270,6 +289,7 @@ export default function TowercoIncidentsPage() {
                   const patrollingOfficer = getPatrollingOfficerByGuardName(
                     incident.guard
                   );
+                  const isResolved = incident.status === 'Resolved';
                   return (
                     <TableRow key={incident.id}>
                       <TableCell className="font-medium">
@@ -291,6 +311,35 @@ export default function TowercoIncidentsPage() {
                           </Link>
                         </Button>
                       </TableCell>
+                      <TableCell>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="outline" size="sm" disabled={isResolved}>
+                                Actions <ChevronDown className="ml-2 h-4 w-4" />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                                <DropdownMenuItem
+                                onClick={() =>
+                                    handleStatusChange(incident.id, 'Under Review')
+                                }
+                                disabled={
+                                    incident.status === 'Under Review' || isResolved
+                                }
+                                >
+                                <ShieldAlert className="mr-2 h-4 w-4" />
+                                Start Review
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                onClick={() => handleStatusChange(incident.id, 'Resolved')}
+                                disabled={isResolved}
+                                >
+                                <CheckCircle className="mr-2 h-4 w-4" />
+                                Mark as Resolved
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
                       <TableCell className="text-right">
                         <Button
                           variant="outline"
@@ -307,7 +356,7 @@ export default function TowercoIncidentsPage() {
               ) : (
                 <TableRow>
                   <TableCell
-                    colSpan={9}
+                    colSpan={10}
                     className="text-center text-muted-foreground"
                   >
                     No incidents found for the current filter.
