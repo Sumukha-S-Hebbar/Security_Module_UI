@@ -2,6 +2,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import { useSearchParams } from 'next/navigation';
 import {
   alerts,
   guards,
@@ -51,10 +52,13 @@ const LOGGED_IN_TOWERCO = 'TowerCo Alpha'; // Simulate logged-in user
 
 export default function TowercoIncidentsPage() {
   const { toast } = useToast();
+  const searchParams = useSearchParams();
+  const monthFromQuery = searchParams.get('month');
+  
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedAgency, setSelectedAgency] = useState('all');
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
-  const [selectedMonth, setSelectedMonth] = useState('all');
+  const [selectedMonth, setSelectedMonth] = useState(monthFromQuery || 'all');
 
   const towercoSites = useMemo(
     () => sites.filter((site) => site.towerco === LOGGED_IN_TOWERCO),

@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useMemo } from 'react';
@@ -24,6 +23,7 @@ import {
   ChartConfig,
 } from '@/components/ui/chart';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
+import { useRouter } from 'next/navigation';
 
 const chartConfig = {
   total: {
@@ -45,6 +45,7 @@ export function IncidentChart({
   sites: Site[];
   securityAgencies: SecurityAgency[];
 }) {
+  const router = useRouter();
   // Get unique years from the alerts data
   const availableYears = useMemo(() => {
     const years = new Set(
@@ -91,6 +92,10 @@ export function IncidentChart({
 
     return monthlyData;
   }, [alerts, sites, selectedYear, selectedCompany]);
+
+  const handleBarClick = (data: any, index: number) => {
+    router.push(`/towerco/reports?month=${index + 1}`);
+  };
 
   return (
     <Card>
@@ -151,8 +156,8 @@ export function IncidentChart({
               cursor={false}
               content={<ChartTooltipContent />}
             />
-            <Bar dataKey="total" fill="var(--color-total)" radius={4} />
-            <Bar dataKey="resolved" fill="var(--color-resolved)" radius={4} />
+            <Bar dataKey="total" fill="var(--color-total)" radius={4} onClick={handleBarClick} cursor="pointer" />
+            <Bar dataKey="resolved" fill="var(--color-resolved)" radius={4} onClick={handleBarClick} cursor="pointer" />
           </BarChart>
         </ChartContainer>
       </CardContent>
