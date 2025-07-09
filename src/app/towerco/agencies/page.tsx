@@ -8,10 +8,11 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useToast } from '@/hooks/use-toast';
 import { securityAgencies, sites } from '@/lib/data';
+import type { SecurityAgency } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Phone, Mail, Upload, Loader2, PlusCircle, Search, MapPin, Eye, FileDown } from 'lucide-react';
+import { Phone, Mail, Upload, Loader2, PlusCircle, Search, MapPin, Eye, Building2 } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -30,6 +31,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 
 const LOGGED_IN_TOWERCO = 'TowerCo Alpha'; // Simulate logged-in user
 
@@ -55,6 +64,7 @@ export default function TowercoAgenciesPage() {
     const [isAddAgencyDialogOpen, setIsAddAgencyDialogOpen] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
     const [isAddingAgency, setIsAddingAgency] = useState(false);
+    const [selectedAgencyForSites, setSelectedAgencyForSites] = useState<SecurityAgency | null>(null);
     const { toast } = useToast();
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCountry, setSelectedCountry] = useState('all');
@@ -109,13 +119,6 @@ export default function TowercoAgenciesPage() {
         setIsAddingAgency(false);
         setIsAddAgencyDialogOpen(false);
     }
-
-    const handleDownloadReport = (agencyName: string) => {
-        toast({
-            title: 'Report Download Started',
-            description: `Downloading report for agency ${agencyName}. This is a mock action.`,
-        });
-    };
 
     const countries = useMemo(() => {
         const allCountries = securityAgencies.map((agency) => agency.country);
@@ -177,6 +180,11 @@ export default function TowercoAgenciesPage() {
             return matchesSearch && matchesCountry && matchesState && matchesCity;
         });
     }, [searchQuery, selectedCountry, selectedState, selectedCity]);
+
+    const assignedSitesForSelectedAgency = useMemo(() => {
+      if (!selectedAgencyForSites) return [];
+      return sites.filter(s => s.agencyId === selectedAgencyForSites.id && s.towerco === LOGGED_IN_TOWERCO);
+    }, [selectedAgencyForSites]);
 
     return (
         <div className="p-4 sm:p-6 lg:p-8 space-y-6">
@@ -477,10 +485,10 @@ export default function TowercoAgenciesPage() {
                                 <Button
                                     variant="outline"
                                     size="sm"
-                                    onClick={() => handleDownloadReport(agency.name)}
+                                    onClick={() => setSelectedAgencyForSites(agency)}
                                 >
-                                    <FileDown className="mr-2 h-4 w-4" />
-                                    Download Report
+                                    <Building2 className="mr-2 h-4 w-4" />
+                                    View Sites
                                 </Button>
                             </CardFooter>
                             </Card>
@@ -493,6 +501,45 @@ export default function TowercoAgenciesPage() {
                     </div>
                 </CardContent>
             </Card>
+
+            <Dialog open={!!selectedAgencyForSites} onOpenChange={(isOpen) => !isOpen && setSelectedAgencyForSites(null)}>
+              <DialogContent className="max-w-3xl">
+                <DialogHeader>
+                  <DialogTitle>Sites Assigned to {selectedAgencyForSites?.name}</DialogTitle>
+                  <DialogDescription>
+                    A list of all sites managed by this agency for {LOGGED_IN_TOWERCO}.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="pt-4">
+                  {assignedSitesForSelectedAgency.length > 0 ? (
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Site Name</TableHead>
+                          <TableHead>Address</TableHead>
+                          <TableHead>City</TableHead>
+                          <TableHead>State</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {assignedSitesForSelectedAgency.map((site) => (
+                          <TableRow key={site.id}>
+                            <TableCell className="font-medium">{site.name}</TableCell>
+                            <TableCell>{site.address}</TableCell>
+                            <TableCell>{site.city}</TableCell>
+                            <TableCell>{site.state}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  ) : (
+                    <p className="text-sm text-muted-foreground text-center py-4">
+                      No sites from {LOGGED_IN_TOWERCO} are assigned to this agency.
+                    </p>
+                  )}
+                </div>
+              </DialogContent>
+            </Dialog>
         </div>
     );
 }
