@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useMemo } from 'react';
@@ -24,6 +23,7 @@ import {
   ChartConfig,
 } from '@/components/ui/chart';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
+import { useRouter } from 'next/navigation';
 
 const chartConfig = {
   total: {
@@ -41,6 +41,7 @@ export function AgencyIncidentChart({
 }: {
   alerts: Alert[];
 }) {
+  const router = useRouter();
   const availableYears = useMemo(() => {
     const years = new Set(
       alerts.map((alert) => new Date(alert.date).getFullYear().toString())
@@ -77,6 +78,10 @@ export function AgencyIncidentChart({
 
     return monthlyData;
   }, [alerts, selectedYear]);
+
+  const handleBarClick = (data: any, index: number) => {
+    router.push(`/agency/incidents?month=${index}`);
+  };
 
   return (
     <Card>
@@ -124,8 +129,8 @@ export function AgencyIncidentChart({
               cursor={false}
               content={<ChartTooltipContent />}
             />
-            <Bar dataKey="total" fill="var(--color-total)" radius={4} />
-            <Bar dataKey="resolved" fill="var(--color-resolved)" radius={4} />
+            <Bar dataKey="total" fill="var(--color-total)" radius={4} onClick={handleBarClick} cursor="pointer" />
+            <Bar dataKey="resolved" fill="var(--color-resolved)" radius={4} onClick={handleBarClick} cursor="pointer" />
           </BarChart>
         </ChartContainer>
       </CardContent>

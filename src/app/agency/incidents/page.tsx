@@ -2,6 +2,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { alerts as initialAlerts, guards, patrollingOfficers, sites } from '@/lib/data';
 import type { Alert, Guard, PatrollingOfficer } from '@/types';
 import {
@@ -51,11 +52,14 @@ const LOGGED_IN_AGENCY_ID = 'AGY01'; // Simulate logged-in agency
 
 export default function AgencyIncidentsPage() {
   const { toast } = useToast();
+  const searchParams = useSearchParams();
+  const monthFromQuery = searchParams.get('month');
+
   const [alerts, setAlerts] = useState(initialAlerts);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
-  const [selectedMonth, setSelectedMonth] = useState('all');
+  const [selectedMonth, setSelectedMonth] = useState(monthFromQuery || 'all');
 
   const agencySites = useMemo(() => sites.filter(site => site.agencyId === LOGGED_IN_AGENCY_ID), []);
   const agencySiteNames = useMemo(() => new Set(agencySites.map(site => site.name)), [agencySites]);
