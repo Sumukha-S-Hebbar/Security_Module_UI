@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { alerts, guards, sites, patrollingOfficers } from '@/lib/data';
 import type { Guard, PatrollingOfficer, Site } from '@/types';
 import { AgencyAnalyticsDashboard } from './_components/agency-analytics-dashboard';
@@ -31,10 +31,19 @@ import { IncidentStatusBreakdown } from './_components/incident-status-breakdown
 import { AgencyIncidentChart } from './_components/agency-incident-chart';
 import { GuardPerformanceBreakdown } from './_components/guard-performance-breakdown';
 import { PatrollingOfficerPerformance } from './_components/patrolling-officer-performance';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 const LOGGED_IN_AGENCY_ID = 'AGY01'; // Simulate logged-in agency
 
 export default function AgencyHomePage() {
+  const [selectedMonth, setSelectedMonth] = useState('all');
+
   const agencySites = useMemo(() => sites.filter(site => site.agencyId === LOGGED_IN_AGENCY_ID), []);
   const agencySiteNames = useMemo(() => new Set(agencySites.map(site => site.name)), [agencySites]);
 
@@ -46,6 +55,16 @@ export default function AgencyHomePage() {
     const poIds = new Set(agencySites.map(s => s.patrollingOfficerId).filter(Boolean));
     return patrollingOfficers.filter(po => poIds.has(po.id));
   }, [agencySites]);
+
+  const monthlyFilteredAlerts = useMemo(() => {
+    if (selectedMonth === 'all') {
+      return agencyAlerts;
+    }
+    return agencyAlerts.filter(alert => {
+      const alertDate = new Date(alert.date);
+      return alertDate.getMonth() === parseInt(selectedMonth, 10);
+    });
+  }, [agencyAlerts, selectedMonth]);
 
   const activeEmergencies = useMemo(() => agencyAlerts.filter(
     (alert) => alert.type === 'Emergency' && alert.status === 'Active'
@@ -69,11 +88,30 @@ export default function AgencyHomePage() {
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Agency Dashboard</h1>
-        <p className="text-muted-foreground">
-          Welcome! Here's a high-level overview of your operations.
-        </p>
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Agency Dashboard</h1>
+          <p className="text-muted-foreground">
+            Welcome! Here's a high-level overview of your operations.
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+            <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+              <SelectTrigger className="w-full sm:w-[180px]">
+                <SelectValue placeholder="Filter by month" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Months</SelectItem>
+                {Array.from({ length: 12 }, (_, i) => (
+                  <SelectItem key={i} value={i.toString()}>
+                    {new Date(0, i).toLocaleString('default', {
+                      month: 'long',
+                    })}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+        </div>
       </div>
 
       <Card className="border-destructive bg-destructive/10">
@@ -155,14 +193,14 @@ export default function AgencyHomePage() {
         patrollingOfficers={agencyPatrollingOfficers}
       />
 
-      <IncidentStatusBreakdown alerts={agencyAlerts} />
+      <IncidentStatusBreakdown alerts={monthlyFilteredAlerts} />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <GuardPerformanceBreakdown guards={agencyGuards} />
         <PatrollingOfficerPerformance patrollingOfficers={agencyPatrollingOfficers} sites={agencySites} />
       </div>
 
-      <AgencyIncidentChart alerts={agencyAlerts} />
+      <AgencyIncidentChart alerts={monthlyFilteredAlerts} />
     </div>
   );
 }

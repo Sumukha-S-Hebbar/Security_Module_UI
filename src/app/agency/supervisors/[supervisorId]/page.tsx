@@ -26,11 +26,14 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ArrowLeft, FileDown, Phone, Mail, MapPin, Users, ShieldAlert, Map, Clock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Progress } from '@/components/ui/progress';
+import { useMemo, useState } from 'react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export default function AgencyPatrollingOfficerReportPage() {
   const params = useParams();
   const { toast } = useToast();
   const supervisorId = params.supervisorId as string;
+  const [selectedMonth, setSelectedMonth] = useState('all');
 
   const patrollingOfficer = patrollingOfficers.find((p) => p.id === supervisorId);
 
@@ -51,6 +54,16 @@ export default function AgencyPatrollingOfficerReportPage() {
   const assignedGuards = guards.filter(guard => assignedSiteNames.has(guard.site));
   const assignedIncidents = alerts.filter(alert => assignedSiteNames.has(alert.site) && alert.type === 'Emergency');
   
+  const filteredIncidents = useMemo(() => {
+    if (selectedMonth === 'all') {
+      return assignedIncidents;
+    }
+    return assignedIncidents.filter(incident => {
+        const incidentDate = new Date(incident.date);
+        return incidentDate.getMonth() === parseInt(selectedMonth, 10);
+    });
+  }, [assignedIncidents, selectedMonth]);
+
   const visitedSites = assignedSites.filter(s => s.visited).length;
   const siteVisitAccuracy = assignedSites.length > 0 ? (visitedSites / assignedSites.length) * 100 : 100;
   const averageResponseTime = patrollingOfficer.averageResponseTime || 0;
@@ -230,12 +243,29 @@ export default function AgencyPatrollingOfficerReportPage() {
       </div>
 
       <Card>
-        <CardHeader>
-          <CardTitle>Recent Incidents</CardTitle>
-          <CardDescription>A log of emergency incidents at sites managed by {patrollingOfficer.name}.</CardDescription>
+        <CardHeader className="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <CardTitle>Recent Incidents</CardTitle>
+            <CardDescription>A log of emergency incidents at sites managed by {patrollingOfficer.name}.</CardDescription>
+          </div>
+          <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+            <SelectTrigger className="w-full sm:w-[180px]">
+              <SelectValue placeholder="Filter by month" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Months</SelectItem>
+              {Array.from({ length: 12 }, (_, i) => (
+                <SelectItem key={i} value={i.toString()}>
+                  {new Date(0, i).toLocaleString('default', {
+                    month: 'long',
+                  })}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </CardHeader>
         <CardContent>
-          {assignedIncidents.length > 0 ? (
+          {filteredIncidents.length > 0 ? (
             <Table>
               <TableHeader>
                 <TableRow>
@@ -248,7 +278,7 @@ export default function AgencyPatrollingOfficerReportPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {assignedIncidents.map((incident) => (
+                {filteredIncidents.map((incident) => (
                   <TableRow key={incident.id}>
                     <TableCell>{incident.id}</TableCell>
                     <TableCell>{new Date(incident.date).toLocaleDateString()}</TableCell>
@@ -261,7 +291,7 @@ export default function AgencyPatrollingOfficerReportPage() {
               </TableBody>
             </Table>
           ) : (
-            <p className="text-muted-foreground text-center py-4">No recent incidents for this officer's sites.</p>
+            <p className="text-muted-foreground text-center py-4">No recent incidents for this officer's sites {selectedMonth !== 'all' && 'in the selected month'}.</p>
           )}
         </CardContent>
       </Card>
