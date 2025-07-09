@@ -3,6 +3,7 @@
 
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
+import { useState, useMemo } from 'react';
 import {
   securityAgencies,
   sites,
@@ -44,8 +45,35 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+} from 'recharts';
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  ChartConfig,
+} from '@/components/ui/chart';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 const LOGGED_IN_TOWERCO = 'TowerCo Alpha'; // Simulate logged-in user
+
+const chartConfig = {
+  incidents: {
+    label: 'Incidents',
+    color: 'hsl(var(--destructive))',
+  },
+} satisfies ChartConfig;
 
 export default function AgencyReportPage() {
   const params = useParams();
@@ -118,6 +146,38 @@ export default function AgencyReportPage() {
         return <Badge variant="secondary">{status}</Badge>;
     }
   };
+  
+  const [selectedYear, setSelectedYear] = useState<string>(new Date().getFullYear().toString());
+
+  const availableYears = useMemo(() => {
+    const years = new Set(
+      agencyIncidents.map((alert) => new Date(alert.date).getFullYear().toString())
+    );
+    if (years.size === 0) {
+      years.add(new Date().getFullYear().toString());
+    }
+    return Array.from(years).sort((a, b) => parseInt(b) - parseInt(a));
+  }, [agencyIncidents]);
+
+  const monthlyIncidentData = useMemo(() => {
+    const months = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+    ];
+    const monthlyData: { month: string; incidents: number }[] = months.map(
+      (month) => ({ month, incidents: 0 })
+    );
+
+    agencyIncidents.forEach((alert) => {
+      const alertDate = new Date(alert.date);
+      if (alertDate.getFullYear().toString() === selectedYear) {
+        const monthIndex = alertDate.getMonth();
+        monthlyData[monthIndex].incidents += 1;
+      }
+    });
+
+    return monthlyData;
+  }, [agencyIncidents, selectedYear]);
 
 
   return (
@@ -244,6 +304,64 @@ export default function AgencyReportPage() {
                     )}
                 </div>
             </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <div>
+            <CardTitle>Incident Trend</CardTitle>
+            <CardDescription>
+              Monthly emergency incidents for {selectedYear}.
+            </CardDescription>
+          </div>
+          <Select value={selectedYear} onValueChange={setSelectedYear}>
+            <SelectTrigger className="w-[120px]">
+              <SelectValue placeholder="Select Year" />
+            </SelectTrigger>
+            <SelectContent>
+              {availableYears.map((year) => (
+                <SelectItem key={year} value={year}>
+                  {year}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </CardHeader>
+        <CardContent>
+          <ChartContainer config={chartConfig} className="h-[250px] w-full">
+            <LineChart
+              data={monthlyIncidentData}
+              margin={{ top: 5, right: 20, left: -10, bottom: 5 }}
+            >
+              <CartesianGrid vertical={false} />
+              <XAxis
+                dataKey="month"
+                tickLine={false}
+                axisLine={false}
+                tickMargin={8}
+                fontSize={12}
+              />
+              <YAxis
+                tickLine={false}
+                axisLine={false}
+                tickMargin={8}
+                allowDecimals={false}
+                fontSize={12}
+              />
+              <ChartTooltip
+                cursor={true}
+                content={<ChartTooltipContent />}
+              />
+              <Line
+                type="monotone"
+                dataKey="incidents"
+                stroke="var(--color-incidents)"
+                strokeWidth={2}
+                dot={true}
+              />
+            </LineChart>
+          </ChartContainer>
         </CardContent>
       </Card>
 
