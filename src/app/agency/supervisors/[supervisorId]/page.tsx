@@ -23,8 +23,9 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { ArrowLeft, FileDown, Phone, Mail, MapPin, Users, ShieldAlert } from 'lucide-react';
+import { ArrowLeft, FileDown, Phone, Mail, MapPin, Users, ShieldAlert, Map, Clock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { Progress } from '@/components/ui/progress';
 
 export default function AgencyPatrollingOfficerReportPage() {
   const params = useParams();
@@ -49,6 +50,11 @@ export default function AgencyPatrollingOfficerReportPage() {
   const assignedSiteNames = new Set(assignedSites.map(s => s.name));
   const assignedGuards = guards.filter(guard => assignedSiteNames.has(guard.site));
   const assignedIncidents = alerts.filter(alert => assignedSiteNames.has(alert.site) && alert.type === 'Emergency');
+  
+  const visitedSites = assignedSites.filter(s => s.visited).length;
+  const siteVisitAccuracy = assignedSites.length > 0 ? (visitedSites / assignedSites.length) * 100 : 100;
+  const averageResponseTime = patrollingOfficer.averageResponseTime || 0;
+
 
   const handleDownloadReport = () => {
     toast({
@@ -138,6 +144,34 @@ export default function AgencyPatrollingOfficerReportPage() {
         </CardContent>
       </Card>
       
+      <Card>
+        <CardHeader>
+          <CardTitle>Performance Metrics</CardTitle>
+           <CardDescription>
+            Key performance indicators for this patrolling officer.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <div className="flex justify-between items-center mb-1">
+              <h4 className="font-medium flex items-center gap-2 text-sm">
+                  <Map className="w-4 h-4 text-primary" />
+                  Site Visit Accuracy
+              </h4>
+              <span className="font-bold text-muted-foreground">{siteVisitAccuracy.toFixed(1)}%</span>
+            </div>
+            <Progress value={siteVisitAccuracy} className="h-2" />
+          </div>
+          <div className="flex items-center justify-between pt-2">
+              <h4 className="font-medium flex items-center gap-2 text-sm">
+                  <Clock className="w-4 h-4 text-primary" />
+                  Average Response Time
+              </h4>
+              <span className="font-bold text-lg text-foreground">{averageResponseTime.toFixed(0)} mins</span>
+          </div>
+        </CardContent>
+      </Card>
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
