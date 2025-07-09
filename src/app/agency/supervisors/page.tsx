@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { patrollingOfficers, guards, sites } from '@/lib/data';
-import type { PatrollingOfficer } from '@/types';
+import type { PatrollingOfficer, Site } from '@/types';
 import {
   Card,
   CardContent,
@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Users, Phone, Map, FileDown, Upload, PlusCircle, Loader2, Search, Mail, Eye } from 'lucide-react';
+import { Users, Phone, Map, Upload, PlusCircle, Loader2, Search, Mail, Eye } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import {
   Dialog,
@@ -31,6 +31,14 @@ import {
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import Link from 'next/link';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 
 const LOGGED_IN_AGENCY_ID = 'AGY01'; // Simulate logged-in agency
 
@@ -54,6 +62,7 @@ export default function AgencyPatrollingOfficersPage() {
     const [isUploading, setIsUploading] = useState(false);
     const [isAdding, setIsAdding] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
+    const [selectedPatrollingOfficer, setSelectedPatrollingOfficer] = useState<PatrollingOfficer | null>(null);
 
     const agencySites = useMemo(() => sites.filter(site => site.agencyId === LOGGED_IN_AGENCY_ID), []);
     
@@ -69,8 +78,11 @@ export default function AgencyPatrollingOfficersPage() {
     };
 
     const getAssignedSitesForPO = (patrollingOfficerId: string) => {
-        return agencySites.filter(s => s.patrollingOfficerId === patrollingOfficerId).map(s => s.name);
+        return agencySites.filter(s => s.patrollingOfficerId === patrollingOfficerId);
     }
+    
+    const sitesForSelectedPO = selectedPatrollingOfficer ? agencySites.filter(site => site.patrollingOfficerId === selectedPatrollingOfficer.id) : [];
+
 
     const uploadForm = useForm<z.infer<typeof uploadFormSchema>>({
         resolver: zodResolver(uploadFormSchema),
@@ -107,13 +119,6 @@ export default function AgencyPatrollingOfficersPage() {
         setIsAddDialogOpen(false);
     }
 
-    const handleDownloadReport = (patrollingOfficer: PatrollingOfficer) => {
-        toast({
-            title: 'Report Download Started',
-            description: `Downloading report for ${patrollingOfficer.name}.`,
-        });
-    };
-
     const filteredPatrollingOfficers = useMemo(() => {
         return agencyPatrollingOfficers.filter((po) =>
             po.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -123,6 +128,7 @@ export default function AgencyPatrollingOfficersPage() {
     }, [searchQuery, agencyPatrollingOfficers]);
 
     return (
+      <>
         <div className="p-4 sm:p-6 lg:p-8 space-y-6">
             <div>
                 <h1 className="text-3xl font-bold tracking-tight">Patrolling Officer Management</h1>
@@ -319,7 +325,7 @@ export default function AgencyPatrollingOfficersPage() {
                                     </div>
                                     <div className="flex items-center gap-2 text-muted-foreground">
                                         <Map className="h-4 w-4 flex-shrink-0" />
-                                        <span className="truncate" title={assignedSites.join(', ')}>{assignedSites.join(', ') || 'No sites assigned'}</span>
+                                        <span className="truncate" title={assignedSites.map(s => s.name).join(', ')}>{assignedSites.map(s => s.name).join(', ') || 'No sites assigned'}</span>
                                     </div>
                                 </CardContent>
                                 <CardFooter className="grid grid-cols-2 gap-2">
@@ -332,10 +338,10 @@ export default function AgencyPatrollingOfficersPage() {
                                     <Button
                                         variant="outline"
                                         size="sm"
-                                        onClick={() => handleDownloadReport(patrollingOfficer)}
+                                        onClick={() => setSelectedPatrollingOfficer(patrollingOfficer)}
                                     >
-                                        <FileDown className="mr-2 h-4 w-4" />
-                                        Download Report
+                                        <Map className="mr-2 h-4 w-4" />
+                                        View Sites ({assignedSites.length})
                                     </Button>
                                 </CardFooter>
                                 </Card>
@@ -349,5 +355,40 @@ export default function AgencyPatrollingOfficersPage() {
                 </CardContent>
             </Card>
         </div>
+        <Dialog open={!!selectedPatrollingOfficer} onOpenChange={(isOpen) => !isOpen && setSelectedPatrollingOfficer(null)}>
+            <DialogContent className="max-w-xl">
+            <DialogHeader>
+                <DialogTitle>Sites Assigned to {selectedPatrollingOfficer?.name}</DialogTitle>
+                <DialogDescription>
+                A list of all sites managed by this patrolling officer.
+                </DialogDescription>
+            </DialogHeader>
+            <div className="pt-4">
+                {sitesForSelectedPO.length > 0 ? (
+                <Table>
+                    <TableHeader>
+                    <TableRow>
+                        <TableHead>Site Name</TableHead>
+                        <TableHead>Address</TableHead>
+                    </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                    {sitesForSelectedPO.map((site) => (
+                        <TableRow key={site.id}>
+                            <TableCell className="font-medium">{site.name}</TableCell>
+                            <TableCell>{site.address}</TableCell>
+                        </TableRow>
+                    ))}
+                    </TableBody>
+                </Table>
+                ) : (
+                <p className="text-sm text-muted-foreground text-center py-4">
+                    No sites are assigned to this patrolling officer.
+                </p>
+                )}
+            </div>
+            </DialogContent>
+        </Dialog>
+      </>
     );
 }
