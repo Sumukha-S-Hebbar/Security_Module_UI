@@ -32,6 +32,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { SiteStatusBreakdown } from './_components/site-status-breakdown';
 import { IncidentChart } from './_components/incident-chart';
+import { AgencyPerformance } from './_components/agency-performance';
 
 const LOGGED_IN_TOWERCO = 'TowerCo Alpha'; // Simulate logged-in user
 
@@ -181,6 +182,12 @@ export default function TowercoHomePage() {
       />
 
       <SiteStatusBreakdown sites={towercoSites} />
+
+      <AgencyPerformance
+        agencies={towercoAgencies}
+        sites={towercoSites}
+        alerts={towercoAlerts}
+      />
 
       <IncidentChart
         alerts={towercoAlerts}
