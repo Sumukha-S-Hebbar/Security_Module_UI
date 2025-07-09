@@ -52,6 +52,7 @@ export type PatrollingOfficer = {
   email: string;
   avatar: string;
   routes?: string[];
+  averageResponseTime?: number;
 };
 
 export type Incident = {

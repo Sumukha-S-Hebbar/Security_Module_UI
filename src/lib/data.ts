@@ -9,6 +9,7 @@ export const patrollingOfficers: PatrollingOfficer[] = [
     email: 'michael.s@guardlink.com',
     avatar: 'https://placehold.co/100x100.png',
     routes: ['Downtown Route', 'Waterfront Route'],
+    averageResponseTime: 15,
   },
   {
     id: 'PO02',
@@ -17,6 +18,7 @@ export const patrollingOfficers: PatrollingOfficer[] = [
     email: 'jessica.p@guardlink.com',
     avatar: 'https://placehold.co/100x100.png',
     routes: ['Tech Park Route', 'Cyberdyne Route'],
+    averageResponseTime: 12,
   },
   {
     id: 'PO03',
@@ -25,6 +27,7 @@ export const patrollingOfficers: PatrollingOfficer[] = [
     email: 'harvey.s@guardlink.com',
     avatar: 'https://placehold.co/100x100.png',
     routes: ['Industrial Zone Route'],
+    averageResponseTime: 18,
   },
 ];
 
