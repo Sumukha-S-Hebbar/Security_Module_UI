@@ -1,4 +1,3 @@
-
 'use client';
 
 import Link from 'next/link';
@@ -9,6 +8,7 @@ import {
   Shield,
   Briefcase,
   ShieldAlert,
+  LogOut,
 } from 'lucide-react';
 import {
   SidebarHeader,
@@ -16,6 +16,7 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
+  SidebarFooter,
 } from '@/components/ui/sidebar';
 import { cn } from '@/lib/utils';
 
@@ -62,6 +63,21 @@ export default function TowercoSidebar() {
           ))}
         </SidebarMenu>
       </SidebarContent>
+      <SidebarFooter>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              asChild
+              className="w-full justify-start"
+            >
+              <Link href="/">
+                <LogOut className="h-5 w-5" />
+                <span>Logout</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
     </>
   );
 }
