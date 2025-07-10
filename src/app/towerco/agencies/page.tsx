@@ -1,14 +1,14 @@
 
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useToast } from '@/hooks/use-toast';
-import { securityAgencies, sites } from '@/lib/data';
-import type { SecurityAgency } from '@/types';
+import { sites } from '@/lib/data';
+import type { SecurityAgency, Site } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -39,6 +39,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { Skeleton } from '@/components/ui/skeleton';
+
 
 const LOGGED_IN_TOWERCO = 'TowerCo Alpha'; // Simulate logged-in user
 
@@ -59,7 +61,27 @@ const addAgencyFormSchema = z.object({
     country: z.string().min(1, { message: 'Country is required.' }),
 });
 
+async function getAgencies(): Promise<SecurityAgency[]> {
+    // TODO: Replace with your actual Django API endpoint
+    const API_URL = 'https://your-django-api.com/api/agencies/';
+    try {
+        const res = await fetch(API_URL);
+        if (!res.ok) {
+            // This will activate the closest `error.js` Error Boundary
+            throw new Error('Failed to fetch agencies');
+        }
+        return res.json();
+    } catch (error) {
+        console.error("Could not fetch agencies, returning empty array.", error);
+        // In a real app, you might want to handle this more gracefully.
+        return [];
+    }
+}
+
+
 export default function TowercoAgenciesPage() {
+    const [securityAgencies, setSecurityAgencies] = useState<SecurityAgency[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
     const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
     const [isAddAgencyDialogOpen, setIsAddAgencyDialogOpen] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
@@ -70,6 +92,16 @@ export default function TowercoAgenciesPage() {
     const [selectedCountry, setSelectedCountry] = useState('all');
     const [selectedState, setSelectedState] = useState('all');
     const [selectedCity, setSelectedCity] = useState('all');
+
+    useEffect(() => {
+        const fetchData = async () => {
+            setIsLoading(true);
+            const agencies = await getAgencies();
+            setSecurityAgencies(agencies);
+            setIsLoading(false);
+        };
+        fetchData();
+    }, []);
 
     const uploadForm = useForm<z.infer<typeof uploadFormSchema>>({
         resolver: zodResolver(uploadFormSchema),
@@ -123,7 +155,7 @@ export default function TowercoAgenciesPage() {
     const countries = useMemo(() => {
         const allCountries = securityAgencies.map((agency) => agency.country);
         return [...new Set(allCountries)];
-    }, []);
+    }, [securityAgencies]);
 
     const states = useMemo(() => {
         if (selectedCountry === 'all') {
@@ -133,7 +165,7 @@ export default function TowercoAgenciesPage() {
             .filter((agency) => agency.country === selectedCountry)
             .map((agency) => agency.state);
         return [...new Set(allStates)];
-    }, [selectedCountry]);
+    }, [selectedCountry, securityAgencies]);
 
     const cities = useMemo(() => {
         if (selectedState === 'all' || selectedCountry === 'all') {
@@ -143,7 +175,7 @@ export default function TowercoAgenciesPage() {
             .filter((agency) => agency.country === selectedCountry && agency.state === selectedState)
             .map((agency) => agency.city);
         return [...new Set(allCities)];
-    }, [selectedCountry, selectedState]);
+    }, [selectedCountry, selectedState, securityAgencies]);
 
     const handleCountryChange = (country: string) => {
         setSelectedCountry(country);
@@ -179,7 +211,7 @@ export default function TowercoAgenciesPage() {
 
             return matchesSearch && matchesCountry && matchesState && matchesCity;
         });
-    }, [searchQuery, selectedCountry, selectedState, selectedCity]);
+    }, [searchQuery, selectedCountry, selectedState, selectedCity, securityAgencies]);
 
     const assignedSitesForSelectedAgency = useMemo(() => {
       if (!selectedAgencyForSites) return [];
@@ -444,7 +476,30 @@ export default function TowercoAgenciesPage() {
                 </CardHeader>
                 <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-6">
-                        {filteredAgencies.length > 0 ? (
+                        {isLoading ? (
+                            Array.from({ length: 3 }).map((_, i) => (
+                                <Card key={i}>
+                                    <CardHeader>
+                                        <div className="flex items-center gap-4">
+                                            <Skeleton className="h-12 w-12 rounded-full" />
+                                            <div className="space-y-2">
+                                                <Skeleton className="h-4 w-[150px]" />
+                                                <Skeleton className="h-4 w-[100px]" />
+                                            </div>
+                                        </div>
+                                    </CardHeader>
+                                    <CardContent className="space-y-2">
+                                        <Skeleton className="h-4 w-full" />
+                                        <Skeleton className="h-4 w-full" />
+                                        <Skeleton className="h-4 w-[80%]" />
+                                    </CardContent>
+                                    <CardFooter className="grid grid-cols-2 gap-2">
+                                        <Skeleton className="h-9 w-full" />
+                                        <Skeleton className="h-9 w-full" />
+                                    </CardFooter>
+                                </Card>
+                            ))
+                        ) : filteredAgencies.length > 0 ? (
                         filteredAgencies.map((agency) => (
                             <Card key={agency.id} className="flex flex-col">
                             <CardHeader>
