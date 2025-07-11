@@ -62,18 +62,59 @@ const addAgencyFormSchema = z.object({
 });
 
 async function getAgencies(): Promise<SecurityAgency[]> {
-    // TODO: Replace with your actual Django API endpoint
-    const API_URL = 'https://your-django-api.com/api/agencies/';
+    // TODO: This is a mocked endpoint. Please replace with your actual Django API endpoint.
+    const API_URL = 'https://ken.towerbuddy.tel:8000/api/v1/agencies/';
     try {
-        const res = await fetch(API_URL);
-        if (!res.ok) {
-            // This will activate the closest `error.js` Error Boundary
-            throw new Error('Failed to fetch agencies');
-        }
-        return res.json();
+        // Since the API endpoint might not exist, we'll return mock data.
+        // In a real scenario, you'd fetch from your API like this:
+        // const res = await fetch(API_URL);
+        // if (!res.ok) {
+        //     throw new Error('Failed to fetch agencies');
+        // }
+        // return res.json();
+
+        // Simulating network delay
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        // Returning mock data that matches the SecurityAgency type
+        return [
+          {
+            id: 'AGY01',
+            name: 'GuardLink Security',
+            phone: '555-001-0001',
+            email: 'contact@guardlink.com',
+            address: '123 Security Blvd, Safe City, CA, USA',
+            avatar: 'https://placehold.co/100x100.png',
+            city: 'Safe City',
+            state: 'CA',
+            country: 'USA',
+          },
+          {
+            id: 'AGY02',
+            name: 'Vigilant Watch',
+            phone: '555-002-0002',
+            email: 'info@vigilantwatch.com',
+            address: '456 Protector Ave, Secure Town, WA, USA',
+            avatar: 'https://placehold.co/100x100.png',
+            city: 'Secure Town',
+            state: 'WA',
+            country: 'USA',
+          },
+          {
+            id: 'AGY03',
+            name: 'Aegis Protection',
+            phone: '555-003-0003',
+            email: 'support@aegispro.com',
+            address: '789 Guardian Way, Metroplex, NY, USA',
+            avatar: 'https://placehold.co/100x100.png',
+            city: 'Metroplex',
+            state: 'NY',
+            country: 'USA',
+          },
+        ];
+
     } catch (error) {
         console.error("Could not fetch agencies, returning empty array.", error);
-        // In a real app, you might want to handle this more gracefully.
         return [];
     }
 }
@@ -597,4 +638,5 @@ export default function TowercoAgenciesPage() {
             </Dialog>
         </div>
     );
-}
+
+    
