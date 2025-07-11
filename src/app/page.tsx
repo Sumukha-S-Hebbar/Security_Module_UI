@@ -129,10 +129,6 @@ export default function RootPage() {
                             <SelectValue placeholder="Choose An Option" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="towerco">Tower CO</SelectItem>
-                            <SelectItem value="mno">MNO</SelectItem>
-                            <SelectItem value="agency">Agency</SelectItem>
-                            <SelectItem value="supervisor">Security Supervisor</SelectItem>
                             <SelectItem value="officer">Patrolling Officer</SelectItem>
                             <SelectItem value="guard">Security Guard</SelectItem>
                         </SelectContent>
