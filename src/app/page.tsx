@@ -41,7 +41,7 @@ export default function RootPage() {
       const response = await fetch('https://ken.towerbuddy.tel:8000/api/v1/users/auth/token/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ username: email, password }),
       });
 
       const data = await response.json();
