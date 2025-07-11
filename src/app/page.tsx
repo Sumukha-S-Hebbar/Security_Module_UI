@@ -24,20 +24,38 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Checkbox } from '@/components/ui/checkbox';
 import { CheckIcon } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 export default function RootPage() {
   const router = useRouter();
-  const [signInRole, setSignInRole] = useState('');
+  const { toast } = useToast();
+  const [email, setEmail] = useState('');
 
   const handleSignIn = (event: React.FormEvent) => {
     event.preventDefault();
-    if (!signInRole) {
-      // In a real app, you'd show a proper error message.
-      alert('Please select a role to sign in.');
-      return;
+    
+    // In a real application, you would make an API call here with the email and password.
+    // The API would return the user's role.
+    // For this prototype, we'll simulate that based on the email.
+    
+    let role = '';
+    if (email.includes('towerco')) {
+        role = 'towerco_mno';
+    } else if (email.includes('agency')) {
+        role = 'agency';
+    } else if (email.includes('supervisor')) {
+        role = 'supervisor';
+    } else {
+        toast({
+            variant: 'destructive',
+            title: 'Login Failed',
+            description: 'Could not determine user role. Please use a valid email.',
+        });
+        return;
     }
 
-    switch (signInRole) {
+
+    switch (role) {
       case 'towerco_mno':
         router.push('/towerco/home');
         break;
@@ -48,7 +66,11 @@ export default function RootPage() {
         router.push('/supervisor/home');
         break;
       default:
-        // Fallback or error for unhandled roles
+        toast({
+            variant: 'destructive',
+            title: 'Login Failed',
+            description: 'Invalid role or credentials.',
+        });
         break;
     }
   };
@@ -114,24 +136,18 @@ export default function RootPage() {
                   <CardContent className="space-y-4">
                     <div className="space-y-2">
                       <Label htmlFor="email-in">Email</Label>
-                      <Input id="email-in" type="email" placeholder="m@example.com" required />
+                      <Input 
+                        id="email-in" 
+                        type="email" 
+                        placeholder="m@example.com" 
+                        required 
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                      />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="password-in">Password</Label>
                       <Input id="password-in" type="password" required />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="role-in">Sign In As</Label>
-                      <Select value={signInRole} onValueChange={setSignInRole}>
-                          <SelectTrigger id="role-in">
-                              <SelectValue placeholder="Choose Your Role" />
-                          </SelectTrigger>
-                          <SelectContent>
-                              <SelectItem value="towerco_mno">TowerCo / MNO</SelectItem>
-                              <SelectItem value="agency">Agency</SelectItem>
-                              <SelectItem value="supervisor">Patrolling Officer</SelectItem>
-                          </SelectContent>
-                      </Select>
                     </div>
                   </CardContent>
                   <CardFooter>
@@ -207,5 +223,3 @@ export default function RootPage() {
     </div>
   );
 }
-
-    
