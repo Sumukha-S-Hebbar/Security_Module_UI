@@ -1,6 +1,8 @@
 
 'use client';
 
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -21,9 +23,36 @@ import {
 } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Checkbox } from '@/components/ui/checkbox';
-import { CheckIcon, ShieldCheck } from 'lucide-react';
+import { CheckIcon } from 'lucide-react';
 
 export default function RootPage() {
+  const router = useRouter();
+  const [signInRole, setSignInRole] = useState('');
+
+  const handleSignIn = (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!signInRole) {
+      // In a real app, you'd show a proper error message.
+      alert('Please select a role to sign in.');
+      return;
+    }
+
+    switch (signInRole) {
+      case 'towerco_mno':
+        router.push('/towerco/home');
+        break;
+      case 'agency':
+        router.push('/agency/home');
+        break;
+      case 'supervisor':
+        router.push('/supervisor/home');
+        break;
+      default:
+        // Fallback or error for unhandled roles
+        break;
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background text-foreground flex items-center justify-center">
       <div className="flex flex-col md:flex-row w-full max-w-5xl mx-4 my-8 rounded-xl shadow-2xl overflow-hidden">
@@ -67,7 +96,7 @@ export default function RootPage() {
 
         {/* Right Column */}
         <div className="w-full md:w-3/5 bg-card text-card-foreground p-8">
-          <Tabs defaultValue="signup" className="w-full">
+          <Tabs defaultValue="signin" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="signin">SIGN IN</TabsTrigger>
               <TabsTrigger value="signup">SIGN UP</TabsTrigger>
@@ -75,25 +104,40 @@ export default function RootPage() {
             
             <TabsContent value="signin" className="mt-8">
               <Card className="border-0 shadow-none">
-                <CardHeader>
-                  <CardTitle className="text-2xl">Sign In</CardTitle>
-                  <CardDescription>
-                    Enter your credentials to access your portal.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="email-in">Email</Label>
-                    <Input id="email-in" type="email" placeholder="m@example.com" required />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="password-in">Password</Label>
-                    <Input id="password-in" type="password" required />
-                  </div>
-                </CardContent>
-                <CardFooter>
-                  <Button className="w-full bg-[#1e90ff] hover:bg-[#1c86ee]">Sign In</Button>
-                </CardFooter>
+                <form onSubmit={handleSignIn}>
+                  <CardHeader>
+                    <CardTitle className="text-2xl">Sign In</CardTitle>
+                    <CardDescription>
+                      Enter your credentials to access your portal.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="email-in">Email</Label>
+                      <Input id="email-in" type="email" placeholder="m@example.com" required />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="password-in">Password</Label>
+                      <Input id="password-in" type="password" required />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="role-in">Sign In As</Label>
+                      <Select value={signInRole} onValueChange={setSignInRole}>
+                          <SelectTrigger id="role-in">
+                              <SelectValue placeholder="Choose Your Role" />
+                          </SelectTrigger>
+                          <SelectContent>
+                              <SelectItem value="towerco_mno">TowerCo / MNO</SelectItem>
+                              <SelectItem value="agency">Agency</SelectItem>
+                              <SelectItem value="supervisor">Patrolling Officer</SelectItem>
+                          </SelectContent>
+                      </Select>
+                    </div>
+                  </CardContent>
+                  <CardFooter>
+                    <Button type="submit" className="w-full bg-[#1e90ff] hover:bg-[#1c86ee]">Sign In</Button>
+                  </CardFooter>
+                </form>
               </Card>
             </TabsContent>
             
@@ -163,3 +207,5 @@ export default function RootPage() {
     </div>
   );
 }
+
+    
