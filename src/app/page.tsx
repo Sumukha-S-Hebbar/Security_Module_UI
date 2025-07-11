@@ -30,48 +30,72 @@ export default function RootPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
-  const handleSignIn = (event: React.FormEvent) => {
+  const handleSignIn = async (event: React.FormEvent) => {
     event.preventDefault();
     
     // In a real application, you would make an API call here with the email and password.
-    // The API would return the user's role.
-    // For this prototype, we'll simulate that based on the email.
-    
-    let role = '';
-    if (email.includes('towerco')) {
-        role = 'towerco_mno';
-    } else if (email.includes('agency')) {
-        role = 'agency';
-    } else if (email.includes('supervisor')) {
-        role = 'supervisor';
-    } else {
-        toast({
+    // For this prototype, we'll simulate an API response.
+    // TODO: Replace this with your actual API call.
+    try {
+      // const response = await fetch('YOUR_DJANGO_API_ENDPOINT/login', {
+      //   method: 'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify({ email, password }),
+      // });
+      // if (!response.ok) {
+      //   throw new Error('Login failed');
+      // }
+      // const data = await response.json();
+      
+      // MOCK API RESPONSE based on email for prototype
+      const mockApiCall = () => {
+         if (email.includes('towerco') || email.includes('mno')) return { user: { role: 'T' } };
+         if (email.includes('agency')) return { user: { role: 'A' } };
+         if (email.includes('supervisor') || email.includes('officer')) return { user: { role: 'P' } };
+         return null;
+      }
+      
+      const data = mockApiCall();
+      if (!data) {
+           toast({
+                variant: 'destructive',
+                title: 'Login Failed',
+                description: 'Invalid credentials or role.',
+            });
+            return;
+      }
+      // END MOCK
+
+      const role = data.user.role;
+
+      switch (role) {
+        case 'T': // TowerCo
+        case 'M': // MNO
+          router.push('/towerco/home');
+          break;
+        case 'A': // Agency
+          router.push('/agency/home');
+          break;
+        case 'S': // Security Supervisor
+        case 'P': // Patrolling Officer
+          router.push('/supervisor/home');
+          break;
+        default:
+          toast({
+              variant: 'destructive',
+              title: 'Login Failed',
+              description: 'Your role does not have access to a web portal.',
+          });
+          break;
+      }
+    } catch (error) {
+       toast({
             variant: 'destructive',
             title: 'Login Failed',
-            description: 'Could not determine user role. Please use a valid email.',
+            description: 'An error occurred. Please try again.',
         });
-        return;
-    }
-
-
-    switch (role) {
-      case 'towerco_mno':
-        router.push('/towerco/home');
-        break;
-      case 'agency':
-        router.push('/agency/home');
-        break;
-      case 'supervisor':
-        router.push('/supervisor/home');
-        break;
-      default:
-        toast({
-            variant: 'destructive',
-            title: 'Login Failed',
-            description: 'Invalid role or credentials.',
-        });
-        break;
     }
   };
 
@@ -147,7 +171,13 @@ export default function RootPage() {
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="password-in">Password</Label>
-                      <Input id="password-in" type="password" required />
+                      <Input 
+                        id="password-in" 
+                        type="password" 
+                        required 
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                      />
                     </div>
                   </CardContent>
                   <CardFooter>
