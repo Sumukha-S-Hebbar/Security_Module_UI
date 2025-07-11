@@ -23,7 +23,7 @@ import {
 } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Checkbox } from '@/components/ui/checkbox';
-import { CheckIcon } from 'lucide-react';
+import { CheckIcon, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 export default function RootPage() {
@@ -31,44 +31,28 @@ export default function RootPage() {
   const { toast } = useToast();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSignIn = async (event: React.FormEvent) => {
     event.preventDefault();
-    
-    // In a real application, you would make an API call here with the email and password.
-    // For this prototype, we'll simulate an API response.
-    // TODO: Replace this with your actual API call.
-    try {
-      // const response = await fetch('YOUR_DJANGO_API_ENDPOINT/login', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ email, password }),
-      // });
-      // if (!response.ok) {
-      //   throw new Error('Login failed');
-      // }
-      // const data = await response.json();
-      
-      // MOCK API RESPONSE based on email for prototype
-      const mockApiCall = () => {
-         if (email.includes('towerco') || email.includes('mno')) return { user: { role: 'T' } };
-         if (email.includes('agency')) return { user: { role: 'A' } };
-         if (email.includes('supervisor') || email.includes('officer')) return { user: { role: 'P' } };
-         return null;
-      }
-      
-      const data = mockApiCall();
-      if (!data) {
-           toast({
-                variant: 'destructive',
-                title: 'Login Failed',
-                description: 'Invalid credentials or role.',
-            });
-            return;
-      }
-      // END MOCK
+    setIsLoading(true);
 
-      const role = data.user.role;
+    try {
+      const response = await fetch('https://ken.towerbuddy.tel:8000/api/v1/users/auth/token/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        // The API might return error details in the JSON body
+        const errorDescription = data.non_field_errors?.[0] || 'Invalid credentials or role.';
+        throw new Error(errorDescription);
+      }
+
+      const role = data.user?.role;
 
       switch (role) {
         case 'T': // TowerCo
@@ -90,12 +74,14 @@ export default function RootPage() {
           });
           break;
       }
-    } catch (error) {
+    } catch (error: any) {
        toast({
             variant: 'destructive',
             title: 'Login Failed',
-            description: 'An error occurred. Please try again.',
+            description: error.message || 'An error occurred. Please try again.',
         });
+    } finally {
+        setIsLoading(false);
     }
   };
 
@@ -117,7 +103,7 @@ export default function RootPage() {
                     d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"
                     opacity="0.3"
                   />
-                  <path d="M12 4.5c-4.14 0-7.5 3.36-7.5 7.5s3.36 7.5 7.5 7.5 7.5-3.36 7.5-7.5-3.36-7.5-7.5-7.5zm0 2.5c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5-1.5-.67-1.5-1.5.67-1.5 1.5-1.5zm0 10.5c-2.48 0-4.5-2.02-4.5-4.5s2.02-4.5 4.5-4.5 4.5 2.02 4.5 4.5-2.02 4.5-4.5-4.5z" />
+                  <path d="M12 4.5c-4.14 0-7.5 3.36-7.5 7.5s3.36 7.5 7.5 7.5 7.5-3.36 7.5-7.5-3.36-7.5-7.5-7.5zm0 2.5c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5-1.5-.67-1.5-1.5.67-1.5 1.5-1.5zm0 10.5c-2.48 0-4.5-2.02-4.5-4.5s2.02-4.5 4.5-4.5 4.5 2.02 4.5 4.5-2.02 4.5-4.5 4.5z" />
                   <path d="M7 12.5c0-.64.13-1.25.36-1.82-.55-.25-1.18-.38-1.86-.38-1.66 0-3 1.34-3 3s1.34 3 3 3c.68 0 1.31-.13 1.86-.38C7.13 13.75 7 13.14 7 12.5zm10 0c0-.64-.13-1.25-.36-1.82.55-.25 1.18-.38 1.86-.38 1.66 0 3 1.34 3 3s-1.34 3-3 3c-.68 0-1.31-.13-1.86-.38.23-.57.36-1.18.36-1.82z" />
                 </svg>
             </div>
@@ -167,6 +153,7 @@ export default function RootPage() {
                         required 
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
+                        disabled={isLoading}
                       />
                     </div>
                     <div className="space-y-2">
@@ -177,11 +164,15 @@ export default function RootPage() {
                         required 
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
+                        disabled={isLoading}
                       />
                     </div>
                   </CardContent>
                   <CardFooter>
-                    <Button type="submit" className="w-full bg-[#1e90ff] hover:bg-[#1c86ee]">Sign In</Button>
+                    <Button type="submit" className="w-full bg-[#1e90ff] hover:bg-[#1c86ee]" disabled={isLoading}>
+                      {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      Sign In
+                    </Button>
                   </CardFooter>
                 </form>
               </Card>
