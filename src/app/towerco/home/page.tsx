@@ -1,12 +1,14 @@
 
-import {
-  alerts,
-  guards,
-  sites,
-  securityAgencies,
-  patrollingOfficers,
-} from '@/lib/data';
-import type { Guard, PatrollingOfficer, SecurityAgency } from '@/types';
+'use client';
+
+import { useState, useEffect, useMemo } from 'react';
+import type {
+  Guard,
+  PatrollingOfficer,
+  SecurityAgency,
+  Site,
+  Alert,
+} from '@/types';
 import {
   Card,
   CardContent,
@@ -33,53 +35,149 @@ import {
 import { SiteStatusBreakdown } from './_components/site-status-breakdown';
 import { IncidentChart } from './_components/incident-chart';
 import { AgencyPerformance } from './_components/agency-performance';
+import { Skeleton } from '@/components/ui/skeleton';
+import { securityAgencies as mockAgencies, alerts as mockAlerts, guards as mockGuards, patrollingOfficers as mockPatrollingOfficers, sites as mockSites } from '@/lib/data';
+
 
 const LOGGED_IN_TOWERCO = 'TowerCo Alpha'; // Simulate logged-in user
 
+interface DashboardData {
+  sites: Site[];
+  agencies: SecurityAgency[];
+  alerts: Alert[];
+  guards: Guard[];
+  patrollingOfficers: PatrollingOfficer[];
+}
+
+async function getDashboardData(): Promise<DashboardData> {
+  // TODO: Replace with your actual API endpoint.
+  // This endpoint should return all the necessary data for the dashboard,
+  // filtered for the logged-in TOWERCO user.
+  const API_URL = '/api/v1/towerco/dashboard/';
+  try {
+    // const res = await fetch(API_URL);
+    // if (!res.ok) {
+    //   throw new Error('Failed to fetch dashboard data');
+    // }
+    // return res.json();
+    
+    // Simulating network delay and returning mock data for now.
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    const towercoSites = mockSites.filter(
+      (site) => site.towerco === LOGGED_IN_TOWERCO
+    );
+    const towercoSiteNames = new Set(towercoSites.map((site) => site.name));
+    const towercoAlerts = mockAlerts.filter((alert) =>
+      towercoSiteNames.has(alert.site)
+    );
+    const towercoSiteAgencyIds = new Set(
+      towercoSites.map((site) => site.agencyId).filter(Boolean)
+    );
+    const towercoAgencies = mockAgencies.filter((agency) =>
+      towercoSiteAgencyIds.has(agency.id)
+    );
+    const towercoGuards = mockGuards.filter(guard => towercoSiteNames.has(guard.site));
+    const towercoPatrollingOfficers = mockPatrollingOfficers.filter(po => {
+        const poSiteIds = new Set(towercoSites.map(s => s.patrollingOfficerId));
+        return poSiteIds.has(po.id);
+    });
+
+    return {
+      sites: towercoSites,
+      agencies: towercoAgencies,
+      alerts: towercoAlerts,
+      guards: towercoGuards,
+      patrollingOfficers: towercoPatrollingOfficers,
+    };
+
+  } catch (error) {
+    console.error('Could not fetch dashboard data:', error);
+    return { sites: [], agencies: [], alerts: [], guards: [], patrollingOfficers: [] };
+  }
+}
+
 export default function TowercoHomePage() {
-  // Filter data for the logged-in towerco
-  const towercoSites = sites.filter(
-    (site) => site.towerco === LOGGED_IN_TOWERCO
-  );
-  const towercoSiteNames = new Set(towercoSites.map((site) => site.name));
-  const towercoAlerts = alerts.filter((alert) =>
-    towercoSiteNames.has(alert.site)
-  );
-  const activeEmergencies = towercoAlerts.filter(
-    (alert) => alert.type === 'Emergency' && alert.status === 'Active'
-  );
-  const towercoSiteAgencyIds = new Set(
-    towercoSites.map((site) => site.agencyId).filter(Boolean)
-  );
-  const towercoAgencies = securityAgencies.filter((agency) =>
-    towercoSiteAgencyIds.has(agency.id)
-  );
+  const [data, setData] = useState<DashboardData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsLoading(true);
+      const dashboardData = await getDashboardData();
+      setData(dashboardData);
+      setIsLoading(false);
+    };
+    fetchData();
+  }, []);
+
+  const activeEmergencies = useMemo(() => {
+    if (!data) return [];
+    return data.alerts.filter(
+      (alert) => alert.type === 'Emergency' && alert.status === 'Active'
+    );
+  }, [data]);
 
   const getGuardByName = (name: string): Guard | undefined => {
-    return guards.find((g) => g.name === name);
+    return data?.guards.find((g) => g.name === name);
   };
 
   const getPatrollingOfficerByGuardName = (
     guardName: string
   ): PatrollingOfficer | undefined => {
     const guard = getGuardByName(guardName);
-    if (!guard) return undefined;
-    const site = sites.find(s => s.name === guard.site);
+    if (!guard || !data) return undefined;
+    const site = data.sites.find((s) => s.name === guard.site);
     if (!site || !site.patrollingOfficerId) {
       return undefined;
     }
-    return patrollingOfficers.find((s) => s.id === site.patrollingOfficerId);
+    return data.patrollingOfficers.find((s) => s.id === site.patrollingOfficerId);
   };
 
-  const getAgencyBySiteName = (
-    siteName: string
-  ): SecurityAgency | undefined => {
-    const site = sites.find((s) => s.name === siteName);
+  const getAgencyBySiteName = (siteName: string): SecurityAgency | undefined => {
+    if (!data) return undefined;
+    const site = data.sites.find((s) => s.name === siteName);
     if (!site || !site.agencyId) {
       return undefined;
     }
-    return securityAgencies.find((a) => a.id === site.agencyId);
+    return data.agencies.find((a) => a.id === site.agencyId);
   };
+
+  if (isLoading) {
+    return (
+      <div className="p-4 sm:p-6 lg:p-8 space-y-6">
+        <div className="space-y-2">
+            <Skeleton className="h-8 w-1/3" />
+            <Skeleton className="h-4 w-1/2" />
+        </div>
+        <Card>
+            <CardHeader className="flex flex-row items-center gap-2">
+                <Skeleton className="h-6 w-6 rounded-full" />
+                <Skeleton className="h-6 w-48" />
+            </CardHeader>
+            <CardContent>
+                <Skeleton className="h-24 w-full" />
+            </CardContent>
+        </Card>
+        <div className="grid gap-4 md:grid-cols-3">
+            <Skeleton className="h-28 w-full" />
+            <Skeleton className="h-28 w-full" />
+            <Skeleton className="h-28 w-full" />
+        </div>
+        <Skeleton className="h-24 w-full" />
+        <Skeleton className="h-64 w-full" />
+        <Skeleton className="h-80 w-full" />
+      </div>
+    );
+  }
+
+  if (!data) {
+    return (
+        <div className="p-4 sm:p-6 lg:p-8">
+            <p>Could not load dashboard data.</p>
+        </div>
+    )
+  }
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6">
@@ -123,10 +221,10 @@ export default function TowercoHomePage() {
                       </TableCell>
                       <TableCell>{agencyDetails?.name || 'N/A'}</TableCell>
                       <TableCell>
-                        {patrollingOfficerDetails?.name}
+                        {patrollingOfficerDetails?.name || 'N/A'}
                       </TableCell>
                       <TableCell>{alert.guard}</TableCell>
-                      <TableCell>{alert.date}</TableCell>
+                      <TableCell>{new Date(alert.date).toLocaleDateString()}</TableCell>
                       <TableCell>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
@@ -176,23 +274,23 @@ export default function TowercoHomePage() {
       </Card>
 
       <TowercoAnalyticsDashboard
-        sites={towercoSites}
-        agencies={towercoAgencies}
+        sites={data.sites}
+        agencies={data.agencies}
         alerts={activeEmergencies}
       />
 
-      <SiteStatusBreakdown sites={towercoSites} />
+      <SiteStatusBreakdown sites={data.sites} />
 
       <AgencyPerformance
-        agencies={towercoAgencies}
-        sites={towercoSites}
-        alerts={towercoAlerts}
+        agencies={data.agencies}
+        sites={data.sites}
+        alerts={data.alerts}
       />
 
       <IncidentChart
-        alerts={towercoAlerts}
-        sites={towercoSites}
-        securityAgencies={towercoAgencies}
+        alerts={data.alerts}
+        sites={data.sites}
+        securityAgencies={data.agencies}
       />
     </div>
   );
