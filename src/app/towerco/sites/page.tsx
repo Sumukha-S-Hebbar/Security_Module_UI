@@ -133,24 +133,30 @@ export default function TowercoSitesPage() {
 
   async function onUploadSubmit(values: z.infer<typeof uploadFormSchema>) {
     setIsUploading(true);
-    console.log('Uploaded file:', values.csvFile[0]);
+    // In a real app, you would parse the CSV and POST each site to your API.
+    // The backend would ensure the `towerco` ID is set for the logged-in user.
+    console.log('Uploading file for TOWERCO:', LOGGED_IN_TOWERCO, values.csvFile[0]);
     await new Promise((resolve) => setTimeout(resolve, 1500));
     toast({
       title: 'Upload Successful',
       description: `File "${values.csvFile[0].name}" has been uploaded. Site profiles would be processed.`,
     });
     uploadForm.reset({ csvFile: undefined });
+    const fileInput = document.getElementById('csvFile-site-input') as HTMLInputElement | null;
+    if (fileInput) fileInput.value = '';
     setIsUploading(false);
     setIsUploadDialogOpen(false);
   }
 
   async function onAddSiteSubmit(values: z.infer<typeof addSiteFormSchema>) {
     setIsAddingSite(true);
+    // In a real app, you would POST this to your API.
+    // The backend would handle creating the site and associating it with the logged-in TOWERCO.
     console.log('New site data:', { ...values, towerco: LOGGED_IN_TOWERCO });
     await new Promise((resolve) => setTimeout(resolve, 1500));
     toast({
       title: 'Site Added',
-      description: `Site "${values.name}" has been created successfully.`,
+      description: `Site "${values.name}" has been created successfully for ${LOGGED_IN_TOWERCO}.`,
     });
     addSiteForm.reset();
     setIsAddingSite(false);
@@ -180,6 +186,11 @@ export default function TowercoSitesPage() {
     }
     const siteName = sites.find((s) => s.id === siteId)?.name;
     const agencyName = securityAgencies.find((a) => a.id === agencyId)?.name;
+
+    // In a real app, this would be a PATCH/PUT API call to update the site.
+    // The backend would verify that the site belongs to the logged-in TOWERCO before assigning the agency.
+    console.log(`Assigning agency ${agencyId} to site ${siteId} for TOWERCO ${LOGGED_IN_TOWERCO}`);
+    
     toast({
       title: 'Agency Assigned',
       description: `${agencyName} has been assigned to site ${siteName}. This change will be reflected on the next refresh.`,
