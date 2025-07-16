@@ -67,9 +67,9 @@ async function getDashboardData(): Promise<DashboardData> {
     const towercoSites = mockSites.filter(
       (site) => site.towerco === LOGGED_IN_TOWERCO
     );
-    const towercoSiteNames = new Set(towercoSites.map((site) => site.name));
+    const towercoSiteIds = new Set(towercoSites.map((site) => site.id));
     const towercoIncidents = mockIncidents.filter((incident) =>
-      towercoSiteNames.has(incident.site)
+      towercoSiteIds.has(incident.siteId)
     );
     const towercoSiteAgencyIds = new Set(
       towercoSites.map((site) => site.agencyId).filter(Boolean)
@@ -77,11 +77,12 @@ async function getDashboardData(): Promise<DashboardData> {
     const towercoAgencies = mockAgencies.filter((agency) =>
       towercoSiteAgencyIds.has(agency.id)
     );
-    const towercoGuards = mockGuards.filter(guard => towercoSiteNames.has(guard.site));
-    const towercoPatrollingOfficers = mockPatrollingOfficers.filter(po => {
-        const poSiteIds = new Set(towercoSites.map(s => s.patrollingOfficerId));
-        return poSiteIds.has(po.id);
-    });
+    
+    const towercoGuardIds = new Set(towercoSites.flatMap(s => s.guards));
+    const towercoGuards = mockGuards.filter(guard => towercoGuardIds.has(guard.id));
+
+    const towercoPatrollingOfficerIds = new Set(towercoSites.map(s => s.patrollingOfficerId).filter(Boolean));
+    const towercoPatrollingOfficers = mockPatrollingOfficers.filter(po => towercoPatrollingOfficerIds.has(po.id));
 
     return {
       sites: towercoSites,
@@ -118,30 +119,24 @@ export default function TowercoHomePage() {
     );
   }, [data]);
 
-  const getGuardByName = (name: string): Guard | undefined => {
-    return data?.guards.find((g) => g.name === name);
+  const getGuardById = (id: string): Guard | undefined => {
+    return data?.guards.find((g) => g.id === id);
   };
 
-  const getPatrollingOfficerByGuardName = (
-    guardName: string
-  ): PatrollingOfficer | undefined => {
-    const guard = getGuardByName(guardName);
-    if (!guard || !data) return undefined;
-    const site = data.sites.find((s) => s.name === guard.site);
-    if (!site || !site.patrollingOfficerId) {
-      return undefined;
-    }
-    return data.patrollingOfficers.find((s) => s.id === site.patrollingOfficerId);
+  const getPatrollingOfficerById = (id?: string): PatrollingOfficer | undefined => {
+      if (!id || !data) return undefined;
+      return data.patrollingOfficers.find((p) => p.id === id);
   };
 
-  const getAgencyBySiteName = (siteName: string): SecurityAgency | undefined => {
-    if (!data) return undefined;
-    const site = data.sites.find((s) => s.name === siteName);
-    if (!site || !site.agencyId) {
-      return undefined;
-    }
-    return data.agencies.find((a) => a.id === site.agencyId);
+  const getAgencyById = (id?: string): SecurityAgency | undefined => {
+    if (!id || !data) return undefined;
+    return data.agencies.find((a) => a.id === id);
   };
+
+  const getSiteById = (id: string): Site | undefined => {
+      if (!data) return undefined;
+      return data.sites.find(s => s.id === id);
+  }
 
   if (isLoading) {
     return (
@@ -208,23 +203,24 @@ export default function TowercoHomePage() {
               </TableHeader>
               <TableBody>
                 {activeEmergencies.map((incident) => {
-                  const guardDetails = getGuardByName(incident.guard);
-                  const patrollingOfficerDetails = getPatrollingOfficerByGuardName(
-                    incident.guard
+                  const siteDetails = getSiteById(incident.siteId);
+                  const guardDetails = getGuardById(incident.raisedByGuardId);
+                  const patrollingOfficerDetails = getPatrollingOfficerById(
+                    incident.attendedByPatrollingOfficerId
                   );
-                  const agencyDetails = getAgencyBySiteName(incident.site);
+                  const agencyDetails = getAgencyById(siteDetails?.agencyId);
 
                   return (
                     <TableRow key={incident.id}>
                       <TableCell className="font-medium">
-                        {incident.site}
+                        {siteDetails?.name || 'N/A'}
                       </TableCell>
                       <TableCell>{agencyDetails?.name || 'N/A'}</TableCell>
                       <TableCell>
                         {patrollingOfficerDetails?.name || 'N/A'}
                       </TableCell>
-                      <TableCell>{incident.guard}</TableCell>
-                      <TableCell>{new Date(incident.date).toLocaleDateString()}</TableCell>
+                      <TableCell>{guardDetails?.name || 'N/A'}</TableCell>
+                      <TableCell>{new Date(incident.incidentTime).toLocaleDateString()}</TableCell>
                       <TableCell>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>

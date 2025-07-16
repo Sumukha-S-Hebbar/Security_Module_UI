@@ -10,7 +10,7 @@ import {
   securityAgencies,
   patrollingOfficers,
 } from '@/lib/data';
-import type { Incident, Guard, PatrollingOfficer, SecurityAgency } from '@/types';
+import type { Incident, Guard, PatrollingOfficer, SecurityAgency, Site } from '@/types';
 import {
   Card,
   CardContent,
@@ -72,8 +72,8 @@ export default function TowercoIncidentsPage() {
     []
   );
 
-  const towercoSiteNames = useMemo(
-    () => new Set(towercoSites.map((site) => site.name)),
+  const towercoSiteIds = useMemo(
+    () => new Set(towercoSites.map((site) => site.id)),
     [towercoSites]
   );
 
@@ -81,9 +81,9 @@ export default function TowercoIncidentsPage() {
     () =>
       incidents.filter(
         (incident) =>
-          towercoSiteNames.has(incident.site)
+          towercoSiteIds.has(incident.siteId)
       ),
-    [towercoSiteNames, incidents]
+    [towercoSiteIds, incidents]
   );
 
   const agenciesOnSites = useMemo(() => {
@@ -93,27 +93,22 @@ export default function TowercoIncidentsPage() {
     return securityAgencies.filter((a) => agencyIds.has(a.id));
   }, [towercoSites]);
 
-  const siteToAgencyMap = useMemo(() => {
-    const map = new Map<string, string | undefined>();
-    towercoSites.forEach((site) => {
-      map.set(site.name, site.agencyId);
-    });
-    return map;
-  }, [towercoSites]);
-
   const filteredIncidents = useMemo(() => {
     return towercoIncidents.filter((incident) => {
+      const site = sites.find(s => s.id === incident.siteId);
+      const guard = guards.find(g => g.id === incident.raisedByGuardId);
+      if (!site || !guard) return false;
+
       const searchLower = searchQuery.toLowerCase();
       const matchesSearch =
         incident.id.toLowerCase().includes(searchLower) ||
-        incident.site.toLowerCase().includes(searchLower) ||
-        incident.guard.toLowerCase().includes(searchLower);
+        site.name.toLowerCase().includes(searchLower) ||
+        guard.name.toLowerCase().includes(searchLower);
 
-      const incidentAgencyId = siteToAgencyMap.get(incident.site);
       const matchesAgency =
-        selectedAgency === 'all' || incidentAgencyId === selectedAgency;
+        selectedAgency === 'all' || site.agencyId === selectedAgency;
 
-      const incidentDate = new Date(incident.date);
+      const incidentDate = new Date(incident.incidentTime);
       const matchesDate =
         !selectedDate ||
         format(incidentDate, 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd');
@@ -124,7 +119,7 @@ export default function TowercoIncidentsPage() {
 
       return matchesSearch && matchesAgency && matchesDate && matchesMonth;
     });
-  }, [searchQuery, selectedAgency, selectedDate, selectedMonth, towercoIncidents, siteToAgencyMap]);
+  }, [searchQuery, selectedAgency, selectedDate, selectedMonth, towercoIncidents]);
 
   const handleStatusChange = (incidentId: string, status: Incident['status']) => {
     setIncidents((prevIncidents) =>
@@ -151,30 +146,22 @@ export default function TowercoIncidentsPage() {
     }
   };
 
-  const getGuardByName = (name: string): Guard | undefined => {
-    return guards.find((g) => g.name === name);
+  const getGuardById = (id: string): Guard | undefined => {
+    return guards.find((g) => g.id === id);
   };
 
-  const getPatrollingOfficerByGuardName = (
-    guardName: string
-  ): PatrollingOfficer | undefined => {
-    const guard = getGuardByName(guardName);
-    if (!guard) return undefined;
-    const site = sites.find(s => s.name === guard.site);
-    if (!site || !site.patrollingOfficerId) {
-      return undefined;
-    }
-    return patrollingOfficers.find((s) => s.id === site.patrollingOfficerId);
+  const getPatrollingOfficerById = (id?: string): PatrollingOfficer | undefined => {
+    if (!id) return undefined;
+    return patrollingOfficers.find((s) => s.id === id);
   };
 
-  const getAgencyBySiteName = (
-    siteName: string
-  ): SecurityAgency | undefined => {
-    const site = sites.find((s) => s.name === siteName);
-    if (!site || !site.agencyId) {
-      return undefined;
-    }
-    return securityAgencies.find((a) => a.id === site.agencyId);
+  const getAgencyById = (id?: string): SecurityAgency | undefined => {
+    if (!id) return undefined;
+    return securityAgencies.find((a) => a.id === id);
+  };
+  
+  const getSiteById = (id: string): Site | undefined => {
+    return sites.find((s) => s.id === id);
   };
 
   const handleDownloadReport = (incident: Incident) => {
@@ -286,9 +273,11 @@ export default function TowercoIncidentsPage() {
             <TableBody>
               {filteredIncidents.length > 0 ? (
                 filteredIncidents.map((incident) => {
-                  const agency = getAgencyBySiteName(incident.site);
-                  const patrollingOfficer = getPatrollingOfficerByGuardName(
-                    incident.guard
+                  const site = getSiteById(incident.siteId);
+                  const agency = getAgencyById(site?.agencyId);
+                  const guard = getGuardById(incident.raisedByGuardId);
+                  const patrollingOfficer = getPatrollingOfficerById(
+                    incident.attendedByPatrollingOfficerId
                   );
                   const isResolved = incident.status === 'Resolved';
                   return (
@@ -296,13 +285,13 @@ export default function TowercoIncidentsPage() {
                       <TableCell className="font-medium">
                         {incident.id}
                       </TableCell>
-                      <TableCell>{new Date(incident.date).toLocaleDateString()}</TableCell>
-                      <TableCell>{incident.site}</TableCell>
+                      <TableCell>{new Date(incident.incidentTime).toLocaleDateString()}</TableCell>
+                      <TableCell>{site?.name || 'N/A'}</TableCell>
                       <TableCell>{agency?.name || 'N/A'}</TableCell>
                       <TableCell>
                         {patrollingOfficer?.name || 'N/A'}
                       </TableCell>
-                      <TableCell>{incident.guard}</TableCell>
+                      <TableCell>{guard?.name || 'N/A'}</TableCell>
                       <TableCell>{getStatusBadge(incident.status)}</TableCell>
                       <TableCell>
                         <Button asChild variant="outline" size="sm">

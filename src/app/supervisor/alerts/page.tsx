@@ -33,11 +33,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
-import {
   AlertTriangle,
   CameraOff,
   LogOut,
@@ -48,7 +43,7 @@ import {
   ChevronDown,
   FileDown,
 } from 'lucide-react';
-import type { Alert, Incident } from '@/types';
+import type { Alert, Incident, Site, Guard } from '@/types';
 import { useToast } from '@/hooks/use-toast';
 
 const LOGGED_IN_SUPERVISOR_ID = 'PO01'; // Simulate logged-in Patrolling Officer
@@ -60,15 +55,22 @@ export default function AlertsPage() {
   const { toast } = useToast();
 
   const supervisorSites = useMemo(() => sites.filter(s => s.patrollingOfficerId === LOGGED_IN_SUPERVISOR_ID), []);
-  const supervisorSiteNames = useMemo(() => new Set(supervisorSites.map(s => s.name)), [supervisorSites]);
-  const supervisorGuards = useMemo(() => guards.filter(g => supervisorSiteNames.has(g.site)), [supervisorSiteNames]);
+  const supervisorSiteIds = useMemo(() => new Set(supervisorSites.map(s => s.id)), [supervisorSites]);
+  const supervisorGuards = useMemo(() => {
+      const siteNames = new Set(supervisorSites.map(s => s.name));
+      return guards.filter(g => siteNames.has(g.site));
+  }, [supervisorSites]);
   
-  const supervisorAlerts = useMemo(() => alerts.filter(a => supervisorSiteNames.has(a.site)), [supervisorSiteNames, alerts]);
-  const supervisorIncidents = useMemo(() => incidents.filter(i => supervisorSiteNames.has(i.site)), [supervisorSiteNames, incidents]);
+  const supervisorAlerts = useMemo(() => {
+    const siteNames = new Set(supervisorSites.map(s => s.name));
+    return alerts.filter(a => siteNames.has(a.site));
+  }, [supervisorSites, alerts]);
 
-  const otherAlerts = supervisorAlerts.filter((alert) => alert.type !== 'Emergency');
+  const supervisorIncidents = useMemo(() => incidents.filter(i => supervisorSiteIds.has(i.siteId)), [supervisorSiteIds, incidents]);
 
-  const getGuardByName = (name: string) => supervisorGuards.find((g) => g.name === name);
+  const getGuardById = (id: string): Guard | undefined => supervisorGuards.find((g) => g.id === id);
+  const getGuardByName = (name: string): Guard | undefined => supervisorGuards.find((g) => g.name === name);
+  const getSiteById = (id: string): Site | undefined => supervisorSites.find((s) => s.id === id);
 
   const handleStatusChange = (incidentId: string, status: Incident['status']) => {
     setIncidents((prevIncidents) =>
@@ -102,7 +104,6 @@ export default function AlertsPage() {
             <span>Guard Out of Premises</span>
           </div>
         );
-      case 'Emergency':
       default:
         return null;
     }
@@ -155,18 +156,19 @@ export default function AlertsPage() {
               </TableHeader>
               <TableBody>
                 {supervisorIncidents.map((incident) => {
-                  const guardDetails = getGuardByName(incident.guard);
+                  const guardDetails = getGuardById(incident.raisedByGuardId);
+                  const siteDetails = getSiteById(incident.siteId);
                   const isResolved = incident.status === 'Resolved';
 
                   return (
                     <TableRow key={incident.id}>
                       <TableCell className="font-medium">{incident.id}</TableCell>
-                      <TableCell>{new Date(incident.date).toLocaleDateString()}</TableCell>
-                      <TableCell>{incident.site}</TableCell>
-                      <TableCell>{incident.guard}</TableCell>
+                      <TableCell>{new Date(incident.incidentTime).toLocaleDateString()}</TableCell>
+                      <TableCell>{siteDetails?.name || 'N/A'}</TableCell>
+                      <TableCell>{guardDetails?.name || 'N/A'}</TableCell>
                       <TableCell>{getStatusBadge(incident.status)}</TableCell>
                       <TableCell>
-                        {incident.images && incident.images.length > 0 ? (
+                        {incident.initialIncidentMediaUrl && incident.initialIncidentMediaUrl.length > 0 ? (
                           <Button
                             variant="outline"
                             size="sm"
@@ -250,7 +252,7 @@ export default function AlertsPage() {
             <CardTitle>Guard Alerts</CardTitle>
           </CardHeader>
           <CardContent>
-            {otherAlerts.length > 0 ? (
+            {supervisorAlerts.length > 0 ? (
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -263,7 +265,7 @@ export default function AlertsPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {otherAlerts.map((alert) => {
+                  {supervisorAlerts.map((alert) => {
                     const guardDetails = getGuardByName(alert.guard);
                     return (
                       <TableRow key={alert.id}>
@@ -311,7 +313,7 @@ export default function AlertsPage() {
               <DialogTitle>Details for Incident #{selectedIncident.id}</DialogTitle>
             </DialogHeader>
             <div className="grid gap-4 py-4 grid-cols-1 sm:grid-cols-2">
-              {selectedIncident.images?.map((src, index) => (
+              {selectedIncident.initialIncidentMediaUrl?.map((src, index) => (
                 <div key={index} className="relative aspect-video">
                   <Image
                     src={src}
@@ -319,7 +321,7 @@ export default function AlertsPage() {
                     fill
                     className="rounded-md object-cover"
                     data-ai-hint={
-                      selectedIncident.id === 'A001'
+                      selectedIncident.id === 'INC001'
                         ? 'security camera'
                         : 'fire alarm'
                     }

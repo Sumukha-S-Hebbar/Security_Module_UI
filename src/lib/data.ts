@@ -1,5 +1,5 @@
 
-import type { Guard, Site, Incident, PatrollingOfficer, SecurityAgency } from '@/types';
+import type { Guard, Site, Incident, PatrollingOfficer, SecurityAgency, Alert } from '@/types';
 
 export const patrollingOfficers: PatrollingOfficer[] = [
   {
@@ -32,11 +32,66 @@ export const patrollingOfficers: PatrollingOfficer[] = [
 ];
 
 export const incidents: Incident[] = [
-    { id: 'INC001', date: '2024-07-20', type: 'Break-in', details: 'Attempted break-in at west entrance.', status: 'Active', guard: 'John Doe', site: 'Downtown Mall', images: ['https://placehold.co/600x400.png']},
-    { id: 'INC002', date: '2024-07-21', type: 'Fire Alarm', details: 'False alarm triggered by dust.', status: 'Resolved', guard: 'Jane Smith', site: 'Tech Park One'},
-    { id: 'INC003', date: '2024-06-15', type: 'Vandalism', details: 'Graffiti on the north wall.', status: 'Under Review', guard: 'Mike Johnson', site: 'City Waterfront'},
-    { id: 'INC004', date: '2024-05-10', type: 'Medical', details: 'Guard reported feeling unwell.', status: 'Resolved', guard: 'Sarah Connor', site: 'Cyberdyne Systems'},
-    { id: 'INC005', date: '2024-04-01', type: 'Break-in', details: 'Successful break-in, items stolen.', status: 'Resolved', guard: 'Kyle Reese', site: 'Cyberdyne Systems'},
+    { 
+      id: 'INC001', 
+      incidentTime: '2024-07-20T14:30:00Z', 
+      description: 'Attempted break-in at west entrance.', 
+      status: 'Active', 
+      raisedByGuardId: 'GL001', 
+      siteId: 'SITE02', 
+      initialIncidentMediaUrl: ['https://placehold.co/600x400.png'],
+      attendedByPatrollingOfficerId: 'PO01'
+    },
+    { 
+      id: 'INC002', 
+      incidentTime: '2024-07-21T09:00:00Z', 
+      description: 'False fire alarm triggered by dust near sensor in Lobby.', 
+      status: 'Resolved', 
+      raisedByGuardId: 'GL002', 
+      siteId: 'SITE01',
+      initialIncidentMediaUrl: [],
+      resolvedIncidentMediaUrl: [],
+      attendedByPatrollingOfficerId: 'PO02',
+      resolvedByUserId: 'PO02'
+    },
+    { 
+      id: 'INC003', 
+      incidentTime: '2024-06-15T22:05:00Z', 
+      description: 'Graffiti on the north wall of Pier 3.', 
+      status: 'Under Review', 
+      raisedByGuardId: 'GL003', 
+      siteId: 'SITE03',
+      initialIncidentMediaUrl: ['https://placehold.co/600x400.png'],
+      attendedByPatrollingOfficerId: 'PO01'
+    },
+    { 
+      id: 'INC004', 
+      incidentTime: '2024-05-10T11:00:00Z', 
+      description: 'Guard reported feeling unwell, requested relief.', 
+      status: 'Resolved', 
+      raisedByGuardId: 'GL005', 
+      siteId: 'SITE04',
+      initialIncidentMediaUrl: [],
+      attendedByPatrollingOfficerId: 'PO02',
+      resolvedByUserId: 'AGY02'
+    },
+    { 
+      id: 'INC005', 
+      incidentTime: '2024-04-01T02:15:00Z', 
+      description: 'Successful break-in at R&D department, items stolen.', 
+      status: 'Resolved', 
+      raisedByGuardId: 'GL006', 
+      siteId: 'SITE04',
+      initialIncidentMediaUrl: ['https://placehold.co/600x400.png', 'https://placehold.co/600x400.png'],
+      resolvedIncidentMediaUrl: ['https://placehold.co/600x400.png'],
+      attendedByPatrollingOfficerId: 'PO02',
+      resolvedByUserId: 'AGY02'
+    },
+];
+
+export const alerts: Alert[] = [
+    { id: 'A001', type: 'Missed Selfie', date: '2024-07-21 08:00', site: 'Downtown Mall', guard: 'John Doe', status: 'Active' },
+    { id: 'A002', type: 'Guard Out of Premises', date: '2024-07-20 15:30', site: 'Tech Park One', guard: 'Jane Smith', status: 'Resolved' },
 ];
 
 
@@ -213,6 +268,7 @@ export const sites: Site[] = [
     agencyId: 'AGY01',
     patrollingOfficerId: 'PO02',
     geofencePerimeter: 500,
+    incidents: incidents.filter(i => i.siteId === 'SITE01')
   },
   {
     id: 'SITE02',
@@ -230,6 +286,7 @@ export const sites: Site[] = [
     agencyId: 'AGY01',
     patrollingOfficerId: 'PO01',
     geofencePerimeter: 1000,
+    incidents: incidents.filter(i => i.siteId === 'SITE02')
   },
   {
     id: 'SITE03',
@@ -247,6 +304,7 @@ export const sites: Site[] = [
     agencyId: 'AGY01',
     patrollingOfficerId: 'PO01',
     geofencePerimeter: 800,
+    incidents: incidents.filter(i => i.siteId === 'SITE03')
   },
   {
     id: 'SITE04',
@@ -264,6 +322,7 @@ export const sites: Site[] = [
     patrollingOfficerId: 'PO02',
     geofencePerimeter: 1200,
     assignedOn: '2024-03-15',
+    incidents: incidents.filter(i => i.siteId === 'SITE04')
   },
   {
     id: 'SITE05',
@@ -281,6 +340,7 @@ export const sites: Site[] = [
     patrollingOfficerId: 'PO03',
     assignedOn: '2024-07-01',
     geofencePerimeter: 1500,
+    incidents: incidents.filter(i => i.siteId === 'SITE05')
   },
   {
     id: 'SITE06',
@@ -298,6 +358,7 @@ export const sites: Site[] = [
     patrollingOfficerId: 'PO03',
     assignedOn: '2024-07-05',
     geofencePerimeter: 2000,
+    incidents: incidents.filter(i => i.siteId === 'SITE06')
   },
   {
     id: 'SITE07',

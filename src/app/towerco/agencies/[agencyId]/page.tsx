@@ -10,7 +10,7 @@ import {
   incidents,
   guards,
 } from '@/lib/data';
-import type { Incident } from '@/types';
+import type { Incident, Site } from '@/types';
 import {
   Card,
   CardContent,
@@ -105,20 +105,19 @@ export default function AgencyReportPage() {
     (site) =>
       site.agencyId === agency.id && site.towerco === LOGGED_IN_TOWERCO
   );
-  const agencySiteNames = new Set(agencySites.map((site) => site.name));
+  const agencySiteIds = new Set(agencySites.map((site) => site.id));
 
   const agencyIncidents = incidents.filter(
     (incident) =>
-      agencySiteNames.has(incident.site)
+      agencySiteIds.has(incident.siteId)
   );
   const totalIncidents = agencyIncidents.length;
   const resolvedIncidents = agencyIncidents.filter(
     (i) => i.status === 'Resolved'
   ).length;
 
-  const agencyGuards = guards.filter((guard) =>
-    agencySiteNames.has(guard.site)
-  );
+  const agencyGuardIds = new Set(agencySites.flatMap(s => s.guards));
+  const agencyGuards = guards.filter(g => agencyGuardIds.has(g.id));
   const agencyPatrollingOfficerIds = new Set(
     agencySites.map((s) => s.patrollingOfficerId).filter(Boolean)
   );
@@ -150,7 +149,7 @@ export default function AgencyReportPage() {
 
   const availableYears = useMemo(() => {
     const years = new Set(
-      agencyIncidents.map((incident) => new Date(incident.date).getFullYear().toString())
+      agencyIncidents.map((incident) => new Date(incident.incidentTime).getFullYear().toString())
     );
     if (years.size === 0) {
       years.add(new Date().getFullYear().toString());
@@ -168,7 +167,7 @@ export default function AgencyReportPage() {
     );
 
     agencyIncidents.forEach((incident) => {
-      const incidentDate = new Date(incident.date);
+      const incidentDate = new Date(incident.incidentTime);
       if (incidentDate.getFullYear().toString() === selectedYear) {
         const monthIndex = incidentDate.getMonth();
         monthlyData[monthIndex].incidents += 1;
@@ -178,6 +177,8 @@ export default function AgencyReportPage() {
     return monthlyData;
   }, [agencyIncidents, selectedYear]);
 
+  const getSiteById = (id: string) => sites.find(s => s.id === id);
+  const getGuardById = (id: string) => guards.find(g => g.id === id);
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6">
@@ -387,7 +388,7 @@ export default function AgencyReportPage() {
                 {agencySites.map((site) => {
                   const siteIncidents = incidents.filter(
                     (incident) =>
-                      incident.site === site.name
+                      incident.siteId === site.id
                   );
                   const resolvedCount = siteIncidents.filter(
                     (incident) => incident.status === 'Resolved'
@@ -456,16 +457,20 @@ export default function AgencyReportPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {agencyIncidents.map((incident) => (
-                  <TableRow key={incident.id}>
-                    <TableCell>{incident.id}</TableCell>
-                    <TableCell>{new Date(incident.date).toLocaleDateString()}</TableCell>
-                    <TableCell>{incident.site}</TableCell>
-                    <TableCell>{incident.guard}</TableCell>
-                    <TableCell>{getStatusBadge(incident.status)}</TableCell>
-                    <TableCell className="max-w-xs truncate">{incident.details}</TableCell>
-                  </TableRow>
-                ))}
+                {agencyIncidents.map((incident) => {
+                  const site = getSiteById(incident.siteId);
+                  const guard = getGuardById(incident.raisedByGuardId);
+                  return (
+                    <TableRow key={incident.id}>
+                      <TableCell>{incident.id}</TableCell>
+                      <TableCell>{new Date(incident.incidentTime).toLocaleDateString()}</TableCell>
+                      <TableCell>{site?.name || 'N/A'}</TableCell>
+                      <TableCell>{guard?.name || 'N/A'}</TableCell>
+                      <TableCell>{getStatusBadge(incident.status)}</TableCell>
+                      <TableCell className="max-w-xs truncate">{incident.description}</TableCell>
+                    </TableRow>
+                  )
+                })}
               </TableBody>
             </Table>
           ) : (

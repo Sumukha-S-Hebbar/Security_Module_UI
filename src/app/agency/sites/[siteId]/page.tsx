@@ -46,7 +46,7 @@ export default function AgencySiteReportPage() {
   }
 
   const siteIncidents = incidents.filter(
-    (incident) => incident.site === site.name
+    (incident) => incident.siteId === site.id
   );
   
   const siteGuards = guards.filter(g => site.guards.includes(g.id));
@@ -73,6 +73,8 @@ export default function AgencySiteReportPage() {
         return <Badge variant="secondary">{status}</Badge>;
     }
   };
+
+  const getGuardById = (id: string) => guards.find(g => g.id === id);
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6">
@@ -180,15 +182,18 @@ export default function AgencySiteReportPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {siteIncidents.map((incident) => (
-                      <TableRow key={incident.id}>
-                        <TableCell>{incident.id}</TableCell>
-                        <TableCell>{new Date(incident.date).toLocaleDateString()}</TableCell>
-                        <TableCell>{incident.guard}</TableCell>
-                        <TableCell>{getStatusBadge(incident.status)}</TableCell>
-                        <TableCell className="max-w-xs truncate">{incident.details}</TableCell>
-                      </TableRow>
-                    ))}
+                    {siteIncidents.map((incident) => {
+                      const guard = getGuardById(incident.raisedByGuardId);
+                      return (
+                        <TableRow key={incident.id}>
+                          <TableCell>{incident.id}</TableCell>
+                          <TableCell>{new Date(incident.incidentTime).toLocaleDateString()}</TableCell>
+                          <TableCell>{guard?.name || 'N/A'}</TableCell>
+                          <TableCell>{getStatusBadge(incident.status)}</TableCell>
+                          <TableCell className="max-w-xs truncate">{incident.description}</TableCell>
+                        </TableRow>
+                      )
+                    })}
                   </TableBody>
                 </Table>
               ) : (

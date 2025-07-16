@@ -45,11 +45,14 @@ export default function AgencyHomePage() {
   const [selectedMonth, setSelectedMonth] = useState('all');
 
   const agencySites = useMemo(() => sites.filter(site => site.agencyId === LOGGED_IN_AGENCY_ID), []);
-  const agencySiteNames = useMemo(() => new Set(agencySites.map(site => site.name)), [agencySites]);
+  const agencySiteIds = useMemo(() => new Set(agencySites.map(site => site.id)), [agencySites]);
 
-  const agencyIncidents = useMemo(() => incidents.filter(incident => agencySiteNames.has(incident.site)), [agencySiteNames]);
+  const agencyIncidents = useMemo(() => incidents.filter(incident => agencySiteIds.has(incident.siteId)), [agencySiteIds]);
   
-  const agencyGuards = useMemo(() => guards.filter(guard => agencySiteNames.has(guard.site)), [agencySiteNames]);
+  const agencyGuards = useMemo(() => {
+    const siteNames = new Set(agencySites.map(s => s.name));
+    return guards.filter(guard => siteNames.has(guard.site));
+  }, [agencySites]);
   
   const agencyPatrollingOfficers = useMemo(() => {
     const poIds = new Set(agencySites.map(s => s.patrollingOfficerId).filter(Boolean));
@@ -61,7 +64,7 @@ export default function AgencyHomePage() {
       return agencyIncidents;
     }
     return agencyIncidents.filter(incident => {
-      const incidentDate = new Date(incident.date);
+      const incidentDate = new Date(incident.incidentTime);
       return incidentDate.getMonth() === parseInt(selectedMonth, 10);
     });
   }, [agencyIncidents, selectedMonth]);
@@ -70,21 +73,19 @@ export default function AgencyHomePage() {
     (incident) => incident.status === 'Active'
   ), [agencyIncidents]);
 
-  const getGuardByName = (name: string): Guard | undefined => {
-    return agencyGuards.find((g) => g.name === name);
+  const getGuardById = (id: string): Guard | undefined => {
+    return agencyGuards.find((g) => g.id === id);
+  };
+  
+  const getSiteById = (id: string): Site | undefined => {
+    return agencySites.find((s) => s.id === id);
   };
 
-  const getPatrollingOfficerByGuardName = (
-    guardName: string
-  ): PatrollingOfficer | undefined => {
-    const guard = getGuardByName(guardName);
-    if (!guard) return undefined;
-    const site = agencySites.find(s => s.name === guard.site);
-    if (!site || !site.patrollingOfficerId) {
-      return undefined;
-    }
-    return agencyPatrollingOfficers.find((s) => s.id === site.patrollingOfficerId);
+  const getPatrollingOfficerById = (id?: string): PatrollingOfficer | undefined => {
+    if (!id) return undefined;
+    return agencyPatrollingOfficers.find((p) => p.id === id);
   };
+
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6">
@@ -133,20 +134,20 @@ export default function AgencyHomePage() {
               </TableHeader>
               <TableBody>
                 {activeEmergencies.map((incident) => {
-                  const guardDetails = getGuardByName(incident.guard);
-                  const patrollingOfficerDetails = getPatrollingOfficerByGuardName(
-                    incident.guard
-                  );
+                  const siteDetails = getSiteById(incident.siteId);
+                  const guardDetails = getGuardById(incident.raisedByGuardId);
+                  const patrollingOfficerDetails = getPatrollingOfficerById(incident.attendedByPatrollingOfficerId);
+                  
                   return (
                     <TableRow key={incident.id}>
                       <TableCell className="font-medium">
-                        {incident.site}
+                        {siteDetails?.name || 'N/A'}
                       </TableCell>
-                      <TableCell>{incident.guard}</TableCell>
+                      <TableCell>{guardDetails?.name || 'N/A'}</TableCell>
                       <TableCell>
-                        {patrollingOfficerDetails?.name}
+                        {patrollingOfficerDetails?.name || 'N/A'}
                       </TableCell>
-                      <TableCell>{new Date(incident.date).toLocaleDateString()}</TableCell>
+                      <TableCell>{new Date(incident.incidentTime).toLocaleDateString()}</TableCell>
                       <TableCell>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>

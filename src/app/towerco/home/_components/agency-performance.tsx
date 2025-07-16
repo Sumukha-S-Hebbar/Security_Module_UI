@@ -28,10 +28,9 @@ export function AgencyPerformance({
 
   const performanceData = useMemo(() => {
     const data: AgencyPerformanceData[] = agencies.map((agency) => {
-      const agencySites = sites.filter((site) => site.agencyId === agency.id);
-      const agencySiteNames = new Set(agencySites.map((site) => site.name));
+      const agencySiteIds = new Set(sites.filter((site) => site.agencyId === agency.id).map(s => s.id));
       const agencyIncidents = incidents.filter(
-        (incident) => agencySiteNames.has(incident.site)
+        (incident) => agencySiteIds.has(incident.siteId)
       );
       
       const totalIncidents = agencyIncidents.length;

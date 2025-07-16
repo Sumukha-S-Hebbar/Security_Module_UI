@@ -4,7 +4,7 @@
 import { useState, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { incidents as initialIncidents, guards, patrollingOfficers, sites } from '@/lib/data';
-import type { Incident, Guard, PatrollingOfficer } from '@/types';
+import type { Incident, Guard, PatrollingOfficer, Site } from '@/types';
 import {
   Table,
   TableBody,
@@ -62,26 +62,43 @@ export default function AgencyIncidentsPage() {
   const [selectedMonth, setSelectedMonth] = useState(monthFromQuery || 'all');
 
   const agencySites = useMemo(() => sites.filter(site => site.agencyId === LOGGED_IN_AGENCY_ID), []);
-  const agencySiteNames = useMemo(() => new Set(agencySites.map(site => site.name)), [agencySites]);
+  const agencySiteIds = useMemo(() => new Set(agencySites.map(site => site.id)), [agencySites]);
 
   const agencyIncidents = useMemo(() => incidents.filter(
-    (incident) => agencySiteNames.has(incident.site)
-  ), [agencySiteNames, incidents]);
+    (incident) => agencySiteIds.has(incident.siteId)
+  ), [agencySiteIds, incidents]);
 
   const activeIncidents = useMemo(() => agencyIncidents.filter(incident => incident.status === 'Active'), [agencyIncidents]);
 
+  const getSiteById = (id: string): Site | undefined => {
+    return sites.find(s => s.id === id);
+  }
+  
+  const getGuardById = (id: string): Guard | undefined => {
+    return guards.find(g => g.id === id);
+  }
+  
+  const getPatrollingOfficerById = (id?: string): PatrollingOfficer | undefined => {
+    if (!id) return undefined;
+    return patrollingOfficers.find(p => p.id === id);
+  }
+
   const filteredIncidents = useMemo(() => {
     return agencyIncidents.filter((incident) => {
+      const site = getSiteById(incident.siteId);
+      const guard = getGuardById(incident.raisedByGuardId);
+      if (!site || !guard) return false;
+
       const searchLower = searchQuery.toLowerCase();
       const matchesSearch =
         incident.id.toLowerCase().includes(searchLower) ||
-        incident.site.toLowerCase().includes(searchLower) ||
-        incident.guard.toLowerCase().includes(searchLower);
+        site.name.toLowerCase().includes(searchLower) ||
+        guard.name.toLowerCase().includes(searchLower);
 
       const matchesStatus =
         selectedStatus === 'all' || incident.status.toLowerCase().replace(' ', '-') === selectedStatus;
       
-      const incidentDate = new Date(incident.date);
+      const incidentDate = new Date(incident.incidentTime);
       const matchesDate =
         !selectedDate ||
         format(incidentDate, 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd');
@@ -117,22 +134,6 @@ export default function AgencyIncidentsPage() {
       default:
         return <Badge variant="secondary">{status}</Badge>;
     }
-  };
-  
-  const getGuardByName = (name: string): Guard | undefined => {
-    return guards.find((g) => g.name === name);
-  };
-
-  const getPatrollingOfficerByGuardName = (
-    guardName: string
-  ): PatrollingOfficer | undefined => {
-    const guard = getGuardByName(guardName);
-    if (!guard) return undefined;
-    const site = sites.find(s => s.name === guard.site);
-    if (!site || !site.patrollingOfficerId) {
-      return undefined;
-    }
-    return patrollingOfficers.find((s) => s.id === site.patrollingOfficerId);
   };
 
   const handleDownloadReport = (incident: Incident) => {
@@ -173,16 +174,18 @@ export default function AgencyIncidentsPage() {
                     </TableHeader>
                     <TableBody>
                         {activeIncidents.map((incident) => {
-                             const patrollingOfficer = getPatrollingOfficerByGuardName(incident.guard);
-                             const isResolved = incident.status === 'Resolved';
+                            const site = getSiteById(incident.siteId);
+                            const guard = getGuardById(incident.raisedByGuardId);
+                            const patrollingOfficer = getPatrollingOfficerById(incident.attendedByPatrollingOfficerId);
+                            const isResolved = incident.status === 'Resolved';
                              return (
                                  <TableRow key={incident.id}>
                                      <TableCell className="font-medium">
                                         {incident.id}
                                      </TableCell>
-                                     <TableCell>{new Date(incident.date).toLocaleDateString()}</TableCell>
-                                     <TableCell>{incident.site}</TableCell>
-                                     <TableCell>{incident.guard}</TableCell>
+                                     <TableCell>{new Date(incident.incidentTime).toLocaleDateString()}</TableCell>
+                                     <TableCell>{site?.name}</TableCell>
+                                     <TableCell>{guard?.name}</TableCell>
                                      <TableCell>
                                         {patrollingOfficer?.name || 'N/A'}
                                      </TableCell>
@@ -335,16 +338,18 @@ export default function AgencyIncidentsPage() {
             <TableBody>
               {filteredIncidents.length > 0 ? (
                 filteredIncidents.map((incident) => {
-                  const patrollingOfficer = getPatrollingOfficerByGuardName(incident.guard);
+                  const site = getSiteById(incident.siteId);
+                  const guard = getGuardById(incident.raisedByGuardId);
+                  const patrollingOfficer = getPatrollingOfficerById(incident.attendedByPatrollingOfficerId);
                   const isResolved = incident.status === 'Resolved';
                   return (
                     <TableRow key={incident.id}>
                       <TableCell className="font-medium">
                         {incident.id}
                       </TableCell>
-                      <TableCell>{new Date(incident.date).toLocaleDateString()}</TableCell>
-                      <TableCell>{incident.site}</TableCell>
-                      <TableCell>{incident.guard}</TableCell>
+                      <TableCell>{new Date(incident.incidentTime).toLocaleDateString()}</TableCell>
+                      <TableCell>{site?.name}</TableCell>
+                      <TableCell>{guard?.name}</TableCell>
                       <TableCell>
                         {patrollingOfficer?.name || 'N/A'}
                       </TableCell>

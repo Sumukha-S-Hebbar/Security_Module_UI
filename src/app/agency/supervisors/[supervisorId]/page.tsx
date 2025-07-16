@@ -50,16 +50,19 @@ export default function AgencyPatrollingOfficerReportPage() {
   }
 
   const assignedSites = sites.filter(site => site.patrollingOfficerId === supervisorId);
-  const assignedSiteNames = new Set(assignedSites.map(s => s.name));
-  const assignedGuards = guards.filter(guard => assignedSiteNames.has(guard.site));
-  const assignedIncidents = incidents.filter(incident => assignedSiteNames.has(incident.site));
+  const assignedSiteIds = new Set(assignedSites.map(s => s.id));
+  const assignedGuards = guards.filter(guard => {
+    const site = sites.find(s => s.name === guard.site);
+    return site && site.patrollingOfficerId === supervisorId;
+  });
+  const assignedIncidents = incidents.filter(incident => assignedSiteIds.has(incident.siteId));
   
   const filteredIncidents = useMemo(() => {
     if (selectedMonth === 'all') {
       return assignedIncidents;
     }
     return assignedIncidents.filter(incident => {
-        const incidentDate = new Date(incident.date);
+        const incidentDate = new Date(incident.incidentTime);
         return incidentDate.getMonth() === parseInt(selectedMonth, 10);
     });
   }, [assignedIncidents, selectedMonth]);
@@ -278,16 +281,20 @@ export default function AgencyPatrollingOfficerReportPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredIncidents.map((incident) => (
-                  <TableRow key={incident.id}>
-                    <TableCell>{incident.id}</TableCell>
-                    <TableCell>{new Date(incident.date).toLocaleDateString()}</TableCell>
-                    <TableCell>{incident.site}</TableCell>
-                    <TableCell>{incident.guard}</TableCell>
-                    <TableCell>{getStatusBadge(incident.status)}</TableCell>
-                    <TableCell className="max-w-xs truncate">{incident.details}</TableCell>
-                  </TableRow>
-                ))}
+                {filteredIncidents.map((incident) => {
+                    const site = sites.find(s => s.id === incident.siteId);
+                    const guard = guards.find(g => g.id === incident.raisedByGuardId);
+                    return (
+                        <TableRow key={incident.id}>
+                            <TableCell>{incident.id}</TableCell>
+                            <TableCell>{new Date(incident.incidentTime).toLocaleDateString()}</TableCell>
+                            <TableCell>{site?.name || 'N/A'}</TableCell>
+                            <TableCell>{guard?.name || 'N/A'}</TableCell>
+                            <TableCell>{getStatusBadge(incident.status)}</TableCell>
+                            <TableCell className="max-w-xs truncate">{incident.description}</TableCell>
+                        </TableRow>
+                    )
+                })}
               </TableBody>
             </Table>
           ) : (

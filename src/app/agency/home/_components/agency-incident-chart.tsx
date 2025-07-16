@@ -45,7 +45,7 @@ export function AgencyIncidentChart({
   const router = useRouter();
   const availableYears = useMemo(() => {
     const years = new Set(
-      incidents.map((incident) => new Date(incident.date).getFullYear().toString())
+      incidents.map((incident) => new Date(incident.incidentTime).getFullYear().toString())
     );
     return Array.from(years).sort((a, b) => parseInt(b) - parseInt(a));
   }, [incidents]);
@@ -64,7 +64,7 @@ export function AgencyIncidentChart({
     );
 
     incidents.forEach((incident) => {
-      const incidentDate = new Date(incident.date);
+      const incidentDate = new Date(incident.incidentTime);
 
       const yearMatch = incidentDate.getFullYear().toString() === selectedYear;
 

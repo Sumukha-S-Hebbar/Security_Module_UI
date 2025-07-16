@@ -3,7 +3,7 @@
 
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { sites, securityAgencies, incidents } from '@/lib/data';
+import { sites, securityAgencies, incidents, guards } from '@/lib/data';
 import type { Incident } from '@/types';
 import {
   Card,
@@ -46,7 +46,7 @@ export default function SiteReportPage() {
 
   const agency = securityAgencies.find((a) => a.id === site.agencyId);
   const siteIncidents = incidents.filter(
-    (incident) => incident.site === site.name
+    (incident) => incident.siteId === site.id
   );
 
   const handleDownloadReport = () => {
@@ -69,6 +69,8 @@ export default function SiteReportPage() {
         return <Badge variant="secondary">{status}</Badge>;
     }
   };
+
+  const getGuardById = (id: string) => guards.find(g => g.id === id);
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6">
@@ -150,15 +152,18 @@ export default function SiteReportPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {siteIncidents.map((incident) => (
-                  <TableRow key={incident.id}>
-                    <TableCell>{incident.id}</TableCell>
-                    <TableCell>{new Date(incident.date).toLocaleDateString()}</TableCell>
-                    <TableCell>{incident.guard}</TableCell>
-                    <TableCell>{getStatusBadge(incident.status)}</TableCell>
-                    <TableCell className="max-w-xs truncate">{incident.details}</TableCell>
-                  </TableRow>
-                ))}
+                {siteIncidents.map((incident) => {
+                  const guard = getGuardById(incident.raisedByGuardId);
+                  return (
+                    <TableRow key={incident.id}>
+                      <TableCell>{incident.id}</TableCell>
+                      <TableCell>{new Date(incident.incidentTime).toLocaleDateString()}</TableCell>
+                      <TableCell>{guard?.name || 'N/A'}</TableCell>
+                      <TableCell>{getStatusBadge(incident.status)}</TableCell>
+                      <TableCell className="max-w-xs truncate">{incident.description}</TableCell>
+                    </TableRow>
+                  )
+                })}
               </TableBody>
             </Table>
           ) : (

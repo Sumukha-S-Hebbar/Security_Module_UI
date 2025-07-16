@@ -50,7 +50,7 @@ export function IncidentChart({
   // Get unique years from the incidents data
   const availableYears = useMemo(() => {
     const years = new Set(
-      incidents.map((incident) => new Date(incident.date).getFullYear().toString())
+      incidents.map((incident) => new Date(incident.incidentTime).getFullYear().toString())
     );
     return Array.from(years).sort((a, b) => parseInt(b) - parseInt(a));
   }, [incidents]);
@@ -71,12 +71,12 @@ export function IncidentChart({
 
     const siteToAgencyMap = new Map<string, string | undefined>();
     sites.forEach((site) => {
-      siteToAgencyMap.set(site.name, site.agencyId);
+      siteToAgencyMap.set(site.id, site.agencyId);
     });
 
     incidents.forEach((incident) => {
-      const incidentDate = new Date(incident.date);
-      const incidentAgencyId = siteToAgencyMap.get(incident.site);
+      const incidentDate = new Date(incident.incidentTime);
+      const incidentAgencyId = siteToAgencyMap.get(incident.siteId);
 
       const yearMatch = incidentDate.getFullYear().toString() === selectedYear;
       const companyMatch =

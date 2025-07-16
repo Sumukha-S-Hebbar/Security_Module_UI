@@ -31,17 +31,16 @@ export type Site = {
   agencyId?: string;
   patrollingOfficerId?: string;
   geofencePerimeter?: number;
+  incidents?: Incident[];
 };
 
 export type Alert = {
   id: string;
-  type: 'Emergency' | 'Missed Selfie' | 'Guard Out of Premises';
+  type: 'Missed Selfie' | 'Guard Out of Premises';
   date: string;
   site: string;
   guard: string;
   status: 'Active' | 'Resolved' | 'Under Review';
-  callDetails?: string;
-  images?: string[];
 };
 
 export type PatrollingOfficer = {
@@ -56,13 +55,15 @@ export type PatrollingOfficer = {
 
 export type Incident = {
   id: string;
-  date: string;
-  type: 'Break-in' | 'Fire Alarm' | 'Vandalism' | 'Medical';
-  details: string;
-  status: 'Active' | 'Resolved' | 'Under Review';
-  guard: string;
-  site: string;
-  images?: string[];
+  status: 'Active' | 'Under Review' | 'Resolved';
+  description: string;
+  raisedByGuardId: string;
+  siteId: string;
+  incidentTime: string;
+  attendedByPatrollingOfficerId?: string;
+  resolvedByUserId?: string;
+  initialIncidentMediaUrl: string[];
+  resolvedIncidentMediaUrl?: string[];
 };
 
 export type SecurityAgency = {

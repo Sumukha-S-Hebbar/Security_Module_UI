@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { AlertTriangle, Phone } from 'lucide-react';
-import type { Guard } from '@/types';
+import type { Guard, Site } from '@/types';
 import { SitesMap } from './_components/sites-map';
 import { AnalyticsDashboard } from './_components/analytics-dashboard';
 
@@ -25,16 +25,25 @@ const LOGGED_IN_SUPERVISOR_ID = 'PO01'; // Simulate logged-in Patrolling Officer
 
 export default function HomePage() {
   const supervisorSites = useMemo(() => sites.filter(s => s.patrollingOfficerId === LOGGED_IN_SUPERVISOR_ID), []);
-  const supervisorSiteNames = useMemo(() => new Set(supervisorSites.map(s => s.name)), [supervisorSites]);
-  const supervisorGuards = useMemo(() => guards.filter(g => supervisorSiteNames.has(g.site)), [supervisorSiteNames]);
-  const supervisorIncidents = useMemo(() => incidents.filter(i => supervisorSiteNames.has(i.site)), [supervisorSiteNames]);
+  const supervisorSiteIds = useMemo(() => new Set(supervisorSites.map(s => s.id)), [supervisorSites]);
+  
+  const supervisorGuards = useMemo(() => {
+      const siteNames = new Set(supervisorSites.map(s => s.name));
+      return guards.filter(g => siteNames.has(g.site));
+  }, [supervisorSites]);
+  
+  const supervisorIncidents = useMemo(() => incidents.filter(i => supervisorSiteIds.has(i.siteId)), [supervisorSiteIds]);
 
   const activeEmergencies = supervisorIncidents.filter(
     (incident) => incident.status === 'Active'
   );
 
-  const getGuardByName = (name: string): Guard | undefined => {
-    return supervisorGuards.find((g) => g.name === name);
+  const getGuardById = (id: string): Guard | undefined => {
+    return supervisorGuards.find((g) => g.id === id);
+  };
+  
+  const getSiteById = (id: string): Site | undefined => {
+    return supervisorSites.find((s) => s.id === id);
   };
 
   return (
@@ -66,14 +75,15 @@ export default function HomePage() {
               </TableHeader>
               <TableBody>
                 {activeEmergencies.map((incident) => {
-                  const guardDetails = getGuardByName(incident.guard);
+                  const guardDetails = getGuardById(incident.raisedByGuardId);
+                  const siteDetails = getSiteById(incident.siteId);
                   return (
                     <TableRow key={incident.id}>
                       <TableCell className="font-medium">
-                        {incident.site}
+                        {siteDetails?.name}
                       </TableCell>
-                      <TableCell>{incident.guard}</TableCell>
-                      <TableCell>{new Date(incident.date).toLocaleDateString()}</TableCell>
+                      <TableCell>{guardDetails?.name}</TableCell>
+                      <TableCell>{new Date(incident.incidentTime).toLocaleDateString()}</TableCell>
                       <TableCell>
                         {guardDetails ? (
                           <Button asChild variant="outline" size="sm">

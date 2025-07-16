@@ -37,10 +37,10 @@ export default function AgencyIncidentReportPage() {
     );
   }
 
-  const site = sites.find((s) => s.name === incident.site);
+  const site = sites.find((s) => s.id === incident.siteId);
   const agency = site ? securityAgencies.find((a) => a.id === site.agencyId) : undefined;
-  const guard = guards.find((g) => g.name === incident.guard);
-  const patrollingOfficer = site ? patrollingOfficers.find((p) => p.id === site.patrollingOfficerId) : undefined;
+  const guard = guards.find((g) => g.id === incident.raisedByGuardId);
+  const patrollingOfficer = patrollingOfficers.find((p) => p.id === incident.attendedByPatrollingOfficerId);
 
   const handleDownloadReport = () => {
     toast({
@@ -64,7 +64,7 @@ export default function AgencyIncidentReportPage() {
   };
   
   const getHintForIncident = (incident: Incident) => {
-    const details = incident.details?.toLowerCase() || '';
+    const details = incident.description?.toLowerCase() || '';
     if (details.includes('break-in')) {
       return 'security camera';
     }
@@ -99,7 +99,7 @@ export default function AgencyIncidentReportPage() {
               </CardTitle>
               <CardDescription className="flex items-center gap-2 pt-2">
                 <Calendar className="w-4 h-4" />
-                {new Date(incident.date).toLocaleString()}
+                {new Date(incident.incidentTime).toLocaleString()}
               </CardDescription>
             </div>
             <Button onClick={handleDownloadReport}>
@@ -109,21 +109,21 @@ export default function AgencyIncidentReportPage() {
           </div>
         </CardHeader>
         <CardContent className="space-y-6 divide-y">
-            {incident.details && (
+            {incident.description && (
               <div className="pt-6">
                   <h4 className="font-semibold mb-2 text-lg">
                       Incident Summary
                   </h4>
-                  <p className="text-muted-foreground">{incident.details}</p>
+                  <p className="text-muted-foreground">{incident.description}</p>
               </div>
             )}
-            {incident.images && incident.images.length > 0 && (
+            {incident.initialIncidentMediaUrl && incident.initialIncidentMediaUrl.length > 0 && (
                 <div className="pt-6">
                     <h4 className="font-semibold mb-4 text-lg">
                         Media Evidence
                     </h4>
                     <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
-                        {incident.images.map((src, index) => (
+                        {incident.initialIncidentMediaUrl.map((src, index) => (
                             <div key={index} className="relative aspect-video">
                             <Image
                                 src={src}
