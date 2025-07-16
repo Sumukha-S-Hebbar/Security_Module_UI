@@ -235,27 +235,27 @@ export default function TowercoHomePage() {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             {guardDetails && (
-                              <DropdownMenuItem asChild>
-                                <a href={`tel:${guardDetails.phone}`}>
+                              <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                <div className="flex items-center gap-2">
                                   <Phone className="mr-2 h-4 w-4" />
-                                  Contact Guard
-                                </a>
+                                  <span>Guard: {guardDetails.phone}</span>
+                                </div>
                               </DropdownMenuItem>
                             )}
                             {patrollingOfficerDetails && (
-                              <DropdownMenuItem asChild>
-                                <a href={`tel:${patrollingOfficerDetails.phone}`}>
+                              <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                <div className="flex items-center gap-2">
                                   <Phone className="mr-2 h-4 w-4" />
-                                  Contact Patrolling Officer
-                                </a>
+                                  <span>Officer: {patrollingOfficerDetails.phone}</span>
+                                </div>
                               </DropdownMenuItem>
                             )}
                             {agencyDetails && (
-                              <DropdownMenuItem asChild>
-                                <a href={`tel:${agencyDetails.phone}`}>
+                              <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                               <div className="flex items-center gap-2">
                                   <Phone className="mr-2 h-4 w-4" />
-                                  Contact Agency
-                                </a>
+                                  <span>Agency: {agencyDetails.phone}</span>
+                                </div>
                               </DropdownMenuItem>
                             )}
                           </DropdownMenuContent>
