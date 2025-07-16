@@ -52,6 +52,7 @@ const uploadFormSchema = z.object({
 });
 
 const addAgencyFormSchema = z.object({
+    id: z.string().min(1, { message: 'Agency ID is required.' }),
     name: z.string().min(1, { message: 'Agency name is required.' }),
     phone: z.string().min(1, { message: 'Phone is required.' }),
     email: z.string().email({ message: 'Valid email is required.' }),
@@ -151,6 +152,7 @@ export default function TowercoAgenciesPage() {
     const addAgencyForm = useForm<z.infer<typeof addAgencyFormSchema>>({
         resolver: zodResolver(addAgencyFormSchema),
         defaultValues: {
+            id: '',
             name: '',
             phone: '',
             email: '',
@@ -343,7 +345,7 @@ export default function TowercoAgenciesPage() {
                                         Add Agency
                                     </Button>
                                 </DialogTrigger>
-                                <DialogContent>
+                                <DialogContent className="max-h-[90vh] overflow-y-auto">
                                     <DialogHeader>
                                         <DialogTitle>Add a New Agency</DialogTitle>
                                         <DialogDescription>
@@ -352,6 +354,19 @@ export default function TowercoAgenciesPage() {
                                     </DialogHeader>
                                     <Form {...addAgencyForm}>
                                         <form onSubmit={addAgencyForm.handleSubmit(onAddAgencySubmit)} className="space-y-4">
+                                            <FormField
+                                                control={addAgencyForm.control}
+                                                name="id"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>Agency ID</FormLabel>
+                                                        <FormControl>
+                                                            <Input placeholder="e.g., AGY04" {...field} />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
                                             <FormField
                                                 control={addAgencyForm.control}
                                                 name="name"
@@ -638,5 +653,3 @@ export default function TowercoAgenciesPage() {
             </Dialog>
         </div>
     );
-
-    
