@@ -1,7 +1,8 @@
+
 'use client';
 
 import { useState, useMemo } from 'react';
-import type { Alert, Site, SecurityAgency } from '@/types';
+import type { Incident, Site, SecurityAgency } from '@/types';
 import {
   Card,
   CardContent,
@@ -37,22 +38,22 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 export function IncidentChart({
-  alerts,
+  incidents,
   sites,
   securityAgencies,
 }: {
-  alerts: Alert[];
+  incidents: Incident[];
   sites: Site[];
   securityAgencies: SecurityAgency[];
 }) {
   const router = useRouter();
-  // Get unique years from the alerts data
+  // Get unique years from the incidents data
   const availableYears = useMemo(() => {
     const years = new Set(
-      alerts.map((alert) => new Date(alert.date).getFullYear().toString())
+      incidents.map((incident) => new Date(incident.date).getFullYear().toString())
     );
     return Array.from(years).sort((a, b) => parseInt(b) - parseInt(a));
-  }, [alerts]);
+  }, [incidents]);
 
   const [selectedYear, setSelectedYear] = useState<string>(
     availableYears[0] || new Date().getFullYear().toString()
@@ -73,25 +74,25 @@ export function IncidentChart({
       siteToAgencyMap.set(site.name, site.agencyId);
     });
 
-    alerts.forEach((alert) => {
-      const alertDate = new Date(alert.date);
-      const alertAgencyId = siteToAgencyMap.get(alert.site);
+    incidents.forEach((incident) => {
+      const incidentDate = new Date(incident.date);
+      const incidentAgencyId = siteToAgencyMap.get(incident.site);
 
-      const yearMatch = alertDate.getFullYear().toString() === selectedYear;
+      const yearMatch = incidentDate.getFullYear().toString() === selectedYear;
       const companyMatch =
-        selectedCompany === 'all' || alertAgencyId === selectedCompany;
+        selectedCompany === 'all' || incidentAgencyId === selectedCompany;
 
-      if (yearMatch && companyMatch && alert.type === 'Emergency') {
-        const monthIndex = alertDate.getMonth();
+      if (yearMatch && companyMatch) {
+        const monthIndex = incidentDate.getMonth();
         monthlyData[monthIndex].total += 1;
-        if (alert.status === 'Resolved') {
+        if (incident.status === 'Resolved') {
           monthlyData[monthIndex].resolved += 1;
         }
       }
     });
 
     return monthlyData;
-  }, [alerts, sites, selectedYear, selectedCompany]);
+  }, [incidents, sites, selectedYear, selectedCompany]);
 
   const handleBarClick = (data: any, index: number) => {
     router.push(`/towerco/reports?month=${index + 1}`);

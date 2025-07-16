@@ -1,6 +1,6 @@
 
 import { useMemo } from 'react';
-import { alerts, guards, sites } from '@/lib/data';
+import { incidents, guards, sites } from '@/lib/data';
 import {
   Card,
   CardContent,
@@ -27,10 +27,10 @@ export default function HomePage() {
   const supervisorSites = useMemo(() => sites.filter(s => s.patrollingOfficerId === LOGGED_IN_SUPERVISOR_ID), []);
   const supervisorSiteNames = useMemo(() => new Set(supervisorSites.map(s => s.name)), [supervisorSites]);
   const supervisorGuards = useMemo(() => guards.filter(g => supervisorSiteNames.has(g.site)), [supervisorSiteNames]);
-  const supervisorAlerts = useMemo(() => alerts.filter(a => supervisorSiteNames.has(a.site)), [supervisorSiteNames]);
+  const supervisorIncidents = useMemo(() => incidents.filter(i => supervisorSiteNames.has(i.site)), [supervisorSiteNames]);
 
-  const activeEmergencies = supervisorAlerts.filter(
-    (alert) => alert.type === 'Emergency' && alert.status === 'Active'
+  const activeEmergencies = supervisorIncidents.filter(
+    (incident) => incident.status === 'Active'
   );
 
   const getGuardByName = (name: string): Guard | undefined => {
@@ -51,7 +51,7 @@ export default function HomePage() {
       <Card className="border-destructive bg-destructive/10">
         <CardHeader className="flex flex-row items-center gap-2">
           <AlertTriangle className="w-6 h-6 text-destructive" />
-          <CardTitle>Current Emergency Alerts</CardTitle>
+          <CardTitle>Current Emergency Incidents</CardTitle>
         </CardHeader>
         <CardContent>
           {activeEmergencies.length > 0 ? (
@@ -65,15 +65,15 @@ export default function HomePage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {activeEmergencies.map((alert) => {
-                  const guardDetails = getGuardByName(alert.guard);
+                {activeEmergencies.map((incident) => {
+                  const guardDetails = getGuardByName(incident.guard);
                   return (
-                    <TableRow key={alert.id}>
+                    <TableRow key={incident.id}>
                       <TableCell className="font-medium">
-                        {alert.site}
+                        {incident.site}
                       </TableCell>
-                      <TableCell>{alert.guard}</TableCell>
-                      <TableCell>{alert.date}</TableCell>
+                      <TableCell>{incident.guard}</TableCell>
+                      <TableCell>{new Date(incident.date).toLocaleDateString()}</TableCell>
                       <TableCell>
                         {guardDetails ? (
                           <Button asChild variant="outline" size="sm">
@@ -95,7 +95,7 @@ export default function HomePage() {
             </Table>
           ) : (
             <p className="text-muted-foreground text-center py-4">
-              No active emergency calls. All systems are normal.
+              No active emergency incidents. All systems are normal.
             </p>
           )}
         </CardContent>

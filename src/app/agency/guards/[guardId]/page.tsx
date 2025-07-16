@@ -3,8 +3,8 @@
 
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { guards, sites, patrollingOfficers, alerts } from '@/lib/data';
-import type { Alert, Guard, Site, PatrollingOfficer } from '@/types';
+import { guards, sites, patrollingOfficers, incidents } from '@/lib/data';
+import type { Incident, Guard, Site, PatrollingOfficer } from '@/types';
 import {
   Card,
   CardContent,
@@ -49,7 +49,7 @@ export default function AgencyGuardReportPage() {
 
   const site = sites.find((s) => s.name === guard.site);
   const patrollingOfficer = site ? patrollingOfficers.find(p => p.id === site.patrollingOfficerId) : undefined;
-  const guardIncidents = alerts.filter(a => a.guard === guard.name && a.type === 'Emergency');
+  const guardIncidents = incidents.filter(i => i.guard === guard.name);
 
   const handleDownloadReport = () => {
     toast({
@@ -58,7 +58,7 @@ export default function AgencyGuardReportPage() {
     });
   };
 
-  const getStatusBadge = (status: Alert['status']) => {
+  const getStatusBadge = (status: Incident['status']) => {
     switch (status) {
       case 'Active':
         return <Badge variant="destructive">Active</Badge>;

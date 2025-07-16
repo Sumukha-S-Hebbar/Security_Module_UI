@@ -1,7 +1,8 @@
+
 'use client';
 
 import { useState, useMemo } from 'react';
-import type { Alert, Site, SecurityAgency } from '@/types';
+import type { Incident, Site, SecurityAgency } from '@/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Progress } from '@/components/ui/progress';
@@ -17,11 +18,11 @@ interface AgencyPerformanceData {
 export function AgencyPerformance({
   agencies,
   sites,
-  alerts,
+  incidents,
 }: {
   agencies: SecurityAgency[];
   sites: Site[];
-  alerts: Alert[];
+  incidents: Incident[];
 }) {
   const [selectedAgency, setSelectedAgency] = useState('all');
 
@@ -29,8 +30,8 @@ export function AgencyPerformance({
     const data: AgencyPerformanceData[] = agencies.map((agency) => {
       const agencySites = sites.filter((site) => site.agencyId === agency.id);
       const agencySiteNames = new Set(agencySites.map((site) => site.name));
-      const agencyIncidents = alerts.filter(
-        (alert) => agencySiteNames.has(alert.site) && alert.type === 'Emergency'
+      const agencyIncidents = incidents.filter(
+        (incident) => agencySiteNames.has(incident.site)
       );
       
       const totalIncidents = agencyIncidents.length;
@@ -44,7 +45,7 @@ export function AgencyPerformance({
       }
 
       const resolvedIncidents = agencyIncidents.filter(
-        (alert) => alert.status === 'Resolved'
+        (incident) => incident.status === 'Resolved'
       ).length;
       
       const performance = Math.round((resolvedIncidents / totalIncidents) * 100);
@@ -59,7 +60,7 @@ export function AgencyPerformance({
 
     // Sort by performance descending
     return data.sort((a, b) => b.performance - a.performance);
-  }, [agencies, sites, alerts]);
+  }, [agencies, sites, incidents]);
 
   const filteredPerformanceData = useMemo(() => {
     if (selectedAgency === 'all') {

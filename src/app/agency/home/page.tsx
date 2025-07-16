@@ -2,7 +2,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { alerts, guards, sites, patrollingOfficers } from '@/lib/data';
+import { incidents, guards, sites, patrollingOfficers } from '@/lib/data';
 import type { Guard, PatrollingOfficer, Site } from '@/types';
 import { AgencyAnalyticsDashboard } from './_components/agency-analytics-dashboard';
 import {
@@ -47,7 +47,7 @@ export default function AgencyHomePage() {
   const agencySites = useMemo(() => sites.filter(site => site.agencyId === LOGGED_IN_AGENCY_ID), []);
   const agencySiteNames = useMemo(() => new Set(agencySites.map(site => site.name)), [agencySites]);
 
-  const agencyAlerts = useMemo(() => alerts.filter(alert => agencySiteNames.has(alert.site)), [agencySiteNames]);
+  const agencyIncidents = useMemo(() => incidents.filter(incident => agencySiteNames.has(incident.site)), [agencySiteNames]);
   
   const agencyGuards = useMemo(() => guards.filter(guard => agencySiteNames.has(guard.site)), [agencySiteNames]);
   
@@ -56,19 +56,19 @@ export default function AgencyHomePage() {
     return patrollingOfficers.filter(po => poIds.has(po.id));
   }, [agencySites]);
 
-  const monthlyFilteredAlerts = useMemo(() => {
+  const monthlyFilteredIncidents = useMemo(() => {
     if (selectedMonth === 'all') {
-      return agencyAlerts;
+      return agencyIncidents;
     }
-    return agencyAlerts.filter(alert => {
-      const alertDate = new Date(alert.date);
-      return alertDate.getMonth() === parseInt(selectedMonth, 10);
+    return agencyIncidents.filter(incident => {
+      const incidentDate = new Date(incident.date);
+      return incidentDate.getMonth() === parseInt(selectedMonth, 10);
     });
-  }, [agencyAlerts, selectedMonth]);
+  }, [agencyIncidents, selectedMonth]);
 
-  const activeEmergencies = useMemo(() => agencyAlerts.filter(
-    (alert) => alert.type === 'Emergency' && alert.status === 'Active'
-  ), [agencyAlerts]);
+  const activeEmergencies = useMemo(() => agencyIncidents.filter(
+    (incident) => incident.status === 'Active'
+  ), [agencyIncidents]);
 
   const getGuardByName = (name: string): Guard | undefined => {
     return agencyGuards.find((g) => g.name === name);
@@ -117,7 +117,7 @@ export default function AgencyHomePage() {
       <Card className="border-destructive bg-destructive/10">
         <CardHeader className="flex flex-row items-center gap-2">
           <AlertTriangle className="w-6 h-6 text-destructive" />
-          <CardTitle>Active Emergency Alerts</CardTitle>
+          <CardTitle>Active Emergency Incidents</CardTitle>
         </CardHeader>
         <CardContent>
           {activeEmergencies.length > 0 ? (
@@ -132,21 +132,21 @@ export default function AgencyHomePage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {activeEmergencies.map((alert) => {
-                  const guardDetails = getGuardByName(alert.guard);
+                {activeEmergencies.map((incident) => {
+                  const guardDetails = getGuardByName(incident.guard);
                   const patrollingOfficerDetails = getPatrollingOfficerByGuardName(
-                    alert.guard
+                    incident.guard
                   );
                   return (
-                    <TableRow key={alert.id}>
+                    <TableRow key={incident.id}>
                       <TableCell className="font-medium">
-                        {alert.site}
+                        {incident.site}
                       </TableCell>
-                      <TableCell>{alert.guard}</TableCell>
+                      <TableCell>{incident.guard}</TableCell>
                       <TableCell>
                         {patrollingOfficerDetails?.name}
                       </TableCell>
-                      <TableCell>{alert.date}</TableCell>
+                      <TableCell>{new Date(incident.date).toLocaleDateString()}</TableCell>
                       <TableCell>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
@@ -181,7 +181,7 @@ export default function AgencyHomePage() {
             </Table>
           ) : (
             <p className="text-muted-foreground text-center py-4">
-              No active emergency calls. All systems are normal.
+              No active emergency incidents. All systems are normal.
             </p>
           )}
         </CardContent>
@@ -193,14 +193,14 @@ export default function AgencyHomePage() {
         patrollingOfficers={agencyPatrollingOfficers}
       />
 
-      <IncidentStatusBreakdown alerts={monthlyFilteredAlerts} />
+      <IncidentStatusBreakdown incidents={monthlyFilteredIncidents} />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <GuardPerformanceBreakdown guards={agencyGuards} />
         <PatrollingOfficerPerformance patrollingOfficers={agencyPatrollingOfficers} sites={agencySites} />
       </div>
 
-      <AgencyIncidentChart alerts={monthlyFilteredAlerts} />
+      <AgencyIncidentChart incidents={monthlyFilteredIncidents} />
     </div>
   );
 }

@@ -1,5 +1,5 @@
 
-import type { Guard, Site, Alert, PatrollingOfficer, Incident, SecurityAgency } from '@/types';
+import type { Guard, Site, Incident, PatrollingOfficer, SecurityAgency } from '@/types';
 
 export const patrollingOfficers: PatrollingOfficer[] = [
   {
@@ -32,11 +32,11 @@ export const patrollingOfficers: PatrollingOfficer[] = [
 ];
 
 export const incidents: Incident[] = [
-    { id: 'INC001', date: '2024-07-20', type: 'Break-in', details: 'Attempted break-in at west entrance.', resolved: true},
-    { id: 'INC002', date: '2024-07-21', type: 'Fire Alarm', details: 'False alarm triggered by dust.', resolved: true},
-    { id: 'INC003', date: '2024-06-15', type: 'Vandalism', details: 'Graffiti on the north wall.', resolved: false},
-    { id: 'INC004', date: '2024-05-10', type: 'Medical', details: 'Guard reported feeling unwell.', resolved: true},
-    { id: 'INC005', date: '2024-04-01', type: 'Break-in', details: 'Successful break-in, items stolen.', resolved: false},
+    { id: 'INC001', date: '2024-07-20', type: 'Break-in', details: 'Attempted break-in at west entrance.', status: 'Active', guard: 'John Doe', site: 'Downtown Mall', images: ['https://placehold.co/600x400.png']},
+    { id: 'INC002', date: '2024-07-21', type: 'Fire Alarm', details: 'False alarm triggered by dust.', status: 'Resolved', guard: 'Jane Smith', site: 'Tech Park One'},
+    { id: 'INC003', date: '2024-06-15', type: 'Vandalism', details: 'Graffiti on the north wall.', status: 'Under Review', guard: 'Mike Johnson', site: 'City Waterfront'},
+    { id: 'INC004', date: '2024-05-10', type: 'Medical', details: 'Guard reported feeling unwell.', status: 'Resolved', guard: 'Sarah Connor', site: 'Cyberdyne Systems'},
+    { id: 'INC005', date: '2024-04-01', type: 'Break-in', details: 'Successful break-in, items stolen.', status: 'Resolved', guard: 'Kyle Reese', site: 'Cyberdyne Systems'},
 ];
 
 
@@ -209,7 +209,6 @@ export const sites: Site[] = [
     coords: { x: 25, y: 30 },
     visited: true,
     towerco: 'TowerCo Alpha',
-    incidents: [incidents[1]],
     assignedOn: '2024-05-10',
     agencyId: 'AGY01',
     patrollingOfficerId: 'PO02',
@@ -227,7 +226,6 @@ export const sites: Site[] = [
     coords: { x: 55, y: 45 },
     visited: false,
     towerco: 'TowerCo Beta',
-    incidents: [incidents[0]],
     assignedOn: '2024-04-20',
     agencyId: 'AGY01',
     patrollingOfficerId: 'PO01',
@@ -245,7 +243,6 @@ export const sites: Site[] = [
     coords: { x: 75, y: 60 },
     visited: false,
     towerco: 'TowerCo Gamma',
-    incidents: [],
     assignedOn: '2024-06-01',
     agencyId: 'AGY01',
     patrollingOfficerId: 'PO01',
@@ -263,7 +260,6 @@ export const sites: Site[] = [
     coords: { x: 40, y: 70 },
     visited: true,
     towerco: 'TowerCo Alpha',
-    incidents: [incidents[4]],
     agencyId: 'AGY02',
     patrollingOfficerId: 'PO02',
     geofencePerimeter: 1200,
@@ -281,7 +277,6 @@ export const sites: Site[] = [
     coords: { x: 15, y: 80 },
     visited: false,
     towerco: 'TowerCo Delta',
-    incidents: [],
     agencyId: 'AGY03',
     patrollingOfficerId: 'PO03',
     assignedOn: '2024-07-01',
@@ -299,7 +294,6 @@ export const sites: Site[] = [
     coords: { x: 20, y: 85 },
     visited: true,
     towerco: 'TowerCo Delta',
-    incidents: [],
     agencyId: 'AGY03',
     patrollingOfficerId: 'PO03',
     assignedOn: '2024-07-05',
@@ -317,7 +311,6 @@ export const sites: Site[] = [
     coords: { x: 60, y: 50 },
     visited: false,
     towerco: 'TowerCo Beta',
-    incidents: [],
     agencyId: 'AGY01',
     patrollingOfficerId: 'PO01',
     assignedOn: '2024-05-20',
@@ -334,7 +327,6 @@ export const sites: Site[] = [
     coords: { x: 30, y: 15 },
     visited: false,
     towerco: 'TowerCo Alpha',
-    incidents: [],
     agencyId: 'AGY01',
     assignedOn: '2024-06-10',
   },
@@ -350,7 +342,6 @@ export const sites: Site[] = [
     coords: { x: 45, y: 25 },
     visited: false,
     towerco: 'TowerCo Alpha',
-    incidents: [],
     agencyId: 'AGY01',
     assignedOn: '2024-06-11',
   },
@@ -366,7 +357,6 @@ export const sites: Site[] = [
     coords: { x: 35, y: 35 },
     visited: false,
     towerco: 'TowerCo Alpha',
-    incidents: [],
     agencyId: 'AGY01',
     assignedOn: '2024-06-12',
   },
@@ -382,7 +372,6 @@ export const sites: Site[] = [
     coords: { x: 25, y: 40 },
     visited: false,
     towerco: 'TowerCo Alpha',
-    incidents: [],
   },
   {
     id: 'SITE12',
@@ -396,87 +385,5 @@ export const sites: Site[] = [
     coords: { x: 50, y: 30 },
     visited: false,
     towerco: 'TowerCo Alpha',
-    incidents: [],
   },
-];
-
-export const alerts: Alert[] = [
-  // 2024 Data
-  // Jan
-  { id: 'A240101', type: 'Emergency', date: '2024-01-15 10:00', site: 'Tech Park One', guard: 'Jane Smith', status: 'Resolved', callDetails: 'Power outage in Building B.', images: ['https://placehold.co/600x400.png']},
-  // Feb
-  { id: 'A240201', type: 'Emergency', date: '2024-02-10 18:30', site: 'Downtown Mall', guard: 'John Doe', status: 'Resolved', callDetails: 'Suspicious person reported near the food court.' },
-  { id: 'A240202', type: 'Missed Selfie', date: '2024-02-20 09:00', site: 'City Waterfront', guard: 'Mike Johnson', status: 'Resolved'},
-  // Mar
-  { id: 'A240301', type: 'Emergency', date: '2024-03-05 21:00', site: 'Cyberdyne Systems', guard: 'Sarah Connor', status: 'Resolved', callDetails: 'Unauthorized access attempt at main gate.', images: ['https://placehold.co/600x400.png'] },
-  { id: 'A240302', type: 'Emergency', date: '2024-03-25 14:00', site: 'Industrial Zone 5', guard: 'David Brown', status: 'Under Review', callDetails: 'Fence breach detected on the western perimeter.' },
-  // Apr
-  { id: 'A240401', type: 'Emergency', date: '2024-04-01 11:20', site: 'Cyberdyne Systems', guard: 'Kyle Reese', status: 'Resolved', callDetails: 'Medical emergency, employee fainted.', images: ['https://placehold.co/600x400.png'] },
-  // May
-  { id: 'A240501', type: 'Emergency', date: '2024-05-12 03:00', site: 'Downtown Mall', guard: 'John Doe', status: 'Resolved', callDetails: 'Shoplifting incident at a retail store.' },
-  { id: 'A240502', type: 'Guard Out of Premises', date: '2024-05-22 16:00', site: 'Industrial Zone 7', guard: 'Chris Green', status: 'Resolved'},
-  // Jun
-  { id: 'A240601', type: 'Emergency', date: '2024-06-18 17:45', site: 'Tech Park One', guard: 'Emily Williams', status: 'Resolved', callDetails: 'Minor traffic accident in the parking lot.', images: ['https://placehold.co/600x400.png']},
-  // Jul
-  {
-    id: 'A001',
-    type: 'Emergency',
-    date: '2024-07-20 14:30',
-    site: 'Downtown Mall',
-    guard: 'John Doe',
-    status: 'Active',
-    callDetails:
-      'This is John Doe at Downtown Mall, Gate 4. We have a potential break-in situation at the west entrance near the electronics store. Requesting immediate backup. I see two individuals acting suspiciously. The time is approximately 2:30 PM.',
-    images: ['https://placehold.co/600x400.png', 'https://placehold.co/600x400.png'],
-  },
-  {
-    id: 'A005',
-    type: 'Emergency',
-    date: '2024-07-21 02:14',
-    site: 'Cyberdyne Systems',
-    guard: 'Sarah Connor',
-    status: 'Active',
-    callDetails:
-      'Fire alarm activated on the third floor, R&D department. I am proceeding to the location to investigate. All personnel are being evacuated. Time is 2:14 AM. No smoke visible yet.',
-    images: ['https://placehold.co/600x400.png', 'https://placehold.co/600x400.png'],
-  },
-  {
-    id: 'A006',
-    type: 'Emergency',
-    date: '2024-07-19 10:00',
-    site: 'Tech Park One',
-    guard: 'Jane Smith',
-    status: 'Resolved',
-    callDetails: 'False alarm at Building A. A smoke detector was triggered by dust from construction work nearby. Situation is normal. The time is 10:00 AM.',
-    images: ['https://placehold.co/600x400.png', 'https://placehold.co/600x400.png'],
-  },
-  {
-    id: 'A002',
-    type: 'Missed Selfie',
-    date: '2024-07-20 08:05',
-    site: 'City Waterfront',
-    guard: 'Mike Johnson',
-    status: 'Under Review',
-  },
-  {
-    id: 'A003',
-    type: 'Guard Out of Premises',
-    date: '2024-07-19 22:00',
-    site: 'Tech Park One',
-    guard: 'Jane Smith',
-    status: 'Resolved',
-  },
-  {
-    id: 'A004',
-    type: 'Missed Selfie',
-    date: '2024-07-18 16:00',
-    site: 'City Waterfront',
-    guard: 'Mike Johnson',
-    status: 'Resolved',
-  },
-
-  // 2023 Data
-  { id: 'A230801', type: 'Emergency', date: '2023-08-01 12:00', site: 'Downtown Mall', guard: 'John Doe', status: 'Resolved', callDetails: 'Lost child reported, found safe.'},
-  { id: 'A231001', type: 'Emergency', date: '2023-10-15 19:00', site: 'Tech Park One', guard: 'Jane Smith', status: 'Resolved', callDetails: 'Car alarm going off in parking garage.' },
-  { id: 'A231101', type: 'Emergency', date: '2023-11-20 16:30', site: 'City Waterfront', guard: 'Mike Johnson', status: 'Resolved', callDetails: 'Public disturbance on the pier.' },
 ];

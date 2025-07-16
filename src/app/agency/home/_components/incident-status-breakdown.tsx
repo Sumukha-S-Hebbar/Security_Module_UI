@@ -1,18 +1,19 @@
+
 'use client';
 
-import type { Alert } from '@/types';
+import type { Incident } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 
-export function IncidentStatusBreakdown({ alerts }: { alerts: Alert[] }) {
-  const totalIncidents = alerts.filter(alert => alert.type === 'Emergency').length;
-  const activeIncidents = alerts.filter(
-    (alert) => alert.type === 'Emergency' && alert.status === 'Active'
+export function IncidentStatusBreakdown({ incidents }: { incidents: Incident[] }) {
+  const totalIncidents = incidents.length;
+  const activeIncidents = incidents.filter(
+    (incident) => incident.status === 'Active'
   ).length;
-  const underReviewIncidents = alerts.filter(
-    (alert) => alert.type === 'Emergency' && alert.status === 'Under Review'
+  const underReviewIncidents = incidents.filter(
+    (incident) => incident.status === 'Under Review'
   ).length;
-  const resolvedIncidents = alerts.filter(
-    (alert) => alert.type === 'Emergency' && alert.status === 'Resolved'
+  const resolvedIncidents = incidents.filter(
+    (incident) => incident.status === 'Resolved'
   ).length;
 
   const activePercentage =

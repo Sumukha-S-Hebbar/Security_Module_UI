@@ -3,7 +3,7 @@
 
 import { useState, useMemo } from 'react';
 import Image from 'next/image';
-import { alerts as initialAlerts, guards, sites } from '@/lib/data';
+import { alerts as initialAlerts, incidents as initialIncidents, guards, sites } from '@/lib/data';
 import {
   Table,
   TableBody,
@@ -48,39 +48,40 @@ import {
   ChevronDown,
   FileDown,
 } from 'lucide-react';
-import type { Alert } from '@/types';
+import type { Alert, Incident } from '@/types';
 import { useToast } from '@/hooks/use-toast';
 
 const LOGGED_IN_SUPERVISOR_ID = 'PO01'; // Simulate logged-in Patrolling Officer
 
 export default function AlertsPage() {
   const [alerts, setAlerts] = useState<Alert[]>(initialAlerts);
-  const [selectedAlert, setSelectedAlert] = useState<Alert | null>(null);
+  const [incidents, setIncidents] = useState<Incident[]>(initialIncidents);
+  const [selectedIncident, setSelectedIncident] = useState<Incident | null>(null);
   const { toast } = useToast();
 
   const supervisorSites = useMemo(() => sites.filter(s => s.patrollingOfficerId === LOGGED_IN_SUPERVISOR_ID), []);
   const supervisorSiteNames = useMemo(() => new Set(supervisorSites.map(s => s.name)), [supervisorSites]);
   const supervisorGuards = useMemo(() => guards.filter(g => supervisorSiteNames.has(g.site)), [supervisorSiteNames]);
+  
   const supervisorAlerts = useMemo(() => alerts.filter(a => supervisorSiteNames.has(a.site)), [supervisorSiteNames, alerts]);
+  const supervisorIncidents = useMemo(() => incidents.filter(i => supervisorSiteNames.has(i.site)), [supervisorSiteNames, incidents]);
 
-
-  const emergencyAlerts = supervisorAlerts.filter((alert) => alert.type === 'Emergency');
   const otherAlerts = supervisorAlerts.filter((alert) => alert.type !== 'Emergency');
 
   const getGuardByName = (name: string) => supervisorGuards.find((g) => g.name === name);
 
-  const handleStatusChange = (alertId: string, status: Alert['status']) => {
-    setAlerts((prevAlerts) =>
-      prevAlerts.map((alert) =>
-        alert.id === alertId ? { ...alert, status } : alert
+  const handleStatusChange = (incidentId: string, status: Incident['status']) => {
+    setIncidents((prevIncidents) =>
+      prevIncidents.map((incident) =>
+        incident.id === incidentId ? { ...incident, status } : incident
       )
     );
   };
 
-  const handleDownloadReport = (alert: Alert) => {
+  const handleDownloadReport = (incident: Incident) => {
     toast({
       title: 'Report Download Started',
-      description: `Downloading report for incident #${alert.id}.`,
+      description: `Downloading report for incident #${incident.id}.`,
     });
     // In a real app, this would trigger a file download.
   };
@@ -107,7 +108,7 @@ export default function AlertsPage() {
     }
   };
 
-  const getStatusBadge = (status: Alert['status']) => {
+  const getStatusBadge = (status: Incident['status']) => {
     switch (status) {
       case 'Active':
         return <Badge variant="destructive">Active</Badge>;
@@ -134,14 +135,14 @@ export default function AlertsPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-destructive" />
-              Emergency Alerts
+              Emergency Incidents
             </CardTitle>
           </CardHeader>
           <CardContent>
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Alert ID</TableHead>
+                  <TableHead>Incident ID</TableHead>
                   <TableHead>Date</TableHead>
                   <TableHead>Site</TableHead>
                   <TableHead>Guard</TableHead>
@@ -153,23 +154,23 @@ export default function AlertsPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {emergencyAlerts.map((alert) => {
-                  const guardDetails = getGuardByName(alert.guard);
-                  const isResolved = alert.status === 'Resolved';
+                {supervisorIncidents.map((incident) => {
+                  const guardDetails = getGuardByName(incident.guard);
+                  const isResolved = incident.status === 'Resolved';
 
                   return (
-                    <TableRow key={alert.id}>
-                      <TableCell className="font-medium">{alert.id}</TableCell>
-                      <TableCell>{alert.date}</TableCell>
-                      <TableCell>{alert.site}</TableCell>
-                      <TableCell>{alert.guard}</TableCell>
-                      <TableCell>{getStatusBadge(alert.status)}</TableCell>
+                    <TableRow key={incident.id}>
+                      <TableCell className="font-medium">{incident.id}</TableCell>
+                      <TableCell>{new Date(incident.date).toLocaleDateString()}</TableCell>
+                      <TableCell>{incident.site}</TableCell>
+                      <TableCell>{incident.guard}</TableCell>
+                      <TableCell>{getStatusBadge(incident.status)}</TableCell>
                       <TableCell>
-                        {alert.images && alert.images.length > 0 ? (
+                        {incident.images && incident.images.length > 0 ? (
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => setSelectedAlert(alert)}
+                            onClick={() => setSelectedIncident(incident)}
                           >
                             <Eye className="mr-2 h-4 w-4" />
                             View
@@ -190,11 +191,11 @@ export default function AlertsPage() {
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem
                               onClick={() =>
-                                handleStatusChange(alert.id, 'Under Review')
+                                handleStatusChange(incident.id, 'Under Review')
                               }
                               disabled={
-                                alert.status === 'Under Review' ||
-                                alert.status === 'Resolved'
+                                incident.status === 'Under Review' ||
+                                incident.status === 'Resolved'
                               }
                             >
                               <ShieldAlert className="mr-2 h-4 w-4" />
@@ -202,7 +203,7 @@ export default function AlertsPage() {
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               onClick={() =>
-                                handleStatusChange(alert.id, 'Resolved')
+                                handleStatusChange(incident.id, 'Resolved')
                               }
                               disabled={isResolved}
                             >
@@ -216,7 +217,7 @@ export default function AlertsPage() {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => handleDownloadReport(alert)}
+                          onClick={() => handleDownloadReport(incident)}
                         >
                           <FileDown className="mr-2 h-4 w-4" />
                           Download Report
@@ -300,17 +301,17 @@ export default function AlertsPage() {
           </CardContent>
         </Card>
       </div>
-      {selectedAlert && (
+      {selectedIncident && (
         <Dialog
-          open={!!selectedAlert}
-          onOpenChange={(isOpen) => !isOpen && setSelectedAlert(null)}
+          open={!!selectedIncident}
+          onOpenChange={(isOpen) => !isOpen && setSelectedIncident(null)}
         >
           <DialogContent className="max-w-2xl">
             <DialogHeader>
-              <DialogTitle>Details for Alert #{selectedAlert.id}</DialogTitle>
+              <DialogTitle>Details for Incident #{selectedIncident.id}</DialogTitle>
             </DialogHeader>
             <div className="grid gap-4 py-4 grid-cols-1 sm:grid-cols-2">
-              {selectedAlert.images?.map((src, index) => (
+              {selectedIncident.images?.map((src, index) => (
                 <div key={index} className="relative aspect-video">
                   <Image
                     src={src}
@@ -318,7 +319,7 @@ export default function AlertsPage() {
                     fill
                     className="rounded-md object-cover"
                     data-ai-hint={
-                      selectedAlert.id === 'A001'
+                      selectedIncident.id === 'A001'
                         ? 'security camera'
                         : 'fire alarm'
                     }

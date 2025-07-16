@@ -1,7 +1,8 @@
+
 'use client';
 
 import { useState, useMemo } from 'react';
-import type { Alert } from '@/types';
+import type { Incident } from '@/types';
 import {
   Card,
   CardContent,
@@ -37,17 +38,17 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 export function AgencyIncidentChart({
-  alerts,
+  incidents,
 }: {
-  alerts: Alert[];
+  incidents: Incident[];
 }) {
   const router = useRouter();
   const availableYears = useMemo(() => {
     const years = new Set(
-      alerts.map((alert) => new Date(alert.date).getFullYear().toString())
+      incidents.map((incident) => new Date(incident.date).getFullYear().toString())
     );
     return Array.from(years).sort((a, b) => parseInt(b) - parseInt(a));
-  }, [alerts]);
+  }, [incidents]);
 
   const [selectedYear, setSelectedYear] = useState<string>(
     availableYears[0] || new Date().getFullYear().toString()
@@ -62,22 +63,22 @@ export function AgencyIncidentChart({
       (month) => ({ month, total: 0, resolved: 0 })
     );
 
-    alerts.forEach((alert) => {
-      const alertDate = new Date(alert.date);
+    incidents.forEach((incident) => {
+      const incidentDate = new Date(incident.date);
 
-      const yearMatch = alertDate.getFullYear().toString() === selectedYear;
+      const yearMatch = incidentDate.getFullYear().toString() === selectedYear;
 
-      if (yearMatch && alert.type === 'Emergency') {
-        const monthIndex = alertDate.getMonth();
+      if (yearMatch) {
+        const monthIndex = incidentDate.getMonth();
         monthlyData[monthIndex].total += 1;
-        if (alert.status === 'Resolved') {
+        if (incident.status === 'Resolved') {
           monthlyData[monthIndex].resolved += 1;
         }
       }
     });
 
     return monthlyData;
-  }, [alerts, selectedYear]);
+  }, [incidents, selectedYear]);
 
   const handleBarClick = (data: any, index: number) => {
     router.push(`/agency/incidents?month=${index}`);

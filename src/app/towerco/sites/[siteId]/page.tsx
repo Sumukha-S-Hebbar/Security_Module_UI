@@ -1,9 +1,10 @@
+
 'use client';
 
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { sites, securityAgencies, alerts } from '@/lib/data';
-import type { Alert } from '@/types';
+import { sites, securityAgencies, incidents } from '@/lib/data';
+import type { Incident } from '@/types';
 import {
   Card,
   CardContent,
@@ -44,8 +45,8 @@ export default function SiteReportPage() {
   }
 
   const agency = securityAgencies.find((a) => a.id === site.agencyId);
-  const siteIncidents = alerts.filter(
-    (alert) => alert.site === site.name && alert.type === 'Emergency'
+  const siteIncidents = incidents.filter(
+    (incident) => incident.site === site.name
   );
 
   const handleDownloadReport = () => {
@@ -56,7 +57,7 @@ export default function SiteReportPage() {
     // In a real app, this would trigger a download.
   };
   
-  const getStatusBadge = (status: Alert['status']) => {
+  const getStatusBadge = (status: Incident['status']) => {
     switch (status) {
       case 'Active':
         return <Badge variant="destructive">Active</Badge>;
@@ -152,10 +153,10 @@ export default function SiteReportPage() {
                 {siteIncidents.map((incident) => (
                   <TableRow key={incident.id}>
                     <TableCell>{incident.id}</TableCell>
-                    <TableCell>{incident.date}</TableCell>
+                    <TableCell>{new Date(incident.date).toLocaleDateString()}</TableCell>
                     <TableCell>{incident.guard}</TableCell>
                     <TableCell>{getStatusBadge(incident.status)}</TableCell>
-                    <TableCell className="max-w-xs truncate">{incident.callDetails}</TableCell>
+                    <TableCell className="max-w-xs truncate">{incident.details}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>

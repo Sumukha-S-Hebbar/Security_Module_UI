@@ -3,8 +3,8 @@
 
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { patrollingOfficers, sites, guards, alerts } from '@/lib/data';
-import type { Alert, Guard, Site, PatrollingOfficer } from '@/types';
+import { patrollingOfficers, sites, guards, incidents } from '@/lib/data';
+import type { Incident, Guard, Site, PatrollingOfficer } from '@/types';
 import {
   Card,
   CardContent,
@@ -52,7 +52,7 @@ export default function AgencyPatrollingOfficerReportPage() {
   const assignedSites = sites.filter(site => site.patrollingOfficerId === supervisorId);
   const assignedSiteNames = new Set(assignedSites.map(s => s.name));
   const assignedGuards = guards.filter(guard => assignedSiteNames.has(guard.site));
-  const assignedIncidents = alerts.filter(alert => assignedSiteNames.has(alert.site) && alert.type === 'Emergency');
+  const assignedIncidents = incidents.filter(incident => assignedSiteNames.has(incident.site));
   
   const filteredIncidents = useMemo(() => {
     if (selectedMonth === 'all') {
@@ -76,7 +76,7 @@ export default function AgencyPatrollingOfficerReportPage() {
     });
   };
 
-  const getStatusBadge = (status: Alert['status']) => {
+  const getStatusBadge = (status: Incident['status']) => {
     switch (status) {
       case 'Active':
         return <Badge variant="destructive">Active</Badge>;
@@ -285,7 +285,7 @@ export default function AgencyPatrollingOfficerReportPage() {
                     <TableCell>{incident.site}</TableCell>
                     <TableCell>{incident.guard}</TableCell>
                     <TableCell>{getStatusBadge(incident.status)}</TableCell>
-                    <TableCell className="max-w-xs truncate">{incident.callDetails}</TableCell>
+                    <TableCell className="max-w-xs truncate">{incident.details}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>

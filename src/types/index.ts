@@ -27,7 +27,6 @@ export type Site = {
   coords: { x: number; y: number }; // As percentages for map placement
   visited: boolean;
   towerco: string;
-  incidents?: Incident[];
   assignedOn?: string;
   agencyId?: string;
   patrollingOfficerId?: string;
@@ -60,7 +59,10 @@ export type Incident = {
   date: string;
   type: 'Break-in' | 'Fire Alarm' | 'Vandalism' | 'Medical';
   details: string;
-  resolved: boolean;
+  status: 'Active' | 'Resolved' | 'Under Review';
+  guard: string;
+  site: string;
+  images?: string[];
 };
 
 export type SecurityAgency = {

@@ -3,7 +3,7 @@
 
 import { useState, useMemo, useCallback } from 'react';
 import Link from 'next/link';
-import { sites, guards, patrollingOfficers, alerts } from '@/lib/data';
+import { sites, guards, patrollingOfficers, incidents } from '@/lib/data';
 import type { Site, PatrollingOfficer } from '@/types';
 import {
   Card,
@@ -292,16 +292,16 @@ export default function AgencySitesPage() {
 
   const siteIncidentsCount = useMemo(() => {
     const counts: { [siteName: string]: number } = {};
-    alerts.forEach((alert) => {
-      if (alert.type === 'Emergency' && agencySiteNames.has(alert.site)) {
-        if (!counts[alert.site]) {
-          counts[alert.site] = 0;
+    incidents.forEach((incident) => {
+      if (agencySiteNames.has(incident.site)) {
+        if (!counts[incident.site]) {
+          counts[incident.site] = 0;
         }
-        counts[alert.site]++;
+        counts[incident.site]++;
       }
     });
     return counts;
-  }, [agencySiteNames, alerts]);
+  }, [agencySiteNames, incidents]);
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6">

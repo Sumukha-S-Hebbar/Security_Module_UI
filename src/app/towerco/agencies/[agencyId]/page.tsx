@@ -7,11 +7,10 @@ import { useState, useMemo } from 'react';
 import {
   securityAgencies,
   sites,
-  alerts,
+  incidents,
   guards,
-  patrollingOfficers,
 } from '@/lib/data';
-import type { Alert } from '@/types';
+import type { Incident } from '@/types';
 import {
   Card,
   CardContent,
@@ -108,13 +107,13 @@ export default function AgencyReportPage() {
   );
   const agencySiteNames = new Set(agencySites.map((site) => site.name));
 
-  const agencyIncidents = alerts.filter(
-    (alert) =>
-      agencySiteNames.has(alert.site) && alert.type === 'Emergency'
+  const agencyIncidents = incidents.filter(
+    (incident) =>
+      agencySiteNames.has(incident.site)
   );
   const totalIncidents = agencyIncidents.length;
   const resolvedIncidents = agencyIncidents.filter(
-    (a) => a.status === 'Resolved'
+    (i) => i.status === 'Resolved'
   ).length;
 
   const agencyGuards = guards.filter((guard) =>
@@ -134,7 +133,7 @@ export default function AgencyReportPage() {
       ? new Date(Math.min(...assignmentDates.map((d) => d.getTime())))
       : null;
       
-  const getStatusBadge = (status: Alert['status']) => {
+  const getStatusBadge = (status: Incident['status']) => {
     switch (status) {
       case 'Active':
         return <Badge variant="destructive">Active</Badge>;
@@ -151,7 +150,7 @@ export default function AgencyReportPage() {
 
   const availableYears = useMemo(() => {
     const years = new Set(
-      agencyIncidents.map((alert) => new Date(alert.date).getFullYear().toString())
+      agencyIncidents.map((incident) => new Date(incident.date).getFullYear().toString())
     );
     if (years.size === 0) {
       years.add(new Date().getFullYear().toString());
@@ -168,10 +167,10 @@ export default function AgencyReportPage() {
       (month) => ({ month, incidents: 0 })
     );
 
-    agencyIncidents.forEach((alert) => {
-      const alertDate = new Date(alert.date);
-      if (alertDate.getFullYear().toString() === selectedYear) {
-        const monthIndex = alertDate.getMonth();
+    agencyIncidents.forEach((incident) => {
+      const incidentDate = new Date(incident.date);
+      if (incidentDate.getFullYear().toString() === selectedYear) {
+        const monthIndex = incidentDate.getMonth();
         monthlyData[monthIndex].incidents += 1;
       }
     });
@@ -386,12 +385,12 @@ export default function AgencyReportPage() {
               </TableHeader>
               <TableBody>
                 {agencySites.map((site) => {
-                  const siteIncidents = alerts.filter(
-                    (alert) =>
-                      alert.site === site.name && alert.type === 'Emergency'
+                  const siteIncidents = incidents.filter(
+                    (incident) =>
+                      incident.site === site.name
                   );
                   const resolvedCount = siteIncidents.filter(
-                    (alert) => alert.status === 'Resolved'
+                    (incident) => incident.status === 'Resolved'
                   ).length;
                   return (
                     <TableRow key={site.id}>
@@ -464,7 +463,7 @@ export default function AgencyReportPage() {
                     <TableCell>{incident.site}</TableCell>
                     <TableCell>{incident.guard}</TableCell>
                     <TableCell>{getStatusBadge(incident.status)}</TableCell>
-                    <TableCell className="max-w-xs truncate">{incident.callDetails}</TableCell>
+                    <TableCell className="max-w-xs truncate">{incident.details}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>

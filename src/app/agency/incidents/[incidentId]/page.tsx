@@ -4,8 +4,8 @@
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { alerts, sites, securityAgencies, guards, patrollingOfficers } from '@/lib/data';
-import type { Alert, Site, SecurityAgency, Guard, PatrollingOfficer } from '@/types';
+import { incidents, sites, securityAgencies, guards, patrollingOfficers } from '@/lib/data';
+import type { Incident, Site, SecurityAgency, Guard, PatrollingOfficer } from '@/types';
 import {
   Card,
   CardContent,
@@ -23,7 +23,7 @@ export default function AgencyIncidentReportPage() {
   const { toast } = useToast();
   const incidentId = params.incidentId as string;
 
-  const incident = alerts.find((a) => a.id === incidentId);
+  const incident = incidents.find((a) => a.id === incidentId);
 
   if (!incident) {
     return (
@@ -50,7 +50,7 @@ export default function AgencyIncidentReportPage() {
     // In a real app, this would trigger a download.
   };
 
-  const getStatusBadge = (status: Alert['status']) => {
+  const getStatusBadge = (status: Incident['status']) => {
     switch (status) {
       case 'Active':
         return <Badge variant="destructive">Active</Badge>;
@@ -63,8 +63,8 @@ export default function AgencyIncidentReportPage() {
     }
   };
   
-  const getHintForIncident = (incident: Alert) => {
-    const details = incident.callDetails?.toLowerCase() || '';
+  const getHintForIncident = (incident: Incident) => {
+    const details = incident.details?.toLowerCase() || '';
     if (details.includes('break-in')) {
       return 'security camera';
     }
@@ -109,12 +109,12 @@ export default function AgencyIncidentReportPage() {
           </div>
         </CardHeader>
         <CardContent className="space-y-6 divide-y">
-            {incident.callDetails && (
+            {incident.details && (
               <div className="pt-6">
                   <h4 className="font-semibold mb-2 text-lg">
                       Incident Summary
                   </h4>
-                  <p className="text-muted-foreground">{incident.callDetails}</p>
+                  <p className="text-muted-foreground">{incident.details}</p>
               </div>
             )}
             {incident.images && incident.images.length > 0 && (

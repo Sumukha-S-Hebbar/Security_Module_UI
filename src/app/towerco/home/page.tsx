@@ -7,7 +7,7 @@ import type {
   PatrollingOfficer,
   SecurityAgency,
   Site,
-  Alert,
+  Incident,
 } from '@/types';
 import {
   Card,
@@ -36,7 +36,7 @@ import { SiteStatusBreakdown } from './_components/site-status-breakdown';
 import { IncidentChart } from './_components/incident-chart';
 import { AgencyPerformance } from './_components/agency-performance';
 import { Skeleton } from '@/components/ui/skeleton';
-import { securityAgencies as mockAgencies, alerts as mockAlerts, guards as mockGuards, patrollingOfficers as mockPatrollingOfficers, sites as mockSites } from '@/lib/data';
+import { securityAgencies as mockAgencies, incidents as mockIncidents, guards as mockGuards, patrollingOfficers as mockPatrollingOfficers, sites as mockSites } from '@/lib/data';
 
 
 const LOGGED_IN_TOWERCO = 'TowerCo Alpha'; // Simulate logged-in user
@@ -44,7 +44,7 @@ const LOGGED_IN_TOWERCO = 'TowerCo Alpha'; // Simulate logged-in user
 interface DashboardData {
   sites: Site[];
   agencies: SecurityAgency[];
-  alerts: Alert[];
+  incidents: Incident[];
   guards: Guard[];
   patrollingOfficers: PatrollingOfficer[];
 }
@@ -68,8 +68,8 @@ async function getDashboardData(): Promise<DashboardData> {
       (site) => site.towerco === LOGGED_IN_TOWERCO
     );
     const towercoSiteNames = new Set(towercoSites.map((site) => site.name));
-    const towercoAlerts = mockAlerts.filter((alert) =>
-      towercoSiteNames.has(alert.site)
+    const towercoIncidents = mockIncidents.filter((incident) =>
+      towercoSiteNames.has(incident.site)
     );
     const towercoSiteAgencyIds = new Set(
       towercoSites.map((site) => site.agencyId).filter(Boolean)
@@ -86,14 +86,14 @@ async function getDashboardData(): Promise<DashboardData> {
     return {
       sites: towercoSites,
       agencies: towercoAgencies,
-      alerts: towercoAlerts,
+      incidents: towercoIncidents,
       guards: towercoGuards,
       patrollingOfficers: towercoPatrollingOfficers,
     };
 
   } catch (error) {
     console.error('Could not fetch dashboard data:', error);
-    return { sites: [], agencies: [], alerts: [], guards: [], patrollingOfficers: [] };
+    return { sites: [], agencies: [], incidents: [], guards: [], patrollingOfficers: [] };
   }
 }
 
@@ -113,8 +113,8 @@ export default function TowercoHomePage() {
 
   const activeEmergencies = useMemo(() => {
     if (!data) return [];
-    return data.alerts.filter(
-      (alert) => alert.type === 'Emergency' && alert.status === 'Active'
+    return data.incidents.filter(
+      (incident) => incident.status === 'Active'
     );
   }, [data]);
 
@@ -191,7 +191,7 @@ export default function TowercoHomePage() {
       <Card className="border-destructive bg-destructive/10">
         <CardHeader className="flex flex-row items-center gap-2">
           <AlertTriangle className="w-6 h-6 text-destructive" />
-          <CardTitle>Active Emergency Alerts</CardTitle>
+          <CardTitle>Active Emergency Incidents</CardTitle>
         </CardHeader>
         <CardContent>
           {activeEmergencies.length > 0 ? (
@@ -207,24 +207,24 @@ export default function TowercoHomePage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {activeEmergencies.map((alert) => {
-                  const guardDetails = getGuardByName(alert.guard);
+                {activeEmergencies.map((incident) => {
+                  const guardDetails = getGuardByName(incident.guard);
                   const patrollingOfficerDetails = getPatrollingOfficerByGuardName(
-                    alert.guard
+                    incident.guard
                   );
-                  const agencyDetails = getAgencyBySiteName(alert.site);
+                  const agencyDetails = getAgencyBySiteName(incident.site);
 
                   return (
-                    <TableRow key={alert.id}>
+                    <TableRow key={incident.id}>
                       <TableCell className="font-medium">
-                        {alert.site}
+                        {incident.site}
                       </TableCell>
                       <TableCell>{agencyDetails?.name || 'N/A'}</TableCell>
                       <TableCell>
                         {patrollingOfficerDetails?.name || 'N/A'}
                       </TableCell>
-                      <TableCell>{alert.guard}</TableCell>
-                      <TableCell>{new Date(alert.date).toLocaleDateString()}</TableCell>
+                      <TableCell>{incident.guard}</TableCell>
+                      <TableCell>{new Date(incident.date).toLocaleDateString()}</TableCell>
                       <TableCell>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
@@ -267,7 +267,7 @@ export default function TowercoHomePage() {
             </Table>
           ) : (
             <p className="text-muted-foreground text-center py-4">
-              No active emergency calls. All systems are normal.
+              No active emergency incidents. All systems are normal.
             </p>
           )}
         </CardContent>
@@ -276,7 +276,7 @@ export default function TowercoHomePage() {
       <TowercoAnalyticsDashboard
         sites={data.sites}
         agencies={data.agencies}
-        alerts={activeEmergencies}
+        incidents={activeEmergencies}
       />
 
       <SiteStatusBreakdown sites={data.sites} />
@@ -284,11 +284,11 @@ export default function TowercoHomePage() {
       <AgencyPerformance
         agencies={data.agencies}
         sites={data.sites}
-        alerts={data.alerts}
+        incidents={data.incidents}
       />
 
       <IncidentChart
-        alerts={data.alerts}
+        incidents={data.incidents}
         sites={data.sites}
         securityAgencies={data.agencies}
       />

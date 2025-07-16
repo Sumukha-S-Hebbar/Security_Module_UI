@@ -3,8 +3,8 @@
 
 import { useState, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { alerts as initialAlerts, guards, patrollingOfficers, sites } from '@/lib/data';
-import type { Alert, Guard, PatrollingOfficer } from '@/types';
+import { incidents as initialIncidents, guards, patrollingOfficers, sites } from '@/lib/data';
+import type { Incident, Guard, PatrollingOfficer } from '@/types';
 import {
   Table,
   TableBody,
@@ -55,7 +55,7 @@ export default function AgencyIncidentsPage() {
   const searchParams = useSearchParams();
   const monthFromQuery = searchParams.get('month');
 
-  const [alerts, setAlerts] = useState(initialAlerts);
+  const [incidents, setIncidents] = useState(initialIncidents);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
@@ -64,14 +64,14 @@ export default function AgencyIncidentsPage() {
   const agencySites = useMemo(() => sites.filter(site => site.agencyId === LOGGED_IN_AGENCY_ID), []);
   const agencySiteNames = useMemo(() => new Set(agencySites.map(site => site.name)), [agencySites]);
 
-  const agencyAlerts = useMemo(() => alerts.filter(
-    (alert) => alert.type === 'Emergency' && agencySiteNames.has(alert.site)
-  ), [agencySiteNames, alerts]);
+  const agencyIncidents = useMemo(() => incidents.filter(
+    (incident) => agencySiteNames.has(incident.site)
+  ), [agencySiteNames, incidents]);
 
-  const activeIncidents = useMemo(() => agencyAlerts.filter(incident => incident.status === 'Active'), [agencyAlerts]);
+  const activeIncidents = useMemo(() => agencyIncidents.filter(incident => incident.status === 'Active'), [agencyIncidents]);
 
   const filteredIncidents = useMemo(() => {
-    return agencyAlerts.filter((incident) => {
+    return agencyIncidents.filter((incident) => {
       const searchLower = searchQuery.toLowerCase();
       const matchesSearch =
         incident.id.toLowerCase().includes(searchLower) ||
@@ -92,11 +92,11 @@ export default function AgencyIncidentsPage() {
 
       return matchesSearch && matchesStatus && matchesDate && matchesMonth;
     });
-  }, [searchQuery, selectedStatus, selectedDate, selectedMonth, agencyAlerts]);
+  }, [searchQuery, selectedStatus, selectedDate, selectedMonth, agencyIncidents]);
 
-  const handleStatusChange = (incidentId: string, status: Alert['status']) => {
-    setAlerts((prevAlerts) =>
-      prevAlerts.map((incident) =>
+  const handleStatusChange = (incidentId: string, status: Incident['status']) => {
+    setIncidents((prevIncidents) =>
+      prevIncidents.map((incident) =>
         incident.id === incidentId ? { ...incident, status } : incident
       )
     );
@@ -106,7 +106,7 @@ export default function AgencyIncidentsPage() {
     });
   };
 
-  const getStatusBadge = (status: Alert['status']) => {
+  const getStatusBadge = (status: Incident['status']) => {
     switch (status) {
       case 'Active':
         return <Badge variant="destructive">Active</Badge>;
@@ -135,7 +135,7 @@ export default function AgencyIncidentsPage() {
     return patrollingOfficers.find((s) => s.id === site.patrollingOfficerId);
   };
 
-  const handleDownloadReport = (incident: Alert) => {
+  const handleDownloadReport = (incident: Incident) => {
     toast({
       title: 'Report Download Started',
       description: `Downloading report for incident #${incident.id}.`,

@@ -1,15 +1,16 @@
+
 'use client';
 
 import { useState, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import {
-  alerts as initialAlerts,
+  incidents as initialIncidents,
   guards,
   sites,
   securityAgencies,
   patrollingOfficers,
 } from '@/lib/data';
-import type { Alert, Guard, PatrollingOfficer, SecurityAgency } from '@/types';
+import type { Incident, Guard, PatrollingOfficer, SecurityAgency } from '@/types';
 import {
   Card,
   CardContent,
@@ -60,7 +61,7 @@ export default function TowercoIncidentsPage() {
   const searchParams = useSearchParams();
   const monthFromQuery = searchParams.get('month');
   
-  const [alerts, setAlerts] = useState(initialAlerts);
+  const [incidents, setIncidents] = useState(initialIncidents);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedAgency, setSelectedAgency] = useState('all');
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
@@ -76,13 +77,13 @@ export default function TowercoIncidentsPage() {
     [towercoSites]
   );
 
-  const towercoAlerts = useMemo(
+  const towercoIncidents = useMemo(
     () =>
-      alerts.filter(
-        (alert) =>
-          towercoSiteNames.has(alert.site) && alert.type === 'Emergency'
+      incidents.filter(
+        (incident) =>
+          towercoSiteNames.has(incident.site)
       ),
-    [towercoSiteNames, alerts]
+    [towercoSiteNames, incidents]
   );
 
   const agenciesOnSites = useMemo(() => {
@@ -101,7 +102,7 @@ export default function TowercoIncidentsPage() {
   }, [towercoSites]);
 
   const filteredIncidents = useMemo(() => {
-    return towercoAlerts.filter((incident) => {
+    return towercoIncidents.filter((incident) => {
       const searchLower = searchQuery.toLowerCase();
       const matchesSearch =
         incident.id.toLowerCase().includes(searchLower) ||
@@ -123,11 +124,11 @@ export default function TowercoIncidentsPage() {
 
       return matchesSearch && matchesAgency && matchesDate && matchesMonth;
     });
-  }, [searchQuery, selectedAgency, selectedDate, selectedMonth, towercoAlerts, siteToAgencyMap]);
+  }, [searchQuery, selectedAgency, selectedDate, selectedMonth, towercoIncidents, siteToAgencyMap]);
 
-  const handleStatusChange = (incidentId: string, status: Alert['status']) => {
-    setAlerts((prevAlerts) =>
-      prevAlerts.map((incident) =>
+  const handleStatusChange = (incidentId: string, status: Incident['status']) => {
+    setIncidents((prevIncidents) =>
+      prevIncidents.map((incident) =>
         incident.id === incidentId ? { ...incident, status } : incident
       )
     );
@@ -137,7 +138,7 @@ export default function TowercoIncidentsPage() {
     });
   };
   
-  const getStatusBadge = (status: Alert['status']) => {
+  const getStatusBadge = (status: Incident['status']) => {
     switch (status) {
       case 'Active':
         return <Badge variant="destructive">Active</Badge>;
@@ -176,7 +177,7 @@ export default function TowercoIncidentsPage() {
     return securityAgencies.find((a) => a.id === site.agencyId);
   };
 
-  const handleDownloadReport = (incident: Alert) => {
+  const handleDownloadReport = (incident: Incident) => {
     toast({
       title: 'Report Download Started',
       description: `Downloading report for incident #${incident.id}.`,
