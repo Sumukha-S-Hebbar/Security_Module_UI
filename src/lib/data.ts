@@ -87,6 +87,16 @@ export const incidents: Incident[] = [
       attendedByPatrollingOfficerId: 'PO02',
       resolvedByUserId: 'AGY02'
     },
+    { 
+      id: 'INC006', 
+      incidentTime: '2024-07-22T10:00:00Z', 
+      description: 'Unidentified drone spotted over the facility.', 
+      status: 'Active', 
+      raisedByGuardId: 'GL009', 
+      siteId: 'SITE08',
+      initialIncidentMediaUrl: ['https://placehold.co/600x400.png'],
+      attendedByPatrollingOfficerId: 'PO01'
+    },
 ];
 
 export const alerts: Alert[] = [
@@ -389,6 +399,7 @@ export const sites: Site[] = [
     visited: false,
     towerco: 'TowerCo Alpha',
     agencyId: 'AGY01',
+    patrollingOfficerId: 'PO01',
     assignedOn: '2024-06-10',
   },
   {
