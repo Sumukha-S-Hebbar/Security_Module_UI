@@ -36,7 +36,7 @@ export function TowercoAnalyticsDashboard({
         <CardContent>
           <div className="text-2xl font-bold">{agencies.length}</div>
           <p className="text-xs text-muted-foreground">
-            Contracted security providers
+            All agency under your portfolio
           </p>
         </CardContent>
       </Card>
