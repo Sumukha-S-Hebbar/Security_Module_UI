@@ -20,7 +20,7 @@ export type Site = {
   name: string;
   address: string;
   city: string;
-  state: string;
+  region: string;
   country: string;
   guards: string[]; // Guard IDs
   reportUrl: string;
@@ -74,6 +74,6 @@ export type SecurityAgency = {
   address: string;
   avatar: string;
   city: string;
-  state: string;
+  region: string;
   country: string;
 };

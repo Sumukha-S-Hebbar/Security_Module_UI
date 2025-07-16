@@ -225,7 +225,7 @@ export default function AgencyReportPage() {
                 </div>
                 <div className="flex items-center gap-2">
                     <MapPin className="h-4 w-4" />
-                    <span>{`${agency.city}, ${agency.state}, ${agency.country}`}</span>
+                    <span>{`${agency.city}, ${agency.region}, ${agency.country}`}</span>
                 </div>
             </div>
 

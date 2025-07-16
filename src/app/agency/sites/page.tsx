@@ -68,13 +68,13 @@ export default function AgencySitesPage() {
   const [assignedSearchQuery, setAssignedSearchQuery] = useState('');
   const [selectedPatrollingOfficerFilter, setSelectedPatrollingOfficerFilter] = useState('all');
   const [assignedSelectedCountry, setAssignedSelectedCountry] = useState('all');
-  const [assignedSelectedState, setAssignedSelectedState] = useState('all');
+  const [assignedSelectedRegion, setAssignedSelectedRegion] = useState('all');
   const [assignedSelectedCity, setAssignedSelectedCity] = useState('all');
 
   // State for Unassigned Sites filters
   const [unassignedSearchQuery, setUnassignedSearchQuery] = useState('');
   const [unassignedSelectedCountry, setUnassignedSelectedCountry] = useState('all');
-  const [unassignedSelectedState, setUnassignedSelectedState] = useState('all');
+  const [unassignedSelectedRegion, setUnassignedSelectedRegion] = useState('all');
   const [unassignedSelectedCity, setUnassignedSelectedCity] = useState('all');
 
   const agencySites = useMemo(
@@ -130,44 +130,44 @@ export default function AgencySitesPage() {
   
   // Location filters data for ASSIGNED sites
   const assignedCountries = useMemo(() => [...new Set(assignedSites.map((site) => site.country))].sort(), [assignedSites]);
-  const assignedStates = useMemo(() => {
+  const assignedRegions = useMemo(() => {
     if (assignedSelectedCountry === 'all') return [];
-    return [...new Set(assignedSites.filter((site) => site.country === assignedSelectedCountry).map((site) => site.state))].sort();
+    return [...new Set(assignedSites.filter((site) => site.country === assignedSelectedCountry).map((site) => site.region))].sort();
   }, [assignedSelectedCountry, assignedSites]);
   const assignedCities = useMemo(() => {
-    if (assignedSelectedState === 'all' || assignedSelectedCountry === 'all') return [];
-    return [...new Set(assignedSites.filter((site) => site.country === assignedSelectedCountry && site.state === assignedSelectedState).map((site) => site.city))].sort();
-  }, [assignedSelectedCountry, assignedSelectedState, assignedSites]);
+    if (assignedSelectedRegion === 'all' || assignedSelectedCountry === 'all') return [];
+    return [...new Set(assignedSites.filter((site) => site.country === assignedSelectedCountry && site.region === assignedSelectedRegion).map((site) => site.city))].sort();
+  }, [assignedSelectedCountry, assignedSelectedRegion, assignedSites]);
 
   // Location filters data for UNASSIGNED sites
   const unassignedCountries = useMemo(() => [...new Set(unassignedSites.map((site) => site.country))].sort(), [unassignedSites]);
-  const unassignedStates = useMemo(() => {
+  const unassignedRegions = useMemo(() => {
     if (unassignedSelectedCountry === 'all') return [];
-    return [...new Set(unassignedSites.filter((site) => site.country === unassignedSelectedCountry).map((site) => site.state))].sort();
+    return [...new Set(unassignedSites.filter((site) => site.country === unassignedSelectedCountry).map((site) => site.region))].sort();
   }, [unassignedSelectedCountry, unassignedSites]);
   const unassignedCities = useMemo(() => {
-    if (unassignedSelectedState === 'all' || unassignedSelectedCountry === 'all') return [];
-    return [...new Set(unassignedSites.filter((site) => site.country === unassignedSelectedCountry && site.state === unassignedSelectedState).map((site) => site.city))].sort();
-  }, [unassignedSelectedCountry, unassignedSelectedState, unassignedSites]);
+    if (unassignedSelectedRegion === 'all' || unassignedSelectedCountry === 'all') return [];
+    return [...new Set(unassignedSites.filter((site) => site.country === unassignedSelectedCountry && site.region === unassignedSelectedRegion).map((site) => site.city))].sort();
+  }, [unassignedSelectedCountry, unassignedSelectedRegion, unassignedSites]);
 
 
   const handleAssignedCountryChange = (country: string) => {
     setAssignedSelectedCountry(country);
-    setAssignedSelectedState('all');
+    setAssignedSelectedRegion('all');
     setAssignedSelectedCity('all');
   };
-  const handleAssignedStateChange = (state: string) => {
-    setAssignedSelectedState(state);
+  const handleAssignedRegionChange = (region: string) => {
+    setAssignedSelectedRegion(region);
     setAssignedSelectedCity('all');
   };
 
   const handleUnassignedCountryChange = (country: string) => {
     setUnassignedSelectedCountry(country);
-    setUnassignedSelectedState('all');
+    setUnassignedSelectedRegion('all');
     setUnassignedSelectedCity('all');
   };
-  const handleUnassignedStateChange = (state: string) => {
-    setUnassignedSelectedState(state);
+  const handleUnassignedRegionChange = (region: string) => {
+    setUnassignedSelectedRegion(region);
     setUnassignedSelectedCity('all');
   };
 
@@ -260,10 +260,10 @@ export default function AgencySitesPage() {
           patrollingOfficer.id === selectedPatrollingOfficerFilter);
 
       const matchesCountry = assignedSelectedCountry === 'all' || site.country === assignedSelectedCountry;
-      const matchesState = assignedSelectedState === 'all' || site.state === assignedSelectedState;
+      const matchesRegion = assignedSelectedRegion === 'all' || site.region === assignedSelectedRegion;
       const matchesCity = assignedSelectedCity === 'all' || site.city === assignedSelectedCity;
 
-      return matchesSearch && matchesPatrollingOfficer && matchesCountry && matchesState && matchesCity;
+      return matchesSearch && matchesPatrollingOfficer && matchesCountry && matchesRegion && matchesCity;
     });
   }, [
     assignedSearchQuery,
@@ -271,7 +271,7 @@ export default function AgencySitesPage() {
     assignedSites,
     getPatrollingOfficerForSite,
     assignedSelectedCountry,
-    assignedSelectedState,
+    assignedSelectedRegion,
     assignedSelectedCity,
   ]);
   
@@ -283,12 +283,12 @@ export default function AgencySitesPage() {
         site.address.toLowerCase().includes(searchLower);
 
       const matchesCountry = unassignedSelectedCountry === 'all' || site.country === unassignedSelectedCountry;
-      const matchesState = unassignedSelectedState === 'all' || site.state === unassignedSelectedState;
+      const matchesRegion = unassignedSelectedRegion === 'all' || site.region === unassignedSelectedRegion;
       const matchesCity = unassignedSelectedCity === 'all' || site.city === unassignedSelectedCity;
 
-      return matchesSearch && matchesCountry && matchesState && matchesCity;
+      return matchesSearch && matchesCountry && matchesRegion && matchesCity;
     });
-  }, [unassignedSearchQuery, unassignedSites, unassignedSelectedCountry, unassignedSelectedState, unassignedSelectedCity]);
+  }, [unassignedSearchQuery, unassignedSites, unassignedSelectedCountry, unassignedSelectedRegion, unassignedSelectedCity]);
 
   const siteIncidentsCount = useMemo(() => {
     const counts: { [siteName: string]: number } = {};
@@ -359,18 +359,18 @@ export default function AgencySitesPage() {
               </SelectContent>
             </Select>
             <Select
-              value={assignedSelectedState}
-              onValueChange={handleAssignedStateChange}
+              value={assignedSelectedRegion}
+              onValueChange={handleAssignedRegionChange}
               disabled={assignedSelectedCountry === 'all'}
             >
               <SelectTrigger className="w-full sm:w-[180px]">
-                <SelectValue placeholder="Filter by state" />
+                <SelectValue placeholder="Filter by region" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All States</SelectItem>
-                {assignedStates.map((state) => (
-                  <SelectItem key={state} value={state}>
-                    {state}
+                <SelectItem value="all">All Regions</SelectItem>
+                {assignedRegions.map((region) => (
+                  <SelectItem key={region} value={region}>
+                    {region}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -378,7 +378,7 @@ export default function AgencySitesPage() {
             <Select
               value={assignedSelectedCity}
               onValueChange={setAssignedSelectedCity}
-              disabled={assignedSelectedState === 'all' || assignedSelectedCountry === 'all'}
+              disabled={assignedSelectedRegion === 'all' || assignedSelectedCountry === 'all'}
             >
               <SelectTrigger className="w-full sm:w-[180px]">
                 <SelectValue placeholder="Filter by city" />
@@ -488,18 +488,18 @@ export default function AgencySitesPage() {
                   </SelectContent>
                 </Select>
                 <Select
-                  value={unassignedSelectedState}
-                  onValueChange={handleUnassignedStateChange}
+                  value={unassignedSelectedRegion}
+                  onValueChange={handleUnassignedRegionChange}
                   disabled={unassignedSelectedCountry === 'all'}
                 >
                   <SelectTrigger className="w-full sm:w-[180px]">
-                    <SelectValue placeholder="Filter by state" />
+                    <SelectValue placeholder="Filter by region" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All States</SelectItem>
-                    {unassignedStates.map((state) => (
-                      <SelectItem key={state} value={state}>
-                        {state}
+                    <SelectItem value="all">All Regions</SelectItem>
+                    {unassignedRegions.map((region) => (
+                      <SelectItem key={region} value={region}>
+                        {region}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -507,7 +507,7 @@ export default function AgencySitesPage() {
                 <Select
                   value={unassignedSelectedCity}
                   onValueChange={setUnassignedSelectedCity}
-                  disabled={unassignedSelectedState === 'all' || unassignedSelectedCountry === 'all'}
+                  disabled={unassignedSelectedRegion === 'all' || unassignedSelectedCountry === 'all'}
                 >
                   <SelectTrigger className="w-full sm:w-[180px]">
                     <SelectValue placeholder="Filter by city" />
