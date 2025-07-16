@@ -71,12 +71,6 @@ async function getDashboardData(): Promise<DashboardData> {
     const towercoIncidents = mockIncidents.filter((incident) =>
       towercoSiteIds.has(incident.siteId)
     );
-    const towercoSiteAgencyIds = new Set(
-      towercoSites.map((site) => site.agencyId).filter(Boolean)
-    );
-    const towercoAgencies = mockAgencies.filter((agency) =>
-      towercoSiteAgencyIds.has(agency.id)
-    );
     
     const towercoGuardIds = new Set(towercoSites.flatMap(s => s.guards));
     const towercoGuards = mockGuards.filter(guard => towercoGuardIds.has(guard.id));
@@ -86,7 +80,7 @@ async function getDashboardData(): Promise<DashboardData> {
 
     return {
       sites: towercoSites,
-      agencies: towercoAgencies,
+      agencies: mockAgencies, // Return all agencies
       incidents: towercoIncidents,
       guards: towercoGuards,
       patrollingOfficers: towercoPatrollingOfficers,
