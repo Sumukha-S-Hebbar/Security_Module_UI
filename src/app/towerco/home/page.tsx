@@ -193,12 +193,13 @@ export default function TowercoHomePage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Site Name</TableHead>
                   <TableHead>Site ID</TableHead>
+                  <TableHead>Site Name</TableHead>
                   <TableHead>Agency</TableHead>
                   <TableHead>Patrolling Officer</TableHead>
                   <TableHead>Guard</TableHead>
-                  <TableHead>Date & Time</TableHead>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Time</TableHead>
                   <TableHead>Contact</TableHead>
                 </TableRow>
               </TableHeader>
@@ -210,19 +211,21 @@ export default function TowercoHomePage() {
                     incident.attendedByPatrollingOfficerId
                   );
                   const agencyDetails = getAgencyById(siteDetails?.agencyId);
+                  const incidentDate = new Date(incident.incidentTime);
 
                   return (
                     <TableRow key={incident.id}>
+                       <TableCell>{incident.siteId}</TableCell>
                       <TableCell className="font-medium">
                         {siteDetails?.name || 'N/A'}
                       </TableCell>
-                       <TableCell>{incident.siteId}</TableCell>
                       <TableCell>{agencyDetails?.name || 'N/A'}</TableCell>
                       <TableCell>
                         {patrollingOfficerDetails?.name || 'N/A'}
                       </TableCell>
                       <TableCell>{guardDetails?.name || 'N/A'}</TableCell>
-                      <TableCell>{new Date(incident.incidentTime).toLocaleString()}</TableCell>
+                      <TableCell>{incidentDate.toLocaleDateString()}</TableCell>
+                      <TableCell>{incidentDate.toLocaleTimeString()}</TableCell>
                       <TableCell>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
