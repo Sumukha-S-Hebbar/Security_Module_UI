@@ -550,10 +550,6 @@ export default function TowercoSitesPage() {
                       <span>{site.address}</span>
                     </div>
                     <div className="flex items-center gap-2 text-muted-foreground">
-                      <Building2 className="h-4 w-4 flex-shrink-0" />
-                      <span>{site.towerco}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-muted-foreground">
                       <Briefcase className="h-4 w-4 flex-shrink-0" />
                       <span>{getAgencyName(site.agencyId)}</span>
                     </div>
