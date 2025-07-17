@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useMemo } from 'react';
@@ -95,7 +96,7 @@ export function IncidentChart({
   }, [incidents, sites, selectedYear, selectedCompany]);
 
   const handleBarClick = (data: any, index: number) => {
-    router.push(`/towerco/reports?month=${index + 1}`);
+    router.push(`/towerco/incidents?month=${index + 1}`);
   };
 
   return (

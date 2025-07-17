@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useMemo } from 'react';
@@ -113,7 +114,8 @@ export default function TowercoIncidentsPage() {
 
       const matchesMonth =
         selectedMonth === 'all' ||
-        incidentDate.getMonth() === parseInt(selectedMonth) - 1;
+        (incidentDate.getMonth() + 1).toString() === selectedMonth;
+
 
       return matchesSearch && matchesAgency && matchesDate && matchesMonth;
     });
@@ -293,7 +295,7 @@ export default function TowercoIncidentsPage() {
                       <TableCell>{getStatusBadge(incident.status)}</TableCell>
                       <TableCell>
                         <Button asChild variant="outline" size="sm">
-                          <Link href={`/towerco/reports/${incident.id}`}>
+                          <Link href={`/towerco/incidents/${incident.id}`}>
                             <Eye className="mr-2 h-4 w-4" />
                             View Report
                           </Link>

@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useParams } from 'next/navigation';
@@ -82,7 +83,7 @@ export default function IncidentReportPage() {
     <div className="p-4 sm:p-6 lg:p-8 space-y-6">
       <div className="flex items-center gap-4">
         <Button asChild variant="outline" size="icon">
-          <Link href="/towerco/reports">
+          <Link href="/towerco/incidents">
             <ArrowLeft className="h-4 w-4" />
             <span className="sr-only">Back to Incidents</span>
           </Link>
@@ -167,7 +168,7 @@ export default function IncidentReportPage() {
                 <Briefcase className="h-5 w-5 text-primary" />
                 Agency Details
               </CardTitle>
-            </CardHeader>
+            </Header>
             <CardContent className="text-sm space-y-2">
               <p><strong>Name:</strong> {agency.name}</p>
               <div className="flex items-center gap-2"><Phone className="h-4 w-4" /> <a href={`tel:${agency.phone}`} className="hover:underline">{agency.phone}</a></div>
