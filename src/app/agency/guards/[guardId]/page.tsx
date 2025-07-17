@@ -238,7 +238,7 @@ export default function AgencyGuardReportPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Incident ID</TableHead>
-                  <TableHead>Date</TableHead>
+                  <TableHead>Date & Time</TableHead>
                   <TableHead>Site</TableHead>
                   <TableHead>Status</TableHead>
                 </TableRow>
@@ -247,8 +247,8 @@ export default function AgencyGuardReportPage() {
                 {guardIncidents.map((incident) => (
                   <TableRow key={incident.id}>
                     <TableCell>{incident.id}</TableCell>
-                    <TableCell>{new Date(incident.date).toLocaleDateString()}</TableCell>
-                    <TableCell>{incident.site}</TableCell>
+                    <TableCell>{new Date(incident.incidentTime).toLocaleString()}</TableCell>
+                    <TableCell>{incident.siteId}</TableCell>
                     <TableCell>{getStatusBadge(incident.status)}</TableCell>
                   </TableRow>
                 ))}
@@ -263,3 +263,5 @@ export default function AgencyGuardReportPage() {
     </div>
   );
 }
+
+    

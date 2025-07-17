@@ -276,7 +276,7 @@ export default function AgencyPatrollingOfficerReportPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Incident ID</TableHead>
-                  <TableHead>Date</TableHead>
+                  <TableHead>Date & Time</TableHead>
                   <TableHead>Site</TableHead>
                   <TableHead>Guard</TableHead>
                   <TableHead>Status</TableHead>
@@ -290,7 +290,7 @@ export default function AgencyPatrollingOfficerReportPage() {
                     return (
                         <TableRow key={incident.id}>
                             <TableCell>{incident.id}</TableCell>
-                            <TableCell>{new Date(incident.incidentTime).toLocaleDateString()}</TableCell>
+                            <TableCell>{new Date(incident.incidentTime).toLocaleString()}</TableCell>
                             <TableCell>{site?.name || 'N/A'}</TableCell>
                             <TableCell>{guard?.name || 'N/A'}</TableCell>
                             <TableCell>{getStatusBadge(incident.status)}</TableCell>
@@ -309,3 +309,5 @@ export default function AgencyPatrollingOfficerReportPage() {
     </div>
   );
 }
+
+    

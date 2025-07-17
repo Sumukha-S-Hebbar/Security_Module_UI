@@ -136,7 +136,7 @@ export default function AgencyHomePage() {
                   <TableHead>Site</TableHead>
                   <TableHead>Guard</TableHead>
                   <TableHead>Patrolling Officer</TableHead>
-                  <TableHead>Date</TableHead>
+                  <TableHead>Date & Time</TableHead>
                   <TableHead>Contact</TableHead>
                 </TableRow>
               </TableHeader>
@@ -155,7 +155,7 @@ export default function AgencyHomePage() {
                       <TableCell>
                         {patrollingOfficerDetails?.name || 'N/A'}
                       </TableCell>
-                      <TableCell>{new Date(incident.incidentTime).toLocaleDateString()}</TableCell>
+                      <TableCell>{new Date(incident.incidentTime).toLocaleString()}</TableCell>
                       <TableCell>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
@@ -213,3 +213,5 @@ export default function AgencyHomePage() {
     </div>
   );
 }
+
+    

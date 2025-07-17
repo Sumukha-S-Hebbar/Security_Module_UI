@@ -169,7 +169,7 @@ export default function AgencyIncidentsPage() {
                     <TableHeader>
                         <TableRow>
                             <TableHead>Incident ID</TableHead>
-                            <TableHead>Date</TableHead>
+                            <TableHead>Date & Time</TableHead>
                             <TableHead>Site</TableHead>
                             <TableHead>Guard</TableHead>
                             <TableHead>Patrolling Officer</TableHead>
@@ -189,7 +189,7 @@ export default function AgencyIncidentsPage() {
                                      <TableCell className="font-medium">
                                         {incident.id}
                                      </TableCell>
-                                     <TableCell>{new Date(incident.incidentTime).toLocaleDateString()}</TableCell>
+                                     <TableCell>{new Date(incident.incidentTime).toLocaleString()}</TableCell>
                                      <TableCell>{site?.name}</TableCell>
                                      <TableCell>{guard?.name}</TableCell>
                                      <TableCell>
@@ -331,7 +331,7 @@ export default function AgencyIncidentsPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>Incident ID</TableHead>
-                <TableHead>Date</TableHead>
+                <TableHead>Date & Time</TableHead>
                 <TableHead>Site</TableHead>
                 <TableHead>Guard</TableHead>
                 <TableHead>Patrolling Officer</TableHead>
@@ -353,7 +353,7 @@ export default function AgencyIncidentsPage() {
                       <TableCell className="font-medium">
                         {incident.id}
                       </TableCell>
-                      <TableCell>{new Date(incident.incidentTime).toLocaleDateString()}</TableCell>
+                      <TableCell>{new Date(incident.incidentTime).toLocaleString()}</TableCell>
                       <TableCell>{site?.name}</TableCell>
                       <TableCell>{guard?.name}</TableCell>
                       <TableCell>
@@ -427,3 +427,5 @@ export default function AgencyIncidentsPage() {
     </div>
   );
 }
+
+    

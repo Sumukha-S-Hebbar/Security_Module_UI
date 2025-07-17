@@ -263,7 +263,7 @@ export default function TowercoIncidentsPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>Incident ID</TableHead>
-                <TableHead>Date</TableHead>
+                <TableHead>Date & Time</TableHead>
                 <TableHead>Site</TableHead>
                 <TableHead>Agency</TableHead>
                 <TableHead>Patrolling Officer</TableHead>
@@ -289,7 +289,7 @@ export default function TowercoIncidentsPage() {
                       <TableCell className="font-medium">
                         {incident.id}
                       </TableCell>
-                      <TableCell>{new Date(incident.incidentTime).toLocaleDateString()}</TableCell>
+                      <TableCell>{new Date(incident.incidentTime).toLocaleString()}</TableCell>
                       <TableCell>{site?.name || 'N/A'}</TableCell>
                       <TableCell>{agency?.name || 'N/A'}</TableCell>
                       <TableCell>
@@ -364,3 +364,5 @@ export default function TowercoIncidentsPage() {
     </div>
   );
 }
+
+    

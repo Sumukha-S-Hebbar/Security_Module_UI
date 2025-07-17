@@ -148,7 +148,7 @@ export default function SiteReportPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Incident ID</TableHead>
-                  <TableHead>Date</TableHead>
+                  <TableHead>Date & Time</TableHead>
                   <TableHead>Guard</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Details</TableHead>
@@ -160,7 +160,7 @@ export default function SiteReportPage() {
                   return (
                     <TableRow key={incident.id}>
                       <TableCell>{incident.id}</TableCell>
-                      <TableCell>{new Date(incident.incidentTime).toLocaleDateString()}</TableCell>
+                      <TableCell>{new Date(incident.incidentTime).toLocaleString()}</TableCell>
                       <TableCell>{guard?.name || 'N/A'}</TableCell>
                       <TableCell>{getStatusBadge(incident.status)}</TableCell>
                       <TableCell className="max-w-xs truncate">{incident.description}</TableCell>
@@ -177,3 +177,5 @@ export default function SiteReportPage() {
     </div>
   );
 }
+
+    
