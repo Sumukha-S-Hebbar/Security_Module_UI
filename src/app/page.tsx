@@ -38,7 +38,7 @@ export default function RootPage() {
     setIsLoading(true);
 
     try {
-      const response = await fetch('https://ken.towerbuddy.tel:8000/api/v1/users/auth/token/', {
+      const response = await fetch('https://ken.securebuddy.tel:8000/api/v1/users/auth/token/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username: email, password }),
@@ -104,7 +104,7 @@ export default function RootPage() {
                   <path d="M7 12.5c0-.64.13-1.25.36-1.82-.55-.25-1.18-.38-1.86-.38-1.66 0-3 1.34-3 3s1.34 3 3 3c.68 0 1.31-.13 1.86-.38C7.13 13.75 7 13.14 7 12.5zm10 0c0-.64-.13-1.25-.36-1.82.55-.25 1.18-.38 1.86-.38 1.66 0 3 1.34 3 3s-1.34 3-3 3c-.68 0-1.31-.13-1.86-.38.23-.57.36-1.18.36-1.82z" />
                 </svg>
             </div>
-            <h1 className="text-3xl font-bold">Tower Buddy</h1>
+            <h1 className="text-3xl font-bold">Secure Buddy</h1>
           </div>
           <h2 className="text-2xl font-bold mb-6">WHY SIGN UP?</h2>
           <ul className="space-y-4 text-lg">
