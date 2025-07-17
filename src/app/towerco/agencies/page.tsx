@@ -61,7 +61,6 @@ const addAgencyFormSchema = z.object({
     address: z.string().min(1, { message: 'Address is required.' }),
     city: z.string().min(1, { message: 'City is required.' }),
     region: z.string().min(1, { message: 'Region is required.' }),
-    country: z.string().min(1, { message: 'Country is required.' }),
 });
 
 async function getAgencies(): Promise<SecurityAgency[]> {
@@ -148,7 +147,6 @@ export default function TowercoAgenciesPage() {
             address: '',
             city: '',
             region: '',
-            country: '',
         }
     });
 
@@ -177,6 +175,7 @@ export default function TowercoAgenciesPage() {
 
         const newAgency: SecurityAgency = {
             ...values,
+            country: 'USA', // Defaulting country as it's not in the form
             avatar: `https://placehold.co/100x100.png?text=${values.name.charAt(0)}`,
             siteIds: [],
         };
@@ -276,7 +275,7 @@ export default function TowercoAgenciesPage() {
                                                         />
                                                         </FormControl>
                                                         <FormDescription>
-                                                        The CSV should contain columns: name, phone, email, address, city, region, country.
+                                                        The CSV should contain columns: name, phone, email, address, city, region.
                                                         </FormDescription>
                                                         <FormMessage />
                                                     </FormItem>
@@ -405,19 +404,6 @@ export default function TowercoAgenciesPage() {
                                                         <FormLabel>Region</FormLabel>
                                                         <FormControl>
                                                             <Input placeholder="e.g., CA" {...field} />
-                                                        </FormControl>
-                                                        <FormMessage />
-                                                    </FormItem>
-                                                )}
-                                            />
-                                             <FormField
-                                                control={addAgencyForm.control}
-                                                name="country"
-                                                render={({ field }) => (
-                                                    <FormItem>
-                                                        <FormLabel>Country</FormLabel>
-                                                        <FormControl>
-                                                            <Input placeholder="e.g., USA" {...field} />
                                                         </FormControl>
                                                         <FormMessage />
                                                     </FormItem>
