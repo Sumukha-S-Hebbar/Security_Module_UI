@@ -36,7 +36,7 @@ import { SiteStatusBreakdown } from './_components/site-status-breakdown';
 import { IncidentChart } from './_components/incident-chart';
 import { AgencyPerformance } from './_components/agency-performance';
 import { Skeleton } from '@/components/ui/skeleton';
-import { securityAgencies as mockAgencies, incidents as mockIncidents, guards as mockGuards, patrollingOfficers as mockSupervisors, sites as mockSites } from '@/lib/data';
+import { securityAgencies as mockAgencies, incidents as mockIncidents, guards as mockGuards, patrollingOfficers as mockPatrollingOfficers, sites as mockSites } from '@/lib/data';
 
 
 const LOGGED_IN_TOWERCO = 'TowerCo Alpha'; // Simulate logged-in user
@@ -46,7 +46,7 @@ interface DashboardData {
   agencies: SecurityAgency[];
   incidents: Incident[];
   guards: Guard[];
-  supervisors: PatrollingOfficer[];
+  patrollingOfficers: PatrollingOfficer[];
 }
 
 async function getDashboardData(): Promise<DashboardData> {
@@ -75,20 +75,20 @@ async function getDashboardData(): Promise<DashboardData> {
     const towercoGuardIds = new Set(towercoSites.flatMap(s => s.guards));
     const towercoGuards = mockGuards.filter(guard => towercoGuardIds.has(guard.id));
 
-    const towercoSupervisorIds = new Set(towercoSites.map(s => s.patrollingOfficerId).filter(Boolean));
-    const towercoSupervisors = mockSupervisors.filter(po => towercoSupervisorIds.has(po.id));
+    const towercoPatrollingOfficerIds = new Set(towercoSites.map(s => s.patrollingOfficerId).filter(Boolean));
+    const towercoPatrollingOfficers = mockPatrollingOfficers.filter(po => towercoPatrollingOfficerIds.has(po.id));
 
     return {
       sites: towercoSites,
       agencies: mockAgencies, // Return all agencies
       incidents: towercoIncidents,
       guards: towercoGuards,
-      supervisors: towercoSupervisors,
+      patrollingOfficers: towercoPatrollingOfficers,
     };
 
   } catch (error) {
     console.error('Could not fetch dashboard data:', error);
-    return { sites: [], agencies: [], incidents: [], guards: [], supervisors: [] };
+    return { sites: [], agencies: [], incidents: [], guards: [], patrollingOfficers: [] };
   }
 }
 
@@ -117,9 +117,9 @@ export default function TowercoHomePage() {
     return data?.guards.find((g) => g.id === id);
   };
 
-  const getSupervisorById = (id?: string): PatrollingOfficer | undefined => {
+  const getPatrollingOfficerById = (id?: string): PatrollingOfficer | undefined => {
       if (!id || !data) return undefined;
-      return data.supervisors.find((p) => p.id === id);
+      return data.patrollingOfficers.find((p) => p.id === id);
   };
 
   const getAgencyById = (id?: string): SecurityAgency | undefined => {
@@ -190,7 +190,7 @@ export default function TowercoHomePage() {
                   <TableHead>Site ID</TableHead>
                   <TableHead>Site Name</TableHead>
                   <TableHead>Agency</TableHead>
-                  <TableHead>Supervisor</TableHead>
+                  <TableHead>Patrolling Officer</TableHead>
                   <TableHead>Guard</TableHead>
                   <TableHead>Date</TableHead>
                   <TableHead>Time</TableHead>
@@ -201,7 +201,7 @@ export default function TowercoHomePage() {
                 {activeEmergencies.map((incident) => {
                   const siteDetails = getSiteById(incident.siteId);
                   const guardDetails = getGuardById(incident.raisedByGuardId);
-                  const supervisorDetails = getSupervisorById(
+                  const patrollingOfficerDetails = getPatrollingOfficerById(
                     incident.attendedByPatrollingOfficerId
                   );
                   const agencyDetails = getAgencyById(siteDetails?.agencyId);
@@ -215,7 +215,7 @@ export default function TowercoHomePage() {
                       </TableCell>
                       <TableCell>{agencyDetails?.name || 'N/A'}</TableCell>
                       <TableCell>
-                        {supervisorDetails?.name || 'N/A'}
+                        {patrollingOfficerDetails?.name || 'N/A'}
                       </TableCell>
                       <TableCell>{guardDetails?.name || 'N/A'}</TableCell>
                       <TableCell>{incidentDate.toLocaleDateString()}</TableCell>
@@ -236,11 +236,11 @@ export default function TowercoHomePage() {
                                 </div>
                               </DropdownMenuItem>
                             )}
-                            {supervisorDetails && (
+                            {patrollingOfficerDetails && (
                               <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
                                 <div className="flex items-center gap-2">
                                   <Phone className="mr-2 h-4 w-4" />
-                                  <span>Supervisor: {supervisorDetails.phone}</span>
+                                  <span>P. Officer: {patrollingOfficerDetails.phone}</span>
                                 </div>
                               </DropdownMenuItem>
                             )}

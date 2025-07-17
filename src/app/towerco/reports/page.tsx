@@ -150,7 +150,7 @@ export default function TowercoIncidentsPage() {
     return guards.find((g) => g.id === id);
   };
 
-  const getSupervisorById = (id?: string): PatrollingOfficer | undefined => {
+  const getPatrollingOfficerById = (id?: string): PatrollingOfficer | undefined => {
     if (!id) return undefined;
     return patrollingOfficers.find((s) => s.id === id);
   };
@@ -262,7 +262,7 @@ export default function TowercoIncidentsPage() {
                 <TableHead>Date</TableHead>
                 <TableHead>Site</TableHead>
                 <TableHead>Agency</TableHead>
-                <TableHead>Supervisor</TableHead>
+                <TableHead>Patrolling Officer</TableHead>
                 <TableHead>Guard</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Report</TableHead>
@@ -276,7 +276,7 @@ export default function TowercoIncidentsPage() {
                   const site = getSiteById(incident.siteId);
                   const agency = getAgencyById(site?.agencyId);
                   const guard = getGuardById(incident.raisedByGuardId);
-                  const supervisor = getSupervisorById(
+                  const patrollingOfficer = getPatrollingOfficerById(
                     incident.attendedByPatrollingOfficerId
                   );
                   const isResolved = incident.status === 'Resolved';
@@ -289,7 +289,7 @@ export default function TowercoIncidentsPage() {
                       <TableCell>{site?.name || 'N/A'}</TableCell>
                       <TableCell>{agency?.name || 'N/A'}</TableCell>
                       <TableCell>
-                        {supervisor?.name || 'N/A'}
+                        {patrollingOfficer?.name || 'N/A'}
                       </TableCell>
                       <TableCell>{guard?.name || 'N/A'}</TableCell>
                       <TableCell>{getStatusBadge(incident.status)}</TableCell>
