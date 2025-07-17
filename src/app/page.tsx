@@ -38,7 +38,7 @@ export default function RootPage() {
     setIsLoading(true);
 
     try {
-      const response = await fetch('https://ken.securebuddy.tel:8000/api/v1/users/auth/token/', {
+      const response = await fetch('https://ken.securebuddy.tel:8000/api/v1/auth/token/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username: email, password }),
@@ -146,7 +146,7 @@ export default function RootPage() {
                       <Input 
                         id="email-in" 
                         type="email" 
-                        placeholder="Enter your email address" 
+                        placeholder="your-email@example.com" 
                         required 
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
@@ -181,7 +181,7 @@ export default function RootPage() {
                 <CardHeader>
                     <CardTitle className="text-2xl">Sign Up</CardTitle>
                     <CardDescription>
-                    Create an account to get started with GuardLink.
+                    Create an account to get started with Secure Buddy.
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
