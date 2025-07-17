@@ -50,7 +50,7 @@ const uploadFormSchema = z.object({
 });
 
 const addPatrollingOfficerFormSchema = z.object({
-    name: z.string().min(1, { message: 'Patrolling Officer name is required.' }),
+    name: z.string().min(1, { message: 'Supervisor name is required.' }),
     phone: z.string().min(1, { message: 'Phone is required.' }),
     email: z.string().email({ message: 'Valid email is required.' }),
 });
@@ -133,7 +133,7 @@ export default function AgencySupervisorsPage() {
             <div>
                 <h1 className="text-3xl font-bold tracking-tight">Supervisor Management</h1>
                 <p className="text-muted-foreground">
-                    Add, view, and manage supervisors and their assigned patrolling officers.
+                    Add, view, and manage supervisors.
                 </p>
             </div>
 
