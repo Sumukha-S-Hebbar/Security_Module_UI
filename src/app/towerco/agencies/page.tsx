@@ -40,6 +40,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { securityAgencies as mockAgencies } from '@/lib/data/security-agencies';
 
 
 const LOGGED_IN_TOWERCO = 'TowerCo Alpha'; // Simulate logged-in user
@@ -78,41 +79,7 @@ async function getAgencies(): Promise<SecurityAgency[]> {
         await new Promise(resolve => setTimeout(resolve, 1000));
 
         // Returning mock data that matches the SecurityAgency type
-        return [
-          {
-            id: 'AGY01',
-            name: 'GuardLink Security',
-            phone: '555-001-0001',
-            email: 'contact@guardlink.com',
-            address: '123 Security Blvd, Safe City, CA, USA',
-            city: 'Safe City',
-            region: 'CA',
-            country: 'USA',
-            avatar: 'https://placehold.co/100x100.png',
-          },
-          {
-            id: 'AGY02',
-            name: 'Vigilant Watch',
-            phone: '555-002-0002',
-            email: 'info@vigilantwatch.com',
-            address: '456 Protector Ave, Secure Town, WA, USA',
-            city: 'Secure Town',
-            region: 'WA',
-            country: 'USA',
-            avatar: 'https://placehold.co/100x100.png',
-          },
-          {
-            id: 'AGY03',
-            name: 'Aegis Protection',
-            phone: '555-003-0003',
-            email: 'support@aegispro.com',
-            address: '789 Guardian Way, Metroplex, NY, USA',
-            city: 'Metroplex',
-            region: 'NY',
-            country: 'USA',
-            avatar: 'https://placehold.co/100x100.png',
-          },
-        ];
+        return mockAgencies;
 
     } catch (error) {
         console.error("Could not fetch agencies, returning empty array.", error);
