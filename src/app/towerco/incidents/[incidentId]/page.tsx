@@ -168,7 +168,7 @@ export default function IncidentReportPage() {
                 <Briefcase className="h-5 w-5 text-primary" />
                 Agency Details
               </CardTitle>
-            </Header>
+            </CardHeader>
             <CardContent className="text-sm space-y-2">
               <p><strong>Name:</strong> {agency.name}</p>
               <div className="flex items-center gap-2"><Phone className="h-4 w-4" /> <a href={`tel:${agency.phone}`} className="hover:underline">{agency.phone}</a></div>
