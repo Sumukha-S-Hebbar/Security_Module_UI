@@ -63,7 +63,7 @@ export default function AgencyGuardsPage() {
   const [isUploading, setIsUploading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSiteFilter, setSelectedSiteFilter] = useState('all');
-  const [selectedSupervisorFilter, setSelectedSupervisorFilter] = useState('all');
+  const [selectedPatrollingOfficerFilter, setSelectedPatrollingOfficerFilter] = useState('all');
   const [selectedGuard, setSelectedGuard] = useState<Guard | null>(null);
 
   const agencySites = useMemo(() => sites.filter(site => site.agencyId === LOGGED_IN_AGENCY_ID), []);
@@ -71,19 +71,19 @@ export default function AgencyGuardsPage() {
 
   const agencyGuards = useMemo(() => guards.filter(guard => agencySiteNames.has(guard.site)), [agencySiteNames]);
 
-  const agencySupervisors = useMemo(() => {
+  const agencyPatrollingOfficers = useMemo(() => {
     const poIds = new Set(agencySites.map(s => s.patrollingOfficerId).filter(Boolean));
     return patrollingOfficers.filter(po => poIds.has(po.id));
   }, [agencySites]);
 
-  const getSupervisorForGuard = (guard: Guard): PatrollingOfficer | undefined => {
+  const getPatrollingOfficerForGuard = (guard: Guard): PatrollingOfficer | undefined => {
     const site = agencySites.find(s => s.name === guard.site);
     if (!site || !site.patrollingOfficerId) return undefined;
-    return agencySupervisors.find(po => po.id === site.patrollingOfficerId);
+    return agencyPatrollingOfficers.find(po => po.id === site.patrollingOfficerId);
   };
   
-  const assignedGuards = useMemo(() => agencyGuards.filter((guard) => getSupervisorForGuard(guard)), [agencyGuards, getSupervisorForGuard]);
-  const unassignedGuards = useMemo(() => agencyGuards.filter((guard) => !getSupervisorForGuard(guard)), [agencyGuards, getSupervisorForGuard]);
+  const assignedGuards = useMemo(() => agencyGuards.filter((guard) => getPatrollingOfficerForGuard(guard)), [agencyGuards, getPatrollingOfficerForGuard]);
+  const unassignedGuards = useMemo(() => agencyGuards.filter((guard) => !getPatrollingOfficerForGuard(guard)), [agencyGuards, getPatrollingOfficerForGuard]);
   
   const siteForSelectedGuard = useMemo(() => {
     if (!selectedGuard) return null;
@@ -112,18 +112,18 @@ export default function AgencyGuardsPage() {
   const filteredAssignedGuards = useMemo(() => {
     return assignedGuards.filter((guard) => {
       const searchLower = searchQuery.toLowerCase();
-      const supervisor = getSupervisorForGuard(guard);
+      const patrollingOfficer = getPatrollingOfficerForGuard(guard);
       const matchesSearch =
         guard.name.toLowerCase().includes(searchLower) ||
         guard.id.toLowerCase().includes(searchLower) ||
         guard.site.toLowerCase().includes(searchLower);
 
       const matchesSite = selectedSiteFilter === 'all' || guard.site === selectedSiteFilter;
-      const matchesSupervisor = selectedSupervisorFilter === 'all' || supervisor?.id === selectedSupervisorFilter;
+      const matchesPatrollingOfficer = selectedPatrollingOfficerFilter === 'all' || patrollingOfficer?.id === selectedPatrollingOfficerFilter;
 
-      return matchesSearch && matchesSite && matchesSupervisor;
+      return matchesSearch && matchesSite && matchesPatrollingOfficer;
     });
-  }, [searchQuery, selectedSiteFilter, selectedSupervisorFilter, assignedGuards, getSupervisorForGuard]);
+  }, [searchQuery, selectedSiteFilter, selectedPatrollingOfficerFilter, assignedGuards, getPatrollingOfficerForGuard]);
   
   const filteredUnassignedGuards = useMemo(() => {
     return unassignedGuards.filter((guard) => {
@@ -140,10 +140,10 @@ export default function AgencyGuardsPage() {
   }, [searchQuery, selectedSiteFilter, unassignedGuards]);
 
   const uniqueSites = useMemo(() => [...new Set(agencyGuards.map(g => g.site))], [agencyGuards]);
-  const uniqueSupervisors = useMemo(() => {
-    const poIds = new Set(assignedGuards.map(g => getSupervisorForGuard(g)?.id).filter(Boolean));
-    return agencySupervisors.filter(po => poIds.has(po.id));
-  }, [assignedGuards, agencySupervisors, getSupervisorForGuard]);
+  const uniquePatrollingOfficers = useMemo(() => {
+    const poIds = new Set(assignedGuards.map(g => getPatrollingOfficerForGuard(g)?.id).filter(Boolean));
+    return agencyPatrollingOfficers.filter(po => poIds.has(po.id));
+  }, [assignedGuards, agencyPatrollingOfficers, getPatrollingOfficerForGuard]);
 
 
   return (
@@ -247,13 +247,13 @@ export default function AgencyGuardsPage() {
                       ))}
                   </SelectContent>
               </Select>
-              <Select value={selectedSupervisorFilter} onValueChange={setSelectedSupervisorFilter}>
+              <Select value={selectedPatrollingOfficerFilter} onValueChange={setSelectedPatrollingOfficerFilter}>
                   <SelectTrigger className="w-full sm:w-[180px]">
-                      <SelectValue placeholder="Filter by Supervisor" />
+                      <SelectValue placeholder="Filter by Patrolling Officer" />
                   </SelectTrigger>
                   <SelectContent>
-                      <SelectItem value="all">All Supervisors</SelectItem>
-                      {uniqueSupervisors.map((po) => (
+                      <SelectItem value="all">All Patrolling Officers</SelectItem>
+                      {uniquePatrollingOfficers.map((po) => (
                           <SelectItem key={po.id} value={po.id}>
                               {po.name}
                           </SelectItem>
@@ -266,11 +266,11 @@ export default function AgencyGuardsPage() {
             <div className="space-y-6">
               <div>
                 <h3 className="text-lg font-medium tracking-tight">Assigned Guards</h3>
-                <p className="text-sm text-muted-foreground">Guards on sites with an assigned supervisor.</p>
+                <p className="text-sm text-muted-foreground">Guards on sites with an assigned patrolling officer.</p>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-6">
                   {filteredAssignedGuards.length > 0 ? (
                     filteredAssignedGuards.map((guard) => {
-                      const supervisor = getSupervisorForGuard(guard);
+                      const patrollingOfficer = getPatrollingOfficerForGuard(guard);
                       const selfieAccuracy = guard.totalSelfieRequests > 0 ? Math.round(((guard.totalSelfieRequests - guard.missedSelfieCount) / guard.totalSelfieRequests) * 100) : 100;
                       const perimeterAccuracy = guard.performance?.perimeterAccuracy || 0;
                       const compliance = Math.round((perimeterAccuracy + selfieAccuracy) / 2);
@@ -326,7 +326,7 @@ export default function AgencyGuardsPage() {
                             </div>
                             <div className="flex items-center gap-2 text-muted-foreground">
                               <UserCheck className="h-4 w-4 flex-shrink-0" />
-                              <span>{supervisor?.name || 'N/A'}</span>
+                              <span>{patrollingOfficer?.name || 'N/A'}</span>
                             </div>
                             <div className="flex items-center gap-2 text-muted-foreground">
                               <span>Perimeter Accuracy: {perimeterAccuracy}%</span>
@@ -362,12 +362,12 @@ export default function AgencyGuardsPage() {
                 <div className="pt-6 border-t">
                   <h3 className="text-lg font-medium tracking-tight">Unassigned Guards</h3>
                   <p className="text-sm text-muted-foreground">
-                    Guards on sites without an assigned supervisor.
+                    Guards on sites without an assigned patrolling officer.
                   </p>
                   <div className="mt-4 p-4 bg-secondary text-secondary-foreground rounded-md flex items-center gap-3 text-sm">
                     <Info className="h-5 w-5"/>
                     <div>
-                      To assign a supervisor, go to the <Button variant="link" asChild className="p-0 h-auto"><Link href="/agency/sites">Sites page</Link></Button> and assign one to the respective site.
+                      To assign a patrolling officer, go to the <Button variant="link" asChild className="p-0 h-auto"><Link href="/agency/sites">Sites page</Link></Button> and assign one to the respective site.
                     </div>
                   </div>
                   <Table className="mt-4">

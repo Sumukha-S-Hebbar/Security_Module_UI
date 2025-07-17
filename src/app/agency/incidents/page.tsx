@@ -78,7 +78,7 @@ export default function AgencyIncidentsPage() {
     return guards.find(g => g.id === id);
   }
   
-  const getSupervisorById = (id?: string): PatrollingOfficer | undefined => {
+  const getPatrollingOfficerById = (id?: string): PatrollingOfficer | undefined => {
     if (!id) return undefined;
     return patrollingOfficers.find(p => p.id === id);
   }
@@ -166,7 +166,7 @@ export default function AgencyIncidentsPage() {
                             <TableHead>Date</TableHead>
                             <TableHead>Site</TableHead>
                             <TableHead>Guard</TableHead>
-                            <TableHead>Supervisor</TableHead>
+                            <TableHead>Patrolling Officer</TableHead>
                             <TableHead>Report</TableHead>
                             <TableHead>Actions</TableHead>
                             <TableHead className="text-right">Download</TableHead>
@@ -176,7 +176,7 @@ export default function AgencyIncidentsPage() {
                         {activeIncidents.map((incident) => {
                             const site = getSiteById(incident.siteId);
                             const guard = getGuardById(incident.raisedByGuardId);
-                            const supervisor = getSupervisorById(incident.attendedByPatrollingOfficerId);
+                            const patrollingOfficer = getPatrollingOfficerById(incident.attendedByPatrollingOfficerId);
                             const isResolved = incident.status === 'Resolved';
                              return (
                                  <TableRow key={incident.id}>
@@ -187,7 +187,7 @@ export default function AgencyIncidentsPage() {
                                      <TableCell>{site?.name}</TableCell>
                                      <TableCell>{guard?.name}</TableCell>
                                      <TableCell>
-                                        {supervisor?.name || 'N/A'}
+                                        {patrollingOfficer?.name || 'N/A'}
                                      </TableCell>
                                      <TableCell>
                                         <Button asChild variant="outline" size="sm">
@@ -328,7 +328,7 @@ export default function AgencyIncidentsPage() {
                 <TableHead>Date</TableHead>
                 <TableHead>Site</TableHead>
                 <TableHead>Guard</TableHead>
-                <TableHead>Supervisor</TableHead>
+                <TableHead>Patrolling Officer</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Report</TableHead>
                 <TableHead>Actions</TableHead>
@@ -340,7 +340,7 @@ export default function AgencyIncidentsPage() {
                 filteredIncidents.map((incident) => {
                   const site = getSiteById(incident.siteId);
                   const guard = getGuardById(incident.raisedByGuardId);
-                  const supervisor = getSupervisorById(incident.attendedByPatrollingOfficerId);
+                  const patrollingOfficer = getPatrollingOfficerById(incident.attendedByPatrollingOfficerId);
                   const isResolved = incident.status === 'Resolved';
                   return (
                     <TableRow key={incident.id}>
@@ -351,7 +351,7 @@ export default function AgencyIncidentsPage() {
                       <TableCell>{site?.name}</TableCell>
                       <TableCell>{guard?.name}</TableCell>
                       <TableCell>
-                        {supervisor?.name || 'N/A'}
+                        {patrollingOfficer?.name || 'N/A'}
                       </TableCell>
                       <TableCell>{getStatusBadge(incident.status)}</TableCell>
                       <TableCell>
