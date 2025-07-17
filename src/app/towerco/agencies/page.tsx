@@ -153,7 +153,16 @@ export default function TowercoAgenciesPage() {
         setIsAddingAgency(true);
         console.log('New agency data:', values);
 
+        // Simulate API call
         await new Promise((resolve) => setTimeout(resolve, 1500));
+
+        const newAgency: SecurityAgency = {
+            ...values,
+            avatar: `https://placehold.co/100x100.png?text=${values.name.charAt(0)}`,
+            siteIds: [],
+        };
+
+        setSecurityAgencies((prevAgencies) => [newAgency, ...prevAgencies]);
 
         toast({
             title: 'Agency Added',
@@ -582,3 +591,4 @@ export default function TowercoAgenciesPage() {
 }
 
     
+
