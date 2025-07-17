@@ -82,6 +82,8 @@ const uploadFormSchema = z.object({
 const addSiteFormSchema = z.object({
   name: z.string().min(1, 'Site name is required.'),
   address: z.string().min(1, 'Address is required.'),
+  region: z.string().min(1, 'Region is required.'),
+  city: z.string().min(1, 'City is required.'),
 });
 
 export default function TowercoSitesPage() {
@@ -94,13 +96,11 @@ export default function TowercoSitesPage() {
   // State for Assigned Sites filters
   const [assignedSearchQuery, setAssignedSearchQuery] = useState('');
   const [selectedAgency, setSelectedAgency] = useState('all');
-  const [assignedSelectedCountry, setAssignedSelectedCountry] = useState('all');
   const [assignedSelectedRegion, setAssignedSelectedRegion] = useState('all');
   const [assignedSelectedCity, setAssignedSelectedCity] = useState('all');
 
   // State for Unassigned Sites filters
   const [unassignedSearchQuery, setUnassignedSearchQuery] = useState('');
-  const [unassignedSelectedCountry, setUnassignedSelectedCountry] = useState('all');
   const [unassignedSelectedRegion, setUnassignedSelectedRegion] = useState('all');
   const [unassignedSelectedCity, setUnassignedSelectedCity] = useState('all');
   
@@ -129,7 +129,7 @@ export default function TowercoSitesPage() {
 
   const addSiteForm = useForm<z.infer<typeof addSiteFormSchema>>({
     resolver: zodResolver(addSiteFormSchema),
-    defaultValues: { name: '', address: '' },
+    defaultValues: { name: '', address: '', region: '', city: '' },
   });
 
   async function onUploadSubmit(values: z.infer<typeof uploadFormSchema>) {
@@ -207,43 +207,25 @@ export default function TowercoSitesPage() {
   }, [assignedSites]);
 
   // Location filters data for ASSIGNED sites
-  const assignedCountries = useMemo(() => [...new Set(assignedSites.map((site) => site.country))].sort(), [assignedSites]);
-  const assignedRegions = useMemo(() => {
-    if (assignedSelectedCountry === 'all') return [];
-    return [...new Set(assignedSites.filter((site) => site.country === assignedSelectedCountry).map((site) => site.region))].sort();
-  }, [assignedSelectedCountry, assignedSites]);
+  const assignedRegions = useMemo(() => [...new Set(assignedSites.map((site) => site.region))].sort(), [assignedSites]);
   const assignedCities = useMemo(() => {
-    if (assignedSelectedRegion === 'all' || assignedSelectedCountry === 'all') return [];
-    return [...new Set(assignedSites.filter((site) => site.country === assignedSelectedCountry && site.region === assignedSelectedRegion).map((site) => site.city))].sort();
-  }, [assignedSelectedCountry, assignedSelectedRegion, assignedSites]);
+    if (assignedSelectedRegion === 'all') return [];
+    return [...new Set(assignedSites.filter((site) => site.region === assignedSelectedRegion).map((site) => site.city))].sort();
+  }, [assignedSelectedRegion, assignedSites]);
 
   // Location filters data for UNASSIGNED sites
-  const unassignedCountries = useMemo(() => [...new Set(unassignedSites.map((site) => site.country))].sort(), [unassignedSites]);
-  const unassignedRegions = useMemo(() => {
-    if (unassignedSelectedCountry === 'all') return [];
-    return [...new Set(unassignedSites.filter((site) => site.country === unassignedSelectedCountry).map((site) => site.region))].sort();
-  }, [unassignedSelectedCountry, unassignedSites]);
+  const unassignedRegions = useMemo(() => [...new Set(unassignedSites.map((site) => site.region))].sort(), [unassignedSites]);
   const unassignedCities = useMemo(() => {
-    if (unassignedSelectedRegion === 'all' || unassignedSelectedCountry === 'all') return [];
-    return [...new Set(unassignedSites.filter((site) => site.country === unassignedSelectedCountry && site.region === unassignedSelectedRegion).map((site) => site.city))].sort();
-  }, [unassignedSelectedCountry, unassignedSelectedRegion, unassignedSites]);
+    if (unassignedSelectedRegion === 'all') return [];
+    return [...new Set(unassignedSites.filter((site) => site.region === unassignedSelectedRegion).map((site) => site.city))].sort();
+  }, [unassignedSelectedRegion, unassignedSites]);
 
 
-  const handleAssignedCountryChange = (country: string) => {
-    setAssignedSelectedCountry(country);
-    setAssignedSelectedRegion('all');
-    setAssignedSelectedCity('all');
-  };
   const handleAssignedRegionChange = (region: string) => {
     setAssignedSelectedRegion(region);
     setAssignedSelectedCity('all');
   };
 
-  const handleUnassignedCountryChange = (country: string) => {
-    setUnassignedSelectedCountry(country);
-    setUnassignedSelectedRegion('all');
-    setUnassignedSelectedCity('all');
-  };
   const handleUnassignedRegionChange = (region: string) => {
     setUnassignedSelectedRegion(region);
     setUnassignedSelectedCity('all');
@@ -259,17 +241,15 @@ export default function TowercoSitesPage() {
       const matchesAgency =
         selectedAgency === 'all' || site.agencyId === selectedAgency;
 
-      const matchesCountry = assignedSelectedCountry === 'all' || site.country === assignedSelectedCountry;
       const matchesRegion = assignedSelectedRegion === 'all' || site.region === assignedSelectedRegion;
       const matchesCity = assignedSelectedCity === 'all' || site.city === assignedSelectedCity;
 
-      return matchesSearch && matchesAgency && matchesCountry && matchesRegion && matchesCity;
+      return matchesSearch && matchesAgency && matchesRegion && matchesCity;
     });
   }, [
     assignedSearchQuery,
     selectedAgency,
     assignedSites,
-    assignedSelectedCountry,
     assignedSelectedRegion,
     assignedSelectedCity,
   ]);
@@ -281,13 +261,12 @@ export default function TowercoSitesPage() {
         site.name.toLowerCase().includes(searchLower) ||
         site.address.toLowerCase().includes(searchLower);
       
-      const matchesCountry = unassignedSelectedCountry === 'all' || site.country === unassignedSelectedCountry;
       const matchesRegion = unassignedSelectedRegion === 'all' || site.region === unassignedSelectedRegion;
       const matchesCity = unassignedSelectedCity === 'all' || site.city === unassignedSelectedCity;
 
-      return matchesSearch && matchesCountry && matchesRegion && matchesCity;
+      return matchesSearch && matchesRegion && matchesCity;
     });
-  }, [unassignedSearchQuery, unassignedSites, unassignedSelectedCountry, unassignedSelectedRegion, unassignedSelectedCity]);
+  }, [unassignedSearchQuery, unassignedSites, unassignedSelectedRegion, unassignedSelectedCity]);
 
 
   const getAgencyName = (agencyId?: string) => {
@@ -436,6 +415,32 @@ export default function TowercoSitesPage() {
                           </FormItem>
                         )}
                       />
+                      <FormField
+                          control={addSiteForm.control}
+                          name="region"
+                          render={({ field }) => (
+                              <FormItem>
+                                  <FormLabel>Region</FormLabel>
+                                  <FormControl>
+                                      <Input placeholder="e.g., CA" {...field} />
+                                  </FormControl>
+                                  <FormMessage />
+                              </FormItem>
+                          )}
+                      />
+                      <FormField
+                          control={addSiteForm.control}
+                          name="city"
+                          render={({ field }) => (
+                              <FormItem>
+                                  <FormLabel>City</FormLabel>
+                                  <FormControl>
+                                      <Input placeholder="e.g., Sunnyvale" {...field} />
+                                  </FormControl>
+                                  <FormMessage />
+                              </FormItem>
+                          )}
+                      />
                       <DialogFooter>
                         <Button type="submit" disabled={isAddingSite}>
                           {isAddingSite ? (
@@ -478,23 +483,9 @@ export default function TowercoSitesPage() {
                 ))}
               </SelectContent>
             </Select>
-            <Select value={assignedSelectedCountry} onValueChange={handleAssignedCountryChange}>
-              <SelectTrigger className="w-full sm:w-[180px]">
-                <SelectValue placeholder="Filter by country" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Countries</SelectItem>
-                {assignedCountries.map((country) => (
-                  <SelectItem key={country} value={country}>
-                    {country}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
             <Select
               value={assignedSelectedRegion}
               onValueChange={handleAssignedRegionChange}
-              disabled={assignedSelectedCountry === 'all'}
             >
               <SelectTrigger className="w-full sm:w-[180px]">
                 <SelectValue placeholder="Filter by region" />
@@ -511,7 +502,7 @@ export default function TowercoSitesPage() {
             <Select
               value={assignedSelectedCity}
               onValueChange={setAssignedSelectedCity}
-              disabled={assignedSelectedRegion === 'all' || assignedSelectedCountry === 'all'}
+              disabled={assignedSelectedRegion === 'all'}
             >
               <SelectTrigger className="w-full sm:w-[180px]">
                 <SelectValue placeholder="Filter by city" />
@@ -604,24 +595,7 @@ export default function TowercoSitesPage() {
                     className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[320px]"
                 />
                 </div>
-                <Select value={unassignedSelectedCountry} onValueChange={handleUnassignedCountryChange}>
-                  <SelectTrigger className="w-full sm:w-[180px]">
-                    <SelectValue placeholder="Filter by country" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Countries</SelectItem>
-                    {unassignedCountries.map((country) => (
-                      <SelectItem key={country} value={country}>
-                        {country}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Select
-                  value={unassignedSelectedRegion}
-                  onValueChange={handleUnassignedRegionChange}
-                  disabled={unassignedSelectedCountry === 'all'}
-                >
+                <Select value={unassignedSelectedRegion} onValueChange={handleUnassignedRegionChange}>
                   <SelectTrigger className="w-full sm:w-[180px]">
                     <SelectValue placeholder="Filter by region" />
                   </SelectTrigger>
@@ -637,7 +611,7 @@ export default function TowercoSitesPage() {
                 <Select
                   value={unassignedSelectedCity}
                   onValueChange={setUnassignedSelectedCity}
-                  disabled={unassignedSelectedRegion === 'all' || unassignedSelectedCountry === 'all'}
+                  disabled={unassignedSelectedRegion === 'all'}
                 >
                   <SelectTrigger className="w-full sm:w-[180px]">
                     <SelectValue placeholder="Filter by city" />
