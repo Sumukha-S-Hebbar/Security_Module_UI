@@ -1,6 +1,8 @@
+
 'use client';
 
 import type { Site, SecurityAgency } from '@/types';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export function SiteStatusBreakdown({ sites, agencies }: { sites: Site[]; agencies: SecurityAgency[] }) {
   const totalSites = sites.length;
