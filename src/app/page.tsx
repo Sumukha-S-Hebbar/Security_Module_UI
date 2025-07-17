@@ -146,7 +146,7 @@ export default function RootPage() {
                       <Input 
                         id="email-in" 
                         type="email" 
-                        placeholder="m@example.com" 
+                        placeholder="Enter your email address" 
                         required 
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
@@ -158,6 +158,7 @@ export default function RootPage() {
                       <Input 
                         id="password-in" 
                         type="password" 
+                        placeholder="Enter your password"
                         required 
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
