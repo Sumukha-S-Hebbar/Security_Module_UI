@@ -67,6 +67,25 @@ const addAgencyFormSchema = z.object({
 async function getAgencies(): Promise<SecurityAgency[]> {
     // TODO: This is a mocked endpoint. Please replace with your actual Django API endpoint.
     const API_URL = 'https://ken.towerbuddy.tel:8000/api/v1/agencies/';
+    
+    // The API should return a JSON array of security agency objects.
+    // Example response:
+    // [
+    //   {
+    //     "id": "AGY01",
+    //     "name": "GuardLink Security",
+    //     "phone": "555-001-0001",
+    //     "email": "contact@guardlink.com",
+    //     "address": "123 Security Blvd, Safe City, CA, USA",
+    //     "city": "Safe City",
+    //     "region": "CA",
+    //     "country": "USA",
+    //     "avatar": "https://placehold.co/100x100.png",
+    //     "siteIds": ["SITE01", "SITE02"]
+    //   },
+    //   ...
+    // ]
+    
     try {
         // Since the API endpoint might not exist, we'll return mock data.
         // In a real scenario, you'd fetch from your API like this:
@@ -591,4 +610,3 @@ export default function TowercoAgenciesPage() {
 }
 
     
-
