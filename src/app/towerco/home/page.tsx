@@ -8,6 +8,7 @@ import type {
   SecurityAgency,
   Site,
   Incident,
+  Organization,
 } from '@/types';
 import {
   Card,
@@ -41,9 +42,10 @@ import { incidents as mockIncidents } from '@/lib/data/incidents';
 import { guards as mockGuards } from '@/lib/data/guards';
 import { patrollingOfficers as mockPatrollingOfficers } from '@/lib/data/patrolling-officers';
 import { sites as mockSites } from '@/lib/data/sites';
+import { organizations as mockOrganizations } from '@/lib/data/organizations';
 
 
-const LOGGED_IN_TOWERCO = 'TowerCo Alpha'; // Simulate logged-in user
+const LOGGED_IN_ORG_ID = 'TCO01'; // Simulate logged-in user
 
 interface DashboardData {
   sites: Site[];
@@ -51,12 +53,13 @@ interface DashboardData {
   incidents: Incident[];
   guards: Guard[];
   patrollingOfficers: PatrollingOfficer[];
+  currentUserOrg: Organization | undefined;
 }
 
 async function getDashboardData(): Promise<DashboardData> {
   // TODO: Replace with your actual API endpoint.
   // This endpoint should return all the necessary data for the dashboard,
-  // filtered for the logged-in TOWERCO user.
+  // filtered for the logged-in TOWERCO/MNO user.
   const API_URL = '/api/v1/towerco/dashboard/';
   try {
     // const res = await fetch(API_URL);
@@ -68,8 +71,13 @@ async function getDashboardData(): Promise<DashboardData> {
     // Simulating network delay and returning mock data for now.
     await new Promise(resolve => setTimeout(resolve, 1000));
     
+    const currentUserOrg = mockOrganizations.find(org => org.id === LOGGED_IN_ORG_ID);
+    if (!currentUserOrg) {
+        throw new Error("Logged in organization not found");
+    }
+
     const towercoSites = mockSites.filter(
-      (site) => site.towerco === LOGGED_IN_TOWERCO
+      (site) => site.towerco === currentUserOrg.name
     );
     const towercoSiteIds = new Set(towercoSites.map((site) => site.id));
     const towercoIncidents = mockIncidents.filter((incident) =>
@@ -88,11 +96,12 @@ async function getDashboardData(): Promise<DashboardData> {
       incidents: towercoIncidents,
       guards: towercoGuards,
       patrollingOfficers: towercoPatrollingOfficers,
+      currentUserOrg
     };
 
   } catch (error) {
     console.error('Could not fetch dashboard data:', error);
-    return { sites: [], agencies: [], incidents: [], guards: [], patrollingOfficers: [] };
+    return { sites: [], agencies: [], incidents: [], guards: [], patrollingOfficers: [], currentUserOrg: undefined };
   }
 }
 
@@ -164,20 +173,22 @@ export default function TowercoHomePage() {
     );
   }
 
-  if (!data) {
+  if (!data || !data.currentUserOrg) {
     return (
         <div className="p-4 sm:p-6 lg:p-8">
-            <p>Could not load dashboard data.</p>
+            <p>Could not load dashboard data for your organization.</p>
         </div>
     )
   }
+  
+  const portalName = data.currentUserOrg.role === 'TOWERCO' ? 'TOWERCO' : 'MNO';
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">TOWERCO Dashboard</h1>
+        <h1 className="text-3xl font-bold tracking-tight">{portalName} Dashboard</h1>
         <p className="text-muted-foreground">
-          Welcome! Here's a high-level overview of your assets.
+          Welcome, {data.currentUserOrg.name}! Here's a high-level overview of your assets.
         </p>
       </div>
 

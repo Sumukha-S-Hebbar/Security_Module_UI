@@ -8,6 +8,7 @@ import { securityAgencies } from '@/lib/data/security-agencies';
 import { sites } from '@/lib/data/sites';
 import { incidents } from '@/lib/data/incidents';
 import { guards } from '@/lib/data/guards';
+import { organizations } from '@/lib/data/organizations';
 import type { Incident, Site } from '@/types';
 import {
   Card,
@@ -63,7 +64,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
-const LOGGED_IN_TOWERCO = 'TowerCo Alpha'; // Simulate logged-in user
+const LOGGED_IN_ORG_ID = 'TCO01'; // Simulate logged-in user
 
 const chartConfig = {
   incidents: {
@@ -78,13 +79,15 @@ export default function AgencyReportPage() {
   const agencyId = params.agencyId as string;
 
   const agency = securityAgencies.find((a) => a.id === agencyId);
+  const loggedInOrg = organizations.find((o) => o.id === LOGGED_IN_ORG_ID);
 
-  if (!agency) {
+
+  if (!agency || !loggedInOrg) {
     return (
       <div className="p-4 sm:p-6 lg:p-8">
         <Card>
           <CardContent className="pt-6">
-            <p>Agency not found.</p>
+            <p>Agency or Organization not found.</p>
           </CardContent>
         </Card>
       </div>
@@ -101,7 +104,7 @@ export default function AgencyReportPage() {
 
   const agencySites = sites.filter(
     (site) =>
-      agency.siteIds.includes(site.id) && site.towerco === LOGGED_IN_TOWERCO
+      agency.siteIds.includes(site.id) && site.towerco === loggedInOrg.name
   );
   const agencySiteIds = new Set(agencySites.map((site) => site.id));
 
@@ -189,7 +192,7 @@ export default function AgencyReportPage() {
         </Button>
         <div>
             <h1 className="text-3xl font-bold tracking-tight">Agency Report</h1>
-            <p className="text-muted-foreground">Detailed overview for {agency.name} on {LOGGED_IN_TOWERCO}.</p>
+            <p className="text-muted-foreground">Detailed overview for {agency.name} on {loggedInOrg.name}.</p>
         </div>
       </div>
       <Card>

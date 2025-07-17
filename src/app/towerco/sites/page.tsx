@@ -8,6 +8,7 @@ import * as z from 'zod';
 import { useToast } from '@/hooks/use-toast';
 import { sites } from '@/lib/data/sites';
 import { securityAgencies } from '@/lib/data/security-agencies';
+import { organizations } from '@/lib/data/organizations';
 import type { Site, SecurityAgency } from '@/types';
 import {
   Card,
@@ -24,7 +25,6 @@ import {
   Upload,
   PlusCircle,
   Search,
-  Building2,
   Briefcase,
   ShieldAlert,
   Loader2,
@@ -67,7 +67,7 @@ import {
 } from '@/components/ui/table';
 import Link from 'next/link';
 
-const LOGGED_IN_TOWERCO = 'TowerCo Alpha'; // Simulate logged-in user
+const LOGGED_IN_ORG_ID = 'TCO01'; // Simulate logged-in user
 
 const uploadFormSchema = z.object({
   csvFile: z
@@ -107,10 +107,13 @@ export default function TowercoSitesPage() {
   const [assignments, setAssignments] = useState<{ [siteId: string]: string }>(
     {}
   );
+  
+  const loggedInOrg = useMemo(() => organizations.find(o => o.id === LOGGED_IN_ORG_ID), []);
+
 
   const towercoSites = useMemo(
-    () => sites.filter((site) => site.towerco === LOGGED_IN_TOWERCO),
-    []
+    () => sites.filter((site) => site.towerco === loggedInOrg?.name),
+    [loggedInOrg]
   );
 
   const getAgencyForSite = (siteId: string): SecurityAgency | undefined => {
@@ -140,7 +143,7 @@ export default function TowercoSitesPage() {
     setIsUploading(true);
     // In a real app, you would parse the CSV and POST each site to your API.
     // The backend would ensure the `towerco` ID is set for the logged-in user.
-    console.log('Uploading file for TOWERCO:', LOGGED_IN_TOWERCO, values.csvFile[0]);
+    console.log('Uploading file for TOWERCO:', loggedInOrg?.name, values.csvFile[0]);
     await new Promise((resolve) => setTimeout(resolve, 1500));
     toast({
       title: 'Upload Successful',
@@ -157,11 +160,11 @@ export default function TowercoSitesPage() {
     setIsAddingSite(true);
     // In a real app, you would POST this to your API.
     // The backend would handle creating the site and associating it with the logged-in TOWERCO.
-    console.log('New site data:', { ...values, towerco: LOGGED_IN_TOWERCO });
+    console.log('New site data:', { ...values, towerco: loggedInOrg?.name });
     await new Promise((resolve) => setTimeout(resolve, 1500));
     toast({
       title: 'Site Added',
-      description: `Site "${values.name}" has been created successfully for ${LOGGED_IN_TOWERCO}.`,
+      description: `Site "${values.name}" has been created successfully for ${loggedInOrg?.name}.`,
     });
     addSiteForm.reset();
     setIsAddingSite(false);
@@ -194,7 +197,7 @@ export default function TowercoSitesPage() {
 
     // In a real app, this would be a PATCH/PUT API call to update the site.
     // The backend would verify that the site belongs to the logged-in TOWERCO before assigning the agency.
-    console.log(`Assigning agency ${agencyId} to site ${siteId} for TOWERCO ${LOGGED_IN_TOWERCO}`);
+    console.log(`Assigning agency ${agencyId} to site ${siteId} for TOWERCO ${loggedInOrg?.name}`);
     
     toast({
       title: 'Agency Assigned',
@@ -283,6 +286,14 @@ export default function TowercoSitesPage() {
     return agency ? agency.name : 'Unassigned';
   };
 
+  if (!loggedInOrg) {
+     return (
+      <div className="p-4 sm:p-6 lg:p-8">
+        <p>Could not load organization data.</p>
+      </div>
+    )
+  }
+
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6">
       <div>
@@ -299,7 +310,7 @@ export default function TowercoSitesPage() {
               <CardTitle>Assigned Sites</CardTitle>
               <CardDescription>
                 A list of all your sites with an assigned security agency for{' '}
-                {LOGGED_IN_TOWERCO}.
+                {loggedInOrg.name}.
               </CardDescription>
             </div>
             <div className="flex items-center gap-2">
@@ -342,7 +353,7 @@ export default function TowercoSitesPage() {
                               </FormControl>
                               <FormDescription>
                                 The CSV should contain columns: name, address.
-                                The TowerCo will be set to {LOGGED_IN_TOWERCO}.
+                                The TowerCo will be set to {loggedInOrg.name}.
                               </FormDescription>
                               <FormMessage />
                             </FormItem>
@@ -383,7 +394,7 @@ export default function TowercoSitesPage() {
                     <DialogTitle>Add a New Site</DialogTitle>
                     <DialogDescription>
                       Fill in the details below to add a new site for{' '}
-                      {LOGGED_IN_TOWERCO}.
+                      {loggedInOrg.name}.
                     </DialogDescription>
                   </DialogHeader>
                   <Form {...addSiteForm}>

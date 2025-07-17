@@ -8,7 +8,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useToast } from '@/hooks/use-toast';
 import { sites } from '@/lib/data/sites';
-import type { SecurityAgency, Site } from '@/types';
+import { organizations } from '@/lib/data/organizations';
+import type { SecurityAgency } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -43,7 +44,7 @@ import {
 import { securityAgencies as mockAgencies } from '@/lib/data/security-agencies';
 
 
-const LOGGED_IN_TOWERCO = 'TowerCo Alpha'; // Simulate logged-in user
+const LOGGED_IN_ORG_ID = 'TCO01'; // Simulate logged-in user
 
 const uploadFormSchema = z.object({
   csvFile: z
@@ -100,6 +101,9 @@ export default function TowercoAgenciesPage() {
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedRegion, setSelectedRegion] = useState('all');
     const [selectedCity, setSelectedCity] = useState('all');
+    
+    const loggedInOrg = useMemo(() => organizations.find(o => o.id === LOGGED_IN_ORG_ID), []);
+
 
     useEffect(() => {
         const fetchData = async () => {
@@ -190,9 +194,9 @@ export default function TowercoAgenciesPage() {
     }, [searchQuery, securityAgencies, selectedRegion, selectedCity]);
 
     const assignedSitesForSelectedAgency = useMemo(() => {
-      if (!selectedAgencyForSites) return [];
-      return sites.filter(s => selectedAgencyForSites.siteIds.includes(s.id) && s.towerco === LOGGED_IN_TOWERCO);
-    }, [selectedAgencyForSites]);
+      if (!selectedAgencyForSites || !loggedInOrg) return [];
+      return sites.filter(s => selectedAgencyForSites.siteIds.includes(s.id) && s.towerco === loggedInOrg.name);
+    }, [selectedAgencyForSites, loggedInOrg]);
 
     return (
         <div className="p-4 sm:p-6 lg:p-8 space-y-6">
@@ -540,7 +544,7 @@ export default function TowercoAgenciesPage() {
                 <DialogHeader>
                   <DialogTitle>Sites Assigned to {selectedAgencyForSites?.name}</DialogTitle>
                   <DialogDescription>
-                    A list of all sites managed by this agency for {LOGGED_IN_TOWERCO}.
+                    A list of all sites managed by this agency for {loggedInOrg?.name}.
                   </DialogDescription>
                 </DialogHeader>
                 <div className="pt-4">
@@ -567,7 +571,7 @@ export default function TowercoAgenciesPage() {
                     </Table>
                   ) : (
                     <p className="text-sm text-muted-foreground text-center py-4">
-                      No sites from {LOGGED_IN_TOWERCO} are assigned to this agency.
+                      No sites from {loggedInOrg?.name} are assigned to this agency.
                     </p>
                   )}
                 </div>
