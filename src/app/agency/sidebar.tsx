@@ -5,9 +5,10 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   Home,
-  AlertTriangle,
-  Users,
   Building2,
+  Users,
+  UserCheck,
+  ShieldAlert,
   ShieldCheck,
   LogOut,
 } from 'lucide-react';
@@ -22,13 +23,14 @@ import {
 import { cn } from '@/lib/utils';
 
 const menuItems = [
-  { href: '/supervisor/home', label: 'Home', icon: Home },
-  { href: '/supervisor/alerts', label: 'Alerts', icon: AlertTriangle },
-  { href: '/supervisor/guards', label: 'Security Guards', icon: Users },
-  { href: '/supervisor/sites', label: 'Sites', icon: Building2 },
+  { href: '/agency/home', label: 'Home', icon: Home },
+  { href: '/agency/sites', label: 'Sites', icon: Building2 },
+  { href: '/agency/supervisors', label: 'Supervisors', icon: UserCheck },
+  { href: '/agency/guards', label: 'Security Guards', icon: Users },
+  { href: '/agency/incidents', label: 'Incidents', icon: ShieldAlert },
 ];
 
-export default function SupervisorSidebar() {
+export default function AgencySidebar() {
   const pathname = usePathname();
 
   return (
@@ -36,7 +38,10 @@ export default function SupervisorSidebar() {
       <SidebarHeader>
         <div className="flex items-center gap-2">
           <ShieldCheck className="w-8 h-8 text-primary" />
-          <h1 className="text-xl font-bold">GuardLink</h1>
+          <div>
+            <h1 className="text-xl font-bold">GuardLink</h1>
+            <p className="text-xs text-muted-foreground">Agency Portal</p>
+          </div>
         </div>
       </SidebarHeader>
       <SidebarContent>

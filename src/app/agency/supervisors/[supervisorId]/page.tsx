@@ -29,20 +29,20 @@ import { Progress } from '@/components/ui/progress';
 import { useMemo, useState } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-export default function AgencyPatrollingOfficerReportPage() {
+export default function AgencySupervisorReportPage() {
   const params = useParams();
   const { toast } = useToast();
   const supervisorId = params.supervisorId as string;
   const [selectedMonth, setSelectedMonth] = useState('all');
 
-  const patrollingOfficer = patrollingOfficers.find((p) => p.id === supervisorId);
+  const supervisor = patrollingOfficers.find((p) => p.id === supervisorId);
 
-  if (!patrollingOfficer) {
+  if (!supervisor) {
     return (
       <div className="p-4 sm:p-6 lg:p-8">
         <Card>
           <CardContent className="pt-6">
-            <p>Patrolling Officer not found.</p>
+            <p>Supervisor not found.</p>
           </CardContent>
         </Card>
       </div>
@@ -69,13 +69,13 @@ export default function AgencyPatrollingOfficerReportPage() {
 
   const visitedSites = assignedSites.filter(s => s.visited).length;
   const siteVisitAccuracy = assignedSites.length > 0 ? (visitedSites / assignedSites.length) * 100 : 100;
-  const averageResponseTime = patrollingOfficer.averageResponseTime || 0;
+  const averageResponseTime = supervisor.averageResponseTime || 0;
 
 
   const handleDownloadReport = () => {
     toast({
       title: 'Report Generation Started',
-      description: `Generating a detailed report for ${patrollingOfficer.name}.`,
+      description: `Generating a detailed report for ${supervisor.name}.`,
     });
   };
 
@@ -98,12 +98,12 @@ export default function AgencyPatrollingOfficerReportPage() {
         <Button asChild variant="outline" size="icon">
           <Link href="/agency/supervisors">
             <ArrowLeft className="h-4 w-4" />
-            <span className="sr-only">Back to Patrolling Officers</span>
+            <span className="sr-only">Back to Supervisors</span>
           </Link>
         </Button>
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Patrolling Officer Report</h1>
-          <p className="text-muted-foreground">Detailed overview for {patrollingOfficer.name}.</p>
+          <h1 className="text-3xl font-bold tracking-tight">Supervisor Report</h1>
+          <p className="text-muted-foreground">Detailed overview for {supervisor.name}.</p>
         </div>
       </div>
 
@@ -112,12 +112,12 @@ export default function AgencyPatrollingOfficerReportPage() {
           <div className="flex flex-wrap justify-between items-start gap-4">
             <div className="flex items-center gap-4">
               <Avatar className="h-16 w-16">
-                <AvatarImage src={patrollingOfficer.avatar} alt={patrollingOfficer.name} />
-                <AvatarFallback>{patrollingOfficer.name.charAt(0)}</AvatarFallback>
+                <AvatarImage src={supervisor.avatar} alt={supervisor.name} />
+                <AvatarFallback>{supervisor.name.charAt(0)}</AvatarFallback>
               </Avatar>
               <div>
-                <CardTitle className="text-2xl">{patrollingOfficer.name}</CardTitle>
-                <CardDescription>ID: {patrollingOfficer.id}</CardDescription>
+                <CardTitle className="text-2xl">{supervisor.name}</CardTitle>
+                <CardDescription>ID: {supervisor.id}</CardDescription>
               </div>
             </div>
             <Button onClick={handleDownloadReport}>
@@ -132,14 +132,14 @@ export default function AgencyPatrollingOfficerReportPage() {
               <Phone className="h-5 w-5 mt-0.5 text-primary" />
               <div>
                 <p className="font-semibold text-foreground">Phone</p>
-                <a href={`tel:${patrollingOfficer.phone}`} className="hover:underline">{patrollingOfficer.phone}</a>
+                <a href={`tel:${supervisor.phone}`} className="hover:underline">{supervisor.phone}</a>
               </div>
             </div>
             <div className="flex items-start gap-3">
               <Mail className="h-5 w-5 mt-0.5 text-primary" />
               <div>
                 <p className="font-semibold text-foreground">Email</p>
-                <a href={`mailto:${patrollingOfficer.email}`} className="hover:underline">{patrollingOfficer.email}</a>
+                <a href={`mailto:${supervisor.email}`} className="hover:underline">{supervisor.email}</a>
               </div>
             </div>
             <div className="flex items-start gap-3">
@@ -164,7 +164,7 @@ export default function AgencyPatrollingOfficerReportPage() {
         <CardHeader>
           <CardTitle>Performance Metrics</CardTitle>
            <CardDescription>
-            Key performance indicators for this patrolling officer.
+            Key performance indicators for this supervisor.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -214,7 +214,7 @@ export default function AgencyPatrollingOfficerReportPage() {
                     </TableBody>
                 </Table>
             ) : (
-                <p className="text-sm text-muted-foreground">No sites are assigned to this officer.</p>
+                <p className="text-sm text-muted-foreground">No sites are assigned to this supervisor.</p>
             )}
           </CardContent>
         </Card>
@@ -239,7 +239,7 @@ export default function AgencyPatrollingOfficerReportPage() {
                     ))}
                 </div>
             ) : (
-                <p className="text-sm text-muted-foreground">No guards are assigned to this officer's sites.</p>
+                <p className="text-sm text-muted-foreground">No guards are assigned to this supervisor's sites.</p>
             )}
           </CardContent>
         </Card>
@@ -249,7 +249,7 @@ export default function AgencyPatrollingOfficerReportPage() {
         <CardHeader className="flex flex-wrap items-center justify-between gap-2">
           <div>
             <CardTitle>Recent Incidents</CardTitle>
-            <CardDescription>A log of emergency incidents at sites managed by {patrollingOfficer.name}.</CardDescription>
+            <CardDescription>A log of emergency incidents at sites managed by {supervisor.name}.</CardDescription>
           </div>
           <Select value={selectedMonth} onValueChange={setSelectedMonth}>
             <SelectTrigger className="w-full sm:w-[180px]">
@@ -298,7 +298,7 @@ export default function AgencyPatrollingOfficerReportPage() {
               </TableBody>
             </Table>
           ) : (
-            <p className="text-muted-foreground text-center py-4">No recent incidents for this officer's sites {selectedMonth !== 'all' && 'in the selected month'}.</p>
+            <p className="text-muted-foreground text-center py-4">No recent incidents for this supervisor's sites {selectedMonth !== 'all' && 'in the selected month'}.</p>
           )}
         </CardContent>
       </Card>

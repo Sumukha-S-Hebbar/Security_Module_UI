@@ -62,10 +62,10 @@ export default function RootPage() {
         case 'A': // Agency
           router.push('/agency/home');
           break;
-        case 'S': // Security Supervisor
-        case 'P': // Patrolling Officer
+        case 'S': // Supervisor
           router.push('/supervisor/home');
           break;
+        case 'P': // Patrolling Officer - Mobile App only
         default:
           toast({
               variant: 'destructive',

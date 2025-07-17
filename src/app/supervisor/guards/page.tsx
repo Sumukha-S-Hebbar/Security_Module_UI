@@ -6,7 +6,7 @@ import { SelfieRequester } from './_components/selfie-requester';
 import { ComplianceWatchlist } from './_components/compliance-watchlist';
 import { guards, sites } from '@/lib/data';
 
-const LOGGED_IN_SUPERVISOR_ID = 'PO01'; // Simulate logged-in Patrolling Officer
+const LOGGED_IN_SUPERVISOR_ID = 'PO01'; // Simulate logged-in Supervisor
 
 export default function GuardsPage() {
   const supervisorSites = useMemo(() => sites.filter(s => s.patrollingOfficerId === LOGGED_IN_SUPERVISOR_ID), []);

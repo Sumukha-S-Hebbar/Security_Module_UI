@@ -46,7 +46,7 @@ import {
 import type { Alert, Incident, Site, Guard } from '@/types';
 import { useToast } from '@/hooks/use-toast';
 
-const LOGGED_IN_SUPERVISOR_ID = 'PO01'; // Simulate logged-in Patrolling Officer
+const LOGGED_IN_SUPERVISOR_ID = 'PO01'; // Simulate logged-in Supervisor
 
 export default function AlertsPage() {
   const [alerts, setAlerts] = useState<Alert[]>(initialAlerts);

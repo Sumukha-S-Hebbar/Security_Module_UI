@@ -1,3 +1,4 @@
+
 'use client';
 
 import type { PatrollingOfficer, Site } from '@/types';
@@ -5,16 +6,16 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Progress } from '@/components/ui/progress';
 import { Map, Clock } from 'lucide-react';
 
-export function PatrollingOfficerPerformance({ 
-    patrollingOfficers, 
+export function SupervisorPerformance({ 
+    supervisors, 
     sites 
 }: { 
-    patrollingOfficers: PatrollingOfficer[],
+    supervisors: PatrollingOfficer[],
     sites: Site[]
 }) {
-  const totalOfficers = patrollingOfficers.length;
+  const totalOfficers = supervisors.length;
 
-  const performanceData = patrollingOfficers.reduce(
+  const performanceData = supervisors.reduce(
     (acc, officer) => {
       const assignedSites = sites.filter(s => s.patrollingOfficerId === officer.id);
       const visitedSites = assignedSites.filter(s => s.visited).length;
@@ -42,9 +43,9 @@ export function PatrollingOfficerPerformance({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Patrolling Officer Performance</CardTitle>
+        <CardTitle>Supervisor Performance</CardTitle>
         <CardDescription>
-          Average performance metrics across all patrolling officers.
+          Average performance metrics across all supervisors.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">

@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -18,7 +19,7 @@ const formSchema = z.object({
     .refine((files) => files?.[0]?.type === 'text/csv', 'Only .csv files are accepted.'),
 });
 
-export function PatrollingOfficerUploader() {
+export function SupervisorUploader() {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
@@ -37,7 +38,7 @@ export function PatrollingOfficerUploader() {
 
     toast({
       title: 'Upload Successful',
-      description: `File "${values.csvFile[0].name}" has been uploaded. Patrolling officer profiles would be processed.`,
+      description: `File "${values.csvFile[0].name}" has been uploaded. Supervisor profiles would be processed.`,
     });
 
     form.reset({ csvFile: undefined });
@@ -53,9 +54,9 @@ export function PatrollingOfficerUploader() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Upload Patrolling Officer Profiles</CardTitle>
+        <CardTitle>Upload Supervisor Profiles</CardTitle>
         <CardDescription>
-          Upload a CSV file to add multiple patrolling officer profiles at once.
+          Upload a CSV file to add multiple supervisor profiles at once.
         </CardDescription>
       </CardHeader>
       <Form {...form}>
@@ -66,7 +67,7 @@ export function PatrollingOfficerUploader() {
               name="csvFile"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Patrolling Officer CSV File</FormLabel>
+                  <FormLabel>Supervisor CSV File</FormLabel>
                   <FormControl>
                     <Input
                       id="csvFile-input"

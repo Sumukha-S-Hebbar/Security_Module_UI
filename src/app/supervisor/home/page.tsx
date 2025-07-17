@@ -1,4 +1,5 @@
 
+
 import { useMemo } from 'react';
 import { incidents, guards, sites } from '@/lib/data';
 import {
@@ -21,7 +22,7 @@ import type { Guard, Site } from '@/types';
 import { SitesMap } from './_components/sites-map';
 import { AnalyticsDashboard } from './_components/analytics-dashboard';
 
-const LOGGED_IN_SUPERVISOR_ID = 'PO01'; // Simulate logged-in Patrolling Officer
+const LOGGED_IN_SUPERVISOR_ID = 'PO01'; // Simulate logged-in Supervisor
 
 export default function HomePage() {
   const supervisorSites = useMemo(() => sites.filter(s => s.patrollingOfficerId === LOGGED_IN_SUPERVISOR_ID), []);
@@ -51,7 +52,7 @@ export default function HomePage() {
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Home Dashboard</h1>
         <p className="text-muted-foreground">
-          Welcome back, Patrolling Officer. Here's what's happening.
+          Welcome back, Supervisor. Here's what's happening.
         </p>
       </div>
 

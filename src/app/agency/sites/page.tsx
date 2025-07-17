@@ -53,7 +53,7 @@ import { Input } from '@/components/ui/input';
 const LOGGED_IN_AGENCY_ID = 'AGY01'; // Simulate logged-in agency
 
 export default function AgencySitesPage() {
-  const [selectedPatrollingOfficers, setSelectedPatrollingOfficers] = useState<{
+  const [selectedSupervisors, setSelectedSupervisors] = useState<{
     [key: string]: string;
   }>({});
   const [geofencePerimeters, setGeofencePerimeters] = useState<{
@@ -66,7 +66,7 @@ export default function AgencySitesPage() {
   
   // State for Assigned Sites filters
   const [assignedSearchQuery, setAssignedSearchQuery] = useState('');
-  const [selectedPatrollingOfficerFilter, setSelectedPatrollingOfficerFilter] = useState('all');
+  const [selectedSupervisorFilter, setSelectedSupervisorFilter] = useState('all');
   const [assignedSelectedCountry, setAssignedSelectedCountry] = useState('all');
   const [assignedSelectedRegion, setAssignedSelectedRegion] = useState('all');
   const [assignedSelectedCity, setAssignedSelectedCity] = useState('all');
@@ -91,20 +91,20 @@ export default function AgencySitesPage() {
     [agencySiteNames]
   );
   
-  const allAgencyPatrollingOfficers = useMemo(() => {
-    // In a real app, this might be a separate API call for all officers in the agency
+  const allAgencySupervisors = useMemo(() => {
+    // In a real app, this might be a separate API call for all supervisors in the agency
     return patrollingOfficers.filter(po => po); // Simplified for demo
   }, []);
 
-  const getPatrollingOfficerForSite = useCallback(
+  const getSupervisorForSite = useCallback(
     (siteId: string) => {
       const site = agencySites.find((s) => s.id === siteId);
       if (!site || !site.patrollingOfficerId) return null;
-      return allAgencyPatrollingOfficers.find(
+      return allAgencySupervisors.find(
         (s) => s.id === site.patrollingOfficerId
       );
     },
-    [agencySites, allAgencyPatrollingOfficers]
+    [agencySites, allAgencySupervisors]
   );
 
   const assignedSites = useMemo(
@@ -117,16 +117,16 @@ export default function AgencySitesPage() {
     [agencySites]
   );
 
-  const assignedSitesPatrollingOfficers = useMemo(() => {
+  const assignedSitesSupervisors = useMemo(() => {
     const officers = new Map<string, PatrollingOfficer>();
     assignedSites.forEach((site) => {
-      const po = getPatrollingOfficerForSite(site.id);
+      const po = getSupervisorForSite(site.id);
       if (po && !officers.has(po.id)) {
         officers.set(po.id, po);
       }
     });
     return Array.from(officers.values());
-  }, [assignedSites, getPatrollingOfficerForSite]);
+  }, [assignedSites, getSupervisorForSite]);
   
   // Location filters data for ASSIGNED sites
   const assignedCountries = useMemo(() => [...new Set(assignedSites.map((site) => site.country))].sort(), [assignedSites]);
@@ -172,13 +172,13 @@ export default function AgencySitesPage() {
   };
 
 
-  const handlePatrollingOfficerSelect = (
+  const handleSupervisorSelect = (
     siteId: string,
-    patrollingOfficerId: string
+    supervisorId: string
   ) => {
-    setSelectedPatrollingOfficers((prev) => ({
+    setSelectedSupervisors((prev) => ({
       ...prev,
-      [siteId]: patrollingOfficerId,
+      [siteId]: supervisorId,
     }));
   };
 
@@ -200,15 +200,15 @@ export default function AgencySitesPage() {
   };
 
   const handleAssign = (siteId: string) => {
-    const patrollingOfficerId = selectedPatrollingOfficers[siteId];
+    const supervisorId = selectedSupervisors[siteId];
     const perimeter = geofencePerimeters[siteId];
     const guardIds = selectedGuards[siteId] || [];
 
-    if (!patrollingOfficerId) {
+    if (!supervisorId) {
       toast({
         variant: 'destructive',
         title: 'Error',
-        description: 'Please select a patrolling officer.',
+        description: 'Please select a supervisor.',
       });
       return;
     }
@@ -229,13 +229,13 @@ export default function AgencySitesPage() {
       return;
     }
     const siteName = unassignedSites.find((s) => s.id === siteId)?.name;
-    const patrollingOfficerName = allAgencyPatrollingOfficers.find(
-      (s) => s.id === patrollingOfficerId
+    const supervisorName = allAgencySupervisors.find(
+      (s) => s.id === supervisorId
     )?.name;
 
     toast({
       title: 'Site Assigned',
-      description: `${patrollingOfficerName} and ${guardIds.length} guard(s) have been assigned to ${siteName} with a ${perimeter}m geofence. The site will be moved to the assigned list on next refresh.`,
+      description: `${supervisorName} and ${guardIds.length} guard(s) have been assigned to ${siteName} with a ${perimeter}m geofence. The site will be moved to the assigned list on next refresh.`,
     });
   };
 
@@ -253,23 +253,23 @@ export default function AgencySitesPage() {
         site.name.toLowerCase().includes(searchLower) ||
         site.address.toLowerCase().includes(searchLower);
 
-      const patrollingOfficer = getPatrollingOfficerForSite(site.id);
-      const matchesPatrollingOfficer =
-        selectedPatrollingOfficerFilter === 'all' ||
-        (patrollingOfficer &&
-          patrollingOfficer.id === selectedPatrollingOfficerFilter);
+      const supervisor = getSupervisorForSite(site.id);
+      const matchesSupervisor =
+        selectedSupervisorFilter === 'all' ||
+        (supervisor &&
+          supervisor.id === selectedSupervisorFilter);
 
       const matchesCountry = assignedSelectedCountry === 'all' || site.country === assignedSelectedCountry;
       const matchesRegion = assignedSelectedRegion === 'all' || site.region === assignedSelectedRegion;
       const matchesCity = assignedSelectedCity === 'all' || site.city === assignedSelectedCity;
 
-      return matchesSearch && matchesPatrollingOfficer && matchesCountry && matchesRegion && matchesCity;
+      return matchesSearch && matchesSupervisor && matchesCountry && matchesRegion && matchesCity;
     });
   }, [
     assignedSearchQuery,
-    selectedPatrollingOfficerFilter,
+    selectedSupervisorFilter,
     assignedSites,
-    getPatrollingOfficerForSite,
+    getSupervisorForSite,
     assignedSelectedCountry,
     assignedSelectedRegion,
     assignedSelectedCity,
@@ -316,7 +316,7 @@ export default function AgencySitesPage() {
         <CardHeader>
           <CardTitle>Assigned Sites</CardTitle>
           <CardDescription>
-            A list of all sites with an assigned patrolling officer.
+            A list of all sites with an assigned supervisor.
           </CardDescription>
           <div className="flex flex-wrap items-center gap-2 pt-4">
             <div className="relative flex-1 md:grow-0">
@@ -330,15 +330,15 @@ export default function AgencySitesPage() {
               />
             </div>
             <Select
-              value={selectedPatrollingOfficerFilter}
-              onValueChange={setSelectedPatrollingOfficerFilter}
+              value={selectedSupervisorFilter}
+              onValueChange={setSelectedSupervisorFilter}
             >
               <SelectTrigger className="w-full sm:w-[220px]">
-                <SelectValue placeholder="Filter by Patrolling Officer" />
+                <SelectValue placeholder="Filter by Supervisor" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Patrolling Officers</SelectItem>
-                {assignedSitesPatrollingOfficers.map((po) => (
+                <SelectItem value="all">All Supervisors</SelectItem>
+                {assignedSitesSupervisors.map((po) => (
                   <SelectItem key={po.id} value={po.id}>
                     {po.name}
                   </SelectItem>
@@ -398,7 +398,7 @@ export default function AgencySitesPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-6">
             {filteredAssignedSites.length > 0 ? (
               filteredAssignedSites.map((site) => {
-                const patrollingOfficer = getPatrollingOfficerForSite(site.id);
+                const supervisor = getSupervisorForSite(site.id);
                 const incidentsCount = siteIncidentsCount[site.name] || 0;
                 return (
                   <Card key={site.id} className="flex flex-col">
@@ -413,7 +413,7 @@ export default function AgencySitesPage() {
                       </div>
                       <div className="flex items-center gap-2 text-muted-foreground">
                         <UserCheck className="h-4 w-4 flex-shrink-0" />
-                        <span>{patrollingOfficer?.name || 'N/A'}</span>
+                        <span>{supervisor?.name || 'N/A'}</span>
                       </div>
                       <div className="flex items-center gap-2 text-muted-foreground">
                         <Fence className="h-4 w-4 flex-shrink-0" />
@@ -461,7 +461,7 @@ export default function AgencySitesPage() {
           <CardHeader>
             <CardTitle>Unassigned Sites</CardTitle>
             <CardDescription>
-              A list of sites that do not have a patrolling officer assigned.
+              A list of sites that do not have a supervisor assigned.
             </CardDescription>
             <div className="flex flex-wrap items-center gap-2 pt-4">
                 <div className="relative flex-1 md:grow-0">
@@ -530,7 +530,7 @@ export default function AgencySitesPage() {
                   <TableHead>Site</TableHead>
                   <TableHead>Geofence (m)</TableHead>
                   <TableHead>Assign Guards</TableHead>
-                  <TableHead>Assign Patrolling Officer</TableHead>
+                  <TableHead>Assign Supervisor</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -586,21 +586,21 @@ export default function AgencySitesPage() {
                     </TableCell>
                     <TableCell>
                       <Select
-                        value={selectedPatrollingOfficers[site.id] || ''}
+                        value={selectedSupervisors[site.id] || ''}
                         onValueChange={(value) =>
-                          handlePatrollingOfficerSelect(site.id, value)
+                          handleSupervisorSelect(site.id, value)
                         }
                       >
                         <SelectTrigger className="w-[180px]">
-                          <SelectValue placeholder="Select Patrolling Officer" />
+                          <SelectValue placeholder="Select Supervisor" />
                         </SelectTrigger>
                         <SelectContent>
-                          {allAgencyPatrollingOfficers.map((patrollingOfficer) => (
+                          {allAgencySupervisors.map((supervisor) => (
                             <SelectItem
-                              key={patrollingOfficer.id}
-                              value={patrollingOfficer.id}
+                              key={supervisor.id}
+                              value={supervisor.id}
                             >
-                              {patrollingOfficer.name}
+                              {supervisor.name}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -611,7 +611,7 @@ export default function AgencySitesPage() {
                         size="sm"
                         onClick={() => handleAssign(site.id)}
                         disabled={
-                          !selectedPatrollingOfficers[site.id] ||
+                          !selectedSupervisors[site.id] ||
                           !geofencePerimeters[site.id] ||
                           !selectedGuards[site.id]?.length
                         }

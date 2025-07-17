@@ -30,7 +30,7 @@ import { AlertTriangle, ChevronDown, Phone } from 'lucide-react';
 import { IncidentStatusBreakdown } from './_components/incident-status-breakdown';
 import { AgencyIncidentChart } from './_components/agency-incident-chart';
 import { GuardPerformanceBreakdown } from './_components/guard-performance-breakdown';
-import { PatrollingOfficerPerformance } from './_components/patrolling-officer-performance';
+import { SupervisorPerformance } from './_components/patrolling-officer-performance';
 import {
   Select,
   SelectContent,
@@ -54,7 +54,7 @@ export default function AgencyHomePage() {
     return guards.filter(guard => siteNames.has(guard.site));
   }, [agencySites]);
   
-  const agencyPatrollingOfficers = useMemo(() => {
+  const agencySupervisors = useMemo(() => {
     const poIds = new Set(agencySites.map(s => s.patrollingOfficerId).filter(Boolean));
     return patrollingOfficers.filter(po => poIds.has(po.id));
   }, [agencySites]);
@@ -81,9 +81,9 @@ export default function AgencyHomePage() {
     return agencySites.find((s) => s.id === id);
   };
 
-  const getPatrollingOfficerById = (id?: string): PatrollingOfficer | undefined => {
+  const getSupervisorById = (id?: string): PatrollingOfficer | undefined => {
     if (!id) return undefined;
-    return agencyPatrollingOfficers.find((p) => p.id === id);
+    return agencySupervisors.find((p) => p.id === id);
   };
 
 
@@ -127,7 +127,7 @@ export default function AgencyHomePage() {
                 <TableRow>
                   <TableHead>Site</TableHead>
                   <TableHead>Guard</TableHead>
-                  <TableHead>Patrolling Officer</TableHead>
+                  <TableHead>Supervisor</TableHead>
                   <TableHead>Date</TableHead>
                   <TableHead>Contact</TableHead>
                 </TableRow>
@@ -136,7 +136,7 @@ export default function AgencyHomePage() {
                 {activeEmergencies.map((incident) => {
                   const siteDetails = getSiteById(incident.siteId);
                   const guardDetails = getGuardById(incident.raisedByGuardId);
-                  const patrollingOfficerDetails = getPatrollingOfficerById(incident.attendedByPatrollingOfficerId);
+                  const supervisorDetails = getSupervisorById(incident.attendedByPatrollingOfficerId);
                   
                   return (
                     <TableRow key={incident.id}>
@@ -145,7 +145,7 @@ export default function AgencyHomePage() {
                       </TableCell>
                       <TableCell>{guardDetails?.name || 'N/A'}</TableCell>
                       <TableCell>
-                        {patrollingOfficerDetails?.name || 'N/A'}
+                        {supervisorDetails?.name || 'N/A'}
                       </TableCell>
                       <TableCell>{new Date(incident.incidentTime).toLocaleDateString()}</TableCell>
                       <TableCell>
@@ -164,11 +164,11 @@ export default function AgencyHomePage() {
                                 </a>
                               </DropdownMenuItem>
                             )}
-                            {patrollingOfficerDetails && (
+                            {supervisorDetails && (
                               <DropdownMenuItem asChild>
-                                <a href={`tel:${patrollingOfficerDetails.phone}`}>
+                                <a href={`tel:${supervisorDetails.phone}`}>
                                   <Phone className="mr-2 h-4 w-4" />
-                                  Contact Patrolling Officer
+                                  Contact Supervisor
                                 </a>
                               </DropdownMenuItem>
                             )}
@@ -191,14 +191,14 @@ export default function AgencyHomePage() {
       <AgencyAnalyticsDashboard
         guards={agencyGuards}
         sites={agencySites}
-        patrollingOfficers={agencyPatrollingOfficers}
+        supervisors={agencySupervisors}
       />
 
       <IncidentStatusBreakdown incidents={monthlyFilteredIncidents} />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <GuardPerformanceBreakdown guards={agencyGuards} />
-        <PatrollingOfficerPerformance patrollingOfficers={agencyPatrollingOfficers} sites={agencySites} />
+        <SupervisorPerformance supervisors={agencySupervisors} sites={agencySites} />
       </div>
 
       <AgencyIncidentChart incidents={monthlyFilteredIncidents} />

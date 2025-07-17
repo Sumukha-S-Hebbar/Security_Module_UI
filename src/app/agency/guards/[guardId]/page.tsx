@@ -48,7 +48,7 @@ export default function AgencyGuardReportPage() {
   }
 
   const site = sites.find((s) => s.name === guard.site);
-  const patrollingOfficer = site ? patrollingOfficers.find(p => p.id === site.patrollingOfficerId) : undefined;
+  const supervisor = site ? patrollingOfficers.find(p => p.id === site.patrollingOfficerId) : undefined;
   const guardIncidents = incidents.filter(i => i.guard === guard.name);
 
   const handleDownloadReport = () => {
@@ -133,12 +133,12 @@ export default function AgencyGuardReportPage() {
                 </div>
               </div>
             )}
-            {patrollingOfficer && (
+            {supervisor && (
               <div className="flex items-start gap-3">
                 <UserCheck className="h-5 w-5 mt-0.5 text-primary" />
                 <div>
-                  <p className="font-semibold text-foreground">Patrolling Officer</p>
-                  <p>{patrollingOfficer.name}</p>
+                  <p className="font-semibold text-foreground">Supervisor</p>
+                  <p>{supervisor.name}</p>
                 </div>
               </div>
             )}

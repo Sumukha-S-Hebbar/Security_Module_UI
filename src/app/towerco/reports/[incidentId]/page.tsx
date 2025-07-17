@@ -40,7 +40,7 @@ export default function IncidentReportPage() {
   const site = sites.find((s) => s.id === incident.siteId);
   const agency = site ? securityAgencies.find((a) => a.id === site.agencyId) : undefined;
   const guard = guards.find((g) => g.id === incident.raisedByGuardId);
-  const patrollingOfficer = patrollingOfficers.find((p) => p.id === incident.attendedByPatrollingOfficerId);
+  const supervisor = patrollingOfficers.find((p) => p.id === incident.attendedByPatrollingOfficerId);
 
   const handleDownloadReport = () => {
     toast({
@@ -171,18 +171,18 @@ export default function IncidentReportPage() {
             </CardContent>
           </Card>
         )}
-        {patrollingOfficer && (
+        {supervisor && (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <UserCheck className="h-5 w-5 text-primary" />
-                Patrolling Officer
+                Supervisor
               </CardTitle>
             </CardHeader>
             <CardContent className="text-sm space-y-2">
-              <p><strong>Name:</strong> {patrollingOfficer.name}</p>
-              <div className="flex items-center gap-2"><Phone className="h-4 w-4" /> <a href={`tel:${patrollingOfficer.phone}`} className="hover:underline">{patrollingOfficer.phone}</a></div>
-              <div className="flex items-center gap-2"><Mail className="h-4 w-4" /> <a href={`mailto:${patrollingOfficer.email}`} className="hover:underline">{patrollingOfficer.email}</a></div>
+              <p><strong>Name:</strong> {supervisor.name}</p>
+              <div className="flex items-center gap-2"><Phone className="h-4 w-4" /> <a href={`tel:${supervisor.phone}`} className="hover:underline">{supervisor.phone}</a></div>
+              <div className="flex items-center gap-2"><Mail className="h-4 w-4" /> <a href={`mailto:${supervisor.email}`} className="hover:underline">{supervisor.email}</a></div>
             </CardContent>
           </Card>
         )}

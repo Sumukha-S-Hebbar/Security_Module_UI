@@ -15,7 +15,7 @@ import { MapPin, Users, FileDown, ShieldAlert } from 'lucide-react';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 
-const LOGGED_IN_SUPERVISOR_ID = 'PO01'; // Simulate logged-in Patrolling Officer
+const LOGGED_IN_SUPERVISOR_ID = 'PO01'; // Simulate logged-in Supervisor
 
 export default function SitesPage() {
 

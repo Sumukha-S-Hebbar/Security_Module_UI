@@ -55,33 +55,33 @@ const addPatrollingOfficerFormSchema = z.object({
     email: z.string().email({ message: 'Valid email is required.' }),
 });
 
-export default function AgencyPatrollingOfficersPage() {
+export default function AgencySupervisorsPage() {
     const { toast } = useToast();
     const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
     const [isAdding, setIsAdding] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
-    const [selectedPatrollingOfficer, setSelectedPatrollingOfficer] = useState<PatrollingOfficer | null>(null);
+    const [selectedSupervisor, setSelectedSupervisor] = useState<PatrollingOfficer | null>(null);
 
     const agencySites = useMemo(() => sites.filter(site => site.agencyId === LOGGED_IN_AGENCY_ID), []);
     
-    const agencyPatrollingOfficers = useMemo(() => {
+    const agencySupervisors = useMemo(() => {
         const poIds = new Set(agencySites.map(s => s.patrollingOfficerId).filter(Boolean));
         return patrollingOfficers.filter(po => poIds.has(po.id));
     }, [agencySites]);
 
-    const getAssignedGuardsCount = (patrollingOfficerId: string) => {
-        const sitesForPO = agencySites.filter(s => s.patrollingOfficerId === patrollingOfficerId);
+    const getAssignedGuardsCount = (supervisorId: string) => {
+        const sitesForPO = agencySites.filter(s => s.patrollingOfficerId === supervisorId);
         const siteNamesForPO = new Set(sitesForPO.map(s => s.name));
         return guards.filter(g => siteNamesForPO.has(g.site)).length;
     };
 
-    const getAssignedSitesForPO = (patrollingOfficerId: string) => {
-        return agencySites.filter(s => s.patrollingOfficerId === patrollingOfficerId);
+    const getAssignedSitesForPO = (supervisorId: string) => {
+        return agencySites.filter(s => s.patrollingOfficerId === supervisorId);
     }
     
-    const sitesForSelectedPO = selectedPatrollingOfficer ? agencySites.filter(site => site.patrollingOfficerId === selectedPatrollingOfficer.id) : [];
+    const sitesForSelectedPO = selectedSupervisor ? agencySites.filter(site => site.patrollingOfficerId === selectedSupervisor.id) : [];
 
 
     const uploadForm = useForm<z.infer<typeof uploadFormSchema>>({
@@ -99,7 +99,7 @@ export default function AgencyPatrollingOfficersPage() {
         await new Promise((resolve) => setTimeout(resolve, 1500));
         toast({
             title: 'Upload Successful',
-            description: `File "${values.csvFile[0].name}" has been uploaded. Patrolling officer profiles would be processed.`,
+            description: `File "${values.csvFile[0].name}" has been uploaded. Supervisor profiles would be processed.`,
         });
         uploadForm.reset({ csvFile: undefined });
         setIsUploading(false);
@@ -108,32 +108,32 @@ export default function AgencyPatrollingOfficersPage() {
 
     async function onAddSubmit(values: z.infer<typeof addPatrollingOfficerFormSchema>) {
         setIsAdding(true);
-        console.log('New patrolling officer data:', values);
+        console.log('New supervisor data:', values);
         await new Promise((resolve) => setTimeout(resolve, 1500));
         toast({
-            title: 'Patrolling Officer Added',
-            description: `Patrolling officer "${values.name}" has been created successfully.`,
+            title: 'Supervisor Added',
+            description: `Supervisor "${values.name}" has been created successfully.`,
         });
         addForm.reset();
         setIsAdding(false);
         setIsAddDialogOpen(false);
     }
 
-    const filteredPatrollingOfficers = useMemo(() => {
-        return agencyPatrollingOfficers.filter((po) =>
+    const filteredSupervisors = useMemo(() => {
+        return agencySupervisors.filter((po) =>
             po.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
             po.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
             po.phone.includes(searchQuery)
         );
-    }, [searchQuery, agencyPatrollingOfficers]);
+    }, [searchQuery, agencySupervisors]);
 
     return (
       <>
         <div className="p-4 sm:p-6 lg:p-8 space-y-6">
             <div>
-                <h1 className="text-3xl font-bold tracking-tight">Patrolling Officer Management</h1>
+                <h1 className="text-3xl font-bold tracking-tight">Supervisor Management</h1>
                 <p className="text-muted-foreground">
-                    Add, view, and manage patrolling officers and their assigned guards.
+                    Add, view, and manage supervisors and their assigned patrolling officers.
                 </p>
             </div>
 
@@ -141,8 +141,8 @@ export default function AgencyPatrollingOfficersPage() {
                 <CardHeader>
                     <div className="flex flex-wrap items-center justify-between gap-4">
                         <div>
-                            <CardTitle>All Patrolling Officers</CardTitle>
-                            <CardDescription>A list of all patrolling officers in your agency.</CardDescription>
+                            <CardTitle>All Supervisors</CardTitle>
+                            <CardDescription>A list of all supervisors in your agency.</CardDescription>
                         </div>
                         <div className="flex items-center gap-2">
                              <Dialog open={isUploadDialogOpen} onOpenChange={setIsUploadDialogOpen}>
@@ -154,9 +154,9 @@ export default function AgencyPatrollingOfficersPage() {
                                 </DialogTrigger>
                                 <DialogContent>
                                     <DialogHeader>
-                                    <DialogTitle>Upload Patrolling Officer Profiles</DialogTitle>
+                                    <DialogTitle>Upload Supervisor Profiles</DialogTitle>
                                     <DialogDescription>
-                                        Upload a CSV file to add multiple patrolling officer profiles at once.
+                                        Upload a CSV file to add multiple supervisor profiles at once.
                                     </DialogDescription>
                                     </DialogHeader>
                                     <Form {...uploadForm}>
@@ -167,7 +167,7 @@ export default function AgencyPatrollingOfficersPage() {
                                                     name="csvFile"
                                                     render={({ field }) => (
                                                     <FormItem>
-                                                        <FormLabel>Patrolling Officer CSV File</FormLabel>
+                                                        <FormLabel>Supervisor CSV File</FormLabel>
                                                         <FormControl>
                                                         <Input
                                                             type="file"
@@ -208,14 +208,14 @@ export default function AgencyPatrollingOfficersPage() {
                                 <DialogTrigger asChild>
                                     <Button variant="outline">
                                         <PlusCircle className="mr-2 h-4 w-4" />
-                                        Add Patrolling Officer
+                                        Add Supervisor
                                     </Button>
                                 </DialogTrigger>
                                 <DialogContent>
                                     <DialogHeader>
-                                        <DialogTitle>Add a New Patrolling Officer</DialogTitle>
+                                        <DialogTitle>Add a New Supervisor</DialogTitle>
                                         <DialogDescription>
-                                            Fill in the details below to add a new patrolling officer.
+                                            Fill in the details below to add a new supervisor.
                                         </DialogDescription>
                                     </DialogHeader>
                                     <Form {...addForm}>
@@ -267,7 +267,7 @@ export default function AgencyPatrollingOfficersPage() {
                                                     Adding...
                                                     </>
                                                 ) : (
-                                                    "Add Patrolling Officer"
+                                                    "Add Supervisor"
                                                 )}
                                                 </Button>
                                             </DialogFooter>
@@ -281,7 +281,7 @@ export default function AgencyPatrollingOfficersPage() {
                         <Search className="absolute left-2.5 top-6.5 h-4 w-4 text-muted-foreground" />
                         <Input
                         type="search"
-                        placeholder="Search patrolling officers..."
+                        placeholder="Search supervisors..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[320px]"
@@ -290,33 +290,33 @@ export default function AgencyPatrollingOfficersPage() {
                 </CardHeader>
                 <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-6">
-                        {filteredPatrollingOfficers.length > 0 ? (
-                            filteredPatrollingOfficers.map((patrollingOfficer) => {
-                                const assignedGuardsCount = getAssignedGuardsCount(patrollingOfficer.id);
-                                const assignedSites = getAssignedSitesForPO(patrollingOfficer.id);
+                        {filteredSupervisors.length > 0 ? (
+                            filteredSupervisors.map((supervisor) => {
+                                const assignedGuardsCount = getAssignedGuardsCount(supervisor.id);
+                                const assignedSites = getAssignedSitesForPO(supervisor.id);
                                 return (
-                                <Card key={patrollingOfficer.id} className="flex flex-col">
+                                <Card key={supervisor.id} className="flex flex-col">
                                 <CardHeader>
                                     <div className="flex items-center gap-4">
                                         <Avatar className="h-12 w-12">
-                                            <AvatarImage src={patrollingOfficer.avatar} alt={patrollingOfficer.name} />
-                                            <AvatarFallback>{patrollingOfficer.name.charAt(0)}</AvatarFallback>
+                                            <AvatarImage src={supervisor.avatar} alt={supervisor.name} />
+                                            <AvatarFallback>{supervisor.name.charAt(0)}</AvatarFallback>
                                         </Avatar>
                                         <div>
-                                            <CardTitle className="text-lg">{patrollingOfficer.name}</CardTitle>
-                                            <CardDescription>ID: {patrollingOfficer.id}</CardDescription>
+                                            <CardTitle className="text-lg">{supervisor.name}</CardTitle>
+                                            <CardDescription>ID: {supervisor.id}</CardDescription>
                                         </div>
                                     </div>
                                 </CardHeader>
                                 <CardContent className="flex-grow space-y-2 text-sm">
                                     <div className="flex items-center gap-2 text-muted-foreground">
                                         <Phone className="h-4 w-4 flex-shrink-0" />
-                                        <a href={`tel:${patrollingOfficer.phone}`} className="hover:underline">{patrollingOfficer.phone}</a>
+                                        <a href={`tel:${supervisor.phone}`} className="hover:underline">{supervisor.phone}</a>
                                     </div>
                                     <div className="flex items-center gap-2 text-muted-foreground">
                                         <Mail className="h-4 w-4 flex-shrink-0" />
-                                        <a href={`mailto:${patrollingOfficer.email}`} className="truncate hover:underline">
-                                            {patrollingOfficer.email}
+                                        <a href={`mailto:${supervisor.email}`} className="truncate hover:underline">
+                                            {supervisor.email}
                                         </a>
                                     </div>
                                     <div className="flex items-center gap-2 text-muted-foreground">
@@ -330,7 +330,7 @@ export default function AgencyPatrollingOfficersPage() {
                                 </CardContent>
                                 <CardFooter className="grid grid-cols-2 gap-2">
                                     <Button asChild variant="outline" size="sm">
-                                        <Link href={`/agency/supervisors/${patrollingOfficer.id}`}>
+                                        <Link href={`/agency/supervisors/${supervisor.id}`}>
                                             <Eye className="mr-2 h-4 w-4" />
                                             View Report
                                         </Link>
@@ -338,7 +338,7 @@ export default function AgencyPatrollingOfficersPage() {
                                     <Button
                                         variant="outline"
                                         size="sm"
-                                        onClick={() => setSelectedPatrollingOfficer(patrollingOfficer)}
+                                        onClick={() => setSelectedSupervisor(supervisor)}
                                     >
                                         <Map className="mr-2 h-4 w-4" />
                                         View Sites ({assignedSites.length})
@@ -348,19 +348,19 @@ export default function AgencyPatrollingOfficersPage() {
                             )})
                         ) : (
                             <div className="col-span-full text-center text-muted-foreground py-10">
-                                No patrolling officers found.
+                                No supervisors found.
                             </div>
                         )}
                     </div>
                 </CardContent>
             </Card>
         </div>
-        <Dialog open={!!selectedPatrollingOfficer} onOpenChange={(isOpen) => !isOpen && setSelectedPatrollingOfficer(null)}>
+        <Dialog open={!!selectedSupervisor} onOpenChange={(isOpen) => !isOpen && setSelectedSupervisor(null)}>
             <DialogContent className="max-w-xl">
             <DialogHeader>
-                <DialogTitle>Sites Assigned to {selectedPatrollingOfficer?.name}</DialogTitle>
+                <DialogTitle>Sites Assigned to {selectedSupervisor?.name}</DialogTitle>
                 <DialogDescription>
-                A list of all sites managed by this patrolling officer.
+                A list of all sites managed by this supervisor.
                 </DialogDescription>
             </DialogHeader>
             <div className="pt-4">
@@ -383,7 +383,7 @@ export default function AgencyPatrollingOfficersPage() {
                 </Table>
                 ) : (
                 <p className="text-sm text-muted-foreground text-center py-4">
-                    No sites are assigned to this patrolling officer.
+                    No sites are assigned to this supervisor.
                 </p>
                 )}
             </div>
