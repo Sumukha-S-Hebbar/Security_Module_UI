@@ -62,9 +62,7 @@ export default function RootPage() {
         case 'A': // Agency
           router.push('/agency/home');
           break;
-        case 'S': // Supervisor
-          router.push('/supervisor/home');
-          break;
+        case 'S': // Supervisor role is now deprecated
         case 'P': // Patrolling Officer - Mobile App only
         default:
           toast({
