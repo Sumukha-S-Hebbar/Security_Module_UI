@@ -3,7 +3,10 @@
 
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { guards, sites, patrollingOfficers, incidents } from '@/lib/data';
+import { guards } from '@/lib/data/guards';
+import { sites } from '@/lib/data/sites';
+import { patrollingOfficers } from '@/lib/data/patrolling-officers';
+import { incidents } from '@/lib/data/incidents';
 import type { Incident, Guard, Site, PatrollingOfficer } from '@/types';
 import {
   Card,
@@ -49,7 +52,7 @@ export default function AgencyGuardReportPage() {
 
   const site = sites.find((s) => s.name === guard.site);
   const patrollingOfficer = site ? patrollingOfficers.find(p => p.id === site.patrollingOfficerId) : undefined;
-  const guardIncidents = incidents.filter(i => i.guard === guard.name);
+  const guardIncidents = incidents.filter(i => i.raisedByGuardId === guard.id);
 
   const handleDownloadReport = () => {
     toast({

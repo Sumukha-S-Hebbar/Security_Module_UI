@@ -36,7 +36,11 @@ import { SiteStatusBreakdown } from './_components/site-status-breakdown';
 import { IncidentChart } from './_components/incident-chart';
 import { AgencyPerformance } from './_components/agency-performance';
 import { Skeleton } from '@/components/ui/skeleton';
-import { securityAgencies as mockAgencies, incidents as mockIncidents, guards as mockGuards, patrollingOfficers as mockPatrollingOfficers, sites as mockSites } from '@/lib/data';
+import { securityAgencies as mockAgencies } from '@/lib/data/security-agencies';
+import { incidents as mockIncidents } from '@/lib/data/incidents';
+import { guards as mockGuards } from '@/lib/data/guards';
+import { patrollingOfficers as mockPatrollingOfficers } from '@/lib/data/patrolling-officers';
+import { sites as mockSites } from '@/lib/data/sites';
 
 
 const LOGGED_IN_TOWERCO = 'TowerCo Alpha'; // Simulate logged-in user

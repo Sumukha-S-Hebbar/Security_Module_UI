@@ -1,0 +1,20 @@
+import type { Incident } from './incident';
+
+export type Site = {
+  id: string;
+  name: string;
+  address: string;
+  city: string;
+  region: string;
+  country: string;
+  guards: string[]; // Guard IDs
+  reportUrl: string;
+  coords: { x: number; y: number }; // As percentages for map placement
+  visited: boolean;
+  towerco: string;
+  assignedOn?: string;
+  agencyId?: string;
+  patrollingOfficerId?: string;
+  geofencePerimeter?: number;
+  incidents?: Incident[];
+};

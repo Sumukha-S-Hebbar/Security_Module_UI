@@ -6,7 +6,9 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import type { Site, Guard, PatrollingOfficer } from '@/types';
-import { guards, patrollingOfficers, sites } from '@/lib/data';
+import { guards } from '@/lib/data/guards';
+import { patrollingOfficers } from '@/lib/data/patrolling-officers';
+import { sites } from '@/lib/data/sites';
 import {
   Table,
   TableBody,
@@ -82,8 +84,9 @@ export default function AgencyGuardsPage() {
     return agencyPatrollingOfficers.find(po => po.id === site.patrollingOfficerId);
   };
   
-  const assignedGuards = useMemo(() => agencyGuards.filter((guard) => getPatrollingOfficerForGuard(guard)), [agencyGuards, getPatrollingOfficerForGuard]);
-  const unassignedGuards = useMemo(() => agencyGuards.filter((guard) => !getPatrollingOfficerForGuard(guard)), [agencyGuards, getPatrollingOfficerForGuard]);
+  const assignedGuards = useMemo(() => agencyGuards.filter((guard) => getPatrollingOfficerForGuard(guard)), [agencyGuards]);
+
+  const unassignedGuards = useMemo(() => agencyGuards.filter((guard) => !getPatrollingOfficerForGuard(guard)), [agencyGuards]);
   
   const siteForSelectedGuard = useMemo(() => {
     if (!selectedGuard) return null;
@@ -123,7 +126,7 @@ export default function AgencyGuardsPage() {
 
       return matchesSearch && matchesSite && matchesPatrollingOfficer;
     });
-  }, [searchQuery, selectedSiteFilter, selectedPatrollingOfficerFilter, assignedGuards, getPatrollingOfficerForGuard]);
+  }, [searchQuery, selectedSiteFilter, selectedPatrollingOfficerFilter, assignedGuards]);
   
   const filteredUnassignedGuards = useMemo(() => {
     return unassignedGuards.filter((guard) => {
@@ -143,7 +146,7 @@ export default function AgencyGuardsPage() {
   const uniquePatrollingOfficers = useMemo(() => {
     const poIds = new Set(assignedGuards.map(g => getPatrollingOfficerForGuard(g)?.id).filter(Boolean));
     return agencyPatrollingOfficers.filter(po => poIds.has(po.id));
-  }, [assignedGuards, agencyPatrollingOfficers, getPatrollingOfficerForGuard]);
+  }, [assignedGuards, agencyPatrollingOfficers]);
 
 
   return (

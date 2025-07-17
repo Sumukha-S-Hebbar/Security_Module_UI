@@ -3,7 +3,10 @@
 
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { sites, incidents, guards, patrollingOfficers } from '@/lib/data';
+import { sites } from '@/lib/data/sites';
+import { incidents } from '@/lib/data/incidents';
+import { guards } from '@/lib/data/guards';
+import { patrollingOfficers } from '@/lib/data/patrolling-officers';
 import type { Incident } from '@/types';
 import {
   Card,

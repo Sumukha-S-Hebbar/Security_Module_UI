@@ -3,7 +3,10 @@
 
 import { useState, useMemo, useCallback } from 'react';
 import Link from 'next/link';
-import { sites, guards, patrollingOfficers, incidents } from '@/lib/data';
+import { sites } from '@/lib/data/sites';
+import { guards } from '@/lib/data/guards';
+import { patrollingOfficers } from '@/lib/data/patrolling-officers';
+import { incidents } from '@/lib/data/incidents';
 import type { Site, PatrollingOfficer } from '@/types';
 import {
   Card,
@@ -291,17 +294,15 @@ export default function AgencySitesPage() {
   }, [unassignedSearchQuery, unassignedSites, unassignedSelectedCountry, unassignedSelectedRegion, unassignedSelectedCity]);
 
   const siteIncidentsCount = useMemo(() => {
-    const counts: { [siteName: string]: number } = {};
+    const counts: { [siteId: string]: number } = {};
     incidents.forEach((incident) => {
-      if (agencySiteNames.has(incident.site)) {
-        if (!counts[incident.site]) {
-          counts[incident.site] = 0;
+        if (!counts[incident.siteId]) {
+          counts[incident.siteId] = 0;
         }
-        counts[incident.site]++;
-      }
+        counts[incident.siteId]++;
     });
     return counts;
-  }, [agencySiteNames, incidents]);
+  }, [incidents]);
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6">
@@ -399,7 +400,7 @@ export default function AgencySitesPage() {
             {filteredAssignedSites.length > 0 ? (
               filteredAssignedSites.map((site) => {
                 const patrollingOfficer = getPatrollingOfficerForSite(site.id);
-                const incidentsCount = siteIncidentsCount[site.name] || 0;
+                const incidentsCount = siteIncidentsCount[site.id] || 0;
                 return (
                   <Card key={site.id} className="flex flex-col">
                     <CardHeader>

@@ -4,12 +4,10 @@
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { useState, useMemo } from 'react';
-import {
-  securityAgencies,
-  sites,
-  incidents,
-  guards,
-} from '@/lib/data';
+import { securityAgencies } from '@/lib/data/security-agencies';
+import { sites } from '@/lib/data/sites';
+import { incidents } from '@/lib/data/incidents';
+import { guards } from '@/lib/data/guards';
 import type { Incident, Site } from '@/types';
 import {
   Card,

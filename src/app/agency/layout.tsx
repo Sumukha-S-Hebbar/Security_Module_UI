@@ -1,5 +1,5 @@
 
-import AgencySidebar from '@/components/agency/sidebar';
+import AgencySidebar from './sidebar';
 import {
   SidebarProvider,
   Sidebar,

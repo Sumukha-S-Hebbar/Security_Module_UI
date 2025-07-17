@@ -4,7 +4,11 @@
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { incidents, sites, securityAgencies, guards, patrollingOfficers } from '@/lib/data';
+import { incidents } from '@/lib/data/incidents';
+import { sites } from '@/lib/data/sites';
+import { securityAgencies } from '@/lib/data/security-agencies';
+import { guards } from '@/lib/data/guards';
+import { patrollingOfficers } from '@/lib/data/patrolling-officers';
 import type { Incident, Site, SecurityAgency, Guard, PatrollingOfficer } from '@/types';
 import {
   Card,

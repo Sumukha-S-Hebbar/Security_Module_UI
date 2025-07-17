@@ -6,7 +6,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useToast } from '@/hooks/use-toast';
-import { sites, securityAgencies } from '@/lib/data';
+import { sites } from '@/lib/data/sites';
+import { securityAgencies } from '@/lib/data/security-agencies';
 import type { Site, SecurityAgency } from '@/types';
 import {
   Card,

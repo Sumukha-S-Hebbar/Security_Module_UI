@@ -2,7 +2,10 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { incidents, guards, sites, patrollingOfficers } from '@/lib/data';
+import { incidents } from '@/lib/data/incidents';
+import { guards } from '@/lib/data/guards';
+import { sites } from '@/lib/data/sites';
+import { patrollingOfficers } from '@/lib/data/patrolling-officers';
 import type { Guard, PatrollingOfficer, Site } from '@/types';
 import { AgencyAnalyticsDashboard } from './_components/agency-analytics-dashboard';
 import {

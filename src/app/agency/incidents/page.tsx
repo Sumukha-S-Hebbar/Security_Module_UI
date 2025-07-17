@@ -3,7 +3,10 @@
 
 import { useState, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { incidents as initialIncidents, guards, patrollingOfficers, sites } from '@/lib/data';
+import { incidents as initialIncidents } from '@/lib/data/incidents';
+import { guards } from '@/lib/data/guards';
+import { patrollingOfficers } from '@/lib/data/patrolling-officers';
+import { sites } from '@/lib/data/sites';
 import type { Incident, Guard, PatrollingOfficer, Site } from '@/types';
 import {
   Table,

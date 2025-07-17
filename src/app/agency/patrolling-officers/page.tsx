@@ -5,7 +5,9 @@ import { useState, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { patrollingOfficers, guards, sites } from '@/lib/data';
+import { patrollingOfficers } from '@/lib/data/patrolling-officers';
+import { guards } from '@/lib/data/guards';
+import { sites } from '@/lib/data/sites';
 import type { PatrollingOfficer, Site } from '@/types';
 import {
   Card,

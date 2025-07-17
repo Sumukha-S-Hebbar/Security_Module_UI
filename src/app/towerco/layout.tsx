@@ -1,5 +1,5 @@
 
-import TowercoSidebar from '@/components/towerco/sidebar';
+import TowercoSidebar from './sidebar';
 import {
   SidebarProvider,
   Sidebar,
