@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useMemo } from 'react';
@@ -157,7 +156,7 @@ export default function TowercoIncidentsPage() {
 
   const getAgencyById = (id?: string): SecurityAgency | undefined => {
     if (!id) return undefined;
-    return securityAgencies.find((a) => a.id === a.id);
+    return securityAgencies.find((a) => a.id === id);
   };
   
   const getSiteById = (id: string): Site | undefined => {
