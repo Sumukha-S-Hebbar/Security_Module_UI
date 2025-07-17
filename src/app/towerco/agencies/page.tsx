@@ -4,7 +4,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { zodResolver } from '@zod/resolvers/zod';
 import * as z from 'zod';
 import { useToast } from '@/hooks/use-toast';
 import { sites } from '@/lib/data/sites';
@@ -191,7 +191,7 @@ export default function TowercoAgenciesPage() {
 
     const assignedSitesForSelectedAgency = useMemo(() => {
       if (!selectedAgencyForSites) return [];
-      return sites.filter(s => s.agencyId === selectedAgencyForSites.id && s.towerco === LOGGED_IN_TOWERCO);
+      return sites.filter(s => selectedAgencyForSites.siteIds.includes(s.id) && s.towerco === LOGGED_IN_TOWERCO);
     }, [selectedAgencyForSites]);
 
     return (

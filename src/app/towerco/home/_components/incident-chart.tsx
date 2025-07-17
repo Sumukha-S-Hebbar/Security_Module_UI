@@ -71,8 +71,10 @@ export function IncidentChart({
     );
 
     const siteToAgencyMap = new Map<string, string | undefined>();
-    sites.forEach((site) => {
-      siteToAgencyMap.set(site.id, site.agencyId);
+    securityAgencies.forEach((agency) => {
+        agency.siteIds.forEach(siteId => {
+            siteToAgencyMap.set(siteId, agency.id);
+        });
     });
 
     incidents.forEach((incident) => {
@@ -93,7 +95,7 @@ export function IncidentChart({
     });
 
     return monthlyData;
-  }, [incidents, sites, selectedYear, selectedCompany]);
+  }, [incidents, securityAgencies, selectedYear, selectedCompany]);
 
   const handleBarClick = (data: any, index: number) => {
     router.push(`/towerco/incidents?month=${index + 1}`);

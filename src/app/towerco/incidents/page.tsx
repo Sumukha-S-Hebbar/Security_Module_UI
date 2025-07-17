@@ -83,17 +83,23 @@ export default function TowercoIncidentsPage() {
       ),
     [towercoSiteIds, incidents]
   );
-
+  
   const agenciesOnSites = useMemo(() => {
-    const agencyIds = new Set(
-      towercoSites.map((s) => s.agencyId).filter(Boolean)
-    );
+    const agencyIds = new Set<string>();
+    securityAgencies.forEach(agency => {
+        agency.siteIds.forEach(siteId => {
+            if (towercoSiteIds.has(siteId)) {
+                agencyIds.add(agency.id);
+            }
+        })
+    });
     return securityAgencies.filter((a) => agencyIds.has(a.id));
-  }, [towercoSites]);
+  }, [towercoSiteIds]);
 
   const filteredIncidents = useMemo(() => {
     return towercoIncidents.filter((incident) => {
       const site = sites.find(s => s.id === incident.siteId);
+      const agency = site ? securityAgencies.find(a => a.siteIds.includes(site.id)) : undefined;
       const guard = guards.find(g => g.id === incident.raisedByGuardId);
       if (!site || !guard) return false;
 
@@ -104,7 +110,7 @@ export default function TowercoIncidentsPage() {
         guard.name.toLowerCase().includes(searchLower);
 
       const matchesAgency =
-        selectedAgency === 'all' || site.agencyId === selectedAgency;
+        selectedAgency === 'all' || agency?.id === selectedAgency;
 
       const incidentDate = new Date(incident.incidentTime);
       const matchesDate =
@@ -154,9 +160,8 @@ export default function TowercoIncidentsPage() {
     return patrollingOfficers.find((s) => s.id === id);
   };
 
-  const getAgencyById = (id?: string): SecurityAgency | undefined => {
-    if (!id) return undefined;
-    return securityAgencies.find((a) => a.id === id);
+  const getAgencyForSite = (siteId: string): SecurityAgency | undefined => {
+    return securityAgencies.find((a) => a.siteIds.includes(siteId));
   };
   
   const getSiteById = (id: string): Site | undefined => {
@@ -273,7 +278,7 @@ export default function TowercoIncidentsPage() {
               {filteredIncidents.length > 0 ? (
                 filteredIncidents.map((incident) => {
                   const site = getSiteById(incident.siteId);
-                  const agency = getAgencyById(site?.agencyId);
+                  const agency = site ? getAgencyForSite(site.id) : undefined;
                   const guard = getGuardById(incident.raisedByGuardId);
                   const patrollingOfficer = getPatrollingOfficerById(
                     incident.attendedByPatrollingOfficerId

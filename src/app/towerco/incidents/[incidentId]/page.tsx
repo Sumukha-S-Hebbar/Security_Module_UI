@@ -43,7 +43,7 @@ export default function IncidentReportPage() {
   }
 
   const site = sites.find((s) => s.id === incident.siteId);
-  const agency = site ? securityAgencies.find((a) => a.id === site.agencyId) : undefined;
+  const agency = site ? securityAgencies.find((a) => a.siteIds.includes(site.id)) : undefined;
   const guard = guards.find((g) => g.id === incident.raisedByGuardId);
   const patrollingOfficer = patrollingOfficers.find((p) => p.id === incident.attendedByPatrollingOfficerId);
 

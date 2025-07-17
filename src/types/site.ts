@@ -13,7 +13,6 @@ export type Site = {
   visited: boolean;
   towerco: string;
   assignedOn?: string;
-  agencyId?: string;
   patrollingOfficerId?: string;
   geofencePerimeter?: number;
   incidents?: Incident[];

@@ -3,7 +3,7 @@
 
 import { useState, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { zodResolver } from '@zod/resolvers/zod';
 import * as z from 'zod';
 import { useToast } from '@/hooks/use-toast';
 import { sites } from '@/lib/data/sites';
@@ -113,13 +113,17 @@ export default function TowercoSitesPage() {
     []
   );
 
+  const getAgencyForSite = (siteId: string): SecurityAgency | undefined => {
+    return securityAgencies.find(agency => agency.siteIds.includes(siteId));
+  }
+
   const assignedSites = useMemo(
-    () => towercoSites.filter((site) => site.agencyId),
+    () => towercoSites.filter((site) => getAgencyForSite(site.id)),
     [towercoSites]
   );
 
   const unassignedSites = useMemo(
-    () => towercoSites.filter((site) => !site.agencyId),
+    () => towercoSites.filter((site) => !getAgencyForSite(site.id)),
     [towercoSites]
   );
 
@@ -200,9 +204,13 @@ export default function TowercoSitesPage() {
   };
 
   const agenciesOnSites = useMemo(() => {
-    const agencyIds = new Set(
-      assignedSites.map((s) => s.agencyId).filter(Boolean)
-    );
+    const agencyIds = new Set<string>();
+    assignedSites.forEach(site => {
+        const agency = getAgencyForSite(site.id);
+        if(agency) {
+            agencyIds.add(agency.id);
+        }
+    });
     return securityAgencies.filter((a) => agencyIds.has(a.id));
   }, [assignedSites]);
 
@@ -238,8 +246,9 @@ export default function TowercoSitesPage() {
         site.name.toLowerCase().includes(searchLower) ||
         site.address.toLowerCase().includes(searchLower);
 
+      const agency = getAgencyForSite(site.id);
       const matchesAgency =
-        selectedAgency === 'all' || site.agencyId === selectedAgency;
+        selectedAgency === 'all' || agency?.id === selectedAgency;
 
       const matchesRegion = assignedSelectedRegion === 'all' || site.region === assignedSelectedRegion;
       const matchesCity = assignedSelectedCity === 'all' || site.city === assignedSelectedCity;
@@ -269,10 +278,9 @@ export default function TowercoSitesPage() {
   }, [unassignedSearchQuery, unassignedSites, unassignedSelectedRegion, unassignedSelectedCity]);
 
 
-  const getAgencyName = (agencyId?: string) => {
-    return (
-      securityAgencies.find((a) => a.id === agencyId)?.name || 'Unassigned'
-    );
+  const getAgencyName = (siteId: string) => {
+    const agency = getAgencyForSite(siteId);
+    return agency ? agency.name : 'Unassigned';
   };
 
   return (
@@ -521,53 +529,56 @@ export default function TowercoSitesPage() {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-6">
             {filteredAssignedSites.length > 0 ? (
-              filteredAssignedSites.map((site) => (
-                <Card key={site.id} className="flex flex-col">
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <CardTitle className="text-lg">{site.name}</CardTitle>
-                        <CardDescription>ID: {site.id}</CardDescription>
-                      </div>
-                      <Badge
-                        variant={site.agencyId ? 'secondary' : 'destructive'}
-                      >
-                        {site.agencyId ? 'Assigned' : 'Unassigned'}
-                      </Badge>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="flex-grow space-y-2 text-sm">
-                    <div className="flex items-start gap-2 text-muted-foreground">
-                      <MapPin className="h-4 w-4 flex-shrink-0 mt-1" />
-                      <span>{site.address}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-muted-foreground">
-                      <Briefcase className="h-4 w-4 flex-shrink-0" />
-                      <span>{getAgencyName(site.agencyId)}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-muted-foreground">
-                      <ShieldAlert className="h-4 w-4 flex-shrink-0" />
-                      <span>{site.incidents?.length || 0} Incidents</span>
-                    </div>
-                  </CardContent>
-                  <CardFooter className="grid grid-cols-2 gap-2">
-                    <Button asChild variant="outline" size="sm">
-                      <Link href={`/towerco/sites/${site.id}`}>
-                        <Eye className="mr-2 h-4 w-4" />
-                        View Report
-                      </Link>
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleDownloadReport(site.name)}
-                    >
-                      <FileDown className="mr-2 h-4 w-4" />
-                      Download Report
-                    </Button>
-                  </CardFooter>
-                </Card>
-              ))
+              filteredAssignedSites.map((site) => {
+                const isAssigned = !!getAgencyForSite(site.id);
+                return (
+                    <Card key={site.id} className="flex flex-col">
+                    <CardHeader>
+                        <div className="flex items-start justify-between">
+                        <div>
+                            <CardTitle className="text-lg">{site.name}</CardTitle>
+                            <CardDescription>ID: {site.id}</CardDescription>
+                        </div>
+                        <Badge
+                            variant={isAssigned ? 'secondary' : 'destructive'}
+                        >
+                            {isAssigned ? 'Assigned' : 'Unassigned'}
+                        </Badge>
+                        </div>
+                    </CardHeader>
+                    <CardContent className="flex-grow space-y-2 text-sm">
+                        <div className="flex items-start gap-2 text-muted-foreground">
+                        <MapPin className="h-4 w-4 flex-shrink-0 mt-1" />
+                        <span>{site.address}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                        <Briefcase className="h-4 w-4 flex-shrink-0" />
+                        <span>{getAgencyName(site.id)}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                        <ShieldAlert className="h-4 w-4 flex-shrink-0" />
+                        <span>{site.incidents?.length || 0} Incidents</span>
+                        </div>
+                    </CardContent>
+                    <CardFooter className="grid grid-cols-2 gap-2">
+                        <Button asChild variant="outline" size="sm">
+                        <Link href={`/towerco/sites/${site.id}`}>
+                            <Eye className="mr-2 h-4 w-4" />
+                            View Report
+                        </Link>
+                        </Button>
+                        <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleDownloadReport(site.name)}
+                        >
+                        <FileDown className="mr-2 h-4 w-4" />
+                        Download Report
+                        </Button>
+                    </CardFooter>
+                    </Card>
+                )
+              })
             ) : (
               <div className="col-span-full text-center text-muted-foreground py-10">
                 No assigned sites found for the current filter.

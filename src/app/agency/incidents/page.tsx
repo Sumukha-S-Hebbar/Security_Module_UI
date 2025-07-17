@@ -7,6 +7,7 @@ import { incidents as initialIncidents } from '@/lib/data/incidents';
 import { guards } from '@/lib/data/guards';
 import { patrollingOfficers } from '@/lib/data/patrolling-officers';
 import { sites } from '@/lib/data/sites';
+import { securityAgencies } from '@/lib/data/security-agencies';
 import type { Incident, Guard, PatrollingOfficer, Site } from '@/types';
 import {
   Table,
@@ -64,8 +65,10 @@ export default function AgencyIncidentsPage() {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [selectedMonth, setSelectedMonth] = useState(monthFromQuery || 'all');
 
-  const agencySites = useMemo(() => sites.filter(site => site.agencyId === LOGGED_IN_AGENCY_ID), []);
-  const agencySiteIds = useMemo(() => new Set(agencySites.map(site => site.id)), [agencySites]);
+  const agencySiteIds = useMemo(() => {
+    const agency = securityAgencies.find(a => a.id === LOGGED_IN_AGENCY_ID);
+    return new Set(agency ? agency.siteIds : []);
+  }, []);
 
   const agencyIncidents = useMemo(() => incidents.filter(
     (incident) => agencySiteIds.has(incident.siteId)

@@ -28,7 +28,7 @@ export function AgencyPerformance({
 
   const performanceData = useMemo(() => {
     const data: AgencyPerformanceData[] = agencies.map((agency) => {
-      const agencySiteIds = new Set(sites.filter((site) => site.agencyId === agency.id).map(s => s.id));
+      const agencySiteIds = new Set(agency.siteIds);
       const agencyIncidents = incidents.filter(
         (incident) => agencySiteIds.has(incident.siteId)
       );
@@ -59,7 +59,7 @@ export function AgencyPerformance({
 
     // Sort by performance descending
     return data.sort((a, b) => b.performance - a.performance);
-  }, [agencies, sites, incidents]);
+  }, [agencies, incidents]);
 
   const filteredPerformanceData = useMemo(() => {
     if (selectedAgency === 'all') {

@@ -7,6 +7,7 @@ import { sites } from '@/lib/data/sites';
 import { guards } from '@/lib/data/guards';
 import { patrollingOfficers } from '@/lib/data/patrolling-officers';
 import { incidents } from '@/lib/data/incidents';
+import { securityAgencies } from '@/lib/data/security-agencies';
 import type { Site, PatrollingOfficer } from '@/types';
 import {
   Card,
@@ -80,10 +81,16 @@ export default function AgencySitesPage() {
   const [unassignedSelectedRegion, setUnassignedSelectedRegion] = useState('all');
   const [unassignedSelectedCity, setUnassignedSelectedCity] = useState('all');
 
+  const agencySiteIds = useMemo(() => {
+      const agency = securityAgencies.find(a => a.id === LOGGED_IN_AGENCY_ID);
+      return new Set(agency ? agency.siteIds : []);
+  }, []);
+
   const agencySites = useMemo(
-    () => sites.filter((site) => site.agencyId === LOGGED_IN_AGENCY_ID),
-    []
+    () => sites.filter((site) => agencySiteIds.has(site.id)),
+    [agencySiteIds]
   );
+  
   const agencySiteNames = useMemo(
     () => new Set(agencySites.map((s) => s.name)),
     [agencySites]

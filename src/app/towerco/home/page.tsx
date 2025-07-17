@@ -126,10 +126,10 @@ export default function TowercoHomePage() {
       return data.patrollingOfficers.find((p) => p.id === id);
   };
 
-  const getAgencyById = (id?: string): SecurityAgency | undefined => {
-    if (!id || !data) return undefined;
-    return data.agencies.find((a) => a.id === id);
-  };
+  const getAgencyForSite = (siteId: string): SecurityAgency | undefined => {
+    if (!data) return undefined;
+    return data.agencies.find(a => a.siteIds.includes(siteId));
+  }
 
   const getSiteById = (id: string): Site | undefined => {
       if (!data) return undefined;
@@ -208,7 +208,7 @@ export default function TowercoHomePage() {
                   const patrollingOfficerDetails = getPatrollingOfficerById(
                     incident.attendedByPatrollingOfficerId
                   );
-                  const agencyDetails = getAgencyById(siteDetails?.agencyId);
+                  const agencyDetails = siteDetails ? getAgencyForSite(siteDetails.id) : undefined;
                   const incidentDate = new Date(incident.incidentTime);
 
                   return (
@@ -278,7 +278,7 @@ export default function TowercoHomePage() {
         incidents={activeEmergencies}
       />
 
-      <SiteStatusBreakdown sites={data.sites} />
+      <SiteStatusBreakdown sites={data.sites} agencies={data.agencies} />
 
       <AgencyPerformance
         agencies={data.agencies}

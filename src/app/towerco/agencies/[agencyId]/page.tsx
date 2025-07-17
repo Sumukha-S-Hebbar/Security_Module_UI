@@ -101,7 +101,7 @@ export default function AgencyReportPage() {
 
   const agencySites = sites.filter(
     (site) =>
-      site.agencyId === agency.id && site.towerco === LOGGED_IN_TOWERCO
+      agency.siteIds.includes(site.id) && site.towerco === LOGGED_IN_TOWERCO
   );
   const agencySiteIds = new Set(agencySites.map((site) => site.id));
 

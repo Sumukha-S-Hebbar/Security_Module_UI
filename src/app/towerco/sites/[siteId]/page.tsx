@@ -47,7 +47,7 @@ export default function SiteReportPage() {
     );
   }
 
-  const agency = securityAgencies.find((a) => a.id === site.agencyId);
+  const agency = securityAgencies.find((a) => a.siteIds.includes(site.id));
   const siteIncidents = incidents.filter(
     (incident) => incident.siteId === site.id
   );

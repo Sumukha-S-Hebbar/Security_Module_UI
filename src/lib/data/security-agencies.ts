@@ -11,6 +11,7 @@ export const securityAgencies: SecurityAgency[] = [
     region: 'CA',
     country: 'USA',
     avatar: 'https://placehold.co/100x100.png',
+    siteIds: ['SITE01', 'SITE02', 'SITE03', 'SITE07', 'SITE08', 'SITE09', 'SITE10'],
   },
   {
     id: 'AGY02',
@@ -22,6 +23,7 @@ export const securityAgencies: SecurityAgency[] = [
     region: 'WA',
     country: 'USA',
     avatar: 'https://placehold.co/100x100.png',
+    siteIds: ['SITE04'],
   },
   {
     id: 'AGY03',
@@ -33,5 +35,6 @@ export const securityAgencies: SecurityAgency[] = [
     region: 'NY',
     country: 'USA',
     avatar: 'https://placehold.co/100x100.png',
+    siteIds: ['SITE05', 'SITE06'],
   },
 ];

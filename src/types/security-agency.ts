@@ -8,4 +8,5 @@ export type SecurityAgency = {
   region: string;
   country: string;
   avatar: string;
+  siteIds: string[];
 };

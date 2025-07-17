@@ -1,11 +1,11 @@
 'use client';
 
-import type { Site } from '@/types';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import type { Site, SecurityAgency } from '@/types';
 
-export function SiteStatusBreakdown({ sites }: { sites: Site[] }) {
+export function SiteStatusBreakdown({ sites, agencies }: { sites: Site[]; agencies: SecurityAgency[] }) {
   const totalSites = sites.length;
-  const assignedSitesCount = sites.filter((site) => site.agencyId).length;
+  const assignedSiteIds = new Set(agencies.flatMap(a => a.siteIds));
+  const assignedSitesCount = sites.filter((site) => assignedSiteIds.has(site.id)).length;
   const unassignedSitesCount = totalSites - assignedSitesCount;
 
   const assignedPercentage =
