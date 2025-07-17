@@ -65,7 +65,7 @@ const addAgencyFormSchema = z.object({
 
 async function getAgencies(): Promise<SecurityAgency[]> {
     // TODO: This is a mocked endpoint. Please replace with your actual Django API endpoint.
-    const API_URL = 'https://ken.towerbuddy.tel:8000/api/v1/agencies/';
+    const API_URL = 'https://ken.securebuddy.tel:8000/api/v1/agencies/';
     
     // The API should return a JSON array of security agency objects.
     // Example response:
@@ -170,6 +170,24 @@ export default function TowercoAgenciesPage() {
         }
     });
 
+    const watchedRegion = addAgencyForm.watch('region');
+
+    const citiesForAddForm = useMemo(() => {
+        if (!watchedRegion) return [];
+        // In a real app, you might fetch this from an API: /api/regions/${watchedRegion}/cities
+        // For now, we derive it from the existing agencies data.
+        const allCities = new Set(mockAgencies
+            .filter(agency => agency.region === watchedRegion)
+            .map(agency => agency.city)
+        );
+        return Array.from(allCities).sort();
+    }, [watchedRegion]);
+
+    useEffect(() => {
+        // Reset city when region changes
+        addAgencyForm.resetField('city');
+    }, [watchedRegion, addAgencyForm]);
+
     async function onUploadSubmit(values: z.infer<typeof uploadFormSchema>) {
         setIsUploading(true);
         console.log('Uploaded file:', values.csvFile[0]);
@@ -195,7 +213,7 @@ export default function TowercoAgenciesPage() {
 
         const newAgency: SecurityAgency = {
             ...values,
-            country: 'USA', // Defaulting country as it's not in the form
+            country: 'USA',
             avatar: `https://placehold.co/100x100.png?text=${values.name.charAt(0)}`,
             siteIds: [],
         };
@@ -404,26 +422,48 @@ export default function TowercoAgenciesPage() {
                                             />
                                             <FormField
                                                 control={addAgencyForm.control}
-                                                name="city"
-                                                render={({ field }) => (
-                                                    <FormItem>
-                                                        <FormLabel>City</FormLabel>
-                                                        <FormControl>
-                                                            <Input placeholder="e.g., Safe City" {...field} />
-                                                        </FormControl>
-                                                        <FormMessage />
-                                                    </FormItem>
-                                                )}
-                                            />
-                                             <FormField
-                                                control={addAgencyForm.control}
                                                 name="region"
                                                 render={({ field }) => (
                                                     <FormItem>
                                                         <FormLabel>Region</FormLabel>
-                                                        <FormControl>
-                                                            <Input placeholder="e.g., CA" {...field} />
-                                                        </FormControl>
+                                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                            <FormControl>
+                                                                <SelectTrigger>
+                                                                    <SelectValue placeholder="Select a region" />
+                                                                </SelectTrigger>
+                                                            </FormControl>
+                                                            <SelectContent>
+                                                                {regions.map((region) => (
+                                                                    <SelectItem key={region} value={region}>
+                                                                        {region}
+                                                                    </SelectItem>
+                                                                ))}
+                                                            </SelectContent>
+                                                        </Select>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                            <FormField
+                                                control={addAgencyForm.control}
+                                                name="city"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>City</FormLabel>
+                                                         <Select onValueChange={field.onChange} value={field.value} disabled={!watchedRegion}>
+                                                            <FormControl>
+                                                                <SelectTrigger>
+                                                                    <SelectValue placeholder="Select a city" />
+                                                                </SelectTrigger>
+                                                            </FormControl>
+                                                            <SelectContent>
+                                                                {citiesForAddForm.map((city) => (
+                                                                    <SelectItem key={city} value={city}>
+                                                                        {city}
+                                                                    </SelectItem>
+                                                                ))}
+                                                            </SelectContent>
+                                                        </Select>
                                                         <FormMessage />
                                                     </FormItem>
                                                 )}
