@@ -38,7 +38,7 @@ export default function RootPage() {
     setIsLoading(true);
 
     try {
-      const response = await fetch('https://ken.securebuddy.tel:8000/api/v1/auth/token/', {
+      const response = await fetch('https://ken.towerbuddy.tel:8000/api/v1/auth/token/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username: email, password }),
