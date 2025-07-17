@@ -71,18 +71,20 @@ async function getAgencies(): Promise<SecurityAgency[]> {
     // Example response:
     // [
     //   {
-    //     "id": "AGY01",
-    //     "name": "GuardLink Security",
-    //     "phone": "555-001-0001",
-    //     "email": "contact@guardlink.com",
-    //     "address": "123 Security Blvd, Safe City, CA, USA",
-    //     "city": "Safe City",
-    //     "region": "CA",
-    //     "country": "USA",
-    //     "avatar": "https://placehold.co/100x100.png",
-    //     "siteIds": ["SITE01", "SITE02"]
+    //     "id": "string",
+    //     "name": "string",
+    //     "phone": "string",
+    //     "email": "string",
+    //     "address": "string",
+    //     "city": "string",
+    //     "region": "string",
+    //     "country": "string",
+    //     "avatar": "string (URL to an image)",
+    //     "siteIds": ["string", "string", ...]
     //   },
-    //   ...
+    //   {
+    //     "...another agency object"
+    //   }
     // ]
     
     try {
@@ -106,9 +108,23 @@ async function getAgencies(): Promise<SecurityAgency[]> {
     }
 }
 
+async function getRegions(): Promise<string[]> {
+    // TODO: This is a mocked endpoint. It should fetch the list of available regions from your backend.
+    // Example response: ["CA", "WA", "NY", "TX"]
+    try {
+         await new Promise(resolve => setTimeout(resolve, 500));
+         const uniqueRegions = [...new Set(mockAgencies.map(agency => agency.region))];
+         return uniqueRegions.sort();
+    } catch (error) {
+        console.error("Could not fetch regions, returning empty array.", error);
+        return [];
+    }
+}
+
 
 export default function TowercoAgenciesPage() {
     const [securityAgencies, setSecurityAgencies] = useState<SecurityAgency[]>([]);
+    const [regions, setRegions] = useState<string[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
     const [isAddAgencyDialogOpen, setIsAddAgencyDialogOpen] = useState(false);
@@ -126,8 +142,12 @@ export default function TowercoAgenciesPage() {
     useEffect(() => {
         const fetchData = async () => {
             setIsLoading(true);
-            const agencies = await getAgencies();
-            setSecurityAgencies(agencies);
+            const [agenciesData, regionsData] = await Promise.all([
+                getAgencies(),
+                getRegions(),
+            ]);
+            setSecurityAgencies(agenciesData);
+            setRegions(regionsData);
             setIsLoading(false);
         };
         fetchData();
@@ -192,7 +212,6 @@ export default function TowercoAgenciesPage() {
         setIsAddAgencyDialogOpen(false);
     }
     
-    const regions = useMemo(() => [...new Set(securityAgencies.map((agency) => agency.region))].sort(), [securityAgencies]);
     const cities = useMemo(() => {
         if (selectedRegion === 'all') return [];
         return [...new Set(securityAgencies.filter((agency) => agency.region === selectedRegion).map((agency) => agency.city))].sort();
@@ -275,7 +294,7 @@ export default function TowercoAgenciesPage() {
                                                         />
                                                         </FormControl>
                                                         <FormDescription>
-                                                        The CSV should contain columns: name, phone, email, address, city, region.
+                                                        The CSV should contain columns: id, name, phone, email, address, city, region.
                                                         </FormDescription>
                                                         <FormMessage />
                                                     </FormItem>
@@ -594,5 +613,3 @@ export default function TowercoAgenciesPage() {
         </div>
     );
 }
-
-    
