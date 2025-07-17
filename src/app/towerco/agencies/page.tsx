@@ -25,13 +25,6 @@ import {
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
   Table,
   TableBody,
   TableCell,
@@ -57,9 +50,6 @@ const addAgencyFormSchema = z.object({
     phone: z.string().min(1, { message: 'Phone is required.' }),
     email: z.string().email({ message: 'Valid email is required.' }),
     address: z.string().min(1, { message: 'Address is required.' }),
-    city: z.string().min(1, { message: 'City is required.' }),
-    region: z.string().min(1, { message: 'Region is required.' }),
-    country: z.string().min(1, { message: 'Country is required.' }),
 });
 
 async function getAgencies(): Promise<SecurityAgency[]> {
@@ -86,9 +76,6 @@ async function getAgencies(): Promise<SecurityAgency[]> {
             email: 'contact@guardlink.com',
             address: '123 Security Blvd, Safe City, CA, USA',
             avatar: 'https://placehold.co/100x100.png',
-            city: 'Safe City',
-            region: 'CA',
-            country: 'USA',
           },
           {
             id: 'AGY02',
@@ -97,9 +84,6 @@ async function getAgencies(): Promise<SecurityAgency[]> {
             email: 'info@vigilantwatch.com',
             address: '456 Protector Ave, Secure Town, WA, USA',
             avatar: 'https://placehold.co/100x100.png',
-            city: 'Secure Town',
-            region: 'WA',
-            country: 'USA',
           },
           {
             id: 'AGY03',
@@ -108,9 +92,6 @@ async function getAgencies(): Promise<SecurityAgency[]> {
             email: 'support@aegispro.com',
             address: '789 Guardian Way, Metroplex, NY, USA',
             avatar: 'https://placehold.co/100x100.png',
-            city: 'Metroplex',
-            region: 'NY',
-            country: 'USA',
           },
         ];
 
@@ -131,9 +112,6 @@ export default function TowercoAgenciesPage() {
     const [selectedAgencyForSites, setSelectedAgencyForSites] = useState<SecurityAgency | null>(null);
     const { toast } = useToast();
     const [searchQuery, setSearchQuery] = useState('');
-    const [selectedCountry, setSelectedCountry] = useState('all');
-    const [selectedRegion, setSelectedRegion] = useState('all');
-    const [selectedCity, setSelectedCity] = useState('all');
 
     useEffect(() => {
         const fetchData = async () => {
@@ -157,9 +135,6 @@ export default function TowercoAgenciesPage() {
             phone: '',
             email: '',
             address: '',
-            city: '',
-            region: '',
-            country: '',
         }
     });
 
@@ -195,66 +170,17 @@ export default function TowercoAgenciesPage() {
         setIsAddAgencyDialogOpen(false);
     }
 
-    const countries = useMemo(() => {
-        const allCountries = securityAgencies.map((agency) => agency.country);
-        return [...new Set(allCountries)];
-    }, [securityAgencies]);
-
-    const regions = useMemo(() => {
-        if (selectedCountry === 'all') {
-            return [];
-        }
-        const allRegions = securityAgencies
-            .filter((agency) => agency.country === selectedCountry)
-            .map((agency) => agency.region);
-        return [...new Set(allRegions)];
-    }, [selectedCountry, securityAgencies]);
-
-    const cities = useMemo(() => {
-        if (selectedRegion === 'all' || selectedCountry === 'all') {
-            return [];
-        }
-        const allCities = securityAgencies
-            .filter((agency) => agency.country === selectedCountry && agency.region === selectedRegion)
-            .map((agency) => agency.city);
-        return [...new Set(allCities)];
-    }, [selectedCountry, selectedRegion, securityAgencies]);
-
-    const handleCountryChange = (country: string) => {
-        setSelectedCountry(country);
-        setSelectedRegion('all');
-        setSelectedCity('all');
-    };
-
-    const handleRegionChange = (region: string) => {
-        setSelectedRegion(region);
-        setSelectedCity('all');
-    };
-
-
     const filteredAgencies = useMemo(() => {
         return securityAgencies.filter((agency) => {
             const searchLower = searchQuery.toLowerCase();
-            const matchesSearch =
+            return (
                 agency.name.toLowerCase().includes(searchLower) ||
                 agency.id.toLowerCase().includes(searchLower) ||
                 agency.email.toLowerCase().includes(searchLower) ||
-                agency.city.toLowerCase().includes(searchLower) ||
-                agency.region.toLowerCase().includes(searchLower) ||
-                agency.country.toLowerCase().includes(searchLower);
-
-            const matchesCountry =
-                selectedCountry === 'all' || agency.country === selectedCountry;
-
-            const matchesRegion =
-                selectedRegion === 'all' || agency.region === selectedRegion;
-            
-            const matchesCity =
-                selectedCity === 'all' || agency.city === selectedCity;
-
-            return matchesSearch && matchesCountry && matchesRegion && matchesCity;
+                agency.address.toLowerCase().includes(searchLower)
+            );
         });
-    }, [searchQuery, selectedCountry, selectedRegion, selectedCity, securityAgencies]);
+    }, [searchQuery, securityAgencies]);
 
     const assignedSitesForSelectedAgency = useMemo(() => {
       if (!selectedAgencyForSites) return [];
@@ -311,7 +237,7 @@ export default function TowercoAgenciesPage() {
                                                         />
                                                         </FormControl>
                                                         <FormDescription>
-                                                        The CSV should contain columns: name, phone, email, address, city, region, country.
+                                                        The CSV should contain columns: name, phone, email, address.
                                                         </FormDescription>
                                                         <FormMessage />
                                                     </FormItem>
@@ -413,53 +339,12 @@ export default function TowercoAgenciesPage() {
                                                     <FormItem>
                                                         <FormLabel>Address</FormLabel>
                                                         <FormControl>
-                                                            <Input placeholder="e.g., 123 Security Blvd" {...field} />
+                                                            <Input placeholder="e.g., 123 Security Blvd, Safe City, CA, USA" {...field} />
                                                         </FormControl>
                                                         <FormMessage />
                                                     </FormItem>
                                                 )}
                                             />
-                                            <div className="grid grid-cols-3 gap-4">
-                                                <FormField
-                                                    control={addAgencyForm.control}
-                                                    name="city"
-                                                    render={({ field }) => (
-                                                        <FormItem>
-                                                            <FormLabel>City</FormLabel>
-                                                            <FormControl>
-                                                                <Input placeholder="e.g., Metroplex" {...field} />
-                                                            </FormControl>
-                                                            <FormMessage />
-                                                        </FormItem>
-                                                    )}
-                                                />
-                                                <FormField
-                                                    control={addAgencyForm.control}
-                                                    name="region"
-                                                    render={({ field }) => (
-                                                        <FormItem>
-                                                            <FormLabel>Region</FormLabel>
-                                                            <FormControl>
-                                                                <Input placeholder="e.g., NY" {...field} />
-                                                            </FormControl>
-                                                            <FormMessage />
-                                                        </FormItem>
-                                                    )}
-                                                />
-                                                <FormField
-                                                    control={addAgencyForm.control}
-                                                    name="country"
-                                                    render={({ field }) => (
-                                                        <FormItem>
-                                                            <FormLabel>Country</FormLabel>
-                                                            <FormControl>
-                                                                <Input placeholder="e.g., USA" {...field} />
-                                                            </FormControl>
-                                                            <FormMessage />
-                                                        </FormItem>
-                                                    )}
-                                                />
-                                            </div>
                                             <DialogFooter>
                                                 <Button type="submit" disabled={isAddingAgency}>
                                                 {isAddingAgency ? (
@@ -489,45 +374,6 @@ export default function TowercoAgenciesPage() {
                             className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[320px]"
                           />
                         </div>
-                        <Select value={selectedCountry} onValueChange={handleCountryChange}>
-                            <SelectTrigger className="w-full sm:w-[180px]">
-                                <SelectValue placeholder="Filter by country" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="all">All Countries</SelectItem>
-                                {countries.map((country) => (
-                                    <SelectItem key={country} value={country}>
-                                        {country}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                         <Select value={selectedRegion} onValueChange={handleRegionChange} disabled={selectedCountry === 'all'}>
-                            <SelectTrigger className="w-full sm:w-[180px]">
-                                <SelectValue placeholder="Filter by region" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="all">All Regions</SelectItem>
-                                {regions.map((region) => (
-                                    <SelectItem key={region} value={region}>
-                                        {region}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                         <Select value={selectedCity} onValueChange={setSelectedCity} disabled={selectedRegion === 'all' || selectedCountry === 'all'}>
-                            <SelectTrigger className="w-full sm:w-[180px]">
-                                <SelectValue placeholder="Filter by city" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="all">All Cities</SelectItem>
-                                {cities.map((city) => (
-                                    <SelectItem key={city} value={city}>
-                                        {city}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
                     </div>
                 </CardHeader>
                 <CardContent>
@@ -583,7 +429,7 @@ export default function TowercoAgenciesPage() {
                                 </div>
                                 <div className="flex items-center gap-2 text-muted-foreground">
                                 <MapPin className="h-4 w-4 flex-shrink-0" />
-                                <span>{`${agency.city}, ${agency.region}, ${agency.country}`}</span>
+                                <span>{agency.address}</span>
                                 </div>
                             </CardContent>
                             <CardFooter className="grid grid-cols-2 gap-2">

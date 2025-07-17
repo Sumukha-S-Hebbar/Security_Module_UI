@@ -5,7 +5,4 @@ export type SecurityAgency = {
   email: string;
   address: string;
   avatar: string;
-  city: string;
-  region: string;
-  country: string;
 };
