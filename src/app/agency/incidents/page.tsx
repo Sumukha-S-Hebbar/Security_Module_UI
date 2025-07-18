@@ -1,9 +1,9 @@
 
 'use client';
 
-import { useState, useMemo } from 'react';
-import { useSearchParams } from 'next/navigation';
-import { incidents as initialIncidents } from '@/lib/data/incidents';
+import { useState, useMemo, useEffect } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
+import { incidentStore } from '@/lib/data/incident-store';
 import { guards } from '@/lib/data/guards';
 import { patrollingOfficers } from '@/lib/data/patrolling-officers';
 import { sites } from '@/lib/data/sites';
@@ -26,7 +26,7 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { AlertTriangle, Eye, FileDown, Search, Calendar as CalendarIcon, CheckCircle, ChevronDown, ShieldAlert } from 'lucide-react';
+import { Eye, FileDown, Search, Calendar as CalendarIcon, CheckCircle, ChevronDown, ShieldAlert } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 import {
@@ -56,25 +56,27 @@ const LOGGED_IN_AGENCY_ID = 'AGY01'; // Simulate logged-in agency
 
 export default function AgencyIncidentsPage() {
   const { toast } = useToast();
+  const router = useRouter();
   const searchParams = useSearchParams();
   const monthFromQuery = searchParams.get('month');
 
-  const [incidents, setIncidents] = useState(initialIncidents);
+  const [incidents, setIncidents] = useState(incidentStore.getIncidents());
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [selectedMonth, setSelectedMonth] = useState(monthFromQuery || 'all');
 
+  useEffect(() => {
+    const unsubscribe = incidentStore.subscribe(() => {
+      setIncidents(incidentStore.getIncidents());
+    });
+    return () => unsubscribe();
+  }, []);
+
   const agencySiteIds = useMemo(() => {
     const agency = securityAgencies.find(a => a.id === LOGGED_IN_AGENCY_ID);
     return new Set(agency ? agency.siteIds : []);
   }, []);
-
-  const agencyIncidents = useMemo(() => incidents.filter(
-    (incident) => agencySiteIds.has(incident.siteId)
-  ), [agencySiteIds, incidents]);
-
-  const activeIncidents = useMemo(() => agencyIncidents.filter(incident => incident.status === 'Active'), [agencyIncidents]);
 
   const getSiteById = (id: string): Site | undefined => {
     return sites.find(s => s.id === id);
@@ -90,7 +92,11 @@ export default function AgencyIncidentsPage() {
   }
 
   const filteredIncidents = useMemo(() => {
-    return agencyIncidents.filter((incident) => {
+    return incidents.filter((incident) => {
+      if (!agencySiteIds.has(incident.siteId)) {
+        return false;
+      }
+
       const site = getSiteById(incident.siteId);
       const guard = getGuardById(incident.raisedByGuardId);
       if (!site || !guard) return false;
@@ -111,22 +117,22 @@ export default function AgencyIncidentsPage() {
 
       const matchesMonth =
         selectedMonth === 'all' ||
-        incidentDate.getMonth() === parseInt(selectedMonth, 10);
+        (incidentDate.getMonth() + 1).toString() === selectedMonth;
 
       return matchesSearch && matchesStatus && matchesDate && matchesMonth;
     });
-  }, [searchQuery, selectedStatus, selectedDate, selectedMonth, agencyIncidents]);
+  }, [searchQuery, selectedStatus, selectedDate, selectedMonth, incidents, agencySiteIds]);
 
   const handleStatusChange = (incidentId: string, status: Incident['status']) => {
-    setIncidents((prevIncidents) =>
-      prevIncidents.map((incident) =>
-        incident.id === incidentId ? { ...incident, status } : incident
-      )
-    );
+    incidentStore.updateIncident(incidentId, { status });
     toast({
       title: 'Status Updated',
       description: `Incident #${incidentId} status changed to ${status}.`,
     });
+    // Redirect to the report page to add details.
+    if (status === 'Under Review') {
+        router.push(`/agency/incidents/${incidentId}`);
+    }
   };
 
   const getStatusBadge = (status: Incident['status']) => {
@@ -157,103 +163,6 @@ export default function AgencyIncidentsPage() {
           A log of all emergency incidents reported across your sites.
         </p>
       </div>
-
-      <Card className="border-destructive bg-destructive/10">
-        <CardHeader className="flex flex-row items-center gap-2">
-            <AlertTriangle className="w-6 h-6 text-destructive" />
-            <CardTitle>Active Incidents</CardTitle>
-        </CardHeader>
-        <CardContent>
-            {activeIncidents.length > 0 ? (
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>Incident ID</TableHead>
-                            <TableHead>Date & Time</TableHead>
-                            <TableHead>Site</TableHead>
-                            <TableHead>Guard</TableHead>
-                            <TableHead>Patrolling Officer</TableHead>
-                            <TableHead>Report</TableHead>
-                            <TableHead>Actions</TableHead>
-                            <TableHead className="text-right">Download</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {activeIncidents.map((incident) => {
-                            const site = getSiteById(incident.siteId);
-                            const guard = getGuardById(incident.raisedByGuardId);
-                            const patrollingOfficer = getPatrollingOfficerById(incident.attendedByPatrollingOfficerId);
-                            const isResolved = incident.status === 'Resolved';
-                             return (
-                                 <TableRow key={incident.id}>
-                                     <TableCell className="font-medium">
-                                        {incident.id}
-                                     </TableCell>
-                                     <TableCell>{new Date(incident.incidentTime).toLocaleString()}</TableCell>
-                                     <TableCell>{site?.name}</TableCell>
-                                     <TableCell>{guard?.name}</TableCell>
-                                     <TableCell>
-                                        {patrollingOfficer?.name || 'N/A'}
-                                     </TableCell>
-                                     <TableCell>
-                                        <Button asChild variant="outline" size="sm">
-                                            <Link href={`/agency/incidents/${incident.id}`}>
-                                                <Eye className="mr-2 h-4 w-4" />
-                                                View Report
-                                            </Link>
-                                        </Button>
-                                     </TableCell>
-                                     <TableCell>
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                                <Button variant="outline" size="sm">
-                                                Actions <ChevronDown className="ml-2 h-4 w-4" />
-                                                </Button>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end">
-                                                <DropdownMenuItem
-                                                onClick={() =>
-                                                    handleStatusChange(incident.id, 'Under Review')
-                                                }
-                                                disabled={
-                                                    incident.status === 'Under Review' || isResolved
-                                                }
-                                                >
-                                                <ShieldAlert className="mr-2 h-4 w-4" />
-                                                Start Review
-                                                </DropdownMenuItem>
-                                                <DropdownMenuItem
-                                                onClick={() => handleStatusChange(incident.id, 'Resolved')}
-                                                disabled={isResolved}
-                                                >
-                                                <CheckCircle className="mr-2 h-4 w-4" />
-                                                Mark as Resolved
-                                                </DropdownMenuItem>
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
-                                     </TableCell>
-                                     <TableCell className="text-right">
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={() => handleDownloadReport(incident)}
-                                        >
-                                            <FileDown className="mr-2 h-4 w-4" />
-                                            Download
-                                        </Button>
-                                     </TableCell>
-                                 </TableRow>
-                             );
-                        })}
-                    </TableBody>
-                </Table>
-            ) : (
-                <p className="text-muted-foreground text-center py-4">
-                    No active incidents.
-                </p>
-            )}
-        </CardContent>
-      </Card>
 
       <Card>
         <CardHeader>
@@ -290,7 +199,7 @@ export default function AgencyIncidentsPage() {
               <SelectContent>
                 <SelectItem value="all">All Months</SelectItem>
                 {Array.from({ length: 12 }, (_, i) => (
-                  <SelectItem key={i} value={i.toString()}>
+                  <SelectItem key={i + 1} value={(i + 1).toString()}>
                     {new Date(0, i).toLocaleString('default', {
                       month: 'long',
                     })}
@@ -354,8 +263,8 @@ export default function AgencyIncidentsPage() {
                         {incident.id}
                       </TableCell>
                       <TableCell>{new Date(incident.incidentTime).toLocaleString()}</TableCell>
-                      <TableCell>{site?.name}</TableCell>
-                      <TableCell>{guard?.name}</TableCell>
+                      <TableCell>{site?.name || 'N/A'}</TableCell>
+                      <TableCell>{guard?.name || 'N/A'}</TableCell>
                       <TableCell>
                         {patrollingOfficer?.name || 'N/A'}
                       </TableCell>
@@ -427,5 +336,3 @@ export default function AgencyIncidentsPage() {
     </div>
   );
 }
-
-    
