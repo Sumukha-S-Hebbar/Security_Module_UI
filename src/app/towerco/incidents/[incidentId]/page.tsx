@@ -4,7 +4,7 @@
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { incidents as allIncidents } from '@/lib/data/incidents';
+import { incidentStore } from '@/lib/data/incident-store';
 import { sites } from '@/lib/data/sites';
 import { securityAgencies } from '@/lib/data/security-agencies';
 import { guards } from '@/lib/data/guards';
@@ -27,32 +27,28 @@ import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { useState, useEffect } from 'react';
 
-// A mock function to get the latest state of incidents.
-// In a real app, this might not be needed if you use a global state manager (like Redux, Zustand)
-// or refetch data from the server.
-const getIncidents = () => allIncidents;
-
-
 export default function IncidentReportPage() {
   const params = useParams();
   const router = useRouter();
   const { toast } = useToast();
   const incidentId = params.incidentId as string;
   
-  // Use state to hold the specific incident, allowing it to be updated.
-  const [incident, setIncident] = useState<Incident | undefined>(() => 
-    getIncidents().find((i) => i.id === incidentId)
-  );
+  const [incident, setIncident] = useState(incidentStore.getIncidentById(incidentId));
 
   const [description, setDescription] = useState(incident?.description || '');
   const [files, setFiles] = useState<FileList | null>(null);
 
-  // This effect ensures that if the underlying data changes (e.g., by another component),
-  // this component reflects that change.
   useEffect(() => {
-    setIncident(getIncidents().find((i) => i.id === incidentId));
+    const unsubscribe = incidentStore.subscribe(() => {
+      setIncident(incidentStore.getIncidentById(incidentId));
+    });
+    // Set initial description from store
+    const currentIncident = incidentStore.getIncidentById(incidentId);
+    if (currentIncident) {
+        setDescription(currentIncident.description || '');
+    }
+    return () => unsubscribe();
   }, [incidentId]);
-
 
   if (!incident) {
     return (
@@ -85,6 +81,9 @@ export default function IncidentReportPage() {
         description,
         files
     });
+    
+    incidentStore.updateIncident(incident.id, { description });
+
     toast({
         title: "Incident Updated",
         description: `Details for incident #${incident.id} have been saved.`
