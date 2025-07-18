@@ -324,13 +324,6 @@ export default function TowercoIncidentsPage() {
                                 <ShieldAlert className="mr-2 h-4 w-4" />
                                 Start Review
                                 </DropdownMenuItem>
-                                <DropdownMenuItem
-                                onClick={() => handleStatusChange(incident.id, 'Resolved')}
-                                disabled={isResolved}
-                                >
-                                <CheckCircle className="mr-2 h-4 w-4" />
-                                Mark as Resolved
-                                </DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>
