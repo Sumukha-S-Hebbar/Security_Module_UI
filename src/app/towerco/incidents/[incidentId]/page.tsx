@@ -316,7 +316,7 @@ export default function IncidentReportPage() {
                         <Upload className="mr-2 h-4 w-4" />
                         Save Draft
                     </Button>
-                    <Button onClick={handleResolveIncident}>
+                    <Button onClick={handleResolveIncident} disabled={!description || !resolutionNotes}>
                         Mark as Resolved
                     </Button>
                 </CardFooter>
