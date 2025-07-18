@@ -65,6 +65,7 @@ export default function TowercoIncidentsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [selectedMonth, setSelectedMonth] = useState(monthFromQuery || 'all');
+  const [selectedStatus, setSelectedStatus] = useState('all');
 
   useEffect(() => {
     const unsubscribe = incidentStore.subscribe(() => {
@@ -99,11 +100,10 @@ export default function TowercoIncidentsPage() {
     return incidents.filter((incident) => {
       // Basic filter: only show incidents for the logged-in TOWERCO
       if (!towercoSiteIds.has(incident.siteId)) {
-          return false;
+        return false;
       }
       
       const site = getSiteById(incident.siteId);
-      const agency = site ? getAgencyForSite(site.id) : undefined;
       const guard = getGuardById(incident.raisedByGuardId);
       
       // An incident is valid if it has a site and a guard.
@@ -113,9 +113,11 @@ export default function TowercoIncidentsPage() {
       const matchesSearch =
         incident.id.toLowerCase().includes(searchLower) ||
         site.name.toLowerCase().includes(searchLower) ||
-        guard.name.toLowerCase().includes(searchLower) ||
-        (agency && agency.name.toLowerCase().includes(searchLower));
+        guard.name.toLowerCase().includes(searchLower);
 
+      const matchesStatus =
+        selectedStatus === 'all' || incident.status.toLowerCase().replace(' ', '-') === selectedStatus;
+      
       const incidentDate = new Date(incident.incidentTime);
       const matchesDate =
         !selectedDate ||
@@ -125,9 +127,9 @@ export default function TowercoIncidentsPage() {
         selectedMonth === 'all' ||
         (incidentDate.getMonth() + 1).toString() === selectedMonth;
 
-      return matchesSearch && matchesDate && matchesMonth;
+      return matchesSearch && matchesStatus && matchesDate && matchesMonth;
     });
-  }, [searchQuery, selectedDate, selectedMonth, incidents, towercoSiteIds]);
+  }, [searchQuery, selectedStatus, selectedDate, selectedMonth, incidents, towercoSiteIds]);
 
   const handleStatusChange = (incidentId: string, status: Incident['status']) => {
     incidentStore.updateIncident(incidentId, { status });
@@ -182,6 +184,17 @@ export default function TowercoIncidentsPage() {
                 className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[320px]"
               />
             </div>
+            <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+              <SelectTrigger className="w-full sm:w-[180px]">
+                <SelectValue placeholder="Filter by status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Statuses</SelectItem>
+                <SelectItem value="active">Active</SelectItem>
+                <SelectItem value="under-review">Under Review</SelectItem>
+                <SelectItem value="resolved">Resolved</SelectItem>
+              </SelectContent>
+            </Select>
             <Select value={selectedMonth} onValueChange={setSelectedMonth}>
               <SelectTrigger className="w-full sm:w-[180px]">
                 <SelectValue placeholder="Filter by month" />

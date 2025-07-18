@@ -3,15 +3,11 @@ import type { Incident } from '@/types';
 import { incidents as initialIncidents } from './incidents';
 
 /**
- * This is a simple in-memory store that uses localStorage for persistence
- * across page reloads. In a real-world application, this would be replaced
- * by API calls to a backend database.
- * 
- * FOR TESTING: You can clear the stored incident data by calling
- * `incidentStore.reset()` from your browser's developer console.
+ * This is a simple in-memory store. For this prototype, it resets to the
+ * initial data on each page load to ensure a consistent testing experience.
+ * In a real-world application, this would be replaced by API calls to a
+ * backend database, and localStorage might be used for optimistic UI updates.
  */
-
-const INCIDENTS_STORAGE_KEY = 'guardlink-incidents-state';
 
 let incidentsState: Incident[] = [];
 
@@ -22,35 +18,8 @@ function notifyListeners() {
 }
 
 function initializeState() {
-  if (typeof window === 'undefined') {
-    // We are on the server, use initial data without persistence.
-    incidentsState = JSON.parse(JSON.stringify(initialIncidents));
-    return;
-  }
-
-  try {
-    const storedState = window.localStorage.getItem(INCIDENTS_STORAGE_KEY);
-    if (storedState) {
-      incidentsState = JSON.parse(storedState);
-    } else {
-      // If no state in localStorage, initialize with default data
-      incidentsState = JSON.parse(JSON.stringify(initialIncidents));
-      window.localStorage.setItem(INCIDENTS_STORAGE_KEY, JSON.stringify(incidentsState));
-    }
-  } catch (error) {
-    console.error("Failed to initialize state from localStorage, using default.", error);
-    incidentsState = JSON.parse(JSON.stringify(initialIncidents));
-  }
-}
-
-function persistState() {
-    if (typeof window !== 'undefined') {
-        try {
-            window.localStorage.setItem(INCIDENTS_STORAGE_KEY, JSON.stringify(incidentsState));
-        } catch (error) {
-            console.error("Failed to save state to localStorage", error);
-        }
-    }
+  // Always deep copy the initial data to avoid mutations across sessions.
+  incidentsState = JSON.parse(JSON.stringify(initialIncidents));
 }
 
 // Initialize the state when the module is first loaded
@@ -77,7 +46,6 @@ export const incidentStore = {
     });
 
     if (incidentUpdated) {
-        persistState();
         notifyListeners();
     }
   },
@@ -91,12 +59,9 @@ export const incidentStore = {
 
   // Helper for development/testing to reset the data
   reset: () => {
-    if (typeof window !== 'undefined') {
-        window.localStorage.removeItem(INCIDENTS_STORAGE_KEY);
-        incidentsState = JSON.parse(JSON.stringify(initialIncidents));
-        notifyListeners();
-        console.log("Incident store has been reset to initial data.");
-    }
+    initializeState();
+    notifyListeners();
+    console.log("Incident store has been reset to initial data.");
   }
 };
 
