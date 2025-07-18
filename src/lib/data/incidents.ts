@@ -69,4 +69,44 @@ export const incidents: Incident[] = [
       initialIncidentMediaUrl: ['https://placehold.co/600x400.png'],
       attendedByPatrollingOfficerId: 'PO01'
     },
+    { 
+      id: 'INC007', 
+      incidentTime: '2024-07-23T11:00:00Z', 
+      description: 'Power outage affecting security cameras in Warehouse 3.', 
+      status: 'Active', 
+      raisedByGuardId: 'GL007', 
+      siteId: 'SITE05',
+      initialIncidentMediaUrl: [],
+      attendedByPatrollingOfficerId: 'PO03'
+    },
+    { 
+      id: 'INC008', 
+      incidentTime: '2024-07-23T15:00:00Z', 
+      description: 'Unauthorized vehicle parked in restricted area near Building C.', 
+      status: 'Active', 
+      raisedByGuardId: 'GL004', 
+      siteId: 'SITE01',
+      initialIncidentMediaUrl: ['https://placehold.co/600x400.png'],
+      attendedByPatrollingOfficerId: 'PO02'
+    },
+    { 
+      id: 'INC009', 
+      incidentTime: '2024-07-18T18:45:00Z', 
+      description: 'Suspicious individual reported near the perimeter fence of Industrial Zone 7.', 
+      status: 'Under Review', 
+      raisedByGuardId: 'GL008', 
+      siteId: 'SITE06',
+      initialIncidentMediaUrl: [],
+      attendedByPatrollingOfficerId: 'PO03'
+    },
+     { 
+      id: 'INC010', 
+      incidentTime: '2024-07-19T12:00:00Z', 
+      description: 'Main gate access panel is malfunctioning.', 
+      status: 'Under Review', 
+      raisedByGuardId: 'GL002', 
+      siteId: 'SITE01',
+      initialIncidentMediaUrl: ['https://placehold.co/600x400.png'],
+      attendedByPatrollingOfficerId: 'PO02'
+    }
 ];
