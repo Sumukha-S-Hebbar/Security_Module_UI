@@ -118,13 +118,16 @@ export default function TowercoIncidentsPage() {
       const site = getSiteById(incident.siteId);
       const agency = site ? getAgencyForSite(site.id) : undefined;
       const guard = getGuardById(incident.raisedByGuardId);
+      
+      // An incident is valid if it has a site and a guard. Agency is optional.
       if (!site || !guard) return false;
 
       const searchLower = searchQuery.toLowerCase();
       const matchesSearch =
         incident.id.toLowerCase().includes(searchLower) ||
         site.name.toLowerCase().includes(searchLower) ||
-        guard.name.toLowerCase().includes(searchLower);
+        guard.name.toLowerCase().includes(searchLower) ||
+        (agency && agency.name.toLowerCase().includes(searchLower));
 
       const matchesAgency =
         selectedAgency === 'all' || agency?.id === selectedAgency;
