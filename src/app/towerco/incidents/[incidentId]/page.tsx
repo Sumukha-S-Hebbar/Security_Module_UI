@@ -114,7 +114,7 @@ export default function IncidentReportPage() {
           </div>
         </CardHeader>
         <CardContent className="space-y-6 divide-y">
-            {incident.description && (
+            {incident.status !== 'Active' && incident.description && (
               <div className="pt-6">
                   <h4 className="font-semibold mb-2 text-lg">
                       Incident Summary
@@ -122,7 +122,7 @@ export default function IncidentReportPage() {
                   <p className="text-muted-foreground">{incident.description}</p>
               </div>
             )}
-            {incident.initialIncidentMediaUrl && incident.initialIncidentMediaUrl.length > 0 && (
+            {incident.status !== 'Active' && incident.initialIncidentMediaUrl && incident.initialIncidentMediaUrl.length > 0 && (
                 <div className="pt-6">
                     <h4 className="font-semibold mb-4 text-lg">
                         Media Evidence
@@ -141,6 +141,11 @@ export default function IncidentReportPage() {
                         ))}
                     </div>
                 </div>
+            )}
+             {incident.status === 'Active' && (
+              <div className="pt-6 text-center text-muted-foreground">
+                <p>Incident summary and media will be available once the incident is no longer active.</p>
+              </div>
             )}
         </CardContent>
       </Card>
