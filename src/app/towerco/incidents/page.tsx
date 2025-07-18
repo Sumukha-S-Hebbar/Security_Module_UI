@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { incidents as initialIncidents } from '@/lib/data/incidents';
 import { guards } from '@/lib/data/guards';
 import { sites } from '@/lib/data/sites';
@@ -57,6 +57,7 @@ const LOGGED_IN_TOWERCO = 'TowerCo Alpha'; // Simulate logged-in user
 export default function TowercoIncidentsPage() {
   const { toast } = useToast();
   const searchParams = useSearchParams();
+  const router = useRouter();
   const monthFromQuery = searchParams.get('month');
   
   const [incidents, setIncidents] = useState(initialIncidents);
@@ -136,6 +137,9 @@ export default function TowercoIncidentsPage() {
       title: 'Status Updated',
       description: `Incident #${incidentId} status changed to ${status}.`,
     });
+    if (status === 'Under Review') {
+        router.push(`/towerco/incidents/${incidentId}`);
+    }
   };
   
   const getStatusBadge = (status: Incident['status']) => {
@@ -166,14 +170,6 @@ export default function TowercoIncidentsPage() {
   
   const getSiteById = (id: string): Site | undefined => {
     return sites.find((s) => s.id === id);
-  };
-
-  const handleDownloadReport = (incident: Incident) => {
-    toast({
-      title: 'Report Download Started',
-      description: `Downloading report for incident #${incident.id}.`,
-    });
-    // In a real app, this would trigger a file download.
   };
 
   return (

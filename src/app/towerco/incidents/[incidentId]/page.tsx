@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useParams } from 'next/navigation';
@@ -17,11 +16,16 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  CardFooter
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, MapPin, Briefcase, UserCheck, User, Calendar, FileDown, Phone, Mail } from 'lucide-react';
+import { ArrowLeft, MapPin, Briefcase, UserCheck, User, Calendar, FileDown, Phone, Mail, Upload } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
+import { useState } from 'react';
 
 export default function IncidentReportPage() {
   const params = useParams();
@@ -29,6 +33,9 @@ export default function IncidentReportPage() {
   const incidentId = params.incidentId as string;
 
   const incident = incidents.find((a) => a.id === incidentId);
+
+  const [description, setDescription] = useState(incident?.description || '');
+  const [files, setFiles] = useState<FileList | null>(null);
 
   if (!incident) {
     return (
@@ -54,6 +61,19 @@ export default function IncidentReportPage() {
     });
     // In a real app, this would trigger a download.
   };
+
+  const handleUpdateIncident = (e: React.FormEvent) => {
+    e.preventDefault();
+    // In a real app, this would be a PATCH request to your API
+    console.log({
+        description,
+        files
+    });
+    toast({
+        title: "Incident Updated",
+        description: `Details for incident #${incident.id} have been saved.`
+    });
+  }
 
   const getStatusBadge = (status: Incident['status']) => {
     switch (status) {
@@ -114,7 +134,7 @@ export default function IncidentReportPage() {
           </div>
         </CardHeader>
         <CardContent className="space-y-6 divide-y">
-            {incident.status !== 'Active' && incident.description && (
+            {incident.status === 'Resolved' && incident.description && (
               <div className="pt-6">
                   <h4 className="font-semibold mb-2 text-lg">
                       Incident Summary
@@ -122,7 +142,7 @@ export default function IncidentReportPage() {
                   <p className="text-muted-foreground">{incident.description}</p>
               </div>
             )}
-            {incident.status !== 'Active' && incident.initialIncidentMediaUrl && incident.initialIncidentMediaUrl.length > 0 && (
+            {incident.status === 'Resolved' && incident.initialIncidentMediaUrl && incident.initialIncidentMediaUrl.length > 0 && (
                 <div className="pt-6">
                     <h4 className="font-semibold mb-4 text-lg">
                         Media Evidence
@@ -144,8 +164,41 @@ export default function IncidentReportPage() {
             )}
              {incident.status === 'Active' && (
               <div className="pt-6 text-center text-muted-foreground">
-                <p>Incident summary and media will be available once the incident is no longer active.</p>
+                <p>Incident summary and media will be available once the incident is under review.</p>
               </div>
+            )}
+             {incident.status === 'Under Review' && (
+              <form onSubmit={handleUpdateIncident}>
+                <div className="pt-6 space-y-4">
+                    <div>
+                        <Label htmlFor="description" className="text-lg font-semibold">Update Incident Summary</Label>
+                        <Textarea 
+                            id="description" 
+                            className="mt-2" 
+                            placeholder="Provide a detailed summary of what happened..." 
+                            value={description}
+                            onChange={(e) => setDescription(e.target.value)}
+                            rows={5}
+                        />
+                    </div>
+                     <div>
+                        <Label htmlFor="photos" className="text-lg font-semibold">Upload Media Evidence</Label>
+                        <Input 
+                            id="photos" 
+                            type="file" 
+                            multiple
+                            className="mt-2"
+                            onChange={(e) => setFiles(e.target.files)}
+                        />
+                    </div>
+                </div>
+                 <CardFooter className="px-0 pt-6 justify-end">
+                    <Button type="submit">
+                        <Upload className="mr-2 h-4 w-4" />
+                        Update Incident
+                    </Button>
+                </CardFooter>
+              </form>
             )}
         </CardContent>
       </Card>
