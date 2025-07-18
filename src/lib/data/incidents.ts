@@ -108,5 +108,35 @@ export const incidents: Incident[] = [
       siteId: 'SITE01',
       initialIncidentMediaUrl: ['https://placehold.co/600x400.png'],
       attendedByPatrollingOfficerId: 'PO02'
+    },
+    { 
+      id: 'INC011', 
+      incidentTime: '2024-07-24T08:00:00Z', 
+      description: 'Fire alarm triggered in building B. Investigation needed.', 
+      status: 'Active', 
+      raisedByGuardId: 'GL004', 
+      siteId: 'SITE01',
+      initialIncidentMediaUrl: [],
+      attendedByPatrollingOfficerId: 'PO02'
+    },
+    { 
+      id: 'INC012', 
+      incidentTime: '2024-07-24T09:30:00Z', 
+      description: 'A guard has reported a medical emergency onsite.', 
+      status: 'Active', 
+      raisedByGuardId: 'GL007', 
+      siteId: 'SITE05',
+      initialIncidentMediaUrl: [],
+      attendedByPatrollingOfficerId: 'PO03'
+    },
+    { 
+      id: 'INC013', 
+      incidentTime: '2024-07-22T14:00:00Z', 
+      description: 'A water pipe has burst in the server room.', 
+      status: 'Under Review', 
+      raisedByGuardId: 'GL001', 
+      siteId: 'SITE02',
+      initialIncidentMediaUrl: [],
+      attendedByPatrollingOfficerId: 'PO01'
     }
 ];
