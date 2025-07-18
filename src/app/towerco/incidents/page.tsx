@@ -66,6 +66,7 @@ export default function TowercoIncidentsPage() {
   const [selectedAgency, setSelectedAgency] = useState('all');
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [selectedMonth, setSelectedMonth] = useState(monthFromQuery || 'all');
+  const [selectedStatus, setSelectedStatus] = useState('all');
 
   useEffect(() => {
     const unsubscribe = incidentStore.subscribe(() => {
@@ -130,10 +131,13 @@ export default function TowercoIncidentsPage() {
         selectedMonth === 'all' ||
         (incidentDate.getMonth() + 1).toString() === selectedMonth;
 
+      const matchesStatus =
+        selectedStatus === 'all' ||
+        incident.status.toLowerCase().replace(/\s+/g, '-') === selectedStatus;
 
-      return matchesSearch && matchesAgency && matchesDate && matchesMonth;
+      return matchesSearch && matchesAgency && matchesDate && matchesMonth && matchesStatus;
     });
-  }, [searchQuery, selectedAgency, selectedDate, selectedMonth, towercoIncidents]);
+  }, [searchQuery, selectedAgency, selectedDate, selectedMonth, towercoIncidents, selectedStatus]);
 
   const handleStatusChange = (incidentId: string, status: Incident['status']) => {
     incidentStore.updateIncident(incidentId, { status });
@@ -215,6 +219,17 @@ export default function TowercoIncidentsPage() {
                     {agency.name}
                   </SelectItem>
                 ))}
+              </SelectContent>
+            </Select>
+            <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+              <SelectTrigger className="w-full sm:w-[180px]">
+                <SelectValue placeholder="Filter by status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Statuses</SelectItem>
+                <SelectItem value="active">Active</SelectItem>
+                <SelectItem value="under-review">Under Review</SelectItem>
+                <SelectItem value="resolved">Resolved</SelectItem>
               </SelectContent>
             </Select>
             <Select value={selectedMonth} onValueChange={setSelectedMonth}>
