@@ -80,6 +80,7 @@ const uploadFormSchema = z.object({
 });
 
 const addSiteFormSchema = z.object({
+  id: z.string().min(1, 'Site ID is required.'),
   name: z.string().min(1, 'Site name is required.'),
   address: z.string().min(1, 'Address is required.'),
   region: z.string().min(1, 'Region is required.'),
@@ -136,7 +137,7 @@ export default function TowercoSitesPage() {
 
   const addSiteForm = useForm<z.infer<typeof addSiteFormSchema>>({
     resolver: zodResolver(addSiteFormSchema),
-    defaultValues: { name: '', address: '', region: '', city: '' },
+    defaultValues: { id: '', name: '', address: '', region: '', city: '' },
   });
 
   async function onUploadSubmit(values: z.infer<typeof uploadFormSchema>) {
@@ -402,6 +403,22 @@ export default function TowercoSitesPage() {
                       onSubmit={addSiteForm.handleSubmit(onAddSiteSubmit)}
                       className="space-y-4"
                     >
+                      <FormField
+                        control={addSiteForm.control}
+                        name="id"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Site ID</FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="e.g., SITE013"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
                       <FormField
                         control={addSiteForm.control}
                         name="name"
