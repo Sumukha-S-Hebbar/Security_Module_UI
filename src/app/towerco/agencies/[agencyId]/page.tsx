@@ -349,7 +349,6 @@ export default function AgencyReportPage() {
                 <TableRow>
                   <TableHead>Site</TableHead>
                   <TableHead>Assigned On</TableHead>
-                  <TableHead>Assignment Duration</TableHead>
                   <TableHead className="text-center">Incidents</TableHead>
                   <TableHead className="text-center">Resolved</TableHead>
                 </TableRow>
@@ -375,13 +374,6 @@ export default function AgencyReportPage() {
                       <TableCell>
                         {site.assignedOn
                           ? new Date(site.assignedOn).toLocaleDateString()
-                          : 'N/A'}
-                      </TableCell>
-                      <TableCell>
-                        {site.assignedOn
-                          ? formatDistanceToNow(new Date(site.assignedOn), {
-                              addSuffix: true,
-                            })
                           : 'N/A'}
                       </TableCell>
                       <TableCell className="text-center">
