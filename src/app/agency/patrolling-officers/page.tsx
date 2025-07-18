@@ -66,12 +66,11 @@ export default function AgencyPatrollingOfficersPage() {
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedPatrollingOfficer, setSelectedPatrollingOfficer] = useState<PatrollingOfficer | null>(null);
 
+    // In a real app, you'd fetch officers belonging to the logged-in agency.
+    // For this prototype, we'll assume all officers are available to the agency.
+    const agencyPatrollingOfficers = patrollingOfficers;
+
     const agencySites = useMemo(() => sites.filter(site => site.agencyId === LOGGED_IN_AGENCY_ID), []);
-    
-    const agencyPatrollingOfficers = useMemo(() => {
-        const poIds = new Set(agencySites.map(s => s.patrollingOfficerId).filter(Boolean));
-        return patrollingOfficers.filter(po => poIds.has(po.id));
-    }, [agencySites]);
 
     const getAssignedGuardsCount = (patrollingOfficerId: string) => {
         const sitesForPO = agencySites.filter(s => s.patrollingOfficerId === patrollingOfficerId);
@@ -83,7 +82,7 @@ export default function AgencyPatrollingOfficersPage() {
         return agencySites.filter(s => s.patrollingOfficerId === patrollingOfficerId);
     }
     
-    const sitesForSelectedPO = selectedPatrollingOfficer ? agencySites.filter(site => site.patrollingOfficerId === selectedPatrollingOfficer.id) : [];
+    const sitesForSelectedPO = selectedPatrollingOfficer ? getAssignedSitesForPO(selectedPatrollingOfficer.id) : [];
 
 
     const uploadForm = useForm<z.infer<typeof uploadFormSchema>>({
@@ -327,7 +326,7 @@ export default function AgencyPatrollingOfficersPage() {
                                     </div>
                                     <div className="flex items-center gap-2 text-muted-foreground">
                                         <Map className="h-4 w-4 flex-shrink-0" />
-                                        <span className="truncate" title={assignedSites.map(s => s.name).join(', ')}>{assignedSites.map(s => s.name).join(', ') || 'No sites assigned'}</span>
+                                        <span className="truncate" title={assignedSites.map(s => s.name).join(', ')}>{assignedSites.length > 0 ? `${assignedSites.length} Sites Assigned` : 'No sites assigned'}</span>
                                     </div>
                                 </CardContent>
                                 <CardFooter className="grid grid-cols-2 gap-2">
@@ -341,6 +340,7 @@ export default function AgencyPatrollingOfficersPage() {
                                         variant="outline"
                                         size="sm"
                                         onClick={() => setSelectedPatrollingOfficer(patrollingOfficer)}
+                                        disabled={assignedSites.length === 0}
                                     >
                                         <Map className="mr-2 h-4 w-4" />
                                         View Sites ({assignedSites.length})
