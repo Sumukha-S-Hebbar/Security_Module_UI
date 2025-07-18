@@ -34,7 +34,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Eye, Search, Calendar as CalendarIcon, ShieldAlert, CheckCircle, ChevronDown } from 'lucide-react';
+import { Eye, Search, Calendar as CalendarIcon, ShieldAlert, ChevronDown } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 import {
@@ -91,6 +91,11 @@ export default function TowercoIncidentsPage() {
           towercoSiteIds.has(incident.siteId)
       ),
     [towercoSiteIds, incidents]
+  );
+
+  const activeIncidents = useMemo(
+    () => towercoIncidents.filter(incident => incident.status === 'Active'),
+    [towercoIncidents]
   );
   
   const agenciesOnSites = useMemo(() => {
@@ -186,6 +191,80 @@ export default function TowercoIncidentsPage() {
           {LOGGED_IN_TOWERCO}.
         </p>
       </div>
+
+      <Card className="border-destructive bg-destructive/10">
+        <CardHeader className="flex flex-row items-center gap-2">
+            <ShieldAlert className="w-6 h-6 text-destructive" />
+            <CardTitle>Active Incidents</CardTitle>
+        </CardHeader>
+        <CardContent>
+            {activeIncidents.length > 0 ? (
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>Incident ID</TableHead>
+                            <TableHead>Date & Time</TableHead>
+                            <TableHead>Site</TableHead>
+                            <TableHead>Agency</TableHead>
+                            <TableHead>Guard</TableHead>
+                            <TableHead>Report</TableHead>
+                            <TableHead>Actions</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {activeIncidents.map((incident) => {
+                            const site = getSiteById(incident.siteId);
+                            const agency = site ? getAgencyForSite(site.id) : undefined;
+                            const guard = getGuardById(incident.raisedByGuardId);
+                             return (
+                                 <TableRow key={incident.id}>
+                                     <TableCell className="font-medium">
+                                        {incident.id}
+                                     </TableCell>
+                                     <TableCell>{new Date(incident.incidentTime).toLocaleString()}</TableCell>
+                                     <TableCell>{site?.name}</TableCell>
+                                     <TableCell>{agency?.name}</TableCell>
+                                     <TableCell>{guard?.name}</TableCell>
+                                     <TableCell>
+                                        <Button asChild variant="outline" size="sm">
+                                            <Link href={`/towerco/incidents/${incident.id}`}>
+                                                <Eye className="mr-2 h-4 w-4" />
+                                                View Report
+                                            </Link>
+                                        </Button>
+                                     </TableCell>
+                                     <TableCell>
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                                <Button variant="outline" size="sm">
+                                                Actions <ChevronDown className="ml-2 h-4 w-4" />
+                                                </Button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent align="end">
+                                                <DropdownMenuItem
+                                                onClick={() =>
+                                                    handleStatusChange(incident.id, 'Under Review')
+                                                }
+                                                >
+                                                <ShieldAlert className="mr-2 h-4 w-4" />
+                                                Start Review
+                                                </DropdownMenuItem>
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
+                                     </TableCell>
+                                 </TableRow>
+                             );
+                        })}
+                    </TableBody>
+                </Table>
+            ) : (
+                <p className="text-muted-foreground text-center py-4">
+                    No active incidents.
+                </p>
+            )}
+        </CardContent>
+      </Card>
+
       <Card>
         <CardHeader>
           <CardTitle>Incident Log</CardTitle>
