@@ -26,6 +26,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { useState, useEffect } from 'react';
+import { Separator } from '@/components/ui/separator';
 
 export default function IncidentReportPage() {
   const params = useParams();
@@ -36,17 +37,27 @@ export default function IncidentReportPage() {
   const [incident, setIncident] = useState(incidentStore.getIncidentById(incidentId));
 
   const [description, setDescription] = useState(incident?.description || '');
-  const [files, setFiles] = useState<FileList | null>(null);
+  const [resolutionNotes, setResolutionNotes] = useState(incident?.resolutionNotes || '');
+  const [incidentFiles, setIncidentFiles] = useState<FileList | null>(null);
+  const [resolutionFiles, setResolutionFiles] = useState<FileList | null>(null);
 
   useEffect(() => {
     const unsubscribe = incidentStore.subscribe(() => {
-      setIncident(incidentStore.getIncidentById(incidentId));
+      const updatedIncident = incidentStore.getIncidentById(incidentId);
+      setIncident(updatedIncident);
+      if (updatedIncident) {
+        setDescription(updatedIncident.description || '');
+        setResolutionNotes(updatedIncident.resolutionNotes || '');
+      }
     });
-    // Set initial description from store
+    
+    // Set initial state from store
     const currentIncident = incidentStore.getIncidentById(incidentId);
     if (currentIncident) {
         setDescription(currentIncident.description || '');
+        setResolutionNotes(currentIncident.resolutionNotes || '');
     }
+
     return () => unsubscribe();
   }, [incidentId]);
 
@@ -76,17 +87,41 @@ export default function IncidentReportPage() {
 
   const handleUpdateIncident = (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real app, this would be a PATCH request to your API
+    // In a real app, this would be a PATCH request to your API,
+    // handling file uploads appropriately.
     console.log({
         description,
-        files
+        resolutionNotes,
+        incidentFiles,
+        resolutionFiles,
     });
     
-    incidentStore.updateIncident(incident.id, { description });
+    // For now, we just update the text fields. A real implementation
+    // would handle file uploads and update media URLs.
+    incidentStore.updateIncident(incident.id, { description, resolutionNotes });
 
     toast({
         title: "Incident Updated",
         description: `Details for incident #${incident.id} have been saved.`
+    });
+  }
+  
+  const handleResolveIncident = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!description) {
+        toast({ variant: 'destructive', title: 'Error', description: 'Incident description is required to resolve.' });
+        return;
+    }
+    if (!resolutionNotes) {
+        toast({ variant: 'destructive', title: 'Error', description: 'Resolution notes are required to resolve.' });
+        return;
+    }
+
+    incidentStore.updateIncident(incident.id, { description, resolutionNotes, status: 'Resolved' });
+
+    toast({
+        title: "Incident Resolved",
+        description: `Incident #${incident.id} has been marked as resolved.`
     });
     router.push('/towerco/incidents');
   }
@@ -150,70 +185,139 @@ export default function IncidentReportPage() {
           </div>
         </CardHeader>
         <CardContent className="space-y-6 divide-y">
-            {incident.status === 'Resolved' && incident.description && (
-              <div className="pt-6">
-                  <h4 className="font-semibold mb-2 text-lg">
-                      Incident Summary
-                  </h4>
-                  <p className="text-muted-foreground">{incident.description}</p>
-              </div>
-            )}
-            {incident.status === 'Resolved' && incident.initialIncidentMediaUrl && incident.initialIncidentMediaUrl.length > 0 && (
-                <div className="pt-6">
-                    <h4 className="font-semibold mb-4 text-lg">
-                        Media Evidence
-                    </h4>
-                    <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
-                        {incident.initialIncidentMediaUrl.map((src, index) => (
-                            <div key={index} className="relative aspect-video">
-                            <Image
-                                src={src}
-                                alt={`Incident evidence ${index + 1}`}
-                                fill
-                                className="rounded-md object-cover"
-                                data-ai-hint={getHintForIncident(incident)}
-                            />
+            {incident.status === 'Resolved' && (
+                <>
+                    {incident.description && (
+                      <div className="pt-6">
+                          <h4 className="font-semibold mb-2 text-lg">
+                              Incident Summary
+                          </h4>
+                          <p className="text-muted-foreground">{incident.description}</p>
+                      </div>
+                    )}
+                    {incident.initialIncidentMediaUrl && incident.initialIncidentMediaUrl.length > 0 && (
+                        <div className="pt-6">
+                            <h4 className="font-semibold mb-4 text-lg">
+                                Incident Media Evidence
+                            </h4>
+                            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
+                                {incident.initialIncidentMediaUrl.map((src, index) => (
+                                    <div key={index} className="relative aspect-video">
+                                    <Image
+                                        src={src}
+                                        alt={`Incident evidence ${index + 1}`}
+                                        fill
+                                        className="rounded-md object-cover"
+                                        data-ai-hint={getHintForIncident(incident)}
+                                    />
+                                    </div>
+                                ))}
                             </div>
-                        ))}
-                    </div>
-                </div>
+                        </div>
+                    )}
+                     {incident.resolutionNotes && (
+                      <div className="pt-6">
+                          <h4 className="font-semibold mb-2 text-lg">
+                              Resolution Notes
+                          </h4>
+                          <p className="text-muted-foreground">{incident.resolutionNotes}</p>
+                      </div>
+                    )}
+                     {incident.resolvedIncidentMediaUrl && incident.resolvedIncidentMediaUrl.length > 0 && (
+                        <div className="pt-6">
+                            <h4 className="font-semibold mb-4 text-lg">
+                                Resolution Media Evidence
+                            </h4>
+                            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
+                                {incident.resolvedIncidentMediaUrl.map((src, index) => (
+                                    <div key={index} className="relative aspect-video">
+                                    <Image
+                                        src={src}
+                                        alt={`Resolution evidence ${index + 1}`}
+                                        fill
+                                        className="rounded-md object-cover"
+                                        data-ai-hint={'report document'}
+                                    />
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </>
             )}
-             {incident.status === 'Active' && (
+
+            {incident.status === 'Active' && (
               <div className="pt-6 text-center text-muted-foreground">
                 <p>Incident summary and media will be available once the incident is under review.</p>
               </div>
             )}
-             {incident.status === 'Under Review' && (
+
+            {incident.status === 'Under Review' && (
               <form onSubmit={handleUpdateIncident}>
-                <div className="pt-6 space-y-4">
-                    <div>
-                        <Label htmlFor="description" className="text-lg font-semibold">Update Incident Summary</Label>
-                        <Textarea 
-                            id="description" 
-                            className="mt-2" 
-                            placeholder="Provide a detailed summary of what happened..." 
-                            value={description}
-                            onChange={(e) => setDescription(e.target.value)}
-                            rows={5}
-                            required
-                        />
-                    </div>
-                     <div>
-                        <Label htmlFor="photos" className="text-lg font-semibold">Upload Media Evidence</Label>
-                        <Input 
-                            id="photos" 
-                            type="file" 
-                            multiple
-                            className="mt-2"
-                            onChange={(e) => setFiles(e.target.files)}
-                            accept="image/*"
-                        />
-                    </div>
-                </div>
-                 <CardFooter className="px-0 pt-6 justify-end">
-                    <Button type="submit">
+                  <div className="pt-6 space-y-6">
+                      {/* After Incident Section */}
+                      <div className="space-y-4">
+                          <h3 className="text-xl font-semibold">After Incident</h3>
+                          <div>
+                              <Label htmlFor="description" className="text-base">Incident Description</Label>
+                              <Textarea 
+                                  id="description" 
+                                  className="mt-2" 
+                                  placeholder="Provide a detailed summary of what happened..." 
+                                  value={description}
+                                  onChange={(e) => setDescription(e.target.value)}
+                                  rows={5}
+                              />
+                          </div>
+                          <div>
+                              <Label htmlFor="incident-photos" className="text-base">Photos Regarding Incident</Label>
+                              <Input 
+                                  id="incident-photos" 
+                                  type="file" 
+                                  multiple
+                                  className="mt-2"
+                                  onChange={(e) => setIncidentFiles(e.target.files)}
+                                  accept="image/*"
+                              />
+                          </div>
+                      </div>
+
+                      <Separator />
+
+                      {/* After Resolving Section */}
+                      <div className="space-y-4">
+                          <h3 className="text-xl font-semibold">After Resolving</h3>
+                          <div>
+                              <Label htmlFor="resolution-notes" className="text-base">Resolution Notes</Label>
+                              <Textarea 
+                                  id="resolution-notes" 
+                                  className="mt-2" 
+                                  placeholder="Describe the steps taken to resolve the incident..." 
+                                  value={resolutionNotes}
+                                  onChange={(e) => setResolutionNotes(e.target.value)}
+                                  rows={5}
+                              />
+                          </div>
+                          <div>
+                              <Label htmlFor="resolution-photos" className="text-base">Photos or Media Evidence After Resolving</Label>
+                              <Input 
+                                  id="resolution-photos" 
+                                  type="file" 
+                                  multiple
+                                  className="mt-2"
+                                  onChange={(e) => setResolutionFiles(e.target.files)}
+                                  accept="image/*,video/*,.pdf"
+                              />
+                          </div>
+                      </div>
+                  </div>
+                 <CardFooter className="px-0 pt-6 justify-end gap-2">
+                    <Button type="submit" variant="outline">
                         <Upload className="mr-2 h-4 w-4" />
-                        Update Incident
+                        Save Draft
+                    </Button>
+                    <Button onClick={handleResolveIncident}>
+                        Mark as Resolved
                     </Button>
                 </CardFooter>
               </form>

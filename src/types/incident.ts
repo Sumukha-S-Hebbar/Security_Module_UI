@@ -2,6 +2,7 @@ export type Incident = {
   id: string;
   status: 'Active' | 'Under Review' | 'Resolved';
   description: string;
+  resolutionNotes?: string;
   raisedByGuardId: string;
   siteId: string;
   incidentTime: string;
