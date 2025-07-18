@@ -117,13 +117,6 @@ export default function AgencyReportPage() {
     (i) => i.status === 'Resolved'
   ).length;
 
-  const agencyGuardIds = new Set(agencySites.flatMap(s => s.guards));
-  const agencyGuards = guards.filter(g => agencyGuardIds.has(g.id));
-  const agencyPatrollingOfficerIds = new Set(
-    agencySites.map((s) => s.patrollingOfficerId).filter(Boolean)
-  );
-  const totalWorkforce = agencyGuards.length + agencyPatrollingOfficerIds.size;
-
   const assignmentDates = agencySites
     .map((s) => s.assignedOn)
     .filter((d): d is string => !!d)
@@ -245,17 +238,6 @@ export default function AgencyReportPage() {
                     </div>
                     </div>
                     <div className="flex items-center gap-3">
-                    <Users className="h-8 w-8 text-primary" />
-                    <div>
-                        <p className="font-bold text-lg">
-                        {totalWorkforce}
-                        </p>
-                        <p className="text-muted-foreground">
-                        Total Workforce
-                        </p>
-                    </div>
-                    </div>
-                    <div className="flex items-center gap-3">
                     <ShieldAlert className="h-8 w-8 text-primary" />
                     <div>
                         <p className="font-bold text-lg">{totalIncidents}</p>
@@ -285,19 +267,6 @@ export default function AgencyReportPage() {
                             </p>
                             <p className="text-muted-foreground">
                             First Assignment
-                            </p>
-                        </div>
-                        </div>
-                        <div className="flex items-center gap-3">
-                        <Clock className="h-8 w-8 text-primary" />
-                        <div>
-                            <p className="font-bold text-lg">
-                            {formatDistanceToNow(firstAssignedDate, {
-                                addSuffix: true,
-                            })}
-                            </p>
-                            <p className="text-muted-foreground">
-                            Assignment Duration
                             </p>
                         </div>
                         </div>
@@ -484,5 +453,3 @@ export default function AgencyReportPage() {
     </div>
   );
 }
-
-    
