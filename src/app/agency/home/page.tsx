@@ -133,10 +133,12 @@ export default function AgencyHomePage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Site</TableHead>
+                  <TableHead>Site ID</TableHead>
+                  <TableHead>Site Name</TableHead>
                   <TableHead>Guard</TableHead>
                   <TableHead>Patrolling Officer</TableHead>
-                  <TableHead>Date & Time</TableHead>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Time</TableHead>
                   <TableHead>Contact</TableHead>
                 </TableRow>
               </TableHeader>
@@ -145,9 +147,11 @@ export default function AgencyHomePage() {
                   const siteDetails = getSiteById(incident.siteId);
                   const guardDetails = getGuardById(incident.raisedByGuardId);
                   const patrollingOfficerDetails = getPatrollingOfficerById(incident.attendedByPatrollingOfficerId);
+                  const incidentDate = new Date(incident.incidentTime);
                   
                   return (
                     <TableRow key={incident.id}>
+                      <TableCell>{siteDetails?.id || 'N/A'}</TableCell>
                       <TableCell className="font-medium">
                         {siteDetails?.name || 'N/A'}
                       </TableCell>
@@ -155,7 +159,8 @@ export default function AgencyHomePage() {
                       <TableCell>
                         {patrollingOfficerDetails?.name || 'N/A'}
                       </TableCell>
-                      <TableCell>{new Date(incident.incidentTime).toLocaleString()}</TableCell>
+                      <TableCell>{incidentDate.toLocaleDateString()}</TableCell>
+                      <TableCell>{incidentDate.toLocaleTimeString()}</TableCell>
                       <TableCell>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
@@ -213,5 +218,3 @@ export default function AgencyHomePage() {
     </div>
   );
 }
-
-    
