@@ -271,7 +271,6 @@ export default function TowercoIncidentsPage() {
                 <TableHead>Status</TableHead>
                 <TableHead>Report</TableHead>
                 <TableHead>Actions</TableHead>
-                <TableHead className="text-right">Download</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -334,23 +333,13 @@ export default function TowercoIncidentsPage() {
                             </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>
-                      <TableCell className="text-right">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleDownloadReport(incident)}
-                        >
-                          <FileDown className="mr-2 h-4 w-4" />
-                          Download
-                        </Button>
-                      </TableCell>
                     </TableRow>
                   );
                 })
               ) : (
                 <TableRow>
                   <TableCell
-                    colSpan={10}
+                    colSpan={9}
                     className="text-center text-muted-foreground"
                   >
                     No incidents found for the current filter.
@@ -364,5 +353,3 @@ export default function TowercoIncidentsPage() {
     </div>
   );
 }
-
-    
