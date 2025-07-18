@@ -132,7 +132,7 @@ export default function TowercoIncidentsPage() {
         (incidentDate.getMonth() + 1).toString() === selectedMonth;
 
       const matchesStatus =
-        selectedStatus === 'all' || incident.status.toLowerCase().replace(' ', '-') === selectedStatus;
+        selectedStatus === 'all' || incident.status.toLowerCase().replace(/\s+/g, '-') === selectedStatus;
 
       return matchesSearch && matchesAgency && matchesDate && matchesMonth && matchesStatus;
     });
