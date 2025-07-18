@@ -1,10 +1,10 @@
 
 'use client';
 
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { incidents } from '@/lib/data/incidents';
+import { incidents as allIncidents } from '@/lib/data/incidents';
 import { sites } from '@/lib/data/sites';
 import { securityAgencies } from '@/lib/data/security-agencies';
 import { guards } from '@/lib/data/guards';
@@ -25,17 +25,34 @@ import { useToast } from '@/hooks/use-toast';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+
+// A mock function to get the latest state of incidents.
+// In a real app, this might not be needed if you use a global state manager (like Redux, Zustand)
+// or refetch data from the server.
+const getIncidents = () => allIncidents;
+
 
 export default function IncidentReportPage() {
   const params = useParams();
+  const router = useRouter();
   const { toast } = useToast();
   const incidentId = params.incidentId as string;
-
-  const incident = incidents.find((a) => a.id === incidentId);
+  
+  // Use state to hold the specific incident, allowing it to be updated.
+  const [incident, setIncident] = useState<Incident | undefined>(() => 
+    getIncidents().find((i) => i.id === incidentId)
+  );
 
   const [description, setDescription] = useState(incident?.description || '');
   const [files, setFiles] = useState<FileList | null>(null);
+
+  // This effect ensures that if the underlying data changes (e.g., by another component),
+  // this component reflects that change.
+  useEffect(() => {
+    setIncident(getIncidents().find((i) => i.id === incidentId));
+  }, [incidentId]);
+
 
   if (!incident) {
     return (
@@ -59,7 +76,6 @@ export default function IncidentReportPage() {
       title: 'Report Generation Started',
       description: `Generating a detailed report for incident #${incident.id}.`,
     });
-    // In a real app, this would trigger a download.
   };
 
   const handleUpdateIncident = (e: React.FormEvent) => {
@@ -73,6 +89,7 @@ export default function IncidentReportPage() {
         title: "Incident Updated",
         description: `Details for incident #${incident.id} have been saved.`
     });
+    router.push('/towerco/incidents');
   }
 
   const getStatusBadge = (status: Incident['status']) => {
@@ -179,6 +196,7 @@ export default function IncidentReportPage() {
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
                             rows={5}
+                            required
                         />
                     </div>
                      <div>
@@ -189,6 +207,7 @@ export default function IncidentReportPage() {
                             multiple
                             className="mt-2"
                             onChange={(e) => setFiles(e.target.files)}
+                            accept="image/*"
                         />
                     </div>
                 </div>

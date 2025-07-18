@@ -60,7 +60,9 @@ export default function TowercoIncidentsPage() {
   const router = useRouter();
   const monthFromQuery = searchParams.get('month');
   
+  // This state now holds the "source of truth" for incidents on this page.
   const [incidents, setIncidents] = useState(initialIncidents);
+  
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedAgency, setSelectedAgency] = useState('all');
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
@@ -128,6 +130,7 @@ export default function TowercoIncidentsPage() {
   }, [searchQuery, selectedAgency, selectedDate, selectedMonth, towercoIncidents]);
 
   const handleStatusChange = (incidentId: string, status: Incident['status']) => {
+    // Update the state on this page. This change will be passed to the detail page.
     setIncidents((prevIncidents) =>
       prevIncidents.map((incident) =>
         incident.id === incidentId ? { ...incident, status } : incident
@@ -137,6 +140,7 @@ export default function TowercoIncidentsPage() {
       title: 'Status Updated',
       description: `Incident #${incidentId} status changed to ${status}.`,
     });
+    // Redirect to the report page to add details.
     if (status === 'Under Review') {
         router.push(`/towerco/incidents/${incidentId}`);
     }
