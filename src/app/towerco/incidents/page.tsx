@@ -34,7 +34,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Eye, FileDown, Search, Calendar as CalendarIcon, ShieldAlert, CheckCircle, ChevronDown } from 'lucide-react';
+import { Eye, Search, Calendar as CalendarIcon, ShieldAlert, CheckCircle, ChevronDown } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 import {
