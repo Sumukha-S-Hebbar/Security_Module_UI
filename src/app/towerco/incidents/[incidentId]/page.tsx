@@ -245,34 +245,34 @@ export default function IncidentReportPage() {
 
             {incident.status === 'Active' && (
               <div className="pt-6 text-center text-muted-foreground">
-                <p>No details available. Start a review to add an incident summary and media.</p>
+                <p>This incident is currently active. Start a review to add details.</p>
               </div>
             )}
 
             {incident.status === 'Under Review' && !isInitialReportSubmitted && (
                 <form onSubmit={handleSaveIncidentDetails}>
                     <div className="pt-6 space-y-4">
-                        <h3 className="text-xl font-semibold">After Incident</h3>
+                        <h3 className="text-xl font-semibold">Initial Incident Report</h3>
                          <div>
-                              <Label htmlFor="description" className="text-base">Incident Description</Label>
+                              <Label htmlFor="description" className="text-base">Incident Summary</Label>
                               <Textarea 
                                   id="description" 
                                   className="mt-2" 
-                                  placeholder="Provide a detailed summary of what happened..." 
+                                  placeholder="Provide a detailed summary of what happened, who was involved, and the immediate actions taken..." 
                                   value={description}
                                   onChange={(e) => setDescription(e.target.value)}
                                   rows={5}
                               />
                           </div>
                           <div>
-                              <Label htmlFor="incident-photos" className="text-base">Photos Regarding Incident</Label>
+                              <Label htmlFor="incident-photos" className="text-base">Incident Media Evidence</Label>
                               <Input 
                                   id="incident-photos" 
                                   type="file" 
                                   multiple
                                   className="mt-2"
                                   onChange={(e) => setIncidentFiles(e.target.files)}
-                                  accept="image/*"
+                                  accept="image/*,video/*"
                               />
                           </div>
                     </div>
@@ -316,20 +316,20 @@ export default function IncidentReportPage() {
                     <div className="pt-6 space-y-4">
                         <Separator />
                          <div className="pt-4 space-y-4">
-                            <h3 className="text-xl font-semibold">After Resolving</h3>
+                            <h3 className="text-xl font-semibold">Resolve Incident</h3>
                             <div>
                                 <Label htmlFor="resolution-notes" className="text-base">Resolution Notes</Label>
                                 <Textarea 
                                     id="resolution-notes" 
                                     className="mt-2" 
-                                    placeholder="Describe the steps taken to resolve the incident..." 
+                                    placeholder="Describe the steps taken to resolve the incident, the final outcome, and any recommendations..." 
                                     value={resolutionNotes}
                                     onChange={(e) => setResolutionNotes(e.target.value)}
                                     rows={5}
                                 />
                             </div>
                             <div>
-                                <Label htmlFor="resolution-photos" className="text-base">Photos or Media Evidence After Resolving</Label>
+                                <Label htmlFor="resolution-photos" className="text-base">Resolution Media Evidence</Label>
                                 <Input 
                                     id="resolution-photos" 
                                     type="file" 
