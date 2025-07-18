@@ -75,24 +75,10 @@ export default function TowercoIncidentsPage() {
     return () => unsubscribe();
   }, []);
 
-  const towercoSites = useMemo(
-    () => sites.filter((site) => site.towerco === LOGGED_IN_TOWERCO),
-    []
-  );
-
-  const towercoSiteIds = useMemo(
-    () => new Set(towercoSites.map((site) => site.id)),
-    [towercoSites]
-  );
-
-  const towercoIncidents = useMemo(
-    () =>
-      incidents.filter(
-        (incident) =>
-          towercoSiteIds.has(incident.siteId)
-      ),
-    [towercoSiteIds, incidents]
-  );
+  const towercoSiteIds = useMemo(() => {
+    const towercoSites = sites.filter((site) => site.towerco === LOGGED_IN_TOWERCO);
+    return new Set(towercoSites.map((site) => site.id));
+  }, []);
   
   const agenciesOnSites = useMemo(() => {
     const agencyIds = new Set<string>();
@@ -106,11 +92,33 @@ export default function TowercoIncidentsPage() {
     return securityAgencies.filter((a) => agencyIds.has(a.id));
   }, [towercoSiteIds]);
 
+  const getGuardById = (id: string): Guard | undefined => {
+    return guards.find((g) => g.id === id);
+  };
+
+  const getPatrollingOfficerById = (id?: string): PatrollingOfficer | undefined => {
+    if (!id) return undefined;
+    return patrollingOfficers.find((s) => s.id === id);
+  };
+
+  const getAgencyForSite = (siteId: string): SecurityAgency | undefined => {
+    return securityAgencies.find((a) => a.siteIds.includes(siteId));
+  };
+  
+  const getSiteById = (id: string): Site | undefined => {
+    return sites.find((s) => s.id === id);
+  };
+
   const filteredIncidents = useMemo(() => {
-    return towercoIncidents.filter((incident) => {
-      const site = sites.find(s => s.id === incident.siteId);
-      const agency = site ? securityAgencies.find(a => a.siteIds.includes(site.id)) : undefined;
-      const guard = guards.find(g => g.id === incident.raisedByGuardId);
+    return incidents.filter((incident) => {
+      // Basic filter: only show incidents for the logged-in TOWERCO
+      if (!towercoSiteIds.has(incident.siteId)) {
+          return false;
+      }
+      
+      const site = getSiteById(incident.siteId);
+      const agency = site ? getAgencyForSite(site.id) : undefined;
+      const guard = getGuardById(incident.raisedByGuardId);
       if (!site || !guard) return false;
 
       const searchLower = searchQuery.toLowerCase();
@@ -136,7 +144,7 @@ export default function TowercoIncidentsPage() {
 
       return matchesSearch && matchesAgency && matchesDate && matchesMonth && matchesStatus;
     });
-  }, [searchQuery, selectedAgency, selectedDate, selectedMonth, towercoIncidents, selectedStatus]);
+  }, [searchQuery, selectedAgency, selectedDate, selectedMonth, selectedStatus, incidents, towercoSiteIds]);
 
   const handleStatusChange = (incidentId: string, status: Incident['status']) => {
     incidentStore.updateIncident(incidentId, { status });
@@ -163,22 +171,6 @@ export default function TowercoIncidentsPage() {
     }
   };
 
-  const getGuardById = (id: string): Guard | undefined => {
-    return guards.find((g) => g.id === id);
-  };
-
-  const getPatrollingOfficerById = (id?: string): PatrollingOfficer | undefined => {
-    if (!id) return undefined;
-    return patrollingOfficers.find((s) => s.id === id);
-  };
-
-  const getAgencyForSite = (siteId: string): SecurityAgency | undefined => {
-    return securityAgencies.find((a) => a.siteIds.includes(siteId));
-  };
-  
-  const getSiteById = (id: string): Site | undefined => {
-    return sites.find((s) => s.id === id);
-  };
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6">
