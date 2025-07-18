@@ -79,14 +79,9 @@ export default function AgencySitesPage() {
   const [unassignedSelectedRegion, setUnassignedSelectedRegion] = useState('all');
   const [unassignedSelectedCity, setUnassignedSelectedCity] = useState('all');
 
-  const agencySiteIds = useMemo(() => {
-      const agency = securityAgencies.find(a => a.id === LOGGED_IN_AGENCY_ID);
-      return new Set(agency ? agency.siteIds : []);
-  }, []);
-
   const agencySites = useMemo(
-    () => sites.filter((site) => agencySiteIds.has(site.id)),
-    [agencySiteIds]
+    () => sites.filter((site) => site.agencyId === LOGGED_IN_AGENCY_ID),
+    []
   );
   
   const agencySiteNames = useMemo(

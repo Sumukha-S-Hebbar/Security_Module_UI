@@ -12,6 +12,7 @@ export type Site = {
   coords: { x: number; y: number }; // As percentages for map placement
   visited: boolean;
   towerco: string;
+  agencyId?: string;
   assignedOn?: string;
   patrollingOfficerId?: string;
   geofencePerimeter?: number;

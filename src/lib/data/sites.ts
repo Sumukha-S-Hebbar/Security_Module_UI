@@ -9,7 +9,7 @@ export const sites: Site[] = [
     city: 'Silicon Valley',
     region: 'CA',
     country: 'USA',
-    guards: ['GL002', 'GL004'],
+    guards: ['GL002', 'GL004', 'GL014'],
     reportUrl: '#',
     coords: { x: 25, y: 30 },
     visited: true,
@@ -17,7 +17,8 @@ export const sites: Site[] = [
     assignedOn: '2024-05-10',
     patrollingOfficerId: 'PO02',
     geofencePerimeter: 500,
-    incidents: incidents.filter(i => i.siteId === 'SITE01')
+    incidents: incidents.filter(i => i.siteId === 'SITE01'),
+    agencyId: 'AGY01'
   },
   {
     id: 'SITE02',
@@ -26,7 +27,7 @@ export const sites: Site[] = [
     city: 'Metro City',
     region: 'NY',
     country: 'USA',
-    guards: ['GL001'],
+    guards: ['GL001', 'GL013'],
     reportUrl: '#',
     coords: { x: 55, y: 45 },
     visited: false,
@@ -34,7 +35,8 @@ export const sites: Site[] = [
     assignedOn: '2024-04-20',
     patrollingOfficerId: 'PO01',
     geofencePerimeter: 1000,
-    incidents: incidents.filter(i => i.siteId === 'SITE02')
+    incidents: incidents.filter(i => i.siteId === 'SITE02'),
+    agencyId: 'AGY01'
   },
   {
     id: 'SITE03',
@@ -43,7 +45,7 @@ export const sites: Site[] = [
     city: 'Bay City',
     region: 'FL',
     country: 'USA',
-    guards: ['GL003'],
+    guards: ['GL003', 'GL015'],
     reportUrl: '#',
     coords: { x: 75, y: 60 },
     visited: false,
@@ -51,7 +53,8 @@ export const sites: Site[] = [
     assignedOn: '2024-06-01',
     patrollingOfficerId: 'PO01',
     geofencePerimeter: 800,
-    incidents: incidents.filter(i => i.siteId === 'SITE03')
+    incidents: incidents.filter(i => i.siteId === 'SITE03'),
+    agencyId: 'AGY01'
   },
   {
     id: 'SITE04',
@@ -68,7 +71,8 @@ export const sites: Site[] = [
     patrollingOfficerId: 'PO02',
     geofencePerimeter: 1200,
     assignedOn: '2024-03-15',
-    incidents: incidents.filter(i => i.siteId === 'SITE04')
+    incidents: incidents.filter(i => i.siteId === 'SITE04'),
+    agencyId: 'AGY02'
   },
   {
     id: 'SITE05',
@@ -77,7 +81,7 @@ export const sites: Site[] = [
     city: 'Industry City',
     region: 'TX',
     country: 'USA',
-    guards: [],
+    guards: ['GL007'],
     reportUrl: '#',
     coords: { x: 15, y: 80 },
     visited: false,
@@ -85,7 +89,8 @@ export const sites: Site[] = [
     patrollingOfficerId: 'PO03',
     assignedOn: '2024-07-01',
     geofencePerimeter: 1500,
-    incidents: incidents.filter(i => i.siteId === 'SITE05')
+    incidents: incidents.filter(i => i.siteId === 'SITE05'),
+    agencyId: 'AGY03'
   },
   {
     id: 'SITE06',
@@ -94,7 +99,7 @@ export const sites: Site[] = [
     city: 'Industry City',
     region: 'TX',
     country: 'USA',
-    guards: [],
+    guards: ['GL008'],
     reportUrl: '#',
     coords: { x: 20, y: 85 },
     visited: true,
@@ -102,7 +107,8 @@ export const sites: Site[] = [
     patrollingOfficerId: 'PO03',
     assignedOn: '2024-07-05',
     geofencePerimeter: 2000,
-    incidents: incidents.filter(i => i.siteId === 'SITE06')
+    incidents: incidents.filter(i => i.siteId === 'SITE06'),
+    agencyId: 'AGY03'
   },
   {
     id: 'SITE07',
@@ -111,13 +117,14 @@ export const sites: Site[] = [
     city: 'Metro City',
     region: 'NY',
     country: 'USA',
-    guards: [],
+    guards: ['GL012'],
     reportUrl: '#',
     coords: { x: 60, y: 50 },
     visited: false,
     towerco: 'TowerCo Beta',
     patrollingOfficerId: 'PO01',
     assignedOn: '2024-05-20',
+    agencyId: 'AGY01'
   },
   {
     id: 'SITE08',
@@ -133,6 +140,7 @@ export const sites: Site[] = [
     towerco: 'TowerCo Alpha',
     patrollingOfficerId: 'PO01',
     assignedOn: '2024-06-10',
+    agencyId: 'AGY01'
   },
   {
     id: 'SITE09',
@@ -147,6 +155,7 @@ export const sites: Site[] = [
     visited: false,
     towerco: 'TowerCo Alpha',
     assignedOn: '2024-06-11',
+    agencyId: 'AGY01'
   },
   {
     id: 'SITE10',
@@ -155,12 +164,14 @@ export const sites: Site[] = [
     city: 'Crestwood',
     region: 'CA',
     country: 'USA',
-    guards: [],
+    guards: ['GL011'],
     reportUrl: '#',
     coords: { x: 35, y: 35 },
     visited: false,
     towerco: 'TowerCo Alpha',
     assignedOn: '2024-06-12',
+    patrollingOfficerId: 'PO01',
+    agencyId: 'AGY01'
   },
   {
     id: 'SITE11',
@@ -169,11 +180,12 @@ export const sites: Site[] = [
     city: 'Crestwood',
     region: 'CA',
     country: 'USA',
-    guards: [],
+    guards: ['GL017'],
     reportUrl: '#',
     coords: { x: 25, y: 40 },
     visited: false,
     towerco: 'TowerCo Alpha',
+    agencyId: 'AGY01'
   },
   {
     id: 'SITE12',
@@ -182,10 +194,11 @@ export const sites: Site[] = [
     city: 'Sunrise',
     region: 'CA',
     country: 'USA',
-    guards: [],
+    guards: ['GL016'],
     reportUrl: '#',
     coords: { x: 50, y: 30 },
     visited: false,
     towerco: 'TowerCo Alpha',
+    agencyId: 'AGY01'
   },
 ];

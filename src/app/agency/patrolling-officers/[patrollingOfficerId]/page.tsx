@@ -32,6 +32,8 @@ import { Progress } from '@/components/ui/progress';
 import { useMemo, useState } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
+const LOGGED_IN_AGENCY_ID = 'AGY01'; // Simulate logged-in agency
+
 export default function AgencyPatrollingOfficerReportPage() {
   const params = useParams();
   const { toast } = useToast();
@@ -52,13 +54,16 @@ export default function AgencyPatrollingOfficerReportPage() {
     );
   }
 
-  const assignedSites = sites.filter(site => site.patrollingOfficerId === patrollingOfficerId);
-  const assignedSiteIds = new Set(assignedSites.map(s => s.id));
-  const assignedGuards = guards.filter(guard => {
-    const site = sites.find(s => s.name === guard.site);
-    return site && site.patrollingOfficerId === patrollingOfficerId;
-  });
-  const assignedIncidents = incidents.filter(incident => assignedSiteIds.has(incident.siteId));
+  const assignedSites = useMemo(() => sites.filter(site => site.agencyId === LOGGED_IN_AGENCY_ID && site.patrollingOfficerId === patrollingOfficerId), [patrollingOfficerId]);
+  
+  const assignedSiteIds = useMemo(() => new Set(assignedSites.map(s => s.id)), [assignedSites]);
+  
+  const assignedGuards = useMemo(() => {
+    const siteNames = new Set(assignedSites.map(s => s.name));
+    return guards.filter(guard => siteNames.has(guard.site));
+  }, [assignedSites]);
+
+  const assignedIncidents = useMemo(() => incidents.filter(incident => assignedSiteIds.has(incident.siteId)), [assignedSiteIds]);
   
   const filteredIncidents = useMemo(() => {
     if (selectedMonth === 'all') {
@@ -309,5 +314,3 @@ export default function AgencyPatrollingOfficerReportPage() {
     </div>
   );
 }
-
-    
