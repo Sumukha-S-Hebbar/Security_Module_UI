@@ -63,7 +63,6 @@ export default function TowercoIncidentsPage() {
   const [incidents, setIncidents] = useState(incidentStore.getIncidents());
   
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedAgency, setSelectedAgency] = useState('all');
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [selectedMonth, setSelectedMonth] = useState(monthFromQuery || 'all');
 
@@ -78,18 +77,6 @@ export default function TowercoIncidentsPage() {
     const towercoSites = sites.filter((site) => site.towerco === LOGGED_IN_TOWERCO);
     return new Set(towercoSites.map((site) => site.id));
   }, []);
-  
-  const agenciesOnSites = useMemo(() => {
-    const agencyIds = new Set<string>();
-    securityAgencies.forEach(agency => {
-        agency.siteIds.forEach(siteId => {
-            if (towercoSiteIds.has(siteId)) {
-                agencyIds.add(agency.id);
-            }
-        })
-    });
-    return securityAgencies.filter((a) => agencyIds.has(a.id));
-  }, [towercoSiteIds]);
 
   const getGuardById = (id: string): Guard | undefined => {
     return guards.find((g) => g.id === id);
@@ -119,7 +106,7 @@ export default function TowercoIncidentsPage() {
       const agency = site ? getAgencyForSite(site.id) : undefined;
       const guard = getGuardById(incident.raisedByGuardId);
       
-      // An incident is valid if it has a site and a guard. Agency is optional.
+      // An incident is valid if it has a site and a guard.
       if (!site || !guard) return false;
 
       const searchLower = searchQuery.toLowerCase();
@@ -128,9 +115,6 @@ export default function TowercoIncidentsPage() {
         site.name.toLowerCase().includes(searchLower) ||
         guard.name.toLowerCase().includes(searchLower) ||
         (agency && agency.name.toLowerCase().includes(searchLower));
-
-      const matchesAgency =
-        selectedAgency === 'all' || agency?.id === selectedAgency;
 
       const incidentDate = new Date(incident.incidentTime);
       const matchesDate =
@@ -141,9 +125,9 @@ export default function TowercoIncidentsPage() {
         selectedMonth === 'all' ||
         (incidentDate.getMonth() + 1).toString() === selectedMonth;
 
-      return matchesSearch && matchesAgency && matchesDate && matchesMonth;
+      return matchesSearch && matchesDate && matchesMonth;
     });
-  }, [searchQuery, selectedAgency, selectedDate, selectedMonth, incidents, towercoSiteIds]);
+  }, [searchQuery, selectedDate, selectedMonth, incidents, towercoSiteIds]);
 
   const handleStatusChange = (incidentId: string, status: Incident['status']) => {
     incidentStore.updateIncident(incidentId, { status });
@@ -198,19 +182,6 @@ export default function TowercoIncidentsPage() {
                 className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[320px]"
               />
             </div>
-            <Select value={selectedAgency} onValueChange={setSelectedAgency}>
-              <SelectTrigger className="w-full sm:w-[180px]">
-                <SelectValue placeholder="Filter by agency" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Agencies</SelectItem>
-                {agenciesOnSites.map((agency) => (
-                  <SelectItem key={agency.id} value={agency.id}>
-                    {agency.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
             <Select value={selectedMonth} onValueChange={setSelectedMonth}>
               <SelectTrigger className="w-full sm:w-[180px]">
                 <SelectValue placeholder="Filter by month" />
