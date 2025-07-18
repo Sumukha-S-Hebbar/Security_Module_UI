@@ -6,6 +6,9 @@ import { incidents as initialIncidents } from './incidents';
  * This is a simple in-memory store that uses localStorage for persistence
  * across page reloads. In a real-world application, this would be replaced
  * by API calls to a backend database.
+ * 
+ * FOR TESTING: You can clear the stored incident data by calling
+ * `incidentStore.reset()` from your browser's developer console.
  */
 
 const INCIDENTS_STORAGE_KEY = 'guardlink-incidents-state';
@@ -14,10 +17,14 @@ let incidentsState: Incident[] = [];
 
 const listeners = new Set<() => void>();
 
+function notifyListeners() {
+    listeners.forEach(listener => listener());
+}
+
 function initializeState() {
   if (typeof window === 'undefined') {
     // We are on the server, use initial data without persistence.
-    incidentsState = [...initialIncidents.map(i => ({ ...i }))];
+    incidentsState = JSON.parse(JSON.stringify(initialIncidents));
     return;
   }
 
@@ -27,12 +34,12 @@ function initializeState() {
       incidentsState = JSON.parse(storedState);
     } else {
       // If no state in localStorage, initialize with default data
-      incidentsState = [...initialIncidents.map(i => ({ ...i }))];
+      incidentsState = JSON.parse(JSON.stringify(initialIncidents));
       window.localStorage.setItem(INCIDENTS_STORAGE_KEY, JSON.stringify(incidentsState));
     }
   } catch (error) {
     console.error("Failed to initialize state from localStorage, using default.", error);
-    incidentsState = [...initialIncidents.map(i => ({ ...i }))];
+    incidentsState = JSON.parse(JSON.stringify(initialIncidents));
   }
 }
 
@@ -71,12 +78,29 @@ export const incidentStore = {
 
     if (incidentUpdated) {
         persistState();
-        listeners.forEach(listener => listener());
+        notifyListeners();
     }
   },
   
   subscribe: (listener: () => void): (() => void) => {
     listeners.add(listener);
+    // Immediately notify the new listener with the current state
+    listener();
     return () => listeners.delete(listener);
+  },
+
+  // Helper for development/testing to reset the data
+  reset: () => {
+    if (typeof window !== 'undefined') {
+        window.localStorage.removeItem(INCIDENTS_STORAGE_KEY);
+        incidentsState = JSON.parse(JSON.stringify(initialIncidents));
+        notifyListeners();
+        console.log("Incident store has been reset to initial data.");
+    }
   }
 };
+
+// Make the store accessible in the browser console for easy debugging
+if (typeof window !== 'undefined') {
+  (window as any).incidentStore = incidentStore;
+}
