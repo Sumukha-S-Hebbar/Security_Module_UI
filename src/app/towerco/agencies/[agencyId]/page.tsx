@@ -118,15 +118,6 @@ export default function AgencyReportPage() {
     (i) => i.status === 'Resolved'
   ).length;
 
-  const assignmentDates = agencySites
-    .map((s) => s.assignedOn)
-    .filter((d): d is string => !!d)
-    .map((d) => new Date(d));
-  const firstAssignedDate =
-    assignmentDates.length > 0
-      ? new Date(Math.min(...assignmentDates.map((d) => d.getTime())))
-      : null;
-      
   const getStatusBadge = (status: Incident['status']) => {
     switch (status) {
       case 'Active':
@@ -256,21 +247,6 @@ export default function AgencyReportPage() {
                         </p>
                     </div>
                     </div>
-                    {firstAssignedDate && (
-                    <>
-                        <div className="flex items-center gap-3">
-                        <Calendar className="h-8 w-8 text-primary" />
-                        <div>
-                            <p className="font-bold text-lg">
-                            {firstAssignedDate.toLocaleDateString()}
-                            </p>
-                            <p className="text-muted-foreground">
-                            First Assignment
-                            </p>
-                        </div>
-                        </div>
-                    </>
-                    )}
                 </div>
             </div>
         </CardContent>
