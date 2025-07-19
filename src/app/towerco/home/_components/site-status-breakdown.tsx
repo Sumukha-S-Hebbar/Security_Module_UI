@@ -136,7 +136,7 @@ export function SiteStatusBreakdown({ sites, agencies }: { sites: Site[]; agenci
                         <TableCell>{site.region}</TableCell>
                         <TableCell className="text-right">
                             <Button asChild size="sm">
-                                <Link href="/towerco/sites">Assign Agency</Link>
+                                <Link href={`/towerco/sites?focusSite=${site.id}`}>Assign Agency</Link>
                             </Button>
                         </TableCell>
                       </TableRow>

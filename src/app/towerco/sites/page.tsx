@@ -1,7 +1,9 @@
 
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
+import { useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -64,7 +66,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import Link from 'next/link';
+import { cn } from '@/lib/utils';
 
 const LOGGED_IN_ORG_ID = 'TCO01'; // Simulate logged-in user
 
@@ -92,6 +94,7 @@ export default function TowercoSitesPage() {
   const [isUploading, setIsUploading] = useState(false);
   const [isAddingSite, setIsAddingSite] = useState(false);
   const { toast } = useToast();
+  const searchParams = useSearchParams();
 
   // State for Assigned Sites filters
   const [assignedSearchQuery, setAssignedSearchQuery] = useState('');
@@ -109,7 +112,7 @@ export default function TowercoSitesPage() {
   );
   
   const loggedInOrg = useMemo(() => organizations.find(o => o.id === LOGGED_IN_ORG_ID), []);
-
+  const unassignedSitesRef = useRef<Map<string, HTMLTableRowElement | null>>(new Map());
 
   const towercoSites = useMemo(
     () => sites.filter((site) => site.towerco === loggedInOrg?.name),
@@ -138,6 +141,20 @@ export default function TowercoSitesPage() {
     resolver: zodResolver(addSiteFormSchema),
     defaultValues: { id: '', name: '', address: '', region: '', city: '' },
   });
+
+  useEffect(() => {
+    const focusSiteId = searchParams.get('focusSite');
+    if (focusSiteId && unassignedSitesRef.current.has(focusSiteId)) {
+        const row = unassignedSitesRef.current.get(focusSiteId);
+        if (row) {
+            row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            row.classList.add('bg-yellow-200/50', 'transition-all', 'duration-1000');
+            setTimeout(() => {
+                row.classList.remove('bg-yellow-200/50');
+            }, 2000);
+        }
+    }
+  }, [searchParams]);
 
   async function onUploadSubmit(values: z.infer<typeof uploadFormSchema>) {
     setIsUploading(true);
@@ -679,7 +696,7 @@ export default function TowercoSitesPage() {
               <TableBody>
                 {filteredUnassignedSites.length > 0 ? (
                   filteredUnassignedSites.map((site) => (
-                    <TableRow key={site.id}>
+                    <TableRow key={site.id} ref={(el) => unassignedSitesRef.current.set(site.id, el)}>
                       <TableCell className="font-medium">{site.id}</TableCell>
                       <TableCell>
                         <div>{site.name}</div>
