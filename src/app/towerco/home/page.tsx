@@ -26,7 +26,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { AlertTriangle, ChevronDown, Phone, Clock } from 'lucide-react';
+import { AlertTriangle, ChevronDown, Phone } from 'lucide-react';
 import { TowercoAnalyticsDashboard } from './_components/towerco-analytics-dashboard';
 import {
   DropdownMenu,
@@ -44,7 +44,6 @@ import { guards as mockGuards } from '@/lib/data/guards';
 import { patrollingOfficers as mockPatrollingOfficers } from '@/lib/data/patrolling-officers';
 import { sites as mockSites } from '@/lib/data/sites';
 import { organizations as mockOrganizations } from '@/lib/data/organizations';
-import { format } from 'date-fns';
 
 
 const LOGGED_IN_ORG_ID = 'TCO01'; // Simulate logged-in user
@@ -110,14 +109,12 @@ async function getDashboardData(): Promise<DashboardData> {
 export default function TowercoHomePage() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
       const dashboardData = await getDashboardData();
       setData(dashboardData);
-      setLastUpdated(new Date());
       setIsLoading(false);
     };
     fetchData();
@@ -190,14 +187,8 @@ export default function TowercoHomePage() {
             Welcome, {data.currentUserOrg.name}! Here's a high-level overview of your assets.
           </p>
         </div>
-        {lastUpdated && (
-             <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Clock className="h-4 w-4" />
-                <span>Last updated: {format(lastUpdated, "PPP p")}</span>
-            </div>
-        )}
       </div>
-
+      
       <Card className="border-destructive bg-destructive/10">
           <CardHeader className="flex flex-row items-center gap-2">
           <AlertTriangle className="w-6 h-6 text-destructive" />
