@@ -534,6 +534,7 @@ export default function TowercoAgenciesPage() {
                         <TableHeader>
                             <TableRow>
                                 <TableHead>Agency</TableHead>
+                                <TableHead>ID</TableHead>
                                 <TableHead>Contact Info</TableHead>
                                 <TableHead>Location</TableHead>
                                 <TableHead>Sites Assigned</TableHead>
@@ -544,6 +545,7 @@ export default function TowercoAgenciesPage() {
                              {isLoading ? (
                                 Array.from({ length: 5 }).map((_, i) => (
                                     <TableRow key={i}>
+                                        <TableCell><Skeleton className="h-10 w-full" /></TableCell>
                                         <TableCell><Skeleton className="h-10 w-full" /></TableCell>
                                         <TableCell><Skeleton className="h-10 w-full" /></TableCell>
                                         <TableCell><Skeleton className="h-10 w-full" /></TableCell>
@@ -562,11 +564,11 @@ export default function TowercoAgenciesPage() {
                                                         <AvatarImage src={agency.avatar} alt={agency.name} />
                                                         <AvatarFallback>{agency.name.charAt(0)}</AvatarFallback>
                                                     </Avatar>
-                                                    <div>
-                                                        <p className="font-medium">{agency.name}</p>
-                                                        <p className="text-sm text-muted-foreground">ID: {agency.id}</p>
-                                                    </div>
+                                                    <p className="font-medium">{agency.name}</p>
                                                 </div>
+                                            </TableCell>
+                                            <TableCell>
+                                                <p className="text-sm text-muted-foreground">{agency.id}</p>
                                             </TableCell>
                                             <TableCell>
                                                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -610,7 +612,7 @@ export default function TowercoAgenciesPage() {
                                 })
                              ) : (
                                 <TableRow>
-                                    <TableCell colSpan={5} className="text-center text-muted-foreground py-10">
+                                    <TableCell colSpan={6} className="text-center text-muted-foreground py-10">
                                         No agencies found for the current filter.
                                     </TableCell>
                                 </TableRow>
