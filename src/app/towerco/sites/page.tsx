@@ -9,6 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { sites } from '@/lib/data/sites';
 import { securityAgencies } from '@/lib/data/security-agencies';
 import { organizations } from '@/lib/data/organizations';
+import { incidents } from '@/lib/data/incidents';
 import type { Site, SecurityAgency } from '@/types';
 import {
   Card,
@@ -287,6 +288,17 @@ export default function TowercoSitesPage() {
     return agency ? agency.name : 'Unassigned';
   };
 
+  const siteIncidentsCount = useMemo(() => {
+    const counts: { [siteId: string]: number } = {};
+    incidents.forEach((incident) => {
+        if (!counts[incident.siteId]) {
+          counts[incident.siteId] = 0;
+        }
+        counts[incident.siteId]++;
+    });
+    return counts;
+  }, []);
+
   if (!loggedInOrg) {
      return (
       <div className="p-4 sm:p-6 lg:p-8">
@@ -555,64 +567,68 @@ export default function TowercoSitesPage() {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-6">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Site</TableHead>
+                <TableHead>Agency</TableHead>
+                <TableHead>Incidents</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
             {filteredAssignedSites.length > 0 ? (
               filteredAssignedSites.map((site) => {
-                const isAssigned = !!getAgencyForSite(site.id);
+                const incidentsCount = siteIncidentsCount[site.id] || 0;
                 return (
-                    <Card key={site.id} className="flex flex-col">
-                    <CardHeader>
-                        <div className="flex items-start justify-between">
-                        <div>
-                            <CardTitle className="text-lg">{site.name}</CardTitle>
-                            <CardDescription>ID: {site.id}</CardDescription>
-                        </div>
-                        <Badge
-                            variant={isAssigned ? 'secondary' : 'destructive'}
-                        >
-                            {isAssigned ? 'Assigned' : 'Unassigned'}
-                        </Badge>
-                        </div>
-                    </CardHeader>
-                    <CardContent className="flex-grow space-y-2 text-sm">
-                        <div className="flex items-start gap-2 text-muted-foreground">
-                        <MapPin className="h-4 w-4 flex-shrink-0 mt-1" />
-                        <span>{site.address}</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-muted-foreground">
-                        <Briefcase className="h-4 w-4 flex-shrink-0" />
-                        <span>{getAgencyName(site.id)}</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-muted-foreground">
-                        <ShieldAlert className="h-4 w-4 flex-shrink-0" />
-                        <span>{site.incidents?.length || 0} Incidents</span>
-                        </div>
-                    </CardContent>
-                    <CardFooter className="grid grid-cols-2 gap-2">
-                        <Button asChild variant="outline" size="sm">
-                        <Link href={`/towerco/sites/${site.id}`}>
-                            <Eye className="mr-2 h-4 w-4" />
-                            View Report
-                        </Link>
-                        </Button>
-                        <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleDownloadReport(site.name)}
-                        >
-                        <FileDown className="mr-2 h-4 w-4" />
-                        Download Report
-                        </Button>
-                    </CardFooter>
-                    </Card>
+                    <TableRow key={site.id}>
+                        <TableCell>
+                            <div className="font-medium">{site.name}</div>
+                            <div className="text-sm text-muted-foreground flex items-center gap-1">
+                                <MapPin className="w-3 h-3" />
+                                {site.address}
+                            </div>
+                        </TableCell>
+                        <TableCell>
+                            <div className="flex items-center gap-2">
+                                <Briefcase className="h-4 w-4 flex-shrink-0" />
+                                <span>{getAgencyName(site.id)}</span>
+                            </div>
+                        </TableCell>
+                        <TableCell>
+                             <div className="flex items-center gap-2">
+                                <ShieldAlert className="h-4 w-4 flex-shrink-0" />
+                                <span>{incidentsCount}</span>
+                            </div>
+                        </TableCell>
+                        <TableCell className="text-right space-x-2">
+                             <Button asChild variant="outline" size="sm">
+                                <Link href={`/towerco/sites/${site.id}`}>
+                                    <Eye className="mr-2 h-4 w-4" />
+                                    View
+                                </Link>
+                            </Button>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleDownloadReport(site.name)}
+                                >
+                                <FileDown className="mr-2 h-4 w-4" />
+                                Download
+                            </Button>
+                        </TableCell>
+                    </TableRow>
                 )
               })
             ) : (
-              <div className="col-span-full text-center text-muted-foreground py-10">
-                No assigned sites found for the current filter.
-              </div>
+                <TableRow>
+                    <TableCell colSpan={4} className="text-center text-muted-foreground py-10">
+                        No assigned sites found for the current filter.
+                    </TableCell>
+                </TableRow>
             )}
-          </div>
+            </TableBody>
+          </Table>
         </CardContent>
       </Card>
 
