@@ -121,6 +121,7 @@ export function SiteStatusBreakdown({ sites, agencies }: { sites: Site[]; agenci
                   <TableRow>
                     <TableHead>Site</TableHead>
                     <TableHead>Region</TableHead>
+                    <TableHead className="text-right">Action</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -133,6 +134,11 @@ export function SiteStatusBreakdown({ sites, agencies }: { sites: Site[]; agenci
                           <p className="text-xs text-muted-foreground">{site.address}</p>
                         </TableCell>
                         <TableCell>{site.region}</TableCell>
+                        <TableCell className="text-right">
+                            <Button asChild size="sm">
+                                <Link href="/towerco/sites">Assign Agency</Link>
+                            </Button>
+                        </TableCell>
                       </TableRow>
                     ))}
                 </TableBody>
