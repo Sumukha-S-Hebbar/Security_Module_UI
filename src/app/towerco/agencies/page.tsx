@@ -509,14 +509,12 @@ export default function TowercoAgenciesPage() {
                                 <TableHead>Contact Info</TableHead>
                                 <TableHead>Location</TableHead>
                                 <TableHead>Sites Assigned</TableHead>
-                                <TableHead className="text-right">Actions</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                              {isLoading ? (
                                 Array.from({ length: 5 }).map((_, i) => (
                                     <TableRow key={i}>
-                                        <TableCell><Skeleton className="h-10 w-full" /></TableCell>
                                         <TableCell><Skeleton className="h-10 w-full" /></TableCell>
                                         <TableCell><Skeleton className="h-10 w-full" /></TableCell>
                                         <TableCell><Skeleton className="h-10 w-full" /></TableCell>
@@ -560,19 +558,15 @@ export default function TowercoAgenciesPage() {
                                                 </div>
                                             </TableCell>
                                             <TableCell>
-                                                <p>{assignedSitesCount}</p>
-                                            </TableCell>
-                                            <TableCell className="text-right space-x-2">
                                                 <Button
-                                                    variant="outline"
-                                                    size="sm"
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        setSelectedAgencyForSites(agency);
-                                                    }}
+                                                  variant="link"
+                                                  className="p-0 h-auto"
+                                                  onClick={(e) => {
+                                                      e.stopPropagation();
+                                                      setSelectedAgencyForSites(agency);
+                                                  }}
                                                 >
-                                                    <Building2 className="mr-2 h-4 w-4" />
-                                                    Sites
+                                                  {assignedSitesCount}
                                                 </Button>
                                             </TableCell>
                                         </TableRow>
@@ -580,7 +574,7 @@ export default function TowercoAgenciesPage() {
                                 })
                              ) : (
                                 <TableRow>
-                                    <TableCell colSpan={6} className="text-center text-muted-foreground py-10">
+                                    <TableCell colSpan={5} className="text-center text-muted-foreground py-10">
                                         No agencies found for the current filter.
                                     </TableCell>
                                 </TableRow>
