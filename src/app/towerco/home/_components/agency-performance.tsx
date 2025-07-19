@@ -2,17 +2,21 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import type { Incident, Site, SecurityAgency } from '@/types';
+import type { Incident, Site, SecurityAgency, Guard } from '@/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Progress } from '@/components/ui/progress';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { guards } from '@/lib/data/guards';
+import { patrollingOfficers } from '@/lib/data/patrolling-officers';
 
 interface AgencyPerformanceData {
   agency: SecurityAgency;
   performance: number;
-  totalIncidents: number;
-  resolvedIncidents: number;
+  incidentResolutionRate: number;
+  guardPerimeterAccuracy: number;
+  guardSelfieAccuracy: number;
+  officerSiteVisitRate: number;
 }
 
 export function AgencyPerformance({
@@ -29,37 +33,73 @@ export function AgencyPerformance({
   const performanceData = useMemo(() => {
     const data: AgencyPerformanceData[] = agencies.map((agency) => {
       const agencySiteIds = new Set(agency.siteIds);
+      const agencySites = sites.filter(s => agencySiteIds.has(s.id));
+      
+      // 1. Incident Resolution Rate
       const agencyIncidents = incidents.filter(
         (incident) => agencySiteIds.has(incident.siteId)
       );
-      
       const totalIncidents = agencyIncidents.length;
-      if (totalIncidents === 0) {
-        return {
-          agency,
-          performance: 100,
-          totalIncidents: 0,
-          resolvedIncidents: 0,
-        };
-      }
+      const resolvedIncidents = agencyIncidents.filter(i => i.status === 'Resolved').length;
+      const incidentResolutionRate = totalIncidents > 0 ? (resolvedIncidents / totalIncidents) * 100 : 100;
 
-      const resolvedIncidents = agencyIncidents.filter(
-        (incident) => incident.status === 'Resolved'
-      ).length;
+      // 2. Guard Performance
+      const agencyGuardIds = new Set(agencySites.flatMap(s => s.guards));
+      const agencyGuards = guards.filter(g => agencyGuardIds.has(g.id));
+      let totalPerimeterAccuracy = 0;
+      let totalSelfieAccuracy = 0;
+
+      if (agencyGuards.length > 0) {
+        agencyGuards.forEach(guard => {
+          totalPerimeterAccuracy += guard.performance?.perimeterAccuracy || 0;
+          const selfieAccuracy = guard.totalSelfieRequests > 0
+            ? ((guard.totalSelfieRequests - guard.missedSelfieCount) / guard.totalSelfieRequests) * 100
+            : 100;
+          totalSelfieAccuracy += selfieAccuracy;
+        });
+      }
+      const guardPerimeterAccuracy = agencyGuards.length > 0 ? totalPerimeterAccuracy / agencyGuards.length : 100;
+      const guardSelfieAccuracy = agencyGuards.length > 0 ? totalSelfieAccuracy / agencyGuards.length : 100;
+
+      // 3. Patrolling Officer Performance
+      const agencyPatrollingOfficerIds = new Set(agencySites.map(s => s.patrollingOfficerId).filter(Boolean));
+      const agencyPatrollingOfficers = patrollingOfficers.filter(po => agencyPatrollingOfficerIds.has(po.id));
+      let totalSiteVisitRate = 0;
+      if (agencyPatrollingOfficers.length > 0) {
+          agencyPatrollingOfficers.forEach(po => {
+              const poSites = agencySites.filter(s => s.patrollingOfficerId === po.id);
+              if (poSites.length > 0) {
+                  const visitedCount = poSites.filter(s => s.visited).length;
+                  totalSiteVisitRate += (visitedCount / poSites.length) * 100;
+              } else {
+                  totalSiteVisitRate += 100; // If no sites, they haven't missed any.
+              }
+          });
+      }
+      const officerSiteVisitRate = agencyPatrollingOfficers.length > 0 ? totalSiteVisitRate / agencyPatrollingOfficers.length : 100;
       
-      const performance = Math.round((resolvedIncidents / totalIncidents) * 100);
+      // 4. Combined Performance Score (equal weighting for this example)
+      const performanceComponents = [
+        incidentResolutionRate,
+        guardPerimeterAccuracy,
+        guardSelfieAccuracy,
+        officerSiteVisitRate,
+      ];
+      const performance = performanceComponents.reduce((a, b) => a + b, 0) / performanceComponents.length;
 
       return {
         agency,
-        performance,
-        totalIncidents,
-        resolvedIncidents,
+        performance: Math.round(performance),
+        incidentResolutionRate: Math.round(incidentResolutionRate),
+        guardPerimeterAccuracy: Math.round(guardPerimeterAccuracy),
+        guardSelfieAccuracy: Math.round(guardSelfieAccuracy),
+        officerSiteVisitRate: Math.round(officerSiteVisitRate),
       };
     });
 
     // Sort by performance descending
     return data.sort((a, b) => b.performance - a.performance);
-  }, [agencies, incidents]);
+  }, [agencies, sites, incidents]);
 
   const filteredPerformanceData = useMemo(() => {
     if (selectedAgency === 'all') {
@@ -77,7 +117,7 @@ export function AgencyPerformance({
             <div>
                 <CardTitle>Agency Performance</CardTitle>
                 <CardDescription>
-                Incident resolution rate by security agency.
+                Overall score based on incidents, guard, and officer performance.
                 </CardDescription>
             </div>
             <Select value={selectedAgency} onValueChange={setSelectedAgency}>
@@ -98,8 +138,8 @@ export function AgencyPerformance({
       <CardContent className="space-y-4">
         {filteredPerformanceData.length > 0 ? (
           filteredPerformanceData.map((data) => (
-            <div key={data.agency.id} className="space-y-2 p-3 rounded-lg border">
-                <div className="flex justify-between items-center">
+            <div key={data.agency.id} className="space-y-3 p-4 rounded-lg border">
+                <div className="flex justify-between items-center gap-4">
                     <div className="flex items-center gap-3">
                         <Avatar className="h-10 w-10">
                             <AvatarImage src={data.agency.avatar} alt={data.agency.name} />
@@ -107,14 +147,18 @@ export function AgencyPerformance({
                         </Avatar>
                         <div>
                             <p className="font-semibold">{data.agency.name}</p>
-                            <p className="text-sm text-muted-foreground">
-                                {data.resolvedIncidents} of {data.totalIncidents} incidents resolved
-                            </p>
+                            <p className="text-sm text-muted-foreground">Overall Performance Score</p>
                         </div>
                     </div>
-                     <span className="font-bold text-lg">{data.performance}%</span>
+                     <span className="font-bold text-2xl">{data.performance}%</span>
                 </div>
                  <Progress value={data.performance} className="h-2" />
+                 <div className="text-xs text-muted-foreground grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-1 pt-2">
+                    <p>Resolution: {data.incidentResolutionRate}%</p>
+                    <p>Perimeter: {data.guardPerimeterAccuracy}%</p>
+                    <p>Selfies: {data.guardSelfieAccuracy}%</p>
+                    <p>Site Visits: {data.officerSiteVisitRate}%</p>
+                 </div>
             </div>
           ))
         ) : (
