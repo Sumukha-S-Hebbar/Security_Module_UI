@@ -2,7 +2,7 @@
 'use client';
 
 import type { Site, SecurityAgency } from '@/types';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 
 export function SiteStatusBreakdown({ sites, agencies }: { sites: Site[]; agencies: SecurityAgency[] }) {
   const totalSites = sites.length;
@@ -18,10 +18,11 @@ export function SiteStatusBreakdown({ sites, agencies }: { sites: Site[]; agenci
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Site Status</CardTitle>
+        <CardTitle>Site Status Breakdown</CardTitle>
+        <CardDescription>A real-time overview of site assignments.</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="flex w-full h-4 rounded-full overflow-hidden bg-muted">
+      <CardContent className="space-y-4 pt-2">
+        <div className="flex w-full h-3 rounded-full overflow-hidden bg-muted">
           <div
             className="bg-chart-2"
             style={{ width: `${assignedPercentage}%` }}

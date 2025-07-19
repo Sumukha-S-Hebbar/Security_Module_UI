@@ -103,43 +103,45 @@ export function IncidentChart({
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <div>
-          <CardTitle>Incidents Occurred</CardTitle>
-          <CardDescription>
-            Total vs. resolved emergency incidents per month.
-          </CardDescription>
-        </div>
-        <div className="flex items-center gap-2">
-          <Select value={selectedCompany} onValueChange={setSelectedCompany}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Select Company" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Companies</SelectItem>
-              {securityAgencies.map((agency) => (
-                <SelectItem key={agency.id} value={agency.id}>
-                  {agency.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select value={selectedYear} onValueChange={setSelectedYear}>
-            <SelectTrigger className="w-[120px]">
-              <SelectValue placeholder="Select Year" />
-            </SelectTrigger>
-            <SelectContent>
-              {availableYears.map((year) => (
-                <SelectItem key={year} value={year}>
-                  {year}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+      <CardHeader>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+            <div>
+                <CardTitle>Incident Trend</CardTitle>
+                <CardDescription>
+                    Monthly total vs. resolved incidents.
+                </CardDescription>
+            </div>
+            <div className="flex items-center gap-2">
+            <Select value={selectedCompany} onValueChange={setSelectedCompany}>
+                <SelectTrigger className="w-full sm:w-[180px]">
+                <SelectValue placeholder="Select Company" />
+                </SelectTrigger>
+                <SelectContent>
+                <SelectItem value="all">All Companies</SelectItem>
+                {securityAgencies.map((agency) => (
+                    <SelectItem key={agency.id} value={agency.id}>
+                    {agency.name}
+                    </SelectItem>
+                ))}
+                </SelectContent>
+            </Select>
+            <Select value={selectedYear} onValueChange={setSelectedYear}>
+                <SelectTrigger className="w-full sm:w-[120px]">
+                <SelectValue placeholder="Select Year" />
+                </SelectTrigger>
+                <SelectContent>
+                {availableYears.map((year) => (
+                    <SelectItem key={year} value={year}>
+                    {year}
+                    </SelectItem>
+                ))}
+                </SelectContent>
+            </Select>
+            </div>
         </div>
       </CardHeader>
-      <CardContent>
-        <ChartContainer config={chartConfig} className="h-[250px] w-full">
+      <CardContent className="pt-4">
+        <ChartContainer config={chartConfig} className="h-[300px] w-full">
           <BarChart data={monthlyIncidentData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
             <CartesianGrid vertical={false} />
             <XAxis

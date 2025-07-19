@@ -15,6 +15,7 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
+  CardDescription,
 } from '@/components/ui/card';
 import {
   Table,
@@ -25,7 +26,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { AlertTriangle, ChevronDown, Phone } from 'lucide-react';
+import { AlertTriangle, ChevronDown, Phone, Clock } from 'lucide-react';
 import { TowercoAnalyticsDashboard } from './_components/towerco-analytics-dashboard';
 import {
   DropdownMenu,
@@ -43,6 +44,7 @@ import { guards as mockGuards } from '@/lib/data/guards';
 import { patrollingOfficers as mockPatrollingOfficers } from '@/lib/data/patrolling-officers';
 import { sites as mockSites } from '@/lib/data/sites';
 import { organizations as mockOrganizations } from '@/lib/data/organizations';
+import { format } from 'date-fns';
 
 
 const LOGGED_IN_ORG_ID = 'TCO01'; // Simulate logged-in user
@@ -108,12 +110,14 @@ async function getDashboardData(): Promise<DashboardData> {
 export default function TowercoHomePage() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
       const dashboardData = await getDashboardData();
       setData(dashboardData);
+      setLastUpdated(new Date());
       setIsLoading(false);
     };
     fetchData();
@@ -152,23 +156,20 @@ export default function TowercoHomePage() {
             <Skeleton className="h-8 w-1/3" />
             <Skeleton className="h-4 w-1/2" />
         </div>
-        <Card>
-            <CardHeader className="flex flex-row items-center gap-2">
-                <Skeleton className="h-6 w-6 rounded-full" />
-                <Skeleton className="h-6 w-48" />
-            </CardHeader>
-            <CardContent>
-                <Skeleton className="h-24 w-full" />
-            </CardContent>
-        </Card>
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <Skeleton className="h-28 w-full" />
             <Skeleton className="h-28 w-full" />
             <Skeleton className="h-28 w-full" />
             <Skeleton className="h-28 w-full" />
         </div>
-        <Skeleton className="h-24 w-full" />
-        <Skeleton className="h-64 w-full" />
-        <Skeleton className="h-80 w-full" />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Skeleton className="h-80 w-full" />
+            <Skeleton className="h-80 w-full" />
+        </div>
+         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Skeleton className="h-64 w-full" />
+            <Skeleton className="h-64 w-full" />
+        </div>
       </div>
     );
   }
@@ -185,123 +186,135 @@ export default function TowercoHomePage() {
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">{portalName} Dashboard</h1>
-        <p className="text-muted-foreground">
-          Welcome, {data.currentUserOrg.name}! Here's a high-level overview of your assets.
-        </p>
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">{portalName} Dashboard</h1>
+          <p className="text-muted-foreground">
+            Welcome, {data.currentUserOrg.name}! Here's a high-level overview of your assets.
+          </p>
+        </div>
+        {lastUpdated && (
+             <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Clock className="h-4 w-4" />
+                <span>Last updated: {format(lastUpdated, "PPP p")}</span>
+            </div>
+        )}
       </div>
-
-      <Card className="border-destructive bg-destructive/10">
-        <CardHeader className="flex flex-row items-center gap-2">
-          <AlertTriangle className="w-6 h-6 text-destructive" />
-          <CardTitle>Active Emergency Incidents</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {activeEmergencies.length > 0 ? (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Site ID</TableHead>
-                  <TableHead>Site Name</TableHead>
-                  <TableHead>Agency</TableHead>
-                  <TableHead>Patrolling Officer</TableHead>
-                  <TableHead>Guard</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Time</TableHead>
-                  <TableHead>Contact</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {activeEmergencies.map((incident) => {
-                  const siteDetails = getSiteById(incident.siteId);
-                  const guardDetails = getGuardById(incident.raisedByGuardId);
-                  const patrollingOfficerDetails = getPatrollingOfficerById(
-                    incident.attendedByPatrollingOfficerId
-                  );
-                  const agencyDetails = siteDetails ? getAgencyForSite(siteDetails.id) : undefined;
-                  const incidentDate = new Date(incident.incidentTime);
-
-                  return (
-                    <TableRow key={incident.id}>
-                       <TableCell>{incident.siteId}</TableCell>
-                      <TableCell className="font-medium">
-                        {siteDetails?.name || 'N/A'}
-                      </TableCell>
-                      <TableCell>{agencyDetails?.name || 'N/A'}</TableCell>
-                      <TableCell>
-                        {patrollingOfficerDetails?.name || 'N/A'}
-                      </TableCell>
-                      <TableCell>{guardDetails?.name || 'N/A'}</TableCell>
-                      <TableCell>{incidentDate.toLocaleDateString()}</TableCell>
-                      <TableCell>{incidentDate.toLocaleTimeString()}</TableCell>
-                      <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="outline" size="sm">
-                              Contact <ChevronDown className="ml-2 h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            {guardDetails && (
-                              <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                                <div className="flex items-center gap-2">
-                                  <Phone className="mr-2 h-4 w-4" />
-                                  <span>Guard: {guardDetails.phone}</span>
-                                </div>
-                              </DropdownMenuItem>
-                            )}
-                            {patrollingOfficerDetails && (
-                              <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                                <div className="flex items-center gap-2">
-                                  <Phone className="mr-2 h-4 w-4" />
-                                  <span>P. Officer: {patrollingOfficerDetails.phone}</span>
-                                </div>
-                              </DropdownMenuItem>
-                            )}
-                            {agencyDetails && (
-                              <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                               <div className="flex items-center gap-2">
-                                  <Phone className="mr-2 h-4 w-4" />
-                                  <span>Agency: {agencyDetails.phone}</span>
-                                </div>
-                              </DropdownMenuItem>
-                            )}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          ) : (
-            <p className="text-muted-foreground text-center py-4">
-              No active emergency incidents. All systems are normal.
-            </p>
-          )}
-        </CardContent>
-      </Card>
 
       <TowercoAnalyticsDashboard
         sites={data.sites}
         agencies={data.agencies}
-        incidents={activeEmergencies}
+        incidents={data.incidents}
       />
+      
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        <Card className="border-destructive bg-destructive/10 xl:col-span-2">
+            <CardHeader className="flex flex-row items-center gap-2">
+            <AlertTriangle className="w-6 h-6 text-destructive" />
+            <CardTitle>Active Emergency Incidents ({activeEmergencies.length})</CardTitle>
+            </CardHeader>
+            <CardContent>
+            {activeEmergencies.length > 0 ? (
+                <div className="overflow-x-auto">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                            <TableHead>Site ID</TableHead>
+                            <TableHead>Site Name</TableHead>
+                            <TableHead>Agency</TableHead>
+                            <TableHead>Patrolling Officer</TableHead>
+                            <TableHead>Guard</TableHead>
+                            <TableHead>Time</TableHead>
+                            <TableHead className="text-right">Contact</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {activeEmergencies.map((incident) => {
+                            const siteDetails = getSiteById(incident.siteId);
+                            const guardDetails = getGuardById(incident.raisedByGuardId);
+                            const patrollingOfficerDetails = getPatrollingOfficerById(
+                                incident.attendedByPatrollingOfficerId
+                            );
+                            const agencyDetails = siteDetails ? getAgencyForSite(siteDetails.id) : undefined;
+                            const incidentDate = new Date(incident.incidentTime);
+
+                            return (
+                                <TableRow key={incident.id}>
+                                <TableCell>{incident.siteId}</TableCell>
+                                <TableCell className="font-medium">
+                                    {siteDetails?.name || 'N/A'}
+                                </TableCell>
+                                <TableCell>{agencyDetails?.name || 'N/A'}</TableCell>
+                                <TableCell>
+                                    {patrollingOfficerDetails?.name || 'N/A'}
+                                </TableCell>
+                                <TableCell>{guardDetails?.name || 'N/A'}</TableCell>
+                                <TableCell>{incidentDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</TableCell>
+                                <TableCell className="text-right">
+                                    <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button variant="outline" size="sm">
+                                        Contact <ChevronDown className="ml-2 h-4 w-4" />
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                        {guardDetails && (
+                                        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                            <a href={`tel:${guardDetails.phone}`} className="flex items-center gap-2 w-full">
+                                                <Phone className="mr-2 h-4 w-4" />
+                                                <span>Guard: {guardDetails.phone}</span>
+                                            </a>
+                                        </DropdownMenuItem>
+                                        )}
+                                        {patrollingOfficerDetails && (
+                                        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                            <a href={`tel:${patrollingOfficerDetails.phone}`} className="flex items-center gap-2 w-full">
+                                                <Phone className="mr-2 h-4 w-4" />
+                                                <span>P. Officer: {patrollingOfficerDetails.phone}</span>
+                                            </a>
+                                        </DropdownMenuItem>
+                                        )}
+                                        {agencyDetails && (
+                                        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                            <a href={`tel:${agencyDetails.phone}`} className="flex items-center gap-2 w-full">
+                                                <Phone className="mr-2 h-4 w-4" />
+                                                <span>Agency: {agencyDetails.phone}</span>
+                                            </a>
+                                        </DropdownMenuItem>
+                                        )}
+                                    </DropdownMenuContent>
+                                    </DropdownMenu>
+                                </TableCell>
+                                </TableRow>
+                            );
+                            })}
+                        </TableBody>
+                    </Table>
+                </div>
+            ) : (
+                <p className="text-muted-foreground text-center py-4">
+                No active emergency incidents. All systems are normal.
+                </p>
+            )}
+            </CardContent>
+        </Card>
+      </div>
+
+       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+            <IncidentChart
+                incidents={data.incidents}
+                sites={data.sites}
+                securityAgencies={data.agencies}
+            />
+             <AgencyPerformance
+                agencies={data.agencies}
+                sites={data.sites}
+                incidents={data.incidents}
+            />
+       </div>
 
       <SiteStatusBreakdown sites={data.sites} agencies={data.agencies} />
 
-      <AgencyPerformance
-        agencies={data.agencies}
-        sites={data.sites}
-        incidents={data.incidents}
-      />
-
-      <IncidentChart
-        incidents={data.incidents}
-        sites={data.sites}
-        securityAgencies={data.agencies}
-      />
     </div>
   );
 }
