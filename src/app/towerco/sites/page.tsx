@@ -21,7 +21,6 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
-  FileDown,
   MapPin,
   Upload,
   PlusCircle,
@@ -57,7 +56,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
 import {
   Table,
   TableBody,
@@ -172,13 +170,6 @@ export default function TowercoSitesPage() {
     setIsAddingSite(false);
     setIsAddSiteDialogOpen(false);
   }
-
-  const handleDownloadReport = (siteName: string) => {
-    toast({
-      title: 'Report Download Started',
-      description: `Downloading report for site ${siteName}. This is a mock action.`,
-    });
-  };
 
   const handleAssignmentChange = (siteId: string, agencyId: string) => {
     setAssignments((prev) => ({ ...prev, [siteId]: agencyId }));
@@ -605,14 +596,6 @@ export default function TowercoSitesPage() {
                                     <Eye className="mr-2 h-4 w-4" />
                                     View
                                 </Link>
-                            </Button>
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleDownloadReport(site.name)}
-                                >
-                                <FileDown className="mr-2 h-4 w-4" />
-                                Download
                             </Button>
                         </TableCell>
                     </TableRow>
