@@ -1,20 +1,20 @@
 
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useState, useMemo, useEffect, useRef, Fragment } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useToast } from '@/hooks/use-toast';
 import { sites } from '@/lib/data/sites';
 import { organizations } from '@/lib/data/organizations';
-import type { SecurityAgency } from '@/types';
+import { incidents } from '@/lib/data/incidents';
+import type { SecurityAgency, Site } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Phone, Mail, Upload, Loader2, PlusCircle, Search, MapPin, Building2, ChevronDown } from 'lucide-react';
+import { Phone, Mail, Upload, Loader2, PlusCircle, Search, MapPin, Building2, ChevronDown, ShieldAlert } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -232,6 +232,12 @@ export default function TowercoAgenciesPage() {
       if (!agency) return [];
       return sites.filter(s => agency.siteIds.includes(s.id) && s.towerco === loggedInOrg.name);
     };
+
+    const getIncidentCountForAgency = (agencyId: string) => {
+      const assignedSites = getAssignedSitesForAgency(agencyId);
+      const siteIds = new Set(assignedSites.map(s => s.id));
+      return incidents.filter(i => siteIds.has(i.siteId)).length;
+    }
     
     const handleRowClick = (agencyId: string) => {
         router.push(`/towerco/agencies/${agencyId}`);
@@ -518,27 +524,25 @@ export default function TowercoAgenciesPage() {
                                 <TableHead>Contact Info</TableHead>
                                 <TableHead>Location</TableHead>
                                 <TableHead>Sites Assigned</TableHead>
+                                <TableHead>Incidents Occurred</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                              {isLoading ? (
                                 Array.from({ length: 5 }).map((_, i) => (
                                     <TableRow key={i}>
-                                        <TableCell><Skeleton className="h-10 w-full" /></TableCell>
-                                        <TableCell><Skeleton className="h-10 w-full" /></TableCell>
-                                        <TableCell><Skeleton className="h-10 w-full" /></TableCell>
-                                        <TableCell><Skeleton className="h-10 w-full" /></TableCell>
-                                        <TableCell><Skeleton className="h-10 w-full" /></TableCell>
+                                        <TableCell colSpan={6}><Skeleton className="h-10 w-full" /></TableCell>
                                     </TableRow>
                                 ))
                             ) : filteredAgencies.length > 0 ? (
                                 filteredAgencies.map((agency) => {
                                     const assignedSites = getAssignedSitesForAgency(agency.id);
                                     const assignedSitesCount = assignedSites.length;
+                                    const incidentCount = getIncidentCountForAgency(agency.id);
                                     const isExpanded = expandedAgencyId === agency.id;
 
                                     return (
-                                        <React.Fragment key={agency.id}>
+                                        <Fragment key={agency.id}>
                                             <TableRow onClick={() => handleRowClick(agency.id)} className="cursor-pointer">
                                                 <TableCell>
                                                     <p className="font-medium">{agency.id}</p>
@@ -584,10 +588,16 @@ export default function TowercoAgenciesPage() {
                                                         )}
                                                     </Button>
                                                 </TableCell>
+                                                <TableCell>
+                                                  <div className="flex items-center gap-2">
+                                                    <ShieldAlert className="h-4 w-4" />
+                                                    {incidentCount}
+                                                  </div>
+                                                </TableCell>
                                             </TableRow>
                                             {isExpanded && (
                                                 <TableRow className="bg-muted/50 hover:bg-muted/50">
-                                                    <TableCell colSpan={5} className="p-0">
+                                                    <TableCell colSpan={6} className="p-0">
                                                         <div className="p-4">
                                                             <h4 className="font-semibold mb-2">Sites Assigned to {agency.name}</h4>
                                                             {assignedSites.length > 0 ? (
@@ -622,12 +632,12 @@ export default function TowercoAgenciesPage() {
                                                     </TableCell>
                                                 </TableRow>
                                             )}
-                                        </React.Fragment>
+                                        </Fragment>
                                     )
                                 })
                              ) : (
                                 <TableRow>
-                                    <TableCell colSpan={5} className="text-center text-muted-foreground py-10">
+                                    <TableCell colSpan={6} className="text-center text-muted-foreground py-10">
                                         No agencies found for the current filter.
                                     </TableCell>
                                 </TableRow>
