@@ -131,7 +131,9 @@ export default function AgencyReportPage() {
     }
   };
   
-  const [selectedYear, setSelectedYear] = useState<string>(new Date().getFullYear().toString());
+  const [trendSelectedYear, setTrendSelectedYear] = useState<string>(new Date().getFullYear().toString());
+  const [historySelectedYear, setHistorySelectedYear] = useState<string>('all');
+  const [historySelectedMonth, setHistorySelectedMonth] = useState<string>('all');
 
   const availableYears = useMemo(() => {
     const yearsFromIncidents = new Set(
@@ -152,14 +154,23 @@ export default function AgencyReportPage() {
 
     agencyIncidents.forEach((incident) => {
       const incidentDate = new Date(incident.incidentTime);
-      if (incidentDate.getFullYear().toString() === selectedYear) {
+      if (incidentDate.getFullYear().toString() === trendSelectedYear) {
         const monthIndex = incidentDate.getMonth();
         monthlyData[monthIndex].incidents += 1;
       }
     });
 
     return monthlyData;
-  }, [agencyIncidents, selectedYear]);
+  }, [agencyIncidents, trendSelectedYear]);
+
+  const filteredIncidents = useMemo(() => {
+    return agencyIncidents.filter(incident => {
+      const incidentDate = new Date(incident.incidentTime);
+      const yearMatch = historySelectedYear === 'all' || incidentDate.getFullYear().toString() === historySelectedYear;
+      const monthMatch = historySelectedMonth === 'all' || incidentDate.getMonth().toString() === historySelectedMonth;
+      return yearMatch && monthMatch;
+    });
+  }, [agencyIncidents, historySelectedYear, historySelectedMonth]);
 
   const getSiteById = (id: string) => sites.find(s => s.id === id);
   const getGuardById = (id: string) => guards.find(g => g.id === id);
@@ -263,10 +274,10 @@ export default function AgencyReportPage() {
           <div>
             <CardTitle>Incident Trend</CardTitle>
             <CardDescription>
-              Monthly emergency incidents for {selectedYear}.
+              Monthly emergency incidents for {trendSelectedYear}.
             </CardDescription>
           </div>
-          <Select value={selectedYear} onValueChange={setSelectedYear}>
+          <Select value={trendSelectedYear} onValueChange={setTrendSelectedYear}>
             <SelectTrigger className="w-[120px]">
               <SelectValue placeholder="Select Year" />
             </SelectTrigger>
@@ -386,14 +397,44 @@ export default function AgencyReportPage() {
         </CardContent>
       </Card>
       <Card>
-        <CardHeader>
-          <CardTitle>Recent Incidents</CardTitle>
-          <CardDescription>
-            A log of emergency incidents at sites managed by {agency.name}.
-          </CardDescription>
+        <CardHeader className="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <CardTitle>Incidents History</CardTitle>
+            <CardDescription>
+              A log of emergency incidents at sites managed by {agency.name}.
+            </CardDescription>
+          </div>
+          <div className="flex items-center gap-2">
+              <Select value={historySelectedYear} onValueChange={setHistorySelectedYear}>
+                <SelectTrigger className="w-[120px]">
+                  <SelectValue placeholder="Select Year" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Years</SelectItem>
+                  {availableYears.map((year) => (
+                    <SelectItem key={year} value={year}>
+                      {year}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={historySelectedMonth} onValueChange={setHistorySelectedMonth}>
+                <SelectTrigger className="w-[140px]">
+                  <SelectValue placeholder="Select Month" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Months</SelectItem>
+                  {Array.from({ length: 12 }, (_, i) => (
+                    <SelectItem key={i} value={i.toString()}>
+                      {new Date(0, i).toLocaleString('default', { month: 'long' })}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+          </div>
         </CardHeader>
         <CardContent>
-          {agencyIncidents.length > 0 ? (
+          {filteredIncidents.length > 0 ? (
             <Table>
               <TableHeader>
                 <TableRow>
@@ -406,7 +447,7 @@ export default function AgencyReportPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {agencyIncidents.map((incident) => {
+                {filteredIncidents.map((incident) => {
                   const site = getSiteById(incident.siteId);
                   const guard = getGuardById(incident.raisedByGuardId);
                   return (
@@ -424,7 +465,7 @@ export default function AgencyReportPage() {
             </Table>
           ) : (
             <p className="text-muted-foreground text-center py-4">
-              No recent incidents for this agency's sites.
+              No incidents found for the selected period.
             </p>
           )}
         </CardContent>
