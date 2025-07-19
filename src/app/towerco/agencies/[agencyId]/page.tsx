@@ -328,6 +328,7 @@ export default function AgencyReportPage() {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead>Site ID</TableHead>
                   <TableHead>Site</TableHead>
                   <TableHead>Assigned On</TableHead>
                   <TableHead className="text-center">Incidents</TableHead>
@@ -345,6 +346,7 @@ export default function AgencyReportPage() {
                   ).length;
                   return (
                     <TableRow key={site.id}>
+                       <TableCell className="font-medium">{site.id}</TableCell>
                       <TableCell>
                         <div className="font-medium">{site.name}</div>
                         <div className="text-sm text-muted-foreground flex items-center gap-1">
