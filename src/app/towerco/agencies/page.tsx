@@ -594,6 +594,7 @@ export default function TowercoAgenciesPage() {
                                                                 <Table>
                                                                     <TableHeader>
                                                                         <TableRow>
+                                                                            <TableHead>Site ID</TableHead>
                                                                             <TableHead>Site Name</TableHead>
                                                                             <TableHead>Address</TableHead>
                                                                             <TableHead>City</TableHead>
@@ -603,7 +604,8 @@ export default function TowercoAgenciesPage() {
                                                                     <TableBody>
                                                                         {assignedSites.map((site) => (
                                                                             <TableRow key={site.id}>
-                                                                                <TableCell className="font-medium">{site.name}</TableCell>
+                                                                                <TableCell className="font-medium">{site.id}</TableCell>
+                                                                                <TableCell>{site.name}</TableCell>
                                                                                 <TableCell>{site.address}</TableCell>
                                                                                 <TableCell>{site.city}</TableCell>
                                                                                 <TableCell>{site.region}</TableCell>
