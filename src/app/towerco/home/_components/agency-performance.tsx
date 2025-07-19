@@ -153,12 +153,39 @@ export function AgencyPerformance({
                      <span className="font-bold text-2xl">{data.performance}%</span>
                 </div>
                  <Progress value={data.performance} className="h-2" />
-                 <div className="text-xs text-muted-foreground grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-1 pt-2">
-                    <p>Resolution: {data.incidentResolutionRate}%</p>
-                    <p>Perimeter: {data.guardPerimeterAccuracy}%</p>
-                    <p>Selfies: {data.guardSelfieAccuracy}%</p>
-                    <p>Site Visits: {data.officerSiteVisitRate}%</p>
-                 </div>
+                 
+                {selectedAgency !== 'all' && (
+                  <div className="pt-4 space-y-3">
+                      <div className="text-sm">
+                          <div className="flex justify-between items-center mb-1">
+                              <span className="text-muted-foreground">Incident Resolution Rate</span>
+                              <span className="font-medium">{data.incidentResolutionRate}%</span>
+                          </div>
+                          <Progress value={data.incidentResolutionRate} className="h-2" />
+                      </div>
+                      <div className="text-sm">
+                          <div className="flex justify-between items-center mb-1">
+                              <span className="text-muted-foreground">Guard Perimeter Accuracy</span>
+                              <span className="font-medium">{data.guardPerimeterAccuracy}%</span>
+                          </div>
+                          <Progress value={data.guardPerimeterAccuracy} className="h-2" />
+                      </div>
+                      <div className="text-sm">
+                          <div className="flex justify-between items-center mb-1">
+                              <span className="text-muted-foreground">Guard Selfie Accuracy</span>
+                              <span className="font-medium">{data.guardSelfieAccuracy}%</span>
+                          </div>
+                          <Progress value={data.guardSelfieAccuracy} className="h-2" />
+                      </div>
+                      <div className="text-sm">
+                          <div className="flex justify-between items-center mb-1">
+                              <span className="text-muted-foreground">Officer Site Visit Rate</span>
+                              <span className="font-medium">{data.officerSiteVisitRate}%</span>
+                          </div>
+                          <Progress value={data.officerSiteVisitRate} className="h-2" />
+                      </div>
+                  </div>
+                )}
             </div>
           ))
         ) : (
