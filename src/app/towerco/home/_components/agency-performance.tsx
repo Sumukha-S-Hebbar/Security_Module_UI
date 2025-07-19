@@ -4,11 +4,19 @@
 import { useState, useMemo } from 'react';
 import type { Incident, Site, SecurityAgency, Guard } from '@/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Progress } from '@/components/ui/progress';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { guards } from '@/lib/data/guards';
 import { patrollingOfficers } from '@/lib/data/patrolling-officers';
+import { Button } from '@/components/ui/button';
+import { ChevronDown } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
+
 
 interface AgencyPerformanceData {
   agency: SecurityAgency;
@@ -28,7 +36,7 @@ export function AgencyPerformance({
   sites: Site[];
   incidents: Incident[];
 }) {
-  const [selectedAgency, setSelectedAgency] = useState('all');
+  const [openAgencyId, setOpenAgencyId] = useState<string | null>(null);
 
   const performanceData = useMemo(() => {
     const data: AgencyPerformanceData[] = agencies.map((agency) => {
@@ -101,14 +109,6 @@ export function AgencyPerformance({
     return data.sort((a, b) => b.performance - a.performance);
   }, [agencies, sites, incidents]);
 
-  const filteredPerformanceData = useMemo(() => {
-    if (selectedAgency === 'all') {
-      return performanceData;
-    }
-    return performanceData.filter(
-      (data) => data.agency.id === selectedAgency
-    );
-  }, [performanceData, selectedAgency]);
 
   return (
     <Card>
@@ -117,45 +117,40 @@ export function AgencyPerformance({
             <div>
                 <CardTitle>Agency Performance</CardTitle>
                 <CardDescription>
-                Overall score based on incidents, guard, and officer performance.
+                Overall score based on incidents, guard, and officer performance. Click to expand.
                 </CardDescription>
             </div>
-            <Select value={selectedAgency} onValueChange={setSelectedAgency}>
-                <SelectTrigger className="w-full sm:w-[220px]">
-                    <SelectValue placeholder="Filter by agency" />
-                </SelectTrigger>
-                <SelectContent>
-                    <SelectItem value="all">All Agencies</SelectItem>
-                    {agencies.map((agency) => (
-                    <SelectItem key={agency.id} value={agency.id}>
-                        {agency.name}
-                    </SelectItem>
-                    ))}
-                </SelectContent>
-            </Select>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        {filteredPerformanceData.length > 0 ? (
-          filteredPerformanceData.map((data) => (
-            <div key={data.agency.id} className="space-y-3 p-4 rounded-lg border">
-                <div className="flex justify-between items-center gap-4">
-                    <div className="flex items-center gap-3">
-                        <Avatar className="h-10 w-10">
-                            <AvatarImage src={data.agency.avatar} alt={data.agency.name} />
-                            <AvatarFallback>{data.agency.name.charAt(0)}</AvatarFallback>
-                        </Avatar>
-                        <div>
-                            <p className="font-semibold">{data.agency.name}</p>
-                            <p className="text-sm text-muted-foreground">Overall Performance Score</p>
+        {performanceData.length > 0 ? (
+          performanceData.map((data) => (
+            <Collapsible key={data.agency.id} open={openAgencyId === data.agency.id} onOpenChange={() => setOpenAgencyId(openAgencyId === data.agency.id ? null : data.agency.id)}>
+              <CollapsibleTrigger asChild>
+                <div className="space-y-3 p-4 rounded-lg border hover:bg-muted/50 transition-colors cursor-pointer">
+                    <div className="flex justify-between items-center gap-4">
+                        <div className="flex items-center gap-3">
+                            <Avatar className="h-10 w-10">
+                                <AvatarImage src={data.agency.avatar} alt={data.agency.name} />
+                                <AvatarFallback>{data.agency.name.charAt(0)}</AvatarFallback>
+                            </Avatar>
+                            <div>
+                                <p className="font-semibold">{data.agency.name}</p>
+                                <p className="text-sm text-muted-foreground">Overall Performance Score</p>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-4">
+                            <span className="font-bold text-2xl">{data.performance}%</span>
+                             <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                                <ChevronDown className={cn('h-4 w-4 transition-transform', openAgencyId === data.agency.id && 'rotate-180')} />
+                            </Button>
                         </div>
                     </div>
-                     <span className="font-bold text-2xl">{data.performance}%</span>
+                    <Progress value={data.performance} className="h-2" />
                 </div>
-                 <Progress value={data.performance} className="h-2" />
-                 
-                {selectedAgency !== 'all' && (
-                  <div className="pt-4 space-y-3">
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                  <div className="pt-4 px-4 pb-2 space-y-3 border border-t-0 rounded-b-lg">
                       <div className="text-sm">
                           <div className="flex justify-between items-center mb-1">
                               <span className="text-muted-foreground">Incident Resolution Rate</span>
@@ -185,12 +180,12 @@ export function AgencyPerformance({
                           <Progress value={data.officerSiteVisitRate} className="h-2" />
                       </div>
                   </div>
-                )}
-            </div>
+              </CollapsibleContent>
+            </Collapsible>
           ))
         ) : (
           <p className="text-muted-foreground text-center py-4">
-            No performance data available for the selected agency.
+            No performance data available for any agency.
           </p>
         )}
       </CardContent>
