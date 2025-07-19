@@ -70,11 +70,12 @@ export function IncidentChart({
     const years = new Set(
       incidents.map((incident) => new Date(incident.incidentTime).getFullYear().toString())
     );
+    years.add(new Date().getFullYear().toString());
     return Array.from(years).sort((a, b) => parseInt(b) - parseInt(a));
   }, [incidents]);
 
   const [selectedYear, setSelectedYear] = useState<string>(
-    availableYears[0] || new Date().getFullYear().toString()
+    new Date().getFullYear().toString()
   );
   const [selectedCompany, setSelectedCompany] = useState<string>('all');
   const [selectedMonthIndex, setSelectedMonthIndex] = useState<number | null>(null);

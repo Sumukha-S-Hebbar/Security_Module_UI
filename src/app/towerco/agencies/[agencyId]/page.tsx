@@ -142,11 +142,10 @@ export default function AgencyReportPage() {
   const [selectedYear, setSelectedYear] = useState<string>(new Date().getFullYear().toString());
 
   const availableYears = useMemo(() => {
-    const currentYear = new Date().getFullYear().toString();
     const yearsFromIncidents = new Set(
       agencyIncidents.map((incident) => new Date(incident.incidentTime).getFullYear().toString())
     );
-    yearsFromIncidents.add(currentYear);
+    yearsFromIncidents.add(new Date().getFullYear().toString());
     return Array.from(yearsFromIncidents).sort((a, b) => parseInt(b) - parseInt(a));
   }, [agencyIncidents]);
 
