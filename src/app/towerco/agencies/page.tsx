@@ -3,6 +3,7 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -13,7 +14,7 @@ import type { SecurityAgency } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Phone, Mail, Upload, Loader2, PlusCircle, Search, MapPin, Eye, Building2 } from 'lucide-react';
+import { Phone, Mail, Upload, Loader2, PlusCircle, Search, MapPin, Building2 } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -67,39 +68,9 @@ async function getAgencies(): Promise<SecurityAgency[]> {
     // TODO: This is a mocked endpoint. Please replace with your actual Django API endpoint.
     const API_URL = 'https://ken.securebuddy.tel:8000/api/v1/agencies/';
     
-    // The API should return a JSON array of security agency objects.
-    // Example response:
-    // [
-    //   {
-    //     "id": "string",
-    //     "name": "string",
-    //     "phone": "string",
-    //     "email": "string",
-    //     "address": "string",
-    //     "city": "string",
-    //     "region": "string",
-    //     "country": "string",
-    //     "avatar": "string (URL to an image)",
-    //     "siteIds": ["string", "string", ...]
-    //   },
-    //   {
-    //     "...another agency object"
-    //   }
-    // ]
-    
     try {
-        // Since the API endpoint might not exist, we'll return mock data.
-        // In a real scenario, you'd fetch from your API like this:
-        // const res = await fetch(API_URL);
-        // if (!res.ok) {
-        //     throw new Error('Failed to fetch agencies');
-        // }
-        // return res.json();
-
         // Simulating network delay
         await new Promise(resolve => setTimeout(resolve, 1000));
-
-        // Returning mock data that matches the SecurityAgency type
         return mockAgencies;
 
     } catch (error) {
@@ -110,7 +81,6 @@ async function getAgencies(): Promise<SecurityAgency[]> {
 
 async function getRegions(): Promise<string[]> {
     // TODO: This is a mocked endpoint. It should fetch the list of available regions from your backend.
-    // Example response: ["CA", "WA", "NY", "TX"]
     try {
          await new Promise(resolve => setTimeout(resolve, 500));
          const uniqueRegions = [...new Set(mockAgencies.map(agency => agency.region))];
@@ -132,6 +102,7 @@ export default function TowercoAgenciesPage() {
     const [isAddingAgency, setIsAddingAgency] = useState(false);
     const [selectedAgencyForSites, setSelectedAgencyForSites] = useState<SecurityAgency | null>(null);
     const { toast } = useToast();
+    const router = useRouter();
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedRegion, setSelectedRegion] = useState('all');
     const [selectedCity, setSelectedCity] = useState('all');
@@ -174,8 +145,6 @@ export default function TowercoAgenciesPage() {
 
     const citiesForAddForm = useMemo(() => {
         if (!watchedRegion) return [];
-        // In a real app, you might fetch this from an API: /api/regions/${watchedRegion}/cities
-        // For now, we derive it from the existing agencies data.
         const allCities = new Set(mockAgencies
             .filter(agency => agency.region === watchedRegion)
             .map(agency => agency.city)
@@ -184,7 +153,6 @@ export default function TowercoAgenciesPage() {
     }, [watchedRegion]);
 
     useEffect(() => {
-        // Reset city when region changes
         addAgencyForm.resetField('city');
     }, [watchedRegion, addAgencyForm]);
 
@@ -208,7 +176,6 @@ export default function TowercoAgenciesPage() {
         setIsAddingAgency(true);
         console.log('New agency data:', values);
 
-        // Simulate API call
         await new Promise((resolve) => setTimeout(resolve, 1500));
 
         const newAgency: SecurityAgency = {
@@ -261,6 +228,10 @@ export default function TowercoAgenciesPage() {
       if (!selectedAgencyForSites || !loggedInOrg) return [];
       return sites.filter(s => selectedAgencyForSites.siteIds.includes(s.id) && s.towerco === loggedInOrg.name);
     }, [selectedAgencyForSites, loggedInOrg]);
+    
+    const handleRowClick = (agencyId: string) => {
+        router.push(`/towerco/agencies/${agencyId}`);
+    };
 
     return (
         <div className="p-4 sm:p-6 lg:p-8 space-y-6">
@@ -557,7 +528,7 @@ export default function TowercoAgenciesPage() {
                                 filteredAgencies.map((agency) => {
                                     const assignedSitesCount = sites.filter(s => agency.siteIds.includes(s.id) && s.towerco === loggedInOrg?.name).length;
                                     return (
-                                        <TableRow key={agency.id}>
+                                        <TableRow key={agency.id} onClick={() => handleRowClick(agency.id)} className="cursor-pointer">
                                             <TableCell>
                                                 <p className="font-medium">{agency.id}</p>
                                             </TableCell>
@@ -573,7 +544,7 @@ export default function TowercoAgenciesPage() {
                                             <TableCell>
                                                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                                     <Mail className="h-4 w-4 flex-shrink-0" />
-                                                    <a href={`mailto:${agency.email}`} className="truncate hover:underline">
+                                                    <a href={`mailto:${agency.email}`} onClick={(e) => e.stopPropagation()} className="truncate hover:underline">
                                                         {agency.email}
                                                     </a>
                                                 </div>
@@ -592,16 +563,13 @@ export default function TowercoAgenciesPage() {
                                                 <p>{assignedSitesCount}</p>
                                             </TableCell>
                                             <TableCell className="text-right space-x-2">
-                                                 <Button asChild variant="outline" size="sm">
-                                                    <Link href={`/towerco/agencies/${agency.id}`}>
-                                                        <Eye className="mr-2 h-4 w-4" />
-                                                        Report
-                                                    </Link>
-                                                </Button>
                                                 <Button
                                                     variant="outline"
                                                     size="sm"
-                                                    onClick={() => setSelectedAgencyForSites(agency)}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setSelectedAgencyForSites(agency);
+                                                    }}
                                                 >
                                                     <Building2 className="mr-2 h-4 w-4" />
                                                     Sites
