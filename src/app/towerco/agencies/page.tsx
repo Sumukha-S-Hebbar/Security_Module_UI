@@ -14,7 +14,7 @@ import type { SecurityAgency } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Phone, Mail, Upload, Loader2, PlusCircle, Search, MapPin, Building2 } from 'lucide-react';
+import { Phone, Mail, Upload, Loader2, PlusCircle, Search, MapPin, Building2, ChevronDown } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -43,6 +43,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { securityAgencies as mockAgencies } from '@/lib/data/security-agencies';
+import React from 'react';
+import { cn } from '@/lib/utils';
 
 
 const LOGGED_IN_ORG_ID = 'TCO01'; // Simulate logged-in user
@@ -100,7 +102,7 @@ export default function TowercoAgenciesPage() {
     const [isAddAgencyDialogOpen, setIsAddAgencyDialogOpen] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
     const [isAddingAgency, setIsAddingAgency] = useState(false);
-    const [selectedAgencyForSites, setSelectedAgencyForSites] = useState<SecurityAgency | null>(null);
+    const [expandedAgencyId, setExpandedAgencyId] = useState<string | null>(null);
     const { toast } = useToast();
     const router = useRouter();
     const [searchQuery, setSearchQuery] = useState('');
@@ -224,14 +226,21 @@ export default function TowercoAgenciesPage() {
         });
     }, [searchQuery, securityAgencies, selectedRegion, selectedCity]);
 
-    const assignedSitesForSelectedAgency = useMemo(() => {
-      if (!selectedAgencyForSites || !loggedInOrg) return [];
-      return sites.filter(s => selectedAgencyForSites.siteIds.includes(s.id) && s.towerco === loggedInOrg.name);
-    }, [selectedAgencyForSites, loggedInOrg]);
+    const getAssignedSitesForAgency = (agencyId: string) => {
+      if (!loggedInOrg) return [];
+      const agency = securityAgencies.find(a => a.id === agencyId);
+      if (!agency) return [];
+      return sites.filter(s => agency.siteIds.includes(s.id) && s.towerco === loggedInOrg.name);
+    };
     
     const handleRowClick = (agencyId: string) => {
         router.push(`/towerco/agencies/${agencyId}`);
     };
+
+    const handleExpandClick = (e: React.MouseEvent, agencyId: string) => {
+        e.stopPropagation();
+        setExpandedAgencyId(prevId => prevId === agencyId ? null : agencyId);
+    }
 
     return (
         <div className="p-4 sm:p-6 lg:p-8 space-y-6">
@@ -524,53 +533,94 @@ export default function TowercoAgenciesPage() {
                                 ))
                             ) : filteredAgencies.length > 0 ? (
                                 filteredAgencies.map((agency) => {
-                                    const assignedSitesCount = sites.filter(s => agency.siteIds.includes(s.id) && s.towerco === loggedInOrg?.name).length;
+                                    const assignedSites = getAssignedSitesForAgency(agency.id);
+                                    const assignedSitesCount = assignedSites.length;
+                                    const isExpanded = expandedAgencyId === agency.id;
+
                                     return (
-                                        <TableRow key={agency.id} onClick={() => handleRowClick(agency.id)} className="cursor-pointer">
-                                            <TableCell>
-                                                <p className="font-medium">{agency.id}</p>
-                                            </TableCell>
-                                            <TableCell>
-                                                <div className="flex items-center gap-3">
-                                                    <Avatar className="h-10 w-10">
-                                                        <AvatarImage src={agency.avatar} alt={agency.name} />
-                                                        <AvatarFallback>{agency.name.charAt(0)}</AvatarFallback>
-                                                    </Avatar>
-                                                    <span className="font-medium text-primary hover:underline">{agency.name}</span>
-                                                </div>
-                                            </TableCell>
-                                            <TableCell>
-                                                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                                    <Mail className="h-4 w-4 flex-shrink-0" />
-                                                    <a href={`mailto:${agency.email}`} onClick={(e) => e.stopPropagation()} className="truncate hover:underline">
-                                                        {agency.email}
-                                                    </a>
-                                                </div>
-                                                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                                    <Phone className="h-4 w-4 flex-shrink-0" />
-                                                    <span>{agency.phone}</span>
-                                                </div>
-                                            </TableCell>
-                                            <TableCell>
-                                                 <div className="text-sm text-muted-foreground">
-                                                    <p>{agency.address}</p>
-                                                    <p>{agency.city}, {agency.region}</p>
-                                                </div>
-                                            </TableCell>
-                                            <TableCell>
-                                                <Button
-                                                  variant="link"
-                                                  className="p-0 h-auto flex items-center gap-2"
-                                                  onClick={(e) => {
-                                                      e.stopPropagation();
-                                                      setSelectedAgencyForSites(agency);
-                                                  }}
-                                                >
-                                                  <Building2 className="h-4 w-4" />
-                                                  {assignedSitesCount}
-                                                </Button>
-                                            </TableCell>
-                                        </TableRow>
+                                        <React.Fragment key={agency.id}>
+                                            <TableRow onClick={() => handleRowClick(agency.id)} className="cursor-pointer">
+                                                <TableCell>
+                                                    <p className="font-medium">{agency.id}</p>
+                                                </TableCell>
+                                                <TableCell>
+                                                    <div className="flex items-center gap-3">
+                                                        <Avatar className="h-10 w-10">
+                                                            <AvatarImage src={agency.avatar} alt={agency.name} />
+                                                            <AvatarFallback>{agency.name.charAt(0)}</AvatarFallback>
+                                                        </Avatar>
+                                                        <span className="font-medium text-primary hover:underline">{agency.name}</span>
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell>
+                                                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                                        <Mail className="h-4 w-4 flex-shrink-0" />
+                                                        <a href={`mailto:${agency.email}`} onClick={(e) => e.stopPropagation()} className="truncate hover:underline">
+                                                            {agency.email}
+                                                        </a>
+                                                    </div>
+                                                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                                        <Phone className="h-4 w-4 flex-shrink-0" />
+                                                        <span>{agency.phone}</span>
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell>
+                                                    <div className="text-sm text-muted-foreground">
+                                                        <p>{agency.address}</p>
+                                                        <p>{agency.city}, {agency.region}</p>
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell>
+                                                    <Button
+                                                    variant="link"
+                                                    className="p-0 h-auto flex items-center gap-2"
+                                                    onClick={(e) => handleExpandClick(e, agency.id)}
+                                                    disabled={assignedSitesCount === 0}
+                                                    >
+                                                        <Building2 className="h-4 w-4" />
+                                                        {assignedSitesCount}
+                                                        {assignedSitesCount > 0 && (
+                                                            <ChevronDown className={cn("h-4 w-4 transition-transform", isExpanded && "rotate-180")} />
+                                                        )}
+                                                    </Button>
+                                                </TableCell>
+                                            </TableRow>
+                                            {isExpanded && (
+                                                <TableRow className="bg-muted/50 hover:bg-muted/50">
+                                                    <TableCell colSpan={5} className="p-0">
+                                                        <div className="p-4">
+                                                            <h4 className="font-semibold mb-2">Sites Assigned to {agency.name}</h4>
+                                                            {assignedSites.length > 0 ? (
+                                                                <Table>
+                                                                    <TableHeader>
+                                                                        <TableRow>
+                                                                            <TableHead>Site Name</TableHead>
+                                                                            <TableHead>Address</TableHead>
+                                                                            <TableHead>City</TableHead>
+                                                                            <TableHead>Region</TableHead>
+                                                                        </TableRow>
+                                                                    </TableHeader>
+                                                                    <TableBody>
+                                                                        {assignedSites.map((site) => (
+                                                                            <TableRow key={site.id}>
+                                                                                <TableCell className="font-medium">{site.name}</TableCell>
+                                                                                <TableCell>{site.address}</TableCell>
+                                                                                <TableCell>{site.city}</TableCell>
+                                                                                <TableCell>{site.region}</TableCell>
+                                                                            </TableRow>
+                                                                        ))}
+                                                                    </TableBody>
+                                                                </Table>
+                                                            ) : (
+                                                                <p className="text-sm text-muted-foreground text-center py-4">
+                                                                    No sites from {loggedInOrg?.name} are assigned to this agency.
+                                                                </p>
+                                                            )}
+                                                        </div>
+                                                    </TableCell>
+                                                </TableRow>
+                                            )}
+                                        </React.Fragment>
                                     )
                                 })
                              ) : (
@@ -584,45 +634,6 @@ export default function TowercoAgenciesPage() {
                     </Table>
                 </CardContent>
             </Card>
-
-            <Dialog open={!!selectedAgencyForSites} onOpenChange={(isOpen) => !isOpen && setSelectedAgencyForSites(null)}>
-              <DialogContent className="max-w-3xl">
-                <DialogHeader>
-                  <DialogTitle>Sites Assigned to {selectedAgencyForSites?.name}</DialogTitle>
-                  <DialogDescription>
-                    A list of all sites managed by this agency for {loggedInOrg?.name}.
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="pt-4">
-                  {assignedSitesForSelectedAgency.length > 0 ? (
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Site Name</TableHead>
-                          <TableHead>Address</TableHead>
-                          <TableHead>City</TableHead>
-                          <TableHead>Region</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {assignedSitesForSelectedAgency.map((site) => (
-                          <TableRow key={site.id}>
-                            <TableCell className="font-medium">{site.name}</TableCell>
-                            <TableCell>{site.address}</TableCell>
-                            <TableCell>{site.city}</TableCell>
-                            <TableCell>{site.region}</TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  ) : (
-                    <p className="text-sm text-muted-foreground text-center py-4">
-                      No sites from {loggedInOrg?.name} are assigned to this agency.
-                    </p>
-                  )}
-                </div>
-              </DialogContent>
-            </Dialog>
         </div>
     );
 }
