@@ -156,13 +156,13 @@ export default function TowercoHomePage() {
             <Skeleton className="h-8 w-1/3" />
             <Skeleton className="h-4 w-1/2" />
         </div>
+        <Skeleton className="h-64 w-full" />
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <Skeleton className="h-28 w-full" />
             <Skeleton className="h-28 w-full" />
             <Skeleton className="h-28 w-full" />
             <Skeleton className="h-28 w-full" />
         </div>
-        <Skeleton className="h-64 w-full" />
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <Skeleton className="h-80 w-full" />
             <Skeleton className="h-80 w-full" />
@@ -198,12 +198,6 @@ export default function TowercoHomePage() {
         )}
       </div>
 
-      <TowercoAnalyticsDashboard
-        sites={data.sites}
-        agencies={data.agencies}
-        incidents={data.incidents}
-      />
-      
       <Card className="border-destructive bg-destructive/10">
           <CardHeader className="flex flex-row items-center gap-2">
           <AlertTriangle className="w-6 h-6 text-destructive" />
@@ -294,6 +288,12 @@ export default function TowercoHomePage() {
           )}
           </CardContent>
       </Card>
+      
+      <TowercoAnalyticsDashboard
+        sites={data.sites}
+        agencies={data.agencies}
+        incidents={data.incidents}
+      />
 
        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
             <IncidentChart
