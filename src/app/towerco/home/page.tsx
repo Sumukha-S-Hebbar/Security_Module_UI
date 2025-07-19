@@ -285,20 +285,17 @@ export default function TowercoHomePage() {
         agencies={data.agencies}
         incidents={data.incidents}
       />
-
-       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-            <IncidentChart
-                incidents={data.incidents}
-                sites={data.sites}
-                securityAgencies={data.agencies}
-            />
-             <AgencyPerformance
-                agencies={data.agencies}
-                sites={data.sites}
-                incidents={data.incidents}
-            />
-       </div>
-
+      
+      <IncidentChart
+          incidents={data.incidents}
+          sites={data.sites}
+          securityAgencies={data.agencies}
+      />
+      <AgencyPerformance
+          agencies={data.agencies}
+          sites={data.sites}
+          incidents={data.incidents}
+      />
       <SiteStatusBreakdown sites={data.sites} agencies={data.agencies} />
 
     </div>
