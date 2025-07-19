@@ -533,8 +533,8 @@ export default function TowercoAgenciesPage() {
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead>Agency</TableHead>
                                 <TableHead>ID</TableHead>
+                                <TableHead>Agency</TableHead>
                                 <TableHead>Contact Info</TableHead>
                                 <TableHead>Location</TableHead>
                                 <TableHead>Sites Assigned</TableHead>
@@ -559,6 +559,9 @@ export default function TowercoAgenciesPage() {
                                     return (
                                         <TableRow key={agency.id}>
                                             <TableCell>
+                                                <p className="font-medium">{agency.id}</p>
+                                            </TableCell>
+                                            <TableCell>
                                                 <div className="flex items-center gap-3">
                                                     <Avatar className="h-10 w-10">
                                                         <AvatarImage src={agency.avatar} alt={agency.name} />
@@ -566,9 +569,6 @@ export default function TowercoAgenciesPage() {
                                                     </Avatar>
                                                     <p className="font-medium">{agency.name}</p>
                                                 </div>
-                                            </TableCell>
-                                            <TableCell>
-                                                <p className="text-sm text-muted-foreground">{agency.id}</p>
                                             </TableCell>
                                             <TableCell>
                                                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
