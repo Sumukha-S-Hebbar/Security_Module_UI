@@ -3,7 +3,8 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import type { Incident, Site, SecurityAgency } from '@/types';
+import type { Incident, Site, SecurityAgency, Guard } from '@/types';
+import Link from 'next/link';
 import {
   Card,
   CardContent,
@@ -24,8 +25,25 @@ import {
   ChartTooltipContent,
   ChartConfig,
 } from '@/components/ui/chart';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
+  Collapsible,
+  CollapsibleContent,
+} from '@/components/ui/collapsible';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 import { useRouter } from 'next/navigation';
+import { Eye } from 'lucide-react';
+import { guards } from '@/lib/data/guards';
+
 
 const chartConfig = {
   total: {
@@ -48,7 +66,6 @@ export function IncidentChart({
   securityAgencies: SecurityAgency[];
 }) {
   const router = useRouter();
-  // Get unique years from the incidents data
   const availableYears = useMemo(() => {
     const years = new Set(
       incidents.map((incident) => new Date(incident.incidentTime).getFullYear().toString())
@@ -60,6 +77,7 @@ export function IncidentChart({
     availableYears[0] || new Date().getFullYear().toString()
   );
   const [selectedCompany, setSelectedCompany] = useState<string>('all');
+  const [selectedMonthIndex, setSelectedMonthIndex] = useState<number | null>(null);
 
   const monthlyIncidentData = useMemo(() => {
     const months = [
@@ -96,10 +114,56 @@ export function IncidentChart({
 
     return monthlyData;
   }, [incidents, securityAgencies, selectedYear, selectedCompany]);
+  
+  const incidentsInSelectedMonth = useMemo(() => {
+    if (selectedMonthIndex === null) return [];
+    
+    const siteToAgencyMap = new Map<string, string | undefined>();
+    securityAgencies.forEach((agency) => {
+        agency.siteIds.forEach(siteId => {
+            siteToAgencyMap.set(siteId, agency.id);
+        });
+    });
+
+    return incidents.filter(incident => {
+        const incidentDate = new Date(incident.incidentTime);
+        const incidentAgencyId = siteToAgencyMap.get(incident.siteId);
+
+        const yearMatch = incidentDate.getFullYear().toString() === selectedYear;
+        const companyMatch = selectedCompany === 'all' || incidentAgencyId === selectedCompany;
+        const monthMatch = incidentDate.getMonth() === selectedMonthIndex;
+        
+        return yearMatch && companyMatch && monthMatch;
+    });
+  }, [selectedMonthIndex, selectedYear, selectedCompany, incidents, securityAgencies]);
 
   const handleBarClick = (data: any, index: number) => {
-    router.push(`/towerco/incidents?month=${index + 1}`);
+    if (selectedMonthIndex === index) {
+      setSelectedMonthIndex(null); // Collapse if clicking the same month
+    } else {
+      setSelectedMonthIndex(index);
+    }
   };
+
+  const getSiteName = (siteId: string) => sites.find(s => s.id === siteId)?.name || 'N/A';
+  const getAgencyName = (siteId: string) => {
+      const agency = securityAgencies.find(a => a.siteIds.includes(siteId));
+      return agency?.name || 'N/A';
+  }
+  
+  const getStatusBadge = (status: Incident['status']) => {
+    switch (status) {
+      case 'Active':
+        return <Badge variant="destructive">Active</Badge>;
+      case 'Under Review':
+        return <Badge variant="default">Under Review</Badge>;
+      case 'Resolved':
+        return <Badge variant="secondary">Resolved</Badge>;
+      default:
+        return <Badge variant="secondary">{status}</Badge>;
+    }
+  };
+
 
   return (
     <Card>
@@ -108,7 +172,7 @@ export function IncidentChart({
             <div>
                 <CardTitle>Incident Trend</CardTitle>
                 <CardDescription>
-                    Monthly total vs. resolved incidents.
+                    Monthly total vs. resolved incidents. Click a bar to see details.
                 </CardDescription>
             </div>
             <div className="flex items-center gap-2">
@@ -167,6 +231,54 @@ export function IncidentChart({
           </BarChart>
         </ChartContainer>
       </CardContent>
+
+      <Collapsible open={selectedMonthIndex !== null}>
+        <CollapsibleContent>
+            <CardHeader>
+                <CardTitle>
+                    Incidents in {selectedMonthIndex !== null ? monthlyIncidentData[selectedMonthIndex].month : ''} {selectedYear}
+                </CardTitle>
+            </CardHeader>
+            <CardContent>
+                {incidentsInSelectedMonth.length > 0 ? (
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Incident ID</TableHead>
+                                <TableHead>Date</TableHead>
+                                <TableHead>Site</TableHead>
+                                <TableHead>Agency</TableHead>
+                                <TableHead>Status</TableHead>
+                                <TableHead>Actions</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {incidentsInSelectedMonth.map(incident => (
+                                <TableRow key={incident.id}>
+                                    <TableCell className="font-medium">{incident.id}</TableCell>
+                                    <TableCell>{new Date(incident.incidentTime).toLocaleDateString()}</TableCell>
+                                    <TableCell>{getSiteName(incident.siteId)}</TableCell>
+                                    <TableCell>{getAgencyName(incident.siteId)}</TableCell>
+                                    <TableCell>{getStatusBadge(incident.status)}</TableCell>
+                                    <TableCell>
+                                        <Button asChild variant="outline" size="sm">
+                                            <Link href={`/towerco/incidents/${incident.id}`}>
+                                                <Eye className="mr-2 h-4 w-4" />
+                                                View Report
+                                            </Link>
+                                        </Button>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                ) : (
+                    <p className="text-sm text-muted-foreground text-center">No incidents recorded for this month.</p>
+                )}
+            </CardContent>
+        </CollapsibleContent>
+      </Collapsible>
     </Card>
   );
 }
+
