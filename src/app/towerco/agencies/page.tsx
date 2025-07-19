@@ -560,12 +560,13 @@ export default function TowercoAgenciesPage() {
                                             <TableCell>
                                                 <Button
                                                   variant="link"
-                                                  className="p-0 h-auto"
+                                                  className="p-0 h-auto flex items-center gap-2"
                                                   onClick={(e) => {
                                                       e.stopPropagation();
                                                       setSelectedAgencyForSites(agency);
                                                   }}
                                                 >
+                                                  <Building2 className="h-4 w-4" />
                                                   {assignedSitesCount}
                                                 </Button>
                                             </TableCell>
