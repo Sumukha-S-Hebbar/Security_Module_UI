@@ -530,85 +530,93 @@ export default function TowercoAgenciesPage() {
                     </div>
                 </CardHeader>
                 <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-6">
-                        {isLoading ? (
-                            Array.from({ length: 3 }).map((_, i) => (
-                                <Card key={i}>
-                                    <CardHeader>
-                                        <div className="flex items-center gap-4">
-                                            <Skeleton className="h-12 w-12 rounded-full" />
-                                            <div className="space-y-2">
-                                                <Skeleton className="h-4 w-[150px]" />
-                                                <Skeleton className="h-4 w-[100px]" />
-                                            </div>
-                                        </div>
-                                    </CardHeader>
-                                    <CardContent className="space-y-2">
-                                        <Skeleton className="h-4 w-full" />
-                                        <Skeleton className="h-4 w-full" />
-                                        <Skeleton className="h-4 w-[80%]" />
-                                    </CardContent>
-                                    <CardFooter className="grid grid-cols-2 gap-2">
-                                        <Skeleton className="h-9 w-full" />
-                                        <Skeleton className="h-9 w-full" />
-                                    </CardFooter>
-                                </Card>
-                            ))
-                        ) : filteredAgencies.length > 0 ? (
-                        filteredAgencies.map((agency) => (
-                            <Card key={agency.id} className="flex flex-col">
-                            <CardHeader>
-                                <div className="flex items-center gap-4">
-                                <Avatar className="h-12 w-12">
-                                    <AvatarImage src={agency.avatar} alt={agency.name} />
-                                    <AvatarFallback>{agency.name.charAt(0)}</AvatarFallback>
-                                </Avatar>
-                                <div>
-                                    <CardTitle className="text-lg">{agency.name}</CardTitle>
-                                    <CardDescription>ID: {agency.id}</CardDescription>
-                                </div>
-                                </div>
-                            </CardHeader>
-                            <CardContent className="flex-grow space-y-2 text-sm">
-                                <div className="flex items-center gap-2 text-muted-foreground">
-                                <Mail className="h-4 w-4 flex-shrink-0" />
-                                <a href={`mailto:${agency.email}`} className="truncate hover:underline">
-                                    {agency.email}
-                                </a>
-                                </div>
-                                <div className="flex items-center gap-2 text-muted-foreground">
-                                <Phone className="h-4 w-4 flex-shrink-0" />
-                                <span>{agency.phone}</span>
-                                </div>
-                                <div className="flex items-center gap-2 text-muted-foreground">
-                                <MapPin className="h-4 w-4 flex-shrink-0" />
-                                <span>{agency.address}</span>
-                                </div>
-                            </CardContent>
-                            <CardFooter className="grid grid-cols-2 gap-2">
-                                <Button asChild variant="outline" size="sm">
-                                    <Link href={`/towerco/agencies/${agency.id}`}>
-                                        <Eye className="mr-2 h-4 w-4" />
-                                        View Report
-                                    </Link>
-                                </Button>
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => setSelectedAgencyForSites(agency)}
-                                >
-                                    <Building2 className="mr-2 h-4 w-4" />
-                                    View Sites
-                                </Button>
-                            </CardFooter>
-                            </Card>
-                        ))
-                        ) : (
-                            <div className="col-span-full text-center text-muted-foreground py-10">
-                                No agencies found for the current filter.
-                            </div>
-                        )}
-                    </div>
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Agency</TableHead>
+                                <TableHead>Contact Info</TableHead>
+                                <TableHead>Location</TableHead>
+                                <TableHead>Sites Assigned</TableHead>
+                                <TableHead className="text-right">Actions</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                             {isLoading ? (
+                                Array.from({ length: 5 }).map((_, i) => (
+                                    <TableRow key={i}>
+                                        <TableCell><Skeleton className="h-10 w-full" /></TableCell>
+                                        <TableCell><Skeleton className="h-10 w-full" /></TableCell>
+                                        <TableCell><Skeleton className="h-10 w-full" /></TableCell>
+                                        <TableCell><Skeleton className="h-10 w-full" /></TableCell>
+                                        <TableCell><Skeleton className="h-10 w-full" /></TableCell>
+                                    </TableRow>
+                                ))
+                            ) : filteredAgencies.length > 0 ? (
+                                filteredAgencies.map((agency) => {
+                                    const assignedSitesCount = sites.filter(s => agency.siteIds.includes(s.id) && s.towerco === loggedInOrg?.name).length;
+                                    return (
+                                        <TableRow key={agency.id}>
+                                            <TableCell>
+                                                <div className="flex items-center gap-3">
+                                                    <Avatar className="h-10 w-10">
+                                                        <AvatarImage src={agency.avatar} alt={agency.name} />
+                                                        <AvatarFallback>{agency.name.charAt(0)}</AvatarFallback>
+                                                    </Avatar>
+                                                    <div>
+                                                        <p className="font-medium">{agency.name}</p>
+                                                        <p className="text-sm text-muted-foreground">ID: {agency.id}</p>
+                                                    </div>
+                                                </div>
+                                            </TableCell>
+                                            <TableCell>
+                                                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                                    <Mail className="h-4 w-4 flex-shrink-0" />
+                                                    <a href={`mailto:${agency.email}`} className="truncate hover:underline">
+                                                        {agency.email}
+                                                    </a>
+                                                </div>
+                                                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                                    <Phone className="h-4 w-4 flex-shrink-0" />
+                                                    <span>{agency.phone}</span>
+                                                </div>
+                                            </TableCell>
+                                            <TableCell>
+                                                 <div className="text-sm text-muted-foreground">
+                                                    <p>{agency.address}</p>
+                                                    <p>{agency.city}, {agency.region}</p>
+                                                </div>
+                                            </TableCell>
+                                            <TableCell>
+                                                <p>{assignedSitesCount}</p>
+                                            </TableCell>
+                                            <TableCell className="text-right space-x-2">
+                                                 <Button asChild variant="outline" size="sm">
+                                                    <Link href={`/towerco/agencies/${agency.id}`}>
+                                                        <Eye className="mr-2 h-4 w-4" />
+                                                        Report
+                                                    </Link>
+                                                </Button>
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    onClick={() => setSelectedAgencyForSites(agency)}
+                                                >
+                                                    <Building2 className="mr-2 h-4 w-4" />
+                                                    Sites
+                                                </Button>
+                                            </TableCell>
+                                        </TableRow>
+                                    )
+                                })
+                             ) : (
+                                <TableRow>
+                                    <TableCell colSpan={5} className="text-center text-muted-foreground py-10">
+                                        No agencies found for the current filter.
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
                 </CardContent>
             </Card>
 
