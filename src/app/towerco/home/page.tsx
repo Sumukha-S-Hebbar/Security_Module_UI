@@ -162,13 +162,10 @@ export default function TowercoHomePage() {
             <Skeleton className="h-28 w-full" />
             <Skeleton className="h-28 w-full" />
         </div>
+        <Skeleton className="h-64 w-full" />
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <Skeleton className="h-80 w-full" />
             <Skeleton className="h-80 w-full" />
-        </div>
-         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Skeleton className="h-64 w-full" />
-            <Skeleton className="h-64 w-full" />
         </div>
       </div>
     );
@@ -207,98 +204,96 @@ export default function TowercoHomePage() {
         incidents={data.incidents}
       />
       
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-        <Card className="border-destructive bg-destructive/10 xl:col-span-2">
-            <CardHeader className="flex flex-row items-center gap-2">
-            <AlertTriangle className="w-6 h-6 text-destructive" />
-            <CardTitle>Active Emergency Incidents ({activeEmergencies.length})</CardTitle>
-            </CardHeader>
-            <CardContent>
-            {activeEmergencies.length > 0 ? (
-                <div className="overflow-x-auto">
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                            <TableHead>Site ID</TableHead>
-                            <TableHead>Site Name</TableHead>
-                            <TableHead>Agency</TableHead>
-                            <TableHead>Patrolling Officer</TableHead>
-                            <TableHead>Guard</TableHead>
-                            <TableHead>Time</TableHead>
-                            <TableHead className="text-right">Contact</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {activeEmergencies.map((incident) => {
-                            const siteDetails = getSiteById(incident.siteId);
-                            const guardDetails = getGuardById(incident.raisedByGuardId);
-                            const patrollingOfficerDetails = getPatrollingOfficerById(
-                                incident.attendedByPatrollingOfficerId
-                            );
-                            const agencyDetails = siteDetails ? getAgencyForSite(siteDetails.id) : undefined;
-                            const incidentDate = new Date(incident.incidentTime);
+      <Card className="border-destructive bg-destructive/10">
+          <CardHeader className="flex flex-row items-center gap-2">
+          <AlertTriangle className="w-6 h-6 text-destructive" />
+          <CardTitle>Active Emergency Incidents ({activeEmergencies.length})</CardTitle>
+          </CardHeader>
+          <CardContent>
+          {activeEmergencies.length > 0 ? (
+              <div className="overflow-x-auto">
+                  <Table>
+                      <TableHeader>
+                          <TableRow>
+                          <TableHead>Site ID</TableHead>
+                          <TableHead>Site Name</TableHead>
+                          <TableHead>Agency</TableHead>
+                          <TableHead>Patrolling Officer</TableHead>
+                          <TableHead>Guard</TableHead>
+                          <TableHead>Time</TableHead>
+                          <TableHead className="text-right">Contact</TableHead>
+                          </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                          {activeEmergencies.map((incident) => {
+                          const siteDetails = getSiteById(incident.siteId);
+                          const guardDetails = getGuardById(incident.raisedByGuardId);
+                          const patrollingOfficerDetails = getPatrollingOfficerById(
+                              incident.attendedByPatrollingOfficerId
+                          );
+                          const agencyDetails = siteDetails ? getAgencyForSite(siteDetails.id) : undefined;
+                          const incidentDate = new Date(incident.incidentTime);
 
-                            return (
-                                <TableRow key={incident.id}>
-                                <TableCell>{incident.siteId}</TableCell>
-                                <TableCell className="font-medium">
-                                    {siteDetails?.name || 'N/A'}
-                                </TableCell>
-                                <TableCell>{agencyDetails?.name || 'N/A'}</TableCell>
-                                <TableCell>
-                                    {patrollingOfficerDetails?.name || 'N/A'}
-                                </TableCell>
-                                <TableCell>{guardDetails?.name || 'N/A'}</TableCell>
-                                <TableCell>{incidentDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</TableCell>
-                                <TableCell className="text-right">
-                                    <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                        <Button variant="outline" size="sm">
-                                        Contact <ChevronDown className="ml-2 h-4 w-4" />
-                                        </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="end">
-                                        {guardDetails && (
-                                        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                                            <a href={`tel:${guardDetails.phone}`} className="flex items-center gap-2 w-full">
-                                                <Phone className="mr-2 h-4 w-4" />
-                                                <span>Guard: {guardDetails.phone}</span>
-                                            </a>
-                                        </DropdownMenuItem>
-                                        )}
-                                        {patrollingOfficerDetails && (
-                                        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                                            <a href={`tel:${patrollingOfficerDetails.phone}`} className="flex items-center gap-2 w-full">
-                                                <Phone className="mr-2 h-4 w-4" />
-                                                <span>P. Officer: {patrollingOfficerDetails.phone}</span>
-                                            </a>
-                                        </DropdownMenuItem>
-                                        )}
-                                        {agencyDetails && (
-                                        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                                            <a href={`tel:${agencyDetails.phone}`} className="flex items-center gap-2 w-full">
-                                                <Phone className="mr-2 h-4 w-4" />
-                                                <span>Agency: {agencyDetails.phone}</span>
-                                            </a>
-                                        </DropdownMenuItem>
-                                        )}
-                                    </DropdownMenuContent>
-                                    </DropdownMenu>
-                                </TableCell>
-                                </TableRow>
-                            );
-                            })}
-                        </TableBody>
-                    </Table>
-                </div>
-            ) : (
-                <p className="text-muted-foreground text-center py-4">
-                No active emergency incidents. All systems are normal.
-                </p>
-            )}
-            </CardContent>
-        </Card>
-      </div>
+                          return (
+                              <TableRow key={incident.id}>
+                              <TableCell>{incident.siteId}</TableCell>
+                              <TableCell className="font-medium">
+                                  {siteDetails?.name || 'N/A'}
+                              </TableCell>
+                              <TableCell>{agencyDetails?.name || 'N/A'}</TableCell>
+                              <TableCell>
+                                  {patrollingOfficerDetails?.name || 'N/A'}
+                              </TableCell>
+                              <TableCell>{guardDetails?.name || 'N/A'}</TableCell>
+                              <TableCell>{incidentDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</TableCell>
+                              <TableCell className="text-right">
+                                  <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                      <Button variant="outline" size="sm">
+                                      Contact <ChevronDown className="ml-2 h-4 w-4" />
+                                      </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end">
+                                      {guardDetails && (
+                                      <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                          <a href={`tel:${guardDetails.phone}`} className="flex items-center gap-2 w-full">
+                                              <Phone className="mr-2 h-4 w-4" />
+                                              <span>Guard: {guardDetails.phone}</span>
+                                          </a>
+                                      </DropdownMenuItem>
+                                      )}
+                                      {patrollingOfficerDetails && (
+                                      <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                          <a href={`tel:${patrollingOfficerDetails.phone}`} className="flex items-center gap-2 w-full">
+                                              <Phone className="mr-2 h-4 w-4" />
+                                              <span>P. Officer: {patrollingOfficerDetails.phone}</span>
+                                          </a>
+                                      </DropdownMenuItem>
+                                      )}
+                                      {agencyDetails && (
+                                      <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                          <a href={`tel:${agencyDetails.phone}`} className="flex items-center gap-2 w-full">
+                                              <Phone className="mr-2 h-4 w-4" />
+                                              <span>Agency: {agencyDetails.phone}</span>
+                                          </a>
+                                      </DropdownMenuItem>
+                                      )}
+                                  </DropdownMenuContent>
+                                  </DropdownMenu>
+                              </TableCell>
+                              </TableRow>
+                          );
+                          })}
+                      </TableBody>
+                  </Table>
+              </div>
+          ) : (
+              <p className="text-muted-foreground text-center py-4">
+              No active emergency incidents. All systems are normal.
+              </p>
+          )}
+          </CardContent>
+      </Card>
 
        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
             <IncidentChart
