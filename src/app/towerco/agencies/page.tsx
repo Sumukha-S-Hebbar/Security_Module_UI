@@ -538,7 +538,7 @@ export default function TowercoAgenciesPage() {
                                                         <AvatarImage src={agency.avatar} alt={agency.name} />
                                                         <AvatarFallback>{agency.name.charAt(0)}</AvatarFallback>
                                                     </Avatar>
-                                                    <p className="font-medium">{agency.name}</p>
+                                                    <span className="font-medium text-primary hover:underline">{agency.name}</span>
                                                 </div>
                                             </TableCell>
                                             <TableCell>
