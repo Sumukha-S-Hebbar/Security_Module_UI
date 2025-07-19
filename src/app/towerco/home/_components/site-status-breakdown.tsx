@@ -20,7 +20,8 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { ChevronDown, Building2, Briefcase } from 'lucide-react';
+import { ChevronDown, Briefcase } from 'lucide-react';
+import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 
 export function SiteStatusBreakdown({ sites, agencies }: { sites: Site[]; agencies: SecurityAgency[] }) {
   const [openSection, setOpenSection] = useState<string | null>(null);
@@ -30,8 +31,22 @@ export function SiteStatusBreakdown({ sites, agencies }: { sites: Site[]; agenci
   const assignedSites = sites.filter((site) => agencySiteIds.has(site.id));
   const unassignedSites = sites.filter((site) => !agencySiteIds.has(site.id));
   
+  const totalSites = sites.length;
   const assignedSitesCount = assignedSites.length;
   const unassignedSitesCount = unassignedSites.length;
+  
+  const assignedData = totalSites > 0 ? [
+    { name: 'Assigned', value: assignedSitesCount },
+    { name: 'Other', value: totalSites - assignedSitesCount },
+  ] : [];
+
+  const unassignedData = totalSites > 0 ? [
+    { name: 'Unassigned', value: unassignedSitesCount },
+    { name: 'Other', value: totalSites - unassignedSitesCount },
+  ] : [];
+
+  const ASSIGNED_COLORS = ['hsl(var(--chart-2))', 'hsl(var(--muted))'];
+  const UNASSIGNED_COLORS = ['hsl(var(--destructive))', 'hsl(var(--muted))'];
 
   const getAgencyForSite = (siteId: string) => {
     return agencies.find(a => a.siteIds.includes(siteId));
@@ -52,8 +67,27 @@ export function SiteStatusBreakdown({ sites, agencies }: { sites: Site[]; agenci
         <Collapsible open={openSection === 'assigned'} onOpenChange={() => toggleSection('assigned')}>
           <CollapsibleTrigger asChild>
             <div className="flex w-full items-center justify-between rounded-lg border p-4 cursor-pointer hover:bg-muted/50 transition-colors">
-              <div className="flex items-center gap-3">
-                <div className="h-3 w-3 rounded-full bg-chart-2" />
+              <div className="flex items-center gap-4">
+                 <div className="w-10 h-10 relative">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                            <Pie
+                                data={assignedData}
+                                cx="50%"
+                                cy="50%"
+                                innerRadius="60%"
+                                outerRadius="100%"
+                                paddingAngle={0}
+                                dataKey="value"
+                                stroke="none"
+                            >
+                                {assignedData.map((entry, index) => (
+                                    <Cell key={`cell-${index}`} fill={ASSIGNED_COLORS[index % ASSIGNED_COLORS.length]} />
+                                ))}
+                            </Pie>
+                        </PieChart>
+                    </ResponsiveContainer>
+                </div>
                 <span className="font-medium">Assigned Sites</span>
               </div>
               <div className="flex items-center gap-4">
@@ -102,8 +136,27 @@ export function SiteStatusBreakdown({ sites, agencies }: { sites: Site[]; agenci
         <Collapsible open={openSection === 'unassigned'} onOpenChange={() => toggleSection('unassigned')}>
            <CollapsibleTrigger asChild>
              <div className="flex w-full items-center justify-between rounded-lg border p-4 cursor-pointer hover:bg-muted/50 transition-colors">
-                <div className="flex items-center gap-3">
-                  <div className="h-3 w-3 rounded-full bg-destructive" />
+                <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 relative">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <PieChart>
+                                <Pie
+                                    data={unassignedData}
+                                    cx="50%"
+                                    cy="50%"
+                                    innerRadius="60%"
+                                    outerRadius="100%"
+                                    paddingAngle={0}
+                                    dataKey="value"
+                                    stroke="none"
+                                >
+                                    {unassignedData.map((entry, index) => (
+                                        <Cell key={`cell-${index}`} fill={UNASSIGNED_COLORS[index % UNASSIGNED_COLORS.length]} />
+                                    ))}
+                                </Pie>
+                            </PieChart>
+                        </ResponsiveContainer>
+                    </div>
                   <span className="font-medium">Unassigned Sites</span>
                 </div>
                 <div className="flex items-center gap-4">
