@@ -346,7 +346,11 @@ export default function AgencyReportPage() {
                   ).length;
                   return (
                     <TableRow key={site.id}>
-                       <TableCell className="font-medium">{site.id}</TableCell>
+                       <TableCell>
+                          <Button asChild variant="link" className="p-0 h-auto font-medium">
+                            <Link href={`/towerco/sites/${site.id}`}>{site.id}</Link>
+                          </Button>
+                        </TableCell>
                       <TableCell>
                         <div className="font-medium">{site.name}</div>
                         <div className="text-sm text-muted-foreground flex items-center gap-1">
