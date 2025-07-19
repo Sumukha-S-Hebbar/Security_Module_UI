@@ -593,7 +593,7 @@ export default function TowercoSitesPage() {
                                 <span>{incidentsCount}</span>
                             </div>
                         </TableCell>
-                        <TableCell className="text-right space-x-2">
+                        <TableCell className="text-right">
                              <Button asChild variant="outline" size="sm">
                                 <Link href={`/towerco/sites/${site.id}`}>
                                     <Eye className="mr-2 h-4 w-4" />
@@ -670,8 +670,8 @@ export default function TowercoSitesPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Site</TableHead>
-                  <TableHead>Address</TableHead>
+                  <TableHead>Site ID</TableHead>
+                  <TableHead>Site Name</TableHead>
                   <TableHead>Assign Agency</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
@@ -680,13 +680,14 @@ export default function TowercoSitesPage() {
                 {filteredUnassignedSites.length > 0 ? (
                   filteredUnassignedSites.map((site) => (
                     <TableRow key={site.id}>
+                      <TableCell className="font-medium">{site.id}</TableCell>
                       <TableCell>
-                        <div className="font-medium">{site.name}</div>
-                        <div className="text-sm text-muted-foreground">
-                          ID: {site.id}
+                        <div>{site.name}</div>
+                        <div className="text-sm text-muted-foreground flex items-center gap-1">
+                          <MapPin className="w-3 h-3" />
+                          {site.address}
                         </div>
                       </TableCell>
-                      <TableCell>{site.address}</TableCell>
                       <TableCell>
                         <Select
                           onValueChange={(value) =>
