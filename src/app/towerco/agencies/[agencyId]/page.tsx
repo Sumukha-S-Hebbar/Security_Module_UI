@@ -397,7 +397,7 @@ export default function AgencyReportPage() {
         </CardContent>
       </Card>
       <Card>
-        <CardHeader className="flex flex-row items-start justify-between gap-4">
+        <CardHeader className="flex flex-wrap items-start justify-between gap-4">
             <div className="flex-grow">
                 <CardTitle>Incidents History</CardTitle>
                 <CardDescription>
@@ -452,7 +452,11 @@ export default function AgencyReportPage() {
                   const guard = getGuardById(incident.raisedByGuardId);
                   return (
                     <TableRow key={incident.id}>
-                      <TableCell>{incident.id}</TableCell>
+                      <TableCell>
+                        <Button asChild variant="link" className="p-0 h-auto font-medium">
+                          <Link href={`/towerco/incidents/${incident.id}`}>{incident.id}</Link>
+                        </Button>
+                      </TableCell>
                       <TableCell>{new Date(incident.incidentTime).toLocaleString()}</TableCell>
                       <TableCell>{site?.name || 'N/A'}</TableCell>
                       <TableCell>{guard?.name || 'N/A'}</TableCell>
