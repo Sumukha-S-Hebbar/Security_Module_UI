@@ -153,17 +153,22 @@ export default function TowercoHomePage() {
             <Skeleton className="h-8 w-1/3" />
             <Skeleton className="h-4 w-1/2" />
         </div>
+        <Card>
+            <CardHeader>
+                <Skeleton className="h-6 w-1/4" />
+            </CardHeader>
+            <CardContent>
+                <Skeleton className="h-24 w-full" />
+            </CardContent>
+        </Card>
+        <div className="grid gap-4 md:grid-cols-3">
+            <Skeleton className="h-28 w-full" />
+            <Skeleton className="h-28 w-full" />
+            <Skeleton className="h-28 w-full" />
+        </div>
+        <Skeleton className="h-[400px] w-full" />
+        <Skeleton className="h-48 w-full" />
         <Skeleton className="h-64 w-full" />
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <Skeleton className="h-28 w-full" />
-            <Skeleton className="h-28 w-full" />
-            <Skeleton className="h-28 w-full" />
-            <Skeleton className="h-28 w-full" />
-        </div>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Skeleton className="h-80 w-full" />
-            <Skeleton className="h-80 w-full" />
-        </div>
       </div>
     );
   }
@@ -291,6 +296,7 @@ export default function TowercoHomePage() {
           sites={data.sites}
           securityAgencies={data.agencies}
       />
+
       <AgencyPerformance
           agencies={data.agencies}
           sites={data.sites}
