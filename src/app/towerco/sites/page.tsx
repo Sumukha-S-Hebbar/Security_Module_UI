@@ -309,204 +309,202 @@ export default function TowercoSitesPage() {
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Site Management</h1>
-        <p className="text-muted-foreground">
-          Add, view, and manage operational sites.
-        </p>
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Site Management</h1>
+          <p className="text-muted-foreground">
+            Add, view, and manage operational sites.
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Dialog
+            open={isUploadDialogOpen}
+            onOpenChange={setIsUploadDialogOpen}
+          >
+            <DialogTrigger asChild>
+              <Button>
+                <Upload className="mr-2 h-4 w-4" />
+                Upload CSV
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Upload Site Profiles</DialogTitle>
+                <DialogDescription>
+                  Upload a CSV file to add multiple sites at once.
+                </DialogDescription>
+              </DialogHeader>
+              <Form {...uploadForm}>
+                <form onSubmit={uploadForm.handleSubmit(onUploadSubmit)}>
+                  <div className="grid gap-4 py-4">
+                    <FormField
+                      control={uploadForm.control}
+                      name="csvFile"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Site CSV File</FormLabel>
+                          <FormControl>
+                            <Input
+                              id="csvFile-site-input"
+                              type="file"
+                              accept=".csv"
+                              disabled={isUploading}
+                              onChange={(e) =>
+                                field.onChange(e.target.files)
+                              }
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            The CSV should contain columns: name, address.
+                            The TowerCo will be set to {loggedInOrg.name}.
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  <DialogFooter>
+                    <Button type="submit" disabled={isUploading}>
+                      {isUploading ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />{' '}
+                          Uploading...
+                        </>
+                      ) : (
+                        <>
+                          <Upload className="mr-2 h-4 w-4" /> Upload CSV
+                        </>
+                      )}
+                    </Button>
+                  </DialogFooter>
+                </form>
+              </Form>
+            </DialogContent>
+          </Dialog>
+
+          <Dialog
+            open={isAddSiteDialogOpen}
+            onOpenChange={setIsAddSiteDialogOpen}
+          >
+            <DialogTrigger asChild>
+              <Button variant="outline">
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Add Site
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Add a New Site</DialogTitle>
+                <DialogDescription>
+                  Fill in the details below to add a new site for{' '}
+                  {loggedInOrg.name}.
+                </DialogDescription>
+              </DialogHeader>
+              <Form {...addSiteForm}>
+                <form
+                  onSubmit={addSiteForm.handleSubmit(onAddSiteSubmit)}
+                  className="space-y-4"
+                >
+                  <FormField
+                    control={addSiteForm.control}
+                    name="id"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Site ID</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="e.g., SITE013"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={addSiteForm.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Site Name</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="e.g., North Tower"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={addSiteForm.control}
+                    name="address"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Address</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="e.g., 123 Main St, Anytown, USA"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                      control={addSiteForm.control}
+                      name="region"
+                      render={({ field }) => (
+                          <FormItem>
+                              <FormLabel>Region</FormLabel>
+                              <FormControl>
+                                  <Input placeholder="e.g., CA" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                          </FormItem>
+                      )}
+                  />
+                  <FormField
+                      control={addSiteForm.control}
+                      name="city"
+                      render={({ field }) => (
+                          <FormItem>
+                              <FormLabel>City</FormLabel>
+                              <FormControl>
+                                  <Input placeholder="e.g., Sunnyvale" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                          </FormItem>
+                      )}
+                  />
+                  <DialogFooter>
+                    <Button type="submit" disabled={isAddingSite}>
+                      {isAddingSite ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />{' '}
+                          Adding Site...
+                        </>
+                      ) : (
+                        'Add Site'
+                      )}
+                    </Button>
+                  </DialogFooter>
+                </form>
+              </Form>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
       <Card>
         <CardHeader>
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <CardTitle>Assigned Sites</CardTitle>
-              <CardDescription>
-                A list of all your sites with an assigned security agency for{' '}
-                {loggedInOrg.name}.
-              </CardDescription>
-            </div>
-            <div className="flex items-center gap-2">
-              <Dialog
-                open={isUploadDialogOpen}
-                onOpenChange={setIsUploadDialogOpen}
-              >
-                <DialogTrigger asChild>
-                  <Button>
-                    <Upload className="mr-2 h-4 w-4" />
-                    Upload CSV
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Upload Site Profiles</DialogTitle>
-                    <DialogDescription>
-                      Upload a CSV file to add multiple sites at once.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <Form {...uploadForm}>
-                    <form onSubmit={uploadForm.handleSubmit(onUploadSubmit)}>
-                      <div className="grid gap-4 py-4">
-                        <FormField
-                          control={uploadForm.control}
-                          name="csvFile"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Site CSV File</FormLabel>
-                              <FormControl>
-                                <Input
-                                  id="csvFile-site-input"
-                                  type="file"
-                                  accept=".csv"
-                                  disabled={isUploading}
-                                  onChange={(e) =>
-                                    field.onChange(e.target.files)
-                                  }
-                                />
-                              </FormControl>
-                              <FormDescription>
-                                The CSV should contain columns: name, address.
-                                The TowerCo will be set to {loggedInOrg.name}.
-                              </FormDescription>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-                      <DialogFooter>
-                        <Button type="submit" disabled={isUploading}>
-                          {isUploading ? (
-                            <>
-                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />{' '}
-                              Uploading...
-                            </>
-                          ) : (
-                            <>
-                              <Upload className="mr-2 h-4 w-4" /> Upload CSV
-                            </>
-                          )}
-                        </Button>
-                      </DialogFooter>
-                    </form>
-                  </Form>
-                </DialogContent>
-              </Dialog>
-
-              <Dialog
-                open={isAddSiteDialogOpen}
-                onOpenChange={setIsAddSiteDialogOpen}
-              >
-                <DialogTrigger asChild>
-                  <Button variant="outline">
-                    <PlusCircle className="mr-2 h-4 w-4" />
-                    Add Site
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Add a New Site</DialogTitle>
-                    <DialogDescription>
-                      Fill in the details below to add a new site for{' '}
-                      {loggedInOrg.name}.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <Form {...addSiteForm}>
-                    <form
-                      onSubmit={addSiteForm.handleSubmit(onAddSiteSubmit)}
-                      className="space-y-4"
-                    >
-                      <FormField
-                        control={addSiteForm.control}
-                        name="id"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Site ID</FormLabel>
-                            <FormControl>
-                              <Input
-                                placeholder="e.g., SITE013"
-                                {...field}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={addSiteForm.control}
-                        name="name"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Site Name</FormLabel>
-                            <FormControl>
-                              <Input
-                                placeholder="e.g., North Tower"
-                                {...field}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={addSiteForm.control}
-                        name="address"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Address</FormLabel>
-                            <FormControl>
-                              <Input
-                                placeholder="e.g., 123 Main St, Anytown, USA"
-                                {...field}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                          control={addSiteForm.control}
-                          name="region"
-                          render={({ field }) => (
-                              <FormItem>
-                                  <FormLabel>Region</FormLabel>
-                                  <FormControl>
-                                      <Input placeholder="e.g., CA" {...field} />
-                                  </FormControl>
-                                  <FormMessage />
-                              </FormItem>
-                          )}
-                      />
-                      <FormField
-                          control={addSiteForm.control}
-                          name="city"
-                          render={({ field }) => (
-                              <FormItem>
-                                  <FormLabel>City</FormLabel>
-                                  <FormControl>
-                                      <Input placeholder="e.g., Sunnyvale" {...field} />
-                                  </FormControl>
-                                  <FormMessage />
-                              </FormItem>
-                          )}
-                      />
-                      <DialogFooter>
-                        <Button type="submit" disabled={isAddingSite}>
-                          {isAddingSite ? (
-                            <>
-                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />{' '}
-                              Adding Site...
-                            </>
-                          ) : (
-                            'Add Site'
-                          )}
-                        </Button>
-                      </DialogFooter>
-                    </form>
-                  </Form>
-                </DialogContent>
-              </Dialog>
-            </div>
-          </div>
+          <CardTitle>Assigned Sites</CardTitle>
+          <CardDescription>
+            A list of all your sites with an assigned security agency for{' '}
+            {loggedInOrg.name}.
+          </CardDescription>
           <div className="flex flex-wrap items-center gap-2 pt-4">
             <div className="relative flex-1 md:grow-0">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
