@@ -98,7 +98,7 @@ export default function AgencyReportPage() {
   const handleGenerateReport = (name: string, type: string) => {
     toast({
       title: 'Report Generation Started',
-      description: `Generating a detailed report for ${type} ${name}.`,
+      description: `Generating a detailed report for type ${name}.`,
     });
     // In a real app, this would trigger a download.
   };
@@ -397,41 +397,41 @@ export default function AgencyReportPage() {
         </CardContent>
       </Card>
       <Card>
-        <CardHeader className="flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <CardTitle>Incidents History</CardTitle>
-            <CardDescription>
-              A log of emergency incidents at sites managed by {agency.name}.
-            </CardDescription>
-          </div>
-          <div className="flex items-center gap-2">
-              <Select value={historySelectedYear} onValueChange={setHistorySelectedYear}>
-                <SelectTrigger className="w-[120px]">
-                  <SelectValue placeholder="Select Year" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Years</SelectItem>
-                  {availableYears.map((year) => (
-                    <SelectItem key={year} value={year}>
-                      {year}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Select value={historySelectedMonth} onValueChange={setHistorySelectedMonth}>
-                <SelectTrigger className="w-[140px]">
-                  <SelectValue placeholder="Select Month" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Months</SelectItem>
-                  {Array.from({ length: 12 }, (_, i) => (
-                    <SelectItem key={i} value={i.toString()}>
-                      {new Date(0, i).toLocaleString('default', { month: 'long' })}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-          </div>
+        <CardHeader className="flex flex-row items-start justify-between gap-4">
+            <div className="flex-grow">
+                <CardTitle>Incidents History</CardTitle>
+                <CardDescription>
+                A log of emergency incidents at sites managed by {agency.name}.
+                </CardDescription>
+            </div>
+            <div className="flex items-center gap-2 flex-shrink-0">
+                <Select value={historySelectedYear} onValueChange={setHistorySelectedYear}>
+                    <SelectTrigger className="w-[120px]">
+                    <SelectValue placeholder="Select Year" />
+                    </SelectTrigger>
+                    <SelectContent>
+                    <SelectItem value="all">All Years</SelectItem>
+                    {availableYears.map((year) => (
+                        <SelectItem key={year} value={year}>
+                        {year}
+                        </SelectItem>
+                    ))}
+                    </SelectContent>
+                </Select>
+                <Select value={historySelectedMonth} onValueChange={setHistorySelectedMonth}>
+                    <SelectTrigger className="w-[140px]">
+                    <SelectValue placeholder="Select Month" />
+                    </SelectTrigger>
+                    <SelectContent>
+                    <SelectItem value="all">All Months</SelectItem>
+                    {Array.from({ length: 12 }, (_, i) => (
+                        <SelectItem key={i} value={i.toString()}>
+                        {new Date(0, i).toLocaleString('default', { month: 'long' })}
+                        </SelectItem>
+                    ))}
+                    </SelectContent>
+                </Select>
+            </div>
         </CardHeader>
         <CardContent>
           {filteredIncidents.length > 0 ? (
