@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import type { Site, SecurityAgency, Incident } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Building2, Briefcase, ShieldAlert, CheckCircle } from 'lucide-react';
+import { Building2, Briefcase, ShieldAlert } from 'lucide-react';
 
 export function TowercoAnalyticsDashboard({
   sites,
@@ -14,11 +14,9 @@ export function TowercoAnalyticsDashboard({
   incidents: Incident[];
 }) {
   const activeIncidents = incidents.filter(i => i.status === 'Active').length;
-  const resolvedIncidents = incidents.filter(i => i.status === 'Resolved').length;
-  const resolutionRate = incidents.length > 0 ? Math.round((resolvedIncidents / incidents.length) * 100) : 0;
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-4 md:grid-cols-3">
       <Link href="/towerco/sites">
         <Card className="transition-all hover:shadow-md">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -58,18 +56,6 @@ export function TowercoAnalyticsDashboard({
           <div className="text-2xl font-bold">{activeIncidents}</div>
           <p className="text-xs text-muted-foreground">
             Ongoing emergency incidents
-          </p>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Resolution Rate</CardTitle>
-          <CheckCircle className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{resolutionRate}%</div>
-          <p className="text-xs text-muted-foreground">
-            Of all incidents reported
           </p>
         </CardContent>
       </Card>
