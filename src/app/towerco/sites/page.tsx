@@ -240,7 +240,8 @@ export default function TowercoSitesPage() {
       const searchLower = assignedSearchQuery.toLowerCase();
       const matchesSearch =
         site.name.toLowerCase().includes(searchLower) ||
-        site.address.toLowerCase().includes(searchLower);
+        site.address.toLowerCase().includes(searchLower) ||
+        site.id.toLowerCase().includes(searchLower);
 
       const agency = getAgencyForSite(site.id);
       const matchesAgency =
@@ -559,7 +560,8 @@ export default function TowercoSitesPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Site</TableHead>
+                <TableHead>Site ID</TableHead>
+                <TableHead>Site Name</TableHead>
                 <TableHead>Agency</TableHead>
                 <TableHead>Incidents</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
@@ -571,8 +573,9 @@ export default function TowercoSitesPage() {
                 const incidentsCount = siteIncidentsCount[site.id] || 0;
                 return (
                     <TableRow key={site.id}>
+                        <TableCell className="font-medium">{site.id}</TableCell>
                         <TableCell>
-                            <div className="font-medium">{site.name}</div>
+                            <div>{site.name}</div>
                             <div className="text-sm text-muted-foreground flex items-center gap-1">
                                 <MapPin className="w-3 h-3" />
                                 {site.address}
@@ -603,7 +606,7 @@ export default function TowercoSitesPage() {
               })
             ) : (
                 <TableRow>
-                    <TableCell colSpan={4} className="text-center text-muted-foreground py-10">
+                    <TableCell colSpan={5} className="text-center text-muted-foreground py-10">
                         No assigned sites found for the current filter.
                     </TableCell>
                 </TableRow>
