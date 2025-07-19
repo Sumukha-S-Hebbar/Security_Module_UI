@@ -264,227 +264,227 @@ export default function TowercoAgenciesPage() {
 
     return (
         <div className="p-4 sm:p-6 lg:p-8 space-y-6">
-            <div>
-                <h1 className="text-3xl font-bold tracking-tight">Security Agency Management</h1>
-                <p className="text-muted-foreground">
-                    Add, view, and manage security agencies.
-                </p>
-            </div>
+            <div className="flex flex-wrap items-center justify-between gap-4">
+                <div>
+                    <h1 className="text-3xl font-bold tracking-tight">Security Agency Management</h1>
+                    <p className="text-muted-foreground">
+                        Add, view, and manage security agencies.
+                    </p>
+                </div>
+                <div className="flex items-center gap-2">
+                    <Dialog open={isUploadDialogOpen} onOpenChange={setIsUploadDialogOpen}>
+                        <DialogTrigger asChild>
+                            <Button>
+                                <Upload className="mr-2 h-4 w-4" />
+                                Upload CSV
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                            <DialogHeader>
+                            <DialogTitle>Upload Agency Profiles</DialogTitle>
+                            <DialogDescription>
+                                Upload a CSV file to add multiple security agency profiles at once.
+                            </DialogDescription>
+                            </DialogHeader>
+                            <Form {...uploadForm}>
+                                <form onSubmit={uploadForm.handleSubmit(onUploadSubmit)}>
+                                    <div className="grid gap-4 py-4">
+                                        <FormField
+                                            control={uploadForm.control}
+                                            name="csvFile"
+                                            render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Agency CSV File</FormLabel>
+                                                <FormControl>
+                                                <Input
+                                                    id="csvFile-agency-input"
+                                                    type="file"
+                                                    accept=".csv"
+                                                    disabled={isUploading}
+                                                    onChange={(e) => field.onChange(e.target.files)}
+                                                />
+                                                </FormControl>
+                                                <FormDescription>
+                                                The CSV should contain columns: id, name, phone, email, address, city, region.
+                                                </FormDescription>
+                                                <FormMessage />
+                                            </FormItem>
+                                            )}
+                                        />
+                                    </div>
+                                    <DialogFooter>
+                                        <Button type="submit" disabled={isUploading}>
+                                        {isUploading ? (
+                                            <>
+                                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                            Uploading...
+                                            </>
+                                        ) : (
+                                            <>
+                                            <Upload className="mr-2 h-4 w-4" />
+                                            Upload CSV
+                                            </>
+                                        )}
+                                        </Button>
+                                    </DialogFooter>
+                                </form>
+                            </Form>
+                        </DialogContent>
+                    </Dialog>
 
+                    <Dialog open={isAddAgencyDialogOpen} onOpenChange={setIsAddAgencyDialogOpen}>
+                        <DialogTrigger asChild>
+                            <Button variant="outline">
+                                <PlusCircle className="mr-2 h-4 w-4" />
+                                Add Agency
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent className="max-h-[90vh] overflow-y-auto">
+                            <DialogHeader>
+                                <DialogTitle>Add a New Agency</DialogTitle>
+                                <DialogDescription>
+                                    Fill in the details below to add a new security agency profile.
+                                </DialogDescription>
+                            </DialogHeader>
+                            <Form {...addAgencyForm}>
+                                <form onSubmit={addAgencyForm.handleSubmit(onAddAgencySubmit)} className="space-y-4">
+                                    <FormField
+                                        control={addAgencyForm.control}
+                                        name="id"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Agency ID</FormLabel>
+                                                <FormControl>
+                                                    <Input placeholder="e.g., AGY04" {...field} />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={addAgencyForm.control}
+                                        name="name"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Agency Name</FormLabel>
+                                                <FormControl>
+                                                    <Input placeholder="e.g., SecureGuard Inc." {...field} />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={addAgencyForm.control}
+                                        name="phone"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Phone</FormLabel>
+                                                <FormControl>
+                                                    <Input placeholder="e.g., 555-123-4567" {...field} />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={addAgencyForm.control}
+                                        name="email"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Email</FormLabel>
+                                                <FormControl>
+                                                    <Input placeholder="e.g., contact@secureguard.com" {...field} />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={addAgencyForm.control}
+                                        name="address"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Address</FormLabel>
+                                                <FormControl>
+                                                    <Input placeholder="e.g., 123 Security Blvd" {...field} />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={addAgencyForm.control}
+                                        name="region"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Region</FormLabel>
+                                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                    <FormControl>
+                                                        <SelectTrigger>
+                                                            <SelectValue placeholder="Select a region" />
+                                                        </SelectTrigger>
+                                                    </FormControl>
+                                                    <SelectContent>
+                                                        {regions.map((region) => (
+                                                            <SelectItem key={region} value={region}>
+                                                                {region}
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={addAgencyForm.control}
+                                        name="city"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>City</FormLabel>
+                                                 <Select onValueChange={field.onChange} value={field.value} disabled={!watchedRegion}>
+                                                    <FormControl>
+                                                        <SelectTrigger>
+                                                            <SelectValue placeholder="Select a city" />
+                                                        </SelectTrigger>
+                                                    </FormControl>
+                                                    <SelectContent>
+                                                        {citiesForAddForm.map((city) => (
+                                                            <SelectItem key={city} value={city}>
+                                                                {city}
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <DialogFooter>
+                                        <Button type="submit" disabled={isAddingAgency}>
+                                        {isAddingAgency ? (
+                                            <>
+                                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                            Adding Agency...
+                                            </>
+                                        ) : (
+                                            "Add Agency"
+                                        )}
+                                        </Button>
+                                    </DialogFooter>
+                                </form>
+                            </Form>
+                        </DialogContent>
+                    </Dialog>
+                </div>
+            </div>
+            
             <Card>
                 <CardHeader>
-                    <div className="flex flex-wrap items-center justify-between gap-4">
-                        <div>
-                            <CardTitle>All Security Agencies</CardTitle>
-                            <CardDescription>A list of all security service providers.</CardDescription>
-                        </div>
-                        <div className="flex items-center gap-2">
-                             <Dialog open={isUploadDialogOpen} onOpenChange={setIsUploadDialogOpen}>
-                                <DialogTrigger asChild>
-                                    <Button>
-                                        <Upload className="mr-2 h-4 w-4" />
-                                        Upload CSV
-                                    </Button>
-                                </DialogTrigger>
-                                <DialogContent>
-                                    <DialogHeader>
-                                    <DialogTitle>Upload Agency Profiles</DialogTitle>
-                                    <DialogDescription>
-                                        Upload a CSV file to add multiple security agency profiles at once.
-                                    </DialogDescription>
-                                    </DialogHeader>
-                                    <Form {...uploadForm}>
-                                        <form onSubmit={uploadForm.handleSubmit(onUploadSubmit)}>
-                                            <div className="grid gap-4 py-4">
-                                                <FormField
-                                                    control={uploadForm.control}
-                                                    name="csvFile"
-                                                    render={({ field }) => (
-                                                    <FormItem>
-                                                        <FormLabel>Agency CSV File</FormLabel>
-                                                        <FormControl>
-                                                        <Input
-                                                            id="csvFile-agency-input"
-                                                            type="file"
-                                                            accept=".csv"
-                                                            disabled={isUploading}
-                                                            onChange={(e) => field.onChange(e.target.files)}
-                                                        />
-                                                        </FormControl>
-                                                        <FormDescription>
-                                                        The CSV should contain columns: id, name, phone, email, address, city, region.
-                                                        </FormDescription>
-                                                        <FormMessage />
-                                                    </FormItem>
-                                                    )}
-                                                />
-                                            </div>
-                                            <DialogFooter>
-                                                <Button type="submit" disabled={isUploading}>
-                                                {isUploading ? (
-                                                    <>
-                                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                                    Uploading...
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                    <Upload className="mr-2 h-4 w-4" />
-                                                    Upload CSV
-                                                    </>
-                                                )}
-                                                </Button>
-                                            </DialogFooter>
-                                        </form>
-                                    </Form>
-                                </DialogContent>
-                            </Dialog>
-
-                            <Dialog open={isAddAgencyDialogOpen} onOpenChange={setIsAddAgencyDialogOpen}>
-                                <DialogTrigger asChild>
-                                    <Button variant="outline">
-                                        <PlusCircle className="mr-2 h-4 w-4" />
-                                        Add Agency
-                                    </Button>
-                                </DialogTrigger>
-                                <DialogContent className="max-h-[90vh] overflow-y-auto">
-                                    <DialogHeader>
-                                        <DialogTitle>Add a New Agency</DialogTitle>
-                                        <DialogDescription>
-                                            Fill in the details below to add a new security agency profile.
-                                        </DialogDescription>
-                                    </DialogHeader>
-                                    <Form {...addAgencyForm}>
-                                        <form onSubmit={addAgencyForm.handleSubmit(onAddAgencySubmit)} className="space-y-4">
-                                            <FormField
-                                                control={addAgencyForm.control}
-                                                name="id"
-                                                render={({ field }) => (
-                                                    <FormItem>
-                                                        <FormLabel>Agency ID</FormLabel>
-                                                        <FormControl>
-                                                            <Input placeholder="e.g., AGY04" {...field} />
-                                                        </FormControl>
-                                                        <FormMessage />
-                                                    </FormItem>
-                                                )}
-                                            />
-                                            <FormField
-                                                control={addAgencyForm.control}
-                                                name="name"
-                                                render={({ field }) => (
-                                                    <FormItem>
-                                                        <FormLabel>Agency Name</FormLabel>
-                                                        <FormControl>
-                                                            <Input placeholder="e.g., SecureGuard Inc." {...field} />
-                                                        </FormControl>
-                                                        <FormMessage />
-                                                    </FormItem>
-                                                )}
-                                            />
-                                            <FormField
-                                                control={addAgencyForm.control}
-                                                name="phone"
-                                                render={({ field }) => (
-                                                    <FormItem>
-                                                        <FormLabel>Phone</FormLabel>
-                                                        <FormControl>
-                                                            <Input placeholder="e.g., 555-123-4567" {...field} />
-                                                        </FormControl>
-                                                        <FormMessage />
-                                                    </FormItem>
-                                                )}
-                                            />
-                                            <FormField
-                                                control={addAgencyForm.control}
-                                                name="email"
-                                                render={({ field }) => (
-                                                    <FormItem>
-                                                        <FormLabel>Email</FormLabel>
-                                                        <FormControl>
-                                                            <Input placeholder="e.g., contact@secureguard.com" {...field} />
-                                                        </FormControl>
-                                                        <FormMessage />
-                                                    </FormItem>
-                                                )}
-                                            />
-                                            <FormField
-                                                control={addAgencyForm.control}
-                                                name="address"
-                                                render={({ field }) => (
-                                                    <FormItem>
-                                                        <FormLabel>Address</FormLabel>
-                                                        <FormControl>
-                                                            <Input placeholder="e.g., 123 Security Blvd" {...field} />
-                                                        </FormControl>
-                                                        <FormMessage />
-                                                    </FormItem>
-                                                )}
-                                            />
-                                            <FormField
-                                                control={addAgencyForm.control}
-                                                name="region"
-                                                render={({ field }) => (
-                                                    <FormItem>
-                                                        <FormLabel>Region</FormLabel>
-                                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                            <FormControl>
-                                                                <SelectTrigger>
-                                                                    <SelectValue placeholder="Select a region" />
-                                                                </SelectTrigger>
-                                                            </FormControl>
-                                                            <SelectContent>
-                                                                {regions.map((region) => (
-                                                                    <SelectItem key={region} value={region}>
-                                                                        {region}
-                                                                    </SelectItem>
-                                                                ))}
-                                                            </SelectContent>
-                                                        </Select>
-                                                        <FormMessage />
-                                                    </FormItem>
-                                                )}
-                                            />
-                                            <FormField
-                                                control={addAgencyForm.control}
-                                                name="city"
-                                                render={({ field }) => (
-                                                    <FormItem>
-                                                        <FormLabel>City</FormLabel>
-                                                         <Select onValueChange={field.onChange} value={field.value} disabled={!watchedRegion}>
-                                                            <FormControl>
-                                                                <SelectTrigger>
-                                                                    <SelectValue placeholder="Select a city" />
-                                                                </SelectTrigger>
-                                                            </FormControl>
-                                                            <SelectContent>
-                                                                {citiesForAddForm.map((city) => (
-                                                                    <SelectItem key={city} value={city}>
-                                                                        {city}
-                                                                    </SelectItem>
-                                                                ))}
-                                                            </SelectContent>
-                                                        </Select>
-                                                        <FormMessage />
-                                                    </FormItem>
-                                                )}
-                                            />
-                                            <DialogFooter>
-                                                <Button type="submit" disabled={isAddingAgency}>
-                                                {isAddingAgency ? (
-                                                    <>
-                                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                                    Adding Agency...
-                                                    </>
-                                                ) : (
-                                                    "Add Agency"
-                                                )}
-                                                </Button>
-                                            </DialogFooter>
-                                        </form>
-                                    </Form>
-                                </DialogContent>
-                            </Dialog>
-                        </div>
+                    <div>
+                        <CardTitle>All Security Agencies</CardTitle>
+                        <CardDescription>A list of all security service providers.</CardDescription>
                     </div>
                     <div className="flex flex-wrap items-center gap-2 pt-4">
                         <div className="relative flex-1 md:grow-0">
