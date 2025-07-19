@@ -545,7 +545,7 @@ export default function TowercoAgenciesPage() {
                                         <Fragment key={agency.id}>
                                             <TableRow onClick={() => handleRowClick(agency.id)} className="cursor-pointer">
                                                 <TableCell>
-                                                    <p className="font-medium">{agency.id}</p>
+                                                    <p className="font-medium text-primary hover:underline">{agency.id}</p>
                                                 </TableCell>
                                                 <TableCell>
                                                     <div className="flex items-center gap-3">
@@ -553,7 +553,7 @@ export default function TowercoAgenciesPage() {
                                                             <AvatarImage src={agency.avatar} alt={agency.name} />
                                                             <AvatarFallback>{agency.name.charAt(0)}</AvatarFallback>
                                                         </Avatar>
-                                                        <span className="font-medium text-primary hover:underline">{agency.name}</span>
+                                                        <span className="font-medium">{agency.name}</span>
                                                     </div>
                                                 </TableCell>
                                                 <TableCell>
