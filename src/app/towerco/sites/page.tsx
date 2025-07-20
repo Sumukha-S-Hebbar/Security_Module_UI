@@ -606,7 +606,7 @@ export default function TowercoSitesPage() {
                         const incidentsCount = siteIncidentsCount[site.id] || 0;
                         return (
                         <TableRow key={site.id}>
-                            <TableCell>
+                           <TableCell>
                                 <Button asChild variant="link" className="p-0 h-auto font-medium">
                                     <Link href={`/towerco/sites/${site.id}`}>{site.id}</Link>
                                 </Button>
@@ -697,45 +697,56 @@ export default function TowercoSitesPage() {
                 </TableHeader>
                 <TableBody>
                   {filteredUnassignedSites.length > 0 ? (
-                    filteredUnassignedSites.map((site) => (
-                      <TableRow key={site.id} ref={(el) => unassignedSitesRef.current.set(site.id, el)}>
-                        <TableCell className="font-medium">{site.id}</TableCell>
-                        <TableCell>
-                          <div>{site.name}</div>
-                          <div className="text-sm text-muted-foreground flex items-center gap-1">
-                            <MapPin className="w-3 h-3" />
-                            {site.address}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Select
-                            onValueChange={(value) =>
-                              handleAssignmentChange(site.id, value)
-                            }
-                          >
-                            <SelectTrigger className="w-[200px]">
-                              <SelectValue placeholder="Select an agency" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {securityAgencies.map((agency) => (
-                                <SelectItem key={agency.id} value={agency.id}>
-                                  {agency.name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <Button
-                            size="sm"
-                            onClick={() => handleAssignAgency(site.id)}
-                            disabled={!assignments[site.id]}
-                          >
-                            Assign Agency
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))
+                    filteredUnassignedSites.map((site) => {
+                      const agenciesInRegion = securityAgencies.filter(
+                        (agency) => agency.region === site.region
+                      );
+                      return (
+                        <TableRow key={site.id} ref={(el) => unassignedSitesRef.current.set(site.id, el)}>
+                          <TableCell className="font-medium">{site.id}</TableCell>
+                          <TableCell>
+                            <div>{site.name}</div>
+                            <div className="text-sm text-muted-foreground flex items-center gap-1">
+                              <MapPin className="w-3 h-3" />
+                              {site.address}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Select
+                              onValueChange={(value) =>
+                                handleAssignmentChange(site.id, value)
+                              }
+                            >
+                              <SelectTrigger className="w-[200px]">
+                                <SelectValue placeholder="Select an agency" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {agenciesInRegion.length > 0 ? (
+                                  agenciesInRegion.map((agency) => (
+                                    <SelectItem key={agency.id} value={agency.id}>
+                                      {agency.name}
+                                    </SelectItem>
+                                  ))
+                                ) : (
+                                  <div className="px-2 py-1.5 text-sm text-muted-foreground">
+                                    No agencies in this region
+                                  </div>
+                                )}
+                              </SelectContent>
+                            </Select>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <Button
+                              size="sm"
+                              onClick={() => handleAssignAgency(site.id)}
+                              disabled={!assignments[site.id]}
+                            >
+                              Assign Agency
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      )
+                    })
                   ) : (
                       <TableRow>
                           <TableCell colSpan={4} className="text-center text-muted-foreground">
