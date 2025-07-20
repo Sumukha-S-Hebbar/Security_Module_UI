@@ -265,7 +265,6 @@ export default function TowercoIncidentsPage() {
                 <TableHead>Patrolling Officer</TableHead>
                 <TableHead>Guard</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>Report</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -281,8 +280,10 @@ export default function TowercoIncidentsPage() {
                   const isResolved = incident.status === 'Resolved';
                   return (
                     <TableRow key={incident.id}>
-                      <TableCell className="font-medium">
-                        {incident.id}
+                      <TableCell>
+                        <Button asChild variant="link" className="p-0 h-auto font-medium">
+                          <Link href={`/towerco/incidents/${incident.id}`}>{incident.id}</Link>
+                        </Button>
                       </TableCell>
                       <TableCell>{new Date(incident.incidentTime).toLocaleString()}</TableCell>
                       <TableCell>{site?.name || 'N/A'}</TableCell>
@@ -292,14 +293,6 @@ export default function TowercoIncidentsPage() {
                       </TableCell>
                       <TableCell>{guard?.name || 'N/A'}</TableCell>
                       <TableCell>{getStatusBadge(incident.status)}</TableCell>
-                      <TableCell>
-                        <Button asChild variant="outline" size="sm">
-                          <Link href={`/towerco/incidents/${incident.id}`}>
-                            <Eye className="mr-2 h-4 w-4" />
-                            View Report
-                          </Link>
-                        </Button>
-                      </TableCell>
                       <TableCell>
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
@@ -328,7 +321,7 @@ export default function TowercoIncidentsPage() {
               ) : (
                 <TableRow>
                   <TableCell
-                    colSpan={9}
+                    colSpan={8}
                     className="text-center text-muted-foreground"
                   >
                     No incidents found for the current filter.
