@@ -71,13 +71,10 @@ import { cn } from '@/lib/utils';
 const LOGGED_IN_ORG_ID = 'TCO01'; // Simulate logged-in user
 
 const uploadFormSchema = z.object({
-  csvFile: z
+  excelFile: z
     .any()
-    .refine((files) => files?.length === 1, 'CSV file is required.')
-    .refine(
-      (files) => files?.[0]?.type === 'text/csv',
-      'Only .csv files are accepted.'
-    ),
+    .refine((files) => files?.length === 1, 'Excel file is required.')
+    .refine((files) => ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel'].includes(files?.[0]?.type), 'Only .xlsx or .xls files are accepted.'),
 });
 
 const addSiteFormSchema = z.object({
@@ -159,14 +156,14 @@ export default function TowercoSitesPage() {
 
   async function onUploadSubmit(values: z.infer<typeof uploadFormSchema>) {
     setIsUploading(true);
-    console.log('Uploading file for TOWERCO:', loggedInOrg?.name, values.csvFile[0]);
+    console.log('Uploading file for TOWERCO:', loggedInOrg?.name, values.excelFile[0]);
     await new Promise((resolve) => setTimeout(resolve, 1500));
     toast({
       title: 'Upload Successful',
-      description: `File "${values.csvFile[0].name}" has been uploaded. Site profiles would be processed.`,
+      description: `File "${values.excelFile[0].name}" has been uploaded. Site profiles would be processed.`,
     });
-    uploadForm.reset({ csvFile: undefined });
-    const fileInput = document.getElementById('csvFile-site-input') as HTMLInputElement | null;
+    uploadForm.reset({ excelFile: undefined });
+    const fileInput = document.getElementById('excelFile-site-input') as HTMLInputElement | null;
     if (fileInput) fileInput.value = '';
     setIsUploading(false);
     setIsUploadDialogOpen(false);
@@ -325,14 +322,14 @@ export default function TowercoSitesPage() {
             <DialogTrigger asChild>
               <Button>
                 <Upload className="mr-2 h-4 w-4" />
-                Upload CSV
+                Upload Excel
               </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Upload Site Profiles</DialogTitle>
                 <DialogDescription>
-                  Upload a CSV file to add multiple sites at once.
+                  Upload an Excel file to add multiple sites at once.
                 </DialogDescription>
               </DialogHeader>
               <Form {...uploadForm}>
@@ -340,15 +337,15 @@ export default function TowercoSitesPage() {
                   <div className="grid gap-4 py-4">
                     <FormField
                       control={uploadForm.control}
-                      name="csvFile"
+                      name="excelFile"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Site CSV File</FormLabel>
+                          <FormLabel>Site Excel File</FormLabel>
                           <FormControl>
                             <Input
-                              id="csvFile-site-input"
+                              id="excelFile-site-input"
                               type="file"
-                              accept=".csv"
+                              accept=".xlsx, .xls"
                               disabled={isUploading}
                               onChange={(e) =>
                                 field.onChange(e.target.files)
@@ -356,7 +353,7 @@ export default function TowercoSitesPage() {
                             />
                           </FormControl>
                           <FormDescription>
-                            The CSV should contain columns: name, address.
+                            The Excel file should contain columns: name, address.
                             The TowerCo will be set to {loggedInOrg.name}.
                           </FormDescription>
                           <FormMessage />
@@ -373,7 +370,7 @@ export default function TowercoSitesPage() {
                         </>
                       ) : (
                         <>
-                          <Upload className="mr-2 h-4 w-4" /> Upload CSV
+                          <Upload className="mr-2 h-4 w-4" /> Upload Excel
                         </>
                       )}
                     </Button>

@@ -51,10 +51,10 @@ import Link from 'next/link';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 
 const uploadFormSchema = z.object({
-  csvFile: z
+  excelFile: z
     .any()
-    .refine((files) => files?.length === 1, 'CSV file is required.')
-    .refine((files) => files?.[0]?.type === 'text/csv', 'Only .csv files are accepted.'),
+    .refine((files) => files?.length === 1, 'Excel file is required.')
+    .refine((files) => ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel'].includes(files?.[0]?.type), 'Only .xlsx or .xls files are accepted.'),
 });
 
 const LOGGED_IN_AGENCY_ID = 'AGY01'; // Simulate logged-in agency
@@ -99,14 +99,14 @@ export default function AgencyGuardsPage() {
 
   async function onUploadSubmit(values: z.infer<typeof uploadFormSchema>) {
     setIsUploading(true);
-    console.log('Uploaded file:', values.csvFile[0]);
+    console.log('Uploaded file:', values.excelFile[0]);
     await new Promise((resolve) => setTimeout(resolve, 1500));
     toast({
       title: 'Upload Successful',
-      description: `File "${values.csvFile[0].name}" has been uploaded. Guard profiles would be processed.`,
+      description: `File "${values.excelFile[0].name}" has been uploaded. Guard profiles would be processed.`,
     });
-    uploadForm.reset({ csvFile: undefined });
-    const fileInput = document.getElementById('csvFile-guard-input') as HTMLInputElement | null;
+    uploadForm.reset({ excelFile: undefined });
+    const fileInput = document.getElementById('excelFile-guard-input') as HTMLInputElement | null;
     if (fileInput) fileInput.value = '';
     setIsUploading(false);
     setIsUploadDialogOpen(false);
@@ -148,6 +148,48 @@ export default function AgencyGuardsPage() {
     return agencyPatrollingOfficers.filter(po => poIds.has(po.id));
   }, [assignedGuards, agencyPatrollingOfficers]);
 
+  const getStatusIndicator = (status: 'Active' | 'Under Review' | 'Resolved') => {
+    switch (status) {
+      case 'Active':
+        return (
+          <div className="flex items-center gap-2">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-destructive"></span>
+            </span>
+            <span>Active</span>
+          </div>
+        );
+      case 'Under Review':
+        return (
+          <div className="flex items-center gap-2">
+            <span className="relative flex h-2 w-2">
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+            </span>
+            <span>Under Review</span>
+          </div>
+        );
+      case 'Resolved':
+        return (
+          <div className="flex items-center gap-2">
+            <span className="relative flex h-2 w-2">
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-chart-2"></span>
+            </span>
+            <span>Resolved</span>
+          </div>
+        );
+      default:
+        return (
+          <div className="flex items-center gap-2">
+            <span className="relative flex h-2 w-2">
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-muted-foreground"></span>
+            </span>
+            <span>{status}</span>
+          </div>
+        );
+    }
+  };
+
 
   return (
     <>
@@ -169,14 +211,14 @@ export default function AgencyGuardsPage() {
                         <DialogTrigger asChild>
                             <Button>
                                 <Upload className="mr-2 h-4 w-4" />
-                                Upload CSV
+                                Upload Excel
                             </Button>
                         </DialogTrigger>
                         <DialogContent>
                             <DialogHeader>
                             <DialogTitle>Upload Guard Profiles</DialogTitle>
                             <DialogDescription>
-                                Upload a CSV file to add multiple security guard profiles at once.
+                                Upload an Excel file to add multiple security guard profiles at once.
                             </DialogDescription>
                             </DialogHeader>
                             <Form {...uploadForm}>
@@ -184,21 +226,21 @@ export default function AgencyGuardsPage() {
                                     <div className="grid gap-4 py-4">
                                         <FormField
                                             control={uploadForm.control}
-                                            name="csvFile"
+                                            name="excelFile"
                                             render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel>Guard CSV File</FormLabel>
+                                                <FormLabel>Guard Excel File</FormLabel>
                                                 <FormControl>
                                                 <Input
-                                                    id="csvFile-guard-input"
+                                                    id="excelFile-guard-input"
                                                     type="file"
-                                                    accept=".csv"
+                                                    accept=".xlsx, .xls"
                                                     disabled={isUploading}
                                                     onChange={(e) => field.onChange(e.target.files)}
                                                 />
                                                 </FormControl>
                                                 <FormDescription>
-                                                The CSV should contain columns: name, phone, site.
+                                                The Excel file should contain columns: name, phone, site.
                                                 </FormDescription>
                                                 <FormMessage />
                                             </FormItem>
@@ -215,7 +257,7 @@ export default function AgencyGuardsPage() {
                                         ) : (
                                             <>
                                             <Upload className="mr-2 h-4 w-4" />
-                                            Upload CSV
+                                            Upload Excel
                                             </>
                                         )}
                                         </Button>

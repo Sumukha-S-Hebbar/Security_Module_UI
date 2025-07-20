@@ -45,10 +45,10 @@ import {
 const LOGGED_IN_AGENCY_ID = 'AGY01'; // Simulate logged-in agency
 
 const uploadFormSchema = z.object({
-  csvFile: z
+  excelFile: z
     .any()
-    .refine((files) => files?.length === 1, 'CSV file is required.')
-    .refine((files) => files?.[0]?.type === 'text/csv', 'Only .csv files are accepted.'),
+    .refine((files) => files?.length === 1, 'Excel file is required.')
+    .refine((files) => ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel'].includes(files?.[0]?.type), 'Only .xlsx or .xls files are accepted.'),
 });
 
 const addPatrollingOfficerFormSchema = z.object({
@@ -96,13 +96,13 @@ export default function AgencyPatrollingOfficersPage() {
 
     async function onUploadSubmit(values: z.infer<typeof uploadFormSchema>) {
         setIsUploading(true);
-        console.log('Uploaded file:', values.csvFile[0]);
+        console.log('Uploaded file:', values.excelFile[0]);
         await new Promise((resolve) => setTimeout(resolve, 1500));
         toast({
             title: 'Upload Successful',
-            description: `File "${values.csvFile[0].name}" has been uploaded. Patrolling officer profiles would be processed.`,
+            description: `File "${values.excelFile[0].name}" has been uploaded. Patrolling officer profiles would be processed.`,
         });
-        uploadForm.reset({ csvFile: undefined });
+        uploadForm.reset({ excelFile: undefined });
         setIsUploading(false);
         setIsUploadDialogOpen(false);
     }
@@ -150,14 +150,14 @@ export default function AgencyPatrollingOfficersPage() {
                                 <DialogTrigger asChild>
                                     <Button>
                                         <Upload className="mr-2 h-4 w-4" />
-                                        Upload CSV
+                                        Upload Excel
                                     </Button>
                                 </DialogTrigger>
                                 <DialogContent>
                                     <DialogHeader>
                                     <DialogTitle>Upload Patrolling Officer Profiles</DialogTitle>
                                     <DialogDescription>
-                                        Upload a CSV file to add multiple patrolling officer profiles at once.
+                                        Upload an Excel file to add multiple patrolling officer profiles at once.
                                     </DialogDescription>
                                     </DialogHeader>
                                     <Form {...uploadForm}>
@@ -165,20 +165,20 @@ export default function AgencyPatrollingOfficersPage() {
                                             <div className="grid gap-4 py-4">
                                                 <FormField
                                                     control={uploadForm.control}
-                                                    name="csvFile"
+                                                    name="excelFile"
                                                     render={({ field }) => (
                                                     <FormItem>
-                                                        <FormLabel>Patrolling Officer CSV File</FormLabel>
+                                                        <FormLabel>Patrolling Officer Excel File</FormLabel>
                                                         <FormControl>
                                                         <Input
                                                             type="file"
-                                                            accept=".csv"
+                                                            accept=".xlsx, .xls"
                                                             disabled={isUploading}
                                                             onChange={(e) => field.onChange(e.target.files)}
                                                         />
                                                         </FormControl>
                                                         <FormDescription>
-                                                        The CSV should contain columns: name, phone, email.
+                                                        The Excel file should contain columns: name, phone, email.
                                                         </FormDescription>
                                                         <FormMessage />
                                                     </FormItem>
@@ -195,7 +195,7 @@ export default function AgencyPatrollingOfficersPage() {
                                                 ) : (
                                                     <>
                                                     <Upload className="mr-2 h-4 w-4" />
-                                                    Upload CSV
+                                                    Upload Excel
                                                     </>
                                                 )}
                                                 </Button>
