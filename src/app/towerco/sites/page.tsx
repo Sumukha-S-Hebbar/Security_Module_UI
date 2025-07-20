@@ -558,47 +558,52 @@ export default function TowercoSitesPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredAssignedSites.length > 0 ? (
-                filteredAssignedSites.map((site) => {
-                  const incidentsCount = siteIncidentsCount[site.id] || 0;
-                  return (
-                    <Card key={site.id} className="flex flex-col">
-                       <CardHeader>
-                          <CardTitle className="text-lg">{site.name}</CardTitle>
-                          <CardDescription>ID: {site.id}</CardDescription>
-                        </CardHeader>
-                        <CardContent className="flex-grow space-y-2 text-sm">
-                          <div className="flex items-start gap-2 text-muted-foreground">
-                            <MapPin className="h-4 w-4 flex-shrink-0 mt-1" />
-                            <span>{site.address}</span>
-                          </div>
-                          <div className="flex items-center gap-2 text-muted-foreground">
-                            <Briefcase className="h-4 w-4 flex-shrink-0" />
-                            <span>{getAgencyName(site.id)}</span>
-                          </div>
-                          <div className="flex items-center gap-2 text-muted-foreground">
-                            <ShieldAlert className="h-4 w-4 flex-shrink-0" />
-                            <span>{incidentsCount} Incidents</span>
-                          </div>
-                        </CardContent>
-                      <CardFooter>
-                        <Button asChild variant="outline" size="sm" className="w-full">
-                          <Link href={`/towerco/sites/${site.id}`}>
-                            <Eye className="mr-2 h-4 w-4" />
-                            View Report
-                          </Link>
-                        </Button>
-                      </CardFooter>
-                    </Card>
-                  );
-                })
-              ) : (
-                <div className="col-span-full text-center text-muted-foreground py-10">
-                  No assigned sites found for the current filter.
-                </div>
-              )}
-            </div>
+            <Table>
+                <TableHeader>
+                    <TableRow>
+                    <TableHead>Site ID</TableHead>
+                    <TableHead>Site Name</TableHead>
+                    <TableHead>Agency</TableHead>
+                    <TableHead>Incidents</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                </TableHeader>
+                <TableBody>
+                    {filteredAssignedSites.length > 0 ? (
+                    filteredAssignedSites.map((site) => {
+                        const incidentsCount = siteIncidentsCount[site.id] || 0;
+                        return (
+                        <TableRow key={site.id}>
+                            <TableCell className="font-medium">{site.id}</TableCell>
+                            <TableCell>
+                            <div>{site.name}</div>
+                            <div className="text-sm text-muted-foreground flex items-center gap-1">
+                                <MapPin className="w-3 h-3" />
+                                {site.address}
+                            </div>
+                            </TableCell>
+                            <TableCell>{getAgencyName(site.id)}</TableCell>
+                            <TableCell>{incidentsCount}</TableCell>
+                            <TableCell className="text-right">
+                                <Button asChild variant="outline" size="sm">
+                                    <Link href={`/towerco/sites/${site.id}`}>
+                                        <Eye className="mr-2 h-4 w-4" />
+                                        View Report
+                                    </Link>
+                                </Button>
+                            </TableCell>
+                        </TableRow>
+                        );
+                    })
+                    ) : (
+                    <TableRow>
+                        <TableCell colSpan={5} className="text-center text-muted-foreground py-10">
+                        No assigned sites found for the current filter.
+                        </TableCell>
+                    </TableRow>
+                    )}
+                </TableBody>
+            </Table>
           </CardContent>
         </Card>
 
