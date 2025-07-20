@@ -51,6 +51,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { IncidentStatusSummary } from './_components/incident-status-summary';
 
 const LOGGED_IN_TOWERCO = 'TowerCo Alpha'; // Simulate logged-in user
 
@@ -166,6 +167,8 @@ export default function TowercoIncidentsPage() {
           {LOGGED_IN_TOWERCO}.
         </p>
       </div>
+
+      <IncidentStatusSummary incidents={filteredIncidents} />
 
       <Card>
         <CardHeader>
