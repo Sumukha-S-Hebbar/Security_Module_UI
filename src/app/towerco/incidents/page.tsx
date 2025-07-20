@@ -141,16 +141,45 @@ export default function TowercoIncidentsPage() {
     }
   }
   
-  const getStatusBadge = (status: Incident['status']) => {
+  const getStatusIndicator = (status: Incident['status']) => {
     switch (status) {
       case 'Active':
-        return <Badge variant="destructive">Active</Badge>;
+        return (
+          <div className="flex items-center gap-2">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-destructive"></span>
+            </span>
+            <span>Active</span>
+          </div>
+        );
       case 'Under Review':
-        return <Badge variant="default">Under Review</Badge>;
+        return (
+          <div className="flex items-center gap-2">
+            <span className="relative flex h-2 w-2">
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+            </span>
+            <span>Under Review</span>
+          </div>
+        );
       case 'Resolved':
-        return <Badge variant="secondary">Resolved</Badge>;
+        return (
+          <div className="flex items-center gap-2">
+            <span className="relative flex h-2 w-2">
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-chart-2"></span>
+            </span>
+            <span>Resolved</span>
+          </div>
+        );
       default:
-        return <Badge variant="secondary">{status}</Badge>;
+        return (
+          <div className="flex items-center gap-2">
+            <span className="relative flex h-2 w-2">
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-muted-foreground"></span>
+            </span>
+            <span>{status}</span>
+          </div>
+        );
     }
   };
 
@@ -278,7 +307,7 @@ export default function TowercoIncidentsPage() {
                         {patrollingOfficer?.name || 'N/A'}
                       </TableCell>
                       <TableCell>{guard?.name || 'N/A'}</TableCell>
-                      <TableCell>{getStatusBadge(incident.status)}</TableCell>
+                      <TableCell>{getStatusIndicator(incident.status)}</TableCell>
                     </TableRow>
                   );
                 })

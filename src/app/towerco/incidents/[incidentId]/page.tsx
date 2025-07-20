@@ -99,16 +99,45 @@ export default function IncidentReportPage() {
     router.push('/towerco/incidents');
   }
 
-  const getStatusBadge = (status: Incident['status']) => {
+  const getStatusIndicator = (status: Incident['status']) => {
     switch (status) {
       case 'Active':
-        return <Badge variant="destructive">Active</Badge>;
+        return (
+          <div className="flex items-center gap-2 text-destructive">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-destructive"></span>
+            </span>
+            <span>Active</span>
+          </div>
+        );
       case 'Under Review':
-        return <Badge variant="default">Under Review</Badge>;
+        return (
+          <div className="flex items-center gap-2 text-primary">
+            <span className="relative flex h-2 w-2">
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+            </span>
+            <span>Under Review</span>
+          </div>
+        );
       case 'Resolved':
-        return <Badge variant="secondary">Resolved</Badge>;
+        return (
+          <div className="flex items-center gap-2 text-chart-2">
+            <span className="relative flex h-2 w-2">
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-chart-2"></span>
+            </span>
+            <span>Resolved</span>
+          </div>
+        );
       default:
-        return <Badge variant="secondary">{status}</Badge>;
+        return (
+           <div className="flex items-center gap-2 text-muted-foreground">
+            <span className="relative flex h-2 w-2">
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-muted-foreground"></span>
+            </span>
+            <span>{status}</span>
+          </div>
+        );
     }
   };
   
@@ -207,9 +236,9 @@ export default function IncidentReportPage() {
         <CardHeader>
           <div className="flex flex-wrap justify-between items-start gap-4">
             <div>
-              <CardTitle className="text-2xl flex items-center gap-2">
+              <CardTitle className="text-2xl flex items-center gap-3">
                 Incident #{incident.id}
-                {getStatusBadge(incident.status)}
+                {getStatusIndicator(incident.status)}
               </CardTitle>
               <CardDescription className="flex items-center gap-2 pt-2">
                 <Calendar className="w-4 h-4" />
