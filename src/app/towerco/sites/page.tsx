@@ -96,16 +96,10 @@ export default function TowercoSitesPage() {
   const { toast } = useToast();
   const searchParams = useSearchParams();
 
-  // State for Assigned Sites filters
-  const [assignedSearchQuery, setAssignedSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
   const [selectedAgency, setSelectedAgency] = useState('all');
-  const [assignedSelectedRegion, setAssignedSelectedRegion] = useState('all');
-  const [assignedSelectedCity, setAssignedSelectedCity] = useState('all');
-
-  // State for Unassigned Sites filters
-  const [unassignedSearchQuery, setUnassignedSearchQuery] = useState('');
-  const [unassignedSelectedRegion, setUnassignedSelectedRegion] = useState('all');
-  const [unassignedSelectedCity, setUnassignedSelectedCity] = useState('all');
+  const [selectedRegion, setSelectedRegion] = useState('all');
+  const [selectedCity, setSelectedCity] = useState('all');
   
   const [assignments, setAssignments] = useState<{ [siteId: string]: string }>(
     {}
@@ -158,8 +152,6 @@ export default function TowercoSitesPage() {
 
   async function onUploadSubmit(values: z.infer<typeof uploadFormSchema>) {
     setIsUploading(true);
-    // In a real app, you would parse the CSV and POST each site to your API.
-    // The backend would ensure the `towerco` ID is set for the logged-in user.
     console.log('Uploading file for TOWERCO:', loggedInOrg?.name, values.csvFile[0]);
     await new Promise((resolve) => setTimeout(resolve, 1500));
     toast({
@@ -175,8 +167,6 @@ export default function TowercoSitesPage() {
 
   async function onAddSiteSubmit(values: z.infer<typeof addSiteFormSchema>) {
     setIsAddingSite(true);
-    // In a real app, you would POST this to your API.
-    // The backend would handle creating the site and associating it with the logged-in TOWERCO.
     console.log('New site data:', { ...values, towerco: loggedInOrg?.name });
     await new Promise((resolve) => setTimeout(resolve, 1500));
     toast({
@@ -205,15 +195,12 @@ export default function TowercoSitesPage() {
     const siteName = sites.find((s) => s.id === siteId)?.name;
     const agencyName = securityAgencies.find((a) => a.id === agencyId)?.name;
 
-    // In a real app, this would be a PATCH/PUT API call to update the site.
-    // The backend would verify that the site belongs to the logged-in TOWERCO before assigning the agency.
     console.log(`Assigning agency ${agencyId} to site ${siteId} for TOWERCO ${loggedInOrg?.name}`);
     
     toast({
       title: 'Agency Assigned',
       description: `${agencyName} has been assigned to site ${siteName}. This change will be reflected on the next refresh.`,
     });
-    // In a real app, this would be an API call.
   };
 
   const agenciesOnSites = useMemo(() => {
@@ -227,34 +214,21 @@ export default function TowercoSitesPage() {
     return securityAgencies.filter((a) => agencyIds.has(a.id));
   }, [assignedSites]);
 
-  // Location filters data for ASSIGNED sites
-  const assignedRegions = useMemo(() => [...new Set(assignedSites.map((site) => site.region))].sort(), [assignedSites]);
-  const assignedCities = useMemo(() => {
-    if (assignedSelectedRegion === 'all') return [];
-    return [...new Set(assignedSites.filter((site) => site.region === assignedSelectedRegion).map((site) => site.city))].sort();
-  }, [assignedSelectedRegion, assignedSites]);
-
-  // Location filters data for UNASSIGNED sites
-  const unassignedRegions = useMemo(() => [...new Set(unassignedSites.map((site) => site.region))].sort(), [unassignedSites]);
-  const unassignedCities = useMemo(() => {
-    if (unassignedSelectedRegion === 'all') return [];
-    return [...new Set(unassignedSites.filter((site) => site.region === unassignedSelectedRegion).map((site) => site.city))].sort();
-  }, [unassignedSelectedRegion, unassignedSites]);
+  const allRegions = useMemo(() => [...new Set(towercoSites.map((site) => site.region))].sort(), [towercoSites]);
+  const citiesForFilter = useMemo(() => {
+    if (selectedRegion === 'all') return [];
+    return [...new Set(towercoSites.filter((site) => site.region === selectedRegion).map((site) => site.city))].sort();
+  }, [selectedRegion, towercoSites]);
 
 
-  const handleAssignedRegionChange = (region: string) => {
-    setAssignedSelectedRegion(region);
-    setAssignedSelectedCity('all');
-  };
-
-  const handleUnassignedRegionChange = (region: string) => {
-    setUnassignedSelectedRegion(region);
-    setUnassignedSelectedCity('all');
+  const handleRegionChange = (region: string) => {
+    setSelectedRegion(region);
+    setSelectedCity('all');
   };
 
   const filteredAssignedSites = useMemo(() => {
     return assignedSites.filter((site) => {
-      const searchLower = assignedSearchQuery.toLowerCase();
+      const searchLower = searchQuery.toLowerCase();
       const matchesSearch =
         site.name.toLowerCase().includes(searchLower) ||
         site.address.toLowerCase().includes(searchLower) ||
@@ -264,32 +238,32 @@ export default function TowercoSitesPage() {
       const matchesAgency =
         selectedAgency === 'all' || agency?.id === selectedAgency;
 
-      const matchesRegion = assignedSelectedRegion === 'all' || site.region === assignedSelectedRegion;
-      const matchesCity = assignedSelectedCity === 'all' || site.city === assignedSelectedCity;
+      const matchesRegion = selectedRegion === 'all' || site.region === selectedRegion;
+      const matchesCity = selectedCity === 'all' || site.city === selectedCity;
 
       return matchesSearch && matchesAgency && matchesRegion && matchesCity;
     });
   }, [
-    assignedSearchQuery,
+    searchQuery,
     selectedAgency,
     assignedSites,
-    assignedSelectedRegion,
-    assignedSelectedCity,
+    selectedRegion,
+    selectedCity,
   ]);
 
   const filteredUnassignedSites = useMemo(() => {
     return unassignedSites.filter((site) => {
-      const searchLower = unassignedSearchQuery.toLowerCase();
+      const searchLower = searchQuery.toLowerCase();
       const matchesSearch =
         site.name.toLowerCase().includes(searchLower) ||
         site.address.toLowerCase().includes(searchLower);
       
-      const matchesRegion = unassignedSelectedRegion === 'all' || site.region === unassignedSelectedRegion;
-      const matchesCity = unassignedSelectedCity === 'all' || site.city === unassignedSelectedCity;
+      const matchesRegion = selectedRegion === 'all' || site.region === selectedRegion;
+      const matchesCity = selectedCity === 'all' || site.city === selectedCity;
 
       return matchesSearch && matchesRegion && matchesCity;
     });
-  }, [unassignedSearchQuery, unassignedSites, unassignedSelectedRegion, unassignedSelectedCity]);
+  }, [searchQuery, unassignedSites, selectedRegion, selectedCity]);
 
 
   const getAgencyName = (siteId: string) => {
@@ -322,7 +296,7 @@ export default function TowercoSitesPage() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Site Management</h1>
           <p className="text-muted-foreground">
-            Add, view, and manage operational sites.
+            Add, view, and manage operational sites for {loggedInOrg.name}.
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -506,22 +480,25 @@ export default function TowercoSitesPage() {
           </Dialog>
         </div>
       </div>
-
+      
       <Card>
         <CardHeader>
-          <CardTitle>Assigned Sites</CardTitle>
-          <CardDescription>
-            A list of all your sites with an assigned security agency for{' '}
-            {loggedInOrg.name}.
-          </CardDescription>
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <CardTitle>Site Filters</CardTitle>
+              <CardDescription>
+                Use the filters below to refine the lists of assigned and unassigned sites.
+              </CardDescription>
+            </div>
+          </div>
           <div className="flex flex-wrap items-center gap-2 pt-4">
             <div className="relative flex-1 md:grow-0">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
                 type="search"
-                placeholder="Search assigned sites..."
-                value={assignedSearchQuery}
-                onChange={(e) => setAssignedSearchQuery(e.target.value)}
+                placeholder="Search all sites..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[320px]"
               />
             </div>
@@ -538,16 +515,13 @@ export default function TowercoSitesPage() {
                 ))}
               </SelectContent>
             </Select>
-            <Select
-              value={assignedSelectedRegion}
-              onValueChange={handleAssignedRegionChange}
-            >
+            <Select value={selectedRegion} onValueChange={handleRegionChange}>
               <SelectTrigger className="w-full sm:w-[180px]">
                 <SelectValue placeholder="Filter by region" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Regions</SelectItem>
-                {assignedRegions.map((region) => (
+                {allRegions.map((region) => (
                   <SelectItem key={region} value={region}>
                     {region}
                   </SelectItem>
@@ -555,16 +529,16 @@ export default function TowercoSitesPage() {
               </SelectContent>
             </Select>
             <Select
-              value={assignedSelectedCity}
-              onValueChange={setAssignedSelectedCity}
-              disabled={assignedSelectedRegion === 'all'}
+              value={selectedCity}
+              onValueChange={setSelectedCity}
+              disabled={selectedRegion === 'all'}
             >
               <SelectTrigger className="w-full sm:w-[180px]">
                 <SelectValue placeholder="Filter by city" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Cities</SelectItem>
-                {assignedCities.map((city) => (
+                {citiesForFilter.map((city) => (
                   <SelectItem key={city} value={city}>
                     {city}
                   </SelectItem>
@@ -573,179 +547,133 @@ export default function TowercoSitesPage() {
             </Select>
           </div>
         </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Site ID</TableHead>
-                <TableHead>Site Name</TableHead>
-                <TableHead>Agency</TableHead>
-                <TableHead>Incidents</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-            {filteredAssignedSites.length > 0 ? (
-              filteredAssignedSites.map((site) => {
-                const incidentsCount = siteIncidentsCount[site.id] || 0;
-                return (
-                    <TableRow key={site.id}>
-                        <TableCell className="font-medium">{site.id}</TableCell>
-                        <TableCell>
-                            <div>{site.name}</div>
-                            <div className="text-sm text-muted-foreground flex items-center gap-1">
-                                <MapPin className="w-3 h-3" />
-                                {site.address}
-                            </div>
-                        </TableCell>
-                        <TableCell>
-                            <div className="flex items-center gap-2">
-                                <Briefcase className="h-4 w-4 flex-shrink-0" />
-                                <span>{getAgencyName(site.id)}</span>
-                            </div>
-                        </TableCell>
-                        <TableCell>
-                             <div className="flex items-center gap-2">
-                                <ShieldAlert className="h-4 w-4 flex-shrink-0" />
-                                <span>{incidentsCount}</span>
-                            </div>
-                        </TableCell>
-                        <TableCell className="text-right">
-                             <Button asChild variant="outline" size="sm">
-                                <Link href={`/towerco/sites/${site.id}`}>
-                                    <Eye className="mr-2 h-4 w-4" />
-                                    View
-                                </Link>
-                            </Button>
-                        </TableCell>
-                    </TableRow>
-                )
-              })
-            ) : (
-                <TableRow>
-                    <TableCell colSpan={5} className="text-center text-muted-foreground py-10">
-                        No assigned sites found for the current filter.
-                    </TableCell>
-                </TableRow>
-            )}
-            </TableBody>
-          </Table>
-        </CardContent>
       </Card>
 
-      {unassignedSites.length > 0 && (
+      <div className="space-y-6">
         <Card>
           <CardHeader>
-            <CardTitle>Unassigned Sites</CardTitle>
+            <CardTitle>Assigned Sites</CardTitle>
             <CardDescription>
-              Sites that need a security agency to be assigned.
+              A list of all your sites with an assigned security agency.
             </CardDescription>
-            <div className="flex flex-wrap items-center gap-2 pt-4">
-                <div className="relative flex-1 md:grow-0">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                    type="search"
-                    placeholder="Search unassigned sites..."
-                    value={unassignedSearchQuery}
-                    onChange={(e) => setUnassignedSearchQuery(e.target.value)}
-                    className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[320px]"
-                />
-                </div>
-                <Select value={unassignedSelectedRegion} onValueChange={handleUnassignedRegionChange}>
-                  <SelectTrigger className="w-full sm:w-[180px]">
-                    <SelectValue placeholder="Filter by region" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Regions</SelectItem>
-                    {unassignedRegions.map((region) => (
-                      <SelectItem key={region} value={region}>
-                        {region}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Select
-                  value={unassignedSelectedCity}
-                  onValueChange={setUnassignedSelectedCity}
-                  disabled={unassignedSelectedRegion === 'all'}
-                >
-                  <SelectTrigger className="w-full sm:w-[180px]">
-                    <SelectValue placeholder="Filter by city" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Cities</SelectItem>
-                    {unassignedCities.map((city) => (
-                      <SelectItem key={city} value={city}>
-                        {city}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-            </div>
           </CardHeader>
           <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Site ID</TableHead>
-                  <TableHead>Site Name</TableHead>
-                  <TableHead>Assign Agency</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredUnassignedSites.length > 0 ? (
-                  filteredUnassignedSites.map((site) => (
-                    <TableRow key={site.id} ref={(el) => unassignedSitesRef.current.set(site.id, el)}>
-                      <TableCell className="font-medium">{site.id}</TableCell>
-                      <TableCell>
-                        <div>{site.name}</div>
-                        <div className="text-sm text-muted-foreground flex items-center gap-1">
-                          <MapPin className="w-3 h-3" />
-                          {site.address}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Select
-                          onValueChange={(value) =>
-                            handleAssignmentChange(site.id, value)
-                          }
-                        >
-                          <SelectTrigger className="w-[200px]">
-                            <SelectValue placeholder="Select an agency" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {securityAgencies.map((agency) => (
-                              <SelectItem key={agency.id} value={agency.id}>
-                                {agency.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Button
-                          size="sm"
-                          onClick={() => handleAssignAgency(site.id)}
-                          disabled={!assignments[site.id]}
-                        >
-                          Assign Agency
+             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredAssignedSites.length > 0 ? (
+                filteredAssignedSites.map((site) => {
+                  const incidentsCount = siteIncidentsCount[site.id] || 0;
+                  return (
+                    <Card key={site.id} className="flex flex-col">
+                       <CardHeader>
+                          <CardTitle className="text-lg">{site.name}</CardTitle>
+                          <CardDescription>ID: {site.id}</CardDescription>
+                        </CardHeader>
+                        <CardContent className="flex-grow space-y-2 text-sm">
+                          <div className="flex items-start gap-2 text-muted-foreground">
+                            <MapPin className="h-4 w-4 flex-shrink-0 mt-1" />
+                            <span>{site.address}</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-muted-foreground">
+                            <Briefcase className="h-4 w-4 flex-shrink-0" />
+                            <span>{getAgencyName(site.id)}</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-muted-foreground">
+                            <ShieldAlert className="h-4 w-4 flex-shrink-0" />
+                            <span>{incidentsCount} Incidents</span>
+                          </div>
+                        </CardContent>
+                      <CardFooter>
+                        <Button asChild variant="outline" size="sm" className="w-full">
+                          <Link href={`/towerco/sites/${site.id}`}>
+                            <Eye className="mr-2 h-4 w-4" />
+                            View Report
+                          </Link>
                         </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                ) : (
-                    <TableRow>
-                        <TableCell colSpan={4} className="text-center text-muted-foreground">
-                            No unassigned sites found for the current filter.
-                        </TableCell>
-                    </TableRow>
-                )}
-              </TableBody>
-            </Table>
+                      </CardFooter>
+                    </Card>
+                  );
+                })
+              ) : (
+                <div className="col-span-full text-center text-muted-foreground py-10">
+                  No assigned sites found for the current filter.
+                </div>
+              )}
+            </div>
           </CardContent>
         </Card>
-      )}
+
+        {unassignedSites.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Unassigned Sites</CardTitle>
+              <CardDescription>
+                Sites that need a security agency to be assigned.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Site ID</TableHead>
+                    <TableHead>Site Name</TableHead>
+                    <TableHead>Assign Agency</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredUnassignedSites.length > 0 ? (
+                    filteredUnassignedSites.map((site) => (
+                      <TableRow key={site.id} ref={(el) => unassignedSitesRef.current.set(site.id, el)}>
+                        <TableCell className="font-medium">{site.id}</TableCell>
+                        <TableCell>
+                          <div>{site.name}</div>
+                          <div className="text-sm text-muted-foreground flex items-center gap-1">
+                            <MapPin className="w-3 h-3" />
+                            {site.address}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Select
+                            onValueChange={(value) =>
+                              handleAssignmentChange(site.id, value)
+                            }
+                          >
+                            <SelectTrigger className="w-[200px]">
+                              <SelectValue placeholder="Select an agency" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {securityAgencies.map((agency) => (
+                                <SelectItem key={agency.id} value={agency.id}>
+                                  {agency.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button
+                            size="sm"
+                            onClick={() => handleAssignAgency(site.id)}
+                            disabled={!assignments[site.id]}
+                          >
+                            Assign Agency
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                      <TableRow>
+                          <TableCell colSpan={4} className="text-center text-muted-foreground">
+                              No unassigned sites found for the current filter.
+                          </TableCell>
+                      </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        )}
+      </div>
     </div>
   );
 }
