@@ -96,11 +96,13 @@ export default function TowercoSitesPage() {
   const { toast } = useToast();
   const searchParams = useSearchParams();
 
-  const [searchQuery, setSearchQuery] = useState('');
+  // State for filters
+  const [assignedSearchQuery, setAssignedSearchQuery] = useState('');
+  const [unassignedSearchQuery, setUnassignedSearchQuery] = useState('');
   const [selectedAgency, setSelectedAgency] = useState('all');
   const [selectedRegion, setSelectedRegion] = useState('all');
   const [selectedCity, setSelectedCity] = useState('all');
-  
+
   const [assignments, setAssignments] = useState<{ [siteId: string]: string }>(
     {}
   );
@@ -142,9 +144,9 @@ export default function TowercoSitesPage() {
         const row = unassignedSitesRef.current.get(focusSiteId);
         if (row) {
             row.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            row.classList.add('bg-yellow-200/50', 'transition-all', 'duration-1000');
+            row.classList.add('highlight-row');
             setTimeout(() => {
-                row.classList.remove('bg-yellow-200/50');
+                row.classList.remove('highlight-row');
             }, 2000);
         }
     }
@@ -228,7 +230,7 @@ export default function TowercoSitesPage() {
 
   const filteredAssignedSites = useMemo(() => {
     return assignedSites.filter((site) => {
-      const searchLower = searchQuery.toLowerCase();
+      const searchLower = assignedSearchQuery.toLowerCase();
       const matchesSearch =
         site.name.toLowerCase().includes(searchLower) ||
         site.address.toLowerCase().includes(searchLower) ||
@@ -244,7 +246,7 @@ export default function TowercoSitesPage() {
       return matchesSearch && matchesAgency && matchesRegion && matchesCity;
     });
   }, [
-    searchQuery,
+    assignedSearchQuery,
     selectedAgency,
     assignedSites,
     selectedRegion,
@@ -253,7 +255,7 @@ export default function TowercoSitesPage() {
 
   const filteredUnassignedSites = useMemo(() => {
     return unassignedSites.filter((site) => {
-      const searchLower = searchQuery.toLowerCase();
+      const searchLower = unassignedSearchQuery.toLowerCase();
       const matchesSearch =
         site.name.toLowerCase().includes(searchLower) ||
         site.address.toLowerCase().includes(searchLower);
@@ -263,7 +265,7 @@ export default function TowercoSitesPage() {
 
       return matchesSearch && matchesRegion && matchesCity;
     });
-  }, [searchQuery, unassignedSites, selectedRegion, selectedCity]);
+  }, [unassignedSearchQuery, unassignedSites, selectedRegion, selectedCity]);
 
 
   const getAgencyName = (siteId: string) => {
@@ -481,74 +483,6 @@ export default function TowercoSitesPage() {
         </div>
       </div>
       
-      <Card>
-        <CardHeader>
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <CardTitle>Site Filters</CardTitle>
-              <CardDescription>
-                Use the filters below to refine the lists of assigned and unassigned sites.
-              </CardDescription>
-            </div>
-          </div>
-          <div className="flex flex-wrap items-center gap-2 pt-4">
-            <div className="relative flex-1 md:grow-0">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                type="search"
-                placeholder="Search all sites..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[320px]"
-              />
-            </div>
-            <Select value={selectedAgency} onValueChange={setSelectedAgency}>
-              <SelectTrigger className="w-full sm:w-[180px]">
-                <SelectValue placeholder="Filter by agency" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Agencies</SelectItem>
-                {agenciesOnSites.map((agency) => (
-                  <SelectItem key={agency.id} value={agency.id}>
-                    {agency.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={selectedRegion} onValueChange={handleRegionChange}>
-              <SelectTrigger className="w-full sm:w-[180px]">
-                <SelectValue placeholder="Filter by region" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Regions</SelectItem>
-                {allRegions.map((region) => (
-                  <SelectItem key={region} value={region}>
-                    {region}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select
-              value={selectedCity}
-              onValueChange={setSelectedCity}
-              disabled={selectedRegion === 'all'}
-            >
-              <SelectTrigger className="w-full sm:w-[180px]">
-                <SelectValue placeholder="Filter by city" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Cities</SelectItem>
-                {citiesForFilter.map((city) => (
-                  <SelectItem key={city} value={city}>
-                    {city}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </CardHeader>
-      </Card>
-
       <div className="space-y-6">
         <Card>
           <CardHeader>
@@ -556,6 +490,61 @@ export default function TowercoSitesPage() {
             <CardDescription>
               A list of all your sites with an assigned security agency.
             </CardDescription>
+             <div className="flex flex-wrap items-center gap-2 pt-4">
+                <div className="relative flex-1 md:grow-0">
+                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    type="search"
+                    placeholder="Search assigned sites..."
+                    value={assignedSearchQuery}
+                    onChange={(e) => setAssignedSearchQuery(e.target.value)}
+                    className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[320px]"
+                  />
+                </div>
+                <Select value={selectedAgency} onValueChange={setSelectedAgency}>
+                  <SelectTrigger className="w-full sm:w-[180px]">
+                    <SelectValue placeholder="Filter by agency" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Agencies</SelectItem>
+                    {agenciesOnSites.map((agency) => (
+                      <SelectItem key={agency.id} value={agency.id}>
+                        {agency.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select value={selectedRegion} onValueChange={handleRegionChange}>
+                  <SelectTrigger className="w-full sm:w-[180px]">
+                    <SelectValue placeholder="Filter by region" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Regions</SelectItem>
+                    {allRegions.map((region) => (
+                      <SelectItem key={region} value={region}>
+                        {region}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select
+                  value={selectedCity}
+                  onValueChange={setSelectedCity}
+                  disabled={selectedRegion === 'all'}
+                >
+                  <SelectTrigger className="w-full sm:w-[180px]">
+                    <SelectValue placeholder="Filter by city" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Cities</SelectItem>
+                    {citiesForFilter.map((city) => (
+                      <SelectItem key={city} value={city}>
+                        {city}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
           </CardHeader>
           <CardContent>
             <Table>
@@ -614,6 +603,48 @@ export default function TowercoSitesPage() {
               <CardDescription>
                 Sites that need a security agency to be assigned.
               </CardDescription>
+               <div className="flex flex-wrap items-center gap-2 pt-4">
+                <div className="relative flex-1 md:grow-0">
+                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    type="search"
+                    placeholder="Search unassigned sites..."
+                    value={unassignedSearchQuery}
+                    onChange={(e) => setUnassignedSearchQuery(e.target.value)}
+                    className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[320px]"
+                  />
+                </div>
+                 <Select value={selectedRegion} onValueChange={handleRegionChange}>
+                  <SelectTrigger className="w-full sm:w-[180px]">
+                    <SelectValue placeholder="Filter by region" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Regions</SelectItem>
+                    {allRegions.map((region) => (
+                      <SelectItem key={region} value={region}>
+                        {region}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select
+                  value={selectedCity}
+                  onValueChange={setSelectedCity}
+                  disabled={selectedRegion === 'all'}
+                >
+                  <SelectTrigger className="w-full sm:w-[180px]">
+                    <SelectValue placeholder="Filter by city" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Cities</SelectItem>
+                    {citiesForFilter.map((city) => (
+                      <SelectItem key={city} value={city}>
+                        {city}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </CardHeader>
             <CardContent>
               <Table>
