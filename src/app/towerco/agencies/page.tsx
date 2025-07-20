@@ -43,7 +43,6 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { securityAgencies as mockAgencies } from '@/lib/data/security-agencies';
-import React from 'react';
 import { cn } from '@/lib/utils';
 
 
@@ -66,14 +65,23 @@ const addAgencyFormSchema = z.object({
     region: z.string().min(1, { message: 'Region is required.' }),
 });
 
-async function getAgencies(): Promise<SecurityAgency[]> {
-    // TODO: This is a mocked endpoint. Please replace with your actual Django API endpoint.
+async function getAgencies(orgId: string): Promise<SecurityAgency[]> {
     const API_URL = 'https://ken.securebuddy.tel:8000/api/v1/agencies/';
     
     try {
-        // Simulating network delay
         await new Promise(resolve => setTimeout(resolve, 1000));
-        return mockAgencies;
+        
+        const org = organizations.find(o => o.id === orgId);
+        if (!org) return [];
+
+        const orgSites = sites.filter(s => s.towerco === org.name);
+        const orgSiteIds = new Set(orgSites.map(s => s.id));
+        
+        const relevantAgencies = mockAgencies.filter(agency => 
+            agency.siteIds.some(siteId => orgSiteIds.has(siteId))
+        );
+
+        return relevantAgencies;
 
     } catch (error) {
         console.error("Could not fetch agencies, returning empty array.", error);
@@ -82,7 +90,6 @@ async function getAgencies(): Promise<SecurityAgency[]> {
 }
 
 async function getRegions(): Promise<string[]> {
-    // TODO: This is a mocked endpoint. It should fetch the list of available regions from your backend.
     try {
          await new Promise(resolve => setTimeout(resolve, 500));
          const uniqueRegions = [...new Set(mockAgencies.map(agency => agency.region))];
@@ -116,7 +123,7 @@ export default function TowercoAgenciesPage() {
         const fetchData = async () => {
             setIsLoading(true);
             const [agenciesData, regionsData] = await Promise.all([
-                getAgencies(),
+                getAgencies(LOGGED_IN_ORG_ID),
                 getRegions(),
             ]);
             setSecurityAgencies(agenciesData);
