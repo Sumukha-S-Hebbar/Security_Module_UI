@@ -256,7 +256,11 @@ export function IncidentChart({
                         <TableBody>
                             {incidentsInSelectedMonth.map(incident => (
                                 <TableRow key={incident.id}>
-                                    <TableCell className="font-medium">{incident.id}</TableCell>
+                                    <TableCell>
+                                        <Button asChild variant="link" className="p-0 h-auto font-medium">
+                                          <Link href={`/towerco/incidents/${incident.id}`}>{incident.id}</Link>
+                                        </Button>
+                                    </TableCell>
                                     <TableCell>{new Date(incident.incidentTime).toLocaleDateString()}</TableCell>
                                     <TableCell>{getSiteName(incident.siteId)}</TableCell>
                                     <TableCell>{getAgencyName(incident.siteId)}</TableCell>
@@ -282,4 +286,3 @@ export function IncidentChart({
     </Card>
   );
 }
-
