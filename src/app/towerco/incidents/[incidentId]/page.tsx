@@ -138,6 +138,71 @@ export default function IncidentReportPage() {
         </div>
       </div>
 
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+        {site && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <MapPin className="h-5 w-5 text-primary" />
+                Site Details
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="text-sm space-y-2">
+              <p><strong>Name:</strong> {site.name}</p>
+              <p><strong>Address:</strong> {site.address}</p>
+              <p><strong>TowerCo:</strong> {site.towerco}</p>
+              {site.latitude && site.longitude && (
+                <p><strong>Coords:</strong> {site.latitude}, {site.longitude}</p>
+              )}
+            </CardContent>
+          </Card>
+        )}
+        {agency && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Briefcase className="h-5 w-5 text-primary" />
+                Agency Details
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="text-sm space-y-2">
+              <p><strong>Name:</strong> {agency.name}</p>
+              <div className="flex items-center gap-2"><Phone className="h-4 w-4" /> <a href={`tel:${agency.phone}`} className="hover:underline">{agency.phone}</a></div>
+              <div className="flex items-center gap-2"><Mail className="h-4 w-4" /> <a href={`mailto:${agency.email}`} className="hover:underline">{agency.email}</a></div>
+            </CardContent>
+          </Card>
+        )}
+        {patrollingOfficer && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <UserCheck className="h-5 w-5 text-primary" />
+                Patrolling Officer
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="text-sm space-y-2">
+              <p><strong>Name:</strong> {patrollingOfficer.name}</p>
+              <div className="flex items-center gap-2"><Phone className="h-4 w-4" /> <a href={`tel:${patrollingOfficer.phone}`} className="hover:underline">{patrollingOfficer.phone}</a></div>
+              <div className="flex items-center gap-2"><Mail className="h-4 w-4" /> <a href={`mailto:${patrollingOfficer.email}`} className="hover:underline">{patrollingOfficer.email}</a></div>
+            </CardContent>
+          </Card>
+        )}
+        {guard && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <User className="h-5 w-5 text-primary" />
+                Guard Details
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="text-sm space-y-2">
+              <p><strong>Name:</strong> {guard.name}</p>
+              <div className="flex items-center gap-2"><Phone className="h-4 w-4" /> <a href={`tel:${guard.phone}`} className="hover:underline">{guard.phone}</a></div>
+            </CardContent>
+          </Card>
+        )}
+      </div>
+
       <Card>
         <CardHeader>
           <div className="flex flex-wrap justify-between items-start gap-4">
@@ -257,72 +322,6 @@ export default function IncidentReportPage() {
 
         </CardContent>
       </Card>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
-        {site && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <MapPin className="h-5 w-5 text-primary" />
-                Site Details
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="text-sm space-y-2">
-              <p><strong>Name:</strong> {site.name}</p>
-              <p><strong>Address:</strong> {site.address}</p>
-              <p><strong>TowerCo:</strong> {site.towerco}</p>
-              {site.latitude && site.longitude && (
-                <p><strong>Coords:</strong> {site.latitude}, {site.longitude}</p>
-              )}
-            </CardContent>
-          </Card>
-        )}
-        {agency && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Briefcase className="h-5 w-5 text-primary" />
-                Agency Details
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="text-sm space-y-2">
-              <p><strong>Name:</strong> {agency.name}</p>
-              <div className="flex items-center gap-2"><Phone className="h-4 w-4" /> <a href={`tel:${agency.phone}`} className="hover:underline">{agency.phone}</a></div>
-              <div className="flex items-center gap-2"><Mail className="h-4 w-4" /> <a href={`mailto:${agency.email}`} className="hover:underline">{agency.email}</a></div>
-            </CardContent>
-          </Card>
-        )}
-        {patrollingOfficer && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <UserCheck className="h-5 w-5 text-primary" />
-                Patrolling Officer
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="text-sm space-y-2">
-              <p><strong>Name:</strong> {patrollingOfficer.name}</p>
-              <div className="flex items-center gap-2"><Phone className="h-4 w-4" /> <a href={`tel:${patrollingOfficer.phone}`} className="hover:underline">{patrollingOfficer.phone}</a></div>
-              <div className="flex items-center gap-2"><Mail className="h-4 w-4" /> <a href={`mailto:${patrollingOfficer.email}`} className="hover:underline">{patrollingOfficer.email}</a></div>
-            </CardContent>
-          </Card>
-        )}
-        {guard && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <User className="h-5 w-5 text-primary" />
-                Guard Details
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="text-sm space-y-2">
-              <p><strong>Name:</strong> {guard.name}</p>
-              <div className="flex items-center gap-2"><Phone className="h-4 w-4" /> <a href={`tel:${guard.phone}`} className="hover:underline">{guard.phone}</a></div>
-            </CardContent>
-          </Card>
-        )}
-      </div>
-
     </div>
   );
 }
