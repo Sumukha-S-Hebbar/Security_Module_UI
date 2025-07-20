@@ -86,6 +86,8 @@ const addSiteFormSchema = z.object({
   address: z.string().min(1, 'Address is required.'),
   region: z.string().min(1, 'Region is required.'),
   city: z.string().min(1, 'City is required.'),
+  latitude: z.coerce.number().min(-90).max(90),
+  longitude: z.coerce.number().min(-180).max(180),
 });
 
 export default function TowercoSitesPage() {
@@ -391,7 +393,7 @@ export default function TowercoSitesPage() {
                 Add Site
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>Add a New Site</DialogTitle>
                 <DialogDescription>
@@ -478,6 +480,34 @@ export default function TowercoSitesPage() {
                           </FormItem>
                       )}
                   />
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                        control={addSiteForm.control}
+                        name="latitude"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Latitude</FormLabel>
+                                <FormControl>
+                                    <Input type="number" placeholder="e.g., 37.4024" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={addSiteForm.control}
+                        name="longitude"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Longitude</FormLabel>
+                                <FormControl>
+                                    <Input type="number" placeholder="e.g., -122.0785" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                  </div>
                   <DialogFooter>
                     <Button type="submit" disabled={isAddingSite}>
                       {isAddingSite ? (

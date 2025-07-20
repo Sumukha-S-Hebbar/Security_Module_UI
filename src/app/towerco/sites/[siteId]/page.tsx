@@ -133,6 +133,15 @@ export default function SiteReportPage() {
                 <p>{siteIncidents.length}</p>
               </div>
             </div>
+            {site.latitude && site.longitude && (
+              <div className="flex items-start gap-3 sm:col-span-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-globe mt-0.5 text-primary"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+                <div>
+                  <p className="font-semibold text-foreground">Coordinates</p>
+                  <p>Latitude: {site.latitude}, Longitude: {site.longitude}</p>
+                </div>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -177,5 +186,3 @@ export default function SiteReportPage() {
     </div>
   );
 }
-
-    

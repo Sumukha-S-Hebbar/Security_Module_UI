@@ -7,6 +7,8 @@ export type Site = {
   city: string;
   region: string;
   country: string;
+  latitude?: number;
+  longitude?: number;
   guards: string[]; // Guard IDs
   reportUrl: string;
   coords: { x: number; y: number }; // As percentages for map placement
