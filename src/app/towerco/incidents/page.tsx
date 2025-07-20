@@ -143,6 +143,15 @@ export default function TowercoIncidentsPage() {
         router.push(`/towerco/incidents/${incidentId}`);
     }
   };
+
+  const handleStatusSelectFromSummary = (status: string) => {
+    // If clicking the same status card again, reset the filter
+    if (selectedStatus === status) {
+      setSelectedStatus('all');
+    } else {
+      setSelectedStatus(status);
+    }
+  }
   
   const getStatusBadge = (status: Incident['status']) => {
     switch (status) {
@@ -168,7 +177,11 @@ export default function TowercoIncidentsPage() {
         </p>
       </div>
 
-      <IncidentStatusSummary incidents={filteredIncidents} />
+      <IncidentStatusSummary 
+        incidents={filteredIncidents} 
+        onStatusSelect={handleStatusSelectFromSummary}
+        selectedStatus={selectedStatus}
+      />
 
       <Card>
         <CardHeader>

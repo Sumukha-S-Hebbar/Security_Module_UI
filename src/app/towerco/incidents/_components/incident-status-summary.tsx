@@ -6,7 +6,15 @@ import { useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { ShieldAlert, ShieldQuestion, CheckCircle2 } from 'lucide-react';
 
-export function IncidentStatusSummary({ incidents }: { incidents: Incident[] }) {
+export function IncidentStatusSummary({ 
+  incidents,
+  onStatusSelect,
+  selectedStatus,
+}: { 
+  incidents: Incident[];
+  onStatusSelect: (status: string) => void;
+  selectedStatus: string;
+}) {
   const summary = useMemo(() => {
     return incidents.reduce(
       (acc, incident) => {
@@ -19,24 +27,43 @@ export function IncidentStatusSummary({ incidents }: { incidents: Incident[] }) 
     );
   }, [incidents]);
 
+  const baseClasses = "flex items-center gap-4 p-4 rounded-lg cursor-pointer transition-all";
+  const selectedClasses = "ring-2 ring-primary shadow-md";
+  const unselectedClasses = "hover:bg-muted/80";
+
   return (
     <Card>
       <CardContent className="p-4 grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="flex items-center gap-4 p-4 rounded-lg bg-destructive/10">
+        <div 
+          className={`${baseClasses} bg-destructive/10 ${selectedStatus === 'active' ? selectedClasses : unselectedClasses}`}
+          onClick={() => onStatusSelect('active')}
+          role="button"
+          tabIndex={0}
+        >
             <ShieldAlert className="h-8 w-8 text-destructive" />
             <div>
                 <p className="text-sm text-destructive font-semibold">Active</p>
                 <p className="text-2xl font-bold">{summary.active}</p>
             </div>
         </div>
-        <div className="flex items-center gap-4 p-4 rounded-lg bg-primary/10">
+        <div 
+          className={`${baseClasses} bg-primary/10 ${selectedStatus === 'under-review' ? selectedClasses : unselectedClasses}`}
+          onClick={() => onStatusSelect('under-review')}
+          role="button"
+          tabIndex={0}
+        >
             <ShieldQuestion className="h-8 w-8 text-primary" />
             <div>
                 <p className="text-sm text-primary font-semibold">Under Review</p>
                 <p className="text-2xl font-bold">{summary.underReview}</p>
             </div>
         </div>
-        <div className="flex items-center gap-4 p-4 rounded-lg bg-chart-2/10">
+        <div 
+          className={`${baseClasses} bg-chart-2/10 ${selectedStatus === 'resolved' ? selectedClasses : unselectedClasses}`}
+          onClick={() => onStatusSelect('resolved')}
+          role="button"
+          tabIndex={0}
+        >
             <CheckCircle2 className="h-8 w-8 text-chart-2" />
             <div>
                 <p className="text-sm text-chart-2 font-semibold">Resolved</p>
