@@ -132,27 +132,6 @@ export default function TowercoIncidentsPage() {
     });
   }, [searchQuery, selectedStatus, selectedDate, selectedMonth, incidents, towercoSiteIds]);
 
-  const handleStatusChange = (incidentId: string, status: Incident['status']) => {
-    if (status === 'Resolved') {
-        const incident = incidentStore.getIncidentById(incidentId);
-        if (!incident?.resolutionNotes) {
-            toast({
-                variant: 'destructive',
-                title: 'Resolution Notes Required',
-                description: 'Please add resolution notes on the incident report page before marking it as resolved.'
-            });
-            router.push(`/towerco/incidents/${incidentId}`);
-            return;
-        }
-    }
-    
-    incidentStore.updateIncident(incidentId, { status });
-    toast({
-      title: 'Status Updated',
-      description: `Incident #${incidentId} status changed to ${status}.`,
-    });
-  };
-
   const handleStatusSelectFromSummary = (status: string) => {
     // If clicking the same status card again, reset the filter
     if (selectedStatus === status) {
@@ -274,7 +253,6 @@ export default function TowercoIncidentsPage() {
                 <TableHead>Patrolling Officer</TableHead>
                 <TableHead>Guard</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -286,7 +264,6 @@ export default function TowercoIncidentsPage() {
                   const patrollingOfficer = getPatrollingOfficerById(
                     incident.attendedByPatrollingOfficerId
                   );
-                  const isResolved = incident.status === 'Resolved';
                   return (
                     <TableRow key={incident.id}>
                       <TableCell>
@@ -302,33 +279,13 @@ export default function TowercoIncidentsPage() {
                       </TableCell>
                       <TableCell>{guard?.name || 'N/A'}</TableCell>
                       <TableCell>{getStatusBadge(incident.status)}</TableCell>
-                      <TableCell>
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button variant="outline" size="sm" disabled={isResolved}>
-                                Actions <ChevronDown className="ml-2 h-4 w-4" />
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                                <DropdownMenuItem
-                                onClick={() =>
-                                    handleStatusChange(incident.id, 'Resolved')
-                                }
-                                disabled={isResolved}
-                                >
-                                <CheckCircle className="mr-2 h-4 w-4" />
-                                 Mark as Resolved
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
                     </TableRow>
                   );
                 })
               ) : (
                 <TableRow>
                   <TableCell
-                    colSpan={8}
+                    colSpan={7}
                     className="text-center text-muted-foreground"
                   >
                     No incidents found for the current filter.
