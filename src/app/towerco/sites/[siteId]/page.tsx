@@ -168,7 +168,11 @@ export default function SiteReportPage() {
                   const guard = getGuardById(incident.raisedByGuardId);
                   return (
                     <TableRow key={incident.id}>
-                      <TableCell>{incident.id}</TableCell>
+                      <TableCell>
+                        <Button asChild variant="link" className="p-0 h-auto font-medium">
+                          <Link href={`/towerco/incidents/${incident.id}`}>{incident.id}</Link>
+                        </Button>
+                      </TableCell>
                       <TableCell>{new Date(incident.incidentTime).toLocaleString()}</TableCell>
                       <TableCell>{guard?.name || 'N/A'}</TableCell>
                       <TableCell>{getStatusBadge(incident.status)}</TableCell>
