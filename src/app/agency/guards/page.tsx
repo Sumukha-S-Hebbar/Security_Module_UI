@@ -112,6 +112,13 @@ export default function AgencyGuardsPage() {
     setIsUploadDialogOpen(false);
   }
 
+  const handleDownloadTemplate = () => {
+    toast({
+        title: 'Template Downloaded',
+        description: 'Guard profile Excel template has been downloaded.',
+    });
+  }
+
   const filteredAssignedGuards = useMemo(() => {
     return assignedGuards.filter((guard) => {
       const searchLower = searchQuery.toLowerCase();
@@ -207,6 +214,10 @@ export default function AgencyGuardsPage() {
                     <CardDescription>A list of all guards in your agency.</CardDescription>
                 </div>
                 <div className="flex items-center gap-2">
+                      <Button variant="outline" onClick={handleDownloadTemplate}>
+                        <FileDown className="mr-2 h-4 w-4" />
+                        Download Excel Template
+                      </Button>
                       <Dialog open={isUploadDialogOpen} onOpenChange={setIsUploadDialogOpen}>
                         <DialogTrigger asChild>
                             <Button>

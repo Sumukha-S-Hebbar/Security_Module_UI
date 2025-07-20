@@ -31,6 +31,7 @@ import {
   ShieldAlert,
   Loader2,
   Eye,
+  FileDown,
 } from 'lucide-react';
 import {
   Dialog,
@@ -182,6 +183,13 @@ export default function TowercoSitesPage() {
     setIsAddSiteDialogOpen(false);
   }
 
+  const handleDownloadTemplate = () => {
+    toast({
+        title: 'Template Downloaded',
+        description: 'Site profile Excel template has been downloaded.',
+    });
+  }
+
   const handleAssignmentChange = (siteId: string, agencyId: string) => {
     setAssignments((prev) => ({ ...prev, [siteId]: agencyId }));
   };
@@ -315,6 +323,10 @@ export default function TowercoSitesPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={handleDownloadTemplate}>
+            <FileDown className="mr-2 h-4 w-4" />
+            Download Excel Template
+          </Button>
           <Dialog
             open={isUploadDialogOpen}
             onOpenChange={setIsUploadDialogOpen}

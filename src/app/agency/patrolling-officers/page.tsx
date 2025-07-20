@@ -19,7 +19,7 @@ import {
 } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Users, Phone, Map, Upload, PlusCircle, Loader2, Search, Mail, Eye } from 'lucide-react';
+import { Users, Phone, Map, Upload, PlusCircle, Loader2, Search, Mail, Eye, FileDown } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import {
   Dialog,
@@ -120,6 +120,13 @@ export default function AgencyPatrollingOfficersPage() {
         setIsAddDialogOpen(false);
     }
 
+    const handleDownloadTemplate = () => {
+        toast({
+            title: 'Template Downloaded',
+            description: 'Patrolling officer Excel template has been downloaded.',
+        });
+    }
+
     const filteredPatrollingOfficers = useMemo(() => {
         return agencyPatrollingOfficers.filter((po) =>
             po.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -146,6 +153,10 @@ export default function AgencyPatrollingOfficersPage() {
                             <CardDescription>A list of all patrolling officers in your agency.</CardDescription>
                         </div>
                         <div className="flex items-center gap-2">
+                             <Button variant="outline" onClick={handleDownloadTemplate}>
+                                <FileDown className="mr-2 h-4 w-4" />
+                                Download Excel Template
+                            </Button>
                              <Dialog open={isUploadDialogOpen} onOpenChange={setIsUploadDialogOpen}>
                                 <DialogTrigger asChild>
                                     <Button>

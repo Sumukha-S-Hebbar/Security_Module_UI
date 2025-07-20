@@ -14,7 +14,7 @@ import type { SecurityAgency, Site } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Phone, Mail, Upload, Loader2, PlusCircle, Search, MapPin, Building2, ChevronDown, ShieldAlert } from 'lucide-react';
+import { Phone, Mail, Upload, Loader2, PlusCircle, Search, MapPin, Building2, ChevronDown, ShieldAlert, FileDown } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -206,6 +206,13 @@ export default function TowercoAgenciesPage() {
         setIsAddAgencyDialogOpen(false);
     }
     
+    const handleDownloadTemplate = () => {
+        toast({
+            title: 'Template Downloaded',
+            description: 'Agency profile Excel template has been downloaded.',
+        });
+    }
+
     const cities = useMemo(() => {
         if (selectedRegion === 'all') return [];
         return [...new Set(securityAgencies.filter((agency) => agency.region === selectedRegion).map((agency) => agency.city))].sort();
@@ -265,6 +272,10 @@ export default function TowercoAgenciesPage() {
                     </p>
                 </div>
                 <div className="flex items-center gap-2">
+                    <Button variant="outline" onClick={handleDownloadTemplate}>
+                        <FileDown className="mr-2 h-4 w-4" />
+                        Download Excel Template
+                    </Button>
                     <Dialog open={isUploadDialogOpen} onOpenChange={setIsUploadDialogOpen}>
                         <DialogTrigger asChild>
                             <Button>
