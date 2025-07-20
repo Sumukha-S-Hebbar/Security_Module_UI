@@ -34,7 +34,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Eye, Search, Calendar as CalendarIcon, ShieldAlert, ChevronDown } from 'lucide-react';
+import { Eye, Search, Calendar as CalendarIcon, ShieldAlert, ChevronDown, CheckCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 import {
@@ -133,15 +133,24 @@ export default function TowercoIncidentsPage() {
   }, [searchQuery, selectedStatus, selectedDate, selectedMonth, incidents, towercoSiteIds]);
 
   const handleStatusChange = (incidentId: string, status: Incident['status']) => {
+    if (status === 'Resolved') {
+        const incident = incidentStore.getIncidentById(incidentId);
+        if (!incident?.resolutionNotes) {
+            toast({
+                variant: 'destructive',
+                title: 'Resolution Notes Required',
+                description: 'Please add resolution notes on the incident report page before marking it as resolved.'
+            });
+            router.push(`/towerco/incidents/${incidentId}`);
+            return;
+        }
+    }
+    
     incidentStore.updateIncident(incidentId, { status });
     toast({
       title: 'Status Updated',
       description: `Incident #${incidentId} status changed to ${status}.`,
     });
-    // Redirect to the report page to add details.
-    if (status === 'Under Review') {
-        router.push(`/towerco/incidents/${incidentId}`);
-    }
   };
 
   const handleStatusSelectFromSummary = (status: string) => {
@@ -178,7 +187,7 @@ export default function TowercoIncidentsPage() {
       </div>
 
       <IncidentStatusSummary 
-        incidents={filteredIncidents} 
+        incidents={incidents.filter(i => towercoSiteIds.has(i.siteId))} 
         onStatusSelect={handleStatusSelectFromSummary}
         selectedStatus={selectedStatus}
       />
@@ -303,14 +312,12 @@ export default function TowercoIncidentsPage() {
                             <DropdownMenuContent align="end">
                                 <DropdownMenuItem
                                 onClick={() =>
-                                    handleStatusChange(incident.id, 'Under Review')
+                                    handleStatusChange(incident.id, 'Resolved')
                                 }
-                                disabled={
-                                    incident.status === 'Under Review' || isResolved
-                                }
+                                disabled={isResolved}
                                 >
-                                <ShieldAlert className="mr-2 h-4 w-4" />
-                                Start Review
+                                <CheckCircle className="mr-2 h-4 w-4" />
+                                 Mark as Resolved
                                 </DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
