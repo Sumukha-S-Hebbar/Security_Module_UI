@@ -100,8 +100,11 @@ export default function TowercoSitesPage() {
   const [assignedSearchQuery, setAssignedSearchQuery] = useState('');
   const [unassignedSearchQuery, setUnassignedSearchQuery] = useState('');
   const [selectedAgency, setSelectedAgency] = useState('all');
-  const [selectedRegion, setSelectedRegion] = useState('all');
-  const [selectedCity, setSelectedCity] = useState('all');
+  const [assignedSelectedRegion, setAssignedSelectedRegion] = useState('all');
+  const [assignedSelectedCity, setAssignedSelectedCity] = useState('all');
+  const [unassignedSelectedRegion, setUnassignedSelectedRegion] = useState('all');
+  const [unassignedSelectedCity, setUnassignedSelectedCity] = useState('all');
+
 
   const [assignments, setAssignments] = useState<{ [siteId: string]: string }>(
     {}
@@ -216,16 +219,27 @@ export default function TowercoSitesPage() {
     return securityAgencies.filter((a) => agencyIds.has(a.id));
   }, [assignedSites]);
 
-  const allRegions = useMemo(() => [...new Set(towercoSites.map((site) => site.region))].sort(), [towercoSites]);
-  const citiesForFilter = useMemo(() => {
-    if (selectedRegion === 'all') return [];
-    return [...new Set(towercoSites.filter((site) => site.region === selectedRegion).map((site) => site.city))].sort();
-  }, [selectedRegion, towercoSites]);
+  const allAssignedRegions = useMemo(() => [...new Set(assignedSites.map((site) => site.region))].sort(), [assignedSites]);
+  const assignedCitiesForFilter = useMemo(() => {
+    if (assignedSelectedRegion === 'all') return [];
+    return [...new Set(assignedSites.filter((site) => site.region === assignedSelectedRegion).map((site) => site.city))].sort();
+  }, [assignedSelectedRegion, assignedSites]);
+
+  const allUnassignedRegions = useMemo(() => [...new Set(unassignedSites.map((site) => site.region))].sort(), [unassignedSites]);
+  const unassignedCitiesForFilter = useMemo(() => {
+    if (unassignedSelectedRegion === 'all') return [];
+    return [...new Set(unassignedSites.filter((site) => site.region === unassignedSelectedRegion).map((site) => site.city))].sort();
+    }, [unassignedSelectedRegion, unassignedSites]);
 
 
-  const handleRegionChange = (region: string) => {
-    setSelectedRegion(region);
-    setSelectedCity('all');
+  const handleAssignedRegionChange = (region: string) => {
+    setAssignedSelectedRegion(region);
+    setAssignedSelectedCity('all');
+  };
+  
+  const handleUnassignedRegionChange = (region: string) => {
+    setUnassignedSelectedRegion(region);
+    setUnassignedSelectedCity('all');
   };
 
   const filteredAssignedSites = useMemo(() => {
@@ -240,8 +254,8 @@ export default function TowercoSitesPage() {
       const matchesAgency =
         selectedAgency === 'all' || agency?.id === selectedAgency;
 
-      const matchesRegion = selectedRegion === 'all' || site.region === selectedRegion;
-      const matchesCity = selectedCity === 'all' || site.city === selectedCity;
+      const matchesRegion = assignedSelectedRegion === 'all' || site.region === assignedSelectedRegion;
+      const matchesCity = assignedSelectedCity === 'all' || site.city === assignedSelectedCity;
 
       return matchesSearch && matchesAgency && matchesRegion && matchesCity;
     });
@@ -249,8 +263,8 @@ export default function TowercoSitesPage() {
     assignedSearchQuery,
     selectedAgency,
     assignedSites,
-    selectedRegion,
-    selectedCity,
+    assignedSelectedRegion,
+    assignedSelectedCity,
   ]);
 
   const filteredUnassignedSites = useMemo(() => {
@@ -260,12 +274,12 @@ export default function TowercoSitesPage() {
         site.name.toLowerCase().includes(searchLower) ||
         site.address.toLowerCase().includes(searchLower);
       
-      const matchesRegion = selectedRegion === 'all' || site.region === selectedRegion;
-      const matchesCity = selectedCity === 'all' || site.city === selectedCity;
+      const matchesRegion = unassignedSelectedRegion === 'all' || site.region === unassignedSelectedRegion;
+      const matchesCity = unassignedSelectedCity === 'all' || site.city === unassignedSelectedCity;
 
       return matchesSearch && matchesRegion && matchesCity;
     });
-  }, [unassignedSearchQuery, unassignedSites, selectedRegion, selectedCity]);
+  }, [unassignedSearchQuery, unassignedSites, unassignedSelectedRegion, unassignedSelectedCity]);
 
 
   const getAgencyName = (siteId: string) => {
@@ -514,13 +528,13 @@ export default function TowercoSitesPage() {
                     ))}
                   </SelectContent>
                 </Select>
-                <Select value={selectedRegion} onValueChange={handleRegionChange}>
+                <Select value={assignedSelectedRegion} onValueChange={handleAssignedRegionChange}>
                   <SelectTrigger className="w-full sm:w-[180px]">
                     <SelectValue placeholder="Filter by region" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Regions</SelectItem>
-                    {allRegions.map((region) => (
+                    {allAssignedRegions.map((region) => (
                       <SelectItem key={region} value={region}>
                         {region}
                       </SelectItem>
@@ -528,16 +542,16 @@ export default function TowercoSitesPage() {
                   </SelectContent>
                 </Select>
                 <Select
-                  value={selectedCity}
-                  onValueChange={setSelectedCity}
-                  disabled={selectedRegion === 'all'}
+                  value={assignedSelectedCity}
+                  onValueChange={setAssignedSelectedCity}
+                  disabled={assignedSelectedRegion === 'all'}
                 >
                   <SelectTrigger className="w-full sm:w-[180px]">
                     <SelectValue placeholder="Filter by city" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Cities</SelectItem>
-                    {citiesForFilter.map((city) => (
+                    {assignedCitiesForFilter.map((city) => (
                       <SelectItem key={city} value={city}>
                         {city}
                       </SelectItem>
@@ -554,7 +568,6 @@ export default function TowercoSitesPage() {
                     <TableHead>Site Name</TableHead>
                     <TableHead>Agency</TableHead>
                     <TableHead>Incidents</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -563,7 +576,11 @@ export default function TowercoSitesPage() {
                         const incidentsCount = siteIncidentsCount[site.id] || 0;
                         return (
                         <TableRow key={site.id}>
-                            <TableCell className="font-medium">{site.id}</TableCell>
+                            <TableCell>
+                                <Button asChild variant="link" className="p-0 h-auto font-medium">
+                                    <Link href={`/towerco/sites/${site.id}`}>{site.id}</Link>
+                                </Button>
+                            </TableCell>
                             <TableCell>
                             <div>{site.name}</div>
                             <div className="text-sm text-muted-foreground flex items-center gap-1">
@@ -573,20 +590,12 @@ export default function TowercoSitesPage() {
                             </TableCell>
                             <TableCell>{getAgencyName(site.id)}</TableCell>
                             <TableCell>{incidentsCount}</TableCell>
-                            <TableCell className="text-right">
-                                <Button asChild variant="outline" size="sm">
-                                    <Link href={`/towerco/sites/${site.id}`}>
-                                        <Eye className="mr-2 h-4 w-4" />
-                                        View Report
-                                    </Link>
-                                </Button>
-                            </TableCell>
                         </TableRow>
                         );
                     })
                     ) : (
                     <TableRow>
-                        <TableCell colSpan={5} className="text-center text-muted-foreground py-10">
+                        <TableCell colSpan={4} className="text-center text-muted-foreground py-10">
                         No assigned sites found for the current filter.
                         </TableCell>
                     </TableRow>
@@ -614,13 +623,13 @@ export default function TowercoSitesPage() {
                     className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[320px]"
                   />
                 </div>
-                 <Select value={selectedRegion} onValueChange={handleRegionChange}>
+                 <Select value={unassignedSelectedRegion} onValueChange={handleUnassignedRegionChange}>
                   <SelectTrigger className="w-full sm:w-[180px]">
                     <SelectValue placeholder="Filter by region" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Regions</SelectItem>
-                    {allRegions.map((region) => (
+                    {allUnassignedRegions.map((region) => (
                       <SelectItem key={region} value={region}>
                         {region}
                       </SelectItem>
@@ -628,16 +637,16 @@ export default function TowercoSitesPage() {
                   </SelectContent>
                 </Select>
                 <Select
-                  value={selectedCity}
-                  onValueChange={setSelectedCity}
-                  disabled={selectedRegion === 'all'}
+                  value={unassignedSelectedCity}
+                  onValueChange={setUnassignedSelectedCity}
+                  disabled={unassignedSelectedRegion === 'all'}
                 >
                   <SelectTrigger className="w-full sm:w-[180px]">
                     <SelectValue placeholder="Filter by city" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Cities</SelectItem>
-                    {citiesForFilter.map((city) => (
+                    {unassignedCitiesForFilter.map((city) => (
                       <SelectItem key={city} value={city}>
                         {city}
                       </SelectItem>
