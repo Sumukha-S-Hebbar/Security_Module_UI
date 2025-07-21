@@ -136,18 +136,6 @@ export default function AgencyIncidentsPage() {
 
   const totalPages = Math.ceil(filteredIncidents.length / ITEMS_PER_PAGE);
 
-  const handleStatusChange = (incidentId: string, status: Incident['status']) => {
-    incidentStore.updateIncident(incidentId, { status });
-    toast({
-      title: 'Status Updated',
-      description: `Incident #${incidentId} status changed to ${status}.`,
-    });
-    // Redirect to the report page to add details.
-    if (status === 'Under Review') {
-        router.push(`/agency/incidents/${incidentId}`);
-    }
-  };
-
   const handleStatusSelectFromSummary = (status: string) => {
     if (selectedStatus === status) {
       setSelectedStatus('all');
@@ -294,7 +282,6 @@ export default function AgencyIncidentsPage() {
                 <TableHead>Guard</TableHead>
                 <TableHead>Patrolling Officer</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -303,7 +290,6 @@ export default function AgencyIncidentsPage() {
                   const site = getSiteById(incident.siteId);
                   const guard = getGuardById(incident.raisedByGuardId);
                   const patrollingOfficer = getPatrollingOfficerById(incident.attendedByPatrollingOfficerId);
-                  const isResolved = incident.status === 'Resolved';
                   return (
                     <TableRow 
                       key={incident.id} 
@@ -322,35 +308,13 @@ export default function AgencyIncidentsPage() {
                         {patrollingOfficer?.name || 'N/A'}
                       </TableCell>
                       <TableCell>{getStatusIndicator(incident.status)}</TableCell>
-                      <TableCell>
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button variant="outline" size="sm" disabled={isResolved} onClick={(e) => e.stopPropagation()}>
-                                Actions <ChevronDown className="ml-2 h-4 w-4" />
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
-                                <DropdownMenuItem
-                                onClick={() =>
-                                    handleStatusChange(incident.id, 'Under Review')
-                                }
-                                disabled={
-                                    incident.status !== 'Active'
-                                }
-                                >
-                                <ShieldAlert className="mr-2 h-4 w-4" />
-                                Start Review
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
                     </TableRow>
                   );
                 })
               ) : (
                 <TableRow>
                   <TableCell
-                    colSpan={7}
+                    colSpan={6}
                     className="text-center text-muted-foreground"
                   >
                     No incidents found for the current filter.
