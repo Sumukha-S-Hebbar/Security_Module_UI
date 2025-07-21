@@ -47,6 +47,7 @@ import { cn } from '@/lib/utils';
 
 
 const LOGGED_IN_ORG_ID = 'TCO01'; // Simulate logged-in user
+const ITEMS_PER_PAGE = 5;
 
 const uploadFormSchema = z.object({
   excelFile: z
@@ -115,6 +116,7 @@ export default function TowercoAgenciesPage() {
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedRegion, setSelectedRegion] = useState('all');
     const [selectedCity, setSelectedCity] = useState('all');
+    const [currentPage, setCurrentPage] = useState(1);
     
     const loggedInOrg = useMemo(() => organizations.find(o => o.id === LOGGED_IN_ORG_ID), []);
 
@@ -224,7 +226,7 @@ export default function TowercoAgenciesPage() {
     };
 
     const filteredAgencies = useMemo(() => {
-        return securityAgencies.filter((agency) => {
+        const filtered = securityAgencies.filter((agency) => {
             const searchLower = searchQuery.toLowerCase();
             const matchesSearch = (
                 agency.name.toLowerCase().includes(searchLower) ||
@@ -238,7 +240,17 @@ export default function TowercoAgenciesPage() {
 
             return matchesSearch && matchesRegion && matchesCity;
         });
+        setCurrentPage(1); // Reset to first page on filter change
+        return filtered;
     }, [searchQuery, securityAgencies, selectedRegion, selectedCity]);
+
+    const paginatedAgencies = useMemo(() => {
+        const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+        const endIndex = startIndex + ITEMS_PER_PAGE;
+        return filteredAgencies.slice(startIndex, endIndex);
+    }, [filteredAgencies, currentPage]);
+    
+    const totalPages = Math.ceil(filteredAgencies.length / ITEMS_PER_PAGE);
 
     const getAssignedSitesForAgency = (agencyId: string) => {
       if (!loggedInOrg) return [];
@@ -552,8 +564,8 @@ export default function TowercoAgenciesPage() {
                                         <TableCell colSpan={6}><Skeleton className="h-10 w-full" /></TableCell>
                                     </TableRow>
                                 ))
-                            ) : filteredAgencies.length > 0 ? (
-                                filteredAgencies.map((agency) => {
+                            ) : paginatedAgencies.length > 0 ? (
+                                paginatedAgencies.map((agency) => {
                                     const assignedSites = getAssignedSitesForAgency(agency.id);
                                     const assignedSitesCount = assignedSites.length;
                                     const incidentCount = getIncidentCountForAgency(agency.id);
@@ -663,7 +675,34 @@ export default function TowercoAgenciesPage() {
                         </TableBody>
                     </Table>
                 </CardContent>
+                <CardFooter>
+                    <div className="flex items-center justify-between w-full">
+                        <div className="text-sm text-muted-foreground">
+                            Showing {Math.min(filteredAgencies.length, ITEMS_PER_PAGE * currentPage)} of {filteredAgencies.length} agencies.
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                                disabled={currentPage === 1}
+                            >
+                                Previous
+                            </Button>
+                            <span className="text-sm">Page {currentPage} of {totalPages}</span>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                                disabled={currentPage === totalPages}
+                            >
+                                Next
+                            </Button>
+                        </div>
+                    </div>
+                </CardFooter>
             </Card>
         </div>
     );
 }
+
