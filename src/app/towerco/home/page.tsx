@@ -36,7 +36,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { SiteStatusBreakdown } from './_components/site-status-breakdown';
 import { IncidentChart } from './_components/incident-chart';
-import { AgencyPerformance } from './_components/agency-performance';
+import { OverallPerformanceChart } from './_components/overall-performance-chart';
 import { Skeleton } from '@/components/ui/skeleton';
 import { securityAgencies as mockAgencies } from '@/lib/data/security-agencies';
 import { incidents as mockIncidents } from '@/lib/data/incidents';
@@ -308,7 +308,7 @@ export default function TowercoHomePage() {
           securityAgencies={data.agencies}
       />
 
-      <AgencyPerformance
+      <OverallPerformanceChart
           agencies={data.agencies}
           sites={data.sites}
           incidents={data.incidents}

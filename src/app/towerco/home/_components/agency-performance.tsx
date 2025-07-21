@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useMemo } from 'react';
@@ -9,16 +8,12 @@ import { guards } from '@/lib/data/guards';
 import { patrollingOfficers } from '@/lib/data/patrolling-officers';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { ShieldCheck, UserCheck, Map, ShieldAlert } from 'lucide-react';
+import { ShieldAlert, UserCheck, Map } from 'lucide-react';
 
 interface AgencyPerformanceData {
   agency: SecurityAgency;
   name: string;
   performance: number;
-  incidentResolutionRate: number;
-  guardPerimeterAccuracy: number;
-  guardSelfieAccuracy: number;
-  officerSiteVisitRate: number;
 }
 
 const getPerformanceClass = (score: number) => {
@@ -27,7 +22,7 @@ const getPerformanceClass = (score: number) => {
   return 'text-destructive';
 };
 
-export function AgencyPerformance({
+export function AgencyPerformanceList({
   agencies,
   sites,
   incidents,
@@ -93,10 +88,6 @@ export function AgencyPerformance({
         agency,
         name: agency.name,
         performance: Math.round(performance),
-        incidentResolutionRate: Math.round(incidentResolutionRate),
-        guardPerimeterAccuracy: Math.round(guardPerimeterAccuracy),
-        guardSelfieAccuracy: Math.round(guardSelfieAccuracy),
-        officerSiteVisitRate: Math.round(officerSiteVisitRate),
       };
     });
 
@@ -138,33 +129,18 @@ export function AgencyPerformance({
               className="p-4 rounded-lg border bg-card hover:bg-muted/50 cursor-pointer transition-colors"
             >
               <div className="flex flex-wrap items-center gap-4">
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-4 flex-1">
                    <div className="text-2xl font-bold text-muted-foreground w-8 text-center">
                     {index + 1}
                    </div>
                    <Avatar className="h-12 w-12 border">
-                     <AvatarImage src={data.agency.avatar} alt={data.agency.name} />
-                     <AvatarFallback>{data.agency.name.charAt(0)}</AvatarFallback>
+                     <AvatarImage src={data.agency.avatar} alt={data.name} />
+                     <AvatarFallback>{data.name.charAt(0)}</AvatarFallback>
                    </Avatar>
                    <div>
                      <p className="font-semibold text-card-foreground">{data.name}</p>
                      <p className="text-sm text-muted-foreground">ID: {data.agency.id}</p>
                    </div>
-                </div>
-
-                <div className="flex-grow flex flex-wrap items-center justify-end gap-x-6 gap-y-2 text-sm ml-auto">
-                    <div className="flex items-center gap-2" title="Incident Resolution Rate">
-                      <ShieldAlert className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium">{data.incidentResolutionRate}%</span>
-                    </div>
-                    <div className="flex items-center gap-2" title="Guard Selfie Accuracy">
-                      <UserCheck className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium">{data.guardSelfieAccuracy}%</span>
-                    </div>
-                     <div className="flex items-center gap-2" title="Officer Site Visit Rate">
-                      <Map className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium">{data.officerSiteVisitRate}%</span>
-                    </div>
                 </div>
 
                  <div className="text-3xl font-bold w-20 text-right" >
