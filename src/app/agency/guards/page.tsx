@@ -35,7 +35,7 @@ import {
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { FileDown, Upload, Loader2, Search, Building, UserCheck, Info, Eye } from 'lucide-react';
+import { FileDown, Upload, Loader2, Search, PlusCircle } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -59,13 +59,21 @@ const uploadFormSchema = z.object({
     .refine((files) => ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel'].includes(files?.[0]?.type), 'Only .xlsx or .xls files are accepted.'),
 });
 
+const addGuardFormSchema = z.object({
+    name: z.string().min(1, { message: 'Guard name is required.' }),
+    phone: z.string().min(1, { message: 'Phone is required.' }),
+    site: z.string().min(1, { message: 'Please select a site.' }),
+});
+
 const LOGGED_IN_AGENCY_ID = 'AGY01'; // Simulate logged-in agency
 
 export default function AgencyGuardsPage() {
   const { toast } = useToast();
   const router = useRouter();
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [isAdding, setIsAdding] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSiteFilter, setSelectedSiteFilter] = useState('all');
   const [selectedPatrollingOfficerFilter, setSelectedPatrollingOfficerFilter] = useState('all');
@@ -89,6 +97,11 @@ export default function AgencyGuardsPage() {
   const uploadForm = useForm<z.infer<typeof uploadFormSchema>>({
     resolver: zodResolver(uploadFormSchema),
   });
+  
+  const addGuardForm = useForm<z.infer<typeof addGuardFormSchema>>({
+    resolver: zodResolver(addGuardFormSchema),
+    defaultValues: { name: '', phone: '', site: '' },
+  });
 
   async function onUploadSubmit(values: z.infer<typeof uploadFormSchema>) {
     setIsUploading(true);
@@ -103,6 +116,19 @@ export default function AgencyGuardsPage() {
     if (fileInput) fileInput.value = '';
     setIsUploading(false);
     setIsUploadDialogOpen(false);
+  }
+
+  async function onAddGuardSubmit(values: z.infer<typeof addGuardFormSchema>) {
+    setIsAdding(true);
+    console.log('New guard data:', values);
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+    toast({
+      title: 'Guard Added',
+      description: `Guard "${values.name}" has been added successfully.`,
+    });
+    addGuardForm.reset();
+    setIsAdding(false);
+    setIsAddDialogOpen(false);
   }
 
   const handleDownloadTemplate = () => {
@@ -142,84 +168,164 @@ export default function AgencyGuardsPage() {
   return (
     <>
       <div className="p-4 sm:p-6 lg:p-8 space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Security Guard Management</h1>
-          <p className="text-muted-foreground">Add, view, and manage guard profiles and their assignments.</p>
+        <div className="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight">Security Guard Management</h1>
+              <p className="text-muted-foreground">Add, view, and manage guard profiles and their assignments.</p>
+            </div>
+             <div className="flex items-center gap-2">
+                <Button variant="outline" onClick={handleDownloadTemplate}>
+                    <FileDown className="mr-2 h-4 w-4" />
+                    Download Excel Template
+                </Button>
+                <Dialog open={isUploadDialogOpen} onOpenChange={setIsUploadDialogOpen}>
+                    <DialogTrigger asChild>
+                        <Button>
+                            <Upload className="mr-2 h-4 w-4" />
+                            Upload Excel
+                        </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                        <DialogHeader>
+                        <DialogTitle>Upload Guard Profiles</DialogTitle>
+                        <DialogDescription>
+                            Upload an Excel file to add multiple security guard profiles at once.
+                        </DialogDescription>
+                        </DialogHeader>
+                        <Form {...uploadForm}>
+                            <form onSubmit={uploadForm.handleSubmit(onUploadSubmit)}>
+                                <div className="grid gap-4 py-4">
+                                    <FormField
+                                        control={uploadForm.control}
+                                        name="excelFile"
+                                        render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Guard Excel File</FormLabel>
+                                            <FormControl>
+                                            <Input
+                                                id="excelFile-guard-input"
+                                                type="file"
+                                                accept=".xlsx, .xls"
+                                                disabled={isUploading}
+                                                onChange={(e) => field.onChange(e.target.files)}
+                                            />
+                                            </FormControl>
+                                            <FormDescription>
+                                            The Excel file should contain columns: name, phone, site.
+                                            </FormDescription>
+                                            <FormMessage />
+                                        </FormItem>
+                                        )}
+                                    />
+                                </div>
+                                <DialogFooter>
+                                    <Button type="submit" disabled={isUploading}>
+                                    {isUploading ? (
+                                        <>
+                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                        Uploading...
+                                        </>
+                                    ) : (
+                                        <>
+                                        <Upload className="mr-2 h-4 w-4" />
+                                        Upload Excel
+                                        </>
+                                    )}
+                                    </Button>
+                                </DialogFooter>
+                            </form>
+                        </Form>
+                    </DialogContent>
+                </Dialog>
+                <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+                    <DialogTrigger asChild>
+                        <Button variant="outline">
+                            <PlusCircle className="mr-2 h-4 w-4" />
+                            Add Guard
+                        </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Add a New Guard</DialogTitle>
+                            <DialogDescription>
+                                Fill in the details below to add a new security guard.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <Form {...addGuardForm}>
+                            <form onSubmit={addGuardForm.handleSubmit(onAddGuardSubmit)} className="space-y-4">
+                                <FormField
+                                    control={addGuardForm.control}
+                                    name="name"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Full Name</FormLabel>
+                                            <FormControl>
+                                                <Input placeholder="e.g., John Doe" {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={addGuardForm.control}
+                                    name="phone"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Phone</FormLabel>
+                                            <FormControl>
+                                                <Input placeholder="e.g., 555-123-4567" {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={addGuardForm.control}
+                                    name="site"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Assign to Site</FormLabel>
+                                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                <FormControl>
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder="Select a site" />
+                                                    </SelectTrigger>
+                                                </FormControl>
+                                                <SelectContent>
+                                                    {agencySites.map((site) => (
+                                                        <SelectItem key={site.id} value={site.name}>
+                                                            {site.name}
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <DialogFooter>
+                                    <Button type="submit" disabled={isAdding}>
+                                    {isAdding ? (
+                                        <>
+                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                        Adding Guard...
+                                        </>
+                                    ) : (
+                                        "Add Guard"
+                                    )}
+                                    </Button>
+                                </DialogFooter>
+                            </form>
+                        </Form>
+                    </DialogContent>
+                </Dialog>
+            </div>
         </div>
 
         <Card>
           <CardHeader>
-            <div className="flex flex-wrap items-center justify-between gap-4">
-                <div>
-                    <CardTitle>All Guard Details</CardTitle>
-                    <CardDescription>A list of all guards in your agency.</CardDescription>
-                </div>
-                <div className="flex items-center gap-2">
-                      <Button variant="outline" onClick={handleDownloadTemplate}>
-                        <FileDown className="mr-2 h-4 w-4" />
-                        Download Excel Template
-                      </Button>
-                      <Dialog open={isUploadDialogOpen} onOpenChange={setIsUploadDialogOpen}>
-                        <DialogTrigger asChild>
-                            <Button>
-                                <Upload className="mr-2 h-4 w-4" />
-                                Upload Excel
-                            </Button>
-                        </DialogTrigger>
-                        <DialogContent>
-                            <DialogHeader>
-                            <DialogTitle>Upload Guard Profiles</DialogTitle>
-                            <DialogDescription>
-                                Upload an Excel file to add multiple security guard profiles at once.
-                            </DialogDescription>
-                            </DialogHeader>
-                            <Form {...uploadForm}>
-                                <form onSubmit={uploadForm.handleSubmit(onUploadSubmit)}>
-                                    <div className="grid gap-4 py-4">
-                                        <FormField
-                                            control={uploadForm.control}
-                                            name="excelFile"
-                                            render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Guard Excel File</FormLabel>
-                                                <FormControl>
-                                                <Input
-                                                    id="excelFile-guard-input"
-                                                    type="file"
-                                                    accept=".xlsx, .xls"
-                                                    disabled={isUploading}
-                                                    onChange={(e) => field.onChange(e.target.files)}
-                                                />
-                                                </FormControl>
-                                                <FormDescription>
-                                                The Excel file should contain columns: name, phone, site.
-                                                </FormDescription>
-                                                <FormMessage />
-                                            </FormItem>
-                                            )}
-                                        />
-                                    </div>
-                                    <DialogFooter>
-                                        <Button type="submit" disabled={isUploading}>
-                                        {isUploading ? (
-                                            <>
-                                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                            Uploading...
-                                            </>
-                                        ) : (
-                                            <>
-                                            <Upload className="mr-2 h-4 w-4" />
-                                            Upload Excel
-                                            </>
-                                        )}
-                                        </Button>
-                                    </DialogFooter>
-                                </form>
-                            </Form>
-                        </DialogContent>
-                    </Dialog>
-                </div>
-            </div>
+            <CardTitle>All Guard Details</CardTitle>
+            <CardDescription>A list of all guards in your agency.</CardDescription>
             <div className="flex flex-wrap items-center gap-2 pt-4">
               <div className="relative flex-1 md:grow-0">
                   <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
