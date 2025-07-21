@@ -1,8 +1,10 @@
+// src/app/towerco/home/_components/site-status-breakdown.tsx
 
 'use client';
 
 import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import type { Site, SecurityAgency } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
@@ -39,7 +41,7 @@ export function SiteStatusBreakdown({ sites, agencies }: { sites: Site[]; agenci
   }, [sites, agencies]);
 
   const handlePieClick = (data: any) => {
-    const section = data.key as 'assigned' | 'unassigned';
+    const section = data.payload.key as 'assigned' | 'unassigned';
     setSelectedSection(section);
   };
   
@@ -105,6 +107,7 @@ export function SiteStatusBreakdown({ sites, agencies }: { sites: Site[]; agenci
                     <Table>
                       <TableHeader>
                         <TableRow>
+                          <TableHead>Site ID</TableHead>
                           <TableHead>Site Name</TableHead>
                           <TableHead>Region</TableHead>
                           {selectedSection === 'unassigned' && <TableHead className="text-right">Action</TableHead>}
@@ -118,6 +121,11 @@ export function SiteStatusBreakdown({ sites, agencies }: { sites: Site[]; agenci
                             className={selectedSection === 'assigned' ? 'cursor-pointer' : ''}
                           >
                             <TableCell>
+                                <Button asChild variant="link" className="p-0 h-auto font-medium" onClick={(e) => e.stopPropagation()}>
+                                    <Link href={`/towerco/sites/${site.id}`}>{site.id}</Link>
+                                </Button>
+                            </TableCell>
+                            <TableCell>
                               <p className="font-medium">{site.name}</p>
                               <p className="text-xs text-muted-foreground">{site.address}</p>
                             </TableCell>
@@ -129,7 +137,10 @@ export function SiteStatusBreakdown({ sites, agencies }: { sites: Site[]; agenci
                                 <Button 
                                   variant="outline" 
                                   size="sm"
-                                  onClick={() => router.push(`/towerco/sites?focusSite=${site.id}`)}
+                                  onClick={(e) => {
+                                      e.stopPropagation();
+                                      router.push(`/towerco/sites?focusSite=${site.id}`);
+                                  }}
                                 >
                                   Assign Agency
                                 </Button>
