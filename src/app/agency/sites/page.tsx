@@ -121,6 +121,16 @@ export default function AgencySitesPage() {
       agencySites.filter((site) => !site.patrollingOfficerId),
     [agencySites]
   );
+  
+  // Set default geofence value for unassigned sites
+  useEffect(() => {
+    const defaultGeofences = unassignedSites.reduce((acc, site) => {
+      acc[site.id] = '20';
+      return acc;
+    }, {} as { [key: string]: string });
+    setGeofencePerimeters(defaultGeofences);
+  }, [unassignedSites]);
+
 
   const assignedSitesPatrollingOfficers = useMemo(() => {
     const officers = new Map<string, PatrollingOfficer>();
@@ -477,7 +487,7 @@ export default function AgencySitesPage() {
                     <TableCell>
                       <Input
                         type="number"
-                        placeholder="e.g. 500"
+                        placeholder="20"
                         className="w-[120px]"
                         value={geofencePerimeters[site.id] || ''}
                         onChange={(e) =>
