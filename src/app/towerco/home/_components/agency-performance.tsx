@@ -22,7 +22,7 @@ const getPerformanceClass = (score: number) => {
   return 'text-destructive';
 };
 
-export function AgencyPerformanceList({
+export function AgencyPerformance({
   agencies,
   sites,
   incidents,
