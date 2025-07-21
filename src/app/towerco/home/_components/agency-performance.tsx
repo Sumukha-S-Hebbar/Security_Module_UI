@@ -143,17 +143,16 @@ export function AgencyPerformance({
                             <AvatarImage src={data.agency.avatar} alt={data.name} />
                             <AvatarFallback>{data.name.charAt(0)}</AvatarFallback>
                         </Avatar>
-                        <div className="flex-grow w-1/3" onClick={(e) => {
+                        <div className="w-1/3 flex-grow" onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
                             router.push(`/towerco/agencies/${data.agency.id}`)
                         }}>
                             <p className="font-medium truncate">{data.name}</p>
                         </div>
-                        <div className="flex-1">
-                             <Progress value={data.performance} indicatorClassName={getPerformanceClass(data.performance)} className="h-4 rounded-full relative overflow-visible">
-                                <div className="text-xs font-bold text-white text-center absolute w-full">{data.performance}%</div>
-                             </Progress>
+                        <div className="flex-1 relative">
+                             <Progress value={data.performance} indicatorClassName={getPerformanceClass(data.performance)} className="h-4 rounded-full" />
+                             <div className="absolute inset-0 flex items-center justify-center text-xs font-bold text-white" style={{ textShadow: '1px 1px 2px rgba(0,0,0,0.5)' }}>{data.performance}%</div>
                         </div>
                         <Button variant="ghost" size="sm" className="w-9 p-0">
                             <ChevronDown className={cn("h-4 w-4 transition-transform", openCollapsible === data.agency.id && "rotate-180")} />
@@ -164,24 +163,32 @@ export function AgencyPerformance({
                 <CollapsibleContent className="space-y-3 py-2 px-4 border-t">
                      <div className="text-sm space-y-2">
                         <div className="flex justify-between items-center">
-                            <span className="text-muted-foreground">Incident Resolution</span>
-                            <Progress value={data.incidentResolutionRate} indicatorClassName={getPerformanceClass(data.incidentResolutionRate)} className="h-3 w-1/2" />
-                            <span className="font-medium w-10 text-right">{data.incidentResolutionRate}%</span>
+                            <span className="text-muted-foreground w-1/3">Incident Resolution</span>
+                            <div className="w-1/2 relative">
+                                <Progress value={data.incidentResolutionRate} indicatorClassName={getPerformanceClass(data.incidentResolutionRate)} className="h-3" />
+                                <div className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-white" style={{ textShadow: '1px 1px 1px rgba(0,0,0,0.7)' }}>{data.incidentResolutionRate}%</div>
+                            </div>
                         </div>
                          <div className="flex justify-between items-center">
-                            <span className="text-muted-foreground">Perimeter Accuracy</span>
-                            <Progress value={data.guardPerimeterAccuracy} indicatorClassName={getPerformanceClass(data.guardPerimeterAccuracy)} className="h-3 w-1/2" />
-                            <span className="font-medium w-10 text-right">{data.guardPerimeterAccuracy}%</span>
+                            <span className="text-muted-foreground w-1/3">Perimeter Accuracy</span>
+                            <div className="w-1/2 relative">
+                                <Progress value={data.guardPerimeterAccuracy} indicatorClassName={getPerformanceClass(data.guardPerimeterAccuracy)} className="h-3" />
+                                <div className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-white" style={{ textShadow: '1px 1px 1px rgba(0,0,0,0.7)' }}>{data.guardPerimeterAccuracy}%</div>
+                            </div>
                         </div>
                          <div className="flex justify-between items-center">
-                            <span className="text-muted-foreground">Selfie Accuracy</span>
-                            <Progress value={data.guardSelfieAccuracy} indicatorClassName={getPerformanceClass(data.guardSelfieAccuracy)} className="h-3 w-1/2" />
-                            <span className="font-medium w-10 text-right">{data.guardSelfieAccuracy}%</span>
+                            <span className="text-muted-foreground w-1/3">Selfie Accuracy</span>
+                            <div className="w-1/2 relative">
+                                <Progress value={data.guardSelfieAccuracy} indicatorClassName={getPerformanceClass(data.guardSelfieAccuracy)} className="h-3" />
+                                <div className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-white" style={{ textShadow: '1px 1px 1px rgba(0,0,0,0.7)' }}>{data.guardSelfieAccuracy}%</div>
+                            </div>
                         </div>
                          <div className="flex justify-between items-center">
-                            <span className="text-muted-foreground">Site Visit Rate</span>
-                            <Progress value={data.officerSiteVisitRate} indicatorClassName={getPerformanceClass(data.officerSiteVisitRate)} className="h-3 w-1/2" />
-                            <span className="font-medium w-10 text-right">{data.officerSiteVisitRate}%</span>
+                            <span className="text-muted-foreground w-1/3">Site Visit Rate</span>
+                            <div className="w-1/2 relative">
+                                <Progress value={data.officerSiteVisitRate} indicatorClassName={getPerformanceClass(data.officerSiteVisitRate)} className="h-3" />
+                                <div className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-white" style={{ textShadow: '1px 1px 1px rgba(0,0,0,0.7)' }}>{data.officerSiteVisitRate}%</div>
+                            </div>
                         </div>
                     </div>
                 </CollapsibleContent>
