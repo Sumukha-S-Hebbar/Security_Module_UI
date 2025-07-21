@@ -22,7 +22,7 @@ import { cn } from '@/lib/utils';
 const COLORS = ['hsl(var(--chart-2))', 'hsl(var(--destructive))'];
 
 export function SiteStatusBreakdown({ sites, agencies }: { sites: Site[]; agencies: SecurityAgency[] }) {
-  const [activeSection, setActiveSection] = useState<'Assigned' | 'Unassigned' | null>('Assigned');
+  const [activeSection, setActiveSection] = useState<'Assigned' | 'Unassigned'>('Assigned');
 
   const { assignedSites, unassignedSites, chartData } = useMemo(() => {
     const agencySiteIds = new Set(agencies.flatMap(a => a.siteIds));
@@ -43,81 +43,58 @@ export function SiteStatusBreakdown({ sites, agencies }: { sites: Site[]; agenci
     return agencies.find(a => a.siteIds.includes(siteId));
   }
 
-  const CustomLegend = (props: any) => {
-    const { payload } = props;
-    return (
-      <ul className="flex flex-col gap-2">
-        {payload.map((entry: any, index: number) => (
-          <li
-            key={`item-${index}`}
-            onClick={() => setActiveSection(entry.value)}
-            className={cn(
-              "flex items-center gap-2 cursor-pointer p-2 rounded-md transition-colors",
-              activeSection === entry.value ? "bg-muted" : "hover:bg-muted/50"
-            )}
-          >
-            <span style={{ backgroundColor: entry.color }} className="w-3 h-3 rounded-full inline-block" />
-            <span className="font-medium">{entry.value}</span>
-            <span className="ml-auto text-muted-foreground">{entry.payload.value} sites</span>
-          </li>
-        ))}
-      </ul>
-    );
-  };
-  
   const renderActiveSection = () => {
-    if (!activeSection) {
-      return (
-         <div className="flex items-center justify-center h-full text-muted-foreground">
-            <p>Select a category to see details.</p>
-         </div>
-      );
-    }
-    
     const isAssigned = activeSection === 'Assigned';
     const sitesToList = isAssigned ? assignedSites : unassignedSites;
     
-    return (
-        <div>
-            <h3 className="font-semibold text-lg mb-4">{activeSection} Sites</h3>
-             <ScrollArea className="h-80 border rounded-md">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Site</TableHead>
-                    {isAssigned ? <TableHead>Agency</TableHead> : <TableHead className="text-right">Action</TableHead>}
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {sitesToList.map(site => {
-                    const agency = isAssigned ? getAgencyForSite(site.id) : null;
-                    return (
-                      <TableRow key={site.id}>
-                        <TableCell>
-                          <Button variant="link" asChild className="p-0 h-auto font-medium text-left">
-                            <Link href={`/towerco/sites/${site.id}`}>{site.name}</Link>
-                          </Button>
-                          <p className="text-xs text-muted-foreground">{site.address}</p>
-                        </TableCell>
-                        <TableCell className={!isAssigned ? 'text-right' : ''}>
-                          {isAssigned ? (
-                            <div className="flex items-center gap-2 text-sm">
-                              <Briefcase className="h-4 w-4 text-muted-foreground" />
-                              {agency?.name || 'N/A'}
-                            </div>
-                          ) : (
-                             <Button asChild size="sm">
-                                <Link href={`/towerco/sites?focusSite=${site.id}`}>Assign Agency</Link>
-                            </Button>
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    )
-                  })}
-                </TableBody>
-              </Table>
-            </ScrollArea>
+    if (sitesToList.length === 0) {
+      return (
+        <div className="flex h-full items-center justify-center rounded-lg border border-dashed">
+            <div className="text-center text-sm text-muted-foreground">
+                <p>No {activeSection.toLowerCase()} sites found.</p>
+            </div>
         </div>
+      );
+    }
+
+    return (
+        <ScrollArea className="h-80">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Site</TableHead>
+                {isAssigned ? <TableHead>Agency</TableHead> : <TableHead className="text-right">Action</TableHead>}
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {sitesToList.map(site => {
+                const agency = isAssigned ? getAgencyForSite(site.id) : null;
+                return (
+                  <TableRow key={site.id}>
+                    <TableCell>
+                      <Button variant="link" asChild className="p-0 h-auto font-medium text-left whitespace-normal">
+                        <Link href={`/towerco/sites/${site.id}`}>{site.name}</Link>
+                      </Button>
+                      <p className="text-xs text-muted-foreground">{site.address}</p>
+                    </TableCell>
+                    <TableCell className={!isAssigned ? 'text-right' : ''}>
+                      {isAssigned ? (
+                        <div className="flex items-center gap-2 text-sm">
+                          <Briefcase className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                          <span className="truncate">{agency?.name || 'N/A'}</span>
+                        </div>
+                      ) : (
+                         <Button asChild size="sm">
+                            <Link href={`/towerco/sites?focusSite=${site.id}`}>Assign Agency</Link>
+                        </Button>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                )
+              })}
+            </TableBody>
+          </Table>
+        </ScrollArea>
     );
   }
 
@@ -137,8 +114,8 @@ export function SiteStatusBreakdown({ sites, agencies }: { sites: Site[]; agenci
                         cx="50%"
                         cy="50%"
                         labelLine={false}
-                        outerRadius={100}
-                        innerRadius={60}
+                        outerRadius={80}
+                        innerRadius={50}
                         dataKey="value"
                         stroke="none"
                     >
@@ -146,13 +123,33 @@ export function SiteStatusBreakdown({ sites, agencies }: { sites: Site[]; agenci
                         <Cell key={`cell-${index}`} fill={entry.color} />
                         ))}
                     </Pie>
-                    <Tooltip />
-                    <Legend content={<CustomLegend />} wrapperStyle={{width: '80%'}}/>
+                    <Tooltip 
+                      contentStyle={{
+                        borderRadius: 'var(--radius)',
+                        border: '1px solid hsl(var(--border))',
+                        background: 'hsl(var(--background))',
+                      }}
+                    />
                     </PieChart>
                 </ResponsiveContainer>
             </div>
+             <div className="w-full flex justify-center gap-4">
+                {chartData.map((entry) => (
+                    <Button
+                        key={entry.name}
+                        variant={activeSection === entry.name ? "default" : "outline"}
+                        onClick={() => setActiveSection(entry.name as 'Assigned' | 'Unassigned')}
+                        className="w-32"
+                    >
+                        <Dot style={{ color: entry.color }} className="w-6 h-6 -ml-2"/>
+                        <div>
+                            {entry.name} ({entry.value})
+                        </div>
+                    </Button>
+                ))}
+             </div>
         </div>
-        <div className="h-full">
+        <div className="h-96">
             {renderActiveSection()}
         </div>
       </CardContent>
