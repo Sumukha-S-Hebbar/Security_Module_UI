@@ -42,6 +42,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Progress } from '@/components/ui/progress';
+import { useRouter } from 'next/navigation';
 
 const LOGGED_IN_AGENCY_ID = 'AGY01'; // Simulate logged-in agency
 
@@ -60,6 +61,7 @@ const addPatrollingOfficerFormSchema = z.object({
 
 export default function AgencyPatrollingOfficersPage() {
     const { toast } = useToast();
+    const router = useRouter();
     const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
@@ -308,7 +310,6 @@ export default function AgencyPatrollingOfficersPage() {
                         <TableHead>Assignments</TableHead>
                         <TableHead>Site Visit Accuracy</TableHead>
                         <TableHead>Avg. Response Time</TableHead>
-                        <TableHead className="text-right">Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -320,9 +321,15 @@ export default function AgencyPatrollingOfficersPage() {
                                 const siteVisitAccuracy = assignedSites.length > 0 ? Math.round((visitedSites / assignedSites.length) * 100) : 100;
 
                                 return (
-                                <TableRow key={patrollingOfficer.id}>
+                                <TableRow 
+                                  key={patrollingOfficer.id}
+                                  onClick={() => router.push(`/agency/patrolling-officers/${patrollingOfficer.id}`)}
+                                  className="cursor-pointer"
+                                >
                                   <TableCell>
-                                    <p className="font-medium">{patrollingOfficer.id}</p>
+                                    <Button asChild variant="link" className="p-0 h-auto font-medium" onClick={(e) => e.stopPropagation()}>
+                                      <Link href={`/agency/patrolling-officers/${patrollingOfficer.id}`}>{patrollingOfficer.id}</Link>
+                                    </Button>
                                   </TableCell>
                                   <TableCell>
                                     <div className="flex items-center gap-3">
@@ -336,11 +343,11 @@ export default function AgencyPatrollingOfficersPage() {
                                   <TableCell>
                                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                           <Phone className="h-4 w-4 flex-shrink-0" />
-                                          <a href={`tel:${patrollingOfficer.phone}`} className="hover:underline">{patrollingOfficer.phone}</a>
+                                          <a href={`tel:${patrollingOfficer.phone}`} className="hover:underline" onClick={(e) => e.stopPropagation()}>{patrollingOfficer.phone}</a>
                                       </div>
                                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                           <Mail className="h-4 w-4 flex-shrink-0" />
-                                          <a href={`mailto:${patrollingOfficer.email}`} className="truncate hover:underline">
+                                          <a href={`mailto:${patrollingOfficer.email}`} className="truncate hover:underline" onClick={(e) => e.stopPropagation()}>
                                               {patrollingOfficer.email}
                                           </a>
                                       </div>
@@ -364,19 +371,11 @@ export default function AgencyPatrollingOfficersPage() {
                                   <TableCell>
                                       <span className="font-medium text-sm">{patrollingOfficer.averageResponseTime} mins</span>
                                   </TableCell>
-                                  <TableCell className="text-right">
-                                    <Button asChild variant="outline" size="sm">
-                                        <Link href={`/agency/patrolling-officers/${patrollingOfficer.id}`}>
-                                            <Eye className="mr-2 h-4 w-4" />
-                                            View Report
-                                        </Link>
-                                    </Button>
-                                  </TableCell>
                                 </TableRow>
                             )})
                         ) : (
                             <TableRow>
-                              <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
+                              <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">
                                   No patrolling officers found.
                               </TableCell>
                             </TableRow>
