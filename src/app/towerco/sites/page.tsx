@@ -70,7 +70,7 @@ import {
 import { cn } from '@/lib/utils';
 
 const LOGGED_IN_ORG_ID = 'TCO01'; // Simulate logged-in user
-const ASSIGNED_ITEMS_PER_PAGE = 6;
+const ASSIGNED_ITEMS_PER_PAGE = 5;
 const UNASSIGNED_ITEMS_PER_PAGE = 5;
 
 
@@ -624,54 +624,69 @@ export default function TowercoSitesPage() {
               </div>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-6">
-                {paginatedAssignedSites.length > 0 ? (
-                paginatedAssignedSites.map((site) => {
-                    const agency = getAgencyForSite(site.id);
-                    const incidentsCount = siteIncidentsCount[site.id] || 0;
-                    return (
-                    <Card key={site.id} className="flex flex-col">
-                        <CardHeader>
-                            <CardTitle className="text-lg">{site.name}</CardTitle>
-                            <CardDescription>ID: {site.id}</CardDescription>
-                        </CardHeader>
-                        <CardContent className="flex-grow space-y-2 text-sm">
-                            <div className="flex items-start gap-2 text-muted-foreground">
-                                <MapPin className="h-4 w-4 flex-shrink-0 mt-1" />
-                                <span>{site.address}</span>
-                            </div>
-                            <div className="flex items-center gap-2 text-muted-foreground">
-                                <Briefcase className="h-4 w-4 flex-shrink-0" />
-                                <span>{agency?.name || 'N/A'}</span>
-                            </div>
-                            <div className="flex items-center gap-2 text-muted-foreground">
-                                <ShieldAlert className="h-4 w-4 flex-shrink-0" />
-                                <span>{incidentsCount} Incidents</span>
-                            </div>
-                        </CardContent>
-                        <CardFooter>
-                            <Button asChild variant="outline" size="sm" className="w-full">
-                                <Link href={`/towerco/sites/${site.id}`}>
-                                    <Eye className="mr-2 h-4 w-4" />
-                                    View Full Report
-                                </Link>
-                            </Button>
-                        </CardFooter>
-                    </Card>
-                    );
-                })
-                ) : (
-                <div className="col-span-full text-center text-muted-foreground py-10">
-                    No assigned sites found for the current filter.
-                </div>
-                )}
-            </div>
+            <Table>
+                <TableHeader>
+                    <TableRow>
+                        <TableHead>Site ID</TableHead>
+                        <TableHead>Site Name</TableHead>
+                        <TableHead>Agency</TableHead>
+                        <TableHead>Incidents</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                </TableHeader>
+                <TableBody>
+                    {paginatedAssignedSites.length > 0 ? (
+                        paginatedAssignedSites.map((site) => {
+                            const agency = getAgencyForSite(site.id);
+                            const incidentsCount = siteIncidentsCount[site.id] || 0;
+                            return (
+                                <TableRow key={site.id}>
+                                    <TableCell className="font-medium">{site.id}</TableCell>
+                                    <TableCell>
+                                        <div className="font-medium">{site.name}</div>
+                                        <div className="text-sm text-muted-foreground flex items-center gap-1">
+                                            <MapPin className="w-3 h-3" />
+                                            {site.address}
+                                        </div>
+                                    </TableCell>
+                                    <TableCell>
+                                        <div className="flex items-center gap-2">
+                                            <Briefcase className="h-4 w-4 text-muted-foreground" />
+                                            <span>{agency?.name || 'N/A'}</span>
+                                        </div>
+                                    </TableCell>
+                                    <TableCell>
+                                        <div className="flex items-center gap-2">
+                                            <ShieldAlert className="h-4 w-4 text-muted-foreground" />
+                                            <span>{incidentsCount}</span>
+                                        </div>
+                                    </TableCell>
+                                    <TableCell className="text-right">
+                                        <Button asChild variant="outline" size="sm">
+                                            <Link href={`/towerco/sites/${site.id}`}>
+                                                <Eye className="mr-2 h-4 w-4" />
+                                                View Report
+                                            </Link>
+                                        </Button>
+                                    </TableCell>
+                                </TableRow>
+                            )
+                        })
+                    ) : (
+                         <TableRow>
+                            <TableCell colSpan={5} className="text-center text-muted-foreground py-10">
+                                No assigned sites found for the current filter.
+                            </TableCell>
+                        </TableRow>
+                    )}
+                </TableBody>
+            </Table>
           </CardContent>
           {totalAssignedPages > 1 && (
             <CardFooter>
                 <div className="flex items-center justify-between w-full">
                     <div className="text-sm text-muted-foreground">
-                        Showing {paginatedAssignedSites.length} of {filteredAssignedSites.length} sites.
+                        Showing page {assignedCurrentPage} of {totalAssignedPages}
                     </div>
                     <div className="flex items-center gap-2">
                         <Button
@@ -682,7 +697,6 @@ export default function TowercoSitesPage() {
                         >
                             Previous
                         </Button>
-                        <span className="text-sm">Page {assignedCurrentPage} of {totalAssignedPages}</span>
                         <Button
                             variant="outline"
                             size="sm"
@@ -823,7 +837,7 @@ export default function TowercoSitesPage() {
                 <CardFooter>
                     <div className="flex items-center justify-between w-full">
                         <div className="text-sm text-muted-foreground">
-                            Showing {paginatedUnassignedSites.length} of {filteredUnassignedSites.length} sites.
+                            Showing page {unassignedCurrentPage} of {totalUnassignedPages}
                         </div>
                         <div className="flex items-center gap-2">
                             <Button
@@ -834,7 +848,6 @@ export default function TowercoSitesPage() {
                             >
                                 Previous
                             </Button>
-                            <span className="text-sm">Page {unassignedCurrentPage} of {totalUnassignedPages}</span>
                             <Button
                                 variant="outline"
                                 size="sm"
