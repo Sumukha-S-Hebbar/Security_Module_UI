@@ -25,6 +25,20 @@ import {
 } from '@/components/ui/chart';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 import { useRouter } from 'next/navigation';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
+  Collapsible,
+  CollapsibleContent,
+} from '@/components/ui/collapsible';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 
 const chartConfig = {
   total: {
@@ -54,6 +68,7 @@ export function AgencyIncidentChart({
   const [selectedYear, setSelectedYear] = useState<string>(
     new Date().getFullYear().toString()
   );
+  const [selectedMonthIndex, setSelectedMonthIndex] = useState<number | null>(null);
 
   const monthlyIncidentData = useMemo(() => {
     const months = [
@@ -81,9 +96,68 @@ export function AgencyIncidentChart({
     return monthlyData;
   }, [incidents, selectedYear]);
 
+  const incidentsInSelectedMonth = useMemo(() => {
+    if (selectedMonthIndex === null) return [];
+    
+    return incidents.filter(incident => {
+        const incidentDate = new Date(incident.incidentTime);
+        const yearMatch = incidentDate.getFullYear().toString() === selectedYear;
+        const monthMatch = incidentDate.getMonth() === selectedMonthIndex;
+        return yearMatch && monthMatch;
+    });
+  }, [selectedMonthIndex, selectedYear, incidents]);
+
+
   const handleBarClick = (data: any, index: number) => {
-    router.push(`/agency/incidents?month=${index}`);
+    if (selectedMonthIndex === index) {
+      setSelectedMonthIndex(null); // Collapse if clicking the same month
+    } else {
+      setSelectedMonthIndex(index);
+    }
   };
+
+  const getStatusIndicator = (status: Incident['status']) => {
+    switch (status) {
+      case 'Active':
+        return (
+          <div className="flex items-center gap-2">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-destructive"></span>
+            </span>
+            <span>Active</span>
+          </div>
+        );
+      case 'Under Review':
+        return (
+          <div className="flex items-center gap-2">
+            <span className="relative flex h-2 w-2">
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+            </span>
+            <span>Under Review</span>
+          </div>
+        );
+      case 'Resolved':
+        return (
+          <div className="flex items-center gap-2">
+            <span className="relative flex h-2 w-2">
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-chart-2"></span>
+            </span>
+            <span>Resolved</span>
+          </div>
+        );
+      default:
+        return (
+          <div className="flex items-center gap-2">
+            <span className="relative flex h-2 w-2">
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-muted-foreground"></span>
+            </span>
+            <span>{status}</span>
+          </div>
+        );
+    }
+  };
+
 
   return (
     <Card>
@@ -91,7 +165,7 @@ export function AgencyIncidentChart({
         <div>
           <CardTitle>Incidents Occurred</CardTitle>
           <CardDescription>
-            Total vs. resolved emergency incidents per month.
+            Total vs. resolved emergency incidents per month. Click a bar to see details.
           </CardDescription>
         </div>
         <div className="flex items-center gap-2">
@@ -136,6 +210,49 @@ export function AgencyIncidentChart({
           </BarChart>
         </ChartContainer>
       </CardContent>
+      <Collapsible open={selectedMonthIndex !== null}>
+        <CollapsibleContent>
+            <CardHeader>
+                <CardTitle>
+                    Incidents in {selectedMonthIndex !== null ? monthlyIncidentData[selectedMonthIndex].month : ''} {selectedYear}
+                </CardTitle>
+            </CardHeader>
+            <CardContent>
+                {incidentsInSelectedMonth.length > 0 ? (
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Incident ID</TableHead>
+                                <TableHead>Date</TableHead>
+                                <TableHead>Site ID</TableHead>
+                                <TableHead>Status</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {incidentsInSelectedMonth.map(incident => (
+                                <TableRow 
+                                  key={incident.id}
+                                  onClick={() => router.push(`/agency/incidents/${incident.id}`)}
+                                  className="cursor-pointer"
+                                >
+                                    <TableCell>
+                                        <Button asChild variant="link" className="p-0 h-auto font-medium" onClick={(e) => e.stopPropagation()}>
+                                          <Link href={`/agency/incidents/${incident.id}`}>{incident.id}</Link>
+                                        </Button>
+                                    </TableCell>
+                                    <TableCell>{new Date(incident.incidentTime).toLocaleDateString()}</TableCell>
+                                    <TableCell>{incident.siteId}</TableCell>
+                                    <TableCell>{getStatusIndicator(incident.status)}</TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                ) : (
+                    <p className="text-sm text-muted-foreground text-center">No incidents recorded for this month.</p>
+                )}
+            </CardContent>
+        </CollapsibleContent>
+      </Collapsible>
     </Card>
   );
 }
