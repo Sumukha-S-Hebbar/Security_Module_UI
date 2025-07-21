@@ -684,11 +684,10 @@ export default function TowercoSitesPage() {
                 </TableBody>
             </Table>
           </CardContent>
-          {totalAssignedPages > 1 && (
             <CardFooter>
                 <div className="flex items-center justify-between w-full">
                     <div className="text-sm text-muted-foreground">
-                        Showing page {assignedCurrentPage} of {totalAssignedPages}
+                        Showing {paginatedAssignedSites.length} of {filteredAssignedSites.length} sites.
                     </div>
                     <div className="flex items-center gap-2">
                         <Button
@@ -699,18 +698,18 @@ export default function TowercoSitesPage() {
                         >
                             Previous
                         </Button>
+                        <span className="text-sm">Page {assignedCurrentPage} of {totalAssignedPages || 1}</span>
                         <Button
                             variant="outline"
                             size="sm"
                             onClick={() => setAssignedCurrentPage(prev => Math.min(prev + 1, totalAssignedPages))}
-                            disabled={assignedCurrentPage === totalAssignedPages}
+                            disabled={assignedCurrentPage === totalAssignedPages || totalAssignedPages === 0}
                         >
                             Next
                         </Button>
                     </div>
                 </div>
             </CardFooter>
-          )}
         </Card>
 
         {unassignedSites.length > 0 && (
@@ -835,33 +834,32 @@ export default function TowercoSitesPage() {
                 </TableBody>
               </Table>
             </CardContent>
-             {totalUnassignedPages > 1 && (
-                <CardFooter>
-                    <div className="flex items-center justify-between w-full">
-                        <div className="text-sm text-muted-foreground">
-                            Showing page {unassignedCurrentPage} of {totalUnassignedPages}
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => setUnassignedCurrentPage(prev => Math.max(prev - 1, 1))}
-                                disabled={unassignedCurrentPage === 1}
-                            >
-                                Previous
-                            </Button>
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => setUnassignedCurrentPage(prev => Math.min(prev + 1, totalUnassignedPages))}
-                                disabled={unassignedCurrentPage === totalUnassignedPages}
-                            >
-                                Next
-                            </Button>
-                        </div>
+             <CardFooter>
+                <div className="flex items-center justify-between w-full">
+                    <div className="text-sm text-muted-foreground">
+                        Showing {paginatedUnassignedSites.length} of {filteredUnassignedSites.length} sites.
                     </div>
-                </CardFooter>
-             )}
+                    <div className="flex items-center gap-2">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setUnassignedCurrentPage(prev => Math.max(prev - 1, 1))}
+                            disabled={unassignedCurrentPage === 1}
+                        >
+                            Previous
+                        </Button>
+                        <span className="text-sm">Page {unassignedCurrentPage} of {totalUnassignedPages || 1}</span>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setUnassignedCurrentPage(prev => Math.min(prev + 1, totalUnassignedPages))}
+                            disabled={unassignedCurrentPage === totalUnassignedPages || totalUnassignedPages === 0}
+                        >
+                            Next
+                        </Button>
+                    </div>
+                </div>
+            </CardFooter>
           </Card>
         )}
       </div>
