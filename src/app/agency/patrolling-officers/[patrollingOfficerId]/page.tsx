@@ -142,7 +142,7 @@ export default function AgencyPatrollingOfficerReportPage() {
         </Button>
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Patrolling Officer Report</h1>
-          <p className="text-muted-foreground">Detailed overview for {patrollingOfficer.name}.</p>
+          <p className="text-muted-foreground">Detailed overview for ${patrollingOfficer.name}.</p>
         </div>
       </div>
 
@@ -237,6 +237,7 @@ export default function AgencyPatrollingOfficerReportPage() {
                 <Table>
                     <TableHeader>
                         <TableRow>
+                            <TableHead>Site ID</TableHead>
                             <TableHead>Site Name</TableHead>
                             <TableHead>Address</TableHead>
                             <TableHead>Guards</TableHead>
@@ -245,6 +246,11 @@ export default function AgencyPatrollingOfficerReportPage() {
                     <TableBody>
                         {assignedSites.map(site => (
                             <TableRow key={site.id}>
+                                <TableCell>
+                                    <Button asChild variant="link" className="p-0 h-auto font-medium">
+                                        <Link href={`/agency/sites/${site.id}`}>{site.id}</Link>
+                                    </Button>
+                                </TableCell>
                                 <TableCell className="font-medium">{site.name}</TableCell>
                                 <TableCell>{site.address}</TableCell>
                                 <TableCell>{site.guards.length}</TableCell>
@@ -271,7 +277,9 @@ export default function AgencyPatrollingOfficerReportPage() {
                                 <AvatarFallback>{guard.name.charAt(0)}</AvatarFallback>
                             </Avatar>
                             <div>
-                                <p className="font-medium">{guard.name}</p>
+                                <Button asChild variant="link" className="p-0 h-auto font-medium text-base">
+                                  <Link href={`/agency/guards/${guard.id}`}>{guard.name}</Link>
+                                </Button>
                                 <p className="text-sm text-muted-foreground">ID: {guard.id} | Site: {guard.site}</p>
                             </div>
                         </div>
@@ -288,7 +296,7 @@ export default function AgencyPatrollingOfficerReportPage() {
         <CardHeader className="flex flex-wrap items-center justify-between gap-2">
           <div>
             <CardTitle>Recent Incidents</CardTitle>
-            <CardDescription>A log of emergency incidents at sites managed by {patrollingOfficer.name}.</CardDescription>
+            <CardDescription>A log of emergency incidents at sites managed by ${patrollingOfficer.name}.</CardDescription>
           </div>
           <Select value={selectedMonth} onValueChange={setSelectedMonth}>
             <SelectTrigger className="w-full sm:w-[180px]">
