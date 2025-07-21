@@ -4,10 +4,7 @@
 import { useMemo } from 'react';
 import type { SecurityAgency, Site, Incident } from '@/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
 import { guards } from '@/lib/data/guards';
 import { patrollingOfficers } from '@/lib/data/patrolling-officers';
 import { useRouter } from 'next/navigation';
@@ -17,13 +14,12 @@ interface AgencyPerformanceData {
   agency: SecurityAgency;
   name: string;
   performance: number;
-  incidentResolution: { rate: number; resolved: number; total: number };
 }
 
 const getPerformanceClass = (score: number) => {
-  if (score >= 90) return 'bg-chart-2'; // Green
-  if (score >= 75) return 'bg-yellow-500'; // Amber/Yellow
-  return 'bg-destructive'; // Red
+  if (score >= 90) return 'bg-chart-2';
+  if (score >= 70) return 'bg-yellow-500';
+  return 'bg-destructive';
 };
 
 export function AgencyPerformance({
@@ -92,7 +88,6 @@ export function AgencyPerformance({
         agency,
         name: agency.name,
         performance: Math.round(performance),
-        incidentResolution: { rate: Math.round(incidentResolutionRate), resolved: resolvedIncidents, total: totalIncidents },
       };
     });
 
@@ -122,58 +117,42 @@ export function AgencyPerformance({
       <CardHeader>
         <CardTitle>Agency Performance Rankings</CardTitle>
         <CardDescription>
-          Overall scores based on incidents, guard, and officer performance. Click a row to view details.
+          Overall scores based on incidents, guard, and officer performance. Click a bar to view details.
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[50px]">Rank</TableHead>
-              <TableHead>Agency</TableHead>
-              <TableHead className="w-[250px]">Overall Score</TableHead>
-              <TableHead>Incidents Resolved</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {performanceData.map((data, index) => (
-              <TableRow 
-                key={data.agency.id}
-                className="cursor-pointer"
-                onClick={() => router.push(`/towerco/agencies/${data.agency.id}`)}
-              >
-                <TableCell className="font-bold text-lg text-muted-foreground">{index + 1}</TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-3">
-                    <Avatar className="h-10 w-10 border">
-                        <AvatarImage src={data.agency.avatar} alt={data.agency.name} />
-                        <AvatarFallback>{data.agency.name.charAt(0)}</AvatarFallback>
-                    </Avatar>
-                    <div>
-                        <p className="font-medium">{data.name}</p>
-                        <p className="text-sm text-muted-foreground">ID: {data.agency.id}</p>
-                    </div>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-3">
-                    <Progress 
-                      value={data.performance} 
-                      className="h-2 flex-1" 
-                      indicatorClassName={getPerformanceClass(data.performance)}
-                    />
-                    <span className="font-bold w-12 text-right">{data.performance}%</span>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <Badge variant={data.incidentResolution.rate > 90 ? 'default' : 'secondary'} className={cn({'bg-chart-2 hover:bg-chart-2/90': data.incidentResolution.rate > 90})}>
-                    {data.incidentResolution.resolved} / {data.incidentResolution.total}
-                  </Badge>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+        <div className="space-y-4">
+          {performanceData.map((data) => (
+            <div
+              key={data.agency.id}
+              className="group relative cursor-pointer"
+              onClick={() => router.push(`/towerco/agencies/${data.agency.id}`)}
+            >
+              <div
+                className={cn(
+                  'absolute left-0 top-0 h-full rounded-md transition-all duration-300 ease-in-out',
+                  getPerformanceClass(data.performance)
+                )}
+                style={{ width: `${data.performance}%` }}
+              ></div>
+               <div className="relative flex items-center justify-between p-3 bg-muted/50 rounded-md group-hover:bg-muted transition-colors">
+                 <div className="flex items-center gap-3">
+                   <Avatar className="h-10 w-10 border-2 border-background">
+                     <AvatarImage src={data.agency.avatar} alt={data.agency.name} />
+                     <AvatarFallback>{data.agency.name.charAt(0)}</AvatarFallback>
+                   </Avatar>
+                   <div>
+                     <p className="font-semibold text-foreground">{data.name}</p>
+                     <p className="text-sm text-muted-foreground">ID: {data.agency.id}</p>
+                   </div>
+                 </div>
+                 <div className="text-lg font-bold text-foreground">
+                   {data.performance}%
+                 </div>
+               </div>
+            </div>
+          ))}
+        </div>
       </CardContent>
     </Card>
   );
