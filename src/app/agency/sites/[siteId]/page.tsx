@@ -187,7 +187,9 @@ export default function AgencySiteReportPage() {
                                     <AvatarFallback>{guard.name.charAt(0)}</AvatarFallback>
                                 </Avatar>
                                 <div>
-                                    <p className="font-medium">{guard.name}</p>
+                                    <Button asChild variant="link" className="p-0 h-auto font-medium text-base">
+                                        <Link href={`/agency/guards/${guard.id}`}>{guard.name}</Link>
+                                    </Button>
                                     <p className="text-sm text-muted-foreground">ID: {guard.id}</p>
                                 </div>
                             </div>
