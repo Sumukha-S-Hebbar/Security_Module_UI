@@ -268,7 +268,6 @@ export default function AgencyGuardsPage() {
                   <TableHead>Site</TableHead>
                   <TableHead>Patrolling Officer</TableHead>
                   <TableHead>Overall Compliance</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -280,7 +279,11 @@ export default function AgencyGuardsPage() {
                     const compliance = Math.round((perimeterAccuracy + selfieAccuracy) / 2);
                     
                     return (
-                      <TableRow key={guard.id}>
+                      <TableRow 
+                        key={guard.id}
+                        onClick={() => router.push(`/agency/guards/${guard.id}`)}
+                        className="cursor-pointer"
+                      >
                         <TableCell>
                           <div className="flex items-center gap-3">
                             <Avatar>
@@ -289,7 +292,11 @@ export default function AgencyGuardsPage() {
                             </Avatar>
                             <div>
                               <p className="font-medium">{guard.name}</p>
-                              <p className="text-sm text-muted-foreground">ID: {guard.id}</p>
+                              <p className="text-sm text-muted-foreground">
+                                ID: <Button asChild variant="link" className="p-0 h-auto font-normal text-muted-foreground" onClick={(e) => e.stopPropagation()}>
+                                  <Link href={`/agency/guards/${guard.id}`}>{guard.id}</Link>
+                                </Button>
+                              </p>
                             </div>
                           </div>
                         </TableCell>
@@ -301,20 +308,12 @@ export default function AgencyGuardsPage() {
                             <span className="font-medium text-sm text-muted-foreground">{compliance}%</span>
                           </div>
                         </TableCell>
-                        <TableCell className="text-right">
-                          <Button asChild variant="outline" size="sm">
-                            <Link href={`/agency/guards/${guard.id}`}>
-                              <Eye className="mr-2 h-4 w-4" />
-                              View Report
-                            </Link>
-                          </Button>
-                        </TableCell>
                       </TableRow>
                     )
                   })
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center text-muted-foreground py-10">
+                    <TableCell colSpan={4} className="text-center text-muted-foreground py-10">
                       No guards found for the current filter.
                     </TableCell>
                   </TableRow>
