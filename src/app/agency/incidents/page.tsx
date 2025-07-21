@@ -371,34 +371,32 @@ export default function AgencyIncidentsPage() {
             </TableBody>
           </Table>
         </CardContent>
-        {totalPages > 1 && (
-            <CardFooter>
-                <div className="flex items-center justify-between w-full">
-                    <div className="text-sm text-muted-foreground">
-                        Showing {paginatedIncidents.length} of {filteredIncidents.length} incidents.
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                            disabled={currentPage === 1}
-                        >
-                            Previous
-                        </Button>
-                        <span className="text-sm">Page {currentPage} of {totalPages}</span>
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                            disabled={currentPage === totalPages}
-                        >
-                            Next
-                        </Button>
-                    </div>
+        <CardFooter>
+            <div className="flex items-center justify-between w-full">
+                <div className="text-sm text-muted-foreground">
+                    Showing {paginatedIncidents.length} of {filteredIncidents.length} incidents.
                 </div>
-            </CardFooter>
-        )}
+                <div className="flex items-center gap-2">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                        disabled={currentPage === 1}
+                    >
+                        Previous
+                    </Button>
+                    <span className="text-sm">Page {currentPage} of {totalPages || 1}</span>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                        disabled={currentPage === totalPages || totalPages === 0}
+                    >
+                        Next
+                    </Button>
+                </div>
+            </div>
+        </CardFooter>
       </Card>
     </div>
   );
