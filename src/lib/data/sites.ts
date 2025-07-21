@@ -20,7 +20,8 @@ export const sites: Site[] = [
     patrollingOfficerId: 'PO02',
     geofencePerimeter: 500,
     incidents: incidents.filter(i => i.siteId === 'SITE01'),
-    agencyId: 'AGY01'
+    agencyId: 'AGY01',
+    guardsRequired: 3
   },
   {
     id: 'SITE02',
@@ -40,7 +41,8 @@ export const sites: Site[] = [
     patrollingOfficerId: 'PO01',
     geofencePerimeter: 1000,
     incidents: incidents.filter(i => i.siteId === 'SITE02'),
-    agencyId: 'AGY01'
+    agencyId: 'AGY01',
+    guardsRequired: 2,
   },
   {
     id: 'SITE03',
@@ -60,7 +62,8 @@ export const sites: Site[] = [
     patrollingOfficerId: 'PO01',
     geofencePerimeter: 800,
     incidents: incidents.filter(i => i.siteId === 'SITE03'),
-    agencyId: 'AGY01'
+    agencyId: 'AGY01',
+    guardsRequired: 2,
   },
   {
     id: 'SITE04',
@@ -80,7 +83,8 @@ export const sites: Site[] = [
     geofencePerimeter: 1200,
     assignedOn: '2024-03-15',
     incidents: incidents.filter(i => i.siteId === 'SITE04'),
-    agencyId: 'AGY02'
+    agencyId: 'AGY02',
+    guardsRequired: 2
   },
   {
     id: 'SITE05',
@@ -100,7 +104,8 @@ export const sites: Site[] = [
     assignedOn: '2024-07-01',
     geofencePerimeter: 1500,
     incidents: incidents.filter(i => i.siteId === 'SITE05'),
-    agencyId: 'AGY03'
+    agencyId: 'AGY03',
+    guardsRequired: 1,
   },
   {
     id: 'SITE06',
@@ -120,7 +125,8 @@ export const sites: Site[] = [
     assignedOn: '2024-07-05',
     geofencePerimeter: 2000,
     incidents: incidents.filter(i => i.siteId === 'SITE06'),
-    agencyId: 'AGY03'
+    agencyId: 'AGY03',
+    guardsRequired: 1,
   },
   {
     id: 'SITE07',
@@ -138,7 +144,8 @@ export const sites: Site[] = [
     towerco: 'TowerCo Beta',
     patrollingOfficerId: 'PO01',
     assignedOn: '2024-05-20',
-    agencyId: 'AGY01'
+    agencyId: 'AGY01',
+    guardsRequired: 1,
   },
   {
     id: 'SITE08',
@@ -156,7 +163,8 @@ export const sites: Site[] = [
     towerco: 'TowerCo Alpha',
     patrollingOfficerId: 'PO01',
     assignedOn: '2024-06-10',
-    agencyId: 'AGY01'
+    agencyId: 'AGY01',
+    guardsRequired: 1,
   },
   {
     id: 'SITE09',
@@ -173,7 +181,8 @@ export const sites: Site[] = [
     visited: false,
     towerco: 'TowerCo Alpha',
     assignedOn: '2024-06-11',
-    agencyId: 'AGY01'
+    agencyId: 'AGY01',
+    guardsRequired: 1,
   },
   {
     id: 'SITE10',
@@ -191,7 +200,8 @@ export const sites: Site[] = [
     towerco: 'TowerCo Alpha',
     assignedOn: '2024-06-12',
     patrollingOfficerId: 'PO01',
-    agencyId: 'AGY01'
+    agencyId: 'AGY01',
+    guardsRequired: 1,
   },
   {
     id: 'SITE11',
@@ -207,7 +217,8 @@ export const sites: Site[] = [
     coords: { x: 25, y: 40 },
     visited: false,
     towerco: 'TowerCo Alpha',
-    agencyId: 'AGY01'
+    agencyId: 'AGY01',
+    guardsRequired: 1,
   },
   {
     id: 'SITE12',
@@ -223,6 +234,7 @@ export const sites: Site[] = [
     coords: { x: 50, y: 30 },
     visited: false,
     towerco: 'TowerCo Alpha',
-    agencyId: 'AGY01'
+    agencyId: 'AGY01',
+    guardsRequired: 1,
   },
 ];

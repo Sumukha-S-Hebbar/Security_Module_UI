@@ -496,32 +496,35 @@ export default function AgencySitesPage() {
                       />
                     </TableCell>
                     <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="outline" className="w-[180px]">
-                            <Users className="mr-2 h-4 w-4" />
-                            Select Guards ({selectedGuards[site.id]?.length || 0})
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent className="w-64">
-                          <DropdownMenuLabel>Available Guards</DropdownMenuLabel>
-                          <DropdownMenuSeparator />
-                          {unassignedGuards.length > 0 ? (
-                            unassignedGuards.map((guard) => (
-                              <DropdownMenuCheckboxItem
-                                key={guard.id}
-                                checked={selectedGuards[site.id]?.includes(guard.id)}
-                                onSelect={(e) => e.preventDefault()}
-                                onCheckedChange={() => handleGuardSelect(site.id, guard.id)}
-                              >
-                                {guard.name}
-                              </DropdownMenuCheckboxItem>
-                            ))
-                          ) : (
-                            <div className="px-2 py-1.5 text-sm text-muted-foreground">No unassigned guards</div>
-                          )}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                      <div className='flex flex-col gap-2'>
+                        {site.guardsRequired && <p className="text-xs text-muted-foreground">Guards Required: <span className="font-bold">{site.guardsRequired}</span></p>}
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="outline" className="w-[180px]">
+                              <Users className="mr-2 h-4 w-4" />
+                              Select Guards ({selectedGuards[site.id]?.length || 0})
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent className="w-64">
+                            <DropdownMenuLabel>Available Guards</DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            {unassignedGuards.length > 0 ? (
+                              unassignedGuards.map((guard) => (
+                                <DropdownMenuCheckboxItem
+                                  key={guard.id}
+                                  checked={selectedGuards[site.id]?.includes(guard.id)}
+                                  onSelect={(e) => e.preventDefault()}
+                                  onCheckedChange={() => handleGuardSelect(site.id, guard.id)}
+                                >
+                                  {guard.name}
+                                </DropdownMenuCheckboxItem>
+                              ))
+                            ) : (
+                              <div className="px-2 py-1.5 text-sm text-muted-foreground">No unassigned guards</div>
+                            )}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
                     </TableCell>
                     <TableCell>
                       <Select
