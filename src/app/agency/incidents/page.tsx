@@ -177,7 +177,8 @@ export default function AgencyIncidentsPage() {
     }
   };
 
-  const handleDownloadReport = (incident: Incident) => {
+  const handleDownloadReport = (e: React.MouseEvent, incident: Incident) => {
+    e.stopPropagation();
     toast({
       title: 'Report Download Started',
       description: `Downloading report for incident #${incident.id}.`,
@@ -274,7 +275,6 @@ export default function AgencyIncidentsPage() {
                 <TableHead>Guard</TableHead>
                 <TableHead>Patrolling Officer</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>Report</TableHead>
                 <TableHead>Actions</TableHead>
                 <TableHead className="text-right">Download</TableHead>
               </TableRow>
@@ -287,7 +287,11 @@ export default function AgencyIncidentsPage() {
                   const patrollingOfficer = getPatrollingOfficerById(incident.attendedByPatrollingOfficerId);
                   const isResolved = incident.status === 'Resolved';
                   return (
-                    <TableRow key={incident.id}>
+                    <TableRow 
+                      key={incident.id} 
+                      onClick={() => router.push(`/agency/incidents/${incident.id}`)}
+                      className="cursor-pointer"
+                    >
                       <TableCell className="font-medium">
                         {incident.id}
                       </TableCell>
@@ -299,21 +303,13 @@ export default function AgencyIncidentsPage() {
                       </TableCell>
                       <TableCell>{getStatusIndicator(incident.status)}</TableCell>
                       <TableCell>
-                        <Button asChild variant="outline" size="sm">
-                          <Link href={`/agency/incidents/${incident.id}`}>
-                            <Eye className="mr-2 h-4 w-4" />
-                            View Report
-                          </Link>
-                        </Button>
-                      </TableCell>
-                      <TableCell>
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <Button variant="outline" size="sm" disabled={isResolved}>
+                                <Button variant="outline" size="sm" disabled={isResolved} onClick={(e) => e.stopPropagation()}>
                                 Actions <ChevronDown className="ml-2 h-4 w-4" />
                                 </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
+                            <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
                                 <DropdownMenuItem
                                 onClick={() =>
                                     handleStatusChange(incident.id, 'Under Review')
@@ -339,7 +335,7 @@ export default function AgencyIncidentsPage() {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => handleDownloadReport(incident)}
+                          onClick={(e) => handleDownloadReport(e, incident)}
                         >
                           <FileDown className="mr-2 h-4 w-4" />
                           Download
@@ -351,7 +347,7 @@ export default function AgencyIncidentsPage() {
               ) : (
                 <TableRow>
                   <TableCell
-                    colSpan={9}
+                    colSpan={8}
                     className="text-center text-muted-foreground"
                   >
                     No incidents found for the current filter.

@@ -294,11 +294,13 @@ export default function TowercoIncidentsPage() {
                     incident.attendedByPatrollingOfficerId
                   );
                   return (
-                    <TableRow key={incident.id}>
-                      <TableCell>
-                        <Button asChild variant="link" className="p-0 h-auto font-medium">
-                          <Link href={`/towerco/incidents/${incident.id}`}>{incident.id}</Link>
-                        </Button>
+                    <TableRow 
+                      key={incident.id}
+                      onClick={() => router.push(`/towerco/incidents/${incident.id}`)}
+                      className="cursor-pointer"
+                    >
+                      <TableCell className="font-medium">
+                        {incident.id}
                       </TableCell>
                       <TableCell>{new Date(incident.incidentTime).toLocaleString()}</TableCell>
                       <TableCell>{site?.name || 'N/A'}</TableCell>
