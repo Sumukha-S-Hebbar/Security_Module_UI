@@ -117,6 +117,7 @@ export default function TowercoSitesPage() {
   const [assignments, setAssignments] = useState<{ [siteId: string]: string }>(
     {}
   );
+  const [guardsRequired, setGuardsRequired] = useState<{ [siteId: string]: string }>({});
   
   const loggedInOrg = useMemo(() => organizations.find(o => o.id === LOGGED_IN_ORG_ID), []);
   const unassignedSitesRef = useRef<Map<string, HTMLTableRowElement | null>>(new Map());
@@ -202,8 +203,14 @@ export default function TowercoSitesPage() {
     setAssignments((prev) => ({ ...prev, [siteId]: agencyId }));
   };
 
+  const handleGuardsRequiredChange = (siteId: string, count: string) => {
+    setGuardsRequired((prev) => ({ ...prev, [siteId]: count }));
+  };
+
   const handleAssignAgency = (siteId: string) => {
     const agencyId = assignments[siteId];
+    const numGuards = guardsRequired[siteId];
+
     if (!agencyId) {
       toast({
         variant: 'destructive',
@@ -212,14 +219,24 @@ export default function TowercoSitesPage() {
       });
       return;
     }
+
+    if (!numGuards || Number(numGuards) <= 0) {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Please specify the number of guards required.',
+      });
+      return;
+    }
+
     const siteName = sites.find((s) => s.id === siteId)?.name;
     const agencyName = securityAgencies.find((a) => a.id === agencyId)?.name;
 
-    console.log(`Assigning agency ${agencyId} to site ${siteId} for TOWERCO ${loggedInOrg?.name}`);
+    console.log(`Assigning agency ${agencyId} to site ${siteId} with ${numGuards} guards for TOWERCO ${loggedInOrg?.name}`);
     
     toast({
       title: 'Agency Assigned',
-      description: `${agencyName} has been assigned to site ${siteName}. This change will be reflected on the next refresh.`,
+      description: `${agencyName} has been assigned to site ${siteName} with a requirement of ${numGuards} guards. This change will be reflected on the next refresh.`,
     });
   };
 
@@ -766,8 +783,8 @@ export default function TowercoSitesPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Site ID</TableHead>
-                    <TableHead>Site Name</TableHead>
+                    <TableHead>Site</TableHead>
+                    <TableHead>Guards Required</TableHead>
                     <TableHead>Assign Agency</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
@@ -782,20 +799,23 @@ export default function TowercoSitesPage() {
                         <TableRow 
                           key={site.id} 
                           ref={(el) => unassignedSitesRef.current.set(site.id, el)}
-                          onClick={() => router.push(`/towerco/sites/${site.id}`)}
-                          className="cursor-pointer"
                         >
                           <TableCell>
-                             <Button asChild variant="link" className="p-0 h-auto font-medium" onClick={(e) => e.stopPropagation()}>
-                                <Link href={`/towerco/sites/${site.id}`}>{site.id}</Link>
-                              </Button>
-                          </TableCell>
-                          <TableCell>
-                            <div>{site.name}</div>
+                            <Link href={`/towerco/sites/${site.id}`} className="font-medium text-primary hover:underline">{site.name}</Link>
                             <div className="text-sm text-muted-foreground flex items-center gap-1">
                               <MapPin className="w-3 h-3" />
                               {site.address}
                             </div>
+                          </TableCell>
+                          <TableCell>
+                            <Input
+                                type="number"
+                                placeholder="e.g. 2"
+                                className="w-[120px]"
+                                value={guardsRequired[site.id] || ''}
+                                onChange={(e) => handleGuardsRequiredChange(site.id, e.target.value)}
+                                onClick={(e) => e.stopPropagation()}
+                            />
                           </TableCell>
                           <TableCell>
                             <Select
@@ -829,7 +849,7 @@ export default function TowercoSitesPage() {
                                 e.stopPropagation();
                                 handleAssignAgency(site.id);
                               }}
-                              disabled={!assignments[site.id]}
+                              disabled={!assignments[site.id] || !guardsRequired[site.id]}
                             >
                               Assign Agency
                             </Button>
