@@ -70,6 +70,9 @@ import {
 import { cn } from '@/lib/utils';
 
 const LOGGED_IN_ORG_ID = 'TCO01'; // Simulate logged-in user
+const ASSIGNED_ITEMS_PER_PAGE = 6;
+const UNASSIGNED_ITEMS_PER_PAGE = 5;
+
 
 const uploadFormSchema = z.object({
   excelFile: z
@@ -104,6 +107,10 @@ export default function TowercoSitesPage() {
   const [assignedSelectedCity, setAssignedSelectedCity] = useState('all');
   const [unassignedSelectedRegion, setUnassignedSelectedRegion] = useState('all');
   const [unassignedSelectedCity, setUnassignedSelectedCity] = useState('all');
+
+  // State for pagination
+  const [assignedCurrentPage, setAssignedCurrentPage] = useState(1);
+  const [unassignedCurrentPage, setUnassignedCurrentPage] = useState(1);
 
 
   const [assignments, setAssignments] = useState<{ [siteId: string]: string }>(
@@ -250,6 +257,7 @@ export default function TowercoSitesPage() {
   };
 
   const filteredAssignedSites = useMemo(() => {
+    setAssignedCurrentPage(1);
     return assignedSites.filter((site) => {
       const searchLower = assignedSearchQuery.toLowerCase();
       const matchesSearch =
@@ -273,8 +281,17 @@ export default function TowercoSitesPage() {
     assignedSelectedRegion,
     assignedSelectedCity,
   ]);
+  
+  const paginatedAssignedSites = useMemo(() => {
+    const startIndex = (assignedCurrentPage - 1) * ASSIGNED_ITEMS_PER_PAGE;
+    return filteredAssignedSites.slice(startIndex, startIndex + ASSIGNED_ITEMS_PER_PAGE);
+  }, [filteredAssignedSites, assignedCurrentPage]);
+
+  const totalAssignedPages = Math.ceil(filteredAssignedSites.length / ASSIGNED_ITEMS_PER_PAGE);
+
 
   const filteredUnassignedSites = useMemo(() => {
+    setUnassignedCurrentPage(1);
     return unassignedSites.filter((site) => {
       const searchLower = unassignedSearchQuery.toLowerCase();
       const matchesSearch =
@@ -287,6 +304,13 @@ export default function TowercoSitesPage() {
       return matchesSearch && matchesRegion && matchesCity;
     });
   }, [unassignedSearchQuery, unassignedSites, unassignedSelectedRegion, unassignedSelectedCity]);
+
+  const paginatedUnassignedSites = useMemo(() => {
+      const startIndex = (unassignedCurrentPage - 1) * UNASSIGNED_ITEMS_PER_PAGE;
+      return filteredUnassignedSites.slice(startIndex, startIndex + UNASSIGNED_ITEMS_PER_PAGE);
+  }, [filteredUnassignedSites, unassignedCurrentPage]);
+
+  const totalUnassignedPages = Math.ceil(filteredUnassignedSites.length / UNASSIGNED_ITEMS_PER_PAGE);
 
 
   const getAgencyName = (siteId: string) => {
@@ -610,8 +634,8 @@ export default function TowercoSitesPage() {
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {filteredAssignedSites.length > 0 ? (
-                    filteredAssignedSites.map((site) => {
+                    {paginatedAssignedSites.length > 0 ? (
+                    paginatedAssignedSites.map((site) => {
                         const incidentsCount = siteIncidentsCount[site.id] || 0;
                         return (
                         <TableRow key={site.id}>
@@ -642,6 +666,34 @@ export default function TowercoSitesPage() {
                 </TableBody>
             </Table>
           </CardContent>
+          {totalAssignedPages > 1 && (
+            <CardFooter>
+                <div className="flex items-center justify-between w-full">
+                    <div className="text-sm text-muted-foreground">
+                        Showing {paginatedAssignedSites.length} of {filteredAssignedSites.length} sites.
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setAssignedCurrentPage(prev => Math.max(prev - 1, 1))}
+                            disabled={assignedCurrentPage === 1}
+                        >
+                            Previous
+                        </Button>
+                        <span className="text-sm">Page {assignedCurrentPage} of {totalAssignedPages}</span>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setAssignedCurrentPage(prev => Math.min(prev + 1, totalAssignedPages))}
+                            disabled={assignedCurrentPage === totalAssignedPages}
+                        >
+                            Next
+                        </Button>
+                    </div>
+                </div>
+            </CardFooter>
+          )}
         </Card>
 
         {unassignedSites.length > 0 && (
@@ -705,8 +757,8 @@ export default function TowercoSitesPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredUnassignedSites.length > 0 ? (
-                    filteredUnassignedSites.map((site) => {
+                  {paginatedUnassignedSites.length > 0 ? (
+                    paginatedUnassignedSites.map((site) => {
                       const agenciesInRegion = securityAgencies.filter(
                         (agency) => agency.region === site.region
                       );
@@ -766,6 +818,34 @@ export default function TowercoSitesPage() {
                 </TableBody>
               </Table>
             </CardContent>
+             {totalUnassignedPages > 1 && (
+                <CardFooter>
+                    <div className="flex items-center justify-between w-full">
+                        <div className="text-sm text-muted-foreground">
+                            Showing {paginatedUnassignedSites.length} of {filteredUnassignedSites.length} sites.
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setUnassignedCurrentPage(prev => Math.max(prev - 1, 1))}
+                                disabled={unassignedCurrentPage === 1}
+                            >
+                                Previous
+                            </Button>
+                            <span className="text-sm">Page {unassignedCurrentPage} of {totalUnassignedPages}</span>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setUnassignedCurrentPage(prev => Math.min(prev + 1, totalUnassignedPages))}
+                                disabled={unassignedCurrentPage === totalUnassignedPages}
+                            >
+                                Next
+                            </Button>
+                        </div>
+                    </div>
+                </CardFooter>
+             )}
           </Card>
         )}
       </div>
