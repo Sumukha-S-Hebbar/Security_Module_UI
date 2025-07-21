@@ -41,6 +41,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { Progress } from '@/components/ui/progress';
 
 const LOGGED_IN_AGENCY_ID = 'AGY01'; // Simulate logged-in agency
 
@@ -64,7 +65,6 @@ export default function AgencyPatrollingOfficersPage() {
     const [isUploading, setIsUploading] = useState(false);
     const [isAdding, setIsAdding] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
-    const [selectedPatrollingOfficer, setSelectedPatrollingOfficer] = useState<PatrollingOfficer | null>(null);
 
     // In a real app, you'd fetch officers belonging to the logged-in agency.
     // For this prototype, we'll assume all officers are available to the agency.
@@ -81,9 +81,6 @@ export default function AgencyPatrollingOfficersPage() {
     const getAssignedSitesForPO = (patrollingOfficerId: string) => {
         return agencySites.filter(s => s.patrollingOfficerId === patrollingOfficerId);
     }
-    
-    const sitesForSelectedPO = selectedPatrollingOfficer ? getAssignedSitesForPO(selectedPatrollingOfficer.id) : [];
-
 
     const uploadForm = useForm<z.infer<typeof uploadFormSchema>>({
         resolver: zodResolver(uploadFormSchema),
@@ -301,107 +298,92 @@ export default function AgencyPatrollingOfficersPage() {
                     </div>
                 </CardHeader>
                 <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-6">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Patrolling Officer</TableHead>
+                        <TableHead>Contact Info</TableHead>
+                        <TableHead>Assignments</TableHead>
+                        <TableHead>Site Visit Accuracy</TableHead>
+                        <TableHead>Avg. Response Time</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
                         {filteredPatrollingOfficers.length > 0 ? (
                             filteredPatrollingOfficers.map((patrollingOfficer) => {
                                 const assignedGuardsCount = getAssignedGuardsCount(patrollingOfficer.id);
                                 const assignedSites = getAssignedSitesForPO(patrollingOfficer.id);
+                                const visitedSites = assignedSites.filter(s => s.visited).length;
+                                const siteVisitAccuracy = assignedSites.length > 0 ? Math.round((visitedSites / assignedSites.length) * 100) : 100;
+
                                 return (
-                                <Card key={patrollingOfficer.id} className="flex flex-col">
-                                <CardHeader>
-                                    <div className="flex items-center gap-4">
-                                        <Avatar className="h-12 w-12">
+                                <TableRow key={patrollingOfficer.id}>
+                                  <TableCell>
+                                    <div className="flex items-center gap-3">
+                                        <Avatar className="h-10 w-10">
                                             <AvatarImage src={patrollingOfficer.avatar} alt={patrollingOfficer.name} />
                                             <AvatarFallback>{patrollingOfficer.name.charAt(0)}</AvatarFallback>
                                         </Avatar>
                                         <div>
-                                            <CardTitle className="text-lg">{patrollingOfficer.name}</CardTitle>
-                                            <CardDescription>ID: {patrollingOfficer.id}</CardDescription>
+                                            <p className="font-medium">{patrollingOfficer.name}</p>
+                                            <p className="text-sm text-muted-foreground">ID: {patrollingOfficer.id}</p>
                                         </div>
                                     </div>
-                                </CardHeader>
-                                <CardContent className="flex-grow space-y-2 text-sm">
-                                    <div className="flex items-center gap-2 text-muted-foreground">
-                                        <Phone className="h-4 w-4 flex-shrink-0" />
-                                        <a href={`tel:${patrollingOfficer.phone}`} className="hover:underline">{patrollingOfficer.phone}</a>
-                                    </div>
-                                    <div className="flex items-center gap-2 text-muted-foreground">
-                                        <Mail className="h-4 w-4 flex-shrink-0" />
-                                        <a href={`mailto:${patrollingOfficer.email}`} className="truncate hover:underline">
-                                            {patrollingOfficer.email}
-                                        </a>
-                                    </div>
-                                    <div className="flex items-center gap-2 text-muted-foreground">
-                                        <Users className="h-4 w-4 flex-shrink-0" />
-                                        <span>{assignedGuardsCount} Guards</span>
-                                    </div>
-                                    <div className="flex items-center gap-2 text-muted-foreground">
-                                        <Map className="h-4 w-4 flex-shrink-0" />
-                                        <span className="truncate" title={assignedSites.map(s => s.name).join(', ')}>{assignedSites.length > 0 ? `${assignedSites.length} Sites Assigned` : 'No sites assigned'}</span>
-                                    </div>
-                                </CardContent>
-                                <CardFooter className="grid grid-cols-2 gap-2">
+                                  </TableCell>
+                                  <TableCell>
+                                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                          <Phone className="h-4 w-4 flex-shrink-0" />
+                                          <a href={`tel:${patrollingOfficer.phone}`} className="hover:underline">{patrollingOfficer.phone}</a>
+                                      </div>
+                                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                          <Mail className="h-4 w-4 flex-shrink-0" />
+                                          <a href={`mailto:${patrollingOfficer.email}`} className="truncate hover:underline">
+                                              {patrollingOfficer.email}
+                                          </a>
+                                      </div>
+                                  </TableCell>
+                                  <TableCell>
+                                      <div className="flex items-center gap-2 text-sm">
+                                          <Map className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
+                                          <span>{assignedSites.length} Sites</span>
+                                      </div>
+                                      <div className="flex items-center gap-2 text-sm">
+                                          <Users className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
+                                          <span>{assignedGuardsCount} Guards</span>
+                                      </div>
+                                  </TableCell>
+                                  <TableCell>
+                                      <div className="flex items-center gap-2">
+                                          <Progress value={siteVisitAccuracy} className="w-24 h-2" />
+                                          <span className="font-medium text-sm text-muted-foreground">{siteVisitAccuracy}%</span>
+                                      </div>
+                                  </TableCell>
+                                  <TableCell>
+                                      <span className="font-medium text-sm">{patrollingOfficer.averageResponseTime} mins</span>
+                                  </TableCell>
+                                  <TableCell className="text-right">
                                     <Button asChild variant="outline" size="sm">
                                         <Link href={`/agency/patrolling-officers/${patrollingOfficer.id}`}>
                                             <Eye className="mr-2 h-4 w-4" />
                                             View Report
                                         </Link>
                                     </Button>
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => setSelectedPatrollingOfficer(patrollingOfficer)}
-                                        disabled={assignedSites.length === 0}
-                                    >
-                                        <Map className="mr-2 h-4 w-4" />
-                                        View Sites ({assignedSites.length})
-                                    </Button>
-                                </CardFooter>
-                                </Card>
+                                  </TableCell>
+                                </TableRow>
                             )})
                         ) : (
-                            <div className="col-span-full text-center text-muted-foreground py-10">
-                                No patrolling officers found.
-                            </div>
+                            <TableRow>
+                              <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">
+                                  No patrolling officers found.
+                              </TableCell>
+                            </TableRow>
                         )}
-                    </div>
+                    </TableBody>
+                  </Table>
                 </CardContent>
             </Card>
         </div>
-        <Dialog open={!!selectedPatrollingOfficer} onOpenChange={(isOpen) => !isOpen && setSelectedPatrollingOfficer(null)}>
-            <DialogContent className="max-w-xl">
-            <DialogHeader>
-                <DialogTitle>Sites Assigned to {selectedPatrollingOfficer?.name}</DialogTitle>
-                <DialogDescription>
-                A list of all sites managed by this patrolling officer.
-                </DialogDescription>
-            </DialogHeader>
-            <div className="pt-4">
-                {sitesForSelectedPO.length > 0 ? (
-                <Table>
-                    <TableHeader>
-                    <TableRow>
-                        <TableHead>Site Name</TableHead>
-                        <TableHead>Address</TableHead>
-                    </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                    {sitesForSelectedPO.map((site) => (
-                        <TableRow key={site.id}>
-                            <TableCell className="font-medium">{site.name}</TableCell>
-                            <TableCell>{site.address}</TableCell>
-                        </TableRow>
-                    ))}
-                    </TableBody>
-                </Table>
-                ) : (
-                <p className="text-sm text-muted-foreground text-center py-4">
-                    No sites are assigned to this patrolling officer.
-                </p>
-                )}
-            </div>
-            </DialogContent>
-        </Dialog>
       </>
     );
 }
