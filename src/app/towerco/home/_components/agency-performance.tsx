@@ -1,39 +1,21 @@
 
 'use client';
 
-import { useState, useMemo } from 'react';
-import type { Incident, Site, SecurityAgency } from '@/types';
+import { useMemo } from 'react';
+import type { SecurityAgency, Site, Incident } from '@/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHeader, TableHead, TableRow } from '@/components/ui/table';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { Progress } from '@/components/ui/progress';
 import { guards } from '@/lib/data/guards';
 import { patrollingOfficers } from '@/lib/data/patrolling-officers';
 import { useRouter } from 'next/navigation';
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-} from 'recharts';
-import {
-  ChartContainer,
-  ChartTooltipContent,
-  ChartConfig,
-} from '@/components/ui/chart';
 
 interface AgencyPerformanceData {
   agency: SecurityAgency;
   name: string;
   performance: number;
 }
-
-const chartConfig = {
-  performance: {
-    label: 'Performance',
-    color: 'hsl(var(--primary))',
-  },
-} satisfies ChartConfig;
 
 export function AgencyPerformance({
   agencies,
@@ -106,73 +88,74 @@ export function AgencyPerformance({
       };
     });
 
-    return data.sort((a, b) => a.performance - b.performance);
+    return data.sort((a, b) => b.performance - a.performance);
   }, [agencies, sites, incidents]);
-  
-  const handleBarClick = (data: any) => {
-    if (data && data.activePayload && data.activePayload[0]) {
-      const agencyId = data.activePayload[0].payload.agency.id;
-      router.push(`/towerco/agencies/${agencyId}`);
-    }
-  };
 
   if (performanceData.length === 0) {
-      return (
-          <Card>
-              <CardHeader>
-                  <CardTitle>Agency Performance</CardTitle>
-                  <CardDescription>
-                      Overall score based on incidents, guard, and officer performance.
-                  </CardDescription>
-              </CardHeader>
-              <CardContent>
-                  <p className="text-muted-foreground text-center py-4">
-                      No performance data available for any agency.
-                  </p>
-              </CardContent>
-          </Card>
-      )
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Agency Performance</CardTitle>
+          <CardDescription>
+            Overall score based on incidents, guard, and officer performance.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <p className="text-muted-foreground text-center py-4">
+            No performance data available for any agency.
+          </p>
+        </CardContent>
+      </Card>
+    );
   }
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Agency Performance Overview</CardTitle>
+        <CardTitle>Agency Performance Rankings</CardTitle>
         <CardDescription>
-          Comparison of agencies by overall performance score.
+          Comparison of agencies by overall performance score. Click a row to view details.
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <ChartContainer config={chartConfig} className="w-full h-[400px]">
-          <BarChart
-            data={performanceData}
-            layout="vertical"
-            margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-            onClick={handleBarClick}
-          >
-            <CartesianGrid horizontal={false} />
-            <YAxis
-              dataKey="name"
-              type="category"
-              tickLine={false}
-              axisLine={false}
-              tickMargin={10}
-              fontSize={12}
-              width={120}
-            />
-            <XAxis dataKey="performance" type="number" domain={[0, 100]} unit="%" />
-            <Tooltip
-              cursor={{ fill: 'hsl(var(--muted))' }}
-              content={<ChartTooltipContent />}
-            />
-            <Bar
-              dataKey="performance"
-              fill="var(--color-performance)"
-              radius={4}
-              style={{ cursor: 'pointer' }}
-            />
-          </BarChart>
-        </ChartContainer>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-[80px]">Rank</TableHead>
+              <TableHead>Agency</TableHead>
+              <TableHead>Performance</TableHead>
+              <TableHead className="text-right">Score</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {performanceData.map((data, index) => (
+              <TableRow
+                key={data.agency.id}
+                onClick={() => router.push(`/towerco/agencies/${data.agency.id}`)}
+                className="cursor-pointer"
+              >
+                <TableCell className="font-bold text-lg text-muted-foreground">
+                  {index + 1}
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-3">
+                    <Avatar>
+                      <AvatarImage src={data.agency.avatar} alt={data.agency.name} />
+                      <AvatarFallback>{data.agency.name.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                    <span className="font-medium">{data.name}</span>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <Progress value={data.performance} className="h-2" />
+                </TableCell>
+                <TableCell className="text-right font-semibold text-lg">
+                  {data.performance}%
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       </CardContent>
     </Card>
   );
