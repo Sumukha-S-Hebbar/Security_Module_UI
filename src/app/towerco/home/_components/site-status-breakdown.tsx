@@ -152,9 +152,13 @@ export function SiteStatusBreakdown({ sites, agencies }: { sites: Site[]; agenci
                         key={entry.name}
                         variant={activeSection === entry.name ? "default" : "outline"}
                         onClick={() => setActiveSection(entry.name as 'Assigned' | 'Unassigned')}
-                        className="w-32"
+                        className={cn(
+                          "w-36",
+                          activeSection === entry.name && entry.name === 'Assigned' && "bg-chart-2 hover:bg-chart-2/90 text-white",
+                          activeSection === entry.name && entry.name === 'Unassigned' && "bg-destructive hover:bg-destructive/90 text-white"
+                        )}
                     >
-                        <Dot style={{ color: entry.color }} className="w-6 h-6 -ml-2"/>
+                        <Dot style={{ color: activeSection === entry.name ? 'white' : entry.color }} className="w-8 h-8 -ml-3"/>
                         <div>
                             {entry.name} ({entry.value})
                         </div>
