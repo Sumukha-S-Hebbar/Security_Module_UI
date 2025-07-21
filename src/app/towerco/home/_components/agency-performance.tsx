@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useMemo } from 'react';
@@ -8,19 +9,31 @@ import { guards } from '@/lib/data/guards';
 import { patrollingOfficers } from '@/lib/data/patrolling-officers';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { ShieldAlert, UserCheck, Map } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
 
 interface AgencyPerformanceData {
   agency: SecurityAgency;
   name: string;
   performance: number;
+  metrics: {
+    resolutionRate: number;
+    perimeterAccuracy: number;
+    selfieAccuracy: number;
+    visitRate: number;
+  };
 }
 
 const getPerformanceClass = (score: number) => {
-  if (score >= 90) return 'text-chart-2';
-  if (score >= 70) return 'text-yellow-500';
-  return 'text-destructive';
+  if (score >= 90) return 'bg-chart-2';
+  if (score >= 70) return 'bg-yellow-500';
+  return 'bg-destructive';
 };
+
+const getScoreColorClass = (score: number) => {
+    if (score >= 90) return 'text-chart-2';
+    if (score >= 70) return 'text-yellow-500';
+    return 'text-destructive';
+}
 
 export function AgencyPerformance({
   agencies,
@@ -88,6 +101,12 @@ export function AgencyPerformance({
         agency,
         name: agency.name,
         performance: Math.round(performance),
+        metrics: {
+            resolutionRate: Math.round(incidentResolutionRate),
+            perimeterAccuracy: Math.round(guardPerimeterAccuracy),
+            selfieAccuracy: Math.round(guardSelfieAccuracy),
+            visitRate: Math.round(officerSiteVisitRate),
+        }
       };
     });
 
@@ -121,15 +140,15 @@ export function AgencyPerformance({
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <ol className="space-y-3">
+        <ol className="space-y-4">
           {performanceData.map((data, index) => (
             <li
               key={data.agency.id}
               onClick={() => router.push(`/towerco/agencies/${data.agency.id}`)}
               className="p-4 rounded-lg border bg-card hover:bg-muted/50 cursor-pointer transition-colors"
             >
-              <div className="flex flex-wrap items-center gap-4">
-                <div className="flex items-center gap-4 flex-1">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="md:col-span-1 flex items-center gap-4">
                    <div className="text-2xl font-bold text-muted-foreground w-8 text-center">
                     {index + 1}
                    </div>
@@ -143,11 +162,42 @@ export function AgencyPerformance({
                    </div>
                 </div>
 
-                 <div className="text-3xl font-bold w-20 text-right" >
-                   <span className={cn(getPerformanceClass(data.performance))}>
-                    {data.performance}%
-                   </span>
-                 </div>
+                <div className="md:col-span-2 flex flex-col justify-center gap-3">
+                    <div className="flex items-center justify-between">
+                        <p className="text-sm font-medium">Overall Performance</p>
+                        <p className={cn("text-lg font-bold", getScoreColorClass(data.performance))}>{data.performance}%</p>
+                    </div>
+                    <div className="grid grid-cols-2 gap-x-6 gap-y-3 text-xs">
+                        <div>
+                            <div className="flex justify-between text-muted-foreground mb-1">
+                                <span>Incident Resolution</span>
+                                <span>{data.metrics.resolutionRate}%</span>
+                            </div>
+                            <Progress value={data.metrics.resolutionRate} className="h-1.5" indicatorClassName={getPerformanceClass(data.metrics.resolutionRate)} />
+                        </div>
+                        <div>
+                            <div className="flex justify-between text-muted-foreground mb-1">
+                                <span>Perimeter Accuracy</span>
+                                <span>{data.metrics.perimeterAccuracy}%</span>
+                            </div>
+                            <Progress value={data.metrics.perimeterAccuracy} className="h-1.5" indicatorClassName={getPerformanceClass(data.metrics.perimeterAccuracy)} />
+                        </div>
+                        <div>
+                            <div className="flex justify-between text-muted-foreground mb-1">
+                                <span>Selfie Accuracy</span>
+                                <span>{data.metrics.selfieAccuracy}%</span>
+                            </div>
+                            <Progress value={data.metrics.selfieAccuracy} className="h-1.5" indicatorClassName={getPerformanceClass(data.metrics.selfieAccuracy)} />
+                        </div>
+                        <div>
+                            <div className="flex justify-between text-muted-foreground mb-1">
+                                <span>Site Visit Rate</span>
+                                <span>{data.metrics.visitRate}%</span>
+                            </div>
+                            <Progress value={data.metrics.visitRate} className="h-1.5" indicatorClassName={getPerformanceClass(data.metrics.visitRate)} />
+                        </div>
+                    </div>
+                </div>
               </div>
             </li>
           ))}
