@@ -135,11 +135,77 @@ export default function AgencyPatrollingOfficersPage() {
     return (
       <>
         <div className="p-4 sm:p-6 lg:p-8 space-y-6">
-            <div>
-                <h1 className="text-3xl font-bold tracking-tight">Patrolling Officer Management</h1>
-                <p className="text-muted-foreground">
-                    Add, view, and manage patrolling officers.
-                </p>
+            <div className="flex flex-wrap items-center justify-between gap-4">
+                <div>
+                    <h1 className="text-3xl font-bold tracking-tight">Patrolling Officer Management</h1>
+                    <p className="text-muted-foreground">
+                        Add, view, and manage patrolling officers.
+                    </p>
+                </div>
+                 <div className="flex items-center gap-2">
+                     <Button variant="outline" onClick={handleDownloadTemplate}>
+                        <FileDown className="mr-2 h-4 w-4" />
+                        Download Excel Template
+                    </Button>
+                     <Dialog open={isUploadDialogOpen} onOpenChange={setIsUploadDialogOpen}>
+                        <DialogTrigger asChild>
+                            <Button>
+                                <Upload className="mr-2 h-4 w-4" />
+                                Upload Excel
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                            <DialogHeader>
+                            <DialogTitle>Upload Patrolling Officer Profiles</DialogTitle>
+                            <DialogDescription>
+                                Upload an Excel file to add multiple patrolling officer profiles at once.
+                            </DialogDescription>
+                            </DialogHeader>
+                            <Form {...uploadForm}>
+                                <form onSubmit={uploadForm.handleSubmit(onUploadSubmit)}>
+                                    <div className="grid gap-4 py-4">
+                                        <FormField
+                                            control={uploadForm.control}
+                                            name="excelFile"
+                                            render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Patrolling Officer Excel File</FormLabel>
+                                                <FormControl>
+                                                <Input
+                                                    type="file"
+                                                    accept=".xlsx, .xls"
+                                                    disabled={isUploading}
+                                                    onChange={(e) => field.onChange(e.target.files)}
+                                                />
+                                                </FormControl>
+                                                <FormDescription>
+                                                The Excel file should contain columns: name, phone, email.
+                                                </FormDescription>
+                                                <FormMessage />
+                                            </FormItem>
+                                            )}
+                                        />
+                                    </div>
+                                    <DialogFooter>
+                                        <Button type="submit" disabled={isUploading}>
+                                        {isUploading ? (
+                                            <>
+                                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                            Uploading...
+                                            </>
+                                        ) : (
+                                            <>
+                                            <Upload className="mr-2 h-4 w-4" />
+                                            Upload Excel
+                                            </>
+                                        )}
+                                        </Button>
+                                    </DialogFooter>
+                                </form>
+                            </Form>
+                        </DialogContent>
+                    </Dialog>
+                </div>
             </div>
 
             <Card>
@@ -150,69 +216,6 @@ export default function AgencyPatrollingOfficersPage() {
                             <CardDescription>A list of all patrolling officers in your agency.</CardDescription>
                         </div>
                         <div className="flex items-center gap-2">
-                             <Button variant="outline" onClick={handleDownloadTemplate}>
-                                <FileDown className="mr-2 h-4 w-4" />
-                                Download Excel Template
-                            </Button>
-                             <Dialog open={isUploadDialogOpen} onOpenChange={setIsUploadDialogOpen}>
-                                <DialogTrigger asChild>
-                                    <Button>
-                                        <Upload className="mr-2 h-4 w-4" />
-                                        Upload Excel
-                                    </Button>
-                                </DialogTrigger>
-                                <DialogContent>
-                                    <DialogHeader>
-                                    <DialogTitle>Upload Patrolling Officer Profiles</DialogTitle>
-                                    <DialogDescription>
-                                        Upload an Excel file to add multiple patrolling officer profiles at once.
-                                    </DialogDescription>
-                                    </DialogHeader>
-                                    <Form {...uploadForm}>
-                                        <form onSubmit={uploadForm.handleSubmit(onUploadSubmit)}>
-                                            <div className="grid gap-4 py-4">
-                                                <FormField
-                                                    control={uploadForm.control}
-                                                    name="excelFile"
-                                                    render={({ field }) => (
-                                                    <FormItem>
-                                                        <FormLabel>Patrolling Officer Excel File</FormLabel>
-                                                        <FormControl>
-                                                        <Input
-                                                            type="file"
-                                                            accept=".xlsx, .xls"
-                                                            disabled={isUploading}
-                                                            onChange={(e) => field.onChange(e.target.files)}
-                                                        />
-                                                        </FormControl>
-                                                        <FormDescription>
-                                                        The Excel file should contain columns: name, phone, email.
-                                                        </FormDescription>
-                                                        <FormMessage />
-                                                    </FormItem>
-                                                    )}
-                                                />
-                                            </div>
-                                            <DialogFooter>
-                                                <Button type="submit" disabled={isUploading}>
-                                                {isUploading ? (
-                                                    <>
-                                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                                    Uploading...
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                    <Upload className="mr-2 h-4 w-4" />
-                                                    Upload Excel
-                                                    </>
-                                                )}
-                                                </Button>
-                                            </DialogFooter>
-                                        </form>
-                                    </Form>
-                                </DialogContent>
-                            </Dialog>
-
                             <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
                                 <DialogTrigger asChild>
                                     <Button variant="outline">
