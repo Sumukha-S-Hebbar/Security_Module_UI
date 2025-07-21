@@ -2,7 +2,6 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import type { SecurityAgency, Site, Incident } from '@/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -11,7 +10,8 @@ import { patrollingOfficers } from '@/lib/data/patrolling-officers';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { Building2, CheckCircle, Shield, ShieldCheck, UserCheck, Users } from 'lucide-react';
+import { Building2, CheckCircle, ShieldCheck } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 
 interface AgencyPerformanceData {
@@ -26,9 +26,9 @@ interface AgencyPerformanceData {
 }
 
 const getPerformanceColor = (score: number): string => {
-  if (score >= 90) return 'bg-green-500'; // Excellent
-  if (score >= 75) return 'bg-yellow-500'; // Good
-  return 'bg-red-500'; // Needs attention
+  if (score >= 90) return 'bg-chart-2'; // Excellent (Theme Green)
+  if (score >= 75) return 'bg-chart-4'; // Good (Theme Yellow/Gold)
+  return 'bg-destructive'; // Needs attention (Theme Red)
 };
 
 export function AgencyPerformance({
@@ -119,12 +119,12 @@ export function AgencyPerformance({
       <CardHeader>
         <CardTitle>Agency Performance Leaderboard</CardTitle>
         <CardDescription>
-          Click an agency's performance bar to see a detailed breakdown.
+          A quick overview of security agency performance. Click an agency to see details.
         </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="md:col-span-2 space-y-3">
+            <div className="md:col-span-1 space-y-2">
                 {performanceData.map((data) => {
                   const performanceValue = data.performance['Overall Performance'];
                   return (
@@ -138,20 +138,20 @@ export function AgencyPerformance({
                                 : "hover:bg-muted/50"
                         )}
                     >
-                        <div className={cn("absolute top-0 left-0 h-full", getPerformanceColor(performanceValue))} style={{width: `${performanceValue}%`}} />
+                        <Progress value={performanceValue} className="absolute top-0 left-0 h-full w-full -z-10" indicatorClassName={cn("opacity-20", getPerformanceColor(performanceValue))} />
                         <div className="relative flex items-center gap-3 w-full">
                            <Avatar className="h-10 w-10 border-2 border-background">
                               <AvatarImage src={data.agency.avatar} alt={data.agency.name} />
                               <AvatarFallback>{data.agency.name.charAt(0)}</AvatarFallback>
                           </Avatar>
-                          <span className="font-semibold text-white mix-blend-difference">{data.agency.name}</span>
-                          <span className="ml-auto font-bold text-lg text-white mix-blend-difference pr-2">{performanceValue}%</span>
+                          <span className="font-semibold text-foreground">{data.agency.name}</span>
+                          <span className="ml-auto font-bold text-lg text-foreground pr-2">{performanceValue}%</span>
                         </div>
                     </button>
                 )})}
             </div>
 
-            <div className="md:col-span-1">
+            <div className="md:col-span-2">
                 {selectedAgencyData ? (
                     <div className="border rounded-lg p-4 h-full bg-muted/30">
                         <div className="flex justify-between items-start mb-4">
@@ -159,28 +159,27 @@ export function AgencyPerformance({
                              <h3 className="text-lg font-bold">{selectedAgencyData.agency.name}</h3>
                              <p className="text-sm text-muted-foreground">Performance Breakdown</p>
                            </div>
+                           <Button size="sm" variant="outline" onClick={() => router.push(`/towerco/agencies/${selectedAgencyData.agency.id}`)}>
+                             View Full Report
+                           </Button>
                         </div>
                         
                         <div className="space-y-4">
                             {(Object.entries(selectedAgencyData.performance) as [keyof AgencyPerformanceData['performance'], number][]).map(([metric, value]) => (
-                              metric !== 'Overall Performance' && (
                                 <div key={metric}>
-                                    <div className="flex justify-between items-center mb-1 text-xs">
+                                    <div className="flex justify-between items-center mb-1 text-sm">
                                         <p className="font-medium text-muted-foreground">{metric}</p>
                                         <p className="font-semibold">{value}%</p>
                                     </div>
                                     <Progress value={value} indicatorClassName={getPerformanceColor(value)} />
                                 </div>
-                              )
                             ))}
                         </div>
-                        <Button size="sm" className="w-full mt-4" onClick={() => router.push(`/towerco/agencies/${selectedAgencyData.agency.id}`)}>
-                             View Full Report
-                        </Button>
                     </div>
                 ) : (
                     <div className="flex items-center justify-center border rounded-lg h-full min-h-[200px] bg-muted/30">
                         <div className="text-center text-muted-foreground">
+                            <ShieldCheck className="mx-auto h-12 w-12 text-muted-foreground/50 mb-4" />
                             <p>Select an agency to see details</p>
                         </div>
                     </div>
@@ -191,4 +190,3 @@ export function AgencyPerformance({
     </Card>
   );
 }
-
