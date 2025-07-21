@@ -14,8 +14,6 @@ import { Progress } from '@/components/ui/progress';
 import { guards } from '@/lib/data/guards';
 import { patrollingOfficers } from '@/lib/data/patrolling-officers';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
-import { ShieldCheck } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import {
   BarChart,
@@ -180,6 +178,9 @@ export function AgencyPerformance({
     }));
   }, [performanceData]);
 
+  // Each agency bar group needs roughly 80px.
+  const chartWidth = Math.max(chartData.length * 80, 500); 
+
   return (
     <Card>
       <CardHeader>
@@ -190,34 +191,36 @@ export function AgencyPerformance({
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="md:col-span-2 h-[350px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart
-                data={chartData}
-                margin={{ top: 5, right: 20, left: 0, bottom: 20 }}
-              >
-                <XAxis 
-                  dataKey="name" 
-                  angle={-45}
-                  textAnchor="end"
-                  height={60}
-                  interval={0}
-                  tick={{ fontSize: 12 }}
-                />
-                <YAxis domain={[0, 100]} tick={{ fontSize: 12 }} />
-                <Tooltip cursor={{ fill: 'hsl(var(--muted))' }} content={<CustomTooltip />} />
-                <Bar 
-                  dataKey="performance" 
-                  radius={[4, 4, 0, 0]}
-                  barSize={30}
-                  onClick={(data) => setSelectedAgencyId(data.id)}
+          <div className="md:col-span-2 h-[350px] overflow-x-auto">
+            <div style={{ width: `${chartWidth}px`, height: '100%' }}>
+                <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                    data={chartData}
+                    margin={{ top: 5, right: 20, left: 0, bottom: 20 }}
                 >
-                   {chartData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={getPerformanceColor(entry.performance)} className="cursor-pointer" />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
+                    <XAxis 
+                    dataKey="name" 
+                    angle={-45}
+                    textAnchor="end"
+                    height={60}
+                    interval={0}
+                    tick={{ fontSize: 12 }}
+                    />
+                    <YAxis domain={[0, 100]} tick={{ fontSize: 12 }} />
+                    <Tooltip cursor={{ fill: 'hsl(var(--muted))' }} content={<CustomTooltip />} />
+                    <Bar 
+                    dataKey="performance" 
+                    radius={[4, 4, 0, 0]}
+                    barSize={30}
+                    onClick={(data) => setSelectedAgencyId(data.id)}
+                    >
+                    {chartData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={getPerformanceColor(entry.performance)} className="cursor-pointer" />
+                    ))}
+                    </Bar>
+                </BarChart>
+                </ResponsiveContainer>
+            </div>
           </div>
 
           <div className="md:col-span-1">
@@ -253,12 +256,12 @@ export function AgencyPerformance({
                     ][]
                   ).map(([metric, value]) => (
                     <div key={metric}>
-                       <div className="flex justify-between items-center mb-1 text-sm">
-                        <p className="font-medium text-muted-foreground">
-                          {metric}
-                        </p>
-                        <p className="font-semibold">{value}%</p>
-                      </div>
+                       <div className="flex justify-between items-center mb-1">
+                         <p className="text-sm font-medium text-muted-foreground">
+                           {metric}
+                         </p>
+                         <p className="text-sm font-semibold">{value}%</p>
+                       </div>
                       <Progress
                         value={value}
                         indicatorClassName={getPerformanceColor(value)}
@@ -269,10 +272,7 @@ export function AgencyPerformance({
               </div>
             ) : (
               <div className="flex items-center justify-center border rounded-lg h-full min-h-[200px] bg-muted/30">
-                <div className="text-center text-muted-foreground">
-                  <ShieldCheck className="mx-auto h-12 w-12 text-muted-foreground/50 mb-4" />
-                  <p>Select an agency to see details</p>
-                </div>
+                <p className="text-sm text-muted-foreground">Select an agency to see details</p>
               </div>
             )}
           </div>
