@@ -64,6 +64,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { AgencyPerformanceBreakdown } from './_components/agency-performance-breakdown';
+import { useRouter } from 'next/navigation';
 
 const LOGGED_IN_ORG_ID = 'TCO01'; // Simulate logged-in user
 
@@ -76,6 +77,7 @@ const chartConfig = {
 
 export default function AgencyReportPage() {
   const params = useParams();
+  const router = useRouter();
   const { toast } = useToast();
   const agencyId = params.agencyId as string;
 
@@ -472,7 +474,6 @@ export default function AgencyReportPage() {
                   <TableHead>Site</TableHead>
                   <TableHead>Guard</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead>Details</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -480,9 +481,13 @@ export default function AgencyReportPage() {
                   const site = getSiteById(incident.siteId);
                   const guard = getGuardById(incident.raisedByGuardId);
                   return (
-                    <TableRow key={incident.id}>
+                    <TableRow 
+                      key={incident.id}
+                      onClick={() => router.push(`/towerco/incidents/${incident.id}`)}
+                      className="cursor-pointer"
+                    >
                       <TableCell>
-                        <Button asChild variant="link" className="p-0 h-auto font-medium">
+                        <Button asChild variant="link" className="p-0 h-auto font-medium" onClick={(e) => e.stopPropagation()}>
                           <Link href={`/towerco/incidents/${incident.id}`}>{incident.id}</Link>
                         </Button>
                       </TableCell>
@@ -490,7 +495,6 @@ export default function AgencyReportPage() {
                       <TableCell>{site?.name || 'N/A'}</TableCell>
                       <TableCell>{guard?.name || 'N/A'}</TableCell>
                       <TableCell>{getStatusIndicator(incident.status)}</TableCell>
-                      <TableCell className="max-w-xs truncate">{incident.description}</TableCell>
                     </TableRow>
                   )
                 })}

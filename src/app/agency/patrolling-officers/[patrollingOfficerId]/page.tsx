@@ -31,11 +31,13 @@ import { useToast } from '@/hooks/use-toast';
 import { Progress } from '@/components/ui/progress';
 import { useMemo, useState } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useRouter } from 'next/navigation';
 
 const LOGGED_IN_AGENCY_ID = 'AGY01'; // Simulate logged-in agency
 
 export default function AgencyPatrollingOfficerReportPage() {
   const params = useParams();
+  const router = useRouter();
   const { toast } = useToast();
   const patrollingOfficerId = params.patrollingOfficerId as string;
   const [selectedMonth, setSelectedMonth] = useState('all');
@@ -314,7 +316,6 @@ export default function AgencyPatrollingOfficerReportPage() {
                   <TableHead>Site</TableHead>
                   <TableHead>Guard</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead>Details</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -322,13 +323,20 @@ export default function AgencyPatrollingOfficerReportPage() {
                     const site = sites.find(s => s.id === incident.siteId);
                     const guard = guards.find(g => g.id === incident.raisedByGuardId);
                     return (
-                        <TableRow key={incident.id}>
-                            <TableCell>{incident.id}</TableCell>
+                        <TableRow 
+                          key={incident.id}
+                          onClick={() => router.push(`/agency/incidents/${incident.id}`)}
+                          className="cursor-pointer"
+                        >
+                            <TableCell>
+                              <Button asChild variant="link" className="p-0 h-auto font-medium" onClick={(e) => e.stopPropagation()}>
+                                <Link href={`/agency/incidents/${incident.id}`}>{incident.id}</Link>
+                              </Button>
+                            </TableCell>
                             <TableCell>{new Date(incident.incidentTime).toLocaleString()}</TableCell>
                             <TableCell>{site?.name || 'N/A'}</TableCell>
                             <TableCell>{guard?.name || 'N/A'}</TableCell>
                             <TableCell>{getStatusIndicator(incident.status)}</TableCell>
-                            <TableCell className="max-w-xs truncate">{incident.description}</TableCell>
                         </TableRow>
                     )
                 })}

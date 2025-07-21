@@ -27,9 +27,11 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, MapPin, Building2, Briefcase, ShieldAlert, FileDown } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useRouter } from 'next/navigation';
 
 export default function SiteReportPage() {
   const params = useParams();
+  const router = useRouter();
   const { toast } = useToast();
   const siteId = params.siteId as string;
 
@@ -189,23 +191,25 @@ export default function SiteReportPage() {
                   <TableHead>Date & Time</TableHead>
                   <TableHead>Guard</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead>Details</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {siteIncidents.map((incident) => {
                   const guard = getGuardById(incident.raisedByGuardId);
                   return (
-                    <TableRow key={incident.id}>
+                    <TableRow 
+                      key={incident.id}
+                      onClick={() => router.push(`/towerco/incidents/${incident.id}`)}
+                      className="cursor-pointer"
+                    >
                       <TableCell>
-                        <Button asChild variant="link" className="p-0 h-auto font-medium">
+                        <Button asChild variant="link" className="p-0 h-auto font-medium" onClick={(e) => e.stopPropagation()}>
                           <Link href={`/towerco/incidents/${incident.id}`}>{incident.id}</Link>
                         </Button>
                       </TableCell>
                       <TableCell>{new Date(incident.incidentTime).toLocaleString()}</TableCell>
                       <TableCell>{guard?.name || 'N/A'}</TableCell>
                       <TableCell>{getStatusIndicator(incident.status)}</TableCell>
-                      <TableCell className="max-w-xs truncate">{incident.description}</TableCell>
                     </TableRow>
                   )
                 })}

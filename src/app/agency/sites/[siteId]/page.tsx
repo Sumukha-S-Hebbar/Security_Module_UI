@@ -28,9 +28,11 @@ import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, MapPin, UserCheck, ShieldAlert, FileDown, Fence, Users } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useRouter } from 'next/navigation';
 
 export default function AgencySiteReportPage() {
   const params = useParams();
+  const router = useRouter();
   const { toast } = useToast();
   const siteId = params.siteId as string;
 
@@ -210,19 +212,25 @@ export default function AgencySiteReportPage() {
                       <TableHead>Date & Time</TableHead>
                       <TableHead>Guard</TableHead>
                       <TableHead>Status</TableHead>
-                      <TableHead>Details</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {siteIncidents.map((incident) => {
                       const guard = getGuardById(incident.raisedByGuardId);
                       return (
-                        <TableRow key={incident.id}>
-                          <TableCell>{incident.id}</TableCell>
+                        <TableRow 
+                          key={incident.id}
+                          onClick={() => router.push(`/agency/incidents/${incident.id}`)}
+                          className="cursor-pointer"
+                        >
+                          <TableCell>
+                            <Button asChild variant="link" className="p-0 h-auto font-medium" onClick={(e) => e.stopPropagation()}>
+                              <Link href={`/agency/incidents/${incident.id}`}>{incident.id}</Link>
+                            </Button>
+                          </TableCell>
                           <TableCell>{new Date(incident.incidentTime).toLocaleString()}</TableCell>
                           <TableCell>{guard?.name || 'N/A'}</TableCell>
                           <TableCell>{getStatusIndicator(incident.status)}</TableCell>
-                          <TableCell className="max-w-xs truncate">{incident.description}</TableCell>
                         </TableRow>
                       )
                     })}

@@ -278,14 +278,17 @@ export function IncidentChart({
                                 <TableHead>Site</TableHead>
                                 <TableHead>Agency</TableHead>
                                 <TableHead>Status</TableHead>
-                                <TableHead>Actions</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {incidentsInSelectedMonth.map(incident => (
-                                <TableRow key={incident.id}>
+                                <TableRow 
+                                  key={incident.id}
+                                  onClick={() => router.push(`/towerco/incidents/${incident.id}`)}
+                                  className="cursor-pointer"
+                                >
                                     <TableCell>
-                                        <Button asChild variant="link" className="p-0 h-auto font-medium">
+                                        <Button asChild variant="link" className="p-0 h-auto font-medium" onClick={(e) => e.stopPropagation()}>
                                           <Link href={`/towerco/incidents/${incident.id}`}>{incident.id}</Link>
                                         </Button>
                                     </TableCell>
@@ -293,14 +296,6 @@ export function IncidentChart({
                                     <TableCell>{getSiteName(incident.siteId)}</TableCell>
                                     <TableCell>{getAgencyName(incident.siteId)}</TableCell>
                                     <TableCell>{getStatusIndicator(incident.status)}</TableCell>
-                                    <TableCell>
-                                        <Button asChild variant="outline" size="sm">
-                                            <Link href={`/towerco/incidents/${incident.id}`}>
-                                                <Eye className="mr-2 h-4 w-4" />
-                                                View Report
-                                            </Link>
-                                        </Button>
-                                    </TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>

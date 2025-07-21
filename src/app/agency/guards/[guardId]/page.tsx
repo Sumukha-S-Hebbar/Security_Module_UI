@@ -30,9 +30,11 @@ import {
 import { ArrowLeft, FileDown, Phone, MapPin, UserCheck, ShieldCheck } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { useToast } from '@/hooks/use-toast';
+import { useRouter } from 'next/navigation';
 
 export default function AgencyGuardReportPage() {
   const params = useParams();
+  const router = useRouter();
   const { toast } = useToast();
   const guardId = params.guardId as string;
 
@@ -274,8 +276,16 @@ export default function AgencyGuardReportPage() {
               </TableHeader>
               <TableBody>
                 {guardIncidents.map((incident) => (
-                  <TableRow key={incident.id}>
-                    <TableCell>{incident.id}</TableCell>
+                  <TableRow 
+                    key={incident.id}
+                    onClick={() => router.push(`/agency/incidents/${incident.id}`)}
+                    className="cursor-pointer"
+                  >
+                    <TableCell>
+                      <Button asChild variant="link" className="p-0 h-auto font-medium" onClick={(e) => e.stopPropagation()}>
+                        <Link href={`/agency/incidents/${incident.id}`}>{incident.id}</Link>
+                      </Button>
+                    </TableCell>
                     <TableCell>{new Date(incident.incidentTime).toLocaleString()}</TableCell>
                     <TableCell>{incident.siteId}</TableCell>
                     <TableCell>{getStatusIndicator(incident.status)}</TableCell>

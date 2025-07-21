@@ -44,7 +44,8 @@ import { guards as mockGuards } from '@/lib/data/guards';
 import { patrollingOfficers as mockPatrollingOfficers } from '@/lib/data/patrolling-officers';
 import { sites as mockSites } from '@/lib/data/sites';
 import { organizations as mockOrganizations } from '@/lib/data/organizations';
-
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 const LOGGED_IN_ORG_ID = 'TCO01'; // Simulate logged-in user
 
@@ -109,6 +110,7 @@ async function getDashboardData(): Promise<DashboardData> {
 export default function TowercoHomePage() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -205,7 +207,7 @@ export default function TowercoHomePage() {
                   <Table>
                       <TableHeader>
                           <TableRow>
-                          <TableHead>Site ID</TableHead>
+                          <TableHead>Incident ID</TableHead>
                           <TableHead>Site Name</TableHead>
                           <TableHead>Agency</TableHead>
                           <TableHead>Patrolling Officer</TableHead>
@@ -225,8 +227,16 @@ export default function TowercoHomePage() {
                           const incidentDate = new Date(incident.incidentTime);
 
                           return (
-                              <TableRow key={incident.id}>
-                              <TableCell>{incident.siteId}</TableCell>
+                              <TableRow 
+                                key={incident.id}
+                                onClick={() => router.push(`/towerco/incidents/${incident.id}`)}
+                                className="cursor-pointer"
+                              >
+                              <TableCell>
+                                <Button asChild variant="link" className="p-0 h-auto font-medium" onClick={(e) => e.stopPropagation()}>
+                                  <Link href={`/towerco/incidents/${incident.id}`}>{incident.id}</Link>
+                                </Button>
+                              </TableCell>
                               <TableCell className="font-medium">
                                   {siteDetails?.name || 'N/A'}
                               </TableCell>
@@ -239,11 +249,11 @@ export default function TowercoHomePage() {
                               <TableCell className="text-right">
                                   <DropdownMenu>
                                   <DropdownMenuTrigger asChild>
-                                      <Button variant="outline" size="sm">
+                                      <Button variant="outline" size="sm" onClick={(e) => e.stopPropagation()}>
                                       Contact <ChevronDown className="ml-2 h-4 w-4" />
                                       </Button>
                                   </DropdownMenuTrigger>
-                                  <DropdownMenuContent align="end">
+                                  <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
                                       {guardDetails && (
                                       <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
                                           <a href={`tel:${guardDetails.phone}`} className="flex items-center gap-2 w-full">

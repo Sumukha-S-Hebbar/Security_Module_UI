@@ -42,11 +42,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 const LOGGED_IN_AGENCY_ID = 'AGY01'; // Simulate logged-in agency
 
 export default function AgencyHomePage() {
   const [selectedMonth, setSelectedMonth] = useState('all');
+  const router = useRouter();
 
   const agencySiteIds = useMemo(() => {
     const agency = securityAgencies.find(a => a.id === LOGGED_IN_AGENCY_ID);
@@ -133,7 +136,7 @@ export default function AgencyHomePage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Site ID</TableHead>
+                  <TableHead>Incident ID</TableHead>
                   <TableHead>Site Name</TableHead>
                   <TableHead>Guard</TableHead>
                   <TableHead>Patrolling Officer</TableHead>
@@ -150,8 +153,16 @@ export default function AgencyHomePage() {
                   const incidentDate = new Date(incident.incidentTime);
                   
                   return (
-                    <TableRow key={incident.id}>
-                      <TableCell>{siteDetails?.id || 'N/A'}</TableCell>
+                    <TableRow 
+                      key={incident.id}
+                      onClick={() => router.push(`/agency/incidents/${incident.id}`)}
+                      className="cursor-pointer"
+                    >
+                      <TableCell>
+                        <Button asChild variant="link" className="p-0 h-auto font-medium" onClick={(e) => e.stopPropagation()}>
+                          <Link href={`/agency/incidents/${incident.id}`}>{incident.id}</Link>
+                        </Button>
+                      </TableCell>
                       <TableCell className="font-medium">
                         {siteDetails?.name || 'N/A'}
                       </TableCell>
@@ -164,11 +175,11 @@ export default function AgencyHomePage() {
                       <TableCell>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="outline" size="sm">
+                            <Button variant="outline" size="sm" onClick={(e) => e.stopPropagation()}>
                               Contact <ChevronDown className="ml-2 h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
+                          <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
                             {guardDetails && (
                               <DropdownMenuItem asChild>
                                 <a href={`tel:${guardDetails.phone}`}>

@@ -299,8 +299,10 @@ export default function TowercoIncidentsPage() {
                       onClick={() => router.push(`/towerco/incidents/${incident.id}`)}
                       className="cursor-pointer"
                     >
-                      <TableCell className="font-medium">
-                        {incident.id}
+                      <TableCell>
+                        <Button asChild variant="link" className="p-0 h-auto font-medium" onClick={(e) => e.stopPropagation()}>
+                          <Link href={`/towerco/incidents/${incident.id}`}>{incident.id}</Link>
+                        </Button>
                       </TableCell>
                       <TableCell>{new Date(incident.incidentTime).toLocaleString()}</TableCell>
                       <TableCell>{site?.name || 'N/A'}</TableCell>
