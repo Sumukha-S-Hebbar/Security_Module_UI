@@ -226,14 +226,6 @@ export default function AgencySitesPage() {
     });
   };
 
-  const handleDownloadReport = (e: React.MouseEvent, site: Site) => {
-    e.stopPropagation();
-    toast({
-      title: 'Report Download Started',
-      description: `Downloading report for ${site.name}.`,
-    });
-  };
-
   const filteredAssignedSites = useMemo(() => {
     return assignedSites.filter((site) => {
       const searchLower = assignedSearchQuery.toLowerCase();
@@ -371,7 +363,6 @@ export default function AgencySitesPage() {
                 <TableHead>Site Name</TableHead>
                 <TableHead>Patrolling Officer</TableHead>
                 <TableHead>Incidents</TableHead>
-                <TableHead className="text-right">Download</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -396,18 +387,12 @@ export default function AgencySitesPage() {
                     </TableCell>
                     <TableCell>{patrollingOfficer?.name || 'N/A'}</TableCell>
                     <TableCell>{incidentsCount}</TableCell>
-                    <TableCell className="text-right">
-                      <Button variant="outline" size="sm" onClick={(e) => handleDownloadReport(e, site)}>
-                          <FileDown className="mr-2 h-4 w-4" />
-                          Report
-                      </Button>
-                    </TableCell>
                   </TableRow>
                 )
               })
             ) : (
               <TableRow>
-                <TableCell colSpan={5} className="text-center text-muted-foreground py-10">
+                <TableCell colSpan={4} className="text-center text-muted-foreground py-10">
                   No assigned sites found for the current filter.
                 </TableCell>
               </TableRow>
