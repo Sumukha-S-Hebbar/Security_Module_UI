@@ -41,8 +41,7 @@ export function AgencyPerformance({
   incidents: Incident[];
 }) {
   const router = useRouter();
-  const [selectedAgencyId, setSelectedAgencyId] = useState<string | null>(null);
-
+  
   const performanceData: AgencyPerformanceData[] = useMemo(() => {
     const data = agencies.map((agency) => {
       const agencySiteIds = new Set(agency.siteIds);
@@ -106,74 +105,78 @@ export function AgencyPerformance({
       };
     });
 
-    const sortedData = data.sort((a, b) => b.performance['Overall Performance'] - a.performance['Overall Performance']);
-    if (sortedData.length > 0 && !selectedAgencyId) {
-        setSelectedAgencyId(sortedData[0].agency.id);
-    }
-    return sortedData;
+    return data.sort((a, b) => b.performance['Overall Performance'] - a.performance['Overall Performance']);
   }, [agencies, sites, incidents]);
+
+  const [selectedAgencyId, setSelectedAgencyId] = useState<string | null>(
+    performanceData.length > 0 ? performanceData[0].agency.id : null
+  );
   
   const selectedAgencyData = performanceData.find(d => d.agency.id === selectedAgencyId);
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Agency Performance</CardTitle>
+        <CardTitle>Agency Performance Leaderboard</CardTitle>
         <CardDescription>
-          Select an agency on the left to view their detailed performance breakdown.
+          Click an agency's performance bar to see a detailed breakdown.
         </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="md:col-span-1 space-y-2">
-                {performanceData.map((data, index) => (
+            <div className="md:col-span-2 space-y-3">
+                {performanceData.map((data) => {
+                  const performanceValue = data.performance['Overall Performance'];
+                  return (
                     <button
                         key={data.agency.id}
                         onClick={() => setSelectedAgencyId(data.agency.id)}
                         className={cn(
-                            "w-full text-left p-3 rounded-lg border transition-all flex items-center gap-3",
+                            "w-full text-left p-2 rounded-lg border transition-all relative h-14 flex items-center gap-3 overflow-hidden",
                             selectedAgencyId === data.agency.id 
                                 ? "bg-primary/10 border-primary ring-2 ring-primary" 
                                 : "hover:bg-muted/50"
                         )}
                     >
-                        <span className="font-bold text-lg text-muted-foreground w-6">#{index + 1}</span>
-                        <Avatar className="h-10 w-10">
-                            <AvatarImage src={data.agency.avatar} alt={data.agency.name} />
-                            <AvatarFallback>{data.agency.name.charAt(0)}</AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1">
-                            <p className="font-semibold">{data.agency.name}</p>
-                            <p className="text-sm text-muted-foreground">Overall: {data.performance['Overall Performance']}%</p>
+                        <div className={cn("absolute top-0 left-0 h-full", getPerformanceColor(performanceValue))} style={{width: `${performanceValue}%`}} />
+                        <div className="relative flex items-center gap-3 w-full">
+                           <Avatar className="h-10 w-10 border-2 border-background">
+                              <AvatarImage src={data.agency.avatar} alt={data.agency.name} />
+                              <AvatarFallback>{data.agency.name.charAt(0)}</AvatarFallback>
+                          </Avatar>
+                          <span className="font-semibold text-white mix-blend-difference">{data.agency.name}</span>
+                          <span className="ml-auto font-bold text-lg text-white mix-blend-difference pr-2">{performanceValue}%</span>
                         </div>
                     </button>
-                ))}
+                )})}
             </div>
 
-            <div className="md:col-span-2">
+            <div className="md:col-span-1">
                 {selectedAgencyData ? (
-                    <div className="border rounded-lg p-6 h-full">
-                        <div className="flex justify-between items-start mb-6">
+                    <div className="border rounded-lg p-4 h-full bg-muted/30">
+                        <div className="flex justify-between items-start mb-4">
                            <div>
-                             <h3 className="text-xl font-bold">{selectedAgencyData.agency.name}</h3>
-                             <p className="text-muted-foreground">Performance Breakdown</p>
+                             <h3 className="text-lg font-bold">{selectedAgencyData.agency.name}</h3>
+                             <p className="text-sm text-muted-foreground">Performance Breakdown</p>
                            </div>
-                           <Button onClick={() => router.push(`/towerco/agencies/${selectedAgencyData.agency.id}`)}>
-                             View Full Report
-                           </Button>
                         </div>
                         
-                        <div className="space-y-5">
+                        <div className="space-y-4">
                             {(Object.entries(selectedAgencyData.performance) as [keyof AgencyPerformanceData['performance'], number][]).map(([metric, value]) => (
+                              metric !== 'Overall Performance' && (
                                 <div key={metric}>
-                                    <div className="flex justify-between items-center mb-1 text-sm">
+                                    <div className="flex justify-between items-center mb-1 text-xs">
                                         <p className="font-medium text-muted-foreground">{metric}</p>
                                         <p className="font-semibold">{value}%</p>
                                     </div>
                                     <Progress value={value} indicatorClassName={getPerformanceColor(value)} />
                                 </div>
+                              )
                             ))}
                         </div>
+                        <Button size="sm" className="w-full mt-4" onClick={() => router.push(`/towerco/agencies/${selectedAgencyData.agency.id}`)}>
+                             View Full Report
+                        </Button>
                     </div>
                 ) : (
                     <div className="flex items-center justify-center border rounded-lg h-full min-h-[200px] bg-muted/30">
@@ -188,3 +191,4 @@ export function AgencyPerformance({
     </Card>
   );
 }
+
