@@ -2,6 +2,7 @@
 'use client';
 
 import { useState, useMemo, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { sites } from '@/lib/data/sites';
 import { guards } from '@/lib/data/guards';
@@ -67,6 +68,7 @@ export default function AgencySitesPage() {
     [key: string]: string[];
   }>({});
   const { toast } = useToast();
+  const router = useRouter();
   
   // State for Assigned Sites filters
   const [assignedSearchQuery, setAssignedSearchQuery] = useState('');
@@ -224,7 +226,8 @@ export default function AgencySitesPage() {
     });
   };
 
-  const handleDownloadReport = (site: Site) => {
+  const handleDownloadReport = (e: React.MouseEvent, site: Site) => {
+    e.stopPropagation();
     toast({
       title: 'Report Download Started',
       description: `Downloading report for ${site.name}.`,
@@ -361,64 +364,56 @@ export default function AgencySitesPage() {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-6">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Site ID</TableHead>
+                <TableHead>Site Name</TableHead>
+                <TableHead>Patrolling Officer</TableHead>
+                <TableHead>Incidents</TableHead>
+                <TableHead className="text-right">Download</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
             {filteredAssignedSites.length > 0 ? (
               filteredAssignedSites.map((site) => {
                 const patrollingOfficer = getPatrollingOfficerForSite(site.id);
                 const incidentsCount = siteIncidentsCount[site.id] || 0;
                 return (
-                  <Card key={site.id} className="flex flex-col">
-                    <CardHeader>
-                      <CardTitle className="text-lg">{site.name}</CardTitle>
-                      <CardDescription>ID: {site.id}</CardDescription>
-                    </CardHeader>
-                    <CardContent className="flex-grow space-y-2 text-sm">
-                      <div className="flex items-start gap-2 text-muted-foreground">
-                        <MapPin className="h-4 w-4 flex-shrink-0 mt-1" />
-                        <span>{site.address}</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <UserCheck className="h-4 w-4 flex-shrink-0" />
-                        <span>{patrollingOfficer?.name || 'N/A'}</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <Fence className="h-4 w-4 flex-shrink-0" />
-                        <span>
-                          {site.geofencePerimeter
-                            ? `${site.geofencePerimeter}m`
-                            : 'N/A'}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <ShieldAlert className="h-4 w-4 flex-shrink-0" />
-                        <span>{incidentsCount} Incidents</span>
-                      </div>
-                    </CardContent>
-                    <CardFooter className="grid grid-cols-2 gap-2">
-                        <Button asChild variant="outline" size="sm">
-                            <Link href={`/agency/sites/${site.id}`}>
-                                <Eye className="mr-2 h-4 w-4" />
-                                View Report
-                            </Link>
-                        </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleDownloadReport(site)}
-                      >
-                        <FileDown className="mr-2 h-4 w-4" />
-                        Download Report
+                  <TableRow 
+                    key={site.id} 
+                    onClick={() => router.push(`/agency/sites/${site.id}`)}
+                    className="cursor-pointer"
+                  >
+                    <TableCell>
+                      <Button asChild variant="link" className="p-0 h-auto font-medium" onClick={(e) => e.stopPropagation()}>
+                        <Link href={`/agency/sites/${site.id}`}>{site.id}</Link>
                       </Button>
-                    </CardFooter>
-                  </Card>
-                );
+                    </TableCell>
+                    <TableCell>
+                      <p className="font-medium">{site.name}</p>
+                      <p className="text-sm text-muted-foreground">{site.address}</p>
+                    </TableCell>
+                    <TableCell>{patrollingOfficer?.name || 'N/A'}</TableCell>
+                    <TableCell>{incidentsCount}</TableCell>
+                    <TableCell className="text-right">
+                      <Button variant="outline" size="sm" onClick={(e) => handleDownloadReport(e, site)}>
+                          <FileDown className="mr-2 h-4 w-4" />
+                          Report
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                )
               })
             ) : (
-              <div className="col-span-full text-center text-muted-foreground py-10">
-                No assigned sites found for the current filter.
-              </div>
+              <TableRow>
+                <TableCell colSpan={5} className="text-center text-muted-foreground py-10">
+                  No assigned sites found for the current filter.
+                </TableCell>
+              </TableRow>
             )}
-          </div>
+            </TableBody>
+          </Table>
         </CardContent>
       </Card>
 

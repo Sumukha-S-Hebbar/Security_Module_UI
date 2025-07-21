@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useMemo, useEffect, useRef } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -98,6 +98,7 @@ export default function TowercoSitesPage() {
   const [isAddingSite, setIsAddingSite] = useState(false);
   const { toast } = useToast();
   const searchParams = useSearchParams();
+  const router = useRouter();
 
   // State for filters
   const [assignedSearchQuery, setAssignedSearchQuery] = useState('');
@@ -633,7 +634,6 @@ export default function TowercoSitesPage() {
                         <TableHead>Site Name</TableHead>
                         <TableHead>Agency</TableHead>
                         <TableHead>Incidents</TableHead>
-                        <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -642,8 +642,16 @@ export default function TowercoSitesPage() {
                             const agency = getAgencyForSite(site.id);
                             const incidentsCount = siteIncidentsCount[site.id] || 0;
                             return (
-                                <TableRow key={site.id}>
-                                    <TableCell className="font-medium">{site.id}</TableCell>
+                                <TableRow
+                                  key={site.id}
+                                  onClick={() => router.push(`/towerco/sites/${site.id}`)}
+                                  className="cursor-pointer"
+                                >
+                                    <TableCell>
+                                      <Button asChild variant="link" className="p-0 h-auto font-medium" onClick={(e) => e.stopPropagation()}>
+                                        <Link href={`/towerco/sites/${site.id}`}>{site.id}</Link>
+                                      </Button>
+                                    </TableCell>
                                     <TableCell>
                                         <div className="font-medium">{site.name}</div>
                                         <div className="text-sm text-muted-foreground flex items-center gap-1">
@@ -663,20 +671,12 @@ export default function TowercoSitesPage() {
                                             <span>{incidentsCount}</span>
                                         </div>
                                     </TableCell>
-                                    <TableCell className="text-right">
-                                        <Button asChild variant="outline" size="sm">
-                                            <Link href={`/towerco/sites/${site.id}`}>
-                                                <Eye className="mr-2 h-4 w-4" />
-                                                View Report
-                                            </Link>
-                                        </Button>
-                                    </TableCell>
                                 </TableRow>
                             )
                         })
                     ) : (
                          <TableRow>
-                            <TableCell colSpan={5} className="text-center text-muted-foreground py-10">
+                            <TableCell colSpan={4} className="text-center text-muted-foreground py-10">
                                 No assigned sites found for the current filter.
                             </TableCell>
                         </TableRow>
@@ -779,8 +779,17 @@ export default function TowercoSitesPage() {
                         (agency) => agency.region === site.region
                       );
                       return (
-                        <TableRow key={site.id} ref={(el) => unassignedSitesRef.current.set(site.id, el)}>
-                          <TableCell className="font-medium">{site.id}</TableCell>
+                        <TableRow 
+                          key={site.id} 
+                          ref={(el) => unassignedSitesRef.current.set(site.id, el)}
+                          onClick={() => router.push(`/towerco/sites/${site.id}`)}
+                          className="cursor-pointer"
+                        >
+                          <TableCell>
+                             <Button asChild variant="link" className="p-0 h-auto font-medium" onClick={(e) => e.stopPropagation()}>
+                                <Link href={`/towerco/sites/${site.id}`}>{site.id}</Link>
+                              </Button>
+                          </TableCell>
                           <TableCell>
                             <div>{site.name}</div>
                             <div className="text-sm text-muted-foreground flex items-center gap-1">
@@ -793,6 +802,7 @@ export default function TowercoSitesPage() {
                               onValueChange={(value) =>
                                 handleAssignmentChange(site.id, value)
                               }
+                               onClick={(e) => e.stopPropagation()}
                             >
                               <SelectTrigger className="w-[200px]">
                                 <SelectValue placeholder="Select an agency" />
@@ -815,7 +825,10 @@ export default function TowercoSitesPage() {
                           <TableCell className="text-right">
                             <Button
                               size="sm"
-                              onClick={() => handleAssignAgency(site.id)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleAssignAgency(site.id);
+                              }}
                               disabled={!assignments[site.id]}
                             >
                               Assign Agency
