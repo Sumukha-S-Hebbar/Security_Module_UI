@@ -39,9 +39,9 @@ interface AgencyPerformanceData {
 }
 
 const getPerformanceColor = (score: number): string => {
-  if (score >= 90) return 'hsl(var(--chart-2))'; // Excellent (Theme Green)
-  if (score >= 75) return 'hsl(var(--chart-4))'; // Good (Theme Yellow/Gold)
-  return 'hsl(var(--destructive))'; // Needs attention (Theme Red)
+  if (score >= 90) return 'hsl(var(--chart-2))';
+  if (score >= 75) return 'hsl(var(--chart-4))';
+  return 'hsl(var(--destructive))';
 };
 
 const CustomTooltip = ({ active, payload, label }: any) => {
@@ -194,13 +194,13 @@ export function AgencyPerformance({
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
                 data={chartData}
-                margin={{ top: 5, right: 20, left: 0, bottom: 80 }}
+                margin={{ top: 5, right: 20, left: 0, bottom: 20 }}
               >
                 <XAxis 
                   dataKey="name" 
                   angle={-45}
                   textAnchor="end"
-                  height={1}
+                  height={60}
                   interval={0}
                   tick={{ fontSize: 12 }}
                 />
@@ -209,6 +209,7 @@ export function AgencyPerformance({
                 <Bar 
                   dataKey="performance" 
                   radius={[4, 4, 0, 0]}
+                  barSize={30}
                   onClick={(data) => setSelectedAgencyId(data.id)}
                 >
                    {chartData.map((entry, index) => (
@@ -252,7 +253,7 @@ export function AgencyPerformance({
                     ][]
                   ).map(([metric, value]) => (
                     <div key={metric}>
-                      <div className="flex justify-between items-center mb-1 text-sm">
+                       <div className="flex justify-between items-center mb-1 text-sm">
                         <p className="font-medium text-muted-foreground">
                           {metric}
                         </p>
