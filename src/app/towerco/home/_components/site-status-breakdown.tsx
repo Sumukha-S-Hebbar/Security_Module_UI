@@ -16,7 +16,8 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { Briefcase, Dot } from 'lucide-react';
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
+import { ChartTooltipContent } from '@/components/ui/chart';
 import { cn } from '@/lib/utils';
 
 const COLORS = ['hsl(var(--chart-2))', 'hsl(var(--destructive))'];
@@ -24,7 +25,7 @@ const COLORS = ['hsl(var(--chart-2))', 'hsl(var(--destructive))'];
 export function SiteStatusBreakdown({ sites, agencies }: { sites: Site[]; agencies: SecurityAgency[] }) {
   const [activeSection, setActiveSection] = useState<'Assigned' | 'Unassigned'>('Assigned');
 
-  const { assignedSites, unassignedSites, chartData } = useMemo(() => {
+  const { assignedSites, unassignedSites, chartData, totalSites } = useMemo(() => {
     const agencySiteIds = new Set(agencies.flatMap(a => a.siteIds));
     const assigned = sites.filter((site) => agencySiteIds.has(site.id));
     const unassigned = sites.filter((site) => !agencySiteIds.has(site.id));
@@ -36,12 +37,30 @@ export function SiteStatusBreakdown({ sites, agencies }: { sites: Site[]; agenci
       assignedSites: assigned,
       unassignedSites: unassigned,
       chartData: data,
+      totalSites: sites.length,
     };
   }, [sites, agencies]);
 
   const getAgencyForSite = (siteId: string) => {
     return agencies.find(a => a.siteIds.includes(siteId));
   }
+  
+  const customTooltipContent = (props: any) => {
+    if (!props.active || !props.payload || props.payload.length === 0) {
+      return null;
+    }
+    const data = props.payload[0].payload;
+    const percentage = totalSites > 0 ? ((data.value / totalSites) * 100).toFixed(1) : 0;
+    
+    return (
+      <div className="rounded-lg border bg-background p-2 text-sm shadow-sm">
+        <div className="font-bold">{data.name}</div>
+        <div>
+          {data.value} Sites ({percentage}%)
+        </div>
+      </div>
+    );
+  };
 
   const renderActiveSection = () => {
     const isAssigned = activeSection === 'Assigned';
@@ -109,27 +128,21 @@ export function SiteStatusBreakdown({ sites, agencies }: { sites: Site[]; agenci
             <div className="w-full h-64">
                 <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
-                    <Pie
-                        data={chartData}
-                        cx="50%"
-                        cy="50%"
-                        labelLine={false}
-                        outerRadius={80}
-                        innerRadius={50}
-                        dataKey="value"
-                        stroke="none"
-                    >
-                        {chartData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                        ))}
-                    </Pie>
-                    <Tooltip 
-                      contentStyle={{
-                        borderRadius: 'var(--radius)',
-                        border: '1px solid hsl(var(--border))',
-                        background: 'hsl(var(--background))',
-                      }}
-                    />
+                        <Tooltip content={customTooltipContent} />
+                        <Pie
+                            data={chartData}
+                            cx="50%"
+                            cy="50%"
+                            labelLine={false}
+                            outerRadius={100}
+                            dataKey="value"
+                            stroke="hsl(var(--background))"
+                            strokeWidth={2}
+                        >
+                            {chartData.map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={entry.color} />
+                            ))}
+                        </Pie>
                     </PieChart>
                 </ResponsiveContainer>
             </div>
