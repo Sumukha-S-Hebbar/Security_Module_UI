@@ -143,14 +143,14 @@ export function AgencyPerformance({
                             <AvatarImage src={data.agency.avatar} alt={data.name} />
                             <AvatarFallback>{data.name.charAt(0)}</AvatarFallback>
                         </Avatar>
-                        <div className="flex-1" onClick={(e) => {
+                        <div className="flex-grow w-1/3" onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
                             router.push(`/towerco/agencies/${data.agency.id}`)
                         }}>
-                            <p className="font-medium">{data.name}</p>
+                            <p className="font-medium truncate">{data.name}</p>
                         </div>
-                        <div className="w-1/3">
+                        <div className="flex-1">
                              <Progress value={data.performance} indicatorClassName={getPerformanceClass(data.performance)} className="h-4 rounded-full relative overflow-visible">
                                 <div className="text-xs font-bold text-white text-center absolute w-full">{data.performance}%</div>
                              </Progress>
