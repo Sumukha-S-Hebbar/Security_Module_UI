@@ -16,7 +16,6 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
-import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import Link from 'next/link';
 
 
@@ -38,7 +37,7 @@ export function AgencyPerformance({
   sites: Site[];
   incidents: Incident[];
 }) {
-  const [openAgencyId, setOpenAgencyId] = useState<string | null>(null);
+  const [openAgencyId, setOpenAgencyId] = useState<string | null>(agencies[0]?.id || null);
 
   const performanceData = useMemo(() => {
     const data: AgencyPerformanceData[] = agencies.map((agency) => {
@@ -127,59 +126,34 @@ export function AgencyPerformance({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Agency Performance</CardTitle>
+        <CardTitle>Agency Performance Ranking</CardTitle>
         <CardDescription>
-          Overall score based on incidents, guard, and officer performance. Click an agency to expand details.
+          Ranked list of agencies by performance. Click to expand details.
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {performanceData.map((data) => {
-              const pieData = [
-                { name: 'Performance', value: data.performance },
-                { name: 'Remaining', value: 100 - data.performance },
-              ];
-              const COLORS = ['hsl(var(--primary))', 'hsl(var(--muted))'];
+        <div className="space-y-4">
+            {performanceData.map((data, index) => {
               const isOpen = openAgencyId === data.agency.id;
 
               return (
                 <Collapsible key={data.agency.id} open={isOpen} onOpenChange={() => setOpenAgencyId(isOpen ? null : data.agency.id)}>
-                  <Card className="overflow-hidden">
+                  <Card className={cn("overflow-hidden transition-all", isOpen ? "border-primary" : "border-border")}>
                     <CollapsibleTrigger asChild>
                       <div className="p-4 cursor-pointer hover:bg-muted/50 transition-colors">
-                        <div className="flex items-start justify-between gap-4">
-                          <div className="flex items-center gap-4">
-                            <Avatar className="h-12 w-12">
-                              <AvatarImage src={data.agency.avatar} alt={data.agency.name} />
-                              <AvatarFallback>{data.agency.name.charAt(0)}</AvatarFallback>
-                            </Avatar>
-                            <div>
-                              <p className="font-semibold">{data.agency.name}</p>
-                              <p className="text-sm text-muted-foreground">Performance Score</p>
-                            </div>
+                        <div className="flex items-center gap-4">
+                          <span className="text-xl font-bold text-muted-foreground w-6 text-center">{index + 1}</span>
+                          <Avatar className="h-10 w-10">
+                            <AvatarImage src={data.agency.avatar} alt={data.agency.name} />
+                            <AvatarFallback>{data.agency.name.charAt(0)}</AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1">
+                            <p className="font-semibold">{data.agency.name}</p>
+                            <Progress value={data.performance} className="h-2 mt-1" />
                           </div>
-                          <div className="w-20 h-20 relative flex-shrink-0">
-                            <ResponsiveContainer width="100%" height="100%">
-                              <PieChart>
-                                <Pie
-                                  data={pieData}
-                                  cx="50%"
-                                  cy="50%"
-                                  innerRadius="70%"
-                                  outerRadius="85%"
-                                  paddingAngle={0}
-                                  dataKey="value"
-                                  stroke="none"
-                                >
-                                  {pieData.map((entry, index) => (
-                                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                  ))}
-                                </Pie>
-                              </PieChart>
-                            </ResponsiveContainer>
-                            <div className="absolute inset-0 flex items-center justify-center">
-                              <span className="text-2xl font-bold text-foreground">{data.performance}%</span>
-                            </div>
+                          <div className="flex items-center gap-2">
+                             <span className="text-xl font-bold text-primary">{data.performance}%</span>
+                             <ChevronDown className={cn("h-5 w-5 text-muted-foreground transition-transform", isOpen && "rotate-180")} />
                           </div>
                         </div>
                       </div>
@@ -187,7 +161,7 @@ export function AgencyPerformance({
                     <CollapsibleContent>
                       <div className="bg-muted/50 p-4 border-t">
                         <h4 className="font-semibold mb-3 text-sm">Performance Breakdown</h4>
-                        <div className="space-y-3 text-sm">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3 text-sm">
                           <div className="flex items-center gap-2">
                             <ShieldAlert className="w-4 h-4 text-primary" />
                             <div className="flex-1 flex justify-between">
