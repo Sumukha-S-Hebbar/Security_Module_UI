@@ -509,16 +509,21 @@ export default function AgencySitesPage() {
                             <DropdownMenuLabel>Available Guards</DropdownMenuLabel>
                             <DropdownMenuSeparator />
                             {unassignedGuards.length > 0 ? (
-                              unassignedGuards.map((guard) => (
-                                <DropdownMenuCheckboxItem
-                                  key={guard.id}
-                                  checked={selectedGuards[site.id]?.includes(guard.id)}
-                                  onSelect={(e) => e.preventDefault()}
-                                  onCheckedChange={() => handleGuardSelect(site.id, guard.id)}
-                                >
-                                  {guard.name}
-                                </DropdownMenuCheckboxItem>
-                              ))
+                              unassignedGuards.map((guard) => {
+                                const isChecked = selectedGuards[site.id]?.includes(guard.id);
+                                const limitReached = (selectedGuards[site.id]?.length || 0) >= (site.guardsRequired || 0);
+                                return (
+                                  <DropdownMenuCheckboxItem
+                                    key={guard.id}
+                                    checked={isChecked}
+                                    disabled={!isChecked && limitReached}
+                                    onSelect={(e) => e.preventDefault()}
+                                    onCheckedChange={() => handleGuardSelect(site.id, guard.id)}
+                                  >
+                                    {guard.name}
+                                  </DropdownMenuCheckboxItem>
+                                )
+                              })
                             ) : (
                               <div className="px-2 py-1.5 text-sm text-muted-foreground">No unassigned guards</div>
                             )}
