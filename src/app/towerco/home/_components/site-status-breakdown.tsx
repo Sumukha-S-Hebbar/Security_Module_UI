@@ -1,4 +1,3 @@
-// src/app/towerco/home/_components/site-status-breakdown.tsx
 
 'use client';
 
@@ -19,8 +18,11 @@ const COLORS = {
   unassigned: 'hsl(var(--destructive))',
 };
 
+const ITEMS_PER_PAGE = 5;
+
 export function SiteStatusBreakdown({ sites, agencies }: { sites: Site[]; agencies: SecurityAgency[] }) {
   const [selectedSection, setSelectedSection] = useState<'assigned' | 'unassigned'>('assigned');
+  const [currentPage, setCurrentPage] = useState(1);
   const router = useRouter();
 
   const { chartData, totalSites, assignedSites, unassignedSites } = useMemo(() => {
@@ -43,10 +45,18 @@ export function SiteStatusBreakdown({ sites, agencies }: { sites: Site[]; agenci
   const handlePieClick = (data: any) => {
     const section = data.payload.key as 'assigned' | 'unassigned';
     setSelectedSection(section);
+    setCurrentPage(1); // Reset page when section changes
   };
   
   const selectedSites = selectedSection === 'assigned' ? assignedSites : unassignedSites;
   
+  const paginatedSites = useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    return selectedSites.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  }, [selectedSites, currentPage]);
+
+  const totalPages = Math.ceil(selectedSites.length / ITEMS_PER_PAGE);
+
   const customTooltipContent = (props: any) => {
     if (!props.active || !props.payload || props.payload.length === 0) {
       return null;
@@ -96,14 +106,14 @@ export function SiteStatusBreakdown({ sites, agencies }: { sites: Site[]; agenci
                 </PieChart>
               </ResponsiveContainer>
             </div>
-            <div className="border-l border-border pl-4 md:pl-8">
+            <div className="border-l border-border pl-4 md:pl-8 flex flex-col">
               {selectedSection ? (
                 <>
                   <div className="flex items-center gap-2 mb-4">
                      <Building2 className="h-5 w-5" />
                      <h3 className="text-lg font-semibold">{selectedSection === 'assigned' ? 'Assigned Sites' : 'Unassigned Sites'} ({selectedSites.length})</h3>
                   </div>
-                  <ScrollArea className="h-80">
+                  <ScrollArea className="h-80 flex-grow">
                     <Table>
                       <TableHeader>
                         <TableRow>
@@ -114,7 +124,7 @@ export function SiteStatusBreakdown({ sites, agencies }: { sites: Site[]; agenci
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {selectedSites.map(site => (
+                        {paginatedSites.map(site => (
                           <TableRow 
                             key={site.id} 
                             onClick={selectedSection === 'assigned' ? () => router.push(`/towerco/sites/${site.id}`) : undefined}
@@ -135,7 +145,6 @@ export function SiteStatusBreakdown({ sites, agencies }: { sites: Site[]; agenci
                             {selectedSection === 'unassigned' && (
                               <TableCell className="text-right">
                                 <Button 
-                                  variant="outline" 
                                   size="sm"
                                   onClick={(e) => {
                                       e.stopPropagation();
@@ -151,6 +160,30 @@ export function SiteStatusBreakdown({ sites, agencies }: { sites: Site[]; agenci
                       </TableBody>
                     </Table>
                   </ScrollArea>
+                   <div className="flex items-center justify-between w-full pt-4">
+                        <div className="text-sm text-muted-foreground">
+                            Showing {paginatedSites.length} of {selectedSites.length} sites.
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                                disabled={currentPage === 1}
+                            >
+                                Previous
+                            </Button>
+                            <span className="text-sm">Page {currentPage} of {totalPages || 1}</span>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                                disabled={currentPage === totalPages || totalPages === 0}
+                            >
+                                Next
+                            </Button>
+                        </div>
+                    </div>
                 </>
               ) : (
                 <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground">
