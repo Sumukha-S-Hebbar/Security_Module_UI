@@ -104,6 +104,14 @@ export default function AgencyIncidentReportPage() {
     });
   };
 
+  const handleStartReview = () => {
+    incidentStore.updateIncident(incident.id, { status: 'Under Review' });
+    toast({
+      title: 'Review Started',
+      description: `Incident #${incident.id} is now under review. Please add details below.`,
+    });
+  };
+
   const getStatusIndicator = (status: Incident['status']) => {
     switch (status) {
       case 'Active':
@@ -195,14 +203,17 @@ export default function AgencyIncidentReportPage() {
         </CardHeader>
         <CardContent className="space-y-6 divide-y">
             {incident.status === 'Active' && (
-              <div className="pt-6">
-                <Alert>
+              <div className="pt-6 text-center">
+                <Alert variant="default" className="text-left mb-4">
                   <Info className="h-4 w-4" />
-                  <AlertTitle>Incident Active</AlertTitle>
+                  <AlertTitle>Incident is Active</AlertTitle>
                   <AlertDescription>
-                    This incident is currently active. To add details, first change the status to "Under Review" on the main incidents page.
+                    This incident requires your attention. Start the review to submit an initial report and provide details.
                   </AlertDescription>
                 </Alert>
+                <Button onClick={handleStartReview}>
+                    Start Review
+                </Button>
               </div>
             )}
             
