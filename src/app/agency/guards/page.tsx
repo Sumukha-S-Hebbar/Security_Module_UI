@@ -264,6 +264,7 @@ export default function AgencyGuardsPage() {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead>Guard ID</TableHead>
                   <TableHead>Guard</TableHead>
                   <TableHead>Site</TableHead>
                   <TableHead>Patrolling Officer</TableHead>
@@ -285,6 +286,11 @@ export default function AgencyGuardsPage() {
                         className="cursor-pointer"
                       >
                         <TableCell>
+                          <Button asChild variant="link" className="p-0 h-auto font-medium" onClick={(e) => e.stopPropagation()}>
+                            <Link href={`/agency/guards/${guard.id}`}>{guard.id}</Link>
+                          </Button>
+                        </TableCell>
+                        <TableCell>
                           <div className="flex items-center gap-3">
                             <Avatar>
                               <AvatarImage src={guard.avatar} alt={guard.name} />
@@ -292,11 +298,6 @@ export default function AgencyGuardsPage() {
                             </Avatar>
                             <div>
                               <p className="font-medium">{guard.name}</p>
-                              <p className="text-sm text-muted-foreground">
-                                ID: <Button asChild variant="link" className="p-0 h-auto font-normal text-muted-foreground" onClick={(e) => e.stopPropagation()}>
-                                  <Link href={`/agency/guards/${guard.id}`}>{guard.id}</Link>
-                                </Button>
-                              </p>
                             </div>
                           </div>
                         </TableCell>
@@ -313,7 +314,7 @@ export default function AgencyGuardsPage() {
                   })
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={4} className="text-center text-muted-foreground py-10">
+                    <TableCell colSpan={5} className="text-center text-muted-foreground py-10">
                       No guards found for the current filter.
                     </TableCell>
                   </TableRow>
