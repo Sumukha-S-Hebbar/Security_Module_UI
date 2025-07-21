@@ -1,7 +1,7 @@
 // src/app/towerco/home/_components/agency-performance.tsx
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import type { SecurityAgency, Site, Incident } from '@/types';
 import {
   Card,
@@ -15,7 +15,15 @@ import { guards } from '@/lib/data/guards';
 import { patrollingOfficers } from '@/lib/data/patrolling-officers';
 import { useRouter } from 'next/navigation';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { CheckCircle, User, Shield, Map } from 'lucide-react';
+import { CheckCircle, User, Shield, Map, ChevronDown } from 'lucide-react';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
+
 
 interface AgencyPerformanceData {
   agency: SecurityAgency;
@@ -90,6 +98,7 @@ export function AgencyPerformance({
   incidents: Incident[];
 }) {
   const router = useRouter();
+  const [openCollapsible, setOpenCollapsible] = useState<string | null>(null);
 
   const performanceData: AgencyPerformanceData[] = useMemo(() => {
     return agencies.map((agency) => {
@@ -202,13 +211,19 @@ export function AgencyPerformance({
           {performanceData.map((data) => {
             const overallScore = data.performance['Overall Performance'];
             const color = getPerformanceColor(overallScore);
+            const isOpen = openCollapsible === data.agency.id;
+
             return (
-              <div
+              <Collapsible
                 key={data.agency.id}
-                onClick={() => router.push(`/towerco/agencies/${data.agency.id}`)}
-                className="rounded-lg border p-4 sm:p-6 space-y-4 cursor-pointer transition-all hover:shadow-lg hover:-translate-y-1"
+                open={isOpen}
+                onOpenChange={() => setOpenCollapsible(isOpen ? null : data.agency.id)}
+                className="rounded-lg border p-4 sm:p-6 space-y-4 transition-all"
               >
-                <div className="flex items-center justify-between gap-4">
+                <div
+                  onClick={() => router.push(`/towerco/agencies/${data.agency.id}`)}
+                  className="flex items-center justify-between gap-4 cursor-pointer"
+                >
                   <div className="flex items-center gap-4">
                     <Avatar className="h-12 w-12">
                       <AvatarImage src={data.agency.avatar} alt={data.agency.name} />
@@ -221,7 +236,8 @@ export function AgencyPerformance({
                   </div>
                   <CircularProgress value={overallScore} color={color} />
                 </div>
-                <div className="space-y-4 pt-4 border-t">
+
+                <CollapsibleContent className="space-y-4 pt-4 border-t">
                   {subMetrics.map(({ key, label, icon: Icon }) => {
                     const value = data.performance[key];
                     return (
@@ -237,8 +253,16 @@ export function AgencyPerformance({
                         </div>
                     );
                   })}
+                </CollapsibleContent>
+                <div className="flex justify-center pt-2">
+                    <CollapsibleTrigger asChild>
+                        <Button variant="ghost" size="sm" className="w-full flex items-center gap-1">
+                            {isOpen ? 'Hide' : 'Show'} Details
+                            <ChevronDown className={cn("h-4 w-4 transition-transform", isOpen && "rotate-180")} />
+                        </Button>
+                    </CollapsibleTrigger>
                 </div>
-              </div>
+              </Collapsible>
             );
           })}
         </div>
