@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Progress } from '@/components/ui/progress';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Button } from '@/components/ui/button';
 import { ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { guards } from '@/lib/data/guards';
@@ -150,7 +151,7 @@ export function AgencyPerformance({
                             <p className="font-medium">{data.name}</p>
                         </div>
                         <div className="w-1/3">
-                             <Progress value={data.performance} indicatorClassName={getPerformanceClass(data.performance)} className="h-4">
+                             <Progress value={data.performance} indicatorClassName={getPerformanceClass(data.performance)} className="h-4 rounded-full relative overflow-visible">
                                 <div className="text-xs font-bold text-white text-center absolute w-full">{data.performance}%</div>
                              </Progress>
                         </div>
