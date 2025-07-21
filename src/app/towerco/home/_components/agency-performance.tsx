@@ -23,6 +23,7 @@ import {
   Tooltip,
   ResponsiveContainer,
   Cell,
+  CartesianGrid,
 } from 'recharts';
 
 interface AgencyPerformanceData {
@@ -198,6 +199,7 @@ export function AgencyPerformance({
                     data={chartData}
                     margin={{ top: 5, right: 20, left: 0, bottom: 20 }}
                 >
+                    <CartesianGrid vertical={false} strokeDasharray="3 3" />
                     <XAxis 
                     dataKey="name" 
                     angle={-45}
