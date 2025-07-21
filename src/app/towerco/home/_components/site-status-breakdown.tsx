@@ -1,14 +1,9 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import type { Site, SecurityAgency } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from '@/components/ui/collapsible';
 import {
   Table,
   TableBody,
@@ -20,96 +15,82 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { ChevronDown, Briefcase } from 'lucide-react';
-import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
+import { Briefcase, Dot } from 'lucide-react';
+import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
+import { cn } from '@/lib/utils';
+
+const COLORS = ['hsl(var(--chart-2))', 'hsl(var(--destructive))'];
 
 export function SiteStatusBreakdown({ sites, agencies }: { sites: Site[]; agencies: SecurityAgency[] }) {
-  const [openSection, setOpenSection] = useState<string | null>(null);
+  const [activeSection, setActiveSection] = useState<'Assigned' | 'Unassigned' | null>('Assigned');
 
-  const agencySiteIds = new Set(agencies.flatMap(a => a.siteIds));
-  
-  const assignedSites = sites.filter((site) => agencySiteIds.has(site.id));
-  const unassignedSites = sites.filter((site) => !agencySiteIds.has(site.id));
-  
-  const totalSites = sites.length;
-  const assignedSitesCount = assignedSites.length;
-  const unassignedSitesCount = unassignedSites.length;
-  
-  const assignedData = totalSites > 0 ? [
-    { name: 'Assigned', value: assignedSitesCount },
-    { name: 'Other', value: totalSites - assignedSitesCount },
-  ] : [];
-
-  const unassignedData = totalSites > 0 ? [
-    { name: 'Unassigned', value: unassignedSitesCount },
-    { name: 'Other', value: totalSites - unassignedSitesCount },
-  ] : [];
-
-  const ASSIGNED_COLORS = ['hsl(var(--chart-2))', 'hsl(var(--muted))'];
-  const UNASSIGNED_COLORS = ['hsl(var(--destructive))', 'hsl(var(--muted))'];
+  const { assignedSites, unassignedSites, chartData } = useMemo(() => {
+    const agencySiteIds = new Set(agencies.flatMap(a => a.siteIds));
+    const assigned = sites.filter((site) => agencySiteIds.has(site.id));
+    const unassigned = sites.filter((site) => !agencySiteIds.has(site.id));
+    const data = [
+      { name: 'Assigned', value: assigned.length, color: COLORS[0] },
+      { name: 'Unassigned', value: unassigned.length, color: COLORS[1] },
+    ];
+    return {
+      assignedSites: assigned,
+      unassignedSites: unassigned,
+      chartData: data,
+    };
+  }, [sites, agencies]);
 
   const getAgencyForSite = (siteId: string) => {
     return agencies.find(a => a.siteIds.includes(siteId));
   }
 
-  const toggleSection = (section: string) => {
-    setOpenSection(openSection === section ? null : section);
+  const CustomLegend = (props: any) => {
+    const { payload } = props;
+    return (
+      <ul className="flex flex-col gap-2">
+        {payload.map((entry: any, index: number) => (
+          <li
+            key={`item-${index}`}
+            onClick={() => setActiveSection(entry.value)}
+            className={cn(
+              "flex items-center gap-2 cursor-pointer p-2 rounded-md transition-colors",
+              activeSection === entry.value ? "bg-muted" : "hover:bg-muted/50"
+            )}
+          >
+            <span style={{ backgroundColor: entry.color }} className="w-3 h-3 rounded-full inline-block" />
+            <span className="font-medium">{entry.value}</span>
+            <span className="ml-auto text-muted-foreground">{entry.payload.value} sites</span>
+          </li>
+        ))}
+      </ul>
+    );
   };
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Site Status Breakdown</CardTitle>
-        <CardDescription>A real-time overview of site assignments. Click a section to expand.</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4 pt-2">
-        
-        <Collapsible open={openSection === 'assigned'} onOpenChange={() => toggleSection('assigned')}>
-          <CollapsibleTrigger asChild>
-            <div className="flex w-full items-center justify-between rounded-lg border p-4 cursor-pointer hover:bg-muted/50 transition-colors">
-              <div className="flex items-center gap-4">
-                 <div className="w-10 h-10 relative">
-                    <ResponsiveContainer width="100%" height="100%">
-                        <PieChart>
-                            <Pie
-                                data={assignedData}
-                                cx="50%"
-                                cy="50%"
-                                innerRadius="60%"
-                                outerRadius="100%"
-                                paddingAngle={0}
-                                dataKey="value"
-                                stroke="none"
-                            >
-                                {assignedData.map((entry, index) => (
-                                    <Cell key={`cell-${index}`} fill={ASSIGNED_COLORS[index % ASSIGNED_COLORS.length]} />
-                                ))}
-                            </Pie>
-                        </PieChart>
-                    </ResponsiveContainer>
-                </div>
-                <span className="font-medium">Assigned Sites</span>
-              </div>
-              <div className="flex items-center gap-4">
-                <span className="text-lg font-bold">{assignedSitesCount}</span>
-                <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-                  <ChevronDown className={`h-4 w-4 transition-transform ${openSection === 'assigned' && 'rotate-180'}`} />
-                </Button>
-              </div>
-            </div>
-          </CollapsibleTrigger>
-          <CollapsibleContent>
-            <ScrollArea className="h-60 mt-2 border rounded-md">
+  
+  const renderActiveSection = () => {
+    if (!activeSection) {
+      return (
+         <div className="flex items-center justify-center h-full text-muted-foreground">
+            <p>Select a category to see details.</p>
+         </div>
+      );
+    }
+    
+    const isAssigned = activeSection === 'Assigned';
+    const sitesToList = isAssigned ? assignedSites : unassignedSites;
+    
+    return (
+        <div>
+            <h3 className="font-semibold text-lg mb-4">{activeSection} Sites</h3>
+             <ScrollArea className="h-80 border rounded-md">
               <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead>Site</TableHead>
-                    <TableHead>Agency</TableHead>
+                    {isAssigned ? <TableHead>Agency</TableHead> : <TableHead className="text-right">Action</TableHead>}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {assignedSites.map(site => {
-                    const agency = getAgencyForSite(site.id);
+                  {sitesToList.map(site => {
+                    const agency = isAssigned ? getAgencyForSite(site.id) : null;
                     return (
                       <TableRow key={site.id}>
                         <TableCell>
@@ -118,11 +99,17 @@ export function SiteStatusBreakdown({ sites, agencies }: { sites: Site[]; agenci
                           </Button>
                           <p className="text-xs text-muted-foreground">{site.address}</p>
                         </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2 text-sm">
-                            <Briefcase className="h-4 w-4 text-muted-foreground" />
-                            {agency?.name || 'N/A'}
-                          </div>
+                        <TableCell className={!isAssigned ? 'text-right' : ''}>
+                          {isAssigned ? (
+                            <div className="flex items-center gap-2 text-sm">
+                              <Briefcase className="h-4 w-4 text-muted-foreground" />
+                              {agency?.name || 'N/A'}
+                            </div>
+                          ) : (
+                             <Button asChild size="sm">
+                                <Link href={`/towerco/sites?focusSite=${site.id}`}>Assign Agency</Link>
+                            </Button>
+                          )}
                         </TableCell>
                       </TableRow>
                     )
@@ -130,76 +117,44 @@ export function SiteStatusBreakdown({ sites, agencies }: { sites: Site[]; agenci
                 </TableBody>
               </Table>
             </ScrollArea>
-          </CollapsibleContent>
-        </Collapsible>
-        
-        <Collapsible open={openSection === 'unassigned'} onOpenChange={() => toggleSection('unassigned')}>
-           <CollapsibleTrigger asChild>
-             <div className="flex w-full items-center justify-between rounded-lg border p-4 cursor-pointer hover:bg-muted/50 transition-colors">
-                <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 relative">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <PieChart>
-                                <Pie
-                                    data={unassignedData}
-                                    cx="50%"
-                                    cy="50%"
-                                    innerRadius="60%"
-                                    outerRadius="100%"
-                                    paddingAngle={0}
-                                    dataKey="value"
-                                    stroke="none"
-                                >
-                                    {unassignedData.map((entry, index) => (
-                                        <Cell key={`cell-${index}`} fill={UNASSIGNED_COLORS[index % UNASSIGNED_COLORS.length]} />
-                                    ))}
-                                </Pie>
-                            </PieChart>
-                        </ResponsiveContainer>
-                    </div>
-                  <span className="font-medium">Unassigned Sites</span>
-                </div>
-                <div className="flex items-center gap-4">
-                    <span className="text-lg font-bold">{unassignedSitesCount}</span>
-                    <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-                      <ChevronDown className={`h-4 w-4 transition-transform ${openSection === 'unassigned' && 'rotate-180'}`} />
-                    </Button>
-                </div>
-            </div>
-          </CollapsibleTrigger>
-           <CollapsibleContent>
-            <ScrollArea className="h-60 mt-2 border rounded-md">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Site</TableHead>
-                    <TableHead>Region</TableHead>
-                    <TableHead className="text-right">Action</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {unassignedSites.map(site => (
-                      <TableRow key={site.id}>
-                        <TableCell>
-                           <Button variant="link" asChild className="p-0 h-auto font-medium text-left">
-                            <Link href={`/towerco/sites/${site.id}`}>{site.name}</Link>
-                          </Button>
-                          <p className="text-xs text-muted-foreground">{site.address}</p>
-                        </TableCell>
-                        <TableCell>{site.region}</TableCell>
-                        <TableCell className="text-right">
-                            <Button asChild size="sm">
-                                <Link href={`/towerco/sites?focusSite=${site.id}`}>Assign Agency</Link>
-                            </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                </TableBody>
-              </Table>
-            </ScrollArea>
-          </CollapsibleContent>
-        </Collapsible>
+        </div>
+    );
+  }
 
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Site Status Overview</CardTitle>
+        <CardDescription>A real-time overview of site assignments.</CardDescription>
+      </CardHeader>
+      <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+        <div className="flex flex-col items-center gap-6">
+            <div className="w-full h-64">
+                <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                    <Pie
+                        data={chartData}
+                        cx="50%"
+                        cy="50%"
+                        labelLine={false}
+                        outerRadius={100}
+                        innerRadius={60}
+                        dataKey="value"
+                        stroke="none"
+                    >
+                        {chartData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                    </Pie>
+                    <Tooltip />
+                    <Legend content={<CustomLegend />} wrapperStyle={{width: '80%'}}/>
+                    </PieChart>
+                </ResponsiveContainer>
+            </div>
+        </div>
+        <div className="h-full">
+            {renderActiveSection()}
+        </div>
       </CardContent>
     </Card>
   );
