@@ -477,6 +477,7 @@ export default function AgencySitesPage() {
                 <TableHead>Site ID</TableHead>
                 <TableHead>Site Name</TableHead>
                 <TableHead>Patrolling Officer</TableHead>
+                <TableHead>Guards</TableHead>
                 <TableHead>Incidents</TableHead>
               </TableRow>
             </TableHeader>
@@ -501,13 +502,14 @@ export default function AgencySitesPage() {
                       <p className="text-sm text-muted-foreground">{site.address}</p>
                     </TableCell>
                     <TableCell>{patrollingOfficer?.name || 'N/A'}</TableCell>
+                    <TableCell>{site.guards.length}</TableCell>
                     <TableCell>{incidentsCount}</TableCell>
                   </TableRow>
                 )
               })
             ) : (
               <TableRow>
-                <TableCell colSpan={4} className="text-center text-muted-foreground py-10">
+                <TableCell colSpan={5} className="text-center text-muted-foreground py-10">
                   No assigned sites found for the current filter.
                 </TableCell>
               </TableRow>
