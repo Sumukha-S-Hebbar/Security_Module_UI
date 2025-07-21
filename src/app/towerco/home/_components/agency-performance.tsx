@@ -1,42 +1,33 @@
-
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import type { SecurityAgency, Site, Incident } from '@/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { guards } from '@/lib/data/guards';
 import { patrollingOfficers } from '@/lib/data/patrolling-officers';
-import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { Progress } from '@/components/ui/progress';
-import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible';
-import { ChevronDown } from 'lucide-react';
-
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface AgencyPerformanceData {
   agency: SecurityAgency;
   name: string;
   performance: number;
-  metrics: {
-    resolutionRate: number;
-    perimeterAccuracy: number;
-    selfieAccuracy: number;
-    visitRate: number;
-  };
 }
 
 const getPerformanceClass = (score: number) => {
-  if (score >= 90) return 'bg-chart-2';
-  if (score >= 70) return 'bg-yellow-500';
-  return 'bg-destructive';
+  if (score >= 90) return 'from-green-400 to-green-600 border-green-500';
+  if (score >= 70) return 'from-yellow-400 to-yellow-600 border-yellow-500';
+  return 'from-red-400 to-red-600 border-red-500';
 };
 
-const getScoreColorClass = (score: number) => {
-    if (score >= 90) return 'text-chart-2';
-    if (score >= 70) return 'text-yellow-500';
-    return 'text-destructive';
-}
+const getPerformanceBgClass = (score: number) => {
+  if (score >= 90) return 'bg-green-500/10';
+  if (score >= 70) return 'bg-yellow-500/10';
+  return 'bg-red-500/10';
+};
+
 
 export function AgencyPerformance({
   agencies,
@@ -48,7 +39,6 @@ export function AgencyPerformance({
   incidents: Incident[];
 }) {
   const router = useRouter();
-  const [openCollapsibleId, setOpenCollapsibleId] = useState<string | null>(null);
 
   const performanceData: AgencyPerformanceData[] = useMemo(() => {
     const data = agencies.map((agency) => {
@@ -105,22 +95,12 @@ export function AgencyPerformance({
         agency,
         name: agency.name,
         performance: Math.round(performance),
-        metrics: {
-            resolutionRate: Math.round(incidentResolutionRate),
-            perimeterAccuracy: Math.round(guardPerimeterAccuracy),
-            selfieAccuracy: Math.round(guardSelfieAccuracy),
-            visitRate: Math.round(officerSiteVisitRate),
-        }
       };
     });
 
     return data.sort((a, b) => b.performance - a.performance);
   }, [agencies, sites, incidents]);
   
-  const handleCollapsibleOpen = (id: string) => {
-    setOpenCollapsibleId(prevId => prevId === id ? null : id);
-  }
-
   if (performanceData.length === 0) {
     return (
       <Card>
@@ -144,70 +124,57 @@ export function AgencyPerformance({
       <CardHeader>
         <CardTitle>Agency Performance</CardTitle>
         <CardDescription>
-          Overall scores and detailed breakdown for each agency.
+          Overall performance scores for each security agency.
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="space-y-2">
-          {performanceData.map((data) => (
-            <Collapsible 
-              key={data.agency.id} 
-              open={openCollapsibleId === data.agency.id}
-              onOpenChange={() => handleCollapsibleOpen(data.agency.id)}
-            >
-              <CollapsibleTrigger asChild>
-                <div className="flex items-center gap-4 p-2 rounded-lg hover:bg-muted/50 cursor-pointer w-full text-left">
-                  <div className="flex items-center gap-3 w-1/3">
-                    <Avatar className="h-10 w-10 border">
-                      <AvatarImage src={data.agency.avatar} alt={data.name} />
-                      <AvatarFallback>{data.name.charAt(0)}</AvatarFallback>
-                    </Avatar>
-                    <p className="font-semibold text-card-foreground truncate">{data.name}</p>
-                  </div>
-                  <div className="flex-1 relative">
-                    <Progress value={data.performance} className="h-6" indicatorClassName={getPerformanceClass(data.performance)} />
-                    <span className="absolute inset-0 flex items-center justify-center text-sm font-bold text-white mix-blend-screen">
-                      {data.performance}%
-                    </span>
-                  </div>
-                   <ChevronDown className={cn("h-5 w-5 transition-transform", openCollapsibleId === data.agency.id && "rotate-180")} />
-                </div>
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 p-4 pl-16 bg-muted/30 rounded-b-lg">
-                    <div>
-                        <div className="flex justify-between text-sm text-muted-foreground mb-1">
-                            <span>Incident Resolution</span>
-                            <span className="font-medium">{data.metrics.resolutionRate}%</span>
+        <TooltipProvider>
+            <div className="flex justify-around items-end gap-4 h-64 pt-10">
+            {performanceData.map((data) => (
+                <Tooltip key={data.agency.id}>
+                    <TooltipTrigger asChild>
+                        <div
+                            onClick={() => router.push(`/towerco/agencies/${data.agency.id}`)}
+                            className="flex flex-col items-center gap-2 w-full h-full cursor-pointer group"
+                        >
+                            <div className="relative w-full h-full flex items-end justify-center">
+                                {/* Ghost Bar */}
+                                <div className={cn("absolute bottom-0 w-12 rounded-t-lg transition-all", getPerformanceBgClass(data.performance))} style={{ height: '100%' }}></div>
+                                
+                                {/* Main Bar */}
+                                <div
+                                className={cn(
+                                    'relative w-12 rounded-t-lg bg-gradient-to-t transition-all duration-500',
+                                    getPerformanceClass(data.performance)
+                                )}
+                                style={{ height: `${data.performance}%` }}
+                                >
+                                    {/* Score Bubble */}
+                                    <div className="absolute -top-5 left-1/2 -translate-x-1/2 w-14 h-14 flex items-center justify-center">
+                                        <div className="absolute w-full h-full bg-background rounded-full scale-90 group-hover:scale-100 transition-transform"></div>
+                                        <div className={cn("absolute w-full h-full rounded-full bg-gradient-to-t opacity-20", getPerformanceClass(data.performance))}></div>
+                                        <div className="absolute w-12 h-12 bg-background rounded-full flex items-center justify-center">
+                                            <span className="text-lg font-bold text-foreground z-10">{data.performance}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="flex flex-col items-center">
+                                <Avatar className="h-10 w-10 border-2 border-background -mt-4 z-10">
+                                    <AvatarImage src={data.agency.avatar} alt={data.name} />
+                                    <AvatarFallback>{data.name.charAt(0)}</AvatarFallback>
+                                </Avatar>
+                                <p className="text-sm font-medium text-center mt-2 truncate max-w-24">{data.name}</p>
+                            </div>
                         </div>
-                        <Progress value={data.metrics.resolutionRate} className="h-2" indicatorClassName={getPerformanceClass(data.metrics.resolutionRate)} />
-                    </div>
-                    <div>
-                        <div className="flex justify-between text-sm text-muted-foreground mb-1">
-                            <span>Guard Perimeter Accuracy</span>
-                            <span className="font-medium">{data.metrics.perimeterAccuracy}%</span>
-                        </div>
-                        <Progress value={data.metrics.perimeterAccuracy} className="h-2" indicatorClassName={getPerformanceClass(data.metrics.perimeterAccuracy)} />
-                    </div>
-                    <div>
-                        <div className="flex justify-between text-sm text-muted-foreground mb-1">
-                            <span>Guard Selfie Accuracy</span>
-                            <span className="font-medium">{data.metrics.selfieAccuracy}%</span>
-                        </div>
-                        <Progress value={data.metrics.selfieAccuracy} className="h-2" indicatorClassName={getPerformanceClass(data.metrics.selfieAccuracy)} />
-                    </div>
-                    <div>
-                        <div className="flex justify-between text-sm text-muted-foreground mb-1">
-                            <span>Officer Site Visit Rate</span>
-                            <span className="font-medium">{data.metrics.visitRate}%</span>
-                        </div>
-                        <Progress value={data.metrics.visitRate} className="h-2" indicatorClassName={getPerformanceClass(data.metrics.visitRate)} />
-                    </div>
-                </div>
-              </CollapsibleContent>
-            </Collapsible>
-          ))}
-        </div>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                        <p>{data.name} - {data.performance}%</p>
+                    </TooltipContent>
+                </Tooltip>
+            ))}
+            </div>
+        </TooltipProvider>
       </CardContent>
     </Card>
   );
