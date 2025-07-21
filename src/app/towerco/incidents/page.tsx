@@ -15,6 +15,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  CardFooter,
 } from '@/components/ui/card';
 import {
   Table,
@@ -54,6 +55,7 @@ import {
 import { IncidentStatusSummary } from './_components/incident-status-summary';
 
 const LOGGED_IN_TOWERCO = 'TowerCo Alpha'; // Simulate logged-in user
+const ITEMS_PER_PAGE = 10;
 
 export default function TowercoIncidentsPage() {
   const { toast } = useToast();
@@ -67,6 +69,7 @@ export default function TowercoIncidentsPage() {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [selectedMonth, setSelectedMonth] = useState(monthFromQuery || 'all');
   const [selectedStatus, setSelectedStatus] = useState('all');
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     const unsubscribe = incidentStore.subscribe(() => {
@@ -98,7 +101,7 @@ export default function TowercoIncidentsPage() {
   };
 
   const filteredIncidents = useMemo(() => {
-    return incidents.filter((incident) => {
+    const filtered = incidents.filter((incident) => {
       // Basic filter: only show incidents for the logged-in TOWERCO
       if (!towercoSiteIds.has(incident.siteId)) {
         return false;
@@ -130,7 +133,16 @@ export default function TowercoIncidentsPage() {
 
       return matchesSearch && matchesStatus && matchesDate && matchesMonth;
     });
+    setCurrentPage(1);
+    return filtered;
   }, [searchQuery, selectedStatus, selectedDate, selectedMonth, incidents, towercoSiteIds]);
+
+  const paginatedIncidents = useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredIncidents.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  }, [filteredIncidents, currentPage]);
+
+  const totalPages = Math.ceil(filteredIncidents.length / ITEMS_PER_PAGE);
 
   const handleStatusSelectFromSummary = (status: string) => {
     // If clicking the same status card again, reset the filter
@@ -285,8 +297,8 @@ export default function TowercoIncidentsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredIncidents.length > 0 ? (
-                filteredIncidents.map((incident) => {
+              {paginatedIncidents.length > 0 ? (
+                paginatedIncidents.map((incident) => {
                   const site = getSiteById(incident.siteId);
                   const agency = site ? getAgencyForSite(site.id) : undefined;
                   const guard = getGuardById(incident.raisedByGuardId);
@@ -328,6 +340,33 @@ export default function TowercoIncidentsPage() {
             </TableBody>
           </Table>
         </CardContent>
+        {totalPages > 1 && (
+            <CardFooter>
+                <div className="flex items-center justify-between w-full">
+                    <div className="text-sm text-muted-foreground">
+                        Showing page {currentPage} of {totalPages}
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                            disabled={currentPage === 1}
+                        >
+                            Previous
+                        </Button>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                            disabled={currentPage === totalPages}
+                        >
+                            Next
+                        </Button>
+                    </div>
+                </div>
+            </CardFooter>
+        )}
       </Card>
     </div>
   );

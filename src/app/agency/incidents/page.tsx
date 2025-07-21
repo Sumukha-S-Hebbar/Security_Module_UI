@@ -23,6 +23,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  CardFooter,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -53,6 +54,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 
 const LOGGED_IN_AGENCY_ID = 'AGY01'; // Simulate logged-in agency
+const ITEMS_PER_PAGE = 10;
 
 export default function AgencyIncidentsPage() {
   const { toast } = useToast();
@@ -65,6 +67,7 @@ export default function AgencyIncidentsPage() {
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [selectedMonth, setSelectedMonth] = useState(monthFromQuery || 'all');
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     const unsubscribe = incidentStore.subscribe(() => {
@@ -92,7 +95,7 @@ export default function AgencyIncidentsPage() {
   }
 
   const filteredIncidents = useMemo(() => {
-    return incidents.filter((incident) => {
+    const filtered = incidents.filter((incident) => {
       if (!agencySiteIds.has(incident.siteId)) {
         return false;
       }
@@ -121,7 +124,16 @@ export default function AgencyIncidentsPage() {
 
       return matchesSearch && matchesStatus && matchesDate && matchesMonth;
     });
+    setCurrentPage(1);
+    return filtered;
   }, [searchQuery, selectedStatus, selectedDate, selectedMonth, incidents, agencySiteIds]);
+
+  const paginatedIncidents = useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredIncidents.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  }, [filteredIncidents, currentPage]);
+
+  const totalPages = Math.ceil(filteredIncidents.length / ITEMS_PER_PAGE);
 
   const handleStatusChange = (incidentId: string, status: Incident['status']) => {
     incidentStore.updateIncident(incidentId, { status });
@@ -280,8 +292,8 @@ export default function AgencyIncidentsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredIncidents.length > 0 ? (
-                filteredIncidents.map((incident) => {
+              {paginatedIncidents.length > 0 ? (
+                paginatedIncidents.map((incident) => {
                   const site = getSiteById(incident.siteId);
                   const guard = getGuardById(incident.raisedByGuardId);
                   const patrollingOfficer = getPatrollingOfficerById(incident.attendedByPatrollingOfficerId);
@@ -359,6 +371,33 @@ export default function AgencyIncidentsPage() {
             </TableBody>
           </Table>
         </CardContent>
+        {totalPages > 1 && (
+            <CardFooter>
+                <div className="flex items-center justify-between w-full">
+                    <div className="text-sm text-muted-foreground">
+                        Showing page {currentPage} of {totalPages}
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                            disabled={currentPage === 1}
+                        >
+                            Previous
+                        </Button>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                            disabled={currentPage === totalPages}
+                        >
+                            Next
+                        </Button>
+                    </div>
+                </div>
+            </CardFooter>
+        )}
       </Card>
     </div>
   );
