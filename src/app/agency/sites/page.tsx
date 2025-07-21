@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { sites } from '@/lib/data/sites';
@@ -9,7 +9,7 @@ import { guards } from '@/lib/data/guards';
 import { patrollingOfficers } from '@/lib/data/patrolling-officers';
 import { incidents } from '@/lib/data/incidents';
 import { securityAgencies } from '@/lib/data/security-agencies';
-import type { Site, PatrollingOfficer } from '@/types';
+import type { Site, PatrollingOfficer, Guard } from '@/types';
 import {
   Card,
   CardContent,
@@ -86,14 +86,18 @@ export default function AgencySitesPage() {
     []
   );
   
-  const agencySiteNames = useMemo(
-    () => new Set(agencySites.map((s) => s.name)),
-    [agencySites]
-  );
-  
+  const siteDetailsMap = useMemo(() => {
+    return sites.reduce((acc, site) => {
+        acc[site.name] = site;
+        return acc;
+    }, {} as {[key: string]: Site});
+  }, []);
+
   const unassignedGuards = useMemo(
-    () => guards.filter(guard => agencySiteNames.has(guard.site) && !guards.find(g => g.id === guard.id)?.patrollingOfficerId),
-    [agencySiteNames]
+    () => guards.filter(guard => {
+      const site = agencySites.find(s => s.guards.includes(guard.id));
+      return !site?.patrollingOfficerId;
+    }), [agencySites]
   );
   
   const allAgencyPatrollingOfficers = useMemo(() => {
@@ -287,6 +291,107 @@ export default function AgencySitesPage() {
     });
     return counts;
   }, [incidents]);
+  
+  const patrollingOfficerLocations = useMemo(() => {
+    const poCities: {[key: string]: Set<string>} = {};
+    allAgencyPatrollingOfficers.forEach(po => {
+        poCities[po.id] = new Set();
+    });
+    
+    agencySites.forEach(site => {
+        if (site.patrollingOfficerId && poCities[site.patrollingOfficerId]) {
+            poCities[site.patrollingOfficerId].add(site.city);
+        }
+    });
+
+    return poCities;
+  }, [allAgencyPatrollingOfficers, agencySites]);
+
+  const renderGuardSelection = (site: Site) => {
+    const guardsInCity = unassignedGuards.filter(guard => {
+        const guardSite = siteDetailsMap[guard.site];
+        return guardSite && guardSite.city === site.city;
+    });
+    const guardsNotInCity = unassignedGuards.filter(guard => {
+        const guardSite = siteDetailsMap[guard.site];
+        return !guardSite || guardSite.city !== site.city;
+    });
+
+    const renderItems = (guardList: Guard[]) => guardList.map((guard) => {
+        const isChecked = selectedGuards[site.id]?.includes(guard.id);
+        const limitReached = (selectedGuards[site.id]?.length || 0) >= (site.guardsRequired || 0);
+        return (
+          <DropdownMenuCheckboxItem
+            key={guard.id}
+            checked={isChecked}
+            disabled={!isChecked && limitReached}
+            onSelect={(e) => e.preventDefault()}
+            onCheckedChange={() => handleGuardSelect(site.id, guard.id)}
+          >
+            {guard.name}
+          </DropdownMenuCheckboxItem>
+        )
+      });
+      
+    return (
+        <DropdownMenuContent className="w-64">
+            <DropdownMenuLabel>Available Guards</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            {guardsInCity.length > 0 && (
+                <>
+                    <DropdownMenuLabel className="text-xs font-normal text-muted-foreground px-2">In {site.city}</DropdownMenuLabel>
+                    {renderItems(guardsInCity)}
+                </>
+            )}
+            {guardsNotInCity.length > 0 && (
+                <>
+                     {guardsInCity.length > 0 && <DropdownMenuSeparator />}
+                    <DropdownMenuLabel className="text-xs font-normal text-muted-foreground px-2">Other Cities</DropdownMenuLabel>
+                    {renderItems(guardsNotInCity)}
+                </>
+            )}
+            {unassignedGuards.length === 0 && (
+                <div className="px-2 py-1.5 text-sm text-muted-foreground">No unassigned guards</div>
+            )}
+      </DropdownMenuContent>
+    )
+  }
+  
+  const renderPatrollingOfficerSelection = (site: Site) => {
+     const officersInCity = allAgencyPatrollingOfficers.filter(po => 
+        patrollingOfficerLocations[po.id]?.has(site.city)
+     );
+     const officersNotInCity = allAgencyPatrollingOfficers.filter(po => 
+        !patrollingOfficerLocations[po.id]?.has(site.city)
+     );
+     
+     const renderItems = (officerList: PatrollingOfficer[]) => officerList.map((po) => (
+        <SelectItem
+          key={po.id}
+          value={po.id}
+        >
+          {po.name}
+        </SelectItem>
+     ));
+
+     return (
+        <SelectContent>
+            {officersInCity.length > 0 && (
+                <>
+                    <DropdownMenuLabel className="text-xs font-normal text-muted-foreground px-2">In {site.city}</DropdownMenuLabel>
+                    {renderItems(officersInCity)}
+                </>
+            )}
+            {officersNotInCity.length > 0 && (
+                 <>
+                    {officersInCity.length > 0 && <DropdownMenuSeparator />}
+                    <DropdownMenuLabel className="text-xs font-normal text-muted-foreground px-2">Other Cities</DropdownMenuLabel>
+                    {renderItems(officersNotInCity)}
+                 </>
+            )}
+        </SelectContent>
+     )
+  }
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6">
@@ -505,29 +610,7 @@ export default function AgencySitesPage() {
                               Select Guards ({selectedGuards[site.id]?.length || 0})
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent className="w-64">
-                            <DropdownMenuLabel>Available Guards</DropdownMenuLabel>
-                            <DropdownMenuSeparator />
-                            {unassignedGuards.length > 0 ? (
-                              unassignedGuards.map((guard) => {
-                                const isChecked = selectedGuards[site.id]?.includes(guard.id);
-                                const limitReached = (selectedGuards[site.id]?.length || 0) >= (site.guardsRequired || 0);
-                                return (
-                                  <DropdownMenuCheckboxItem
-                                    key={guard.id}
-                                    checked={isChecked}
-                                    disabled={!isChecked && limitReached}
-                                    onSelect={(e) => e.preventDefault()}
-                                    onCheckedChange={() => handleGuardSelect(site.id, guard.id)}
-                                  >
-                                    {guard.name}
-                                  </DropdownMenuCheckboxItem>
-                                )
-                              })
-                            ) : (
-                              <div className="px-2 py-1.5 text-sm text-muted-foreground">No unassigned guards</div>
-                            )}
-                          </DropdownMenuContent>
+                          {renderGuardSelection(site)}
                         </DropdownMenu>
                       </div>
                     </TableCell>
@@ -541,16 +624,7 @@ export default function AgencySitesPage() {
                         <SelectTrigger className="w-[180px]">
                           <SelectValue placeholder="Select Patrolling Officer" />
                         </SelectTrigger>
-                        <SelectContent>
-                          {allAgencyPatrollingOfficers.map((patrollingOfficer) => (
-                            <SelectItem
-                              key={patrollingOfficer.id}
-                              value={patrollingOfficer.id}
-                            >
-                              {patrollingOfficer.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
+                        {renderPatrollingOfficerSelection(site)}
                       </Select>
                     </TableCell>
                     <TableCell className="text-right">
