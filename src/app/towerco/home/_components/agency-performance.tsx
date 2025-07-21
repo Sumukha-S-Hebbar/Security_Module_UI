@@ -1,35 +1,52 @@
 
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import type { SecurityAgency, Site, Incident } from '@/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Progress } from '@/components/ui/progress';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Button } from '@/components/ui/button';
-import { ChevronDown } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  ChartConfig,
+} from '@/components/ui/chart';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend } from 'recharts';
 import { guards } from '@/lib/data/guards';
 import { patrollingOfficers } from '@/lib/data/patrolling-officers';
 
 interface AgencyPerformanceData {
-  agency: SecurityAgency;
   name: string;
-  performance: number;
-  incidentResolutionRate: number;
-  guardPerimeterAccuracy: number;
-  guardSelfieAccuracy: number;
-  officerSiteVisitRate: number;
+  agencyId: string;
+  'Overall Performance': number;
+  'Incident Resolution': number;
+  'Perimeter Accuracy': number;
+  'Selfie Accuracy': number;
+  'Site Visits': number;
 }
 
-const getPerformanceClass = (score: number) => {
-  if (score >= 90) return 'bg-green-500';
-  if (score >= 70) return 'bg-yellow-500';
-  return 'bg-red-500';
-};
-
+const chartConfig = {
+  'Overall Performance': {
+    label: 'Overall Performance',
+    color: 'hsl(var(--chart-1))',
+  },
+  'Incident Resolution': {
+    label: 'Incident Resolution',
+    color: 'hsl(var(--chart-2))',
+  },
+  'Perimeter Accuracy': {
+    label: 'Perimeter Accuracy',
+    color: 'hsl(var(--chart-3))',
+  },
+  'Selfie Accuracy': {
+    label: 'Selfie Accuracy',
+    color: 'hsl(var(--chart-4))',
+  },
+  'Site Visits': {
+    label: 'Site Visits',
+    color: 'hsl(var(--chart-5))',
+  },
+} satisfies ChartConfig;
 
 export function AgencyPerformance({
   agencies,
@@ -41,7 +58,6 @@ export function AgencyPerformance({
   incidents: Incident[];
 }) {
   const router = useRouter();
-  const [openCollapsible, setOpenCollapsible] = useState<string | null>(null);
 
   const performanceData: AgencyPerformanceData[] = useMemo(() => {
     const data = agencies.map((agency) => {
@@ -95,17 +111,17 @@ export function AgencyPerformance({
       const performance = performanceComponents.reduce((a, b) => a + b, 0) / performanceComponents.length;
 
       return {
-        agency,
+        agencyId: agency.id,
         name: agency.name,
-        performance: Math.round(performance),
-        incidentResolutionRate: Math.round(incidentResolutionRate),
-        guardPerimeterAccuracy: Math.round(guardPerimeterAccuracy),
-        guardSelfieAccuracy: Math.round(guardSelfieAccuracy),
-        officerSiteVisitRate: Math.round(officerSiteVisitRate),
+        'Overall Performance': Math.round(performance),
+        'Incident Resolution': Math.round(incidentResolutionRate),
+        'Perimeter Accuracy': Math.round(guardPerimeterAccuracy),
+        'Selfie Accuracy': Math.round(guardSelfieAccuracy),
+        'Site Visits': Math.round(officerSiteVisitRate),
       };
     });
 
-    return data.sort((a, b) => b.performance - a.performance);
+    return data.sort((a, b) => b['Overall Performance'] - a['Overall Performance']);
   }, [agencies, sites, incidents]);
   
   if (performanceData.length === 0) {
@@ -126,66 +142,59 @@ export function AgencyPerformance({
     );
   }
 
+  const handleBarClick = (data: any) => {
+    if (data && data.activePayload && data.activePayload[0]) {
+      const agencyId = data.activePayload[0].payload.agencyId;
+      if (agencyId) {
+        router.push(`/towerco/agencies/${agencyId}`);
+      }
+    }
+  };
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Agency Performance</CardTitle>
+        <CardTitle>Agency Performance Comparison</CardTitle>
         <CardDescription>
-          Overall performance scores for each security agency. Click to expand.
+          Side-by-side performance metrics for each security agency.
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-2">
-        {performanceData.map((data) => (
-            <Collapsible key={data.agency.id} open={openCollapsible === data.agency.id} onOpenChange={() => setOpenCollapsible(prev => prev === data.agency.id ? null : data.agency.id)}>
-                <CollapsibleTrigger asChild>
-                    <div className="flex items-center gap-4 p-2 rounded-lg hover:bg-muted cursor-pointer transition-colors">
-                        <Avatar className="h-10 w-10">
-                            <AvatarImage src={data.agency.avatar} alt={data.name} />
-                            <AvatarFallback>{data.name.charAt(0)}</AvatarFallback>
-                        </Avatar>
-                        <div className="w-1/3 flex-grow" onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            router.push(`/towerco/agencies/${data.agency.id}`)
-                        }}>
-                            <p className="font-medium truncate">{data.name}</p>
-                        </div>
-                        <div className="flex-1 relative">
-                             <Progress value={data.performance} indicatorClassName={getPerformanceClass(data.performance)} className="h-4 rounded-full" />
-                             <div className="absolute inset-0 flex items-center justify-center text-xs font-bold text-white" style={{ textShadow: '1px 1px 2px rgba(0,0,0,0.5)' }}>{data.performance}%</div>
-                        </div>
-                        <Button variant="ghost" size="sm" className="w-9 p-0">
-                            <ChevronDown className={cn("h-4 w-4 transition-transform", openCollapsible === data.agency.id && "rotate-180")} />
-                            <span className="sr-only">Toggle</span>
-                        </Button>
-                    </div>
-                </CollapsibleTrigger>
-                <CollapsibleContent className="space-y-3 py-2 px-4 border-t">
-                    <div className="text-sm space-y-2">
-                        <div className="flex justify-between items-center gap-4">
-                            <span className="text-muted-foreground w-1/3">Incident Resolution</span>
-                            <Progress value={data.incidentResolutionRate} indicatorClassName={getPerformanceClass(data.incidentResolutionRate)} className="h-3 flex-1" />
-                            <span className="font-medium w-12 text-right">{data.incidentResolutionRate}%</span>
-                        </div>
-                         <div className="flex justify-between items-center gap-4">
-                            <span className="text-muted-foreground w-1/3">Perimeter Accuracy</span>
-                            <Progress value={data.guardPerimeterAccuracy} indicatorClassName={getPerformanceClass(data.guardPerimeterAccuracy)} className="h-3 flex-1" />
-                            <span className="font-medium w-12 text-right">{data.guardPerimeterAccuracy}%</span>
-                        </div>
-                         <div className="flex justify-between items-center gap-4">
-                            <span className="text-muted-foreground w-1/3">Selfie Accuracy</span>
-                            <Progress value={data.guardSelfieAccuracy} indicatorClassName={getPerformanceClass(data.guardSelfieAccuracy)} className="h-3 flex-1" />
-                            <span className="font-medium w-12 text-right">{data.guardSelfieAccuracy}%</span>
-                        </div>
-                         <div className="flex justify-between items-center gap-4">
-                            <span className="text-muted-foreground w-1/3">Site Visit Rate</span>
-                            <Progress value={data.officerSiteVisitRate} indicatorClassName={getPerformanceClass(data.officerSiteVisitRate)} className="h-3 flex-1" />
-                             <span className="font-medium w-12 text-right">{data.officerSiteVisitRate}%</span>
-                        </div>
-                    </div>
-                </CollapsibleContent>
-            </Collapsible>
-        ))}
+      <CardContent>
+        <ChartContainer config={chartConfig} className="h-[400px] w-full">
+          <BarChart 
+            accessibilityLayer 
+            data={performanceData} 
+            margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+            onClick={handleBarClick}
+          >
+            <CartesianGrid vertical={false} />
+            <XAxis
+              dataKey="name"
+              tickLine={false}
+              axisLine={false}
+              tickMargin={8}
+              fontSize={12}
+            />
+            <YAxis
+                domain={[0, 100]}
+                tickFormatter={(value) => `${value}%`}
+                tickLine={false}
+                axisLine={false}
+                tickMargin={8}
+                fontSize={12}
+            />
+            <ChartTooltip
+                cursor={{ fill: 'hsl(var(--muted))' }}
+                content={<ChartTooltipContent />}
+            />
+            <Legend />
+            <Bar dataKey="Overall Performance" fill="var(--color-Overall Performance)" radius={4} />
+            <Bar dataKey="Incident Resolution" fill="var(--color-Incident Resolution)" radius={4} />
+            <Bar dataKey="Perimeter Accuracy" fill="var(--color-Perimeter Accuracy)" radius={4} />
+            <Bar dataKey="Selfie Accuracy" fill="var(--color-Selfie Accuracy)" radius={4} />
+            <Bar dataKey="Site Visits" fill="var(--color-Site Visits)" radius={4} />
+          </BarChart>
+        </ChartContainer>
       </CardContent>
     </Card>
   );
