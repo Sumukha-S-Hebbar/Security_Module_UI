@@ -1,75 +1,226 @@
 
 'use client';
 
-import type { Incident } from '@/types';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import type { Incident, Guard, Site } from '@/types';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from '@/components/ui/card';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
+import { cn } from '@/lib/utils';
+import { CheckCircle2, ShieldAlert, ShieldQuestion } from 'lucide-react';
+import { guards } from '@/lib/data/guards';
+import { sites } from '@/lib/data/sites';
 
-export function IncidentStatusBreakdown({ incidents }: { incidents: Incident[] }) {
-  const totalIncidents = incidents.length;
-  const activeIncidents = incidents.filter(
-    (incident) => incident.status === 'Active'
-  ).length;
-  const underReviewIncidents = incidents.filter(
-    (incident) => incident.status === 'Under Review'
-  ).length;
-  const resolvedIncidents = incidents.filter(
-    (incident) => incident.status === 'Resolved'
-  ).length;
+export function IncidentStatusBreakdown({
+  incidents,
+}: {
+  incidents: Incident[];
+}) {
+  const router = useRouter();
+  const [selectedStatus, setSelectedStatus] = useState<
+    Incident['status'] | null
+  >(null);
 
-  const activePercentage =
-    totalIncidents > 0 ? (activeIncidents / totalIncidents) * 100 : 0;
-  const underReviewPercentage =
-    totalIncidents > 0 ? (underReviewIncidents / totalIncidents) * 100 : 0;
-  const resolvedPercentage =
-    totalIncidents > 0 ? (resolvedIncidents / totalIncidents) * 100 : 0;
-    
+  const summary = useMemo(() => {
+    return incidents.reduce(
+      (acc, incident) => {
+        if (incident.status === 'Active') acc.active++;
+        if (incident.status === 'Under Review') acc.underReview++;
+        if (incident.status === 'Resolved') acc.resolved++;
+        return acc;
+      },
+      { active: 0, underReview: 0, resolved: 0 }
+    );
+  }, [incidents]);
+
+  const filteredIncidents = useMemo(() => {
+    if (!selectedStatus) return [];
+    return incidents.filter((incident) => incident.status === selectedStatus);
+  }, [incidents, selectedStatus]);
+
+  const getSiteName = (siteId: string) =>
+    sites.find((s) => s.id === siteId)?.name || 'N/A';
+  const getGuardName = (guardId: string) =>
+    guards.find((g) => g.id === guardId)?.name || 'N/A';
+
+  const getStatusIndicator = (status: Incident['status']) => {
+    switch (status) {
+      case 'Active':
+        return (
+          <div className="flex items-center gap-2">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-destructive"></span>
+            </span>
+            <span>Active</span>
+          </div>
+        );
+      case 'Under Review':
+        return (
+          <div className="flex items-center gap-2">
+            <span className="relative flex h-2 w-2">
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+            </span>
+            <span>Under Review</span>
+          </div>
+        );
+      case 'Resolved':
+        return (
+          <div className="flex items-center gap-2">
+            <span className="relative flex h-2 w-2">
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-chart-2"></span>
+            </span>
+            <span>Resolved</span>
+          </div>
+        );
+      default:
+        return (
+          <div className="flex items-center gap-2">
+            <span className="relative flex h-2 w-2">
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-muted-foreground"></span>
+            </span>
+            <span>{status}</span>
+          </div>
+        );
+    }
+  };
+
+  const handleStatusClick = (status: Incident['status']) => {
+    setSelectedStatus((prevStatus) => (prevStatus === status ? null : status));
+  };
+
+  const statusCards = [
+    {
+      status: 'Active',
+      count: summary.active,
+      icon: ShieldAlert,
+      className: 'bg-destructive/10 text-destructive',
+      ring: 'ring-destructive',
+    },
+    {
+      status: 'Under Review',
+      count: summary.underReview,
+      icon: ShieldQuestion,
+      className: 'bg-primary/10 text-primary',
+      ring: 'ring-primary',
+    },
+    {
+      status: 'Resolved',
+      count: summary.resolved,
+      icon: CheckCircle2,
+      className: 'bg-chart-2/10 text-chart-2',
+      ring: 'ring-chart-2',
+    },
+  ] as const;
+
   return (
     <Card>
       <CardHeader>
         <CardTitle>Incident Status Breakdown</CardTitle>
         <CardDescription>
-          A breakdown of all emergency incidents by their current status.
+          Click a status to see the list of incidents.
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="flex w-full h-4 rounded-full overflow-hidden bg-muted">
-          <div
-            className="bg-destructive"
-            style={{ width: `${activePercentage}%` }}
-            title={`Active: ${activeIncidents} (${activePercentage.toFixed(
-              1
-            )}%)`}
-          />
-          <div
-            className="bg-primary"
-            style={{ width: `${underReviewPercentage}%` }}
-            title={`Under Review: ${underReviewIncidents} (${underReviewPercentage.toFixed(
-              1
-            )}%)`}
-          />
-          <div
-            className="bg-chart-2"
-            style={{ width: `${resolvedPercentage}%` }}
-            title={`Resolved: ${resolvedIncidents} (${resolvedPercentage.toFixed(
-              1
-            )}%)`}
-          />
-        </div>
-        <div className="flex justify-between text-sm text-muted-foreground">
-          <div className="flex items-center gap-2">
-            <span className="h-3 w-3 rounded-full bg-destructive" />
-            <span>Active ({activeIncidents})</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="h-3 w-3 rounded-full bg-primary" />
-            <span>Under Review ({underReviewIncidents})</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="h-3 w-3 rounded-full bg-chart-2" />
-            <span>Resolved ({resolvedIncidents})</span>
-          </div>
+      <CardContent>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {statusCards.map((item) => (
+            <div
+              key={item.status}
+              onClick={() => handleStatusClick(item.status)}
+              role="button"
+              tabIndex={0}
+              className={cn(
+                'flex cursor-pointer items-center gap-4 rounded-lg p-4 transition-all',
+                item.className,
+                selectedStatus === item.status && `ring-2 ${item.ring}`
+              )}
+            >
+              <item.icon className="h-8 w-8" />
+              <div>
+                <p className="font-semibold">{item.status}</p>
+                <p className="text-2xl font-bold">{item.count}</p>
+              </div>
+            </div>
+          ))}
         </div>
       </CardContent>
+
+      <Collapsible open={!!selectedStatus}>
+        <CollapsibleContent>
+          <CardHeader>
+            <CardTitle>Incidents: {selectedStatus}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {filteredIncidents.length > 0 ? (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Incident ID</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Site</TableHead>
+                    <TableHead>Guard</TableHead>
+                    <TableHead>Status</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredIncidents.map((incident) => (
+                    <TableRow
+                      key={incident.id}
+                      onClick={() =>
+                        router.push(`/agency/incidents/${incident.id}`)
+                      }
+                      className="cursor-pointer"
+                    >
+                      <TableCell>
+                        <Button
+                          asChild
+                          variant="link"
+                          className="h-auto p-0 font-medium"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <Link href={`/agency/incidents/${incident.id}`}>
+                            {incident.id}
+                          </Link>
+                        </Button>
+                      </TableCell>
+                      <TableCell>
+                        {new Date(incident.incidentTime).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell>{getSiteName(incident.siteId)}</TableCell>
+                      <TableCell>{getGuardName(incident.raisedByGuardId)}</TableCell>
+                      <TableCell>{getStatusIndicator(incident.status)}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            ) : (
+              <p className="text-center text-sm text-muted-foreground">
+                No incidents with status "{selectedStatus}".
+              </p>
+            )}
+          </CardContent>
+        </CollapsibleContent>
+      </Collapsible>
     </Card>
   );
 }
