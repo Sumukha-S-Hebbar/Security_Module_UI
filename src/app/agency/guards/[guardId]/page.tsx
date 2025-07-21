@@ -117,36 +117,36 @@ export default function AgencyGuardReportPage() {
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6">
-      <div className="flex items-center gap-4">
-        <Button asChild variant="outline" size="icon">
-          <Link href="/agency/guards">
-            <ArrowLeft className="h-4 w-4" />
-            <span className="sr-only">Back to Guards</span>
-          </Link>
-        </Button>
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Security Guard Report</h1>
-          <p className="text-muted-foreground">Detailed overview for {guard.name}.</p>
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <Button asChild variant="outline" size="icon">
+            <Link href="/agency/guards">
+              <ArrowLeft className="h-4 w-4" />
+              <span className="sr-only">Back to Guards</span>
+            </Link>
+          </Button>
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Security Guard Report</h1>
+            <p className="text-muted-foreground">Detailed overview for {guard.name}.</p>
+          </div>
         </div>
+        <Button onClick={handleDownloadReport}>
+          <FileDown className="mr-2 h-4 w-4" />
+          Download Full Report
+        </Button>
       </div>
 
       <Card>
         <CardHeader>
-          <div className="flex flex-wrap justify-between items-start gap-4">
-            <div className="flex items-center gap-4">
-              <Avatar className="h-16 w-16">
-                <AvatarImage src={guard.avatar} alt={guard.name} />
-                <AvatarFallback>{guard.name.charAt(0)}</AvatarFallback>
-              </Avatar>
-              <div>
-                <CardTitle className="text-2xl">{guard.name}</CardTitle>
-                <CardDescription>ID: {guard.id}</CardDescription>
-              </div>
+          <div className="flex items-center gap-4">
+            <Avatar className="h-16 w-16">
+              <AvatarImage src={guard.avatar} alt={guard.name} />
+              <AvatarFallback>{guard.name.charAt(0)}</AvatarFallback>
+            </Avatar>
+            <div>
+              <CardTitle className="text-2xl">{guard.name}</CardTitle>
+              <CardDescription>ID: {guard.id}</CardDescription>
             </div>
-            <Button onClick={handleDownloadReport}>
-              <FileDown className="mr-2 h-4 w-4" />
-              Download Full Report
-            </Button>
           </div>
         </CardHeader>
         <CardContent>

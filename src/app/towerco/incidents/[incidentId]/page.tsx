@@ -155,17 +155,23 @@ export default function IncidentReportPage() {
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6">
-      <div className="flex items-center gap-4">
-        <Button asChild variant="outline" size="icon">
-          <Link href="/towerco/incidents">
-            <ArrowLeft className="h-4 w-4" />
-            <span className="sr-only">Back to Incidents</span>
-          </Link>
-        </Button>
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Incident Report</h1>
-          <p className="text-muted-foreground">Detailed overview for Incident #{incident.id}.</p>
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <Button asChild variant="outline" size="icon">
+            <Link href="/towerco/incidents">
+              <ArrowLeft className="h-4 w-4" />
+              <span className="sr-only">Back to Incidents</span>
+            </Link>
+          </Button>
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Incident Report</h1>
+            <p className="text-muted-foreground">Detailed overview for Incident #{incident.id}.</p>
+          </div>
         </div>
+        <Button onClick={handleDownloadReport}>
+          <FileDown className="mr-2 h-4 w-4" />
+          Download Full Report
+        </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
@@ -246,10 +252,6 @@ export default function IncidentReportPage() {
                 {new Date(incident.incidentTime).toLocaleString()}
               </CardDescription>
             </div>
-            <Button onClick={handleDownloadReport}>
-              <FileDown className="mr-2 h-4 w-4" />
-              Download Full Report
-            </Button>
           </div>
         </CardHeader>
         <CardContent className="space-y-6 divide-y">

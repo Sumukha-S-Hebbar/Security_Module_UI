@@ -108,17 +108,23 @@ export default function SiteReportPage() {
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6">
-      <div className="flex items-center gap-4">
-        <Button asChild variant="outline" size="icon">
-          <Link href="/towerco/sites">
-            <ArrowLeft className="h-4 w-4" />
-            <span className="sr-only">Back to Sites</span>
-          </Link>
-        </Button>
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Site Report</h1>
-          <p className="text-muted-foreground">Detailed overview for {site.name}.</p>
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <Button asChild variant="outline" size="icon">
+            <Link href="/towerco/sites">
+              <ArrowLeft className="h-4 w-4" />
+              <span className="sr-only">Back to Sites</span>
+            </Link>
+          </Button>
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Site Report</h1>
+            <p className="text-muted-foreground">Detailed overview for {site.name}.</p>
+          </div>
         </div>
+        <Button onClick={handleDownloadReport}>
+          <FileDown className="mr-2 h-4 w-4" />
+          Download Full Report
+        </Button>
       </div>
 
       <Card>
@@ -128,10 +134,6 @@ export default function SiteReportPage() {
               <CardTitle className="text-2xl">{site.name}</CardTitle>
               <CardDescription>ID: {site.id}</CardDescription>
             </div>
-            <Button onClick={handleDownloadReport}>
-              <FileDown className="mr-2 h-4 w-4" />
-              Download Full Report
-            </Button>
           </div>
         </CardHeader>
         <CardContent>

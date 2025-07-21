@@ -133,36 +133,36 @@ export default function AgencyPatrollingOfficerReportPage() {
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6">
-      <div className="flex items-center gap-4">
-        <Button asChild variant="outline" size="icon">
-          <Link href="/agency/patrolling-officers">
-            <ArrowLeft className="h-4 w-4" />
-            <span className="sr-only">Back to Patrolling Officers</span>
-          </Link>
-        </Button>
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Patrolling Officer Report</h1>
-          <p className="text-muted-foreground">Detailed overview for ${patrollingOfficer.name}.</p>
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <Button asChild variant="outline" size="icon">
+            <Link href="/agency/patrolling-officers">
+              <ArrowLeft className="h-4 w-4" />
+              <span className="sr-only">Back to Patrolling Officers</span>
+            </Link>
+          </Button>
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Patrolling Officer Report</h1>
+            <p className="text-muted-foreground">Detailed overview for {patrollingOfficer.name}.</p>
+          </div>
         </div>
+        <Button onClick={handleDownloadReport}>
+          <FileDown className="mr-2 h-4 w-4" />
+          Download Full Report
+        </Button>
       </div>
 
       <Card>
         <CardHeader>
-          <div className="flex flex-wrap justify-between items-start gap-4">
-            <div className="flex items-center gap-4">
-              <Avatar className="h-16 w-16">
-                <AvatarImage src={patrollingOfficer.avatar} alt={patrollingOfficer.name} />
-                <AvatarFallback>{patrollingOfficer.name.charAt(0)}</AvatarFallback>
-              </Avatar>
-              <div>
-                <CardTitle className="text-2xl">{patrollingOfficer.name}</CardTitle>
-                <CardDescription>ID: {patrollingOfficer.id}</CardDescription>
-              </div>
+          <div className="flex items-center gap-4">
+            <Avatar className="h-16 w-16">
+              <AvatarImage src={patrollingOfficer.avatar} alt={patrollingOfficer.name} />
+              <AvatarFallback>{patrollingOfficer.name.charAt(0)}</AvatarFallback>
+            </Avatar>
+            <div>
+              <CardTitle className="text-2xl">{patrollingOfficer.name}</CardTitle>
+              <CardDescription>ID: {patrollingOfficer.id}</CardDescription>
             </div>
-            <Button onClick={handleDownloadReport}>
-              <FileDown className="mr-2 h-4 w-4" />
-              Download Full Report
-            </Button>
           </div>
         </CardHeader>
         <CardContent>
@@ -296,7 +296,7 @@ export default function AgencyPatrollingOfficerReportPage() {
         <CardHeader className="flex flex-wrap items-center justify-between gap-2">
           <div>
             <CardTitle>Recent Incidents</CardTitle>
-            <CardDescription>A log of emergency incidents at sites managed by ${patrollingOfficer.name}.</CardDescription>
+            <CardDescription>A log of emergency incidents at sites managed by {patrollingOfficer.name}.</CardDescription>
           </div>
           <Select value={selectedMonth} onValueChange={setSelectedMonth}>
             <SelectTrigger className="w-full sm:w-[180px]">

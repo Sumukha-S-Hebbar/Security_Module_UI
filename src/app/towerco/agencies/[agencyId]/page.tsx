@@ -208,35 +208,35 @@ export default function AgencyReportPage() {
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6">
-       <div className="flex items-center gap-4">
-        <Button asChild variant="outline" size="icon">
-          <Link href="/towerco/agencies">
-            <ArrowLeft className="h-4 w-4" />
-            <span className="sr-only">Back to Agencies</span>
-          </Link>
-        </Button>
-        <div>
-            <h1 className="text-3xl font-bold tracking-tight">Agency Report</h1>
-            <p className="text-muted-foreground">Detailed overview for {agency.name} on {loggedInOrg.name}.</p>
+       <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <Button asChild variant="outline" size="icon">
+            <Link href="/towerco/agencies">
+              <ArrowLeft className="h-4 w-4" />
+              <span className="sr-only">Back to Agencies</span>
+            </Link>
+          </Button>
+          <div>
+              <h1 className="text-3xl font-bold tracking-tight">Agency Report</h1>
+              <p className="text-muted-foreground">Detailed overview for {agency.name} on {loggedInOrg.name}.</p>
+          </div>
         </div>
+        <Button onClick={() => handleGenerateReport(agency.name, 'Agency')}>
+          <FileDown className="mr-2 h-4 w-4" />
+          Download Full Report
+        </Button>
       </div>
       <Card>
         <CardHeader>
-          <div className="flex flex-wrap justify-between items-start gap-4">
-            <div className="flex items-center gap-4">
-                <Avatar className="h-16 w-16">
-                    <AvatarImage src={agency.avatar} alt={agency.name} />
-                    <AvatarFallback>{agency.name.charAt(0)}</AvatarFallback>
-                </Avatar>
-                <div>
-                  <CardTitle className="text-2xl">{agency.name}</CardTitle>
-                  <CardDescription>ID: {agency.id}</CardDescription>
-                </div>
-            </div>
-            <Button onClick={() => handleGenerateReport(agency.name, 'Agency')}>
-              <FileDown className="mr-2 h-4 w-4" />
-              Download Full Report
-            </Button>
+          <div className="flex items-center gap-4">
+              <Avatar className="h-16 w-16">
+                  <AvatarImage src={agency.avatar} alt={agency.name} />
+                  <AvatarFallback>{agency.name.charAt(0)}</AvatarFallback>
+              </Avatar>
+              <div>
+                <CardTitle className="text-2xl">{agency.name}</CardTitle>
+                <CardDescription>ID: {agency.id}</CardDescription>
+              </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
