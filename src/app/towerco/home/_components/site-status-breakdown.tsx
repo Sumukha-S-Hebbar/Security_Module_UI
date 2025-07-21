@@ -2,12 +2,14 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import type { Site, SecurityAgency } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Building2 } from 'lucide-react';
 
 const COLORS = {
@@ -16,7 +18,8 @@ const COLORS = {
 };
 
 export function SiteStatusBreakdown({ sites, agencies }: { sites: Site[]; agencies: SecurityAgency[] }) {
-  const [selectedSection, setSelectedSection] = useState<'assigned' | 'unassigned' | null>(null);
+  const [selectedSection, setSelectedSection] = useState<'assigned' | 'unassigned'>('assigned');
+  const router = useRouter();
 
   const { chartData, totalSites, assignedSites, unassignedSites } = useMemo(() => {
     const agencySiteIds = new Set(agencies.flatMap(a => a.siteIds));
@@ -37,7 +40,7 @@ export function SiteStatusBreakdown({ sites, agencies }: { sites: Site[]; agenci
 
   const handlePieClick = (data: any) => {
     const section = data.key as 'assigned' | 'unassigned';
-    setSelectedSection(prev => (prev === section ? null : section));
+    setSelectedSection(section);
   };
   
   const selectedSites = selectedSection === 'assigned' ? assignedSites : unassignedSites;
@@ -104,11 +107,16 @@ export function SiteStatusBreakdown({ sites, agencies }: { sites: Site[]; agenci
                         <TableRow>
                           <TableHead>Site Name</TableHead>
                           <TableHead>Region</TableHead>
+                          {selectedSection === 'unassigned' && <TableHead className="text-right">Action</TableHead>}
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {selectedSites.map(site => (
-                          <TableRow key={site.id}>
+                          <TableRow 
+                            key={site.id} 
+                            onClick={selectedSection === 'assigned' ? () => router.push(`/towerco/sites/${site.id}`) : undefined}
+                            className={selectedSection === 'assigned' ? 'cursor-pointer' : ''}
+                          >
                             <TableCell>
                               <p className="font-medium">{site.name}</p>
                               <p className="text-xs text-muted-foreground">{site.address}</p>
@@ -116,6 +124,17 @@ export function SiteStatusBreakdown({ sites, agencies }: { sites: Site[]; agenci
                             <TableCell>
                               <Badge variant="outline">{site.region}</Badge>
                             </TableCell>
+                            {selectedSection === 'unassigned' && (
+                              <TableCell className="text-right">
+                                <Button 
+                                  variant="outline" 
+                                  size="sm"
+                                  onClick={() => router.push(`/towerco/sites?focusSite=${site.id}`)}
+                                >
+                                  Assign Agency
+                                </Button>
+                              </TableCell>
+                            )}
                           </TableRow>
                         ))}
                       </TableBody>
