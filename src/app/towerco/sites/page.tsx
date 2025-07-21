@@ -624,47 +624,48 @@ export default function TowercoSitesPage() {
               </div>
           </CardHeader>
           <CardContent>
-            <Table>
-                <TableHeader>
-                    <TableRow>
-                    <TableHead>Site ID</TableHead>
-                    <TableHead>Site Name</TableHead>
-                    <TableHead>Agency</TableHead>
-                    <TableHead>Incidents</TableHead>
-                    </TableRow>
-                </TableHeader>
-                <TableBody>
-                    {paginatedAssignedSites.length > 0 ? (
-                    paginatedAssignedSites.map((site) => {
-                        const incidentsCount = siteIncidentsCount[site.id] || 0;
-                        return (
-                        <TableRow key={site.id}>
-                           <TableCell>
-                                <Button asChild variant="link" className="p-0 h-auto font-medium">
-                                    <Link href={`/towerco/sites/${site.id}`}>{site.id}</Link>
-                                </Button>
-                            </TableCell>
-                            <TableCell>
-                            <div>{site.name}</div>
-                            <div className="text-sm text-muted-foreground flex items-center gap-1">
-                                <MapPin className="w-3 h-3" />
-                                {site.address}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-6">
+                {paginatedAssignedSites.length > 0 ? (
+                paginatedAssignedSites.map((site) => {
+                    const agency = getAgencyForSite(site.id);
+                    const incidentsCount = siteIncidentsCount[site.id] || 0;
+                    return (
+                    <Card key={site.id} className="flex flex-col">
+                        <CardHeader>
+                            <CardTitle className="text-lg">{site.name}</CardTitle>
+                            <CardDescription>ID: {site.id}</CardDescription>
+                        </CardHeader>
+                        <CardContent className="flex-grow space-y-2 text-sm">
+                            <div className="flex items-start gap-2 text-muted-foreground">
+                                <MapPin className="h-4 w-4 flex-shrink-0 mt-1" />
+                                <span>{site.address}</span>
                             </div>
-                            </TableCell>
-                            <TableCell>{getAgencyName(site.id)}</TableCell>
-                            <TableCell>{incidentsCount}</TableCell>
-                        </TableRow>
-                        );
-                    })
-                    ) : (
-                    <TableRow>
-                        <TableCell colSpan={4} className="text-center text-muted-foreground py-10">
-                        No assigned sites found for the current filter.
-                        </TableCell>
-                    </TableRow>
-                    )}
-                </TableBody>
-            </Table>
+                            <div className="flex items-center gap-2 text-muted-foreground">
+                                <Briefcase className="h-4 w-4 flex-shrink-0" />
+                                <span>{agency?.name || 'N/A'}</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-muted-foreground">
+                                <ShieldAlert className="h-4 w-4 flex-shrink-0" />
+                                <span>{incidentsCount} Incidents</span>
+                            </div>
+                        </CardContent>
+                        <CardFooter>
+                            <Button asChild variant="outline" size="sm" className="w-full">
+                                <Link href={`/towerco/sites/${site.id}`}>
+                                    <Eye className="mr-2 h-4 w-4" />
+                                    View Full Report
+                                </Link>
+                            </Button>
+                        </CardFooter>
+                    </Card>
+                    );
+                })
+                ) : (
+                <div className="col-span-full text-center text-muted-foreground py-10">
+                    No assigned sites found for the current filter.
+                </div>
+                )}
+            </div>
           </CardContent>
           {totalAssignedPages > 1 && (
             <CardFooter>
