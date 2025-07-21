@@ -4,17 +4,22 @@
 import { useMemo } from 'react';
 import type { SecurityAgency, Site, Incident } from '@/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHeader, TableHead, TableRow } from '@/components/ui/table';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Progress } from '@/components/ui/progress';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { guards } from '@/lib/data/guards';
 import { patrollingOfficers } from '@/lib/data/patrolling-officers';
 import { useRouter } from 'next/navigation';
+import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
+import { Briefcase, ShieldCheck, UserCheck, CheckCircle } from 'lucide-react';
 
 interface AgencyPerformanceData {
   agency: SecurityAgency;
   name: string;
   performance: number;
+  incidentResolutionRate: number;
+  guardPerimeterAccuracy: number;
+  guardSelfieAccuracy: number;
+  officerSiteVisitRate: number;
 }
 
 export function AgencyPerformance({
@@ -28,8 +33,8 @@ export function AgencyPerformance({
 }) {
   const router = useRouter();
 
-  const performanceData = useMemo(() => {
-    const data: AgencyPerformanceData[] = agencies.map((agency) => {
+  const performanceData: AgencyPerformanceData[] = useMemo(() => {
+    const data = agencies.map((agency) => {
       const agencySiteIds = new Set(agency.siteIds);
       const agencySites = sites.filter(s => agencySiteIds.has(s.id));
       
@@ -85,6 +90,10 @@ export function AgencyPerformance({
         agency,
         name: agency.name,
         performance: Math.round(performance),
+        incidentResolutionRate: Math.round(incidentResolutionRate),
+        guardPerimeterAccuracy: Math.round(guardPerimeterAccuracy),
+        guardSelfieAccuracy: Math.round(guardSelfieAccuracy),
+        officerSiteVisitRate: Math.round(officerSiteVisitRate),
       };
     });
 
@@ -97,12 +106,12 @@ export function AgencyPerformance({
         <CardHeader>
           <CardTitle>Agency Performance</CardTitle>
           <CardDescription>
-            Overall score based on incidents, guard, and officer performance.
+            No performance data available for any agency.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <p className="text-muted-foreground text-center py-4">
-            No performance data available for any agency.
+            Assign sites to agencies to see performance metrics.
           </p>
         </CardContent>
       </Card>
@@ -112,50 +121,95 @@ export function AgencyPerformance({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Agency Performance Rankings</CardTitle>
+        <CardTitle>Agency Performance Overview</CardTitle>
         <CardDescription>
-          Comparison of agencies by overall performance score. Click a row to view details.
+          Overall scores based on incidents, guard, and officer performance. Click a card to view details.
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[80px]">Rank</TableHead>
-              <TableHead>Agency</TableHead>
-              <TableHead>Performance Score</TableHead>
-              <TableHead className="text-right">Score</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {performanceData.map((data, index) => (
-              <TableRow
-                key={data.agency.id}
-                onClick={() => router.push(`/towerco/agencies/${data.agency.id}`)}
-                className="cursor-pointer"
-              >
-                <TableCell className="font-bold text-lg text-muted-foreground">
-                  {index + 1}
-                </TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-3">
-                    <Avatar>
-                      <AvatarImage src={data.agency.avatar} alt={data.agency.name} />
-                      <AvatarFallback>{data.agency.name.charAt(0)}</AvatarFallback>
-                    </Avatar>
-                    <span className="font-medium">{data.name}</span>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <Progress value={data.performance} className="h-2" />
-                </TableCell>
-                <TableCell className="text-right font-semibold text-lg">
-                  {data.performance}%
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {performanceData.map((data) => {
+                const complianceData = [
+                    { name: 'Performance', value: data.performance },
+                    { name: 'Remaining', value: 100 - data.performance },
+                ];
+                const COLORS = ['hsl(var(--primary))', 'hsl(var(--muted))'];
+
+                return (
+                    <Card 
+                        key={data.agency.id} 
+                        className="cursor-pointer hover:border-primary transition-all flex flex-col"
+                        onClick={() => router.push(`/towerco/agencies/${data.agency.id}`)}
+                    >
+                        <CardHeader className="flex-row items-start gap-4 space-y-0">
+                            <Avatar className="w-12 h-12 border">
+                                <AvatarImage src={data.agency.avatar} alt={data.agency.name} />
+                                <AvatarFallback>{data.agency.name.charAt(0)}</AvatarFallback>
+                            </Avatar>
+                            <div className="flex-grow">
+                                <p className="font-semibold">{data.name}</p>
+                                <p className="text-sm text-muted-foreground">ID: {data.agency.id}</p>
+                            </div>
+                            <div className="w-20 h-20 relative -mt-4 -mr-2">
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <PieChart>
+                                        <Pie
+                                            data={complianceData}
+                                            cx="50%"
+                                            cy="50%"
+                                            innerRadius="70%"
+                                            outerRadius="85%"
+                                            paddingAngle={0}
+                                            dataKey="value"
+                                            stroke="none"
+                                        >
+                                            {complianceData.map((entry, index) => (
+                                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                            ))}
+                                        </Pie>
+                                    </PieChart>
+                                </ResponsiveContainer>
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                    <span className="text-2xl font-bold text-foreground">{data.performance}%</span>
+                                </div>
+                            </div>
+                        </CardHeader>
+                        <CardContent className="flex-grow space-y-3 pt-2">
+                            <div className="text-sm space-y-3 pt-3 border-t">
+                                <div>
+                                    <div className="flex justify-between items-center mb-1 text-xs">
+                                        <h4 className="font-medium text-muted-foreground flex items-center gap-1.5"><CheckCircle className="w-3.5 h-3.5"/>Incident Resolution</h4>
+                                        <span className="font-bold">{data.incidentResolutionRate}%</span>
+                                    </div>
+                                    <Progress value={data.incidentResolutionRate} className="h-1.5" />
+                                </div>
+                                <div>
+                                    <div className="flex justify-between items-center mb-1 text-xs">
+                                        <h4 className="font-medium text-muted-foreground flex items-center gap-1.5"><ShieldCheck className="w-3.5 h-3.5"/>Guard Perimeter</h4>
+                                        <span className="font-bold">{data.guardPerimeterAccuracy}%</span>
+                                    </div>
+                                    <Progress value={data.guardPerimeterAccuracy} className="h-1.5" />
+                                </div>
+                                <div>
+                                    <div className="flex justify-between items-center mb-1 text-xs">
+                                        <h4 className="font-medium text-muted-foreground flex items-center gap-1.5"><UserCheck className="w-3.5 h-3.5"/>Guard Selfie</h4>
+                                        <span className="font-bold">{data.guardSelfieAccuracy}%</span>
+                                    </div>
+                                    <Progress value={data.guardSelfieAccuracy} className="h-1.5" />
+                                </div>
+                                <div>
+                                    <div className="flex justify-between items-center mb-1 text-xs">
+                                        <h4 className="font-medium text-muted-foreground flex items-center gap-1.5"><Briefcase className="w-3.5 h-3.5"/>Officer Visits</h4>
+                                        <span className="font-bold">{data.officerSiteVisitRate}%</span>
+                                    </div>
+                                    <Progress value={data.officerSiteVisitRate} className="h-1.5" />
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                )
+            })}
+        </div>
       </CardContent>
     </Card>
   );
