@@ -257,8 +257,7 @@ export default function TowercoSitesPage() {
   };
 
   const filteredAssignedSites = useMemo(() => {
-    setAssignedCurrentPage(1);
-    return assignedSites.filter((site) => {
+    const filtered = assignedSites.filter((site) => {
       const searchLower = assignedSearchQuery.toLowerCase();
       const matchesSearch =
         site.name.toLowerCase().includes(searchLower) ||
@@ -274,6 +273,8 @@ export default function TowercoSitesPage() {
 
       return matchesSearch && matchesAgency && matchesRegion && matchesCity;
     });
+    setAssignedCurrentPage(1);
+    return filtered;
   }, [
     assignedSearchQuery,
     selectedAgency,
@@ -291,8 +292,7 @@ export default function TowercoSitesPage() {
 
 
   const filteredUnassignedSites = useMemo(() => {
-    setUnassignedCurrentPage(1);
-    return unassignedSites.filter((site) => {
+    const filtered = unassignedSites.filter((site) => {
       const searchLower = unassignedSearchQuery.toLowerCase();
       const matchesSearch =
         site.name.toLowerCase().includes(searchLower) ||
@@ -303,6 +303,8 @@ export default function TowercoSitesPage() {
 
       return matchesSearch && matchesRegion && matchesCity;
     });
+    setUnassignedCurrentPage(1);
+    return filtered;
   }, [unassignedSearchQuery, unassignedSites, unassignedSelectedRegion, unassignedSelectedCity]);
 
   const paginatedUnassignedSites = useMemo(() => {
