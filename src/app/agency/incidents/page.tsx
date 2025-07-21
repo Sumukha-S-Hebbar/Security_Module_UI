@@ -375,7 +375,7 @@ export default function AgencyIncidentsPage() {
             <CardFooter>
                 <div className="flex items-center justify-between w-full">
                     <div className="text-sm text-muted-foreground">
-                        Showing page {currentPage} of {totalPages}
+                        Showing {paginatedIncidents.length} of {filteredIncidents.length} incidents.
                     </div>
                     <div className="flex items-center gap-2">
                         <Button
@@ -386,6 +386,7 @@ export default function AgencyIncidentsPage() {
                         >
                             Previous
                         </Button>
+                        <span className="text-sm">Page {currentPage} of {totalPages}</span>
                         <Button
                             variant="outline"
                             size="sm"
