@@ -1,39 +1,30 @@
-
+// src/app/towerco/home/_components/agency-performance.tsx
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import type { SecurityAgency, Site, Incident } from '@/types';
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
+  CardDescription,
 } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { guards } from '@/lib/data/guards';
 import { patrollingOfficers } from '@/lib/data/patrolling-officers';
-import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  Cell,
-  CartesianGrid,
-} from 'recharts';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { CheckCircle, User, Shield, Map } from 'lucide-react';
 
 interface AgencyPerformanceData {
   agency: SecurityAgency;
   performance: {
     'Overall Performance': number;
     'Incident Resolution': number;
-    'Perimeter Accuracy': number;
-    'Selfie Accuracy': number;
-    'Site Visits': number;
+    'Guard Perimeter': number;
+    'Guard Selfie': number;
+    'Officer Visits': number;
   };
 }
 
@@ -43,20 +34,50 @@ const getPerformanceColor = (score: number): string => {
   return 'hsl(var(--destructive))';
 };
 
-const CustomTooltip = ({ active, payload, label }: any) => {
-  if (active && payload && payload.length) {
-    return (
-      <div className="rounded-lg border bg-background p-2 text-sm shadow-sm">
-        <p className="font-bold">{label}</p>
-        <p className="text-muted-foreground">
-          Performance:
-          <span className="ml-2 font-medium text-foreground">{`${payload[0].value}%`}</span>
-        </p>
-      </div>
-    );
-  }
+const CircularProgress = ({
+  value,
+  color,
+}: {
+  value: number;
+  color: string;
+}) => {
+  const radius = 50;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference - (value / 100) * circumference;
 
-  return null;
+  return (
+    <div className="relative h-24 w-24">
+      <svg className="h-full w-full" viewBox="0 0 120 120">
+        <circle
+          className="stroke-current text-muted"
+          strokeWidth="10"
+          fill="transparent"
+          r={radius}
+          cx="60"
+          cy="60"
+        />
+        <circle
+          className="stroke-current transition-all duration-500"
+          strokeWidth="10"
+          strokeLinecap="round"
+          fill="transparent"
+          r={radius}
+          cx="60"
+          cy="60"
+          style={{
+            stroke: color,
+            strokeDasharray: circumference,
+            strokeDashoffset: offset,
+            transform: 'rotate(-90deg)',
+            transformOrigin: '50% 50%',
+          }}
+        />
+      </svg>
+      <div className="absolute inset-0 flex items-center justify-center">
+        <span className="text-2xl font-bold">{value}%</span>
+      </div>
+    </div>
+  );
 };
 
 export function AgencyPerformance({
@@ -71,7 +92,7 @@ export function AgencyPerformance({
   const router = useRouter();
 
   const performanceData: AgencyPerformanceData[] = useMemo(() => {
-    const data = agencies.map((agency) => {
+    return agencies.map((agency) => {
       const agencySiteIds = new Set(agency.siteIds);
       const agencySites = sites.filter((s) => agencySiteIds.has(s.id));
 
@@ -149,135 +170,77 @@ export function AgencyPerformance({
         performance: {
           'Overall Performance': Math.round(overallPerformance),
           'Incident Resolution': Math.round(incidentResolutionRate),
-          'Perimeter Accuracy': Math.round(guardPerimeterAccuracy),
-          'Selfie Accuracy': Math.round(guardSelfieAccuracy),
-          'Site Visits': Math.round(officerSiteVisitRate),
+          'Guard Perimeter': Math.round(guardPerimeterAccuracy),
+          'Guard Selfie': Math.round(guardSelfieAccuracy),
+          'Officer Visits': Math.round(officerSiteVisitRate),
         },
       };
-    });
-
-    return data.sort(
-      (a, b) =>
-        b.performance['Overall Performance'] -
-        a.performance['Overall Performance']
-    );
+    }).sort((a, b) => b.performance['Overall Performance'] - a.performance['Overall Performance']);
   }, [agencies, sites, incidents]);
 
-  const [selectedAgencyId, setSelectedAgencyId] = useState<string | null>(
-    performanceData.length > 0 ? performanceData[0].agency.id : null
-  );
-
-  const selectedAgencyData = performanceData.find(
-    (d) => d.agency.id === selectedAgencyId
-  );
-  
-  const chartData = useMemo(() => {
-    return performanceData.map(data => ({
-      name: data.agency.name,
-      id: data.agency.id,
-      performance: data.performance['Overall Performance'],
-    }));
-  }, [performanceData]);
-
-  // Each agency bar group needs roughly 80px.
-  const chartWidth = Math.max(chartData.length * 80, 500); 
+  const subMetrics: {
+    key: keyof Omit<AgencyPerformanceData['performance'], 'Overall Performance'>;
+    label: string;
+    icon: React.ElementType;
+  }[] = [
+    { key: 'Incident Resolution', label: 'Incident Resolution', icon: CheckCircle },
+    { key: 'Guard Perimeter', label: 'Guard Perimeter', icon: Shield },
+    { key: 'Guard Selfie', label: 'Guard Selfie', icon: User },
+    { key: 'Officer Visits', label: 'Officer Visits', icon: Map },
+  ];
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Agency Performance Leaderboard</CardTitle>
+        <CardTitle>Agency Performance Overview</CardTitle>
         <CardDescription>
-          Comparison of security agencies. Click a bar for details.
+          Overall scores based on incidents, guard, and officer performance. Click a card to view details.
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="md:col-span-2 h-[350px] overflow-x-auto">
-            <div style={{ width: `${chartWidth}px`, height: '100%' }}>
-                <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                    data={chartData}
-                    margin={{ top: 5, right: 20, left: 0, bottom: 20 }}
-                >
-                    <CartesianGrid vertical={false} strokeDasharray="3 3" />
-                    <XAxis 
-                    dataKey="name" 
-                    angle={-45}
-                    textAnchor="end"
-                    height={60}
-                    interval={0}
-                    tick={{ fontSize: 12 }}
-                    />
-                    <YAxis domain={[0, 100]} tick={{ fontSize: 12 }} />
-                    <Tooltip cursor={{ fill: 'hsl(var(--muted))' }} content={<CustomTooltip />} />
-                    <Bar 
-                    dataKey="performance" 
-                    radius={[4, 4, 0, 0]}
-                    barSize={30}
-                    onClick={(data) => setSelectedAgencyId(data.id)}
-                    >
-                    {chartData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={getPerformanceColor(entry.performance)} className="cursor-pointer" />
-                    ))}
-                    </Bar>
-                </BarChart>
-                </ResponsiveContainer>
-            </div>
-          </div>
-
-          <div className="md:col-span-1">
-            {selectedAgencyData ? (
-              <div className="border rounded-lg p-4 h-full bg-muted/30">
-                <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <h3 className="text-lg font-bold">
-                      {selectedAgencyData.agency.name}
-                    </h3>
-                    <p className="text-sm text-muted-foreground">
-                      Performance Breakdown
-                    </p>
-                  </div>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() =>
-                      router.push(
-                        `/towerco/agencies/${selectedAgencyData.agency.id}`
-                      )
-                    }
-                  >
-                    View Report
-                  </Button>
-                </div>
-
-                <div className="space-y-4">
-                  {(
-                    Object.entries(selectedAgencyData.performance) as [
-                      keyof AgencyPerformanceData['performance'],
-                      number
-                    ][]
-                  ).map(([metric, value]) => (
-                    <div key={metric}>
-                       <div className="flex justify-between items-center mb-1">
-                         <p className="text-sm font-medium text-muted-foreground">
-                           {metric}
-                         </p>
-                         <p className="text-sm font-semibold">{value}%</p>
-                       </div>
-                      <Progress
-                        value={value}
-                        indicatorClassName={getPerformanceColor(value)}
-                      />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {performanceData.map((data) => {
+            const overallScore = data.performance['Overall Performance'];
+            const color = getPerformanceColor(overallScore);
+            return (
+              <div
+                key={data.agency.id}
+                onClick={() => router.push(`/towerco/agencies/${data.agency.id}`)}
+                className="rounded-lg border p-4 sm:p-6 space-y-4 cursor-pointer transition-all hover:shadow-lg hover:-translate-y-1"
+              >
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-4">
+                    <Avatar className="h-12 w-12">
+                      <AvatarImage src={data.agency.avatar} alt={data.agency.name} />
+                      <AvatarFallback>{data.agency.name.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="font-semibold">{data.agency.name}</p>
+                      <p className="text-xs text-muted-foreground">ID: {data.agency.id}</p>
                     </div>
-                  ))}
+                  </div>
+                  <CircularProgress value={overallScore} color={color} />
+                </div>
+                <div className="space-y-4 pt-4 border-t">
+                  {subMetrics.map(({ key, label, icon: Icon }) => {
+                    const value = data.performance[key];
+                    return (
+                        <div key={key}>
+                            <div className="flex justify-between items-center text-sm mb-1">
+                                <div className="flex items-center gap-2 text-muted-foreground">
+                                    <Icon className="h-4 w-4" />
+                                    <span>{label}</span>
+                                </div>
+                                <span className="font-medium text-foreground">{value}%</span>
+                            </div>
+                            <Progress value={value} indicatorClassName="bg-primary" />
+                        </div>
+                    );
+                  })}
                 </div>
               </div>
-            ) : (
-              <div className="flex items-center justify-center border rounded-lg h-full min-h-[200px] bg-muted/30">
-                <p className="text-sm text-muted-foreground">Select an agency to see details</p>
-              </div>
-            )}
-          </div>
+            );
+          })}
         </div>
       </CardContent>
     </Card>
