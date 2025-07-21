@@ -4,11 +4,11 @@ export const incidents: Incident[] = [
     { 
       id: 'INC001', 
       incidentTime: '2024-07-20T14:30:00Z', 
-      description: 'Attempted break-in at west entrance.', 
+      description: '', 
       status: 'Active', 
       raisedByGuardId: 'GL001', 
       siteId: 'SITE02', 
-      initialIncidentMediaUrl: ['https://placehold.co/600x400.png'],
+      initialIncidentMediaUrl: [],
       attendedByPatrollingOfficerId: 'PO01'
     },
     { 
@@ -62,17 +62,17 @@ export const incidents: Incident[] = [
     { 
       id: 'INC006', 
       incidentTime: '2024-07-22T10:00:00Z', 
-      description: 'Unidentified drone spotted over the facility.', 
+      description: '', 
       status: 'Active', 
       raisedByGuardId: 'GL009', 
       siteId: 'SITE08',
-      initialIncidentMediaUrl: ['https://placehold.co/600x400.png'],
+      initialIncidentMediaUrl: [],
       attendedByPatrollingOfficerId: 'PO01'
     },
     { 
       id: 'INC007', 
       incidentTime: '2024-07-23T11:00:00Z', 
-      description: 'Power outage affecting security cameras in Warehouse 3.', 
+      description: '', 
       status: 'Active', 
       raisedByGuardId: 'GL007', 
       siteId: 'SITE05',
@@ -82,11 +82,11 @@ export const incidents: Incident[] = [
     { 
       id: 'INC008', 
       incidentTime: '2024-07-23T15:00:00Z', 
-      description: 'Unauthorized vehicle parked in restricted area near Building C.', 
+      description: '', 
       status: 'Active', 
       raisedByGuardId: 'GL004', 
       siteId: 'SITE01',
-      initialIncidentMediaUrl: ['https://placehold.co/600x400.png'],
+      initialIncidentMediaUrl: [],
       attendedByPatrollingOfficerId: 'PO02'
     },
     { 
@@ -112,7 +112,7 @@ export const incidents: Incident[] = [
     { 
       id: 'INC011', 
       incidentTime: '2024-07-24T08:00:00Z', 
-      description: 'Fire alarm triggered in building B. Investigation needed.', 
+      description: '', 
       status: 'Active', 
       raisedByGuardId: 'GL004', 
       siteId: 'SITE01',
@@ -122,7 +122,7 @@ export const incidents: Incident[] = [
     { 
       id: 'INC012', 
       incidentTime: '2024-07-24T09:30:00Z', 
-      description: 'A guard has reported a medical emergency onsite.', 
+      description: '', 
       status: 'Active', 
       raisedByGuardId: 'GL007', 
       siteId: 'SITE05',
