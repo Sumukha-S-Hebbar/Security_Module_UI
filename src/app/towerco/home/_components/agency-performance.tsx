@@ -9,17 +9,22 @@ import { guards } from '@/lib/data/guards';
 import { patrollingOfficers } from '@/lib/data/patrolling-officers';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
+import { ShieldCheck, UserCheck, Map, ShieldAlert } from 'lucide-react';
 
 interface AgencyPerformanceData {
   agency: SecurityAgency;
   name: string;
   performance: number;
+  incidentResolutionRate: number;
+  guardPerimeterAccuracy: number;
+  guardSelfieAccuracy: number;
+  officerSiteVisitRate: number;
 }
 
 const getPerformanceClass = (score: number) => {
-  if (score >= 90) return 'bg-chart-2';
-  if (score >= 70) return 'bg-yellow-500';
-  return 'bg-destructive';
+  if (score >= 90) return 'text-chart-2';
+  if (score >= 70) return 'text-yellow-500';
+  return 'text-destructive';
 };
 
 export function AgencyPerformance({
@@ -88,6 +93,10 @@ export function AgencyPerformance({
         agency,
         name: agency.name,
         performance: Math.round(performance),
+        incidentResolutionRate: Math.round(incidentResolutionRate),
+        guardPerimeterAccuracy: Math.round(guardPerimeterAccuracy),
+        guardSelfieAccuracy: Math.round(guardSelfieAccuracy),
+        officerSiteVisitRate: Math.round(officerSiteVisitRate),
       };
     });
 
@@ -117,42 +126,56 @@ export function AgencyPerformance({
       <CardHeader>
         <CardTitle>Agency Performance Rankings</CardTitle>
         <CardDescription>
-          Overall scores based on incidents, guard, and officer performance. Click a bar to view details.
+          Overall scores based on incidents, guard, and officer performance. Click an agency to view details.
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
-          {performanceData.map((data) => (
-            <div
+        <ol className="space-y-3">
+          {performanceData.map((data, index) => (
+            <li
               key={data.agency.id}
-              className="group relative cursor-pointer"
               onClick={() => router.push(`/towerco/agencies/${data.agency.id}`)}
+              className="p-4 rounded-lg border bg-card hover:bg-muted/50 cursor-pointer transition-colors"
             >
-              <div
-                className={cn(
-                  'absolute left-0 top-0 h-full rounded-md transition-all duration-300 ease-in-out',
-                  getPerformanceClass(data.performance)
-                )}
-                style={{ width: `${data.performance}%` }}
-              ></div>
-               <div className="relative flex items-center justify-between p-3 bg-muted/50 rounded-md group-hover:bg-muted transition-colors">
-                 <div className="flex items-center gap-3">
-                   <Avatar className="h-10 w-10 border-2 border-background">
+              <div className="flex flex-wrap items-center gap-4">
+                <div className="flex items-center gap-4">
+                   <div className="text-2xl font-bold text-muted-foreground w-8 text-center">
+                    {index + 1}
+                   </div>
+                   <Avatar className="h-12 w-12 border">
                      <AvatarImage src={data.agency.avatar} alt={data.agency.name} />
                      <AvatarFallback>{data.agency.name.charAt(0)}</AvatarFallback>
                    </Avatar>
                    <div>
-                     <p className="font-semibold text-foreground">{data.name}</p>
+                     <p className="font-semibold text-card-foreground">{data.name}</p>
                      <p className="text-sm text-muted-foreground">ID: {data.agency.id}</p>
                    </div>
+                </div>
+
+                <div className="flex-grow flex flex-wrap items-center justify-end gap-x-6 gap-y-2 text-sm ml-auto">
+                    <div className="flex items-center gap-2" title="Incident Resolution Rate">
+                      <ShieldAlert className="h-4 w-4 text-muted-foreground" />
+                      <span className="font-medium">{data.incidentResolutionRate}%</span>
+                    </div>
+                    <div className="flex items-center gap-2" title="Guard Selfie Accuracy">
+                      <UserCheck className="h-4 w-4 text-muted-foreground" />
+                      <span className="font-medium">{data.guardSelfieAccuracy}%</span>
+                    </div>
+                     <div className="flex items-center gap-2" title="Officer Site Visit Rate">
+                      <Map className="h-4 w-4 text-muted-foreground" />
+                      <span className="font-medium">{data.officerSiteVisitRate}%</span>
+                    </div>
+                </div>
+
+                 <div className="text-3xl font-bold w-20 text-right" >
+                   <span className={cn(getPerformanceClass(data.performance))}>
+                    {data.performance}%
+                   </span>
                  </div>
-                 <div className="text-lg font-bold text-foreground">
-                   {data.performance}%
-                 </div>
-               </div>
-            </div>
+              </div>
+            </li>
           ))}
-        </div>
+        </ol>
       </CardContent>
     </Card>
   );
