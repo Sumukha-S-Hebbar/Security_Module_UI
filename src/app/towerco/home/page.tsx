@@ -299,6 +299,7 @@ export default function TowercoHomePage() {
         sites={data.sites}
         agencies={data.agencies}
         incidents={data.incidents}
+        guards={data.guards}
       />
       
       <IncidentChart
