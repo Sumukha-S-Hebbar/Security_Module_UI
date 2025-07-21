@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import type { SecurityAgency, Site, Incident } from '@/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
@@ -10,6 +10,9 @@ import { patrollingOfficers } from '@/lib/data/patrolling-officers';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Progress } from '@/components/ui/progress';
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible';
+import { ChevronDown } from 'lucide-react';
+
 
 interface AgencyPerformanceData {
   agency: SecurityAgency;
@@ -45,6 +48,7 @@ export function AgencyPerformance({
   incidents: Incident[];
 }) {
   const router = useRouter();
+  const [openCollapsibleId, setOpenCollapsibleId] = useState<string | null>(null);
 
   const performanceData: AgencyPerformanceData[] = useMemo(() => {
     const data = agencies.map((agency) => {
@@ -112,6 +116,10 @@ export function AgencyPerformance({
 
     return data.sort((a, b) => b.performance - a.performance);
   }, [agencies, sites, incidents]);
+  
+  const handleCollapsibleOpen = (id: string) => {
+    setOpenCollapsibleId(prevId => prevId === id ? null : id);
+  }
 
   if (performanceData.length === 0) {
     return (
@@ -134,74 +142,72 @@ export function AgencyPerformance({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Agency Performance Rankings</CardTitle>
+        <CardTitle>Agency Performance</CardTitle>
         <CardDescription>
-          Overall scores based on incidents, guard, and officer performance. Click an agency to view details.
+          Overall scores and detailed breakdown for each agency.
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <ol className="space-y-4">
-          {performanceData.map((data, index) => (
-            <li
-              key={data.agency.id}
-              onClick={() => router.push(`/towerco/agencies/${data.agency.id}`)}
-              className="p-4 rounded-lg border bg-card hover:bg-muted/50 cursor-pointer transition-colors"
+        <div className="space-y-2">
+          {performanceData.map((data) => (
+            <Collapsible 
+              key={data.agency.id} 
+              open={openCollapsibleId === data.agency.id}
+              onOpenChange={() => handleCollapsibleOpen(data.agency.id)}
             >
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="md:col-span-1 flex items-center gap-4">
-                   <div className="text-2xl font-bold text-muted-foreground w-8 text-center">
-                    {index + 1}
-                   </div>
-                   <Avatar className="h-12 w-12 border">
-                     <AvatarImage src={data.agency.avatar} alt={data.name} />
-                     <AvatarFallback>{data.name.charAt(0)}</AvatarFallback>
-                   </Avatar>
-                   <div>
-                     <p className="font-semibold text-card-foreground">{data.name}</p>
-                     <p className="text-sm text-muted-foreground">ID: {data.agency.id}</p>
-                   </div>
+              <CollapsibleTrigger asChild>
+                <div className="flex items-center gap-4 p-2 rounded-lg hover:bg-muted/50 cursor-pointer w-full text-left">
+                  <div className="flex items-center gap-3 w-1/3">
+                    <Avatar className="h-10 w-10 border">
+                      <AvatarImage src={data.agency.avatar} alt={data.name} />
+                      <AvatarFallback>{data.name.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                    <p className="font-semibold text-card-foreground truncate">{data.name}</p>
+                  </div>
+                  <div className="flex-1 relative">
+                    <Progress value={data.performance} className="h-6" indicatorClassName={getPerformanceClass(data.performance)} />
+                    <span className="absolute inset-0 flex items-center justify-center text-sm font-bold text-white mix-blend-screen">
+                      {data.performance}%
+                    </span>
+                  </div>
+                   <ChevronDown className={cn("h-5 w-5 transition-transform", openCollapsibleId === data.agency.id && "rotate-180")} />
                 </div>
-
-                <div className="md:col-span-2 flex flex-col justify-center gap-3">
-                    <div className="flex items-center justify-between">
-                        <p className="text-sm font-medium">Overall Performance</p>
-                        <p className={cn("text-lg font-bold", getScoreColorClass(data.performance))}>{data.performance}%</p>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 p-4 pl-16 bg-muted/30 rounded-b-lg">
+                    <div>
+                        <div className="flex justify-between text-sm text-muted-foreground mb-1">
+                            <span>Incident Resolution</span>
+                            <span className="font-medium">{data.metrics.resolutionRate}%</span>
+                        </div>
+                        <Progress value={data.metrics.resolutionRate} className="h-2" indicatorClassName={getPerformanceClass(data.metrics.resolutionRate)} />
                     </div>
-                    <div className="grid grid-cols-2 gap-x-6 gap-y-3 text-xs">
-                        <div>
-                            <div className="flex justify-between text-muted-foreground mb-1">
-                                <span>Incident Resolution</span>
-                                <span>{data.metrics.resolutionRate}%</span>
-                            </div>
-                            <Progress value={data.metrics.resolutionRate} className="h-1.5" indicatorClassName={getPerformanceClass(data.metrics.resolutionRate)} />
+                    <div>
+                        <div className="flex justify-between text-sm text-muted-foreground mb-1">
+                            <span>Guard Perimeter Accuracy</span>
+                            <span className="font-medium">{data.metrics.perimeterAccuracy}%</span>
                         </div>
-                        <div>
-                            <div className="flex justify-between text-muted-foreground mb-1">
-                                <span>Perimeter Accuracy</span>
-                                <span>{data.metrics.perimeterAccuracy}%</span>
-                            </div>
-                            <Progress value={data.metrics.perimeterAccuracy} className="h-1.5" indicatorClassName={getPerformanceClass(data.metrics.perimeterAccuracy)} />
+                        <Progress value={data.metrics.perimeterAccuracy} className="h-2" indicatorClassName={getPerformanceClass(data.metrics.perimeterAccuracy)} />
+                    </div>
+                    <div>
+                        <div className="flex justify-between text-sm text-muted-foreground mb-1">
+                            <span>Guard Selfie Accuracy</span>
+                            <span className="font-medium">{data.metrics.selfieAccuracy}%</span>
                         </div>
-                        <div>
-                            <div className="flex justify-between text-muted-foreground mb-1">
-                                <span>Selfie Accuracy</span>
-                                <span>{data.metrics.selfieAccuracy}%</span>
-                            </div>
-                            <Progress value={data.metrics.selfieAccuracy} className="h-1.5" indicatorClassName={getPerformanceClass(data.metrics.selfieAccuracy)} />
+                        <Progress value={data.metrics.selfieAccuracy} className="h-2" indicatorClassName={getPerformanceClass(data.metrics.selfieAccuracy)} />
+                    </div>
+                    <div>
+                        <div className="flex justify-between text-sm text-muted-foreground mb-1">
+                            <span>Officer Site Visit Rate</span>
+                            <span className="font-medium">{data.metrics.visitRate}%</span>
                         </div>
-                        <div>
-                            <div className="flex justify-between text-muted-foreground mb-1">
-                                <span>Site Visit Rate</span>
-                                <span>{data.metrics.visitRate}%</span>
-                            </div>
-                            <Progress value={data.metrics.visitRate} className="h-1.5" indicatorClassName={getPerformanceClass(data.metrics.visitRate)} />
-                        </div>
+                        <Progress value={data.metrics.visitRate} className="h-2" indicatorClassName={getPerformanceClass(data.metrics.visitRate)} />
                     </div>
                 </div>
-              </div>
-            </li>
+              </CollapsibleContent>
+            </Collapsible>
           ))}
-        </ol>
+        </div>
       </CardContent>
     </Card>
   );
