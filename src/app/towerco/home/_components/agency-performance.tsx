@@ -123,7 +123,7 @@ export function AgencyPerformance({
             <TableRow>
               <TableHead className="w-[80px]">Rank</TableHead>
               <TableHead>Agency</TableHead>
-              <TableHead>Performance</TableHead>
+              <TableHead>Performance Score</TableHead>
               <TableHead className="text-right">Score</TableHead>
             </TableRow>
           </TableHeader>
