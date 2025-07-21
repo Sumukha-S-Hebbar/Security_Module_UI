@@ -259,7 +259,7 @@ export default function AgencyPatrollingOfficerReportPage() {
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2"><Users className="h-5 w-5"/>Guards Under Him</CardTitle>
+            <CardTitle className="flex items-center gap-2"><Users className="h-5 w-5"/>Guards managed by him</CardTitle>
           </CardHeader>
           <CardContent>
             {assignedGuards.length > 0 ? (
