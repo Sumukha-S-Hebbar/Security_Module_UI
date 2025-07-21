@@ -301,7 +301,8 @@ export default function AgencyPatrollingOfficersPage() {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Patrolling Officer</TableHead>
+                        <TableHead>ID</TableHead>
+                        <TableHead>Name</TableHead>
                         <TableHead>Contact Info</TableHead>
                         <TableHead>Assignments</TableHead>
                         <TableHead>Site Visit Accuracy</TableHead>
@@ -320,15 +321,15 @@ export default function AgencyPatrollingOfficersPage() {
                                 return (
                                 <TableRow key={patrollingOfficer.id}>
                                   <TableCell>
+                                    <p className="font-medium">{patrollingOfficer.id}</p>
+                                  </TableCell>
+                                  <TableCell>
                                     <div className="flex items-center gap-3">
                                         <Avatar className="h-10 w-10">
                                             <AvatarImage src={patrollingOfficer.avatar} alt={patrollingOfficer.name} />
                                             <AvatarFallback>{patrollingOfficer.name.charAt(0)}</AvatarFallback>
                                         </Avatar>
-                                        <div>
-                                            <p className="font-medium">{patrollingOfficer.name}</p>
-                                            <p className="text-sm text-muted-foreground">ID: {patrollingOfficer.id}</p>
-                                        </div>
+                                        <p className="font-medium">{patrollingOfficer.name}</p>
                                     </div>
                                   </TableCell>
                                   <TableCell>
@@ -374,7 +375,7 @@ export default function AgencyPatrollingOfficersPage() {
                             )})
                         ) : (
                             <TableRow>
-                              <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">
+                              <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
                                   No patrolling officers found.
                               </TableCell>
                             </TableRow>
