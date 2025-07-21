@@ -3,7 +3,7 @@
 
 import { useState, useMemo } from 'react';
 import type { Incident, Site, SecurityAgency, Guard } from '@/types';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { guards } from '@/lib/data/guards';
 import { patrollingOfficers } from '@/lib/data/patrolling-officers';
