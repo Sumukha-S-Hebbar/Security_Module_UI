@@ -205,6 +205,77 @@ export default function AgencyPatrollingOfficersPage() {
                             </Form>
                         </DialogContent>
                     </Dialog>
+                    <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+                        <DialogTrigger asChild>
+                            <Button variant="outline">
+                                <PlusCircle className="mr-2 h-4 w-4" />
+                                Add Patrolling Officer
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                            <DialogHeader>
+                                <DialogTitle>Add a New Patrolling Officer</DialogTitle>
+                                <DialogDescription>
+                                    Fill in the details below to add a new patrolling officer.
+                                </DialogDescription>
+                            </DialogHeader>
+                            <Form {...addForm}>
+                                <form onSubmit={addForm.handleSubmit(onAddSubmit)} className="space-y-4">
+                                    <FormField
+                                        control={addForm.control}
+                                        name="name"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Full Name</FormLabel>
+                                                <FormControl>
+                                                    <Input placeholder="e.g., Michael Scott" {...field} />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={addForm.control}
+                                        name="phone"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Phone</FormLabel>
+                                                <FormControl>
+                                                    <Input placeholder="e.g., 555-100-2000" {...field} />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={addForm.control}
+                                        name="email"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Email</FormLabel>
+                                                <FormControl>
+                                                    <Input placeholder="e.g., michael.s@guardlink.com" {...field} />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <DialogFooter>
+                                        <Button type="submit" disabled={isAdding}>
+                                        {isAdding ? (
+                                            <>
+                                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                            Adding...
+                                            </>
+                                        ) : (
+                                            "Add Patrolling Officer"
+                                        )}
+                                        </Button>
+                                    </DialogFooter>
+                                </form>
+                            </Form>
+                        </DialogContent>
+                    </Dialog>
                 </div>
             </div>
 
@@ -214,79 +285,6 @@ export default function AgencyPatrollingOfficersPage() {
                         <div>
                             <CardTitle>All Patrolling Officers</CardTitle>
                             <CardDescription>A list of all patrolling officers in your agency.</CardDescription>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-                                <DialogTrigger asChild>
-                                    <Button variant="outline">
-                                        <PlusCircle className="mr-2 h-4 w-4" />
-                                        Add Patrolling Officer
-                                    </Button>
-                                </DialogTrigger>
-                                <DialogContent>
-                                    <DialogHeader>
-                                        <DialogTitle>Add a New Patrolling Officer</DialogTitle>
-                                        <DialogDescription>
-                                            Fill in the details below to add a new patrolling officer.
-                                        </DialogDescription>
-                                    </DialogHeader>
-                                    <Form {...addForm}>
-                                        <form onSubmit={addForm.handleSubmit(onAddSubmit)} className="space-y-4">
-                                            <FormField
-                                                control={addForm.control}
-                                                name="name"
-                                                render={({ field }) => (
-                                                    <FormItem>
-                                                        <FormLabel>Full Name</FormLabel>
-                                                        <FormControl>
-                                                            <Input placeholder="e.g., Michael Scott" {...field} />
-                                                        </FormControl>
-                                                        <FormMessage />
-                                                    </FormItem>
-                                                )}
-                                            />
-                                            <FormField
-                                                control={addForm.control}
-                                                name="phone"
-                                                render={({ field }) => (
-                                                    <FormItem>
-                                                        <FormLabel>Phone</FormLabel>
-                                                        <FormControl>
-                                                            <Input placeholder="e.g., 555-100-2000" {...field} />
-                                                        </FormControl>
-                                                        <FormMessage />
-                                                    </FormItem>
-                                                )}
-                                            />
-                                            <FormField
-                                                control={addForm.control}
-                                                name="email"
-                                                render={({ field }) => (
-                                                    <FormItem>
-                                                        <FormLabel>Email</FormLabel>
-                                                        <FormControl>
-                                                            <Input placeholder="e.g., michael.s@guardlink.com" {...field} />
-                                                        </FormControl>
-                                                        <FormMessage />
-                                                    </FormItem>
-                                                )}
-                                            />
-                                            <DialogFooter>
-                                                <Button type="submit" disabled={isAdding}>
-                                                {isAdding ? (
-                                                    <>
-                                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                                    Adding...
-                                                    </>
-                                                ) : (
-                                                    "Add Patrolling Officer"
-                                                )}
-                                                </Button>
-                                            </DialogFooter>
-                                        </form>
-                                    </Form>
-                                </DialogContent>
-                            </Dialog>
                         </div>
                     </div>
                     <div className="relative pt-4">
