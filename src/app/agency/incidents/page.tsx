@@ -26,8 +26,6 @@ import {
   CardFooter,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Eye, FileDown, Search, Calendar as CalendarIcon, CheckCircle, ChevronDown, ShieldAlert } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 import {
@@ -52,6 +50,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { IncidentStatusSummary } from './_components/incident-status-summary';
+import { Eye, FileDown, Search, Calendar as CalendarIcon, CheckCircle, ChevronDown, ShieldAlert } from 'lucide-react';
+
 
 const LOGGED_IN_AGENCY_ID = 'AGY01'; // Simulate logged-in agency
 const ITEMS_PER_PAGE = 10;
@@ -64,9 +65,9 @@ export default function AgencyIncidentsPage() {
 
   const [incidents, setIncidents] = useState(incidentStore.getIncidents());
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedStatus, setSelectedStatus] = useState('all');
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [selectedMonth, setSelectedMonth] = useState(monthFromQuery || 'all');
+  const [selectedStatus, setSelectedStatus] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
@@ -147,6 +148,14 @@ export default function AgencyIncidentsPage() {
     }
   };
 
+  const handleStatusSelectFromSummary = (status: string) => {
+    if (selectedStatus === status) {
+      setSelectedStatus('all');
+    } else {
+      setSelectedStatus(status);
+    }
+  }
+
   const getStatusIndicator = (status: Incident['status']) => {
     switch (status) {
       case 'Active':
@@ -189,14 +198,6 @@ export default function AgencyIncidentsPage() {
     }
   };
 
-  const handleDownloadReport = (e: React.MouseEvent, incident: Incident) => {
-    e.stopPropagation();
-    toast({
-      title: 'Report Download Started',
-      description: `Downloading report for incident #${incident.id}.`,
-    });
-  };
-
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6">
       <div>
@@ -205,6 +206,12 @@ export default function AgencyIncidentsPage() {
           A log of all emergency incidents reported across your sites.
         </p>
       </div>
+
+      <IncidentStatusSummary 
+        incidents={incidents.filter(i => agencySiteIds.has(i.siteId))} 
+        onStatusSelect={handleStatusSelectFromSummary}
+        selectedStatus={selectedStatus}
+      />
 
       <Card>
         <CardHeader>
