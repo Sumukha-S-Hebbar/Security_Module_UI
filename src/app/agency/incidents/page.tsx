@@ -288,7 +288,6 @@ export default function AgencyIncidentsPage() {
                 <TableHead>Patrolling Officer</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Actions</TableHead>
-                <TableHead className="text-right">Download</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -329,31 +328,14 @@ export default function AgencyIncidentsPage() {
                                     handleStatusChange(incident.id, 'Under Review')
                                 }
                                 disabled={
-                                    incident.status === 'Under Review' || isResolved
+                                    incident.status !== 'Active'
                                 }
                                 >
                                 <ShieldAlert className="mr-2 h-4 w-4" />
                                 Start Review
                                 </DropdownMenuItem>
-                                <DropdownMenuItem
-                                onClick={() => handleStatusChange(incident.id, 'Resolved')}
-                                disabled={isResolved}
-                                >
-                                <CheckCircle className="mr-2 h-4 w-4" />
-                                Mark as Resolved
-                                </DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={(e) => handleDownloadReport(e, incident)}
-                        >
-                          <FileDown className="mr-2 h-4 w-4" />
-                          Download
-                        </Button>
                       </TableCell>
                     </TableRow>
                   );
@@ -361,7 +343,7 @@ export default function AgencyIncidentsPage() {
               ) : (
                 <TableRow>
                   <TableCell
-                    colSpan={8}
+                    colSpan={7}
                     className="text-center text-muted-foreground"
                   >
                     No incidents found for the current filter.

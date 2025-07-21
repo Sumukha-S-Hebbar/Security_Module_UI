@@ -20,13 +20,15 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, MapPin, Briefcase, UserCheck, User, Calendar, FileDown, Phone, Mail, Upload } from 'lucide-react';
+import { ArrowLeft, MapPin, Briefcase, UserCheck, User, Calendar, FileDown, Phone, Mail, Upload, Info } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { useState, useEffect } from 'react';
 import { Separator } from '@/components/ui/separator';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+
 
 export default function IncidentReportPage() {
   const params = useParams();
@@ -87,10 +89,9 @@ export default function IncidentReportPage() {
         return;
     }
     
-    // In a real app, this would handle resolution file uploads.
-    console.log({ resolutionNotes, resolutionFiles });
+    const mediaUrls = resolutionFiles ? Array.from(resolutionFiles).map(file => `https://placehold.co/600x400.png?text=${encodeURIComponent(file.name)}`) : [];
 
-    incidentStore.updateIncident(incident.id, { resolutionNotes, status: 'Resolved' });
+    incidentStore.updateIncident(incident.id, { resolutionNotes, status: 'Resolved', resolvedIncidentMediaUrl: mediaUrls });
 
     toast({
         title: "Incident Resolved",
@@ -252,12 +253,26 @@ export default function IncidentReportPage() {
           </div>
         </CardHeader>
         <CardContent className="space-y-6 divide-y">
-            <div className="pt-6">
-                <h4 className="font-semibold mb-2 text-lg">
-                    Incident Summary
-                </h4>
-                <p className="text-muted-foreground">{incident.description || "No summary was provided by the agency."}</p>
-            </div>
+            {incident.status === 'Active' && (
+              <div className="pt-6">
+                <Alert variant="destructive">
+                  <Info className="h-4 w-4" />
+                  <AlertTitle>Incident Active</AlertTitle>
+                  <AlertDescription>
+                    This incident is active and awaiting review from the assigned security agency.
+                  </AlertDescription>
+                </Alert>
+              </div>
+            )}
+            
+            {incident.description && (
+                <div className="pt-6">
+                    <h4 className="font-semibold mb-2 text-lg">
+                        Incident Summary
+                    </h4>
+                    <p className="text-muted-foreground">{incident.description}</p>
+                </div>
+            )}
 
             {incident.initialIncidentMediaUrl && incident.initialIncidentMediaUrl.length > 0 && (
                 <div className="pt-6">
@@ -311,7 +326,7 @@ export default function IncidentReportPage() {
                         </div>
                     )}
                  </>
-            ) : (
+            ) : incident.status === 'Under Review' ? (
                 <form onSubmit={handleResolveIncident}>
                     <div className="pt-6 space-y-4">
                         <Separator />
@@ -347,7 +362,7 @@ export default function IncidentReportPage() {
                         </Button>
                     </CardFooter>
                 </form>
-            )}
+            ) : null}
 
         </CardContent>
       </Card>
