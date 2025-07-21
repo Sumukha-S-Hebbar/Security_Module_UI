@@ -48,7 +48,9 @@ import {
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import Link from 'next/link';
-import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
+import { Progress } from '@/components/ui/progress';
+import { useRouter } from 'next/navigation';
+
 
 const uploadFormSchema = z.object({
   excelFile: z
@@ -61,12 +63,12 @@ const LOGGED_IN_AGENCY_ID = 'AGY01'; // Simulate logged-in agency
 
 export default function AgencyGuardsPage() {
   const { toast } = useToast();
+  const router = useRouter();
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSiteFilter, setSelectedSiteFilter] = useState('all');
   const [selectedPatrollingOfficerFilter, setSelectedPatrollingOfficerFilter] = useState('all');
-  const [selectedGuard, setSelectedGuard] = useState<Guard | null>(null);
 
   const agencySites = useMemo(() => sites.filter(site => site.agencyId === LOGGED_IN_AGENCY_ID), []);
   const agencySiteNames = useMemo(() => new Set(agencySites.map(site => site.name)), [agencySites]);
@@ -84,15 +86,6 @@ export default function AgencyGuardsPage() {
     return agencyPatrollingOfficers.find(po => po.id === site.patrollingOfficerId);
   };
   
-  const assignedGuards = useMemo(() => agencyGuards.filter((guard) => getPatrollingOfficerForGuard(guard)), [agencyGuards]);
-
-  const unassignedGuards = useMemo(() => agencyGuards.filter((guard) => !getPatrollingOfficerForGuard(guard)), [agencyGuards]);
-  
-  const siteForSelectedGuard = useMemo(() => {
-    if (!selectedGuard) return null;
-    return agencySites.find(s => s.name === selectedGuard.site);
-  }, [selectedGuard, agencySites]);
-
   const uploadForm = useForm<z.infer<typeof uploadFormSchema>>({
     resolver: zodResolver(uploadFormSchema),
   });
@@ -119,25 +112,11 @@ export default function AgencyGuardsPage() {
     });
   }
 
-  const filteredAssignedGuards = useMemo(() => {
-    return assignedGuards.filter((guard) => {
+  const filteredGuards = useMemo(() => {
+    return agencyGuards.filter((guard) => {
       const searchLower = searchQuery.toLowerCase();
       const patrollingOfficer = getPatrollingOfficerForGuard(guard);
-      const matchesSearch =
-        guard.name.toLowerCase().includes(searchLower) ||
-        guard.id.toLowerCase().includes(searchLower) ||
-        guard.site.toLowerCase().includes(searchLower);
-
-      const matchesSite = selectedSiteFilter === 'all' || guard.site === selectedSiteFilter;
-      const matchesPatrollingOfficer = selectedPatrollingOfficerFilter === 'all' || patrollingOfficer?.id === selectedPatrollingOfficerFilter;
-
-      return matchesSearch && matchesSite && matchesPatrollingOfficer;
-    });
-  }, [searchQuery, selectedSiteFilter, selectedPatrollingOfficerFilter, assignedGuards]);
-  
-  const filteredUnassignedGuards = useMemo(() => {
-    return unassignedGuards.filter((guard) => {
-      const searchLower = searchQuery.toLowerCase();
+      
       const matchesSearch =
         guard.name.toLowerCase().includes(searchLower) ||
         guard.id.toLowerCase().includes(searchLower) ||
@@ -145,58 +124,20 @@ export default function AgencyGuardsPage() {
 
       const matchesSite = selectedSiteFilter === 'all' || guard.site === selectedSiteFilter;
       
-      return matchesSearch && matchesSite;
+      const matchesPatrollingOfficer = 
+        selectedPatrollingOfficerFilter === 'all' || 
+        (selectedPatrollingOfficerFilter === 'unassigned' && !patrollingOfficer) ||
+        (patrollingOfficer && patrollingOfficer.id === selectedPatrollingOfficerFilter);
+
+      return matchesSearch && matchesSite && matchesPatrollingOfficer;
     });
-  }, [searchQuery, selectedSiteFilter, unassignedGuards]);
+  }, [searchQuery, selectedSiteFilter, selectedPatrollingOfficerFilter, agencyGuards]);
 
   const uniqueSites = useMemo(() => [...new Set(agencyGuards.map(g => g.site))], [agencyGuards]);
   const uniquePatrollingOfficers = useMemo(() => {
-    const poIds = new Set(assignedGuards.map(g => getPatrollingOfficerForGuard(g)?.id).filter(Boolean));
+    const poIds = new Set(agencyGuards.map(g => getPatrollingOfficerForGuard(g)?.id).filter(Boolean));
     return agencyPatrollingOfficers.filter(po => poIds.has(po.id));
-  }, [assignedGuards, agencyPatrollingOfficers]);
-
-  const getStatusIndicator = (status: 'Active' | 'Under Review' | 'Resolved') => {
-    switch (status) {
-      case 'Active':
-        return (
-          <div className="flex items-center gap-2">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-destructive"></span>
-            </span>
-            <span>Active</span>
-          </div>
-        );
-      case 'Under Review':
-        return (
-          <div className="flex items-center gap-2">
-            <span className="relative flex h-2 w-2">
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
-            </span>
-            <span>Under Review</span>
-          </div>
-        );
-      case 'Resolved':
-        return (
-          <div className="flex items-center gap-2">
-            <span className="relative flex h-2 w-2">
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-chart-2"></span>
-            </span>
-            <span>Resolved</span>
-          </div>
-        );
-      default:
-        return (
-          <div className="flex items-center gap-2">
-            <span className="relative flex h-2 w-2">
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-muted-foreground"></span>
-            </span>
-            <span>{status}</span>
-          </div>
-        );
-    }
-  };
-
+  }, [agencyGuards, agencyPatrollingOfficers]);
 
   return (
     <>
@@ -210,7 +151,7 @@ export default function AgencyGuardsPage() {
           <CardHeader>
             <div className="flex flex-wrap items-center justify-between gap-4">
                 <div>
-                    <CardTitle>Security Guards</CardTitle>
+                    <CardTitle>All Guard Details</CardTitle>
                     <CardDescription>A list of all guards in your agency.</CardDescription>
                 </div>
                 <div className="flex items-center gap-2">
@@ -314,199 +255,75 @@ export default function AgencyGuardsPage() {
                               {po.name}
                           </SelectItem>
                       ))}
+                      <SelectItem value="unassigned">Unassigned</SelectItem>
                   </SelectContent>
               </Select>
             </div>
           </CardHeader>
           <CardContent>
-            <div className="space-y-6">
-              <div>
-                <h3 className="text-lg font-medium tracking-tight">Assigned Guards</h3>
-                <p className="text-sm text-muted-foreground">Guards on sites with an assigned patrolling officer.</p>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-6">
-                  {filteredAssignedGuards.length > 0 ? (
-                    filteredAssignedGuards.map((guard) => {
-                      const patrollingOfficer = getPatrollingOfficerForGuard(guard);
-                      const selfieAccuracy = guard.totalSelfieRequests > 0 ? Math.round(((guard.totalSelfieRequests - guard.missedSelfieCount) / guard.totalSelfieRequests) * 100) : 100;
-                      const perimeterAccuracy = guard.performance?.perimeterAccuracy || 0;
-                      const compliance = Math.round((perimeterAccuracy + selfieAccuracy) / 2);
-                      const complianceData = [
-                        { name: 'Compliance', value: compliance },
-                        { name: 'Remaining', value: 100 - compliance },
-                      ];
-                      const COLORS = ['hsl(var(--chart-2))', 'hsl(var(--muted))'];
-
-                      return (
-                        <Card key={guard.id} className="flex flex-col">
-                          <CardHeader>
-                              <div className="flex items-start justify-between gap-4">
-                                  <div className="flex items-center gap-4">
-                                      <Avatar className="h-12 w-12">
-                                          <AvatarImage src={guard.avatar} alt={guard.name} />
-                                          <AvatarFallback>{guard.name.charAt(0)}</AvatarFallback>
-                                      </Avatar>
-                                      <div>
-                                          <CardTitle className="text-lg">{guard.name}</CardTitle>
-                                          <CardDescription>ID: {guard.id}</CardDescription>
-                                      </div>
-                                  </div>
-                                  <div className="w-20 h-20 relative">
-                                      <ResponsiveContainer width="100%" height="100%">
-                                          <PieChart>
-                                              <Pie
-                                                  data={complianceData}
-                                                  cx="50%"
-                                                  cy="50%"
-                                                  innerRadius="70%"
-                                                  outerRadius="85%"
-                                                  paddingAngle={0}
-                                                  dataKey="value"
-                                                  stroke="none"
-                                              >
-                                                  {complianceData.map((entry, index) => (
-                                                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                                  ))}
-                                              </Pie>
-                                          </PieChart>
-                                      </ResponsiveContainer>
-                                      <div className="absolute inset-0 flex items-center justify-center">
-                                          <span className="text-xl font-bold text-foreground">{compliance}%</span>
-                                      </div>
-                                  </div>
-                              </div>
-                          </CardHeader>
-                          <CardContent className="flex-grow space-y-2 text-sm">
-                            <div className="flex items-center gap-2 text-muted-foreground">
-                              <Building className="h-4 w-4 flex-shrink-0" />
-                              <span>{guard.site}</span>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Guard</TableHead>
+                  <TableHead>Site</TableHead>
+                  <TableHead>Patrolling Officer</TableHead>
+                  <TableHead>Overall Compliance</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredGuards.length > 0 ? (
+                  filteredGuards.map((guard) => {
+                    const patrollingOfficer = getPatrollingOfficerForGuard(guard);
+                    const selfieAccuracy = guard.totalSelfieRequests > 0 ? Math.round(((guard.totalSelfieRequests - guard.missedSelfieCount) / guard.totalSelfieRequests) * 100) : 100;
+                    const perimeterAccuracy = guard.performance?.perimeterAccuracy || 0;
+                    const compliance = Math.round((perimeterAccuracy + selfieAccuracy) / 2);
+                    
+                    return (
+                      <TableRow key={guard.id}>
+                        <TableCell>
+                          <div className="flex items-center gap-3">
+                            <Avatar>
+                              <AvatarImage src={guard.avatar} alt={guard.name} />
+                              <AvatarFallback>{guard.name.charAt(0)}</AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <p className="font-medium">{guard.name}</p>
+                              <p className="text-sm text-muted-foreground">ID: {guard.id}</p>
                             </div>
-                            <div className="flex items-center gap-2 text-muted-foreground">
-                              <UserCheck className="h-4 w-4 flex-shrink-0" />
-                              <span>{patrollingOfficer?.name || 'N/A'}</span>
-                            </div>
-                            <div className="flex items-center gap-2 text-muted-foreground">
-                              <span>Perimeter Accuracy: {perimeterAccuracy}%</span>
-                            </div>
-                            <div className="flex items-center gap-2 text-muted-foreground">
-                              <span>Selfie Accuracy: {selfieAccuracy}%</span>
-                            </div>
-                          </CardContent>
-                          <CardFooter className="grid grid-cols-2 gap-2">
-                            <Button asChild variant="outline" size="sm">
-                                <Link href={`/agency/guards/${guard.id}`}>
-                                    <Eye className="mr-2 h-4 w-4" />
-                                    View Report
-                                </Link>
-                            </Button>
-                            <Button variant="outline" size="sm" onClick={() => setSelectedGuard(guard)}>
-                                <Building className="mr-2 h-4 w-4" />
-                                View Site
-                            </Button>
-                          </CardFooter>
-                        </Card>
-                      )
-                    })
-                  ) : (
-                    <div className="col-span-full text-center text-muted-foreground py-10">
-                        No assigned guards found for the current filter.
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {unassignedGuards.length > 0 && (
-                <div className="pt-6 border-t">
-                  <h3 className="text-lg font-medium tracking-tight">Unassigned Guards</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Guards on sites without an assigned patrolling officer.
-                  </p>
-                  <div className="mt-4 p-4 bg-secondary text-secondary-foreground rounded-md flex items-center gap-3 text-sm">
-                    <Info className="h-5 w-5"/>
-                    <div>
-                      To assign a patrolling officer, go to the <Button variant="link" asChild className="p-0 h-auto"><Link href="/agency/sites">Sites page</Link></Button> and assign one to the respective site.
-                    </div>
-                  </div>
-                  <Table className="mt-4">
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Guard</TableHead>
-                        <TableHead>Phone</TableHead>
-                        <TableHead>Site</TableHead>
-                        <TableHead className="text-right">Actions</TableHead>
+                          </div>
+                        </TableCell>
+                        <TableCell>{guard.site}</TableCell>
+                        <TableCell>{patrollingOfficer?.name || <span className="text-muted-foreground">Unassigned</span>}</TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Progress value={compliance} className="w-24 h-2" />
+                            <span className="font-medium text-sm text-muted-foreground">{compliance}%</span>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button asChild variant="outline" size="sm">
+                            <Link href={`/agency/guards/${guard.id}`}>
+                              <Eye className="mr-2 h-4 w-4" />
+                              View Report
+                            </Link>
+                          </Button>
+                        </TableCell>
                       </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {filteredUnassignedGuards.length > 0 ? (
-                        filteredUnassignedGuards.map((guard) => (
-                          <TableRow key={guard.id}>
-                            <TableCell>
-                              <div className="flex items-center gap-3">
-                                <Avatar>
-                                  <AvatarImage src={guard.avatar} alt={guard.name} />
-                                  <AvatarFallback>{guard.name.charAt(0)}</AvatarFallback>
-                                </Avatar>
-                                <div>
-                                  <p className="font-medium">{guard.name}</p>
-                                  <p className="text-sm text-muted-foreground">ID: {guard.id}</p>
-                                </div>
-                              </div>
-                            </TableCell>
-                            <TableCell>{guard.phone}</TableCell>
-                            <TableCell>{guard.site}</TableCell>
-                            <TableCell className="text-right">
-                                <Button asChild variant="outline" size="sm">
-                                    <Link href={`/agency/guards/${guard.id}`}>
-                                        <Eye className="mr-2 h-4 w-4" />
-                                        View Report
-                                    </Link>
-                                </Button>
-                            </TableCell>
-                          </TableRow>
-                        ))
-                      ) : (
-                        <TableRow>
-                          <TableCell colSpan={4} className="text-center text-muted-foreground">
-                            No unassigned guards found for the current filter.
-                          </TableCell>
-                        </TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
-                </div>
-              )}
-            </div>
+                    )
+                  })
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center text-muted-foreground py-10">
+                      No guards found for the current filter.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
           </CardContent>
         </Card>
       </div>
-      <Dialog open={!!selectedGuard} onOpenChange={(isOpen) => !isOpen && setSelectedGuard(null)}>
-        <DialogContent>
-            <DialogHeader>
-                <DialogTitle>Site Details</DialogTitle>
-                <DialogDescription>
-                    Assigned site for {selectedGuard?.name}.
-                </DialogDescription>
-            </DialogHeader>
-            {siteForSelectedGuard ? (
-                <div className="pt-4 space-y-3 text-sm">
-                    <div className="flex items-start gap-2">
-                        <Building className="h-4 w-4 flex-shrink-0 mt-1" />
-                        <div>
-                            <p className="font-semibold">{siteForSelectedGuard.name}</p>
-                            <p className="text-muted-foreground">{siteForSelectedGuard.address}</p>
-                        </div>
-                    </div>
-                    <div className="text-muted-foreground space-y-1 pl-6">
-                        <p><strong>TowerCo:</strong> {siteForSelectedGuard.towerco}</p>
-                        <p><strong>Geofence:</strong> {siteForSelectedGuard.geofencePerimeter ? `${siteForSelectedGuard.geofencePerimeter}m` : 'Not set'}</p>
-                    </div>
-                </div>
-            ) : (
-                <p className="text-sm text-muted-foreground text-center py-4">
-                Site details could not be found.
-                </p>
-            )}
-        </DialogContent>
-    </Dialog>
     </>
   );
 }
