@@ -122,13 +122,37 @@ export default function AgencyIncidentReportPage() {
     
     const mediaUrls = incidentFiles ? Array.from(incidentFiles).map(file => `https://placehold.co/600x400.png?text=${encodeURIComponent(file.name)}`) : [];
 
-    incidentStore.updateIncident(incident.id, { description, incidentType, initialIncidentMediaUrl: mediaUrls });
+    incidentStore.updateIncident(incident.id, { 
+      description, 
+      incidentType, 
+      initialIncidentMediaUrl: [...(incident.initialIncidentMediaUrl || []), ...mediaUrls]
+    });
 
     toast({
         title: "Incident Details Saved",
         description: `Initial report for incident #${incident.id} has been saved.`
     });
   };
+
+  const handleMediaUpload = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!incidentFiles) {
+       toast({ variant: 'destructive', title: 'Error', description: 'Please select files to upload.' });
+       return;
+    }
+    const mediaUrls = Array.from(incidentFiles).map(file => `https://placehold.co/600x400.png?text=${encodeURIComponent(file.name)}`);
+    incidentStore.updateIncident(incident.id, {
+        initialIncidentMediaUrl: [...(incident.initialIncidentMediaUrl || []), ...mediaUrls]
+    });
+    toast({
+        title: "Media Uploaded",
+        description: `${incidentFiles.length} file(s) have been added to the incident.`
+    });
+    setIncidentFiles(null);
+    // Reset the file input visually
+    const fileInput = document.getElementById('active-incident-photos') as HTMLInputElement;
+    if(fileInput) fileInput.value = '';
+  }
 
   const handleStartReview = () => {
     incidentStore.updateIncident(incident.id, { status: 'Under Review' });
@@ -298,9 +322,25 @@ export default function AgencyIncidentReportPage() {
                   <Info className="h-4 w-4" />
                   <AlertTitle>Incident is Active</AlertTitle>
                   <AlertDescription>
-                    This incident requires your attention. Start the review to submit an initial report and provide details.
+                    This incident requires your attention. Upload any available media and start the review to submit an initial report.
                   </AlertDescription>
                 </Alert>
+                <form onSubmit={handleMediaUpload} className="text-left p-4 my-4 border rounded-lg">
+                    <Label htmlFor="active-incident-photos" className="text-base font-semibold">Upload Media</Label>
+                    <p className="text-sm text-muted-foreground mb-2">Anyone can upload evidence while the incident is active.</p>
+                    <div className="flex items-center gap-2">
+                      <Input 
+                          id="active-incident-photos" 
+                          type="file" 
+                          multiple
+                          onChange={(e) => setIncidentFiles(e.target.files)}
+                          accept="image/*,video/*"
+                      />
+                      <Button type="submit" variant="secondary" disabled={!incidentFiles}>
+                          <Upload className="mr-2 h-4 w-4"/> Upload
+                      </Button>
+                    </div>
+                </form>
                 <Button onClick={handleStartReview}>
                     Start Review
                 </Button>
@@ -336,7 +376,7 @@ export default function AgencyIncidentReportPage() {
                               />
                           </div>
                           <div>
-                              <Label htmlFor="incident-photos" className="text-base">Incident Media Evidence</Label>
+                              <Label htmlFor="incident-photos" className="text-base">Add More Media Evidence</Label>
                               <Input 
                                   id="incident-photos" 
                                   type="file" 
@@ -372,26 +412,6 @@ export default function AgencyIncidentReportPage() {
                     </h4>
                     <p className="text-muted-foreground">{incident.description}</p>
                 </div>
-                {incident.initialIncidentMediaUrl && incident.initialIncidentMediaUrl.length > 0 && (
-                    <div className="pt-6">
-                        <h4 className="font-semibold mb-4 text-lg">
-                            Incident Media Evidence
-                        </h4>
-                        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
-                            {incident.initialIncidentMediaUrl.map((src, index) => (
-                                <div key={index} className="relative aspect-video">
-                                <Image
-                                    src={src}
-                                    alt={`Incident evidence ${index + 1}`}
-                                    fill
-                                    className="rounded-md object-cover"
-                                    data-ai-hint={getHintForIncident(incident)}
-                                />
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                )}
                  <div className="pt-6">
                     <Alert variant="default">
                       <Info className="h-4 w-4" />
@@ -422,26 +442,6 @@ export default function AgencyIncidentReportPage() {
                           </h4>
                           <p className="text-muted-foreground">{incident.description}</p>
                       </div>
-                    )}
-                    {incident.initialIncidentMediaUrl && incident.initialIncidentMediaUrl.length > 0 && (
-                        <div className="pt-6">
-                            <h4 className="font-semibold mb-4 text-lg">
-                                Incident Media Evidence
-                            </h4>
-                            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
-                                {incident.initialIncidentMediaUrl.map((src, index) => (
-                                    <div key={index} className="relative aspect-video">
-                                    <Image
-                                        src={src}
-                                        alt={`Incident evidence ${index + 1}`}
-                                        fill
-                                        className="rounded-md object-cover"
-                                        data-ai-hint={getHintForIncident(incident)}
-                                    />
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
                     )}
                      {incident.resolutionNotes && (
                       <div className="pt-6">
@@ -474,9 +474,32 @@ export default function AgencyIncidentReportPage() {
                 </>
             )}
 
+            {incident.initialIncidentMediaUrl && incident.initialIncidentMediaUrl.length > 0 && (
+              <div className="pt-6">
+                  <h4 className="font-semibold mb-4 text-lg">
+                      Incident Media Evidence
+                  </h4>
+                  <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
+                      {incident.initialIncidentMediaUrl.map((src, index) => (
+                          <div key={index} className="relative aspect-video">
+                          <Image
+                              src={src}
+                              alt={`Incident evidence ${index + 1}`}
+                              fill
+                              className="rounded-md object-cover"
+                              data-ai-hint={getHintForIncident(incident)}
+                          />
+                          </div>
+                      ))}
+                  </div>
+              </div>
+            )}
+
         </CardContent>
       </Card>
 
     </div>
   );
 }
+
+    
