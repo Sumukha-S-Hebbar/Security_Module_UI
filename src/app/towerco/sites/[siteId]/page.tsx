@@ -28,12 +28,16 @@ import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, MapPin, Building2, Briefcase, ShieldAlert, FileDown } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
+import { useMemo, useState } from 'react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export default function SiteReportPage() {
   const params = useParams();
   const router = useRouter();
   const { toast } = useToast();
   const siteId = params.siteId as string;
+  const [selectedYear, setSelectedYear] = useState('all');
+  const [selectedMonth, setSelectedMonth] = useState('all');
 
   const site = sites.find((s) => s.id === siteId);
 
@@ -53,6 +57,24 @@ export default function SiteReportPage() {
   const siteIncidents = incidents.filter(
     (incident) => incident.siteId === site.id
   );
+  
+  const availableYears = useMemo(() => {
+    const years = new Set(
+      siteIncidents.map((incident) => new Date(incident.incidentTime).getFullYear().toString())
+    );
+    if (years.size > 0) years.add(new Date().getFullYear().toString());
+    return Array.from(years).sort((a, b) => parseInt(b) - parseInt(a));
+  }, [siteIncidents]);
+
+  const filteredIncidents = useMemo(() => {
+    return siteIncidents.filter(incident => {
+      const incidentDate = new Date(incident.incidentTime);
+      const yearMatch = selectedYear === 'all' || incidentDate.getFullYear().toString() === selectedYear;
+      const monthMatch = selectedMonth === 'all' || incidentDate.getMonth().toString() === selectedMonth;
+      return yearMatch && monthMatch;
+    });
+  }, [siteIncidents, selectedYear, selectedMonth]);
+
 
   const handleDownloadReport = () => {
     toast({
@@ -180,12 +202,44 @@ export default function SiteReportPage() {
       </Card>
       
       <Card>
-        <CardHeader>
-          <CardTitle>Incidents at {site.name}</CardTitle>
-          <CardDescription>A log of all emergency incidents reported at this site.</CardDescription>
+        <CardHeader className="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <CardTitle>Incidents at {site.name}</CardTitle>
+            <CardDescription>A log of all emergency incidents reported at this site.</CardDescription>
+          </div>
+          <div className="flex items-center gap-2">
+              {availableYears.length > 0 && (
+                <Select value={selectedYear} onValueChange={setSelectedYear}>
+                  <SelectTrigger className="w-[120px]">
+                    <SelectValue placeholder="Select Year" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Years</SelectItem>
+                    {availableYears.map((year) => (
+                      <SelectItem key={year} value={year}>
+                        {year}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+              <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+                <SelectTrigger className="w-[140px]">
+                  <SelectValue placeholder="Select Month" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Months</SelectItem>
+                  {Array.from({ length: 12 }, (_, i) => (
+                    <SelectItem key={i} value={i.toString()}>
+                      {new Date(0, i).toLocaleString('default', { month: 'long' })}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+          </div>
         </CardHeader>
         <CardContent>
-          {siteIncidents.length > 0 ? (
+          {filteredIncidents.length > 0 ? (
             <Table>
               <TableHeader>
                 <TableRow>
@@ -196,7 +250,7 @@ export default function SiteReportPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {siteIncidents.map((incident) => {
+                {filteredIncidents.map((incident) => {
                   const guard = getGuardById(incident.raisedByGuardId);
                   return (
                     <TableRow 
@@ -218,7 +272,7 @@ export default function SiteReportPage() {
               </TableBody>
             </Table>
           ) : (
-            <p className="text-muted-foreground text-center py-4">No emergency incidents have been reported for this site.</p>
+            <p className="text-muted-foreground text-center py-4">No emergency incidents have been reported for this site {selectedYear !== 'all' || selectedMonth !== 'all' ? 'in the selected period' : ''}.</p>
           )}
         </CardContent>
       </Card>
