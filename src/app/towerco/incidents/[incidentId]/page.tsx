@@ -20,7 +20,7 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, MapPin, Briefcase, UserCheck, User, Calendar, FileDown, Phone, Mail, Upload, Info } from 'lucide-react';
+import { ArrowLeft, MapPin, Briefcase, UserCheck, User, Calendar, FileDown, Phone, Mail, Upload, Info, AlertTriangle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -267,6 +267,16 @@ export default function IncidentReportPage() {
               </div>
             )}
             
+            {incident.incidentType && (
+              <div className="pt-6">
+                  <h4 className="font-semibold mb-2 text-lg flex items-center gap-2">
+                      <AlertTriangle className="h-5 w-5 text-destructive" />
+                      Incident Type
+                  </h4>
+                  <p className="text-muted-foreground">{incident.incidentType}</p>
+              </div>
+            )}
+
             {incident.description && (
                 <div className="pt-6">
                     <h4 className="font-semibold mb-2 text-lg">

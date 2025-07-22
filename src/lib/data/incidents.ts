@@ -9,7 +9,8 @@ export const incidents: Incident[] = [
       raisedByGuardId: 'GL001', 
       siteId: 'SITE02', 
       initialIncidentMediaUrl: [],
-      attendedByPatrollingOfficerId: 'PO01'
+      attendedByPatrollingOfficerId: 'PO01',
+      incidentType: 'SOS'
     },
     { 
       id: 'INC002', 
@@ -22,7 +23,8 @@ export const incidents: Incident[] = [
       initialIncidentMediaUrl: [],
       resolvedIncidentMediaUrl: [],
       attendedByPatrollingOfficerId: 'PO02',
-      resolvedByUserId: 'PO02'
+      resolvedByUserId: 'PO02',
+      incidentType: 'Safety Hazard'
     },
     { 
       id: 'INC003', 
@@ -32,7 +34,8 @@ export const incidents: Incident[] = [
       raisedByGuardId: 'GL003', 
       siteId: 'SITE03',
       initialIncidentMediaUrl: ['https://placehold.co/600x400.png'],
-      attendedByPatrollingOfficerId: 'PO01'
+      attendedByPatrollingOfficerId: 'PO01',
+      incidentType: 'Vandalism'
     },
     { 
       id: 'INC004', 
@@ -44,7 +47,8 @@ export const incidents: Incident[] = [
       siteId: 'SITE04',
       initialIncidentMediaUrl: [],
       attendedByPatrollingOfficerId: 'PO02',
-      resolvedByUserId: 'AGY02'
+      resolvedByUserId: 'AGY02',
+      incidentType: 'Other'
     },
     { 
       id: 'INC005', 
@@ -57,7 +61,8 @@ export const incidents: Incident[] = [
       initialIncidentMediaUrl: ['https://placehold.co/600x400.png', 'https://placehold.co/600x400.png'],
       resolvedIncidentMediaUrl: ['https://placehold.co/600x400.png'],
       attendedByPatrollingOfficerId: 'PO02',
-      resolvedByUserId: 'AGY02'
+      resolvedByUserId: 'AGY02',
+      incidentType: 'Theft'
     },
     { 
       id: 'INC006', 
@@ -97,7 +102,8 @@ export const incidents: Incident[] = [
       raisedByGuardId: 'GL008', 
       siteId: 'SITE06',
       initialIncidentMediaUrl: [],
-      attendedByPatrollingOfficerId: 'PO03'
+      attendedByPatrollingOfficerId: 'PO03',
+      incidentType: 'Suspicious Activity'
     },
      { 
       id: 'INC010', 
@@ -107,7 +113,8 @@ export const incidents: Incident[] = [
       raisedByGuardId: 'GL002', 
       siteId: 'SITE01',
       initialIncidentMediaUrl: ['https://placehold.co/600x400.png'],
-      attendedByPatrollingOfficerId: 'PO02'
+      attendedByPatrollingOfficerId: 'PO02',
+      incidentType: 'Safety Hazard'
     },
     { 
       id: 'INC011', 
@@ -137,6 +144,7 @@ export const incidents: Incident[] = [
       raisedByGuardId: 'GL001', 
       siteId: 'SITE02',
       initialIncidentMediaUrl: [],
-      attendedByPatrollingOfficerId: 'PO01'
+      attendedByPatrollingOfficerId: 'PO01',
+      incidentType: 'Safety Hazard'
     }
 ];

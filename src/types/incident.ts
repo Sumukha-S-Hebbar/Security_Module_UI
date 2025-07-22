@@ -10,4 +10,5 @@ export type Incident = {
   resolvedByUserId?: string;
   initialIncidentMediaUrl: string[];
   resolvedIncidentMediaUrl?: string[];
+  incidentType?: 'SOS' | 'Suspicious Activity' | 'Theft' | 'Vandalism' | 'Trespassing' | 'Safety Hazard' | 'Other';
 };

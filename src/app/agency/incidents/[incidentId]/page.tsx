@@ -20,7 +20,7 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, MapPin, Briefcase, UserCheck, User, Calendar, FileDown, Phone, Mail, Upload, Info } from 'lucide-react';
+import { ArrowLeft, MapPin, Briefcase, UserCheck, User, Calendar, FileDown, Phone, Mail, Upload, Info, AlertTriangle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -28,6 +28,24 @@ import { Input } from '@/components/ui/input';
 import { useState, useEffect } from 'react';
 import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+
+const incidentTypes = [
+  'SOS',
+  'Suspicious Activity',
+  'Theft',
+  'Vandalism',
+  'Trespassing',
+  'Safety Hazard',
+  'Other',
+] as const;
+
 
 export default function AgencyIncidentReportPage() {
   const params = useParams();
@@ -41,6 +59,8 @@ export default function AgencyIncidentReportPage() {
   const [resolutionNotes, setResolutionNotes] = useState(incident?.resolutionNotes || '');
   const [incidentFiles, setIncidentFiles] = useState<FileList | null>(null);
   const [resolutionFiles, setResolutionFiles] = useState<FileList | null>(null);
+  const [incidentType, setIncidentType] = useState<Incident['incidentType']>(incident?.incidentType);
+
 
   useEffect(() => {
     const unsubscribe = incidentStore.subscribe(() => {
@@ -49,6 +69,7 @@ export default function AgencyIncidentReportPage() {
       if (updatedIncident) {
         setDescription(updatedIncident.description || '');
         setResolutionNotes(updatedIncident.resolutionNotes || '');
+        setIncidentType(updatedIncident.incidentType);
       }
     });
     
@@ -56,6 +77,7 @@ export default function AgencyIncidentReportPage() {
     if (currentIncident) {
         setDescription(currentIncident.description || '');
         setResolutionNotes(currentIncident.resolutionNotes || '');
+        setIncidentType(currentIncident.incidentType);
     }
 
     return () => unsubscribe();
@@ -91,12 +113,16 @@ export default function AgencyIncidentReportPage() {
         toast({ variant: 'destructive', title: 'Error', description: 'Incident description is required.' });
         return;
     }
+    if (!incidentType) {
+        toast({ variant: 'destructive', title: 'Error', description: 'Incident type is required.' });
+        return;
+    }
     // In a real app, this would handle file uploads and update media URLs.
-    console.log({ description, incidentFiles });
+    console.log({ description, incidentFiles, incidentType });
     
     const mediaUrls = incidentFiles ? Array.from(incidentFiles).map(file => `https://placehold.co/600x400.png?text=${encodeURIComponent(file.name)}`) : [];
 
-    incidentStore.updateIncident(incident.id, { description, initialIncidentMediaUrl: mediaUrls });
+    incidentStore.updateIncident(incident.id, { description, incidentType, initialIncidentMediaUrl: mediaUrls });
 
     toast({
         title: "Incident Details Saved",
@@ -285,6 +311,19 @@ export default function AgencyIncidentReportPage() {
                 <form onSubmit={handleSaveIncidentDetails}>
                     <div className="pt-6 space-y-4">
                         <h3 className="text-xl font-semibold">Initial Incident Report</h3>
+                        <div>
+                          <Label htmlFor="incident-type" className="text-base">Incident Type</Label>
+                          <Select value={incidentType} onValueChange={(value) => setIncidentType(value as Incident['incidentType'])}>
+                            <SelectTrigger id="incident-type" className="mt-2">
+                              <SelectValue placeholder="Select an incident type" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {incidentTypes.map(type => (
+                                <SelectItem key={type} value={type}>{type}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
                          <div>
                               <Label htmlFor="description" className="text-base">Incident Summary</Label>
                               <Textarea 
@@ -318,6 +357,15 @@ export default function AgencyIncidentReportPage() {
 
             {(incident.status === 'Under Review' && isInitialReportSubmitted) && (
               <>
+                {incident.incidentType && (
+                    <div className="pt-6">
+                        <h4 className="font-semibold mb-2 text-lg flex items-center gap-2">
+                            <AlertTriangle className="h-5 w-5 text-destructive" />
+                            Incident Type
+                        </h4>
+                        <p className="text-muted-foreground">{incident.incidentType}</p>
+                    </div>
+                )}
                 <div className="pt-6">
                     <h4 className="font-semibold mb-2 text-lg">
                         Incident Summary
@@ -358,6 +406,15 @@ export default function AgencyIncidentReportPage() {
 
             {incident.status === 'Resolved' && (
                 <>
+                    {incident.incidentType && (
+                        <div className="pt-6">
+                            <h4 className="font-semibold mb-2 text-lg flex items-center gap-2">
+                                <AlertTriangle className="h-5 w-5 text-destructive" />
+                                Incident Type
+                            </h4>
+                            <p className="text-muted-foreground">{incident.incidentType}</p>
+                        </div>
+                    )}
                     {incident.description && (
                       <div className="pt-6">
                           <h4 className="font-semibold mb-2 text-lg">
