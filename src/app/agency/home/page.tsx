@@ -33,8 +33,6 @@ import { Button } from '@/components/ui/button';
 import { AlertTriangle, ChevronDown, Phone } from 'lucide-react';
 import { IncidentStatusBreakdown } from './_components/incident-status-breakdown';
 import { AgencyIncidentChart } from './_components/agency-incident-chart';
-import { GuardPerformanceBreakdown } from './_components/guard-performance-breakdown';
-import { PatrollingOfficerPerformance } from './_components/patrolling-officer-performance';
 import {
   Select,
   SelectContent,
@@ -48,7 +46,6 @@ import Link from 'next/link';
 const LOGGED_IN_AGENCY_ID = 'AGY01'; // Simulate logged-in agency
 
 export default function AgencyHomePage() {
-  const [selectedMonth, setSelectedMonth] = useState('all');
   const router = useRouter();
 
   const agencySiteIds = useMemo(() => {
@@ -69,16 +66,6 @@ export default function AgencyHomePage() {
     const poIds = new Set(agencySites.map(s => s.patrollingOfficerId).filter(Boolean));
     return patrollingOfficers.filter(po => poIds.has(po.id));
   }, [agencySites]);
-
-  const monthlyFilteredIncidents = useMemo(() => {
-    if (selectedMonth === 'all') {
-      return agencyIncidents;
-    }
-    return agencyIncidents.filter(incident => {
-      const incidentDate = new Date(incident.incidentTime);
-      return incidentDate.getMonth() === parseInt(selectedMonth, 10);
-    });
-  }, [agencyIncidents, selectedMonth]);
 
   const activeEmergencies = useMemo(() => agencyIncidents.filter(
     (incident) => incident.status === 'Active'
@@ -106,23 +93,6 @@ export default function AgencyHomePage() {
           <p className="text-muted-foreground">
             Welcome! Here's a high-level overview of your operations.
           </p>
-        </div>
-        <div className="flex items-center gap-2">
-            <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-              <SelectTrigger className="w-full sm:w-[180px]">
-                <SelectValue placeholder="Filter by month" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Months</SelectItem>
-                {Array.from({ length: 12 }, (_, i) => (
-                  <SelectItem key={i} value={i.toString()}>
-                    {new Date(0, i).toLocaleString('default', {
-                      month: 'long',
-                    })}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
         </div>
       </div>
 
@@ -218,14 +188,14 @@ export default function AgencyHomePage() {
         patrollingOfficers={agencyPatrollingOfficers}
       />
 
-      <IncidentStatusBreakdown incidents={monthlyFilteredIncidents} />
+      <IncidentStatusBreakdown incidents={agencyIncidents} />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <GuardPerformanceBreakdown guards={agencyGuards} />
         <PatrollingOfficerPerformance patrollingOfficers={agencyPatrollingOfficers} sites={agencySites} />
       </div>
 
-      <AgencyIncidentChart incidents={monthlyFilteredIncidents} />
+      <AgencyIncidentChart incidents={agencyIncidents} />
     </div>
   );
 }
