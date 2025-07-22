@@ -153,6 +153,32 @@ export default function IncidentReportPage() {
     return 'incident evidence';
   };
 
+  const renderMediaGallery = () => {
+    if (!incident.initialIncidentMediaUrl || incident.initialIncidentMediaUrl.length === 0) {
+      return null;
+    }
+    return (
+      <div className="pt-6">
+          <h4 className="font-semibold mb-4 text-lg">
+              Incident Media Evidence
+          </h4>
+          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
+              {incident.initialIncidentMediaUrl.map((src, index) => (
+                  <div key={index} className="relative aspect-video">
+                  <Image
+                      src={src}
+                      alt={`Incident evidence ${index + 1}`}
+                      fill
+                      className="rounded-md object-cover"
+                      data-ai-hint={getHintForIncident(incident)}
+                  />
+                  </div>
+              ))}
+          </div>
+      </div>
+    );
+  };
+
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
@@ -264,6 +290,7 @@ export default function IncidentReportPage() {
                     This incident is active and awaiting review from the assigned security agency.
                   </AlertDescription>
                 </Alert>
+                {renderMediaGallery()}
               </div>
             )}
             
@@ -286,26 +313,7 @@ export default function IncidentReportPage() {
                 </div>
             )}
 
-            {incident.initialIncidentMediaUrl && incident.initialIncidentMediaUrl.length > 0 && (
-                <div className="pt-6">
-                    <h4 className="font-semibold mb-4 text-lg">
-                        Incident Media Evidence
-                    </h4>
-                    <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
-                        {incident.initialIncidentMediaUrl.map((src, index) => (
-                            <div key={index} className="relative aspect-video">
-                            <Image
-                                src={src}
-                                alt={`Incident evidence ${index + 1}`}
-                                fill
-                                className="rounded-md object-cover"
-                                data-ai-hint={getHintForIncident(incident)}
-                            />
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            )}
+            {incident.status !== 'Active' && incident.initialIncidentMediaUrl && incident.initialIncidentMediaUrl.length > 0 && renderMediaGallery()}
 
             {incident.status === 'Resolved' ? (
                  <>
