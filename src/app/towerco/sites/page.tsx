@@ -783,6 +783,7 @@ export default function TowercoSitesPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead>Site ID</TableHead>
                     <TableHead>Site</TableHead>
                     <TableHead>Guards Required</TableHead>
                     <TableHead>Assign Agency</TableHead>
@@ -801,7 +802,10 @@ export default function TowercoSitesPage() {
                           ref={(el) => unassignedSitesRef.current.set(site.id, el)}
                         >
                           <TableCell>
-                            <Link href={`/towerco/sites/${site.id}`} className="font-medium text-primary hover:underline">{site.name}</Link>
+                            <Link href={`/towerco/sites/${site.id}`} className="font-medium text-primary hover:underline">{site.id}</Link>
+                          </TableCell>
+                          <TableCell>
+                            <p className="font-medium">{site.name}</p>
                             <div className="text-sm text-muted-foreground flex items-center gap-1">
                               <MapPin className="w-3 h-3" />
                               {site.address}
@@ -859,7 +863,7 @@ export default function TowercoSitesPage() {
                     })
                   ) : (
                       <TableRow>
-                          <TableCell colSpan={4} className="text-center text-muted-foreground">
+                          <TableCell colSpan={5} className="text-center text-muted-foreground">
                               No unassigned sites found for the current filter.
                           </TableCell>
                       </TableRow>
