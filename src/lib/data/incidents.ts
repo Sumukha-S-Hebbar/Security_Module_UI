@@ -1,3 +1,4 @@
+
 import type { Incident } from '@/types';
 
 export const incidents: Incident[] = [
@@ -8,7 +9,7 @@ export const incidents: Incident[] = [
       status: 'Active', 
       raisedByGuardId: 'GL001', 
       siteId: 'SITE02', 
-      initialIncidentMediaUrl: [],
+      initialIncidentMediaUrl: ['https://placehold.co/600x400.png'],
       attendedByPatrollingOfficerId: 'PO01',
       incidentType: 'SOS'
     },
@@ -82,7 +83,7 @@ export const incidents: Incident[] = [
       status: 'Active', 
       raisedByGuardId: 'GL007', 
       siteId: 'SITE05',
-      initialIncidentMediaUrl: [],
+      initialIncidentMediaUrl: ['https://placehold.co/600x400.png', 'https://placehold.co/600x400.png'],
       attendedByPatrollingOfficerId: 'PO03',
       incidentType: 'SOS'
     },
