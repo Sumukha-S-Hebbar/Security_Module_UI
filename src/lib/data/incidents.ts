@@ -72,7 +72,8 @@ export const incidents: Incident[] = [
       raisedByGuardId: 'GL009', 
       siteId: 'SITE08',
       initialIncidentMediaUrl: [],
-      attendedByPatrollingOfficerId: 'PO01'
+      attendedByPatrollingOfficerId: 'PO01',
+      incidentType: 'SOS'
     },
     { 
       id: 'INC007', 
@@ -82,7 +83,8 @@ export const incidents: Incident[] = [
       raisedByGuardId: 'GL007', 
       siteId: 'SITE05',
       initialIncidentMediaUrl: [],
-      attendedByPatrollingOfficerId: 'PO03'
+      attendedByPatrollingOfficerId: 'PO03',
+      incidentType: 'SOS'
     },
     { 
       id: 'INC008', 
@@ -92,7 +94,8 @@ export const incidents: Incident[] = [
       raisedByGuardId: 'GL004', 
       siteId: 'SITE01',
       initialIncidentMediaUrl: [],
-      attendedByPatrollingOfficerId: 'PO02'
+      attendedByPatrollingOfficerId: 'PO02',
+      incidentType: 'SOS'
     },
     { 
       id: 'INC009', 
@@ -124,7 +127,8 @@ export const incidents: Incident[] = [
       raisedByGuardId: 'GL004', 
       siteId: 'SITE01',
       initialIncidentMediaUrl: [],
-      attendedByPatrollingOfficerId: 'PO02'
+      attendedByPatrollingOfficerId: 'PO02',
+      incidentType: 'SOS'
     },
     { 
       id: 'INC012', 
@@ -134,7 +138,8 @@ export const incidents: Incident[] = [
       raisedByGuardId: 'GL007', 
       siteId: 'SITE05',
       initialIncidentMediaUrl: [],
-      attendedByPatrollingOfficerId: 'PO03'
+      attendedByPatrollingOfficerId: 'PO03',
+      incidentType: 'SOS'
     },
     { 
       id: 'INC013', 
