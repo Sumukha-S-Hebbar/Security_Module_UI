@@ -217,6 +217,32 @@ export default function AgencyIncidentReportPage() {
   
   const isInitialReportSubmitted = !!incident.description;
 
+  const renderMediaGallery = () => {
+    if (!incident.initialIncidentMediaUrl || incident.initialIncidentMediaUrl.length === 0) {
+      return null;
+    }
+    return (
+      <div className="pt-6">
+          <h4 className="font-semibold mb-4 text-lg">
+              Incident Media Evidence
+          </h4>
+          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
+              {incident.initialIncidentMediaUrl.map((src, index) => (
+                  <div key={index} className="relative aspect-video">
+                  <Image
+                      src={src}
+                      alt={`Incident evidence ${index + 1}`}
+                      fill
+                      className="rounded-md object-cover"
+                      data-ai-hint={getHintForIncident(incident)}
+                  />
+                  </div>
+              ))}
+          </div>
+      </div>
+    );
+  };
+
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
@@ -316,190 +342,172 @@ export default function AgencyIncidentReportPage() {
           </div>
         </CardHeader>
         <CardContent className="space-y-6 divide-y">
-            {incident.status === 'Active' && (
-              <div className="pt-6 text-center">
-                <Alert variant="default" className="text-left mb-4">
-                  <Info className="h-4 w-4" />
-                  <AlertTitle>Incident is Active</AlertTitle>
-                  <AlertDescription>
-                    This incident requires your attention. Upload any available media and start the review to submit an initial report.
-                  </AlertDescription>
-                </Alert>
-                <form onSubmit={handleMediaUpload} className="text-left p-4 my-4 border rounded-lg">
-                    <Label htmlFor="active-incident-photos" className="text-base font-semibold">Upload Media</Label>
-                    <p className="text-sm text-muted-foreground mb-2">Anyone can upload evidence while the incident is active.</p>
-                    <div className="flex items-center gap-2">
-                      <Input 
-                          id="active-incident-photos" 
-                          type="file" 
-                          multiple
-                          onChange={(e) => setIncidentFiles(e.target.files)}
-                          accept="image/*,video/*"
-                      />
-                      <Button type="submit" variant="secondary" disabled={!incidentFiles}>
-                          <Upload className="mr-2 h-4 w-4"/> Upload
-                      </Button>
-                    </div>
-                </form>
-                <Button onClick={handleStartReview}>
-                    Start Review
-                </Button>
-              </div>
-            )}
-            
-            {incident.status === 'Under Review' && !isInitialReportSubmitted && (
-                <form onSubmit={handleSaveIncidentDetails}>
-                    <div className="pt-6 space-y-4">
-                        <h3 className="text-xl font-semibold">Initial Incident Report</h3>
-                        <div>
-                          <Label htmlFor="incident-type" className="text-base">Incident Type</Label>
-                          <Select value={incidentType} onValueChange={(value) => setIncidentType(value as Incident['incidentType'])}>
-                            <SelectTrigger id="incident-type" className="mt-2">
-                              <SelectValue placeholder="Select an incident type" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {incidentTypes.map(type => (
-                                <SelectItem key={type} value={type}>{type}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                         <div>
-                              <Label htmlFor="description" className="text-base">Incident Summary</Label>
-                              <Textarea 
-                                  id="description" 
-                                  className="mt-2" 
-                                  placeholder="Provide a detailed summary of what happened, who was involved, and the immediate actions taken..." 
-                                  value={description}
-                                  onChange={(e) => setDescription(e.target.value)}
-                                  rows={5}
-                              />
+            <div className="pt-6 space-y-6">
+              {incident.status === 'Active' && (
+                <div className="text-center">
+                  <Alert variant="default" className="text-left mb-4">
+                    <Info className="h-4 w-4" />
+                    <AlertTitle>Incident is Active</AlertTitle>
+                    <AlertDescription>
+                      This incident requires your attention. Upload any available media and start the review to submit an initial report.
+                    </AlertDescription>
+                  </Alert>
+                  <form onSubmit={handleMediaUpload} className="text-left p-4 my-4 border rounded-lg">
+                      <Label htmlFor="active-incident-photos" className="text-base font-semibold">Upload Media</Label>
+                      <p className="text-sm text-muted-foreground mb-2">Anyone can upload evidence while the incident is active.</p>
+                      <div className="flex items-center gap-2">
+                        <Input 
+                            id="active-incident-photos" 
+                            type="file" 
+                            multiple
+                            onChange={(e) => setIncidentFiles(e.target.files)}
+                            accept="image/*,video/*"
+                        />
+                        <Button type="submit" variant="secondary" disabled={!incidentFiles}>
+                            <Upload className="mr-2 h-4 w-4"/> Upload
+                        </Button>
+                      </div>
+                  </form>
+                  {renderMediaGallery()}
+                  <Button onClick={handleStartReview} className="mt-4">
+                      Start Review
+                  </Button>
+                </div>
+              )}
+              
+              {incident.status === 'Under Review' && !isInitialReportSubmitted && (
+                  <form onSubmit={handleSaveIncidentDetails}>
+                      <div className="pt-6 space-y-4">
+                          <h3 className="text-xl font-semibold">Initial Incident Report</h3>
+                          <div>
+                            <Label htmlFor="incident-type" className="text-base">Incident Type</Label>
+                            <Select value={incidentType} onValueChange={(value) => setIncidentType(value as Incident['incidentType'])}>
+                              <SelectTrigger id="incident-type" className="mt-2">
+                                <SelectValue placeholder="Select an incident type" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {incidentTypes.map(type => (
+                                  <SelectItem key={type} value={type}>{type}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
                           </div>
                           <div>
-                              <Label htmlFor="incident-photos" className="text-base">Add More Media Evidence</Label>
-                              <Input 
-                                  id="incident-photos" 
-                                  type="file" 
-                                  multiple
-                                  className="mt-2"
-                                  onChange={(e) => setIncidentFiles(e.target.files)}
-                                  accept="image/*,video/*"
-                              />
-                          </div>
-                    </div>
-                    <CardFooter className="px-0 pt-6 justify-end">
-                        <Button type="submit">
-                            Save Incident Details
-                        </Button>
-                    </CardFooter>
-                </form>
-            )}
-
-            {(incident.status === 'Under Review' && isInitialReportSubmitted) && (
-              <>
-                {incident.incidentType && (
-                    <div className="pt-6">
-                        <h4 className="font-semibold mb-2 text-lg flex items-center gap-2">
-                            <AlertTriangle className="h-5 w-5 text-destructive" />
-                            Incident Type
-                        </h4>
-                        <p className="text-muted-foreground">{incident.incidentType}</p>
-                    </div>
-                )}
-                <div className="pt-6">
-                    <h4 className="font-semibold mb-2 text-lg">
-                        Incident Summary
-                    </h4>
-                    <p className="text-muted-foreground">{incident.description}</p>
-                </div>
-                 <div className="pt-6">
-                    <Alert variant="default">
-                      <Info className="h-4 w-4" />
-                      <AlertTitle>Awaiting Resolution</AlertTitle>
-                      <AlertDescription>
-                        This incident report has been submitted. The TOWERCO/MNO will review and resolve this incident. No further action is required from the agency at this time.
-                      </AlertDescription>
-                    </Alert>
-                </div>
-              </>
-            )}
-
-            {incident.status === 'Resolved' && (
-                <>
-                    {incident.incidentType && (
-                        <div className="pt-6">
-                            <h4 className="font-semibold mb-2 text-lg flex items-center gap-2">
-                                <AlertTriangle className="h-5 w-5 text-destructive" />
-                                Incident Type
-                            </h4>
-                            <p className="text-muted-foreground">{incident.incidentType}</p>
-                        </div>
-                    )}
-                    {incident.description && (
-                      <div className="pt-6">
-                          <h4 className="font-semibold mb-2 text-lg">
-                              Incident Summary
-                          </h4>
-                          <p className="text-muted-foreground">{incident.description}</p>
-                      </div>
-                    )}
-                     {incident.resolutionNotes && (
-                      <div className="pt-6">
-                          <h4 className="font-semibold mb-2 text-lg">
-                              Resolution Notes
-                          </h4>
-                          <p className="text-muted-foreground">{incident.resolutionNotes}</p>
-                      </div>
-                    )}
-                     {incident.resolvedIncidentMediaUrl && incident.resolvedIncidentMediaUrl.length > 0 && (
-                        <div className="pt-6">
-                            <h4 className="font-semibold mb-4 text-lg">
-                                Resolution Media Evidence
-                            </h4>
-                            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
-                                {incident.resolvedIncidentMediaUrl.map((src, index) => (
-                                    <div key={index} className="relative aspect-video">
-                                    <Image
-                                        src={src}
-                                        alt={`Resolution evidence ${index + 1}`}
-                                        fill
-                                        className="rounded-md object-cover"
-                                        data-ai-hint={'report document'}
-                                    />
-                                    </div>
-                                ))}
+                                <Label htmlFor="description" className="text-base">Incident Summary</Label>
+                                <Textarea 
+                                    id="description" 
+                                    className="mt-2" 
+                                    placeholder="Provide a detailed summary of what happened, who was involved, and the immediate actions taken..." 
+                                    value={description}
+                                    onChange={(e) => setDescription(e.target.value)}
+                                    rows={5}
+                                />
                             </div>
-                        </div>
-                    )}
-                </>
-            )}
+                            <div>
+                                <Label htmlFor="incident-photos" className="text-base">Add More Media Evidence</Label>
+                                <Input 
+                                    id="incident-photos" 
+                                    type="file" 
+                                    multiple
+                                    className="mt-2"
+                                    onChange={(e) => setIncidentFiles(e.target.files)}
+                                    accept="image/*,video/*"
+                                />
+                            </div>
+                            {renderMediaGallery()}
+                      </div>
+                      <CardFooter className="px-0 pt-6 justify-end">
+                          <Button type="submit">
+                              Save Incident Details
+                          </Button>
+                      </CardFooter>
+                  </form>
+              )}
 
-            {incident.initialIncidentMediaUrl && incident.initialIncidentMediaUrl.length > 0 && (
-              <div className="pt-6">
-                  <h4 className="font-semibold mb-4 text-lg">
-                      Incident Media Evidence
-                  </h4>
-                  <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
-                      {incident.initialIncidentMediaUrl.map((src, index) => (
-                          <div key={index} className="relative aspect-video">
-                          <Image
-                              src={src}
-                              alt={`Incident evidence ${index + 1}`}
-                              fill
-                              className="rounded-md object-cover"
-                              data-ai-hint={getHintForIncident(incident)}
-                          />
-                          </div>
-                      ))}
+              {(incident.status === 'Under Review' && isInitialReportSubmitted) && (
+                <>
+                  {incident.incidentType && (
+                      <div className="pt-6">
+                          <h4 className="font-semibold mb-2 text-lg flex items-center gap-2">
+                              <AlertTriangle className="h-5 w-5 text-destructive" />
+                              Incident Type
+                          </h4>
+                          <p className="text-muted-foreground">{incident.incidentType}</p>
+                      </div>
+                  )}
+                  <div className="pt-6">
+                      <h4 className="font-semibold mb-2 text-lg">
+                          Incident Summary
+                      </h4>
+                      <p className="text-muted-foreground">{incident.description}</p>
                   </div>
-              </div>
-            )}
+                  {renderMediaGallery()}
+                  <div className="pt-6">
+                      <Alert variant="default">
+                        <Info className="h-4 w-4" />
+                        <AlertTitle>Awaiting Resolution</AlertTitle>
+                        <AlertDescription>
+                          This incident report has been submitted. The TOWERCO/MNO will review and resolve this incident. No further action is required from the agency at this time.
+                        </AlertDescription>
+                      </Alert>
+                  </div>
+                </>
+              )}
 
+              {incident.status === 'Resolved' && (
+                  <>
+                      {incident.incidentType && (
+                          <div className="pt-6">
+                              <h4 className="font-semibold mb-2 text-lg flex items-center gap-2">
+                                  <AlertTriangle className="h-5 w-5 text-destructive" />
+                                  Incident Type
+                              </h4>
+                              <p className="text-muted-foreground">{incident.incidentType}</p>
+                          </div>
+                      )}
+                      {incident.description && (
+                        <div className="pt-6">
+                            <h4 className="font-semibold mb-2 text-lg">
+                                Incident Summary
+                            </h4>
+                            <p className="text-muted-foreground">{incident.description}</p>
+                        </div>
+                      )}
+                      {renderMediaGallery()}
+                      {incident.resolutionNotes && (
+                        <div className="pt-6">
+                            <h4 className="font-semibold mb-2 text-lg">
+                                Resolution Notes
+                            </h4>
+                            <p className="text-muted-foreground">{incident.resolutionNotes}</p>
+                        </div>
+                      )}
+                      {incident.resolvedIncidentMediaUrl && incident.resolvedIncidentMediaUrl.length > 0 && (
+                          <div className="pt-6">
+                              <h4 className="font-semibold mb-4 text-lg">
+                                  Resolution Media Evidence
+                              </h4>
+                              <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
+                                  {incident.resolvedIncidentMediaUrl.map((src, index) => (
+                                      <div key={index} className="relative aspect-video">
+                                      <Image
+                                          src={src}
+                                          alt={`Resolution evidence ${index + 1}`}
+                                          fill
+                                          className="rounded-md object-cover"
+                                          data-ai-hint={'report document'}
+                                      />
+                                      </div>
+                                  ))}
+                              </div>
+                          </div>
+                      )}
+                  </>
+              )}
+            </div>
         </CardContent>
       </Card>
 
     </div>
   );
 }
-
-    
