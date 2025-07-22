@@ -389,5 +389,3 @@ export default function IncidentReportPage() {
     </div>
   );
 }
-
-    
