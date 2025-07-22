@@ -801,9 +801,7 @@ export default function TowercoSitesPage() {
                           key={site.id} 
                           ref={(el) => unassignedSitesRef.current.set(site.id, el)}
                         >
-                          <TableCell>
-                            <Link href={`/towerco/sites/${site.id}`} className="font-medium text-primary hover:underline">{site.id}</Link>
-                          </TableCell>
+                          <TableCell className="font-medium">{site.id}</TableCell>
                           <TableCell>
                             <p className="font-medium">{site.name}</p>
                             <div className="text-sm text-muted-foreground flex items-center gap-1">
