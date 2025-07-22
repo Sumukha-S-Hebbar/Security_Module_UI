@@ -30,6 +30,13 @@ import { cn } from '@/lib/utils';
 import { CheckCircle2, ShieldAlert, ShieldQuestion } from 'lucide-react';
 import { guards } from '@/lib/data/guards';
 import { sites } from '@/lib/data/sites';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 export function IncidentStatusBreakdown({
   incidents,
@@ -40,9 +47,28 @@ export function IncidentStatusBreakdown({
   const [selectedStatus, setSelectedStatus] = useState<
     Incident['status'] | null
   >(null);
+  const [selectedYear, setSelectedYear] = useState<string>('all');
+  const [selectedMonth, setSelectedMonth] = useState<string>('all');
+  
+  const availableYears = useMemo(() => {
+    const years = new Set(
+      incidents.map((incident) => new Date(incident.incidentTime).getFullYear().toString())
+    );
+    if (years.size > 0) years.add(new Date().getFullYear().toString());
+    return Array.from(years).sort((a, b) => parseInt(b) - parseInt(a));
+  }, [incidents]);
+
+  const filteredByDateIncidents = useMemo(() => {
+    return incidents.filter(incident => {
+      const incidentDate = new Date(incident.incidentTime);
+      const yearMatch = selectedYear === 'all' || incidentDate.getFullYear().toString() === selectedYear;
+      const monthMatch = selectedMonth === 'all' || incidentDate.getMonth().toString() === selectedMonth;
+      return yearMatch && monthMatch;
+    });
+  }, [incidents, selectedYear, selectedMonth]);
 
   const summary = useMemo(() => {
-    return incidents.reduce(
+    return filteredByDateIncidents.reduce(
       (acc, incident) => {
         if (incident.status === 'Active') acc.active++;
         if (incident.status === 'Under Review') acc.underReview++;
@@ -51,12 +77,12 @@ export function IncidentStatusBreakdown({
       },
       { active: 0, underReview: 0, resolved: 0 }
     );
-  }, [incidents]);
+  }, [filteredByDateIncidents]);
 
   const filteredIncidents = useMemo(() => {
     if (!selectedStatus) return [];
-    return incidents.filter((incident) => incident.status === selectedStatus);
-  }, [incidents, selectedStatus]);
+    return filteredByDateIncidents.filter((incident) => incident.status === selectedStatus);
+  }, [filteredByDateIncidents, selectedStatus]);
 
   const getSiteName = (siteId: string) =>
     sites.find((s) => s.id === siteId)?.name || 'N/A';
@@ -135,11 +161,43 @@ export function IncidentStatusBreakdown({
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Incident Status Breakdown</CardTitle>
-        <CardDescription>
-          Click a status to see the list of incidents.
-        </CardDescription>
+      <CardHeader className="flex flex-row items-center justify-between">
+        <div>
+            <CardTitle>Incident Status Breakdown</CardTitle>
+            <CardDescription>
+            Click a status to see the list of incidents.
+            </CardDescription>
+        </div>
+        <div className="flex items-center gap-2">
+            {availableYears.length > 0 && (
+                <Select value={selectedYear} onValueChange={setSelectedYear}>
+                  <SelectTrigger className="w-[120px]">
+                    <SelectValue placeholder="Select Year" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Years</SelectItem>
+                    {availableYears.map((year) => (
+                      <SelectItem key={year} value={year}>
+                        {year}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+              <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+                <SelectTrigger className="w-[140px]">
+                  <SelectValue placeholder="Select Month" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Months</SelectItem>
+                  {Array.from({ length: 12 }, (_, i) => (
+                    <SelectItem key={i} value={i.toString()}>
+                      {new Date(0, i).toLocaleString('default', { month: 'long' })}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+        </div>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -215,7 +273,7 @@ export function IncidentStatusBreakdown({
               </Table>
             ) : (
               <p className="text-center text-sm text-muted-foreground">
-                No incidents with status "{selectedStatus}".
+                No incidents with status "{selectedStatus}" {selectedYear !== 'all' || selectedMonth !== 'all' ? 'in the selected period' : ''}.
               </p>
             )}
           </CardContent>
