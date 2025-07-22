@@ -109,28 +109,27 @@ export default function AgencyIncidentReportPage() {
   
   const handleSaveIncidentDetails = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!description) {
-        toast({ variant: 'destructive', title: 'Error', description: 'Incident description is required.' });
-        return;
-    }
     if (!incidentType) {
         toast({ variant: 'destructive', title: 'Error', description: 'Incident type is required.' });
         return;
     }
-    // In a real app, this would handle file uploads and update media URLs.
-    console.log({ description, incidentFiles, incidentType });
+    if (!description) {
+        toast({ variant: 'destructive', title: 'Error', description: 'Incident description is required.' });
+        return;
+    }
     
     const mediaUrls = incidentFiles ? Array.from(incidentFiles).map(file => `https://placehold.co/600x400.png?text=${encodeURIComponent(file.name)}`) : [];
 
     incidentStore.updateIncident(incident.id, { 
       description, 
       incidentType, 
-      initialIncidentMediaUrl: [...(incident.initialIncidentMediaUrl || []), ...mediaUrls]
+      initialIncidentMediaUrl: [...(incident.initialIncidentMediaUrl || []), ...mediaUrls],
+      status: 'Under Review'
     });
 
     toast({
         title: "Incident Details Saved",
-        description: `Initial report for incident #${incident.id} has been saved.`
+        description: `Initial report for incident #${incident.id} has been saved and is now under review.`
     });
   };
 
@@ -153,14 +152,6 @@ export default function AgencyIncidentReportPage() {
     const fileInput = document.getElementById('active-incident-photos') as HTMLInputElement;
     if(fileInput) fileInput.value = '';
   }
-
-  const handleStartReview = () => {
-    incidentStore.updateIncident(incident.id, { status: 'Under Review' });
-    toast({
-      title: 'Review Started',
-      description: `Incident #${incident.id} is now under review. Please add details below.`,
-    });
-  };
 
   const getStatusIndicator = (status: Incident['status']) => {
     switch (status) {
@@ -215,8 +206,6 @@ export default function AgencyIncidentReportPage() {
     return 'incident evidence';
   };
   
-  const isInitialReportSubmitted = !!incident.description;
-
   const renderMediaGallery = () => {
     if (!incident.initialIncidentMediaUrl || incident.initialIncidentMediaUrl.length === 0) {
       return null;
@@ -344,24 +333,16 @@ export default function AgencyIncidentReportPage() {
         <CardContent className="space-y-6 divide-y">
             <div className="pt-6 space-y-6">
               {incident.status === 'Active' && (
-                <div>
-                   {incident.incidentType && (
-                    <div className="pb-6">
-                        <h4 className="font-semibold mb-2 text-lg flex items-center gap-2">
-                            <AlertTriangle className="h-5 w-5 text-destructive" />
-                            Incident Type
-                        </h4>
-                        <p className="text-muted-foreground">{incident.incidentType}</p>
-                    </div>
-                  )}
-                  <Alert variant="default" className="text-left mb-4">
-                    <Info className="h-4 w-4" />
-                    <AlertTitle>Incident is Active</AlertTitle>
-                    <AlertDescription>
-                      This incident requires your attention. Upload any available media and start the review to submit an initial report.
-                    </AlertDescription>
-                  </Alert>
-                  <form onSubmit={handleMediaUpload} className="text-left p-4 my-4 border rounded-lg">
+                 <form onSubmit={handleSaveIncidentDetails}>
+                    <Alert variant="default" className="text-left mb-6">
+                        <Info className="h-4 w-4" />
+                        <AlertTitle>Incident is Active</AlertTitle>
+                        <AlertDescription>
+                        This incident requires your attention. Categorize the incident, add a summary, and upload any available media. Saving these details will move the incident to "Under Review".
+                        </AlertDescription>
+                    </Alert>
+
+                    <div className="text-left p-4 my-4 border rounded-lg">
                       <Label htmlFor="active-incident-photos" className="text-base font-semibold">Upload Media</Label>
                       <p className="text-sm text-muted-foreground mb-2">Anyone can upload evidence while the incident is active.</p>
                       <div className="flex items-center gap-2">
@@ -372,70 +353,50 @@ export default function AgencyIncidentReportPage() {
                             onChange={(e) => setIncidentFiles(e.target.files)}
                             accept="image/*,video/*"
                         />
-                        <Button type="submit" variant="secondary" disabled={!incidentFiles}>
+                        <Button type="button" variant="secondary" disabled={!incidentFiles} onClick={handleMediaUpload}>
                             <Upload className="mr-2 h-4 w-4"/> Upload
                         </Button>
                       </div>
-                  </form>
-                  {renderMediaGallery()}
-                  <div className="text-center">
-                    <Button onClick={handleStartReview} className="mt-4">
-                        Start Review
-                    </Button>
-                  </div>
-                </div>
+                   </div>
+
+                   <div className="pt-6 space-y-4">
+                      <h3 className="text-xl font-semibold">Initial Incident Report</h3>
+                       <div>
+                        <Label htmlFor="incident-type" className="text-base">Incident Type</Label>
+                        <Select value={incidentType} onValueChange={(value) => setIncidentType(value as Incident['incidentType'])}>
+                          <SelectTrigger id="incident-type" className="mt-2">
+                            <SelectValue placeholder="Select an incident type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {incidentTypes.map(type => (
+                              <SelectItem key={type} value={type}>{type}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                            <Label htmlFor="description" className="text-base">Incident Summary</Label>
+                            <Textarea 
+                                id="description" 
+                                className="mt-2" 
+                                placeholder="Provide a detailed summary of what happened, who was involved, and the immediate actions taken..." 
+                                value={description}
+                                onChange={(e) => setDescription(e.target.value)}
+                                rows={5}
+                            />
+                        </div>
+                        {renderMediaGallery()}
+                   </div>
+
+                    <CardFooter className="px-0 pt-6 justify-end">
+                        <Button type="submit">
+                            Save and Start Review
+                        </Button>
+                    </CardFooter>
+                 </form>
               )}
               
-              {incident.status === 'Under Review' && !isInitialReportSubmitted && (
-                  <form onSubmit={handleSaveIncidentDetails}>
-                      <div className="pt-6 space-y-4">
-                          <h3 className="text-xl font-semibold">Initial Incident Report</h3>
-                          <div>
-                            <Label htmlFor="incident-type" className="text-base">Incident Type</Label>
-                            <Select value={incidentType} onValueChange={(value) => setIncidentType(value as Incident['incidentType'])}>
-                              <SelectTrigger id="incident-type" className="mt-2">
-                                <SelectValue placeholder="Select an incident type" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {incidentTypes.map(type => (
-                                  <SelectItem key={type} value={type}>{type}</SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div>
-                                <Label htmlFor="description" className="text-base">Incident Summary</Label>
-                                <Textarea 
-                                    id="description" 
-                                    className="mt-2" 
-                                    placeholder="Provide a detailed summary of what happened, who was involved, and the immediate actions taken..." 
-                                    value={description}
-                                    onChange={(e) => setDescription(e.target.value)}
-                                    rows={5}
-                                />
-                            </div>
-                            <div>
-                                <Label htmlFor="incident-photos" className="text-base">Add More Media Evidence</Label>
-                                <Input 
-                                    id="incident-photos" 
-                                    type="file" 
-                                    multiple
-                                    className="mt-2"
-                                    onChange={(e) => setIncidentFiles(e.target.files)}
-                                    accept="image/*,video/*"
-                                />
-                            </div>
-                            {renderMediaGallery()}
-                      </div>
-                      <CardFooter className="px-0 pt-6 justify-end">
-                          <Button type="submit">
-                              Save Incident Details
-                          </Button>
-                      </CardFooter>
-                  </form>
-              )}
-
-              {(incident.status === 'Under Review' && isInitialReportSubmitted) && (
+              {(incident.status === 'Under Review') && (
                 <>
                   {incident.incidentType && (
                       <div className="pt-6">
