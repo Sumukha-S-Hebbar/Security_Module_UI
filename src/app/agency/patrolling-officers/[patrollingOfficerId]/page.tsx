@@ -41,6 +41,7 @@ export default function AgencyPatrollingOfficerReportPage() {
   const { toast } = useToast();
   const patrollingOfficerId = params.patrollingOfficerId as string;
   const [selectedMonth, setSelectedMonth] = useState('all');
+  const [selectedYear, setSelectedYear] = useState('all');
 
   const patrollingOfficer = patrollingOfficers.find((p) => p.id === patrollingOfficerId);
 
@@ -67,15 +68,22 @@ export default function AgencyPatrollingOfficerReportPage() {
 
   const assignedIncidents = useMemo(() => incidents.filter(incident => assignedSiteIds.has(incident.siteId)), [assignedSiteIds]);
   
+  const availableYears = useMemo(() => {
+    const years = new Set(
+      assignedIncidents.map((incident) => new Date(incident.incidentTime).getFullYear().toString())
+    );
+    if (years.size > 0) years.add(new Date().getFullYear().toString());
+    return Array.from(years).sort((a, b) => parseInt(b) - parseInt(a));
+  }, [assignedIncidents]);
+
   const filteredIncidents = useMemo(() => {
-    if (selectedMonth === 'all') {
-      return assignedIncidents;
-    }
     return assignedIncidents.filter(incident => {
-        const incidentDate = new Date(incident.incidentTime);
-        return incidentDate.getMonth() === parseInt(selectedMonth, 10);
+      const incidentDate = new Date(incident.incidentTime);
+      const yearMatch = selectedYear === 'all' || incidentDate.getFullYear().toString() === selectedYear;
+      const monthMatch = selectedMonth === 'all' || incidentDate.getMonth().toString() === selectedMonth;
+      return yearMatch && monthMatch;
     });
-  }, [assignedIncidents, selectedMonth]);
+  }, [assignedIncidents, selectedYear, selectedMonth]);
 
   const visitedSites = assignedSites.filter(s => s.visited).length;
   const siteVisitAccuracy = assignedSites.length > 0 ? (visitedSites / assignedSites.length) * 100 : 100;
@@ -298,21 +306,38 @@ export default function AgencyPatrollingOfficerReportPage() {
             <CardTitle>Recent Incidents</CardTitle>
             <CardDescription>A log of emergency incidents at sites managed by {patrollingOfficer.name}.</CardDescription>
           </div>
-          <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-            <SelectTrigger className="w-full sm:w-[180px]">
-              <SelectValue placeholder="Filter by month" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Months</SelectItem>
-              {Array.from({ length: 12 }, (_, i) => (
-                <SelectItem key={i} value={i.toString()}>
-                  {new Date(0, i).toLocaleString('default', {
-                    month: 'long',
-                  })}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="flex items-center gap-2">
+            {availableYears.length > 0 && (
+              <Select value={selectedYear} onValueChange={setSelectedYear}>
+                <SelectTrigger className="w-[120px]">
+                  <SelectValue placeholder="Select Year" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Years</SelectItem>
+                  {availableYears.map((year) => (
+                    <SelectItem key={year} value={year}>
+                      {year}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+            <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+              <SelectTrigger className="w-[140px]">
+                <SelectValue placeholder="Select Month" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Months</SelectItem>
+                {Array.from({ length: 12 }, (_, i) => (
+                  <SelectItem key={i} value={i.toString()}>
+                    {new Date(0, i).toLocaleString('default', {
+                      month: 'long',
+                    })}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </CardHeader>
         <CardContent>
           {filteredIncidents.length > 0 ? (
@@ -351,7 +376,7 @@ export default function AgencyPatrollingOfficerReportPage() {
               </TableBody>
             </Table>
           ) : (
-            <p className="text-muted-foreground text-center py-4">No recent incidents for this patrolling officer's sites {selectedMonth !== 'all' && 'in the selected month'}.</p>
+            <p className="text-muted-foreground text-center py-4">No recent incidents for this patrolling officer's sites {selectedYear !== 'all' || selectedMonth !== 'all' ? 'in the selected period' : ''}.</p>
           )}
         </CardContent>
       </Card>

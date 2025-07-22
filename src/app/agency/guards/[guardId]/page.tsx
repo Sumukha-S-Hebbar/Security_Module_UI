@@ -31,12 +31,22 @@ import { ArrowLeft, FileDown, Phone, MapPin, UserCheck, ShieldCheck } from 'luci
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
+import { useMemo, useState } from 'react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 export default function AgencyGuardReportPage() {
   const params = useParams();
   const router = useRouter();
   const { toast } = useToast();
   const guardId = params.guardId as string;
+  const [selectedMonth, setSelectedMonth] = useState('all');
+  const [selectedYear, setSelectedYear] = useState('all');
 
   const guard = guards.find((g) => g.id === guardId);
 
@@ -55,6 +65,24 @@ export default function AgencyGuardReportPage() {
   const site = sites.find((s) => s.name === guard.site);
   const patrollingOfficer = site ? patrollingOfficers.find(p => p.id === site.patrollingOfficerId) : undefined;
   const guardIncidents = incidents.filter(i => i.raisedByGuardId === guard.id);
+  
+  const availableYears = useMemo(() => {
+    const years = new Set(
+      guardIncidents.map((incident) => new Date(incident.incidentTime).getFullYear().toString())
+    );
+    if (years.size > 0) years.add(new Date().getFullYear().toString());
+    return Array.from(years).sort((a, b) => parseInt(b) - parseInt(a));
+  }, [guardIncidents]);
+
+  const filteredIncidents = useMemo(() => {
+    return guardIncidents.filter(incident => {
+      const incidentDate = new Date(incident.incidentTime);
+      const yearMatch = selectedYear === 'all' || incidentDate.getFullYear().toString() === selectedYear;
+      const monthMatch = selectedMonth === 'all' || incidentDate.getMonth().toString() === selectedMonth;
+      return yearMatch && monthMatch;
+    });
+  }, [guardIncidents, selectedYear, selectedMonth]);
+
 
   const handleDownloadReport = () => {
     toast({
@@ -259,12 +287,44 @@ export default function AgencyGuardReportPage() {
       </div>
 
       <Card>
-        <CardHeader>
-          <CardTitle>Recent Incidents</CardTitle>
-          <CardDescription>A log of emergency incidents involving {guard.name}.</CardDescription>
+        <CardHeader className="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <CardTitle>Recent Incidents</CardTitle>
+            <CardDescription>A log of emergency incidents involving {guard.name}.</CardDescription>
+          </div>
+           <div className="flex items-center gap-2">
+              {availableYears.length > 0 && (
+                <Select value={selectedYear} onValueChange={setSelectedYear}>
+                  <SelectTrigger className="w-[120px]">
+                    <SelectValue placeholder="Select Year" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Years</SelectItem>
+                    {availableYears.map((year) => (
+                      <SelectItem key={year} value={year}>
+                        {year}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+              <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+                <SelectTrigger className="w-[140px]">
+                  <SelectValue placeholder="Select Month" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Months</SelectItem>
+                  {Array.from({ length: 12 }, (_, i) => (
+                    <SelectItem key={i} value={i.toString()}>
+                      {new Date(0, i).toLocaleString('default', { month: 'long' })}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+          </div>
         </CardHeader>
         <CardContent>
-          {guardIncidents.length > 0 ? (
+          {filteredIncidents.length > 0 ? (
             <Table>
               <TableHeader>
                 <TableRow>
@@ -275,7 +335,7 @@ export default function AgencyGuardReportPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {guardIncidents.map((incident) => (
+                {filteredIncidents.map((incident) => (
                   <TableRow 
                     key={incident.id}
                     onClick={() => router.push(`/agency/incidents/${incident.id}`)}
@@ -294,7 +354,7 @@ export default function AgencyGuardReportPage() {
               </TableBody>
             </Table>
           ) : (
-            <p className="text-muted-foreground text-center py-4">No recent emergency incidents for this guard.</p>
+            <p className="text-muted-foreground text-center py-4">No recent emergency incidents for this guard {selectedYear !== 'all' || selectedMonth !== 'all' ? 'in the selected period' : ''}.</p>
           )}
         </CardContent>
       </Card>
