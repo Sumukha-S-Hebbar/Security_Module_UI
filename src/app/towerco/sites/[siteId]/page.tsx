@@ -202,7 +202,7 @@ export default function SiteReportPage() {
       </Card>
       
       <Card>
-        <CardHeader className="flex flex-wrap items-center justify-between gap-2">
+        <CardHeader className="flex flex-row items-center justify-between gap-4">
           <div>
             <CardTitle>Incidents at {site.name}</CardTitle>
             <CardDescription>A log of all emergency incidents reported at this site.</CardDescription>
