@@ -9,7 +9,7 @@ export const incidents: Incident[] = [
       status: 'Active', 
       raisedByGuardId: 'GL001', 
       siteId: 'SITE02', 
-      initialIncidentMediaUrl: ['https://placehold.co/600x400.png'],
+      initialIncidentMediaUrl: ['https://placehold.co/600x400.png', 'https://placehold.co/600x400.png'],
       attendedByPatrollingOfficerId: 'PO01',
       incidentType: 'SOS'
     },
@@ -72,7 +72,7 @@ export const incidents: Incident[] = [
       status: 'Active', 
       raisedByGuardId: 'GL009', 
       siteId: 'SITE08',
-      initialIncidentMediaUrl: [],
+      initialIncidentMediaUrl: ['https://placehold.co/600x400.png', 'https://placehold.co/600x400.png?text=Second+Photo'],
       attendedByPatrollingOfficerId: 'PO01',
       incidentType: 'SOS'
     },

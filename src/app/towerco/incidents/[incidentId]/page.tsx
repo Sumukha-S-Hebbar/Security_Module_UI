@@ -294,26 +294,30 @@ export default function IncidentReportPage() {
               </div>
             )}
             
-            {incident.incidentType && (
-              <div className="pt-6">
-                  <h4 className="font-semibold mb-2 text-lg flex items-center gap-2">
-                      <AlertTriangle className="h-5 w-5 text-destructive" />
-                      Incident Type
-                  </h4>
-                  <p className="text-muted-foreground">{incident.incidentType}</p>
-              </div>
-            )}
+            {incident.status !== 'Active' && (
+              <>
+                {incident.incidentType && (
+                  <div className="pt-6">
+                      <h4 className="font-semibold mb-2 text-lg flex items-center gap-2">
+                          <AlertTriangle className="h-5 w-5 text-destructive" />
+                          Incident Type
+                      </h4>
+                      <p className="text-muted-foreground">{incident.incidentType}</p>
+                  </div>
+                )}
 
-            {incident.description && (
-                <div className="pt-6">
-                    <h4 className="font-semibold mb-2 text-lg">
-                        Incident Summary
-                    </h4>
-                    <p className="text-muted-foreground">{incident.description}</p>
-                </div>
-            )}
+                {incident.description && (
+                    <div className="pt-6">
+                        <h4 className="font-semibold mb-2 text-lg">
+                            Incident Summary
+                        </h4>
+                        <p className="text-muted-foreground">{incident.description}</p>
+                    </div>
+                )}
 
-            {incident.status !== 'Active' && incident.initialIncidentMediaUrl && incident.initialIncidentMediaUrl.length > 0 && renderMediaGallery()}
+                {renderMediaGallery()}
+              </>
+            )}
 
             {incident.status === 'Resolved' ? (
                  <>
