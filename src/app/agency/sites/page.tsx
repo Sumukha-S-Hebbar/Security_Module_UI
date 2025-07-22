@@ -603,8 +603,7 @@ export default function AgencySitesPage() {
                       />
                     </TableCell>
                     <TableCell className="align-top py-4">
-                      <div className='flex flex-col gap-2'>
-                        {site.guardsRequired && <p className="text-xs text-muted-foreground">Guards Required: <span className="font-bold">{site.guardsRequired}</span></p>}
+                      <div className='flex flex-col items-start gap-2'>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="outline" className="w-[180px]">
@@ -614,6 +613,7 @@ export default function AgencySitesPage() {
                           </DropdownMenuTrigger>
                           {renderGuardSelection(site)}
                         </DropdownMenu>
+                        {site.guardsRequired && <p className="text-xs text-muted-foreground">Guards Required: <span className="font-bold">{site.guardsRequired}</span></p>}
                       </div>
                     </TableCell>
                     <TableCell className="align-top py-4">
