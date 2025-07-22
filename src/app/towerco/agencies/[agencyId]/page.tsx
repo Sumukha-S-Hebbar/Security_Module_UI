@@ -428,14 +428,14 @@ export default function AgencyReportPage() {
         </CardContent>
       </Card>
       <Card>
-        <CardHeader className="flex flex-wrap items-start justify-between gap-4">
-            <div className="flex-grow">
+        <CardHeader className="flex flex-wrap items-center justify-between gap-4">
+            <div>
                 <CardTitle>Incidents History</CardTitle>
                 <CardDescription>
                 A log of emergency incidents at sites managed by {agency.name}.
                 </CardDescription>
             </div>
-            <div className="flex items-center gap-2 flex-shrink-0">
+            <div className="flex items-center gap-2">
                 <Select value={historySelectedYear} onValueChange={setHistorySelectedYear}>
                     <SelectTrigger className="w-[120px]">
                     <SelectValue placeholder="Select Year" />
