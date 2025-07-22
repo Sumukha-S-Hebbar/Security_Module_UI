@@ -584,14 +584,14 @@ export default function AgencySitesPage() {
                 {filteredUnassignedSites.length > 0 ? (
                   filteredUnassignedSites.map((site) => (
                   <TableRow key={site.id}>
-                    <TableCell>
+                    <TableCell className="align-top py-4">
                       <div className="font-medium">{site.name}</div>
                       <div className="text-sm text-muted-foreground flex items-center gap-1">
                         <MapPin className="w-3 h-3" />
                         {site.address}
                       </div>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="align-top py-4">
                       <Input
                         type="number"
                         placeholder="20"
@@ -602,7 +602,7 @@ export default function AgencySitesPage() {
                         }
                       />
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="align-top py-4">
                       <div className='flex flex-col gap-2'>
                         {site.guardsRequired && <p className="text-xs text-muted-foreground">Guards Required: <span className="font-bold">{site.guardsRequired}</span></p>}
                         <DropdownMenu>
@@ -616,7 +616,7 @@ export default function AgencySitesPage() {
                         </DropdownMenu>
                       </div>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="align-top py-4">
                       <Select
                         value={selectedPatrollingOfficers[site.id] || ''}
                         onValueChange={(value) =>
@@ -629,7 +629,7 @@ export default function AgencySitesPage() {
                         {renderPatrollingOfficerSelection(site)}
                       </Select>
                     </TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="align-top py-4 text-right">
                       <Button
                         size="sm"
                         onClick={() => handleAssign(site.id)}
