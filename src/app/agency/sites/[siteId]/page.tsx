@@ -224,12 +224,12 @@ export default function AgencySiteReportPage() {
             </CardContent>
           </Card>
           <Card>
-            <CardHeader className="flex flex-wrap items-center justify-between gap-2">
-              <div>
+            <CardHeader className="flex flex-row items-start justify-between gap-4">
+              <div className="flex-grow">
                 <CardTitle>Incidents at {site.name}</CardTitle>
                 <CardDescription>A log of all emergency incidents reported at this site.</CardDescription>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-shrink-0">
                 {availableYears.length > 0 && (
                   <Select value={selectedYear} onValueChange={setSelectedYear}>
                     <SelectTrigger className="w-[120px]">
@@ -302,4 +302,5 @@ export default function AgencySiteReportPage() {
 
     </div>
   );
-}
+
+    
