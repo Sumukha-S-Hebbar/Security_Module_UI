@@ -281,6 +281,28 @@ export default function IncidentReportPage() {
           </div>
         </CardHeader>
         <CardContent className="space-y-6 divide-y">
+            
+            <div className="pt-6 space-y-6">
+                {incident.incidentType && (
+                    <div>
+                        <h4 className="font-semibold mb-2 text-lg flex items-center gap-2">
+                            <AlertTriangle className="h-5 w-5 text-destructive" />
+                            Incident Type
+                        </h4>
+                        <p className="text-muted-foreground">{incident.incidentType}</p>
+                    </div>
+                )}
+                {incident.description && (
+                     <div>
+                        <h4 className="font-semibold mb-2 text-lg">
+                            Incident Summary
+                        </h4>
+                        <p className="text-muted-foreground">{incident.description}</p>
+                    </div>
+                )}
+                {renderMediaGallery()}
+            </div>
+
             {incident.status === 'Active' && (
               <div className="pt-6">
                 <Alert variant="destructive">
@@ -290,39 +312,13 @@ export default function IncidentReportPage() {
                     This incident is active and awaiting review from the assigned security agency.
                   </AlertDescription>
                 </Alert>
-                {renderMediaGallery()}
               </div>
             )}
             
-            {incident.status !== 'Active' && (
-              <>
-                {incident.incidentType && (
-                  <div className="pt-6">
-                      <h4 className="font-semibold mb-2 text-lg flex items-center gap-2">
-                          <AlertTriangle className="h-5 w-5 text-destructive" />
-                          Incident Type
-                      </h4>
-                      <p className="text-muted-foreground">{incident.incidentType}</p>
-                  </div>
-                )}
-
-                {incident.description && (
-                    <div className="pt-6">
-                        <h4 className="font-semibold mb-2 text-lg">
-                            Incident Summary
-                        </h4>
-                        <p className="text-muted-foreground">{incident.description}</p>
-                    </div>
-                )}
-
-                {renderMediaGallery()}
-              </>
-            )}
-
             {incident.status === 'Resolved' ? (
-                 <>
+                 <div className="pt-6 space-y-6">
                     {incident.resolutionNotes && (
-                        <div className="pt-6">
+                        <div>
                             <h4 className="font-semibold mb-2 text-lg">
                                 Resolution Notes
                             </h4>
@@ -330,7 +326,7 @@ export default function IncidentReportPage() {
                         </div>
                     )}
                      {incident.resolvedIncidentMediaUrl && incident.resolvedIncidentMediaUrl.length > 0 && (
-                        <div className="pt-6">
+                        <div>
                             <h4 className="font-semibold mb-4 text-lg">
                                 Resolution Media Evidence
                             </h4>
@@ -349,7 +345,7 @@ export default function IncidentReportPage() {
                             </div>
                         </div>
                     )}
-                 </>
+                 </div>
             ) : incident.status === 'Under Review' ? (
                 <form onSubmit={handleResolveIncident}>
                     <div className="pt-6 space-y-4">

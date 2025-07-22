@@ -344,7 +344,16 @@ export default function AgencyIncidentReportPage() {
         <CardContent className="space-y-6 divide-y">
             <div className="pt-6 space-y-6">
               {incident.status === 'Active' && (
-                <div className="text-center">
+                <div>
+                   {incident.incidentType && (
+                    <div className="pb-6">
+                        <h4 className="font-semibold mb-2 text-lg flex items-center gap-2">
+                            <AlertTriangle className="h-5 w-5 text-destructive" />
+                            Incident Type
+                        </h4>
+                        <p className="text-muted-foreground">{incident.incidentType}</p>
+                    </div>
+                  )}
                   <Alert variant="default" className="text-left mb-4">
                     <Info className="h-4 w-4" />
                     <AlertTitle>Incident is Active</AlertTitle>
@@ -369,9 +378,11 @@ export default function AgencyIncidentReportPage() {
                       </div>
                   </form>
                   {renderMediaGallery()}
-                  <Button onClick={handleStartReview} className="mt-4">
-                      Start Review
-                  </Button>
+                  <div className="text-center">
+                    <Button onClick={handleStartReview} className="mt-4">
+                        Start Review
+                    </Button>
+                  </div>
                 </div>
               )}
               
