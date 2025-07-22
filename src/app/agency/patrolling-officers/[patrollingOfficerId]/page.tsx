@@ -301,12 +301,12 @@ export default function AgencyPatrollingOfficerReportPage() {
       </div>
 
       <Card>
-        <CardHeader className="flex flex-wrap items-center justify-between gap-2">
-          <div>
+        <CardHeader className="flex flex-row items-start justify-between gap-4">
+          <div className="flex-grow">
             <CardTitle>Recent Incidents</CardTitle>
             <CardDescription>A log of emergency incidents at sites managed by {patrollingOfficer.name}.</CardDescription>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-shrink-0">
             {availableYears.length > 0 && (
               <Select value={selectedYear} onValueChange={setSelectedYear}>
                 <SelectTrigger className="w-[120px]">
