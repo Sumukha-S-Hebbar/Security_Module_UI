@@ -428,7 +428,7 @@ export default function AgencyReportPage() {
         </CardContent>
       </Card>
       <Card>
-        <CardHeader className="flex flex-wrap items-center justify-between gap-4">
+        <CardHeader className="flex flex-row items-center justify-between gap-4">
             <div>
                 <CardTitle>Incidents History</CardTitle>
                 <CardDescription>
