@@ -33,13 +33,8 @@ import { Button } from '@/components/ui/button';
 import { AlertTriangle, ChevronDown, Phone } from 'lucide-react';
 import { IncidentStatusBreakdown } from './_components/incident-status-breakdown';
 import { AgencyIncidentChart } from './_components/agency-incident-chart';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { GuardPerformanceBreakdown } from './_components/guard-performance-breakdown';
+import { PatrollingOfficerPerformance } from './_components/patrolling-officer-performance';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
