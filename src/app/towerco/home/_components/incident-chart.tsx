@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import type { Incident, Site, SecurityAgency, Guard } from '@/types';
 import Link from 'next/link';
 import {
@@ -78,6 +78,7 @@ export function IncidentChart({
   );
   const [selectedCompany, setSelectedCompany] = useState<string>('all');
   const [selectedMonthIndex, setSelectedMonthIndex] = useState<number | null>(null);
+  const collapsibleRef = useRef<HTMLDivElement>(null);
 
   const monthlyIncidentData = useMemo(() => {
     const months = [
@@ -145,6 +146,14 @@ export function IncidentChart({
     }
   };
 
+  useEffect(() => {
+    if (selectedMonthIndex !== null && collapsibleRef.current) {
+        setTimeout(() => {
+            collapsibleRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 100); 
+    }
+  }, [selectedMonthIndex]);
+
   const getSiteName = (siteId: string) => sites.find(s => s.id === siteId)?.name || 'N/A';
   const getAgencyName = (siteId: string) => {
       const agency = securityAgencies.find(a => a.siteIds.includes(siteId));
@@ -195,7 +204,7 @@ export function IncidentChart({
 
 
   return (
-    <Card>
+    <Card ref={collapsibleRef}>
       <CardHeader>
         <div className="flex flex-wrap items-center justify-between gap-2">
             <div>

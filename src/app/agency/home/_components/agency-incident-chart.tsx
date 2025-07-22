@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import type { Incident } from '@/types';
 import {
   Card,
@@ -69,6 +69,7 @@ export function AgencyIncidentChart({
     new Date().getFullYear().toString()
   );
   const [selectedMonthIndex, setSelectedMonthIndex] = useState<number | null>(null);
+  const collapsibleRef = useRef<HTMLDivElement>(null);
 
   const monthlyIncidentData = useMemo(() => {
     const months = [
@@ -116,6 +117,14 @@ export function AgencyIncidentChart({
     }
   };
 
+  useEffect(() => {
+    if (selectedMonthIndex !== null && collapsibleRef.current) {
+      setTimeout(() => {
+        collapsibleRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100); 
+    }
+  }, [selectedMonthIndex]);
+
   const getStatusIndicator = (status: Incident['status']) => {
     switch (status) {
       case 'Active':
@@ -160,7 +169,7 @@ export function AgencyIncidentChart({
 
 
   return (
-    <Card>
+    <Card ref={collapsibleRef}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <div>
           <CardTitle>Incidents Occurred</CardTitle>
