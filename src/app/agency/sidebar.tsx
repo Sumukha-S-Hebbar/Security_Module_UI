@@ -9,20 +9,12 @@ import {
   Users,
   UserCheck,
   ShieldAlert,
-  ShieldCheck,
   LogOut,
 } from 'lucide-react';
-import {
-  SidebarHeader,
-  SidebarContent,
-  SidebarMenu,
-  SidebarMenuItem,
-  SidebarMenuButton,
-  SidebarFooter,
-} from '@/components/ui/sidebar';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
 
-const menuItems = [
+export const menuItems = [
   { href: '/agency/home', label: 'Home', icon: Home },
   { href: '/agency/sites', label: 'Sites', icon: Building2 },
   { href: '/agency/patrolling-officers', label: 'Patrolling Officers', icon: UserCheck },
@@ -30,57 +22,21 @@ const menuItems = [
   { href: '/agency/incidents', label: 'Incidents', icon: ShieldAlert },
 ];
 
-export default function AgencySidebar() {
+export function NavLinks() {
   const pathname = usePathname();
 
   return (
     <>
-      <SidebarHeader>
-        <div className="flex items-center gap-2">
-          <ShieldCheck className="w-8 h-8 text-primary" />
-          <div>
-            <h1 className="text-xl font-bold">GuardLink</h1>
-            <p className="text-xs text-muted-foreground">Agency Portal</p>
-          </div>
-        </div>
-      </SidebarHeader>
-      <SidebarContent>
-        <SidebarMenu>
-          {menuItems.map((item) => (
-            <SidebarMenuItem key={item.href}>
-              <SidebarMenuButton
-                asChild
-                isActive={pathname.startsWith(item.href)}
-                className={cn(
-                  'w-full justify-start',
-                  pathname.startsWith(item.href) &&
-                    'bg-primary/10 text-primary hover:bg-primary/20'
-                )}
-              >
-                <Link href={item.href}>
-                  <item.icon className="h-5 w-5" />
-                  <span>{item.label}</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          ))}
-        </SidebarMenu>
-      </SidebarContent>
-      <SidebarFooter>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              asChild
-              className="w-full justify-start"
-            >
-              <Link href="/">
-                <LogOut className="h-5 w-5" />
-                <span>Logout</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarFooter>
+      {menuItems.map((item) => (
+        <Button key={item.href} asChild variant="ghost" className={cn(
+            "text-base text-header-foreground/70 hover:text-header-foreground hover:bg-header-background/50",
+            pathname.startsWith(item.href) && "text-header-foreground font-semibold"
+        )}>
+          <Link href={item.href}>
+            {item.label}
+          </Link>
+        </Button>
+      ))}
     </>
   );
 }

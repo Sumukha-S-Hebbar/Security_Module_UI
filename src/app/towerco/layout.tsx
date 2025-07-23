@@ -1,10 +1,5 @@
 
-import TowercoSidebar from './sidebar';
-import {
-  SidebarProvider,
-  Sidebar,
-  SidebarInset,
-} from '@/components/ui/sidebar';
+import TowercoHeader from './header';
 
 export default function TowercoLayout({
   children,
@@ -12,11 +7,9 @@ export default function TowercoLayout({
   children: React.ReactNode;
 }) {
   return (
-    <SidebarProvider>
-      <Sidebar>
-        <TowercoSidebar />
-      </Sidebar>
-      <SidebarInset>{children}</SidebarInset>
-    </SidebarProvider>
+    <div className="flex flex-col min-h-screen">
+      <TowercoHeader />
+      <main className="flex-1">{children}</main>
+    </div>
   );
 }

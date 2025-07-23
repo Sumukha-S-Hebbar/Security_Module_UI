@@ -1,10 +1,5 @@
 
-import AgencySidebar from './sidebar';
-import {
-  SidebarProvider,
-  Sidebar,
-  SidebarInset,
-} from '@/components/ui/sidebar';
+import AgencyHeader from './header';
 
 export default function AgencyLayout({
   children,
@@ -12,11 +7,9 @@ export default function AgencyLayout({
   children: React.ReactNode;
 }) {
   return (
-    <SidebarProvider>
-      <Sidebar>
-        <AgencySidebar />
-      </Sidebar>
-      <SidebarInset>{children}</SidebarInset>
-    </SidebarProvider>
+    <div className="flex flex-col min-h-screen">
+      <AgencyHeader />
+      <main className="flex-1">{children}</main>
+    </div>
   );
 }
