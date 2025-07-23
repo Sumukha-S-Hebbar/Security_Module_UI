@@ -1,3 +1,4 @@
+
 import type {NextConfig} from 'next';
 
 const nextConfig: NextConfig = {
@@ -17,6 +18,10 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       },
     ],
+  },
+  // Add the allowedDevOrigins option to resolve the cross-origin warning
+  experimental: {
+    allowedDevOrigins: ["https://*.cloudworkstations.dev"],
   },
 };
 
