@@ -190,7 +190,7 @@ export default function SiteReportPage() {
             <div className="flex flex-wrap justify-between items-start gap-4">
               <div>
                 <CardTitle className="text-2xl">{site.name}</CardTitle>
-                <CardDescription>ID: {site.id}</CardDescription>
+                <p className="text-sm font-medium">ID: {site.id}</p>
               </div>
             </div>
           </CardHeader>
@@ -200,14 +200,14 @@ export default function SiteReportPage() {
                 <MapPin className="h-5 w-5 mt-0.5 text-primary" />
                 <div>
                   <p className="font-semibold">Address</p>
-                  <p className="font-medium text-muted-foreground">{site.address}</p>
+                  <p className="font-medium">{site.address}</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
                 <ShieldAlert className="h-5 w-5 mt-0.5 text-primary" />
                 <div>
                   <p className="font-semibold">Total Incidents</p>
-                  <p className="font-medium text-muted-foreground">{siteIncidents.length}</p>
+                  <p className="font-medium">{siteIncidents.length}</p>
                 </div>
               </div>
               {site.latitude && site.longitude && (
@@ -215,7 +215,7 @@ export default function SiteReportPage() {
                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-globe mt-0.5 text-primary"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
                   <div>
                     <p className="font-semibold">Coordinates</p>
-                    <p className="font-medium text-muted-foreground">Latitude: {site.latitude}, Longitude: {site.longitude}</p>
+                    <p className="font-medium">Latitude: {site.latitude}, Longitude: {site.longitude}</p>
                   </div>
                 </div>
               )}
