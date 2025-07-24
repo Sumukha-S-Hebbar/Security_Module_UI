@@ -215,12 +215,13 @@ export default function AgencyReportPage() {
     { name: 'Remaining', value: 100 - performanceData.performance },
   ];
 
-  const performanceBreakdownChartData = [
-    { name: 'Resolution', value: performanceData.incidentResolutionRate, fill: 'var(--color-incidentResolutionRate)' },
-    { name: 'Perimeter', value: performanceData.guardPerimeterAccuracy, fill: 'var(--color-guardPerimeterAccuracy)' },
-    { name: 'Selfie', value: performanceData.guardSelfieAccuracy, fill: 'var(--color-guardSelfieAccuracy)' },
-    { name: 'Site Visits', value: performanceData.officerSiteVisitRate, fill: 'var(--color-officerSiteVisitRate)' },
-  ];
+  const performanceBreakdownChartData = [{
+    name: 'Performance',
+    incidentResolutionRate: performanceData.incidentResolutionRate,
+    guardPerimeterAccuracy: performanceData.guardPerimeterAccuracy,
+    guardSelfieAccuracy: performanceData.guardSelfieAccuracy,
+    officerSiteVisitRate: performanceData.officerSiteVisitRate,
+  }];
   
   const getPerformanceColor = () => {
     if (performanceData.performance > 95) return 'hsl(var(--chart-2))'; // Green
@@ -433,20 +434,26 @@ export default function AgencyReportPage() {
               </div>
               <div className="w-full h-full min-h-[300px]">
                 <ChartContainer config={chartConfig} className="w-full h-full">
-                  <BarChart data={performanceBreakdownChartData} margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+                  <BarChart data={performanceBreakdownChartData} margin={{ top: 20, right: 0, bottom: 20, left: 0 }}>
                     <CartesianGrid vertical={false} />
-                    <XAxis dataKey="name" tickMargin={8} />
+                    <XAxis dataKey="name" tick={false} axisLine={false} />
                     <YAxis domain={[0, 100]} tickFormatter={(value) => `${value}%`} />
                     <ChartTooltip
                       cursor={{ fill: 'hsl(var(--accent) / 0.1)' }}
                       content={<ChartTooltipContent indicator="dot" />}
                     />
                     <ChartLegend content={<ChartLegendContent />} />
-                    <Bar dataKey="value" radius={4}>
-                      {performanceBreakdownChartData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.fill} />
-                      ))}
-                      <LabelList dataKey="value" position="top" offset={5} fontSize={12} formatter={(value: number) => `${value}%`} />
+                    <Bar dataKey="incidentResolutionRate" fill="var(--color-incidentResolutionRate)" radius={4}>
+                        <LabelList dataKey="incidentResolutionRate" position="top" offset={5} fontSize={12} formatter={(value: number) => `${value}%`} />
+                    </Bar>
+                     <Bar dataKey="guardPerimeterAccuracy" fill="var(--color-guardPerimeterAccuracy)" radius={4}>
+                        <LabelList dataKey="guardPerimeterAccuracy" position="top" offset={5} fontSize={12} formatter={(value: number) => `${value}%`} />
+                    </Bar>
+                     <Bar dataKey="guardSelfieAccuracy" fill="var(--color-guardSelfieAccuracy)" radius={4}>
+                        <LabelList dataKey="guardSelfieAccuracy" position="top" offset={5} fontSize={12} formatter={(value: number) => `${value}%`} />
+                    </Bar>
+                     <Bar dataKey="officerSiteVisitRate" fill="var(--color-officerSiteVisitRate)" radius={4}>
+                        <LabelList dataKey="officerSiteVisitRate" position="top" offset={5} fontSize={12} formatter={(value: number) => `${value}%`} />
                     </Bar>
                   </BarChart>
                 </ChartContainer>
