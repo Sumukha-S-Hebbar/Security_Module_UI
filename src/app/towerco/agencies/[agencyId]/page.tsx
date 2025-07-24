@@ -395,10 +395,10 @@ export default function AgencyReportPage() {
           <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
             <div className="flex flex-col items-center justify-center gap-2">
                 <div className="relative w-full max-w-[250px] aspect-square">
-                    <ChartContainer
+                  <ChartContainer
                     config={chartConfig}
                     className="w-full h-full"
-                    >
+                  >
                     <PieChart>
                         <ChartTooltip
                         cursor={false}
@@ -422,14 +422,14 @@ export default function AgencyReportPage() {
                         ))}
                         </Pie>
                     </PieChart>
-                    </ChartContainer>
-                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                  </ChartContainer>
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                     <span className="text-4xl font-bold" style={{ color: getPerformanceColor() }}>
                         {performanceData.performance}%
                     </span>
-                    </div>
+                  </div>
                 </div>
-              <p className="text-lg font-medium text-center mt-2">Overall Performance</p>
+                <p className="text-lg font-medium text-center mt-2">Overall Performance</p>
             </div>
             <div className="h-full">
               <ChartContainer config={chartConfig} className="w-full h-64">
@@ -437,7 +437,7 @@ export default function AgencyReportPage() {
                   <BarChart
                     data={performanceBreakdownChartData}
                     layout="vertical"
-                    margin={{ left: 50, right: 20 }}
+                    margin={{ left: 50, right: 40 }}
                   >
                     <CartesianGrid horizontal={false} />
                     <XAxis type="number" domain={[0, 100]} hide />
