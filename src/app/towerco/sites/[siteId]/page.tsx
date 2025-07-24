@@ -101,7 +101,7 @@ export default function SiteReportPage() {
         return (
           <div className="flex items-center gap-2 font-medium">
             <span className="relative flex h-2 w-2">
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-chart-3"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-[#FFC107]"></span>
             </span>
             <span>Under Review</span>
           </div>

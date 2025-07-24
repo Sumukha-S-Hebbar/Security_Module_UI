@@ -26,9 +26,9 @@
     --ring: 194 95% 43%;
     --chart-1: 195 91% 47%;
     --chart-2: 145 63% 49%;
-    --chart-3: 48 96% 56%;
-    --chart-4: 45 100% 51%;
-    --chart-5: 30 100% 50%;
+    --chart-3: 45 93% 53%;
+    --chart-4: #FFC107;
+    --chart-5: #FF8200;
     --radius: 0.5rem;
     --header-background: 216 42% 18%;
     --header-foreground: 210 60% 98%;
@@ -54,9 +54,9 @@
     --ring: 194 95% 43%;
     --chart-1: 195 91% 47%;
     --chart-2: 145 63% 49%;
-    --chart-3: 48 96% 56%;
-    --chart-4: 45 100% 51%;
-    --chart-5: 30 100% 50%;
+    --chart-3: 45 93% 53%;
+    --chart-4: #FFC107;
+    --chart-5: #FF8200;
     --header-background: 216 42% 18%;
     --header-foreground: 210 60% 98%;
   }

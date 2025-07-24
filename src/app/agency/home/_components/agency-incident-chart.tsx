@@ -191,7 +191,7 @@ export function AgencyIncidentChart({
         return (
           <div className="flex items-center gap-2">
             <span className="relative flex h-2 w-2">
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-chart-3"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-[#FFC107]"></span>
             </span>
             <span>Under Review</span>
           </div>
@@ -292,7 +292,7 @@ export function AgencyIncidentChart({
                                         <span>Resolved: {data.resolved}</span>
                                     </div>
                                     <div className="flex items-center gap-2">
-                                        <span className="h-2 w-2 rounded-full" style={{ backgroundColor: 'var(--color-underReview)' }}></span>
+                                        <span className="h-2 w-2 rounded-full" style={{ backgroundColor: '#FFC107' }}></span>
                                         <span>Under Review: {data.underReview}</span>
                                     </div>
                                     <div className="flex items-center gap-2">

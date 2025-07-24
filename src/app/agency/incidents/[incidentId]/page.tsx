@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
@@ -167,9 +168,9 @@ export default function AgencyIncidentReportPage() {
         );
       case 'Under Review':
         return (
-          <div className="flex items-center gap-2 text-chart-3">
+          <div className="flex items-center gap-2 text-[#FFC107]">
             <span className="relative flex h-2 w-2">
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-chart-3"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-[#FFC107]"></span>
             </span>
             <span>Under Review</span>
           </div>

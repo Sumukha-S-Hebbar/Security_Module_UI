@@ -44,9 +44,9 @@ export function IncidentStatusSummary({
       count: summary.underReview,
       label: 'Under Review',
       icon: ShieldQuestion,
-      color: 'text-chart-3',
-      bg: 'bg-chart-3/10',
-      ring: 'ring-chart-3'
+      color: 'text-[#FFC107]',
+      bg: 'bg-[#FFC107]/10',
+      ring: 'ring-[#FFC107]'
     },
     {
       status: 'resolved',
