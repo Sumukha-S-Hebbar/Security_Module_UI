@@ -117,10 +117,10 @@ export function SiteStatusBreakdown({ sites, agencies }: { sites: Site[]; agenci
                     <Table>
                       <TableHeader>
                         <TableRow>
-                          <TableHead>Site ID</TableHead>
-                          <TableHead>Site Name</TableHead>
-                          <TableHead>Region</TableHead>
-                          {selectedSection === 'unassigned' && <TableHead className="text-right">Action</TableHead>}
+                          <TableHead className="text-foreground">Site ID</TableHead>
+                          <TableHead className="text-foreground">Site Name</TableHead>
+                          <TableHead className="text-foreground">Region</TableHead>
+                          {selectedSection === 'unassigned' && <TableHead className="text-right text-foreground">Action</TableHead>}
                         </TableRow>
                       </TableHeader>
                       <TableBody>
