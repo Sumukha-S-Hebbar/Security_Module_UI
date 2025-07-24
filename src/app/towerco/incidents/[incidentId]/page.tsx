@@ -209,10 +209,13 @@ export default function IncidentReportPage() {
                 <MapPin className="h-5 w-5 text-primary" />
                 Site Details
               </CardTitle>
-              <CardDescription>{site.name} (ID: {site.id})</CardDescription>
             </CardHeader>
             <CardContent className="text-sm space-y-3">
-              <div className='font-medium'>
+              <div>
+                <p className="font-bold text-lg">{site.name}</p>
+                <p className="font-medium text-muted-foreground">ID: {site.id}</p>
+              </div>
+              <div className='font-medium pt-2 border-t'>
                 <p className='text-muted-foreground flex items-start gap-2'><MapPin className="h-4 w-4 mt-0.5" /><span>{site.address}</span></p>
               </div>
               {site.latitude && site.longitude && (
@@ -233,10 +236,13 @@ export default function IncidentReportPage() {
                 <Briefcase className="h-5 w-5 text-primary" />
                 Agency Details
               </CardTitle>
-               <CardDescription>{agency.name} (ID: {agency.id})</CardDescription>
             </CardHeader>
             <CardContent className="text-sm space-y-2">
-               <div className='font-medium'>
+              <div>
+                  <p className="font-bold text-lg">{agency.name}</p>
+                  <p className="font-medium text-muted-foreground">ID: {agency.id}</p>
+              </div>
+               <div className='font-medium pt-2 border-t'>
                 <p className='text-muted-foreground flex items-start gap-2'><MapPin className="h-4 w-4 mt-0.5" /><span>{agency.address}</span></p>
               </div>
               <div className="flex items-center gap-2 font-medium pt-2 border-t"><Phone className="h-4 w-4" /> <a href={`tel:${agency.phone}`} className="hover:underline">{agency.phone}</a></div>
@@ -256,8 +262,10 @@ export default function IncidentReportPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="text-sm space-y-2">
-              <p className="font-medium">{patrollingOfficer.name}</p>
-              <div className="flex items-center gap-2 font-medium"><Phone className="h-4 w-4" /> <a href={`tel:${patrollingOfficer.phone}`} className="hover:underline">{patrollingOfficer.phone}</a></div>
+              <div>
+                <p className="font-bold text-lg">{patrollingOfficer.name}</p>
+              </div>
+              <div className="flex items-center gap-2 font-medium pt-2 border-t"><Phone className="h-4 w-4" /> <a href={`tel:${patrollingOfficer.phone}`} className="hover:underline">{patrollingOfficer.phone}</a></div>
               <div className="flex items-center gap-2 font-medium"><Mail className="h-4 w-4" /> <a href={`mailto:${patrollingOfficer.email}`} className="hover:underline">{patrollingOfficer.email}</a></div>
             </CardContent>
           </Card>
@@ -271,8 +279,10 @@ export default function IncidentReportPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="text-sm space-y-2">
-              <p className="font-medium">{guard.name}</p>
-              <div className="flex items-center gap-2 font-medium"><Phone className="h-4 w-4" /> <a href={`tel:${guard.phone}`} className="hover:underline">{guard.phone}</a></div>
+              <div>
+                <p className="font-bold text-lg">{guard.name}</p>
+              </div>
+              <div className="flex items-center gap-2 font-medium pt-2 border-t"><Phone className="h-4 w-4" /> <a href={`tel:${guard.phone}`} className="hover:underline">{guard.phone}</a></div>
             </CardContent>
           </Card>
         )}
