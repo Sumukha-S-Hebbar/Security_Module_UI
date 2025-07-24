@@ -357,40 +357,24 @@ export default function AgencyReportPage() {
               </div>
 
               <div className="pt-4 border-t">
-                  <h4 className="font-semibold mb-4 text-lg">
-                      Operational Overview
-                  </h4>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-6 text-sm">
-                      <div className="flex items-center gap-3">
-                      <Building2 className="h-8 w-8 text-primary" />
-                      <div>
-                          <p className="font-bold text-lg text-foreground">
-                          {agencySites.length}
-                          </p>
-                          <p className="font-medium text-foreground">Sites Assigned</p>
-                      </div>
-                      </div>
-                      <div className="flex items-center gap-3">
-                      <ShieldAlert className="h-8 w-8 text-primary" />
-                      <div>
-                          <p className="font-bold text-lg text-foreground">{agencyIncidents.length}</p>
-                          <p className="font-medium text-foreground">
-                          Total Incidents
-                          </p>
-                      </div>
-                      </div>
-                      <div className="flex items-center gap-3">
-                      <CheckCircle className="h-8 w-8 text-primary" />
-                      <div>
-                          <p className="font-bold text-lg text-foreground">
-                          {agencyIncidents.filter(i => i.status === 'Resolved').length}
-                          </p>
-                          <p className="font-medium text-foreground">
-                          Incidents Resolved
-                          </p>
-                      </div>
-                      </div>
+                <h4 className="font-semibold mb-4 text-lg">Operational Overview</h4>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm text-center">
+                  <div className="flex flex-col items-center gap-1">
+                    <Building2 className="h-8 w-8 text-primary" />
+                    <p className="font-medium text-foreground">Sites Assigned</p>
+                    <p className="font-bold text-lg text-foreground">{agencySites.length}</p>
                   </div>
+                  <div className="flex flex-col items-center gap-1">
+                    <ShieldAlert className="h-8 w-8 text-primary" />
+                    <p className="font-medium text-foreground">Total Incidents</p>
+                    <p className="font-bold text-lg text-foreground">{agencyIncidents.length}</p>
+                  </div>
+                  <div className="flex flex-col items-center gap-1">
+                    <CheckCircle className="h-8 w-8 text-primary" />
+                    <p className="font-medium text-foreground">Incidents Resolved</p>
+                    <p className="font-bold text-lg text-foreground">{agencyIncidents.filter((i) => i.status === 'Resolved').length}</p>
+                  </div>
+                </div>
               </div>
           </CardContent>
         </Card>
@@ -429,40 +413,40 @@ export default function AgencyReportPage() {
           </CardHeader>
           <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
             <div className="relative w-full max-w-[250px] aspect-square mx-auto">
-              <ChartContainer
-                config={chartConfig}
-                className="w-full h-full"
-              >
-                <PieChart>
-                  <ChartTooltip
-                    cursor={false}
-                    content={<ChartTooltipContent hideLabel />}
-                  />
-                  <Pie
-                    data={complianceData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius="70%"
-                    outerRadius="85%"
-                    paddingAngle={0}
-                    dataKey="value"
-                    stroke="none"
-                  >
-                    {complianceData.map((entry, index) => (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={COLORS[index % COLORS.length]}
-                      />
-                    ))}
-                  </Pie>
-                </PieChart>
-              </ChartContainer>
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <span className="text-4xl font-bold" style={{ color: getPerformanceColor() }}>
-                    {performanceData.performance}%
-                </span>
-              </div>
-              <p className="text-lg font-medium text-center mt-2">Overall Performance</p>
+                <ChartContainer
+                    config={chartConfig}
+                    className="w-full h-full"
+                >
+                    <PieChart>
+                    <ChartTooltip
+                        cursor={false}
+                        content={<ChartTooltipContent hideLabel />}
+                    />
+                    <Pie
+                        data={complianceData}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius="70%"
+                        outerRadius="85%"
+                        paddingAngle={0}
+                        dataKey="value"
+                        stroke="none"
+                    >
+                        {complianceData.map((entry, index) => (
+                        <Cell
+                            key={`cell-${index}`}
+                            fill={COLORS[index % COLORS.length]}
+                        />
+                        ))}
+                    </Pie>
+                    </PieChart>
+                </ChartContainer>
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <span className="text-4xl font-bold" style={{ color: getPerformanceColor() }}>
+                        {performanceData.performance}%
+                    </span>
+                </div>
+                <p className="text-lg font-medium text-center mt-2">Overall Performance</p>
             </div>
             <div className="h-full">
               <ChartContainer config={chartConfig} className="w-full h-64">
