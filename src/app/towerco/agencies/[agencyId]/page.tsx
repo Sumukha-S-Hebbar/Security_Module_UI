@@ -391,14 +391,16 @@ export default function AgencyReportPage() {
           <CardHeader>
             <CardTitle>Agency Performance</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 items-center gap-6">
-               <div className="md:col-span-1 flex flex-col items-center justify-center">
-                    <div className="relative h-48 w-48">
-                         <ChartContainer config={chartConfig}>
-                            <ResponsiveContainer width="100%" height="100%">
-                                <PieChart>
-                                <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
+          <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="md:col-span-1 flex flex-col items-center justify-center gap-2">
+                <div className="h-40 w-40">
+                    <ChartContainer config={chartConfig}>
+                        <ResponsiveContainer width="100%" height="100%">
+                            <PieChart>
+                                <ChartTooltip
+                                    cursor={false}
+                                    content={<ChartTooltipContent hideLabel />}
+                                />
                                 <Pie
                                     data={complianceData}
                                     cx="50%"
@@ -421,7 +423,7 @@ export default function AgencyReportPage() {
                                                 y={viewBox.cy}
                                                 textAnchor="middle"
                                                 dominantBaseline="middle"
-                                                className="fill-foreground text-2xl font-bold"
+                                                className="text-2xl font-bold"
                                                 style={{ fill: getPerformanceColor() }}
                                             >
                                                 {`${performanceData.performance}%`}
@@ -431,22 +433,22 @@ export default function AgencyReportPage() {
                                         }}
                                     />
                                 </Pie>
-                                </PieChart>
-                            </ResponsiveContainer>
-                        </ChartContainer>
-                    </div>
-                    <p className="text-lg font-medium text-center mt-2">Overall Performance</p>
+                            </PieChart>
+                        </ResponsiveContainer>
+                    </ChartContainer>
                 </div>
-              <div className="md:col-span-2 h-64">
+                <p className="text-lg font-medium text-center">Overall Performance</p>
+            </div>
+            <div className="md:col-span-2 h-64">
                 <ChartContainer config={chartConfig}>
                     <ResponsiveContainer>
                         <BarChart data={performanceBreakdownChartData} layout="vertical" margin={{ left: 50, right: 20 }}>
                             <CartesianGrid horizontal={false} />
                             <XAxis type="number" domain={[0, 100]} hide />
                             <YAxis 
-                            type="category" 
-                            dataKey="name" 
-                            hide
+                                type="category" 
+                                dataKey="name" 
+                                hide
                             />
                             <ChartTooltip
                                 cursor={false}
@@ -468,7 +470,6 @@ export default function AgencyReportPage() {
                         </BarChart>
                     </ResponsiveContainer>
                 </ChartContainer>
-              </div>
             </div>
           </CardContent>
         </Card>
