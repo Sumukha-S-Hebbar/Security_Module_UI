@@ -25,9 +25,9 @@ export default function AgencyHeader() {
     <header className="bg-header text-header-foreground">
       <div className="container mx-auto flex h-16 items-center px-4 md:px-6">
         <div className="flex items-center gap-6 flex-1">
-          <Link href="/agency/home" className="flex items-center gap-2 hover:text-header-foreground">
+          <Link href="/agency/home" className="flex items-center gap-2">
             <ShieldCheck className="w-8 h-8" />
-            <span className="text-xl font-bold">GuardLink</span>
+            <span className="text-xl font-bold text-header-foreground">GuardLink</span>
           </Link>
         </div>
         
