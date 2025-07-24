@@ -239,7 +239,7 @@ export default function TowercoIncidentsPage() {
               />
             </div>
             <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-              <SelectTrigger className="w-full sm:w-[180px] font-medium">
+              <SelectTrigger className="w-full sm:w-[180px] font-medium hover:bg-accent hover:text-accent-foreground">
                 <SelectValue placeholder="Filter by status" />
               </SelectTrigger>
               <SelectContent>
@@ -250,7 +250,7 @@ export default function TowercoIncidentsPage() {
               </SelectContent>
             </Select>
             <Select value={selectedSite} onValueChange={setSelectedSite}>
-              <SelectTrigger className="w-full sm:w-[180px] font-medium">
+              <SelectTrigger className="w-full sm:w-[180px] font-medium hover:bg-accent hover:text-accent-foreground">
                 <SelectValue placeholder="Filter by site" />
               </SelectTrigger>
               <SelectContent>
@@ -261,7 +261,7 @@ export default function TowercoIncidentsPage() {
               </SelectContent>
             </Select>
             <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-              <SelectTrigger className="w-full sm:w-[180px] font-medium">
+              <SelectTrigger className="w-full sm:w-[180px] font-medium hover:bg-accent hover:text-accent-foreground">
                 <SelectValue placeholder="Filter by month" />
               </SelectTrigger>
               <SelectContent>
@@ -280,7 +280,7 @@ export default function TowercoIncidentsPage() {
                 <Button
                   variant={'outline'}
                   className={cn(
-                    'w-full sm:w-[240px] justify-start text-left font-medium',
+                    'w-full sm:w-[240px] justify-start text-left font-medium hover:bg-accent hover:text-accent-foreground',
                     !selectedDate && 'text-muted-foreground'
                   )}
                 >
@@ -307,13 +307,14 @@ export default function TowercoIncidentsPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Incident ID</TableHead>
-                <TableHead>Date & Time</TableHead>
-                <TableHead>Site</TableHead>
-                <TableHead>Agency</TableHead>
-                <TableHead>Patrolling Officer</TableHead>
-                <TableHead>Guard</TableHead>
-                <TableHead>Status</TableHead>
+                <TableHead className="text-foreground">Incident ID</TableHead>
+                <TableHead className="text-foreground">Incident Date</TableHead>
+                <TableHead className="text-foreground">Incident Time</TableHead>
+                <TableHead className="text-foreground">Site</TableHead>
+                <TableHead className="text-foreground">Agency</TableHead>
+                <TableHead className="text-foreground">Patrolling Officer</TableHead>
+                <TableHead className="text-foreground">Guard</TableHead>
+                <TableHead className="text-foreground">Status</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -333,10 +334,11 @@ export default function TowercoIncidentsPage() {
                     >
                       <TableCell>
                         <Button asChild variant="link" className="p-0 h-auto font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
-                          <Link href={`/towerco/incidents/${incident.id}`}>{incident.id}</Link>
+                          <Link href={`/towerco/incidents/${incident.id}`} className="text-accent group-hover:text-accent-foreground">{incident.id}</Link>
                         </Button>
                       </TableCell>
-                      <TableCell className="font-medium">{new Date(incident.incidentTime).toLocaleString()}</TableCell>
+                      <TableCell className="font-medium">{new Date(incident.incidentTime).toLocaleDateString()}</TableCell>
+                      <TableCell className="font-medium">{new Date(incident.incidentTime).toLocaleTimeString()}</TableCell>
                       <TableCell className="font-medium">{site?.name || 'N/A'}</TableCell>
                       <TableCell className="font-medium">{agency?.name || 'N/A'}</TableCell>
                       <TableCell className="font-medium">
@@ -350,7 +352,7 @@ export default function TowercoIncidentsPage() {
               ) : (
                 <TableRow>
                   <TableCell
-                    colSpan={7}
+                    colSpan={8}
                     className="text-center text-muted-foreground font-medium"
                   >
                     No incidents found for the current filter.
