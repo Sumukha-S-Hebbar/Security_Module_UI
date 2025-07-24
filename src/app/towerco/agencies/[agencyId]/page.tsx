@@ -427,12 +427,12 @@ export default function AgencyReportPage() {
                     </PieChart>
                   </ChartContainer>
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <p 
+                    <span
                       className="text-4xl font-bold"
                       style={{ color: getPerformanceColor() }}
                     >
                       {performanceData.performance}%
-                    </p>
+                    </span>
                   </div>
                 </div>
                 <p className="text-lg font-medium">Overall Performance</p>
