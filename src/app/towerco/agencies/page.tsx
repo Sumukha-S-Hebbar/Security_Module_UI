@@ -576,7 +576,7 @@ export default function TowercoAgenciesPage() {
                                         <Fragment key={agency.id}>
                                             <TableRow onClick={() => handleRowClick(agency.id)} className="cursor-pointer hover:bg-accent hover:text-accent-foreground group">
                                                 <TableCell>
-                                                    <p className="text-accent font-semibold group-hover:text-accent-foreground">{agency.id}</p>
+                                                    <p className="text-accent font-semibold group-hover:text-accent-foreground hover:underline">{agency.id}</p>
                                                 </TableCell>
                                                 <TableCell>
                                                     <div className="flex items-center gap-3">
