@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useMemo } from 'react';
@@ -324,10 +325,10 @@ export default function AgencyPatrollingOfficersPage() {
                                 <TableRow 
                                   key={patrollingOfficer.id}
                                   onClick={() => router.push(`/agency/patrolling-officers/${patrollingOfficer.id}`)}
-                                  className="cursor-pointer"
+                                  className="cursor-pointer hover:bg-accent hover:text-accent-foreground group"
                                 >
                                   <TableCell>
-                                    <Button asChild variant="link" className="p-0 h-auto font-medium" onClick={(e) => e.stopPropagation()}>
+                                    <Button asChild variant="link" className="p-0 h-auto font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
                                       <Link href={`/agency/patrolling-officers/${patrollingOfficer.id}`}>{patrollingOfficer.id}</Link>
                                     </Button>
                                   </TableCell>
@@ -343,29 +344,29 @@ export default function AgencyPatrollingOfficersPage() {
                                   <TableCell>
                                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                           <Phone className="h-4 w-4 flex-shrink-0" />
-                                          <a href={`tel:${patrollingOfficer.phone}`} className="hover:underline font-medium" onClick={(e) => e.stopPropagation()}>{patrollingOfficer.phone}</a>
+                                          <a href={`tel:${patrollingOfficer.phone}`} className="hover:underline font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>{patrollingOfficer.phone}</a>
                                       </div>
                                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                           <Mail className="h-4 w-4 flex-shrink-0" />
-                                          <a href={`mailto:${patrollingOfficer.email}`} className="truncate hover:underline font-medium" onClick={(e) => e.stopPropagation()}>
+                                          <a href={`mailto:${patrollingOfficer.email}`} className="truncate hover:underline font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
                                               {patrollingOfficer.email}
                                           </a>
                                       </div>
                                   </TableCell>
                                   <TableCell>
                                       <div className="flex items-center gap-2 text-sm">
-                                          <Map className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
+                                          <Map className="h-4 w-4 flex-shrink-0 text-muted-foreground group-hover:text-accent-foreground" />
                                           <span className="font-medium">{assignedSites.length} Sites</span>
                                       </div>
                                       <div className="flex items-center gap-2 text-sm">
-                                          <Users className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
+                                          <Users className="h-4 w-4 flex-shrink-0 text-muted-foreground group-hover:text-accent-foreground" />
                                           <span className="font-medium">{assignedGuardsCount} Guards</span>
                                       </div>
                                   </TableCell>
                                   <TableCell>
                                       <div className="flex items-center gap-2">
                                           <Progress value={siteVisitAccuracy} className="w-24 h-2" />
-                                          <span className="text-sm text-muted-foreground font-medium">{siteVisitAccuracy}%</span>
+                                          <span className="text-sm text-muted-foreground font-medium group-hover:text-accent-foreground">{siteVisitAccuracy}%</span>
                                       </div>
                                   </TableCell>
                                   <TableCell>

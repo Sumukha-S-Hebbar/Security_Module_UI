@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useMemo } from 'react';
@@ -389,10 +390,10 @@ export default function AgencyGuardsPage() {
                       <TableRow 
                         key={guard.id}
                         onClick={() => router.push(`/agency/guards/${guard.id}`)}
-                        className="cursor-pointer"
+                        className="cursor-pointer hover:bg-accent hover:text-accent-foreground group"
                       >
                         <TableCell>
-                          <Button asChild variant="link" className="p-0 h-auto font-medium" onClick={(e) => e.stopPropagation()}>
+                          <Button asChild variant="link" className="p-0 h-auto font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
                             <Link href={`/agency/guards/${guard.id}`}>{guard.id}</Link>
                           </Button>
                         </TableCell>
@@ -408,11 +409,11 @@ export default function AgencyGuardsPage() {
                           </div>
                         </TableCell>
                         <TableCell className="font-medium">{guard.site}</TableCell>
-                        <TableCell className="font-medium">{patrollingOfficer?.name || <span className="text-muted-foreground">Unassigned</span>}</TableCell>
+                        <TableCell className="font-medium">{patrollingOfficer?.name || <span className="text-muted-foreground group-hover:text-accent-foreground">Unassigned</span>}</TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2">
                             <Progress value={compliance} className="w-24 h-2" />
-                            <span className="text-sm text-muted-foreground font-medium">{compliance}%</span>
+                            <span className="text-sm text-muted-foreground font-medium group-hover:text-accent-foreground">{compliance}%</span>
                           </div>
                         </TableCell>
                       </TableRow>

@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useMemo, useEffect, useRef } from 'react';
@@ -662,29 +663,29 @@ export default function TowercoSitesPage() {
                                 <TableRow
                                   key={site.id}
                                   onClick={() => router.push(`/towerco/sites/${site.id}`)}
-                                  className="cursor-pointer"
+                                  className="cursor-pointer hover:bg-accent hover:text-accent-foreground group"
                                 >
                                     <TableCell>
-                                      <Button asChild variant="link" className="p-0 h-auto font-medium" onClick={(e) => e.stopPropagation()}>
+                                      <Button asChild variant="link" className="p-0 h-auto font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
                                         <Link href={`/towerco/sites/${site.id}`}>{site.id}</Link>
                                       </Button>
                                     </TableCell>
                                     <TableCell>
                                         <div className="font-medium">{site.name}</div>
-                                        <div className="text-sm text-muted-foreground flex items-center gap-1 font-medium">
+                                        <div className="text-sm text-muted-foreground flex items-center gap-1 font-medium group-hover:text-accent-foreground">
                                             <MapPin className="w-3 h-3" />
                                             {site.address}
                                         </div>
                                     </TableCell>
                                     <TableCell>
                                         <div className="flex items-center gap-2 font-medium">
-                                            <Briefcase className="h-4 w-4 text-muted-foreground" />
+                                            <Briefcase className="h-4 w-4 text-muted-foreground group-hover:text-accent-foreground" />
                                             <span>{agency?.name || 'N/A'}</span>
                                         </div>
                                     </TableCell>
                                     <TableCell>
                                         <div className="flex items-center gap-2 font-medium">
-                                            <ShieldAlert className="h-4 w-4 text-muted-foreground" />
+                                            <ShieldAlert className="h-4 w-4 text-muted-foreground group-hover:text-accent-foreground" />
                                             <span>{incidentsCount}</span>
                                         </div>
                                     </TableCell>

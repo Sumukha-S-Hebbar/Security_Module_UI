@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
@@ -231,7 +232,7 @@ export default function TowercoHomePage() {
                               <TableRow 
                                 key={incident.id}
                                 onClick={() => router.push(`/towerco/incidents/${incident.id}`)}
-                                className="cursor-pointer border-destructive/20"
+                                className="cursor-pointer border-destructive/20 hover:bg-destructive/20"
                               >
                               <TableCell>
                                 <Button asChild variant="link" className="p-0 h-auto" onClick={(e) => e.stopPropagation()}>

@@ -392,15 +392,15 @@ export default function AgencyReportPage() {
                     (incident) => incident.status === 'Resolved'
                   ).length;
                   return (
-                    <TableRow key={site.id}>
+                    <TableRow key={site.id} className="hover:bg-accent hover:text-accent-foreground group">
                        <TableCell>
-                          <Button asChild variant="link" className="p-0 h-auto font-medium" onClick={(e) => e.stopPropagation()}>
+                          <Button asChild variant="link" className="p-0 h-auto font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
                             <Link href={`/towerco/sites/${site.id}`}>{site.id}</Link>
                           </Button>
                         </TableCell>
                       <TableCell>
                         <div className="font-medium">{site.name}</div>
-                        <div className="text-sm text-muted-foreground flex items-center gap-1 font-medium">
+                        <div className="text-sm text-muted-foreground flex items-center gap-1 font-medium group-hover:text-accent-foreground">
                           <MapPin className="w-3 h-3" />
                           {site.address}
                         </div>
@@ -489,10 +489,10 @@ export default function AgencyReportPage() {
                     <TableRow 
                       key={incident.id}
                       onClick={() => router.push(`/towerco/incidents/${incident.id}`)}
-                      className="cursor-pointer"
+                      className="cursor-pointer hover:bg-accent hover:text-accent-foreground group"
                     >
                       <TableCell>
-                        <Button asChild variant="link" className="p-0 h-auto font-medium" onClick={(e) => e.stopPropagation()}>
+                        <Button asChild variant="link" className="p-0 h-auto font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
                           <Link href={`/towerco/incidents/${incident.id}`}>{incident.id}</Link>
                         </Button>
                       </TableCell>

@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
@@ -491,16 +492,16 @@ export default function AgencySitesPage() {
                   <TableRow 
                     key={site.id} 
                     onClick={() => router.push(`/agency/sites/${site.id}`)}
-                    className="cursor-pointer"
+                    className="cursor-pointer hover:bg-accent hover:text-accent-foreground group"
                   >
                     <TableCell>
-                      <Button asChild variant="link" className="p-0 h-auto font-medium" onClick={(e) => e.stopPropagation()}>
+                      <Button asChild variant="link" className="p-0 h-auto font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
                         <Link href={`/agency/sites/${site.id}`}>{site.id}</Link>
                       </Button>
                     </TableCell>
                     <TableCell>
                       <p className="font-medium">{site.name}</p>
-                      <p className="text-sm text-muted-foreground font-medium">{site.address}</p>
+                      <p className="text-sm text-muted-foreground font-medium group-hover:text-accent-foreground">{site.address}</p>
                     </TableCell>
                     <TableCell className="font-medium">{patrollingOfficer?.name || 'N/A'}</TableCell>
                     <TableCell className="font-medium">{site.guards.length}</TableCell>

@@ -295,10 +295,10 @@ export default function AgencyIncidentsPage() {
                     <TableRow 
                       key={incident.id} 
                       onClick={() => router.push(`/agency/incidents/${incident.id}`)}
-                      className="cursor-pointer"
+                      className="cursor-pointer hover:bg-accent hover:text-accent-foreground group"
                     >
                       <TableCell>
-                        <Button asChild variant="link" className="p-0 h-auto font-medium" onClick={(e) => e.stopPropagation()}>
+                        <Button asChild variant="link" className="p-0 h-auto font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
                           <Link href={`/agency/incidents/${incident.id}`}>{incident.id}</Link>
                         </Button>
                       </TableCell>
