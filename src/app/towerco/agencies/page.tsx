@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useMemo, useEffect, useRef, Fragment } from 'react';
@@ -575,7 +576,7 @@ export default function TowercoAgenciesPage() {
                                         <Fragment key={agency.id}>
                                             <TableRow onClick={() => handleRowClick(agency.id)} className="cursor-pointer hover:bg-accent hover:text-accent-foreground group">
                                                 <TableCell>
-                                                    <p className="text-primary group-hover:text-accent-foreground">{agency.id}</p>
+                                                    <p className="text-primary font-semibold group-hover:text-accent-foreground">{agency.id}</p>
                                                 </TableCell>
                                                 <TableCell>
                                                     <div className="flex items-center gap-3">
@@ -589,13 +590,15 @@ export default function TowercoAgenciesPage() {
                                                 <TableCell>
                                                     <div className="flex items-center gap-2 text-sm">
                                                         <Mail className="h-4 w-4 flex-shrink-0" />
-                                                        <a href={`mailto:${agency.email}`} onClick={(e) => e.stopPropagation()} className="truncate hover:underline">
+                                                        <a href={`mailto:${agency.email}`} onClick={(e) => e.stopPropagation()} className="truncate hover:underline text-primary group-hover:text-accent-foreground">
                                                             {agency.email}
                                                         </a>
                                                     </div>
                                                     <div className="flex items-center gap-2 text-sm">
                                                         <Phone className="h-4 w-4 flex-shrink-0" />
-                                                        <span>{agency.phone}</span>
+                                                        <a href={`tel:${agency.phone}`} onClick={(e) => e.stopPropagation()} className="truncate hover:underline text-primary group-hover:text-accent-foreground">
+                                                          {agency.phone}
+                                                        </a>
                                                     </div>
                                                 </TableCell>
                                                 <TableCell>
@@ -607,7 +610,7 @@ export default function TowercoAgenciesPage() {
                                                 <TableCell>
                                                     <Button
                                                     variant="link"
-                                                    className="p-0 h-auto flex items-center gap-2 text-foreground group-hover:text-accent-foreground"
+                                                    className="p-0 h-auto flex items-center gap-2 text-primary group-hover:text-accent-foreground"
                                                     onClick={(e) => handleExpandClick(e, agency.id)}
                                                     disabled={assignedSitesCount === 0}
                                                     >
