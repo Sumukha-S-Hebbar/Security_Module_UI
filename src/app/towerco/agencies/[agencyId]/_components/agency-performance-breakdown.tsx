@@ -1,5 +1,4 @@
 
-// src/app/towerco/agencies/[agencyId]/_components/agency-performance-breakdown.tsx
 
 'use client';
 
@@ -90,6 +89,14 @@ export function AgencyPerformanceBreakdown({
       officerSiteVisitRate: Math.round(officerSiteVisitRate),
     };
   }, [agency, sites, incidents]);
+  
+  const getPerformanceColor = () => {
+    if (performanceData.performance >= 65) return 'hsl(var(--chart-3))';
+    if (performanceData.performance > 95) return 'hsl(var(--chart-2))';
+    return 'hsl(var(--destructive))';
+  };
+
+  const performanceColor = getPerformanceColor();
 
   return (
     <Card>
@@ -100,14 +107,25 @@ export function AgencyPerformanceBreakdown({
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="space-y-2 rounded-lg border p-4">
-            <div className="flex justify-between items-center">
-                <p>Overall Performance Score</p>
-                <span className="font-bold text-2xl text-primary">{performanceData.performance}%</span>
+        <div className="flex justify-center py-6">
+            <div
+                className="relative grid size-48 place-content-center rounded-full bg-muted"
+                style={{
+                background: `conic-gradient(${performanceColor} ${performanceData.performance}%, hsl(var(--muted)) 0deg)`,
+                }}
+            >
+                <div className="absolute inset-0 size-full rounded-full bg-background/80 blur-sm"></div>
+                <div className="grid size-40 place-content-center rounded-full bg-background">
+                    <span
+                        className="text-4xl font-bold"
+                        style={{ color: performanceColor }}
+                    >
+                        {performanceData.performance}%
+                    </span>
+                </div>
             </div>
-            <Progress value={performanceData.performance} className="h-2" />
         </div>
-        <div className="pt-4 grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="pt-4 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
             <div className="text-sm">
                 <div className="flex justify-between items-center mb-1">
                     <span className="text-muted-foreground">Incident Resolution Rate</span>
@@ -117,21 +135,21 @@ export function AgencyPerformanceBreakdown({
             </div>
             <div className="text-sm">
                 <div className="flex justify-between items-center mb-1">
-                    <span className="text-muted-foreground">Guard Perimeter Accuracy</span>
+                    <span className="text-muted-foreground">Guard Check-in Accuracy</span>
                     <span className="font-medium">{performanceData.guardPerimeterAccuracy}%</span>
                 </div>
                 <Progress value={performanceData.guardPerimeterAccuracy} className="h-2" />
             </div>
             <div className="text-sm">
                 <div className="flex justify-between items-center mb-1">
-                    <span className="text-muted-foreground">Guard Selfie Accuracy</span>
+                    <span className="text-muted-foreground">Selfie Check-in Accuracy</span>
                     <span className="font-medium">{performanceData.guardSelfieAccuracy}%</span>
                 </div>
                 <Progress value={performanceData.guardSelfieAccuracy} className="h-2" />
             </div>
             <div className="text-sm">
                 <div className="flex justify-between items-center mb-1">
-                    <span className="text-muted-foreground">Officer Site Visit Rate</span>
+                    <span className="text-muted-foreground">Site Visit Accuracy</span>
                     <span className="font-medium">{performanceData.officerSiteVisitRate}%</span>
                 </div>
                 <Progress value={performanceData.officerSiteVisitRate} className="h-2" />

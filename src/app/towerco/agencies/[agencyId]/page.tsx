@@ -76,6 +76,7 @@ import { useRouter } from 'next/navigation';
 import { patrollingOfficers } from '@/lib/data/patrolling-officers';
 import { Progress } from '@/components/ui/progress';
 import { ClientDate } from './_components/client-date';
+import { AgencyPerformanceBreakdown } from './_components/agency-performance-breakdown';
 
 const LOGGED_IN_ORG_ID = 'TCO01'; // Simulate logged-in user
 
@@ -224,8 +225,8 @@ export default function AgencyReportPage() {
   }];
   
   const getPerformanceColor = () => {
-    if (performanceData.performance > 95) return 'hsl(var(--chart-2))'; // Green
     if (performanceData.performance >= 65) return 'hsl(var(--chart-3))'; // Yellow
+    if (performanceData.performance > 95) return 'hsl(var(--chart-2))'; // Green
     return 'hsl(var(--destructive))'; // Orange/Red
   };
 
@@ -386,86 +387,9 @@ export default function AgencyReportPage() {
             </CardContent>
         </Card>
         
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle>Agency Performance</CardTitle>
-            <CardDescription>
-              Overall score and breakdown of key performance indicators.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-              <div className="flex flex-col items-center justify-center text-center gap-2">
-                <div className="relative h-56 w-56">
-                  <ChartContainer
-                    config={chartConfig}
-                    className="absolute inset-0"
-                  >
-                    <PieChart>
-                      <ChartTooltip
-                        cursor={false}
-                        content={<ChartTooltipContent hideLabel nameKey="name" />}
-                      />
-                      <Pie
-                        data={complianceData}
-                        cx="50%"
-                        cy="50%"
-                        innerRadius="60%"
-                        outerRadius="80%"
-                        paddingAngle={0}
-                        dataKey="value"
-                        stroke="none"
-                      >
-                        {complianceData.map((entry, index) => (
-                          <Cell
-                            key={`cell-${index}`}
-                            fill={COLORS[index % COLORS.length]}
-                            className="outline-none"
-                          />
-                        ))}
-                      </Pie>
-                    </PieChart>
-                  </ChartContainer>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <span
-                      className="text-4xl font-bold"
-                      style={{ color: getPerformanceColor() }}
-                    >
-                      {performanceData.performance}%
-                    </span>
-                  </div>
-                </div>
-                <p className="text-lg font-medium">Overall Performance</p>
-              </div>
-              <div className="w-full h-full min-h-[300px]">
-                <ChartContainer config={chartConfig} className="w-full h-full">
-                  <BarChart data={performanceBreakdownChartData} margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
-                    <CartesianGrid vertical={false} />
-                    <XAxis dataKey="name" hide/>
-                    <YAxis domain={[0, 100]} tickFormatter={(value) => `${value}%`} />
-                    <ChartTooltip
-                      cursor={{ fill: 'hsl(var(--accent) / 0.1)' }}
-                      content={<ChartTooltipContent indicator="dot" />}
-                    />
-                    <ChartLegend content={<ChartLegendContent />} />
-                    <Bar dataKey="incidentResolutionRate" fill="var(--color-incidentResolutionRate)" radius={4}>
-                        <LabelList dataKey="incidentResolutionRate" position="top" offset={5} fontSize={12} formatter={(value: number) => `${value}%`} />
-                    </Bar>
-                     <Bar dataKey="guardPerimeterAccuracy" fill="var(--color-guardPerimeterAccuracy)" radius={4}>
-                        <LabelList dataKey="guardPerimeterAccuracy" position="top" offset={5} fontSize={12} formatter={(value: number) => `${value}%`} />
-                    </Bar>
-                     <Bar dataKey="guardSelfieAccuracy" fill="var(--color-guardSelfieAccuracy)" radius={4}>
-                        <LabelList dataKey="guardSelfieAccuracy" position="top" offset={5} fontSize={12} formatter={(value: number) => `${value}%`} />
-                    </Bar>
-                     <Bar dataKey="officerSiteVisitRate" fill="var(--color-officerSiteVisitRate)" radius={4}>
-                        <LabelList dataKey="officerSiteVisitRate" position="top" offset={5} fontSize={12} formatter={(value: number) => `${value}%`} />
-                    </Bar>
-                  </BarChart>
-                </ChartContainer>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="lg:col-span-2">
+            <AgencyPerformanceBreakdown agency={agency} sites={sites} incidents={incidents} />
+        </div>
       </div>
 
       <Card>
