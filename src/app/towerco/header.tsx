@@ -22,7 +22,7 @@ export default function TowercoHeader() {
   const pathname = usePathname();
 
   return (
-    <header className="bg-[hsl(var(--header-background))] text-[hsl(var(--header-foreground))]">
+    <header className="bg-header text-header-foreground">
       <div className="container mx-auto flex h-16 items-center px-4 md:px-6">
         <div className="flex items-center gap-6 flex-1">
           <Link href="/towerco/home" className="flex items-center gap-2">
@@ -51,7 +51,7 @@ export default function TowercoHeader() {
                         <Menu />
                     </Button>
                 </SheetTrigger>
-                <SheetContent side="left" className="w-[300px] bg-[hsl(var(--header-background))] text-[hsl(var(--header-foreground))]">
+                <SheetContent side="left" className="w-[300px] bg-header text-header-foreground">
                      <div className="flex items-center gap-2 p-4 border-b border-white/10">
                         <Shield className="w-8 h-8" />
                         <div>

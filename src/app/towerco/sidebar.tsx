@@ -27,11 +27,14 @@ export function NavLinks() {
     <>
       {menuItems.map((item) => (
         <Button key={item.href} asChild variant="ghost" className={cn(
-            "text-base text-header-foreground/70 hover:text-header-foreground hover:bg-header-background/50",
-            pathname.startsWith(item.href) && "text-header-foreground font-semibold"
+            "relative text-base text-header-foreground hover:text-header-foreground hover:bg-header-background/50",
+            pathname.startsWith(item.href) && "font-semibold"
         )}>
           <Link href={item.href}>
             {item.label}
+            {pathname.startsWith(item.href) && (
+              <span className="absolute bottom-0 left-0 w-full h-0.5 bg-destructive animate-slide-in" />
+            )}
           </Link>
         </Button>
       ))}
