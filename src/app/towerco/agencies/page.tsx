@@ -604,7 +604,7 @@ export default function TowercoAgenciesPage() {
                                                 <TableCell>
                                                     <div className="text-sm">
                                                         <p>{agency.address}</p>
-                                                        <p>{agency.city}, {agency.region}</p>
+                                                        <p className="text-muted-foreground group-hover:text-accent-foreground">{agency.city}, {agency.region}</p>
                                                     </div>
                                                 </TableCell>
                                                 <TableCell>
@@ -623,7 +623,7 @@ export default function TowercoAgenciesPage() {
                                                 </TableCell>
                                                 <TableCell>
                                                   <div className="flex items-center gap-2">
-                                                    <ShieldAlert className="h-4 w-4" />
+                                                    <ShieldAlert className="h-4 w-4 text-muted-foreground group-hover:text-accent-foreground" />
                                                     {incidentCount}
                                                   </div>
                                                 </TableCell>
