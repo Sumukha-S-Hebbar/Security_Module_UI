@@ -101,13 +101,13 @@ export default function AgencyHomePage() {
             <Table>
               <TableHeader>
                 <TableRow className="border-destructive/20">
-                  <TableHead className="text-foreground">Incident ID</TableHead>
-                  <TableHead className="text-foreground">Site Name</TableHead>
-                  <TableHead className="text-foreground">Guard</TableHead>
-                  <TableHead className="text-foreground">Patrolling Officer</TableHead>
-                  <TableHead className="text-foreground">Date</TableHead>
-                  <TableHead className="text-foreground">Incident Time</TableHead>
-                  <TableHead className="text-foreground">Contact</TableHead>
+                  <TableHead className="text-foreground font-bold">Incident ID</TableHead>
+                  <TableHead className="text-foreground font-bold">Site Name</TableHead>
+                  <TableHead className="text-foreground font-bold">Guard</TableHead>
+                  <TableHead className="text-foreground font-bold">Patrolling Officer</TableHead>
+                  <TableHead className="text-foreground font-bold">Date</TableHead>
+                  <TableHead className="text-foreground font-bold">Incident Time</TableHead>
+                  <TableHead className="text-foreground font-bold">Contact</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -146,7 +146,7 @@ export default function AgencyHomePage() {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
                             {guardDetails && (
-                              <DropdownMenuItem asChild className="focus:bg-destructive/90">
+                              <DropdownMenuItem asChild>
                                 <a href={`tel:${guardDetails.phone}`}>
                                   <Phone className="mr-2 h-4 w-4" />
                                   Contact Guard
@@ -154,7 +154,7 @@ export default function AgencyHomePage() {
                               </DropdownMenuItem>
                             )}
                             {patrollingOfficerDetails && (
-                              <DropdownMenuItem asChild className="focus:bg-destructive/90">
+                              <DropdownMenuItem asChild>
                                 <a href={`tel:${patrollingOfficerDetails.phone}`}>
                                   <Phone className="mr-2 h-4 w-4" />
                                   Contact Patrolling Officer

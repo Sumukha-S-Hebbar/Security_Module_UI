@@ -163,7 +163,8 @@ export default function TowercoHomePage() {
                 <Skeleton className="h-24 w-full" />
             </CardContent>
         </Card>
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <Skeleton className="h-28 w-full" />
             <Skeleton className="h-28 w-full" />
             <Skeleton className="h-28 w-full" />
             <Skeleton className="h-28 w-full" />
@@ -207,13 +208,13 @@ export default function TowercoHomePage() {
                   <Table>
                       <TableHeader>
                           <TableRow className="border-destructive/20">
-                          <TableHead className="text-foreground">Incident ID</TableHead>
-                          <TableHead className="text-foreground">Site Name</TableHead>
-                          <TableHead className="text-foreground">Agency</TableHead>
-                          <TableHead className="text-foreground">Patrolling Officer</TableHead>
-                          <TableHead className="text-foreground">Guard</TableHead>
-                          <TableHead className="text-foreground">Incident Time</TableHead>
-                          <TableHead className="text-foreground">Contact</TableHead>
+                          <TableHead className="text-foreground font-bold">Incident ID</TableHead>
+                          <TableHead className="text-foreground font-bold">Site Name</TableHead>
+                          <TableHead className="text-foreground font-bold">Agency</TableHead>
+                          <TableHead className="text-foreground font-bold">Patrolling Officer</TableHead>
+                          <TableHead className="text-foreground font-bold">Guard</TableHead>
+                          <TableHead className="text-foreground font-bold">Incident Time</TableHead>
+                          <TableHead className="text-foreground font-bold">Contact</TableHead>
                           </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -255,7 +256,7 @@ export default function TowercoHomePage() {
                                   </DropdownMenuTrigger>
                                   <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
                                       {guardDetails && (
-                                      <DropdownMenuItem asChild className="focus:bg-destructive/90">
+                                      <DropdownMenuItem asChild>
                                           <a href={`tel:${guardDetails.phone}`} className="flex items-center gap-2 w-full">
                                               <Phone className="mr-2 h-4 w-4" />
                                               <span>Guard: {guardDetails.phone}</span>
@@ -263,7 +264,7 @@ export default function TowercoHomePage() {
                                       </DropdownMenuItem>
                                       )}
                                       {patrollingOfficerDetails && (
-                                      <DropdownMenuItem asChild className="focus:bg-destructive/90">
+                                      <DropdownMenuItem asChild>
                                           <a href={`tel:${patrollingOfficerDetails.phone}`} className="flex items-center gap-2 w-full">
                                               <Phone className="mr-2 h-4 w-4" />
                                               <span>P. Officer: {patrollingOfficerDetails.phone}</span>
@@ -271,7 +272,7 @@ export default function TowercoHomePage() {
                                       </DropdownMenuItem>
                                       )}
                                       {agencyDetails && (
-                                      <DropdownMenuItem asChild className="focus:bg-destructive/90">
+                                      <DropdownMenuItem asChild>
                                           <a href={`tel:${agencyDetails.phone}`} className="flex items-center gap-2 w-full">
                                               <Phone className="mr-2 h-4 w-4" />
                                               <span>Agency: {agencyDetails.phone}</span>
