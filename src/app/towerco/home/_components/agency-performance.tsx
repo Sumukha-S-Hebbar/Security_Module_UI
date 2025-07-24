@@ -169,7 +169,7 @@ export function AgencyPerformance({
             </div>
             <div className="flex items-center gap-2">
                <Select value={selectedYear} onValueChange={setSelectedYear}>
-                  <SelectTrigger className="w-[120px] font-medium">
+                  <SelectTrigger className="w-[120px] font-medium hover:bg-primary hover:text-primary-foreground">
                     <SelectValue placeholder="Select Year" />
                   </SelectTrigger>
                   <SelectContent>
@@ -182,7 +182,7 @@ export function AgencyPerformance({
                   </SelectContent>
                 </Select>
                 <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-                  <SelectTrigger className="w-[140px] font-medium">
+                  <SelectTrigger className="w-[140px] font-medium hover:bg-primary hover:text-primary-foreground">
                     <SelectValue placeholder="Select Month" />
                   </SelectTrigger>
                   <SelectContent>
