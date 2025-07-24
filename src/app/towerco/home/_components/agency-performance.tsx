@@ -43,6 +43,10 @@ const chartConfig = {
     label: 'Incident Resolution',
     color: 'hsl(var(--chart-3))',
   },
+  siteVisits: {
+    label: 'Site Visit Accuracy',
+    color: 'hsl(var(--chart-1))',
+  },
   perimeterAccuracy: {
     label: 'Guard Check-in Accuracy',
     color: 'hsl(var(--chart-2))',
@@ -50,10 +54,6 @@ const chartConfig = {
   selfieAccuracy: {
     label: 'Selfie Check-in Accuracy',
     color: 'hsl(var(--chart-4))',
-  },
-  siteVisits: {
-    label: 'Site Visit Accuracy',
-    color: 'hsl(var(--chart-1))',
   },
 } satisfies ChartConfig;
 
@@ -86,7 +86,7 @@ export function AgencyPerformance({
       const dateFilteredIncidents = incidents.filter(incident => {
         const incidentDate = new Date(incident.incidentTime);
         const yearMatch = selectedYear === 'all' || incidentDate.getFullYear().toString() === selectedYear;
-        const monthMatch = selectedMonth === 'all' || incidentDate.getMonth().toString() === selectedMonth;
+        const monthMatch = selectedMonth === 'all' || (incidentDate.getMonth()).toString() === selectedMonth;
         return yearMatch && monthMatch;
       });
       
@@ -227,14 +227,14 @@ export function AgencyPerformance({
               <Bar dataKey="incidentResolution" fill="var(--color-incidentResolution)" radius={4}>
                  <LabelList dataKey="incidentResolution" position="top" offset={5} fontSize={12} formatter={(value: number) => `${value}%`} />
               </Bar>
+              <Bar dataKey="siteVisits" fill="var(--color-siteVisits)" radius={4}>
+                 <LabelList dataKey="siteVisits" position="top" offset={5} fontSize={12} formatter={(value: number) => `${value}%`} />
+              </Bar>
               <Bar dataKey="perimeterAccuracy" fill="var(--color-perimeterAccuracy)" radius={4}>
                  <LabelList dataKey="perimeterAccuracy" position="top" offset={5} fontSize={12} formatter={(value: number) => `${value}%`} />
               </Bar>
               <Bar dataKey="selfieAccuracy" fill="var(--color-selfieAccuracy)" radius={4}>
                 <LabelList dataKey="selfieAccuracy" position="top" offset={5} fontSize={12} formatter={(value: number) => `${value}%`} />
-              </Bar>
-              <Bar dataKey="siteVisits" fill="var(--color-siteVisits)" radius={4}>
-                 <LabelList dataKey="siteVisits" position="top" offset={5} fontSize={12} formatter={(value: number) => `${value}%`} />
               </Bar>
 
             </BarChart>
