@@ -298,7 +298,10 @@ export function IncidentChart({
       <CardContent className="pt-4">
         <ChartContainer config={chartConfig} className="h-[300px] w-full">
           <ResponsiveContainer>
-            <BarChart data={monthlyIncidentData} barCategoryGap="20%">
+            <BarChart 
+              data={monthlyIncidentData} 
+              margin={{ top: 20, right: 20, left: -20, bottom: 5 }}
+            >
               <CartesianGrid vertical={false} strokeDasharray="3 3" />
               <XAxis
                 dataKey="month"
