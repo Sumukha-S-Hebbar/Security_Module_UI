@@ -36,7 +36,7 @@ export default function TowercoHeader() {
         </nav>
 
         <div className="hidden md:flex items-center gap-2 justify-end flex-1">
-           <Button asChild variant="ghost" className="text-base text-header-foreground/70 hover:text-header-foreground hover:bg-header-background/50">
+           <Button asChild variant="ghost" className="text-base text-header-foreground hover:text-header-foreground hover:bg-header-background/50">
               <Link href="/">
                 <LogOut className="mr-2 h-5 w-5" />
                 <span>Logout</span>
@@ -74,7 +74,7 @@ export default function TowercoHeader() {
                     </nav>
                     <div className="p-4 mt-auto border-t border-white/10">
                         <SheetClose asChild>
-                            <Link href="/" className="flex items-center gap-3 rounded-lg px-3 py-2 text-header-foreground/70 transition-all hover:text-header-foreground">
+                            <Link href="/" className="flex items-center gap-3 rounded-lg px-3 py-2 text-header-foreground transition-all hover:text-header-foreground/80">
                                 <LogOut className="h-5 w-5" />
                                 Logout
                             </Link>
