@@ -319,8 +319,8 @@ export default function AgencyReportPage() {
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <Card className="lg:col-span-1">
           <CardHeader>
           <div className="flex items-center gap-4">
               <Avatar className="h-16 w-16">
@@ -388,13 +388,13 @@ export default function AgencyReportPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="lg:col-span-2">
             <CardHeader>
               <CardTitle>Agency Performance</CardTitle>
             </CardHeader>
-            <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
               <div className="md:col-span-1 flex flex-col items-center justify-center gap-4">
-                <div className="w-48 h-48">
+                <div className="w-56 h-56">
                   <ChartContainer config={chartConfig}>
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
@@ -427,7 +427,7 @@ export default function AgencyReportPage() {
                                     y={viewBox.cy}
                                     textAnchor="middle"
                                     dominantBaseline="middle"
-                                    className="text-3xl font-bold"
+                                    className="text-4xl font-bold"
                                     style={{ fill: getPerformanceColor() }}
                                   >
                                     {`${performanceData.performance}%`}
@@ -443,7 +443,7 @@ export default function AgencyReportPage() {
                 </div>
                 <p className="text-lg font-medium text-center">Overall Performance</p>
               </div>
-              <div className="md:col-span-2 flex items-center">
+              <div className="md:col-span-2">
                 <ChartContainer config={chartConfig} className="w-full h-64">
                   <ResponsiveContainer>
                     <BarChart
