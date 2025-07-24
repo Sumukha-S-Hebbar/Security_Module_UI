@@ -313,7 +313,7 @@ export default function AgencyReportPage() {
         </Button>
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card className="lg:col-span-2">
+        <Card className="lg:col-span-1">
             <CardHeader>
             <div className="flex items-center gap-4">
                 <Avatar className="h-16 w-16">
@@ -381,12 +381,12 @@ export default function AgencyReportPage() {
             </CardContent>
         </Card>
         
-        <Card className="lg:col-span-1">
+        <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle>Agency Performance</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 gap-6 items-center">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
               <div className="w-full h-40 flex items-center justify-center relative">
                   <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
