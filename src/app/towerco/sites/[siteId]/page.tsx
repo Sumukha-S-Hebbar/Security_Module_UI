@@ -28,7 +28,7 @@ import {
 import { ArrowLeft, MapPin, Briefcase, ShieldAlert, FileDown, Users, Phone, Mail } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useRef } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartConfig } from '@/components/ui/chart';
@@ -50,6 +50,7 @@ export default function SiteReportPage() {
   const siteId = params.siteId as string;
   const [selectedTableYear, setSelectedTableYear] = useState('all');
   const [selectedTableMonth, setSelectedTableMonth] = useState('all');
+  const incidentsTableRef = useRef<HTMLDivElement>(null);
   
   const site = sites.find((s) => s.id === siteId);
 
@@ -117,6 +118,10 @@ export default function SiteReportPage() {
       description: `Generating a detailed report for site ${site.name}.`,
     });
     // In a real app, this would trigger a download.
+  };
+
+  const handleScrollToIncidents = () => {
+    incidentsTableRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
   
   const getStatusIndicator = (status: Incident['status']) => {
@@ -213,12 +218,20 @@ export default function SiteReportPage() {
                 </div>
               )}
               <div className="flex items-start gap-3">
-                <ShieldAlert className="h-5 w-5 mt-0.5 text-primary" />
+                <ShieldAlert className="mt-0.5 text-primary" />
                 <div>
-                  <Link href={`/towerco/incidents?siteId=${site.id}`} className="font-semibold text-accent hover:underline">Total Incidents</Link>
-                  <Button asChild variant="link" className="p-0 h-auto font-medium text-base">
-                    <Link href={`/towerco/incidents?siteId=${site.id}`}>{siteIncidents.length}</Link>
-                  </Button>
+                  <button
+                    onClick={handleScrollToIncidents}
+                    className="font-semibold text-accent hover:underline text-left"
+                  >
+                    Total Incidents
+                  </button>
+                  <button
+                    onClick={handleScrollToIncidents}
+                    className="p-0 h-auto font-medium text-base text-accent hover:underline"
+                  >
+                    {siteIncidents.length}
+                  </button>
                 </div>
               </div>
             </div>
@@ -310,7 +323,7 @@ export default function SiteReportPage() {
         </CardContent>
       </Card>
       
-      <Card>
+      <Card ref={incidentsTableRef}>
         <CardHeader className="flex flex-row items-center justify-between gap-4">
           <div>
             <CardTitle>Incidents at {site.name}</CardTitle>
