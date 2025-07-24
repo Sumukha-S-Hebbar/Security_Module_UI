@@ -311,7 +311,9 @@ export function AgencyIncidentChart({
                   <LabelList dataKey="underReview" position="top" offset={5} fontSize={12} />
               </Bar>
               <LineChart data={monthlyIncidentData}>
-                <Line yAxisId="right" type="monotone" dataKey="avgClosure" stroke="var(--color-avgClosure)" strokeWidth={2} dot={{ r: 4 }} />
+                <Line yAxisId="right" type="monotone" dataKey="avgClosure" stroke="var(--color-avgClosure)" strokeWidth={2} dot={{ r: 4 }}>
+                    <LabelList dataKey="closureTimeFormatted" position="top" offset={8} fontSize={10} />
+                </Line>
               </LineChart>
             </BarChart>
           </ChartContainer>
