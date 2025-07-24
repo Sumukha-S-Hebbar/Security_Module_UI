@@ -244,7 +244,7 @@ export default function AgencyGuardReportPage() {
                   <div>
                     <div className="flex justify-between items-center mb-1">
                       <h4 className="flex items-center gap-2 text-sm font-medium">
-                          Perimeter Accuracy
+                          Guard Check-in Accuracy
                       </h4>
                       <span className="text-muted-foreground font-medium">{perimeterAccuracy}%</span>
                     </div>

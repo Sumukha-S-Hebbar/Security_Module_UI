@@ -36,15 +36,15 @@ const chartConfig = {
     color: 'hsl(var(--chart-1))',
   },
   perimeterAccuracy: {
-    label: 'Perimeter Accuracy',
+    label: 'Guard Check-in Accuracy',
     color: 'hsl(var(--chart-2))',
   },
   selfieAccuracy: {
-    label: 'Selfie Accuracy',
+    label: 'Selfie Check-in Accuracy',
     color: 'hsl(var(--chart-3))',
   },
   siteVisits: {
-    label: 'Site Visits',
+    label: 'Site Visit Accuracy',
     color: 'hsl(var(--chart-4))',
   },
 } satisfies ChartConfig;

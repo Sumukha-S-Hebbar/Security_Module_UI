@@ -42,7 +42,7 @@ export function GuardPerformanceBreakdown({ guards }: { guards: Guard[] }) {
           <div className="flex justify-between items-center mb-1">
             <h4 className="flex items-center gap-2 text-sm">
                 <ShieldCheck className="w-4 h-4 text-primary" />
-                Perimeter Accuracy
+                Guard Check-in Accuracy
             </h4>
             <span className="text-muted-foreground">{avgPerimeterAccuracy.toFixed(1)}%</span>
           </div>
