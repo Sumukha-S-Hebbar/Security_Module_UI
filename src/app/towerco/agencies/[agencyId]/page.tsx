@@ -367,14 +367,14 @@ export default function AgencyReportPage() {
                           <p className="font-bold text-lg">
                           {agencySites.length}
                           </p>
-                          <p className="text-muted-foreground font-medium">Sites Assigned</p>
+                          <p className="font-medium">Sites Assigned</p>
                       </div>
                       </div>
                       <div className="flex items-center gap-3">
                       <ShieldAlert className="h-8 w-8 text-primary" />
                       <div>
                           <p className="font-bold text-lg">{agencyIncidents.length}</p>
-                          <p className="text-muted-foreground font-medium">
+                          <p className="font-medium">
                           Total Incidents
                           </p>
                       </div>
@@ -385,7 +385,7 @@ export default function AgencyReportPage() {
                           <p className="font-bold text-lg">
                           {agencyIncidents.filter(i => i.status === 'Resolved').length}
                           </p>
-                          <p className="text-muted-foreground font-medium">
+                          <p className="font-medium">
                           Incidents Resolved
                           </p>
                       </div>
