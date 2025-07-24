@@ -91,9 +91,9 @@ export default function AgencyHomePage() {
         </div>
       </div>
 
-      <Card className="border-destructive bg-destructive/10">
+      <Card className="border-destructive bg-destructive text-destructive-foreground">
         <CardHeader className="flex flex-row items-center gap-2">
-          <AlertTriangle className="w-6 h-6 text-destructive" />
+          <AlertTriangle className="w-6 h-6 text-destructive-foreground" />
           <CardTitle>Active Emergency Incidents</CardTitle>
         </CardHeader>
         <CardContent>
@@ -124,7 +124,7 @@ export default function AgencyHomePage() {
                       className="cursor-pointer"
                     >
                       <TableCell>
-                        <Button asChild variant="link" className="p-0 h-auto font-medium" onClick={(e) => e.stopPropagation()}>
+                        <Button asChild variant="link" className="p-0 h-auto font-medium text-destructive-foreground hover:text-destructive-foreground/80" onClick={(e) => e.stopPropagation()}>
                           <Link href={`/agency/incidents/${incident.id}`}>{incident.id}</Link>
                         </Button>
                       </TableCell>
@@ -140,7 +140,7 @@ export default function AgencyHomePage() {
                       <TableCell>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="outline" size="sm" onClick={(e) => e.stopPropagation()}>
+                            <Button variant="destructive" size="sm" onClick={(e) => e.stopPropagation()} className="bg-destructive-foreground text-destructive hover:bg-destructive-foreground/90">
                               Contact <ChevronDown className="ml-2 h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
@@ -170,7 +170,7 @@ export default function AgencyHomePage() {
               </TableBody>
             </Table>
           ) : (
-            <p className="text-muted-foreground text-center py-4">
+            <p className="text-center py-4">
               No active emergency incidents. All systems are normal.
             </p>
           )}
