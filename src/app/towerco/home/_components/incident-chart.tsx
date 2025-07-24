@@ -39,7 +39,7 @@ import {
   CollapsibleContent,
 } from '@/components/ui/collapsible';
 import { Button } from '@/components/ui/button';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, LabelList, LineChart, Line } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, LabelList, LineChart, Line, ResponsiveContainer } from 'recharts';
 import { useRouter } from 'next/navigation';
 
 const chartConfig = {
@@ -297,83 +297,85 @@ export function IncidentChart({
       </CardHeader>
       <CardContent className="pt-4">
         <ChartContainer config={chartConfig} className="h-[300px] w-full">
-          <BarChart data={monthlyIncidentData} margin={{ top: 20, right: -20, left: -10, bottom: 5 }} barGap={6}>
-            <CartesianGrid vertical={false} strokeDasharray="3 3" />
-            <XAxis
-              dataKey="month"
-              tickLine={false}
-              axisLine={false}
-              tickMargin={8}
-              fontSize={12}
-              tick={{ fill: '#2F2F2F' }}
-            />
-            <YAxis
-              yAxisId="left"
-              tickLine={false}
-              axisLine={false}
-              tickMargin={8}
-              allowDecimals={false}
-              fontSize={12}
-              tick={{ fill: '#2F2F2F' }}
-            />
-            <YAxis
-              yAxisId="right"
-              orientation="right"
-              tickLine={false}
-              axisLine={false}
-              tickMargin={8}
-              tickFormatter={(value) => `${value}h`}
-              allowDecimals={false}
-              fontSize={12}
-              tick={{ fill: '#2F2F2F' }}
-            />
-            <ChartTooltip
-              cursor={false}
-                content={({ active, payload, label }) => {
-                    if (active && payload && payload.length) {
-                        const data = monthlyIncidentData.find(d => d.month === label);
-                        if (!data) return null;
-                        return (
-                            <div className="grid min-w-[8rem] items-start gap-1.5 rounded-lg border bg-background px-2.5 py-1.5 text-xs shadow-xl">
-                                <div className="font-semibold">{label}</div>
-                                <div className="grid gap-1.5">
-                                    <div className="flex items-center gap-2">
-                                        <span className="h-2 w-2 rounded-full" style={{ backgroundColor: 'var(--color-total)' }}></span>
-                                        <span>Total: {data.total}</span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <span className="h-2 w-2 rounded-full" style={{ backgroundColor: 'var(--color-resolved)' }}></span>
-                                        <span>Resolved: {data.resolved}</span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <span className="h-2 w-2 rounded-full" style={{ backgroundColor: 'var(--color-underReview)' }}></span>
-                                        <span>Under Review: {data.underReview}</span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <span className="h-2 w-2 rounded-full" style={{ backgroundColor: 'var(--color-avgClosure)' }}></span>
-                                        <span>Avg. Closure: {data.closureTimeFormatted}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        )
-                    }
-                    return null;
-                }}
-            />
-             <ChartLegend content={<ChartLegendContent />} />
-            <Bar yAxisId="left" dataKey="total" fill="var(--color-total)" radius={4} onClick={handleBarClick} cursor="pointer">
-                <LabelList dataKey="total" position="top" offset={5} fontSize={12} />
-            </Bar>
-            <Bar yAxisId="left" dataKey="resolved" fill="var(--color-resolved)" radius={4} onClick={handleBarClick} cursor="pointer">
-                <LabelList dataKey="resolved" position="top" offset={5} fontSize={12} />
-            </Bar>
-             <Bar yAxisId="left" dataKey="underReview" fill="var(--color-underReview)" radius={4} onClick={handleBarClick} cursor="pointer">
-                <LabelList dataKey="underReview" position="top" offset={5} fontSize={12} />
-            </Bar>
-            <Line yAxisId="right" type="monotone" dataKey="avgClosure" stroke="var(--color-avgClosure)" strokeWidth={2} dot={{ r: 4 }}>
-                <LabelList dataKey="closureTimeFormatted" position="top" offset={8} fontSize={10} />
-            </Line>
-          </BarChart>
+          <ResponsiveContainer>
+            <BarChart data={monthlyIncidentData} barGap={6}>
+              <CartesianGrid vertical={false} strokeDasharray="3 3" />
+              <XAxis
+                dataKey="month"
+                tickLine={false}
+                axisLine={false}
+                tickMargin={8}
+                fontSize={12}
+                tick={{ fill: '#2F2F2F' }}
+              />
+              <YAxis
+                yAxisId="left"
+                tickLine={false}
+                axisLine={false}
+                tickMargin={8}
+                allowDecimals={false}
+                fontSize={12}
+                tick={{ fill: '#2F2F2F' }}
+              />
+              <YAxis
+                yAxisId="right"
+                orientation="right"
+                tickLine={false}
+                axisLine={false}
+                tickMargin={8}
+                tickFormatter={(value) => `${value}h`}
+                allowDecimals={false}
+                fontSize={12}
+                tick={{ fill: '#2F2F2F' }}
+              />
+              <ChartTooltip
+                cursor={false}
+                  content={({ active, payload, label }) => {
+                      if (active && payload && payload.length) {
+                          const data = monthlyIncidentData.find(d => d.month === label);
+                          if (!data) return null;
+                          return (
+                              <div className="grid min-w-[8rem] items-start gap-1.5 rounded-lg border bg-background px-2.5 py-1.5 text-xs shadow-xl">
+                                  <div className="font-semibold">{label}</div>
+                                  <div className="grid gap-1.5">
+                                      <div className="flex items-center gap-2">
+                                          <span className="h-2 w-2 rounded-full" style={{ backgroundColor: 'var(--color-total)' }}></span>
+                                          <span>Total: {data.total}</span>
+                                      </div>
+                                      <div className="flex items-center gap-2">
+                                          <span className="h-2 w-2 rounded-full" style={{ backgroundColor: 'var(--color-resolved)' }}></span>
+                                          <span>Resolved: {data.resolved}</span>
+                                      </div>
+                                      <div className="flex items-center gap-2">
+                                          <span className="h-2 w-2 rounded-full" style={{ backgroundColor: 'var(--color-underReview)' }}></span>
+                                          <span>Under Review: {data.underReview}</span>
+                                      </div>
+                                      <div className="flex items-center gap-2">
+                                          <span className="h-2 w-2 rounded-full" style={{ backgroundColor: 'var(--color-avgClosure)' }}></span>
+                                          <span>Avg. Closure: {data.closureTimeFormatted}</span>
+                                      </div>
+                                  </div>
+                              </div>
+                          )
+                      }
+                      return null;
+                  }}
+              />
+              <ChartLegend content={<ChartLegendContent />} />
+              <Bar yAxisId="left" dataKey="total" fill="var(--color-total)" radius={4} onClick={handleBarClick} cursor="pointer">
+                  <LabelList dataKey="total" position="top" offset={5} fontSize={12} />
+              </Bar>
+              <Bar yAxisId="left" dataKey="resolved" fill="var(--color-resolved)" radius={4} onClick={handleBarClick} cursor="pointer">
+                  <LabelList dataKey="resolved" position="top" offset={5} fontSize={12} />
+              </Bar>
+              <Bar yAxisId="left" dataKey="underReview" fill="var(--color-underReview)" radius={4} onClick={handleBarClick} cursor="pointer">
+                  <LabelList dataKey="underReview" position="top" offset={5} fontSize={12} />
+              </Bar>
+              <Line yAxisId="right" type="monotone" dataKey="avgClosure" stroke="var(--color-avgClosure)" strokeWidth={2} dot={{ r: 4 }}>
+                  <LabelList dataKey="closureTimeFormatted" position="top" offset={8} fontSize={10} />
+              </Line>
+            </BarChart>
+          </ResponsiveContainer>
         </ChartContainer>
       </CardContent>
 
