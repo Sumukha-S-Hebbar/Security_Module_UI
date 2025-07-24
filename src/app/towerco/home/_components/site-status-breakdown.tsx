@@ -74,6 +74,28 @@ export function SiteStatusBreakdown({ sites, agencies }: { sites: Site[]; agenci
     );
   };
   
+  const renderLegend = (props: any) => {
+    const { payload } = props;
+    if (!payload) return null;
+
+    return (
+      <div className="flex justify-center gap-6 mt-4 text-sm font-medium">
+        {payload.map((entry: any, index: number) => (
+          <div key={`item-${index}`} className="flex items-center gap-2">
+            <span
+              className="h-2.5 w-2.5 rounded-full"
+              style={{ backgroundColor: entry.color }}
+            />
+            <span>
+              {entry.value}:{' '}
+              <span className="font-bold">{entry.payload.value}</span>
+            </span>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -86,7 +108,10 @@ export function SiteStatusBreakdown({ sites, agencies }: { sites: Site[]; agenci
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Tooltip content={customTooltipContent} />
-                  <Legend verticalAlign="bottom" height={36}/>
+                  <Legend
+                    verticalAlign="bottom"
+                    content={renderLegend}
+                  />
                   <Pie
                     data={chartData}
                     cx="50%"
