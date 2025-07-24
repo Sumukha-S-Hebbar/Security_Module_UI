@@ -31,6 +31,18 @@ export function TowercoAnalyticsDashboard({
           </p>
         </CardContent>
       </Card>
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Total Guards</CardTitle>
+          <Users className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{guards.length}</div>
+          <p className="text-xs text-muted-foreground">
+            Personnel across all agencies
+          </p>
+        </CardContent>
+      </Card>
       <Link href="/towerco/sites">
         <Card className="transition-all hover:shadow-md">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -61,18 +73,6 @@ export function TowercoAnalyticsDashboard({
           </CardContent>
         </Card>
       </Link>
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Total Guards</CardTitle>
-          <Users className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{guards.length}</div>
-          <p className="text-xs text-muted-foreground">
-            Personnel across all agencies
-          </p>
-        </CardContent>
-      </Card>
     </div>
   );
 }
