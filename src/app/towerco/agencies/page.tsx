@@ -107,7 +107,7 @@ export default function TowercoAgenciesPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
     const [isAddAgencyDialogOpen, setIsAddAgencyDialogOpen] = useState(false);
-    const [isUploading, setIsUploading] = useState(isUploading);
+    const [isUploading, setIsUploading] = useState(false);
     const [isAddingAgency, setIsAddingAgency] = useState(false);
     const [expandedAgencyId, setExpandedAgencyId] = useState<string | null>(null);
     const { toast } = useToast();
