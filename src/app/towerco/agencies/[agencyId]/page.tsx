@@ -393,10 +393,10 @@ export default function AgencyReportPage() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-              <div className="flex flex-col items-center justify-center gap-2 h-full">
+              <div className="flex flex-col items-center justify-center gap-2">
                 <ChartContainer
                     config={chartConfig}
-                    className="mx-auto aspect-square h-full w-full"
+                    className="mx-auto aspect-square h-48 w-48"
                   >
                   <PieChart>
                     <ChartTooltip
@@ -423,30 +423,30 @@ export default function AgencyReportPage() {
                     </Pie>
                   </PieChart>
                 </ChartContainer>
-                <div className="text-center mt-[-2rem]">
+                <div className="text-center mt-[-1rem]">
                   <p className="text-lg font-medium">Overall Performance</p>
                   <p className="text-4xl font-bold">
                     {performanceData.performance}%
                   </p>
                 </div>
               </div>
-              <div className="w-full h-full">
-                <ChartContainer config={chartConfig} className="w-full h-full">
-                  <BarChart data={performanceBreakdownChartData} margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
-                    <CartesianGrid vertical={false} />
-                    <XAxis dataKey="name" hide/>
-                    <YAxis domain={[0, 100]} tickFormatter={(value) => `${value}%`} />
-                    <Tooltip
-                      cursor={{ fill: 'hsl(var(--accent) / 0.1)' }}
-                      content={<ChartTooltipContent indicator="dot" />}
-                    />
-                    <Bar dataKey="value" radius={4}>
-                      {performanceBreakdownChartData.map((entry) => (
-                          <Cell key={entry.name} fill={entry.fill} />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ChartContainer>
+              <div className="w-full h-64">
+                <ResponsiveContainer width="100%" height="100%">
+                    <BarChart layout="vertical" data={performanceBreakdownChartData} margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+                        <CartesianGrid horizontal={false} />
+                        <XAxis type="number" domain={[0, 100]} tickFormatter={(value) => `${value}%`} />
+                        <YAxis type="category" dataKey="name" width={80} tickLine={false} axisLine={false} />
+                        <ChartTooltip
+                        cursor={{ fill: 'hsl(var(--accent) / 0.1)' }}
+                        content={<ChartTooltipContent indicator="dot" />}
+                        />
+                        <Bar dataKey="value" radius={4}>
+                            {performanceBreakdownChartData.map((entry) => (
+                                <Cell key={entry.name} fill={entry.fill} />
+                            ))}
+                        </Bar>
+                    </BarChart>
+                </ResponsiveContainer>
               </div>
             </div>
           </CardContent>
