@@ -320,7 +320,7 @@ export default function AgencyReportPage() {
               <p className="text-muted-foreground font-medium">Detailed overview for {agency.name} on {loggedInOrg.name}.</p>
           </div>
         </div>
-        <Button onClick={() => handleGenerateReport(agency.name, 'Agency')}>
+        <Button onClick={() => handleGenerateReport(agency.name, 'Agency')} className="bg-[#00B4D8] hover:bg-[#00B4D8]/90">
           <FileDown className="mr-2 h-4 w-4" />
           Download Full Report
         </Button>
@@ -364,17 +364,17 @@ export default function AgencyReportPage() {
                       <div className="flex items-center gap-3">
                       <Building2 className="h-8 w-8 text-primary" />
                       <div>
-                          <p className="font-bold text-lg">
+                          <p className="font-bold text-lg text-foreground">
                           {agencySites.length}
                           </p>
-                          <p className="font-medium">Sites Assigned</p>
+                          <p className="font-medium text-foreground">Sites Assigned</p>
                       </div>
                       </div>
                       <div className="flex items-center gap-3">
                       <ShieldAlert className="h-8 w-8 text-primary" />
                       <div>
-                          <p className="font-bold text-lg">{agencyIncidents.length}</p>
-                          <p className="font-medium">
+                          <p className="font-bold text-lg text-foreground">{agencyIncidents.length}</p>
+                          <p className="font-medium text-foreground">
                           Total Incidents
                           </p>
                       </div>
@@ -382,10 +382,10 @@ export default function AgencyReportPage() {
                       <div className="flex items-center gap-3">
                       <CheckCircle className="h-8 w-8 text-primary" />
                       <div>
-                          <p className="font-bold text-lg">
+                          <p className="font-bold text-lg text-foreground">
                           {agencyIncidents.filter(i => i.status === 'Resolved').length}
                           </p>
-                          <p className="font-medium">
+                          <p className="font-medium text-foreground">
                           Incidents Resolved
                           </p>
                       </div>
@@ -512,11 +512,11 @@ export default function AgencyReportPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Site ID</TableHead>
-                  <TableHead>Site</TableHead>
-                  <TableHead>Assigned On</TableHead>
-                  <TableHead className="text-center">Incidents</TableHead>
-                  <TableHead className="text-center">Resolved</TableHead>
+                  <TableHead className="text-foreground">Site ID</TableHead>
+                  <TableHead className="text-foreground">Site</TableHead>
+                  <TableHead className="text-foreground">Assigned On</TableHead>
+                  <TableHead className="text-center text-foreground">Incidents</TableHead>
+                  <TableHead className="text-center text-foreground">Resolved</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -611,11 +611,11 @@ export default function AgencyReportPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Incident ID</TableHead>
-                  <TableHead>Date & Time</TableHead>
-                  <TableHead>Site</TableHead>
-                  <TableHead>Guard</TableHead>
-                  <TableHead>Status</TableHead>
+                  <TableHead className="text-foreground">Incident ID</TableHead>
+                  <TableHead className="text-foreground">Date & Time</TableHead>
+                  <TableHead className="text-foreground">Site</TableHead>
+                  <TableHead className="text-foreground">Guard</TableHead>
+                  <TableHead className="text-foreground">Status</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
