@@ -1,7 +1,8 @@
+
 // src/app/towerco/home/_components/agency-performance.tsx
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import type { SecurityAgency, Site, Incident } from '@/types';
 import { useRouter } from 'next/navigation';
 import {
@@ -28,6 +29,13 @@ import {
   ChartLegend,
   ChartLegendContent,
 } from '@/components/ui/chart';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { guards } from '@/lib/data/guards';
 import { patrollingOfficers } from '@/lib/data/patrolling-officers';
 
@@ -61,14 +69,32 @@ export function AgencyPerformance({
   incidents: Incident[];
 }) {
   const router = useRouter();
+  const [selectedYear, setSelectedYear] = useState<string>(new Date().getFullYear().toString());
+  const [selectedMonth, setSelectedMonth] = useState<string>('all');
+
+  const availableYears = useMemo(() => {
+    const years = new Set(
+      incidents.map((incident) => new Date(incident.incidentTime).getFullYear().toString())
+    );
+    years.add(new Date().getFullYear().toString());
+    return Array.from(years).sort((a, b) => parseInt(b) - parseInt(a));
+  }, [incidents]);
 
   const performanceData = useMemo(() => {
     return agencies.map((agency) => {
       const agencySiteIds = new Set(agency.siteIds);
+      
+      const dateFilteredIncidents = incidents.filter(incident => {
+        const incidentDate = new Date(incident.incidentTime);
+        const yearMatch = selectedYear === 'all' || incidentDate.getFullYear().toString() === selectedYear;
+        const monthMatch = selectedMonth === 'all' || incidentDate.getMonth().toString() === selectedMonth;
+        return yearMatch && monthMatch;
+      });
+      
       const agencySites = sites.filter((s) => agencySiteIds.has(s.id));
 
       // 1. Incident Resolution
-      const agencyIncidents = incidents.filter((incident) =>
+      const agencyIncidents = dateFilteredIncidents.filter((incident) =>
         agencySiteIds.has(incident.siteId)
       );
       const totalIncidents = agencyIncidents.length;
@@ -80,13 +106,13 @@ export function AgencyPerformance({
           ? (resolvedIncidents / totalIncidents) * 100
           : 100;
 
-      // 2. Guard Perimeter Accuracy
+      // 2. Guard Check-in Accuracy
       const agencyGuardIds = new Set(agencySites.flatMap((s) => s.guards));
       const agencyGuards = guards.filter((g) => agencyGuardIds.has(g.id));
       const totalPerimeterAccuracy = agencyGuards.reduce((acc, guard) => acc + (guard.performance?.perimeterAccuracy || 0), 0);
       const perimeterAccuracy = agencyGuards.length > 0 ? totalPerimeterAccuracy / agencyGuards.length : 100;
 
-      // 3. Guard Selfie Accuracy
+      // 3. Selfie Check-in Accuracy
       const { totalSelfiesTaken, totalSelfieRequests } = agencyGuards.reduce(
         (acc, guard) => {
           acc.totalSelfiesTaken += guard.totalSelfieRequests - guard.missedSelfieCount;
@@ -100,7 +126,7 @@ export function AgencyPerformance({
           ? (totalSelfiesTaken / totalSelfieRequests) * 100
           : 100;
 
-      // 4. Officer Site Visit Rate
+      // 4. Site Visit Accuracy
       const agencyPatrollingOfficerIds = new Set(
         agencySites.map((s) => s.patrollingOfficerId).filter(Boolean)
       );
@@ -129,16 +155,48 @@ export function AgencyPerformance({
         siteVisits: Math.round(siteVisits),
       };
     }).sort((a, b) => a.name.localeCompare(b.name));
-  }, [agencies, sites, incidents]);
+  }, [agencies, sites, incidents, selectedYear, selectedMonth]);
 
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Agency Performance Breakdown</CardTitle>
-        <CardDescription>
-          Comparison of key performance indicators across all agencies.
-        </CardDescription>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <CardTitle>Agency Performance Breakdown</CardTitle>
+              <CardDescription>
+                Comparison of key performance indicators across all agencies.
+              </CardDescription>
+            </div>
+            <div className="flex items-center gap-2">
+               <Select value={selectedYear} onValueChange={setSelectedYear}>
+                  <SelectTrigger className="w-[120px] font-medium">
+                    <SelectValue placeholder="Select Year" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all" className="font-medium">All Years</SelectItem>
+                    {availableYears.map((year) => (
+                      <SelectItem key={year} value={year} className="font-medium">
+                        {year}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+                  <SelectTrigger className="w-[140px] font-medium">
+                    <SelectValue placeholder="Select Month" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all" className="font-medium">All Months</SelectItem>
+                    {Array.from({ length: 12 }, (_, i) => (
+                      <SelectItem key={i} value={i.toString()} className="font-medium">
+                        {new Date(0, i).toLocaleString('default', { month: 'long' })}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+            </div>
+        </div>
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig} className="h-[300px] w-full">
