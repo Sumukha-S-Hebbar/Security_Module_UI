@@ -260,15 +260,22 @@ export default function AgencyIncidentReportPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <MapPin className="h-5 w-5 text-primary" />
-                {site.name}
+                Site Details
               </CardTitle>
-              <CardDescription>ID: {site.id}</CardDescription>
+              <CardDescription>{site.name} (ID: {site.id})</CardDescription>
             </CardHeader>
-            <CardContent className="text-sm space-y-2">
-              <div>
-                <p className="font-semibold">Address</p>
-                <p className="font-medium">{site.address}</p>
+            <CardContent className="text-sm space-y-3">
+              <div className='font-medium'>
+                <p className='text-muted-foreground flex items-start gap-2'><MapPin className="h-4 w-4 mt-0.5" /><span>{site.address}</span></p>
               </div>
+              {site.latitude && site.longitude && (
+                <div className='font-medium'>
+                    <p className='text-muted-foreground flex items-start gap-2'>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-globe mt-0.5 shrink-0"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+                        <span>{site.latitude}, {site.longitude}</span>
+                    </p>
+                </div>
+              )}
             </CardContent>
           </Card>
         )}
@@ -277,12 +284,15 @@ export default function AgencyIncidentReportPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Briefcase className="h-5 w-5 text-primary" />
-                {agency.name}
+                Agency Details
               </CardTitle>
-              <CardDescription>ID: {agency.id}</CardDescription>
+              <CardDescription>{agency.name} (ID: {agency.id})</CardDescription>
             </CardHeader>
             <CardContent className="text-sm space-y-2">
-              <div className="flex items-center gap-2 font-medium"><Phone className="h-4 w-4" /> <a href={`tel:${agency.phone}`} className="hover:underline">{agency.phone}</a></div>
+              <div className='font-medium'>
+                <p className='text-muted-foreground flex items-start gap-2'><MapPin className="h-4 w-4 mt-0.5" /><span>{agency.address}</span></p>
+              </div>
+              <div className="flex items-center gap-2 font-medium pt-2 border-t"><Phone className="h-4 w-4" /> <a href={`tel:${agency.phone}`} className="hover:underline">{agency.phone}</a></div>
               <div className="flex items-center gap-2 font-medium"><Mail className="h-4 w-4" /> <a href={`mailto:${agency.email}`} className="hover:underline">{agency.email}</a></div>
             </CardContent>
           </Card>
