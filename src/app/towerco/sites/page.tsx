@@ -649,11 +649,11 @@ export default function TowercoSitesPage() {
             <Table>
                 <TableHeader>
                     <TableRow>
-                        <TableHead>Site ID</TableHead>
-                        <TableHead>Site Name</TableHead>
-                        <TableHead>Agency</TableHead>
-                        <TableHead>Guards</TableHead>
-                        <TableHead>Incidents</TableHead>
+                        <TableHead className="text-foreground">Site ID</TableHead>
+                        <TableHead className="text-foreground">Site Name</TableHead>
+                        <TableHead className="text-foreground">Agency</TableHead>
+                        <TableHead className="text-foreground">Guards</TableHead>
+                        <TableHead className="text-foreground">Incidents</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -792,11 +792,11 @@ export default function TowercoSitesPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Site ID</TableHead>
-                    <TableHead>Site</TableHead>
-                    <TableHead>Guards Required</TableHead>
-                    <TableHead>Assign Agency</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead className="text-foreground">Site ID</TableHead>
+                    <TableHead className="text-foreground">Site</TableHead>
+                    <TableHead className="text-foreground">Guards Required</TableHead>
+                    <TableHead className="text-foreground">Assign Agency</TableHead>
+                    <TableHead className="text-right text-foreground">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
