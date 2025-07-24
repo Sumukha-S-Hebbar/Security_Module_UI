@@ -232,7 +232,7 @@ export default function SiteReportPage() {
             <CardContent className="space-y-4">
                 <div>
                     <p className="font-semibold text-base">{agency.name}</p>
-                    <p className="text-sm text-muted-foreground font-medium">ID: {agency.id}</p>
+                    <p className="text-sm font-medium">ID: {agency.id}</p>
                 </div>
                 <div className="text-sm space-y-2 pt-2 border-t">
                   <div className="flex items-center gap-2"><Phone className="h-4 w-4" /> <a href={`tel:${agency.phone}`} className="hover:underline">{agency.phone}</a></div>
@@ -261,7 +261,7 @@ export default function SiteReportPage() {
                                 </Avatar>
                                 <div>
                                     <p className="font-semibold text-base">{guard.name}</p>
-                                    <p className="text-sm text-muted-foreground font-medium">ID: {guard.id}</p>
+                                    <p className="text-sm font-medium">ID: {guard.id}</p>
                                 </div>
                             </div>
                         ))}
