@@ -547,10 +547,11 @@ export default function AgencyReportPage() {
                           ? new Date(site.assignedOn).toLocaleDateString()
                           : 'N/A'}
                       </TableCell>
-                      <TableCell className="text-center font-medium">
-                        <Badge variant="secondary">
-                          {siteIncidents.length}
-                        </Badge>
+                      <TableCell className="text-center">
+                        <div className="flex items-center justify-center gap-2 font-medium">
+                            <ShieldAlert className="h-4 w-4 text-muted-foreground group-hover:text-accent-foreground" />
+                            <span>{siteIncidents.length}</span>
+                        </div>
                       </TableCell>
                       <TableCell className="text-center font-medium">
                         <Badge className="bg-chart-2 text-primary-foreground hover:bg-chart-2/90">
