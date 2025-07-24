@@ -514,7 +514,7 @@ export default function TowercoAgenciesPage() {
                           />
                         </div>
                         <Select value={selectedRegion} onValueChange={handleRegionChange}>
-                            <SelectTrigger className="w-full sm:w-[180px]">
+                            <SelectTrigger className="w-full sm:w-[180px] font-medium hover:bg-accent hover:text-accent-foreground">
                                 <SelectValue placeholder="Filter by region" />
                             </SelectTrigger>
                             <SelectContent>
@@ -531,7 +531,7 @@ export default function TowercoAgenciesPage() {
                             onValueChange={setSelectedCity}
                             disabled={selectedRegion === 'all'}
                         >
-                            <SelectTrigger className="w-full sm:w-[180px]">
+                            <SelectTrigger className="w-full sm:w-[180px] font-medium hover:bg-accent hover:text-accent-foreground">
                                 <SelectValue placeholder="Filter by city" />
                             </SelectTrigger>
                             <SelectContent>
