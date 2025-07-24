@@ -395,16 +395,16 @@ export default function AgencyReportPage() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-              <div className="flex flex-col items-center justify-center gap-2">
+              <div className="relative flex flex-col items-center justify-center gap-2">
                 <ChartContainer
-                    config={chartConfig}
-                    className="mx-auto aspect-square h-48 w-48"
-                  >
+                  config={chartConfig}
+                  className="mx-auto aspect-square h-48 w-48"
+                >
                   <PieChart>
                     <ChartTooltip
-                        cursor={false}
-                        content={<ChartTooltipContent hideLabel nameKey="name" />}
-                      />
+                      cursor={false}
+                      content={<ChartTooltipContent hideLabel nameKey="name" />}
+                    />
                     <Pie
                       data={complianceData}
                       cx="50%"
@@ -425,7 +425,7 @@ export default function AgencyReportPage() {
                     </Pie>
                   </PieChart>
                 </ChartContainer>
-                <div className="text-center mt-[-1rem]">
+                <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
                   <p className="text-lg font-medium">Overall Performance</p>
                   <p className="text-4xl font-bold">
                     {performanceData.performance}%
@@ -434,7 +434,7 @@ export default function AgencyReportPage() {
               </div>
               <div className="w-full h-full min-h-[300px]">
                 <ChartContainer config={chartConfig} className="w-full h-full">
-                  <BarChart data={performanceBreakdownChartData} margin={{ top: 20, right: 20, bottom: 20, left: 0 }}>
+                  <BarChart data={performanceBreakdownChartData} margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
                     <CartesianGrid vertical={false} />
                     <XAxis dataKey="name" hide/>
                     <YAxis domain={[0, 100]} tickFormatter={(value) => `${value}%`} />
