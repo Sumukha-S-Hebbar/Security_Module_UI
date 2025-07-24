@@ -212,7 +212,7 @@ export default function TowercoHomePage() {
                           <TableHead className="text-foreground">Agency</TableHead>
                           <TableHead className="text-foreground">Patrolling Officer</TableHead>
                           <TableHead className="text-foreground">Guard</TableHead>
-                          <TableHead className="text-foreground">Time</TableHead>
+                          <TableHead className="text-foreground">Incident Time</TableHead>
                           <TableHead className="text-right text-foreground">Contact</TableHead>
                           </TableRow>
                       </TableHeader>
