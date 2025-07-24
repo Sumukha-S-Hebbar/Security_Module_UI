@@ -228,7 +228,7 @@ export default function SiteReportPage() {
                   </button>
                   <button
                     onClick={handleScrollToIncidents}
-                    className="p-0 h-auto font-medium text-base text-accent hover:underline"
+                    className="p-0 h-auto font-medium text-base text-accent hover:underline flex"
                   >
                     {siteIncidents.length}
                   </button>
