@@ -71,6 +71,7 @@ import {
 import { AgencyPerformanceBreakdown } from './_components/agency-performance-breakdown';
 import { useRouter } from 'next/navigation';
 import { patrollingOfficers } from '@/lib/data/patrolling-officers';
+import { Progress } from '@/components/ui/progress';
 
 const LOGGED_IN_ORG_ID = 'TCO01'; // Simulate logged-in user
 
@@ -311,7 +312,7 @@ export default function AgencyReportPage() {
           Download Full Report
         </Button>
       </div>
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
             <CardHeader>
             <div className="flex items-center gap-4">
@@ -379,43 +380,74 @@ export default function AgencyReportPage() {
                 </div>
             </CardContent>
         </Card>
+        
         <Card>
-            <CardHeader>
-                <CardTitle>Overall Performance</CardTitle>
-            </CardHeader>
-            <CardContent>
-                <div className="w-full h-64 flex items-center justify-center">
-                    <ResponsiveContainer width="100%" height="100%">
-                        <PieChart>
-                            <Pie
-                                data={performanceChartData}
-                                cx="50%"
-                                cy="50%"
-                                innerRadius="70%"
-                                outerRadius="85%"
-                                paddingAngle={0}
-                                dataKey="value"
-                                stroke="none"
-                            >
-                                {performanceChartData.map((entry, index) => (
-                                    <Cell key={`cell-${index}`} fill={PERFORMANCE_COLORS[index % PERFORMANCE_COLORS.length]} />
-                                ))}
-                            </Pie>
-                        </PieChart>
-                    </ResponsiveContainer>
-                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                        <span className="text-4xl font-bold" style={{ color: getPerformanceColor() }}>
-                            {performanceData.performance}%
-                        </span>
-                    </div>
-                </div>
-            </CardContent>
+          <CardHeader>
+            <CardTitle>Agency Performance</CardTitle>
+            <CardDescription>
+              Overall score and breakdown of key performance indicators.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+              <div className="w-full h-48 md:h-full flex items-center justify-center relative">
+                  <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                          <Pie
+                              data={performanceChartData}
+                              cx="50%"
+                              cy="50%"
+                              innerRadius="70%"
+                              outerRadius="85%"
+                              paddingAngle={0}
+                              dataKey="value"
+                              stroke="none"
+                          >
+                              {performanceChartData.map((entry, index) => (
+                                  <Cell key={`cell-${index}`} fill={PERFORMANCE_COLORS[index % PERFORMANCE_COLORS.length]} />
+                              ))}
+                          </Pie>
+                      </PieChart>
+                  </ResponsiveContainer>
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                      <span className="text-4xl font-bold" style={{ color: getPerformanceColor() }}>
+                          {performanceData.performance}%
+                      </span>
+                  </div>
+              </div>
+              <div className="space-y-4 text-sm">
+                  <div>
+                      <div className="flex justify-between items-center mb-1">
+                          <span className="text-muted-foreground">Incident Resolution Rate</span>
+                          <span className="font-medium">{performanceData.incidentResolutionRate}%</span>
+                      </div>
+                      <Progress value={performanceData.incidentResolutionRate} className="h-2" />
+                  </div>
+                  <div>
+                      <div className="flex justify-between items-center mb-1">
+                          <span className="text-muted-foreground">Guard Perimeter Accuracy</span>
+                          <span className="font-medium">{performanceData.guardPerimeterAccuracy}%</span>
+                      </div>
+                      <Progress value={performanceData.guardPerimeterAccuracy} className="h-2" />
+                  </div>
+                  <div>
+                      <div className="flex justify-between items-center mb-1">
+                          <span className="text-muted-foreground">Guard Selfie Accuracy</span>
+                          <span className="font-medium">{performanceData.guardSelfieAccuracy}%</span>
+                      </div>
+                      <Progress value={performanceData.guardSelfieAccuracy} className="h-2" />
+                  </div>
+                  <div>
+                      <div className="flex justify-between items-center mb-1">
+                          <span className="text-muted-foreground">Officer Site Visit Rate</span>
+                          <span className="font-medium">{performanceData.officerSiteVisitRate}%</span>
+                      </div>
+                      <Progress value={performanceData.officerSiteVisitRate} className="h-2" />
+                  </div>
+              </div>
+            </div>
+          </CardContent>
         </Card>
-         <AgencyPerformanceBreakdown
-          agency={agency}
-          sites={sites}
-          incidents={incidents}
-        />
       </div>
 
       <Card>
@@ -632,3 +664,4 @@ export default function AgencyReportPage() {
     </div>
   );
 }
+
