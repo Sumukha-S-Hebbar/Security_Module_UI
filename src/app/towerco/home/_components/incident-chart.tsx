@@ -297,7 +297,7 @@ export function IncidentChart({
       </CardHeader>
       <CardContent className="pt-4">
         <ChartContainer config={chartConfig} className="h-[300px] w-full">
-          <BarChart data={monthlyIncidentData} margin={{ top: 20, right: 20, left: -10, bottom: 5 }} barGap={6}>
+          <BarChart data={monthlyIncidentData} margin={{ top: 20, right: 0, left: -10, bottom: 5 }} barGap={6}>
             <CartesianGrid vertical={false} strokeDasharray="3 3" />
             <XAxis
               dataKey="month"
