@@ -10,7 +10,7 @@ import { sites } from '@/lib/data/sites';
 import { incidents } from '@/lib/data/incidents';
 import { guards } from '@/lib/data/guards';
 import { organizations } from '@/lib/data/organizations';
-import type { Incident, Site } from '@/types';
+import type { Incident, Site, SecurityAgency } from '@/types';
 import {
   Card,
   CardContent,
@@ -430,23 +430,25 @@ export default function AgencyReportPage() {
                   </p>
                 </div>
               </div>
-              <div className="w-full h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                    <BarChart layout="vertical" data={performanceBreakdownChartData} margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
-                        <CartesianGrid horizontal={false} />
-                        <XAxis type="number" domain={[0, 100]} tickFormatter={(value) => `${value}%`} />
-                        <YAxis type="category" dataKey="name" width={80} tickLine={false} axisLine={false} />
-                        <ChartTooltip
+              <div className="w-full h-full min-h-[300px]">
+                <ChartContainer config={chartConfig} className="w-full h-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={performanceBreakdownChartData} margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+                      <CartesianGrid vertical={false} />
+                      <XAxis dataKey="name" />
+                      <YAxis domain={[0, 100]} tickFormatter={(value) => `${value}%`} />
+                      <ChartTooltip
                         cursor={{ fill: 'hsl(var(--accent) / 0.1)' }}
                         content={<ChartTooltipContent indicator="dot" />}
-                        />
-                        <Bar dataKey="value" radius={4}>
-                            {performanceBreakdownChartData.map((entry) => (
-                                <Cell key={entry.name} fill={entry.fill} />
-                            ))}
-                        </Bar>
+                      />
+                      <ChartLegend />
+                      <Bar dataKey="value" name="Incident Resolution" fill="var(--color-incidentResolutionRate)" radius={4} />
+                      <Bar dataKey="value" name="Perimeter Accuracy" fill="var(--color-guardPerimeterAccuracy)" radius={4} />
+                      <Bar dataKey="value" name="Selfie Accuracy" fill="var(--color-guardSelfieAccuracy)" radius={4} />
+                      <Bar dataKey="value" name="Site Visits" fill="var(--color-officerSiteVisitRate)" radius={4} />
                     </BarChart>
-                </ResponsiveContainer>
+                  </ResponsiveContainer>
+                </ChartContainer>
               </div>
             </div>
           </CardContent>
