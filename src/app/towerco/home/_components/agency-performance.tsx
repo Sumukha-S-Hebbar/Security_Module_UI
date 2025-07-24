@@ -1,8 +1,9 @@
 // src/app/towerco/home/_components/agency-performance.tsx
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import type { SecurityAgency, Site, Incident } from '@/types';
+import { useRouter } from 'next/navigation';
 import {
   Card,
   CardContent,
@@ -10,82 +11,33 @@ import {
   CardTitle,
   CardDescription,
 } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  ResponsiveContainer,
+  LabelList,
+} from 'recharts';
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  ChartConfig,
+} from '@/components/ui/chart';
 import { guards } from '@/lib/data/guards';
 import { patrollingOfficers } from '@/lib/data/patrolling-officers';
-import { useRouter } from 'next/navigation';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { CheckCircle, User, Shield, Map, ChevronDown } from 'lucide-react';
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from '@/components/ui/collapsible';
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
 
-
-interface AgencyPerformanceData {
-  agency: SecurityAgency;
-  performance: {
-    'Overall Performance': number;
-    'Incident Resolution': number;
-    'Guard Perimeter': number;
-    'Guard Selfie': number;
-    'Officer Visits': number;
-  };
-}
+const chartConfig = {
+  score: {
+    label: 'Performance Score',
+  },
+} satisfies ChartConfig;
 
 const getPerformanceColor = (score: number): string => {
   if (score >= 90) return 'hsl(var(--chart-2))';
   if (score >= 75) return 'hsl(var(--chart-4))';
   return 'hsl(var(--destructive))';
-};
-
-const CircularProgress = ({
-  value,
-  color,
-}: {
-  value: number;
-  color: string;
-}) => {
-  const radius = 50;
-  const circumference = 2 * Math.PI * radius;
-  const offset = circumference - (value / 100) * circumference;
-
-  return (
-    <div className="relative h-24 w-24">
-      <svg className="h-full w-full" viewBox="0 0 120 120">
-        <circle
-          className="stroke-current text-muted"
-          strokeWidth="10"
-          fill="transparent"
-          r={radius}
-          cx="60"
-          cy="60"
-        />
-        <circle
-          className="stroke-current transition-all duration-500"
-          strokeWidth="10"
-          strokeLinecap="round"
-          fill="transparent"
-          r={radius}
-          cx="60"
-          cy="60"
-          style={{
-            stroke: color,
-            strokeDasharray: circumference,
-            strokeDashoffset: offset,
-            transform: 'rotate(-90deg)',
-            transformOrigin: '50% 50%',
-          }}
-        />
-      </svg>
-      <div className="absolute inset-0 flex items-center justify-center">
-        <span className="text-2xl font-bold">{value}%</span>
-      </div>
-    </div>
-  );
 };
 
 export function AgencyPerformance({
@@ -98,9 +50,8 @@ export function AgencyPerformance({
   incidents: Incident[];
 }) {
   const router = useRouter();
-  const [openCollapsible, setOpenCollapsible] = useState<string | null>(null);
 
-  const performanceData: AgencyPerformanceData[] = useMemo(() => {
+  const performanceData = useMemo(() => {
     return agencies.map((agency) => {
       const agencySiteIds = new Set(agency.siteIds);
       const agencySites = sites.filter((s) => agencySiteIds.has(s.id));
@@ -175,97 +126,68 @@ export function AgencyPerformance({
         performanceComponents.length;
 
       return {
-        agency,
-        performance: {
-          'Overall Performance': Math.round(overallPerformance),
-          'Incident Resolution': Math.round(incidentResolutionRate),
-          'Guard Perimeter': Math.round(guardPerimeterAccuracy),
-          'Guard Selfie': Math.round(guardSelfieAccuracy),
-          'Officer Visits': Math.round(officerSiteVisitRate),
-        },
+        id: agency.id,
+        name: agency.name,
+        score: Math.round(overallPerformance),
+        fill: getPerformanceColor(overallPerformance),
       };
-    }).sort((a, b) => b.performance['Overall Performance'] - a.performance['Overall Performance']);
+    }).sort((a, b) => b.score - a.score);
   }, [agencies, sites, incidents]);
 
-  const subMetrics: {
-    key: keyof Omit<AgencyPerformanceData['performance'], 'Overall Performance'>;
-    label: string;
-    icon: React.ElementType;
-  }[] = [
-    { key: 'Incident Resolution', label: 'Incident Resolution', icon: CheckCircle },
-    { key: 'Guard Perimeter', label: 'Guard Perimeter', icon: Shield },
-    { key: 'Guard Selfie', label: 'Guard Selfie', icon: User },
-    { key: 'Officer Visits', label: 'Officer Visits', icon: Map },
-  ];
+  const handleBarClick = (data: any) => {
+    if (data && data.id) {
+      router.push(`/towerco/agencies/${data.id}`);
+    }
+  };
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>Agency Performance Overview</CardTitle>
         <CardDescription>
-          Overall scores based on incidents, guard, and officer performance. Click a card to view details.
+          Overall scores based on incidents, guard, and officer performance. Click a bar to view details.
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {performanceData.map((data) => {
-            const overallScore = data.performance['Overall Performance'];
-            const color = getPerformanceColor(overallScore);
-            const isOpen = openCollapsible === data.agency.id;
-
-            return (
-              <Collapsible
-                key={data.agency.id}
-                open={isOpen}
-                onOpenChange={() => setOpenCollapsible(isOpen ? null : data.agency.id)}
-                className="rounded-lg border p-4 sm:p-6 space-y-4 transition-all"
+        <ChartContainer config={chartConfig} className="h-[250px] w-full">
+          <ResponsiveContainer>
+            <BarChart
+              data={performanceData}
+              layout="vertical"
+              margin={{ left: 10, right: 30 }}
+            >
+              <YAxis
+                dataKey="name"
+                type="category"
+                tickLine={false}
+                axisLine={false}
+                tickMargin={10}
+                width={120}
+                className="font-medium"
+              />
+              <XAxis dataKey="score" type="number" hide />
+              <ChartTooltip
+                cursor={false}
+                content={<ChartTooltipContent indicator="line" />}
+              />
+              <Bar
+                dataKey="score"
+                radius={5}
+                background={{ fill: 'hsl(var(--muted))', radius: 5 }}
+                onClick={handleBarClick}
+                className="cursor-pointer"
               >
-                <div
-                  onClick={() => router.push(`/towerco/agencies/${data.agency.id}`)}
-                  className="flex items-center justify-between gap-4 cursor-pointer"
-                >
-                  <div className="flex items-center gap-4">
-                    <Avatar className="h-12 w-12">
-                      <AvatarImage src={data.agency.avatar} alt={data.agency.name} />
-                      <AvatarFallback>{data.agency.name.charAt(0)}</AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className="font-semibold">{data.agency.name}</p>
-                      <p className="text-xs text-muted-foreground">ID: {data.agency.id}</p>
-                    </div>
-                  </div>
-                  <CircularProgress value={overallScore} color={color} />
-                </div>
-
-                <CollapsibleContent className="space-y-4 pt-4 border-t">
-                  {subMetrics.map(({ key, label, icon: Icon }) => {
-                    const value = data.performance[key];
-                    return (
-                        <div key={key}>
-                            <div className="flex justify-between items-center text-sm mb-1">
-                                <div className="flex items-center gap-2 text-muted-foreground">
-                                    <Icon className="h-4 w-4" />
-                                    <span>{label}</span>
-                                </div>
-                                <span className="font-medium text-foreground">{value}%</span>
-                            </div>
-                            <Progress value={value} indicatorClassName="bg-primary" />
-                        </div>
-                    );
-                  })}
-                </CollapsibleContent>
-                <div className="flex justify-center pt-2">
-                    <CollapsibleTrigger asChild>
-                        <Button variant="ghost" size="sm" className="w-full flex items-center gap-1">
-                            {isOpen ? 'Hide' : 'Show'} Details
-                            <ChevronDown className={cn("h-4 w-4 transition-transform", isOpen && "rotate-180")} />
-                        </Button>
-                    </CollapsibleTrigger>
-                </div>
-              </Collapsible>
-            );
-          })}
-        </div>
+                <LabelList
+                  position="right"
+                  offset={10}
+                  className="fill-foreground font-bold"
+                  fontSize={12}
+                  formatter={(value: number) => `${value}%`}
+                />
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </ChartContainer>
       </CardContent>
     </Card>
   );
