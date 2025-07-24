@@ -16,6 +16,7 @@ export const incidents: Incident[] = [
     { 
       id: 'INC002', 
       incidentTime: '2024-07-21T09:00:00Z', 
+      resolvedTime: '2024-07-21T17:30:00Z',
       description: 'False fire alarm triggered by dust near sensor in Lobby.', 
       resolutionNotes: 'Confirmed with site maintenance that sensor was cleaned. No actual fire hazard. Closed.',
       status: 'Resolved', 
@@ -41,6 +42,7 @@ export const incidents: Incident[] = [
     { 
       id: 'INC004', 
       incidentTime: '2024-05-10T11:00:00Z', 
+      resolvedTime: '2024-05-11T11:00:00Z',
       description: 'Guard reported feeling unwell, requested relief.', 
       resolutionNotes: 'Relief guard dispatched and arrived on site. Original guard was relieved and went home.',
       status: 'Resolved', 
@@ -54,6 +56,7 @@ export const incidents: Incident[] = [
     { 
       id: 'INC005', 
       incidentTime: '2024-04-01T02:15:00Z', 
+      resolvedTime: '2024-04-03T18:00:00Z',
       description: 'Successful break-in at R&D department, items stolen.', 
       resolutionNotes: 'Police report filed (Case #12345). Site security protocols reviewed and updated. Door access system upgraded.',
       status: 'Resolved', 

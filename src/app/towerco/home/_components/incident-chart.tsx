@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useMemo, useRef, useEffect } from 'react';
-import type { Incident, Site, SecurityAgency, Guard } from '@/types';
+import type { Incident, Site, SecurityAgency } from '@/types';
 import Link from 'next/link';
 import {
   Card,
@@ -36,13 +36,9 @@ import {
   Collapsible,
   CollapsibleContent,
 } from '@/components/ui/collapsible';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, LabelList } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, LabelList, LineChart, Line } from 'recharts';
 import { useRouter } from 'next/navigation';
-import { Eye } from 'lucide-react';
-import { guards } from '@/lib/data/guards';
-
 
 const chartConfig = {
   total: {
@@ -57,7 +53,22 @@ const chartConfig = {
       label: 'Under Review',
       color: 'hsl(var(--chart-3))',
   },
+  avgClosure: {
+    label: 'Avg. Closure (hrs)',
+    color: 'hsl(var(--chart-5))',
+  },
 } satisfies ChartConfig;
+
+const formatClosureTime = (hours: number | null): string => {
+    if (hours === null || hours === 0) return 'N/A';
+    const days = Math.floor(hours / 24);
+    const remainingHours = Math.round(hours % 24);
+    if (days > 0) {
+        return `${days}d ${remainingHours}h`;
+    }
+    return `${remainingHours}h`;
+};
+
 
 export function IncidentChart({
   incidents,
@@ -89,8 +100,15 @@ export function IncidentChart({
       'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
       'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
     ];
-    const monthlyData: { month: string; total: number; resolved: number; underReview: number; }[] = months.map(
-      (month) => ({ month, total: 0, resolved: 0, underReview: 0 })
+    const monthlyData: { 
+        month: string; 
+        total: number; 
+        resolved: number; 
+        underReview: number;
+        avgClosure: number | null;
+        closureTimeFormatted: string;
+    }[] = months.map(
+      (month) => ({ month, total: 0, resolved: 0, underReview: 0, avgClosure: null, closureTimeFormatted: 'N/A' })
     );
 
     const siteToAgencyMap = new Map<string, string | undefined>();
@@ -117,11 +135,34 @@ export function IncidentChart({
         if (incident.status === 'Under Review') {
             monthlyData[monthIndex].underReview += 1;
         }
-        if (incident.status === 'Active') {
-          // Active incidents contribute to the total, but don't have their own bar.
-        }
       }
     });
+
+    // Calculate average closure time for each month
+    for (let i = 0; i < 12; i++) {
+        const monthIncidents = incidents.filter(incident => {
+            const incidentDate = new Date(incident.incidentTime);
+            const incidentAgencyId = siteToAgencyMap.get(incident.siteId);
+            const companyMatch = selectedCompany === 'all' || incidentAgencyId === selectedCompany;
+
+            return incidentDate.getFullYear().toString() === selectedYear && 
+                   incidentDate.getMonth() === i && 
+                   companyMatch &&
+                   incident.status === 'Resolved' && 
+                   incident.resolvedTime;
+        });
+
+        if (monthIncidents.length > 0) {
+            const totalClosureMillis = monthIncidents.reduce((acc, inc) => {
+                const startTime = new Date(inc.incidentTime).getTime();
+                const endTime = new Date(inc.resolvedTime!).getTime();
+                return acc + (endTime - startTime);
+            }, 0);
+            const avgClosureHours = (totalClosureMillis / monthIncidents.length) / (1000 * 60 * 60);
+            monthlyData[i].avgClosure = avgClosureHours;
+            monthlyData[i].closureTimeFormatted = formatClosureTime(avgClosureHours);
+        }
+    }
 
     return monthlyData;
   }, [incidents, securityAgencies, selectedYear, selectedCompany]);
@@ -264,25 +305,68 @@ export function IncidentChart({
               fontSize={12}
             />
             <YAxis
+              yAxisId="left"
               tickLine={false}
               axisLine={false}
               tickMargin={8}
               allowDecimals={false}
               fontSize={12}
             />
+            <YAxis
+              yAxisId="right"
+              orientation="right"
+              tickLine={false}
+              axisLine={false}
+              tickMargin={8}
+              tickFormatter={(value) => `${value}h`}
+              allowDecimals={false}
+              fontSize={12}
+            />
             <ChartTooltip
               cursor={false}
-              content={<ChartTooltipContent />}
+                content={({ active, payload, label }) => {
+                    if (active && payload && payload.length) {
+                        const data = monthlyIncidentData.find(d => d.month === label);
+                        if (!data) return null;
+                        return (
+                            <div className="grid min-w-[8rem] items-start gap-1.5 rounded-lg border bg-background px-2.5 py-1.5 text-xs shadow-xl">
+                                <div className="font-semibold">{label}</div>
+                                <div className="grid gap-1.5">
+                                    <div className="flex items-center gap-2">
+                                        <span className="h-2 w-2 rounded-full" style={{ backgroundColor: 'var(--color-total)' }}></span>
+                                        <span>Total: {data.total}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <span className="h-2 w-2 rounded-full" style={{ backgroundColor: 'var(--color-resolved)' }}></span>
+                                        <span>Resolved: {data.resolved}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <span className="h-2 w-2 rounded-full" style={{ backgroundColor: 'var(--color-underReview)' }}></span>
+                                        <span>Under Review: {data.underReview}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <span className="h-2 w-2 rounded-full" style={{ backgroundColor: 'var(--color-avgClosure)' }}></span>
+                                        <span>Avg. Closure: {data.closureTimeFormatted}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        )
+                    }
+                    return null;
+                }}
             />
-            <Bar dataKey="total" fill="var(--color-total)" radius={4} onClick={handleBarClick} cursor="pointer">
+            <Bar yAxisId="left" dataKey="total" fill="var(--color-total)" radius={4} onClick={handleBarClick} cursor="pointer">
                 <LabelList dataKey="total" position="top" offset={5} fontSize={12} />
             </Bar>
-            <Bar dataKey="resolved" fill="var(--color-resolved)" radius={4} onClick={handleBarClick} cursor="pointer">
+            <Bar yAxisId="left" dataKey="resolved" fill="var(--color-resolved)" radius={4} onClick={handleBarClick} cursor="pointer">
                 <LabelList dataKey="resolved" position="top" offset={5} fontSize={12} />
             </Bar>
-             <Bar dataKey="underReview" fill="var(--color-underReview)" radius={4} onClick={handleBarClick} cursor="pointer">
+             <Bar yAxisId="left" dataKey="underReview" fill="var(--color-underReview)" radius={4} onClick={handleBarClick} cursor="pointer">
                 <LabelList dataKey="underReview" position="top" offset={5} fontSize={12} />
             </Bar>
+             <LineChart data={monthlyIncidentData}>
+                <Line yAxisId="right" type="monotone" dataKey="avgClosure" stroke="var(--color-avgClosure)" strokeWidth={2} dot={{ r: 4 }} />
+            </LineChart>
           </BarChart>
         </ChartContainer>
       </CardContent>
