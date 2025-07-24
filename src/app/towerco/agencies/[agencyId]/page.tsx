@@ -95,6 +95,9 @@ const chartConfig = {
     label: 'Site Visits',
     color: 'hsl(var(--chart-5))',
   },
+   performance: {
+    label: 'Performance',
+  },
 } satisfies ChartConfig;
 
 export default function AgencyReportPage() {
@@ -207,15 +210,15 @@ export default function AgencyReportPage() {
   }, [agency, sites, incidents]);
   
   const complianceData = [
-    { name: 'Performance', value: performanceData.performance },
+    { name: 'performance', value: performanceData.performance },
     { name: 'Remaining', value: 100 - performanceData.performance },
   ];
 
   const performanceBreakdownChartData = [
-    { name: 'Resolution', value: performanceData.incidentResolutionRate },
-    { name: 'Perimeter', value: performanceData.guardPerimeterAccuracy },
-    { name: 'Selfie', value: performanceData.guardSelfieAccuracy },
-    { name: 'Site Visits', value: performanceData.officerSiteVisitRate },
+    { name: 'Resolution', value: performanceData.incidentResolutionRate, fill: 'var(--color-incidentResolutionRate)' },
+    { name: 'Perimeter', value: performanceData.guardPerimeterAccuracy, fill: 'var(--color-guardPerimeterAccuracy)' },
+    { name: 'Selfie', value: performanceData.guardSelfieAccuracy, fill: 'var(--color-guardSelfieAccuracy)' },
+    { name: 'Site Visits', value: performanceData.officerSiteVisitRate, fill: 'var(--color-officerSiteVisitRate)' },
   ];
   
   const getPerformanceColor = () => {
@@ -390,9 +393,16 @@ export default function AgencyReportPage() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-              <div className="flex flex-col items-center justify-center gap-2">
-                <ResponsiveContainer width="100%" height={150}>
+              <div className="flex flex-col items-center justify-center gap-2 h-full">
+                <ChartContainer
+                    config={chartConfig}
+                    className="mx-auto aspect-square h-full w-full"
+                  >
                   <PieChart>
+                    <ChartTooltip
+                        cursor={false}
+                        content={<ChartTooltipContent hideLabel nameKey="name" />}
+                      />
                     <Pie
                       data={complianceData}
                       cx="50%"
@@ -407,35 +417,32 @@ export default function AgencyReportPage() {
                         <Cell
                           key={`cell-${index}`}
                           fill={COLORS[index % COLORS.length]}
+                          className="outline-none"
                         />
                       ))}
                     </Pie>
-                    <ChartTooltip
-                      cursor={false}
-                      content={<ChartTooltipContent hideLabel />}
-                    />
                   </PieChart>
-                </ResponsiveContainer>
-                <div className="text-center">
+                </ChartContainer>
+                <div className="text-center mt-[-2rem]">
                   <p className="text-lg font-medium">Overall Performance</p>
                   <p className="text-4xl font-bold">
                     {performanceData.performance}%
                   </p>
                 </div>
               </div>
-              <div>
-                <ChartContainer config={chartConfig} className="w-full h-[200px]">
-                  <BarChart data={performanceBreakdownChartData} margin={{ top: 20, right: 20, bottom: 20, left: 20 }} barSize={30}>
+              <div className="w-full h-full">
+                <ChartContainer config={chartConfig} className="w-full h-full">
+                  <BarChart data={performanceBreakdownChartData} margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
                     <CartesianGrid vertical={false} />
-                    <XAxis dataKey="name" tickLine={false} axisLine={false} tickMargin={8} fontSize={12} />
+                    <XAxis dataKey="name" hide/>
                     <YAxis domain={[0, 100]} tickFormatter={(value) => `${value}%`} />
                     <Tooltip
                       cursor={{ fill: 'hsl(var(--accent) / 0.1)' }}
                       content={<ChartTooltipContent indicator="dot" />}
                     />
-                    <Bar dataKey="value" fill="var(--color-incidentResolutionRate)" radius={4}>
-                      {performanceBreakdownChartData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={chartConfig[Object.keys(chartConfig)[index] as keyof typeof chartConfig]?.color} />
+                    <Bar dataKey="value" radius={4}>
+                      {performanceBreakdownChartData.map((entry) => (
+                          <Cell key={entry.name} fill={entry.fill} />
                       ))}
                     </Bar>
                   </BarChart>
