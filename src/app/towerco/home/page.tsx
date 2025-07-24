@@ -196,10 +196,10 @@ export default function TowercoHomePage() {
         </div>
       </div>
       
-      <Card className="border-destructive bg-destructive/10 text-destructive-foreground">
+      <Card className="border-destructive bg-destructive/10">
           <CardHeader className="flex flex-row items-center gap-2">
           <AlertTriangle className="w-6 h-6 text-destructive" />
-          <CardTitle className="text-destructive-foreground">Active Emergency Incidents ({activeEmergencies.length})</CardTitle>
+          <CardTitle className="text-foreground">Active Emergency Incidents ({activeEmergencies.length})</CardTitle>
           </CardHeader>
           <CardContent>
           {activeEmergencies.length > 0 ? (
@@ -207,13 +207,13 @@ export default function TowercoHomePage() {
                   <Table>
                       <TableHeader>
                           <TableRow className="border-destructive/20">
-                          <TableHead className="text-destructive-foreground">Incident ID</TableHead>
-                          <TableHead className="text-destructive-foreground">Site Name</TableHead>
-                          <TableHead className="text-destructive-foreground">Agency</TableHead>
-                          <TableHead className="text-destructive-foreground">Patrolling Officer</TableHead>
-                          <TableHead className="text-destructive-foreground">Guard</TableHead>
-                          <TableHead className="text-destructive-foreground">Time</TableHead>
-                          <TableHead className="text-right text-destructive-foreground">Contact</TableHead>
+                          <TableHead className="text-foreground">Incident ID</TableHead>
+                          <TableHead className="text-foreground">Site Name</TableHead>
+                          <TableHead className="text-foreground">Agency</TableHead>
+                          <TableHead className="text-foreground">Patrolling Officer</TableHead>
+                          <TableHead className="text-foreground">Guard</TableHead>
+                          <TableHead className="text-foreground">Time</TableHead>
+                          <TableHead className="text-right text-foreground">Contact</TableHead>
                           </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -233,7 +233,7 @@ export default function TowercoHomePage() {
                                 className="cursor-pointer border-destructive/20"
                               >
                               <TableCell>
-                                <Button asChild variant="link" className="p-0 h-auto text-destructive-foreground hover:text-destructive-foreground/80" onClick={(e) => e.stopPropagation()}>
+                                <Button asChild variant="link" className="p-0 h-auto text-foreground hover:text-foreground/80" onClick={(e) => e.stopPropagation()}>
                                   <Link href={`/towerco/incidents/${incident.id}`}>{incident.id}</Link>
                                 </Button>
                               </TableCell>
@@ -288,7 +288,7 @@ export default function TowercoHomePage() {
                   </Table>
               </div>
           ) : (
-              <p className="text-center py-4">
+              <p className="text-center py-4 text-foreground">
               No active emergency incidents. All systems are normal.
               </p>
           )}
