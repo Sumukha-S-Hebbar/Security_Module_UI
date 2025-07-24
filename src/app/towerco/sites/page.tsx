@@ -377,7 +377,7 @@ export default function TowercoSitesPage() {
             onOpenChange={setIsUploadDialogOpen}
           >
             <DialogTrigger asChild>
-              <Button>
+              <Button className="bg-[#00B4D8] hover:bg-[#00B4D8]/90">
                 <Upload className="mr-2 h-4 w-4" />
                 Upload Excel
               </Button>
@@ -848,6 +848,7 @@ export default function TowercoSitesPage() {
                           <TableCell className="text-right">
                             <Button
                               size="sm"
+                              className="bg-[#00B4D8] hover:bg-[#00B4D8]/90"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handleAssignAgency(site.id);
