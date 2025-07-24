@@ -31,15 +31,26 @@ import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartConfig } from '@/components/ui/chart';
+
+
+const chartConfig = {
+  incidents: {
+    label: "Incidents",
+    color: "hsl(var(--chart-1))",
+  },
+} satisfies ChartConfig;
+
 
 export default function SiteReportPage() {
   const params = useParams();
   const router = useRouter();
   const { toast } = useToast();
   const siteId = params.siteId as string;
-  const [selectedYear, setSelectedYear] = useState('all');
-  const [selectedMonth, setSelectedMonth] = useState('all');
-
+  const [selectedTableYear, setSelectedTableYear] = useState('all');
+  const [selectedTableMonth, setSelectedTableMonth] = useState('all');
+  
   const site = sites.find((s) => s.id === siteId);
 
   if (!site) {
@@ -66,15 +77,37 @@ export default function SiteReportPage() {
     if (years.size > 0) years.add(new Date().getFullYear().toString());
     return Array.from(years).sort((a, b) => parseInt(b) - parseInt(a));
   }, [siteIncidents]);
+  
+  const [selectedChartYear, setSelectedChartYear] = useState<string>(availableYears[0] || new Date().getFullYear().toString());
 
-  const filteredIncidents = useMemo(() => {
+  const filteredIncidentsForTable = useMemo(() => {
     return siteIncidents.filter(incident => {
       const incidentDate = new Date(incident.incidentTime);
-      const yearMatch = selectedYear === 'all' || incidentDate.getFullYear().toString() === selectedYear;
-      const monthMatch = selectedMonth === 'all' || incidentDate.getMonth().toString() === selectedMonth;
+      const yearMatch = selectedTableYear === 'all' || incidentDate.getFullYear().toString() === selectedTableYear;
+      const monthMatch = selectedTableMonth === 'all' || incidentDate.getMonth().toString() === selectedTableMonth;
       return yearMatch && monthMatch;
     });
-  }, [siteIncidents, selectedYear, selectedMonth]);
+  }, [siteIncidents, selectedTableYear, selectedTableMonth]);
+
+  const monthlyIncidentData = useMemo(() => {
+    const months = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+    ];
+    const monthlyData: { month: string; incidents: number }[] = months.map(
+      (month) => ({ month, incidents: 0 })
+    );
+
+    siteIncidents.forEach((incident) => {
+      const incidentDate = new Date(incident.incidentTime);
+      if (incidentDate.getFullYear().toString() === selectedChartYear) {
+        const monthIndex = incidentDate.getMonth();
+        monthlyData[monthIndex].incidents += 1;
+      }
+    });
+
+    return monthlyData;
+  }, [siteIncidents, selectedChartYear]);
 
 
   const handleDownloadReport = () => {
@@ -197,13 +230,47 @@ export default function SiteReportPage() {
       
       <Card>
         <CardHeader className="flex flex-row items-center justify-between gap-4">
+            <div>
+                <CardTitle>Incident Trend</CardTitle>
+                <CardDescription>Monthly incident counts for {site.name}.</CardDescription>
+            </div>
+            <Select value={selectedChartYear} onValueChange={setSelectedChartYear}>
+                <SelectTrigger className="w-[120px] font-medium">
+                    <SelectValue placeholder="Select Year" />
+                </SelectTrigger>
+                <SelectContent>
+                    {availableYears.map((year) => (
+                    <SelectItem key={year} value={year} className="font-medium">
+                        {year}
+                    </SelectItem>
+                    ))}
+                </SelectContent>
+            </Select>
+        </CardHeader>
+        <CardContent>
+            <ChartContainer config={chartConfig} className="h-[250px] w-full">
+                <ResponsiveContainer>
+                    <LineChart data={monthlyIncidentData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="month" fontSize={12} tickLine={false} axisLine={false} />
+                        <YAxis fontSize={12} tickLine={false} axisLine={false} allowDecimals={false} />
+                        <ChartTooltip content={<ChartTooltipContent />} />
+                        <Line type="monotone" dataKey="incidents" stroke="var(--color-incidents)" strokeWidth={2} dot={{ r: 4 }} />
+                    </LineChart>
+                </ResponsiveContainer>
+            </ChartContainer>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between gap-4">
           <div>
             <CardTitle>Incidents at {site.name}</CardTitle>
             <CardDescription className="font-medium">A log of all emergency incidents reported at this site.</CardDescription>
           </div>
           <div className="flex items-center gap-2">
               {availableYears.length > 0 && (
-                <Select value={selectedYear} onValueChange={setSelectedYear}>
+                <Select value={selectedTableYear} onValueChange={setSelectedTableYear}>
                   <SelectTrigger className="w-[120px] font-medium">
                     <SelectValue placeholder="Select Year" />
                   </SelectTrigger>
@@ -217,7 +284,7 @@ export default function SiteReportPage() {
                   </SelectContent>
                 </Select>
               )}
-              <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+              <Select value={selectedTableMonth} onValueChange={setSelectedTableMonth}>
                 <SelectTrigger className="w-[140px] font-medium">
                   <SelectValue placeholder="Select Month" />
                 </SelectTrigger>
@@ -233,7 +300,7 @@ export default function SiteReportPage() {
           </div>
         </CardHeader>
         <CardContent>
-          {filteredIncidents.length > 0 ? (
+          {filteredIncidentsForTable.length > 0 ? (
             <Table>
               <TableHeader>
                 <TableRow>
@@ -244,7 +311,7 @@ export default function SiteReportPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredIncidents.map((incident) => {
+                {filteredIncidentsForTable.map((incident) => {
                   const guard = getGuardById(incident.raisedByGuardId);
                   return (
                     <TableRow 
@@ -266,7 +333,7 @@ export default function SiteReportPage() {
               </TableBody>
             </Table>
           ) : (
-            <p className="text-muted-foreground text-center py-4 font-medium">No emergency incidents have been reported for this site {selectedYear !== 'all' || selectedMonth !== 'all' ? 'in the selected period' : ''}.</p>
+            <p className="text-muted-foreground text-center py-4 font-medium">No emergency incidents have been reported for this site {selectedTableYear !== 'all' || selectedTableMonth !== 'all' ? 'in the selected period' : ''}.</p>
           )}
         </CardContent>
       </Card>
