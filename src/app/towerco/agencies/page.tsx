@@ -519,7 +519,7 @@ export default function TowercoAgenciesPage() {
                                 <SelectValue placeholder="Filter by region" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="all">All Regions</SelectItem>
+                                <SelectItem value="all" className="font-medium">All Regions</SelectItem>
                                 {regions.map((region) => (
                                 <SelectItem key={region} value={region}>
                                     {region}
@@ -536,7 +536,7 @@ export default function TowercoAgenciesPage() {
                                 <SelectValue placeholder="Filter by city" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="all">All Cities</SelectItem>
+                                <SelectItem value="all" className="font-medium">All Cities</SelectItem>
                                 {cities.map((city) => (
                                 <SelectItem key={city} value={city}>
                                     {city}
@@ -550,12 +550,12 @@ export default function TowercoAgenciesPage() {
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead className="text-foreground">ID</TableHead>
-                                <TableHead className="text-foreground">Agency</TableHead>
-                                <TableHead className="text-foreground">Contact Info</TableHead>
-                                <TableHead className="text-foreground">Location</TableHead>
-                                <TableHead className="text-foreground">Sites Assigned</TableHead>
-                                <TableHead className="text-foreground">Incidents Occurred</TableHead>
+                                <TableHead className="text-foreground font-bold">ID</TableHead>
+                                <TableHead className="text-foreground font-bold">Agency</TableHead>
+                                <TableHead className="text-foreground font-bold">Contact Info</TableHead>
+                                <TableHead className="text-foreground font-bold">Location</TableHead>
+                                <TableHead className="text-foreground font-bold">Sites Assigned</TableHead>
+                                <TableHead className="text-foreground font-bold">Incidents Occurred</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -576,7 +576,7 @@ export default function TowercoAgenciesPage() {
                                         <Fragment key={agency.id}>
                                             <TableRow onClick={() => handleRowClick(agency.id)} className="cursor-pointer hover:bg-accent hover:text-accent-foreground group">
                                                 <TableCell>
-                                                    <p className="text-primary font-semibold group-hover:text-accent-foreground">{agency.id}</p>
+                                                    <p className="text-accent font-semibold group-hover:text-accent-foreground">{agency.id}</p>
                                                 </TableCell>
                                                 <TableCell>
                                                     <div className="flex items-center gap-3">
@@ -590,27 +590,27 @@ export default function TowercoAgenciesPage() {
                                                 <TableCell>
                                                     <div className="flex items-center gap-2 text-sm">
                                                         <Mail className="h-4 w-4 flex-shrink-0" />
-                                                        <a href={`mailto:${agency.email}`} onClick={(e) => e.stopPropagation()} className="truncate hover:underline text-primary group-hover:text-accent-foreground">
+                                                        <a href={`mailto:${agency.email}`} onClick={(e) => e.stopPropagation()} className="truncate hover:underline text-accent group-hover:text-accent-foreground">
                                                             {agency.email}
                                                         </a>
                                                     </div>
                                                     <div className="flex items-center gap-2 text-sm">
                                                         <Phone className="h-4 w-4 flex-shrink-0" />
-                                                        <a href={`tel:${agency.phone}`} onClick={(e) => e.stopPropagation()} className="truncate hover:underline text-primary group-hover:text-accent-foreground">
+                                                        <a href={`tel:${agency.phone}`} onClick={(e) => e.stopPropagation()} className="truncate hover:underline text-accent group-hover:text-accent-foreground">
                                                           {agency.phone}
                                                         </a>
                                                     </div>
                                                 </TableCell>
                                                 <TableCell>
                                                     <div className="text-sm">
-                                                        <p>{agency.address}</p>
-                                                        <p className="text-muted-foreground group-hover:text-accent-foreground">{agency.city}, {agency.region}</p>
+                                                        <p className="font-medium">{agency.address}</p>
+                                                        <p className="text-muted-foreground font-medium group-hover:text-accent-foreground">{agency.city}, {agency.region}</p>
                                                     </div>
                                                 </TableCell>
                                                 <TableCell>
                                                     <Button
                                                     variant="link"
-                                                    className="p-0 h-auto flex items-center gap-2 text-primary group-hover:text-accent-foreground"
+                                                    className="p-0 h-auto flex items-center gap-2 text-accent group-hover:text-accent-foreground"
                                                     onClick={(e) => handleExpandClick(e, agency.id)}
                                                     disabled={assignedSitesCount === 0}
                                                     >
@@ -622,7 +622,7 @@ export default function TowercoAgenciesPage() {
                                                     </Button>
                                                 </TableCell>
                                                 <TableCell>
-                                                  <div className="flex items-center gap-2">
+                                                  <div className="flex items-center gap-2 font-medium">
                                                     <ShieldAlert className="h-4 w-4 text-muted-foreground group-hover:text-accent-foreground" />
                                                     {incidentCount}
                                                   </div>
