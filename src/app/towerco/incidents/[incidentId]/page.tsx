@@ -114,9 +114,9 @@ export default function IncidentReportPage() {
         );
       case 'Under Review':
         return (
-          <div className="flex items-center gap-2 text-primary">
+          <div className="flex items-center gap-2 text-chart-3">
             <span className="relative flex h-2 w-2">
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-chart-3"></span>
             </span>
             <span>Under Review</span>
           </div>

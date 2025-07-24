@@ -1,3 +1,4 @@
+
 // src/app/towerco/incidents/_components/incident-status-summary.tsx
 'use client';
 
@@ -5,6 +6,7 @@ import type { Incident } from '@/types';
 import { useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { ShieldAlert, ShieldQuestion, CheckCircle2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 export function IncidentStatusSummary({ 
   incidents,
@@ -27,49 +29,58 @@ export function IncidentStatusSummary({
     );
   }, [incidents]);
 
-  const baseClasses = "flex items-center gap-4 p-4 rounded-lg cursor-pointer transition-all";
-  const selectedClasses = "ring-2 ring-primary shadow-md";
-  const unselectedClasses = "hover:bg-muted/80";
+  const statusCards = [
+    {
+      status: 'active',
+      count: summary.active,
+      label: 'Active',
+      icon: ShieldAlert,
+      color: 'text-destructive',
+      bg: 'bg-destructive/10',
+      ring: 'ring-destructive'
+    },
+    {
+      status: 'under-review',
+      count: summary.underReview,
+      label: 'Under Review',
+      icon: ShieldQuestion,
+      color: 'text-chart-3',
+      bg: 'bg-chart-3/10',
+      ring: 'ring-chart-3'
+    },
+    {
+      status: 'resolved',
+      count: summary.resolved,
+      label: 'Resolved',
+      icon: CheckCircle2,
+      color: 'text-chart-2',
+      bg: 'bg-chart-2/10',
+      ring: 'ring-chart-2'
+    }
+  ] as const;
 
   return (
     <Card>
       <CardContent className="p-4 grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div 
-          className={`${baseClasses} bg-destructive/10 ${selectedStatus === 'active' ? selectedClasses : unselectedClasses}`}
-          onClick={() => onStatusSelect('active')}
-          role="button"
-          tabIndex={0}
-        >
-            <ShieldAlert className="h-8 w-8 text-destructive" />
-            <div>
-                <p className="text-sm text-destructive font-semibold">Active</p>
-                <p className="text-2xl font-bold">{summary.active}</p>
+        {statusCards.map(item => (
+            <div 
+            key={item.status}
+            className={cn(
+                'flex items-center gap-4 p-4 rounded-lg cursor-pointer transition-all',
+                item.bg,
+                selectedStatus === item.status ? `ring-2 ${item.ring} shadow-md` : 'hover:bg-muted/80'
+            )}
+            onClick={() => onStatusSelect(item.status)}
+            role="button"
+            tabIndex={0}
+            >
+                <item.icon className={cn('h-8 w-8', item.color)} />
+                <div>
+                    <p className={cn('text-sm font-semibold', item.color)}>{item.label}</p>
+                    <p className="text-2xl font-bold">{item.count}</p>
+                </div>
             </div>
-        </div>
-        <div 
-          className={`${baseClasses} bg-primary/10 ${selectedStatus === 'under-review' ? selectedClasses : unselectedClasses}`}
-          onClick={() => onStatusSelect('under-review')}
-          role="button"
-          tabIndex={0}
-        >
-            <ShieldQuestion className="h-8 w-8 text-primary" />
-            <div>
-                <p className="text-sm text-primary font-semibold">Under Review</p>
-                <p className="text-2xl font-bold">{summary.underReview}</p>
-            </div>
-        </div>
-        <div 
-          className={`${baseClasses} bg-chart-2/10 ${selectedStatus === 'resolved' ? selectedClasses : unselectedClasses}`}
-          onClick={() => onStatusSelect('resolved')}
-          role="button"
-          tabIndex={0}
-        >
-            <CheckCircle2 className="h-8 w-8 text-chart-2" />
-            <div>
-                <p className="text-sm text-chart-2 font-semibold">Resolved</p>
-                <p className="text-2xl font-bold">{summary.resolved}</p>
-            </div>
-        </div>
+        ))}
       </CardContent>
     </Card>
   );

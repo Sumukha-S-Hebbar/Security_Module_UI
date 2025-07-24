@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import type { Incident } from '@/types';
@@ -43,9 +44,9 @@ export function IncidentStatusSummary({
       count: summary.underReview,
       label: 'Under Review',
       icon: ShieldQuestion,
-      color: 'text-primary',
-      bg: 'bg-primary/10',
-      ring: 'ring-primary'
+      color: 'text-chart-3',
+      bg: 'bg-chart-3/10',
+      ring: 'ring-chart-3'
     },
     {
       status: 'resolved',

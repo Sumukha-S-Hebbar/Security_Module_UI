@@ -230,7 +230,7 @@ export function IncidentChart({
         return (
           <div className="flex items-center gap-2">
             <span className="relative flex h-2 w-2">
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-chart-3"></span>
             </span>
             <span>Under Review</span>
           </div>
@@ -297,7 +297,7 @@ export function IncidentChart({
         </div>
       </CardHeader>
       <CardContent className="pt-4">
-        <ChartContainer config={chartConfig} className="h-[300px] w-full cursor-pointer">
+        <ChartContainer config={chartConfig} className="h-[300px] w-full">
           <ResponsiveContainer>
             <BarChart 
               data={monthlyIncidentData} 
@@ -367,13 +367,13 @@ export function IncidentChart({
                   }}
               />
               <ChartLegend content={<ChartLegendContent />} />
-              <Bar yAxisId="left" dataKey="total" fill="var(--color-total)" radius={4}>
+              <Bar yAxisId="left" dataKey="total" fill="var(--color-total)" radius={4} cursor="pointer">
                   <LabelList dataKey="total" position="top" offset={5} fontSize={12} />
               </Bar>
-              <Bar yAxisId="left" dataKey="resolved" fill="var(--color-resolved)" radius={4}>
+              <Bar yAxisId="left" dataKey="resolved" fill="var(--color-resolved)" radius={4} cursor="pointer">
                   <LabelList dataKey="resolved" position="top" offset={5} fontSize={12} />
               </Bar>
-              <Bar yAxisId="left" dataKey="underReview" fill="var(--color-underReview)" radius={4}>
+              <Bar yAxisId="left" dataKey="underReview" fill="var(--color-underReview)" radius={4} cursor="pointer">
                   <LabelList dataKey="underReview" position="top" offset={5} fontSize={12} />
               </Bar>
               <Line yAxisId="right" type="monotone" dataKey="avgClosure" stroke="var(--color-avgClosure)" strokeWidth={2} dot={{ r: 4 }}>

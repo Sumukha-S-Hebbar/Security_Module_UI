@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useMemo, useState } from 'react';
@@ -105,7 +106,7 @@ export function IncidentStatusBreakdown({
         return (
           <div className="flex items-center gap-2 font-medium">
             <span className="relative flex h-2 w-2">
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-chart-3"></span>
             </span>
             <span>Under Review</span>
           </div>
@@ -147,8 +148,8 @@ export function IncidentStatusBreakdown({
       status: 'Under Review',
       count: summary.underReview,
       icon: ShieldQuestion,
-      className: 'bg-primary/10 text-primary',
-      ring: 'ring-primary',
+      className: 'bg-chart-3/10 text-chart-3',
+      ring: 'ring-chart-3',
     },
     {
       status: 'Resolved',
