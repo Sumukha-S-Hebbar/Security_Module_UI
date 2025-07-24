@@ -25,7 +25,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { ArrowLeft, MapPin, Briefcase, ShieldAlert, FileDown, Users } from 'lucide-react';
+import { ArrowLeft, MapPin, Briefcase, ShieldAlert, FileDown, Users, Phone, Mail } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
@@ -184,7 +184,7 @@ export default function SiteReportPage() {
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <Card>
           <CardHeader>
             <div className="flex flex-wrap justify-between items-start gap-4">
@@ -195,19 +195,12 @@ export default function SiteReportPage() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-sm mt-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="text-sm mt-2 grid grid-cols-1 gap-4">
               <div className="flex items-start gap-3">
                 <MapPin className="h-5 w-5 mt-0.5 text-primary" />
                 <div>
                   <p className="font-semibold">Address</p>
                   <p className="font-medium text-muted-foreground">{site.address}</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <Briefcase className="h-5 w-5 mt-0.5 text-primary" />
-                <div>
-                  <p className="font-semibold">Assigned Agency</p>
-                  <p className="font-medium text-muted-foreground">{agency ? agency.name : 'Unassigned'}</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
@@ -218,7 +211,7 @@ export default function SiteReportPage() {
                 </div>
               </div>
               {site.latitude && site.longitude && (
-                <div className="flex items-start gap-3 sm:col-span-2">
+                <div className="flex items-start gap-3">
                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-globe mt-0.5 text-primary"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
                   <div>
                     <p className="font-semibold">Coordinates</p>
@@ -256,7 +249,30 @@ export default function SiteReportPage() {
                 )}
             </CardContent>
         </Card>
+
+        {agency && (
+          <Card>
+            <CardHeader>
+                <CardTitle className="flex items-center gap-2"><Briefcase className="h-5 w-5"/>Agency Details</CardTitle>
+                <CardDescription>Security provider for this site.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+                <div>
+                    <p className="font-semibold text-base">{agency.name}</p>
+                    <p className="text-sm text-muted-foreground font-medium">ID: {agency.id}</p>
+                </div>
+                <div className="text-sm space-y-2 pt-2 border-t">
+                  <div className="flex items-center gap-2"><Phone className="h-4 w-4" /> <a href={`tel:${agency.phone}`} className="hover:underline">{agency.phone}</a></div>
+                  <div className="flex items-center gap-2"><Mail className="h-4 w-4" /> <a href={`mailto:${agency.email}`} className="hover:underline">{agency.email}</a></div>
+                </div>
+                 <Button asChild variant="link" className="p-0 h-auto font-medium">
+                    <Link href={`/towerco/agencies/${agency.id}`}>View Full Agency Report</Link>
+                </Button>
+            </CardContent>
+          </Card>
+        )}
       </div>
+
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between gap-4">
