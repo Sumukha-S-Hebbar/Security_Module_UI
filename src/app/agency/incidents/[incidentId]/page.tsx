@@ -248,7 +248,7 @@ export default function AgencyIncidentReportPage() {
             <p className="text-muted-foreground">Detailed overview for Incident #{incident.id}.</p>
           </div>
         </div>
-        <Button onClick={handleDownloadReport}>
+        <Button onClick={handleDownloadReport} className="bg-[#00B4D8] hover:bg-[#00B4D8]/90">
           <FileDown className="mr-2 h-4 w-4" />
           Download Full Report
         </Button>
@@ -264,16 +264,16 @@ export default function AgencyIncidentReportPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="text-sm space-y-3">
-              <div>
-                <p className="font-bold text-lg">{site.name}</p>
-                <p className="font-medium text-muted-foreground">ID: {site.id}</p>
+              <div className="font-medium">
+                  <div className="text-xl font-bold">{site.name}</div>
+                  <p className="font-medium">ID: {site.id}</p>
               </div>
               <div className='font-medium pt-2 border-t'>
-                <p className='text-muted-foreground flex items-start gap-2'><MapPin className="h-4 w-4 mt-0.5" /><span>{site.address}</span></p>
+                <p className='flex items-start gap-2'><MapPin className="h-4 w-4 mt-0.5" /><span>{site.address}</span></p>
               </div>
               {site.latitude && site.longitude && (
                 <div className='font-medium'>
-                    <p className='text-muted-foreground flex items-start gap-2'>
+                    <p className='flex items-start gap-2'>
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-globe mt-0.5 shrink-0"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
                         <span>{site.latitude}, {site.longitude}</span>
                     </p>
@@ -291,12 +291,9 @@ export default function AgencyIncidentReportPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="text-sm space-y-2">
-               <div>
-                  <p className="font-bold text-lg">{agency.name}</p>
-                  <p className="font-medium text-muted-foreground">ID: {agency.id}</p>
-              </div>
-              <div className='font-medium pt-2 border-t'>
-                <p className='text-muted-foreground flex items-start gap-2'><MapPin className="h-4 w-4 mt-0.5" /><span>{agency.address}</span></p>
+               <div className="font-medium">
+                  <div className="text-xl font-bold">{agency.name}</div>
+                  <p className="font-medium">ID: {agency.id}</p>
               </div>
               <div className="flex items-center gap-2 font-medium pt-2 border-t"><Phone className="h-4 w-4" /> <a href={`tel:${agency.phone}`} className="hover:underline">{agency.phone}</a></div>
               <div className="flex items-center gap-2 font-medium"><Mail className="h-4 w-4" /> <a href={`mailto:${agency.email}`} className="hover:underline">{agency.email}</a></div>
@@ -312,8 +309,8 @@ export default function AgencyIncidentReportPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="text-sm space-y-2">
-              <div>
-                <p className="font-bold text-lg">{patrollingOfficer.name}</p>
+              <div className="font-medium">
+                <div className="text-xl font-bold">{patrollingOfficer.name}</div>
               </div>
               <div className="flex items-center gap-2 font-medium pt-2 border-t"><Phone className="h-4 w-4" /> <a href={`tel:${patrollingOfficer.phone}`} className="hover:underline">{patrollingOfficer.phone}</a></div>
               <div className="flex items-center gap-2 font-medium"><Mail className="h-4 w-4" /> <a href={`mailto:${patrollingOfficer.email}`} className="hover:underline">{patrollingOfficer.email}</a></div>
@@ -329,8 +326,8 @@ export default function AgencyIncidentReportPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="text-sm space-y-2">
-               <div>
-                  <p className="font-bold text-lg">{guard.name}</p>
+               <div className="font-medium">
+                  <div className="text-xl font-bold">{guard.name}</div>
                 </div>
               <div className="flex items-center gap-2 font-medium pt-2 border-t"><Phone className="h-4 w-4" /> <a href={`tel:${guard.phone}`} className="hover:underline">{guard.phone}</a></div>
             </CardContent>
