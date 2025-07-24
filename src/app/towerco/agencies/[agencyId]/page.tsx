@@ -432,22 +432,21 @@ export default function AgencyReportPage() {
               </div>
               <div className="w-full h-full min-h-[300px]">
                 <ChartContainer config={chartConfig} className="w-full h-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={performanceBreakdownChartData} margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
-                      <CartesianGrid vertical={false} />
-                      <XAxis dataKey="name" />
-                      <YAxis domain={[0, 100]} tickFormatter={(value) => `${value}%`} />
-                      <ChartTooltip
-                        cursor={{ fill: 'hsl(var(--accent) / 0.1)' }}
-                        content={<ChartTooltipContent indicator="dot" />}
-                      />
-                      <ChartLegend />
-                      <Bar dataKey="value" name="Incident Resolution" fill="var(--color-incidentResolutionRate)" radius={4} />
-                      <Bar dataKey="value" name="Perimeter Accuracy" fill="var(--color-guardPerimeterAccuracy)" radius={4} />
-                      <Bar dataKey="value" name="Selfie Accuracy" fill="var(--color-guardSelfieAccuracy)" radius={4} />
-                      <Bar dataKey="value" name="Site Visits" fill="var(--color-officerSiteVisitRate)" radius={4} />
-                    </BarChart>
-                  </ResponsiveContainer>
+                  <BarChart data={performanceBreakdownChartData} margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+                    <CartesianGrid vertical={false} />
+                    <XAxis dataKey="name" tickMargin={8} />
+                    <YAxis domain={[0, 100]} tickFormatter={(value) => `${value}%`} />
+                    <ChartTooltip
+                      cursor={{ fill: 'hsl(var(--accent) / 0.1)' }}
+                      content={<ChartTooltipContent indicator="dot" />}
+                    />
+                    <ChartLegend content={<ChartLegendContent />} />
+                    <Bar dataKey="value" radius={4}>
+                      {performanceBreakdownChartData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.fill} />
+                      ))}
+                    </Bar>
+                  </BarChart>
                 </ChartContainer>
               </div>
             </div>
@@ -609,3 +608,4 @@ export default function AgencyReportPage() {
     </div>
   );
 }
+
