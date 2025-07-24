@@ -218,21 +218,16 @@ export default function SiteReportPage() {
                 </div>
               )}
               <div className="flex items-start gap-3">
-                <ShieldAlert className="mt-0.5 text-primary" />
-                <div>
-                  <button
-                    onClick={handleScrollToIncidents}
-                    className="font-semibold text-accent hover:underline text-left"
-                  >
-                    Total Incidents
-                  </button>
-                  <button
-                    onClick={handleScrollToIncidents}
-                    className="p-0 h-auto font-medium text-base text-accent hover:underline flex"
-                  >
-                    {siteIncidents.length}
-                  </button>
-                </div>
+                <button
+                  onClick={handleScrollToIncidents}
+                  className="flex items-start gap-3 text-left text-accent hover:underline"
+                >
+                  <ShieldAlert className="mt-0.5 text-primary" />
+                  <div>
+                    <span className="font-semibold">Total Incidents</span>
+                    <p className="font-medium text-base">{siteIncidents.length}</p>
+                  </div>
+                </button>
               </div>
             </div>
           </CardContent>
