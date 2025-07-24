@@ -85,7 +85,7 @@ export default function AgencyHomePage() {
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Agency Dashboard</h1>
-          <p className="text-muted-foreground font-medium">
+          <p className="text-muted-foreground">
             Welcome! Here's a high-level overview of your operations.
           </p>
         </div>
@@ -94,20 +94,20 @@ export default function AgencyHomePage() {
       <Card className="border-destructive bg-destructive/10">
         <CardHeader className="flex flex-row items-center gap-2">
           <AlertTriangle className="w-6 h-6 text-destructive" />
-          <CardTitle style={{color: '#2F2F2F'}} className='font-bold'>Active Emergency Incidents</CardTitle>
+          <CardTitle>Active Emergency Incidents</CardTitle>
         </CardHeader>
         <CardContent>
           {activeEmergencies.length > 0 ? (
             <Table>
               <TableHeader>
                 <TableRow className="border-destructive/20">
-                  <TableHead style={{color: '#2F2F2F'}} className="font-bold">Incident ID</TableHead>
-                  <TableHead style={{color: '#2F2F2F'}} className="font-bold">Site Name</TableHead>
-                  <TableHead style={{color: '#2F2F2F'}} className="font-bold">Guard</TableHead>
-                  <TableHead style={{color: '#2F2F2F'}} className="font-bold">Patrolling Officer</TableHead>
-                  <TableHead style={{color: '#2F2F2F'}} className="font-bold">Date</TableHead>
-                  <TableHead style={{color: '#2F2F2F'}} className="font-bold">Time</TableHead>
-                  <TableHead style={{color: '#2F2F2F'}} className="font-bold">Contact</TableHead>
+                  <TableHead>Incident ID</TableHead>
+                  <TableHead>Site Name</TableHead>
+                  <TableHead>Guard</TableHead>
+                  <TableHead>Patrolling Officer</TableHead>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Time</TableHead>
+                  <TableHead>Contact</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -124,19 +124,19 @@ export default function AgencyHomePage() {
                       className="cursor-pointer border-destructive/20"
                     >
                       <TableCell>
-                        <Button asChild variant="link" className="p-0 h-auto" style={{color: '#2F2F2F'}} onClick={(e) => e.stopPropagation()}>
-                          <Link href={`/agency/incidents/${incident.id}`} className='font-medium'>{incident.id}</Link>
+                        <Button asChild variant="link" className="p-0 h-auto" onClick={(e) => e.stopPropagation()}>
+                          <Link href={`/agency/incidents/${incident.id}`}>{incident.id}</Link>
                         </Button>
                       </TableCell>
-                      <TableCell style={{color: '#2F2F2F'}} className='font-medium'>
+                      <TableCell>
                         {siteDetails?.name || 'N/A'}
                       </TableCell>
-                      <TableCell style={{color: '#2F2F2F'}} className='font-medium'>{guardDetails?.name || 'N/A'}</TableCell>
-                      <TableCell style={{color: '#2F2F2F'}} className='font-medium'>
+                      <TableCell>{guardDetails?.name || 'N/A'}</TableCell>
+                      <TableCell>
                         {patrollingOfficerDetails?.name || 'N/A'}
                       </TableCell>
-                      <TableCell style={{color: '#2F2F2F'}} className='font-medium'>{incidentDate.toLocaleDateString()}</TableCell>
-                      <TableCell style={{color: '#2F2F2F'}} className='font-medium'>{incidentDate.toLocaleTimeString()}</TableCell>
+                      <TableCell>{incidentDate.toLocaleDateString()}</TableCell>
+                      <TableCell>{incidentDate.toLocaleTimeString()}</TableCell>
                       <TableCell>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
@@ -170,7 +170,7 @@ export default function AgencyHomePage() {
               </TableBody>
             </Table>
           ) : (
-            <p className="text-center py-4 font-medium" style={{color: '#2F2F2F'}}>
+            <p className="text-center py-4">
               No active emergency incidents. All systems are normal.
             </p>
           )}
