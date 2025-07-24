@@ -178,7 +178,7 @@ export default function TowercoHomePage() {
   if (!data || !data.currentUserOrg) {
     return (
         <div className="p-4 sm:p-6 lg:p-8">
-            <p>Could not load dashboard data for your organization.</p>
+            <p className="font-medium">Could not load dashboard data for your organization.</p>
         </div>
     )
   }
@@ -190,7 +190,7 @@ export default function TowercoHomePage() {
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">{portalName} Dashboard</h1>
-          <p className="text-muted-foreground">
+          <p className="text-muted-foreground font-medium">
             Welcome, {data.currentUserOrg.name}! Here's a high-level overview of your assets.
           </p>
         </div>
@@ -213,7 +213,7 @@ export default function TowercoHomePage() {
                           <TableHead className="text-foreground">Patrolling Officer</TableHead>
                           <TableHead className="text-foreground">Guard</TableHead>
                           <TableHead className="text-foreground">Incident Time</TableHead>
-                          <TableHead className="text-right text-foreground">Contact</TableHead>
+                          <TableHead className="text-foreground">Contact</TableHead>
                           </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -246,7 +246,7 @@ export default function TowercoHomePage() {
                               </TableCell>
                               <TableCell>{guardDetails?.name || 'N/A'}</TableCell>
                               <TableCell>{incidentDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</TableCell>
-                              <TableCell className="text-right">
+                              <TableCell>
                                   <DropdownMenu>
                                   <DropdownMenuTrigger asChild>
                                       <Button variant="destructive" size="sm" onClick={(e) => e.stopPropagation()}>
@@ -288,7 +288,7 @@ export default function TowercoHomePage() {
                   </Table>
               </div>
           ) : (
-              <p className="text-center py-4">
+              <p className="text-center py-4 font-medium">
               No active emergency incidents. All systems are normal.
               </p>
           )}
