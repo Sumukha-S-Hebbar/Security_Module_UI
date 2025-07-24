@@ -8,7 +8,7 @@ import { sites } from '@/lib/data/sites';
 import { securityAgencies } from '@/lib/data/security-agencies';
 import { incidents } from '@/lib/data/incidents';
 import { guards } from '@/lib/data/guards';
-import type { Incident } from '@/types';
+import type { Incident, Guard } from '@/types';
 import {
   Card,
   CardContent,
@@ -25,14 +25,14 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, MapPin, Building2, Briefcase, ShieldAlert, FileDown } from 'lucide-react';
+import { ArrowLeft, MapPin, Briefcase, ShieldAlert, FileDown, Users } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartConfig } from '@/components/ui/chart';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 
 const chartConfig = {
@@ -69,6 +69,7 @@ export default function SiteReportPage() {
   const siteIncidents = incidents.filter(
     (incident) => incident.siteId === site.id
   );
+  const siteGuards = guards.filter(g => site.guards.includes(g.id));
   
   const availableYears = useMemo(() => {
     const years = new Set(
@@ -228,39 +229,68 @@ export default function SiteReportPage() {
         </CardContent>
       </Card>
       
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between gap-4">
-            <div>
-                <CardTitle>Incident Trend</CardTitle>
-                <CardDescription>Monthly incident counts for {site.name}.</CardDescription>
-            </div>
-            <Select value={selectedChartYear} onValueChange={setSelectedChartYear}>
-                <SelectTrigger className="w-[120px] font-medium">
-                    <SelectValue placeholder="Select Year" />
-                </SelectTrigger>
-                <SelectContent>
-                    {availableYears.map((year) => (
-                    <SelectItem key={year} value={year} className="font-medium">
-                        {year}
-                    </SelectItem>
-                    ))}
-                </SelectContent>
-            </Select>
-        </CardHeader>
-        <CardContent>
-            <ChartContainer config={chartConfig} className="h-[250px] w-full">
-                <ResponsiveContainer>
-                    <LineChart data={monthlyIncidentData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="month" fontSize={12} tickLine={false} axisLine={false} />
-                        <YAxis fontSize={12} tickLine={false} axisLine={false} allowDecimals={false} />
-                        <ChartTooltip content={<ChartTooltipContent />} />
-                        <Line type="monotone" dataKey="incidents" stroke="var(--color-incidents)" strokeWidth={2} dot={{ r: 4 }} />
-                    </LineChart>
-                </ResponsiveContainer>
-            </ChartContainer>
-        </CardContent>
-      </Card>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between gap-4">
+              <div>
+                  <CardTitle>Incident Trend</CardTitle>
+                  <CardDescription>Monthly incident counts for {site.name}.</CardDescription>
+              </div>
+              <Select value={selectedChartYear} onValueChange={setSelectedChartYear}>
+                  <SelectTrigger className="w-[120px] font-medium">
+                      <SelectValue placeholder="Select Year" />
+                  </SelectTrigger>
+                  <SelectContent>
+                      {availableYears.map((year) => (
+                      <SelectItem key={year} value={year} className="font-medium">
+                          {year}
+                      </SelectItem>
+                      ))}
+                  </SelectContent>
+              </Select>
+          </CardHeader>
+          <CardContent>
+              <ChartContainer config={chartConfig} className="h-[250px] w-full">
+                  <ResponsiveContainer>
+                      <LineChart data={monthlyIncidentData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="month" fontSize={12} tickLine={false} axisLine={false} />
+                          <YAxis fontSize={12} tickLine={false} axisLine={false} allowDecimals={false} />
+                          <ChartTooltip content={<ChartTooltipContent />} />
+                          <Line type="monotone" dataKey="incidents" stroke="var(--color-incidents)" strokeWidth={2} dot={{ r: 4 }} />
+                      </LineChart>
+                  </ResponsiveContainer>
+              </ChartContainer>
+          </CardContent>
+        </Card>
+        
+        <Card>
+            <CardHeader>
+                <CardTitle className="flex items-center gap-2"><Users className="h-5 w-5"/>Assigned Guards</CardTitle>
+                <CardDescription>Guards currently assigned to {site.name}.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                {siteGuards.length > 0 ? (
+                    <div className="space-y-4">
+                        {siteGuards.map(guard => (
+                            <div key={guard.id} className="flex items-center gap-4">
+                                <Avatar className="h-12 w-12">
+                                    <AvatarImage src={guard.avatar} alt={guard.name} />
+                                    <AvatarFallback>{guard.name.charAt(0)}</AvatarFallback>
+                                </Avatar>
+                                <div>
+                                    <p className="font-semibold text-base">{guard.name}</p>
+                                    <p className="text-sm text-muted-foreground font-medium">ID: {guard.id}</p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <p className="text-sm text-muted-foreground text-center py-4 font-medium">No guards are currently assigned to this site.</p>
+                )}
+            </CardContent>
+        </Card>
+      </div>
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between gap-4">
