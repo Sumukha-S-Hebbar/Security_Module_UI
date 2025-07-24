@@ -270,7 +270,7 @@ export default function SiteReportPage() {
                                 </Avatar>
                                 <div>
                                     <p className="font-semibold text-base">{guard.name}</p>
-                                    <p className="font-medium">ID: <Link href="#" className="text-accent hover:underline">{guard.id}</Link></p>
+                                    <p className="font-medium">Contact: {guard.phone}</p>
                                 </div>
                             </div>
                         ))}
