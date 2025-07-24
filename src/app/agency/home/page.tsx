@@ -100,14 +100,14 @@ export default function AgencyHomePage() {
           {activeEmergencies.length > 0 ? (
             <Table>
               <TableHeader>
-                <TableRow>
-                  <TableHead>Incident ID</TableHead>
-                  <TableHead>Site Name</TableHead>
-                  <TableHead>Guard</TableHead>
-                  <TableHead>Patrolling Officer</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Time</TableHead>
-                  <TableHead>Contact</TableHead>
+                <TableRow className="border-destructive-foreground/20">
+                  <TableHead className="text-destructive-foreground">Incident ID</TableHead>
+                  <TableHead className="text-destructive-foreground">Site Name</TableHead>
+                  <TableHead className="text-destructive-foreground">Guard</TableHead>
+                  <TableHead className="text-destructive-foreground">Patrolling Officer</TableHead>
+                  <TableHead className="text-destructive-foreground">Date</TableHead>
+                  <TableHead className="text-destructive-foreground">Time</TableHead>
+                  <TableHead className="text-destructive-foreground">Contact</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -121,7 +121,7 @@ export default function AgencyHomePage() {
                     <TableRow 
                       key={incident.id}
                       onClick={() => router.push(`/agency/incidents/${incident.id}`)}
-                      className="cursor-pointer"
+                      className="cursor-pointer border-destructive-foreground/20"
                     >
                       <TableCell>
                         <Button asChild variant="link" className="p-0 h-auto font-medium text-destructive-foreground hover:text-destructive-foreground/80" onClick={(e) => e.stopPropagation()}>
