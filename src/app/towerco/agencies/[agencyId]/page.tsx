@@ -553,10 +553,11 @@ export default function AgencyReportPage() {
                             <span>{siteIncidents.length}</span>
                         </div>
                       </TableCell>
-                      <TableCell className="text-center font-medium">
-                        <Badge className="bg-chart-2 text-primary-foreground hover:bg-chart-2/90">
-                          {resolvedCount}
-                        </Badge>
+                      <TableCell className="text-center">
+                        <div className="flex items-center justify-center gap-2 font-medium">
+                          <CheckCircle className="h-4 w-4 text-chart-2" />
+                          <span>{resolvedCount}</span>
+                        </div>
                       </TableCell>
                     </TableRow>
                   );
