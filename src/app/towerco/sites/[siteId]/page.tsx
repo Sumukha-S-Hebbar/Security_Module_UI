@@ -169,13 +169,6 @@ export default function SiteReportPage() {
               </div>
             </div>
             <div className="flex items-start gap-3">
-              <Building2 className="h-5 w-5 mt-0.5 text-primary" />
-              <div>
-                <p className="font-semibold">TowerCo</p>
-                <p className="font-medium text-muted-foreground">{site.towerco}</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
               <Briefcase className="h-5 w-5 mt-0.5 text-primary" />
               <div>
                 <p className="font-semibold">Assigned Agency</p>
