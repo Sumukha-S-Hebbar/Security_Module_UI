@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useParams } from 'next/navigation';
@@ -392,51 +393,50 @@ export default function AgencyReportPage() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-3 items-center gap-6">
-              <div className="md:col-span-1 flex flex-col items-center justify-center">
-                  <div className="relative h-48 w-48">
-                    <ChartContainer config={chartConfig}>
-                      <ResponsiveContainer>
-                        <PieChart>
-                          <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
-                          <Pie
-                            data={complianceData}
-                            cx="50%"
-                            cy="50%"
-                            innerRadius="60%"
-                            outerRadius="80%"
-                            paddingAngle={0}
-                            dataKey="value"
-                            stroke="none"
-                          >
-                            {complianceData.map((entry, index) => (
-                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                            ))}
-                             <Label
-                                content={({ viewBox }) => {
-                                if (viewBox && 'cx' in viewBox && 'cy' in viewBox) {
-                                    return (
-                                    <text
-                                        x={viewBox.cx}
-                                        y={viewBox.cy}
-                                        textAnchor="middle"
-                                        dominantBaseline="middle"
-                                        className="text-2xl font-bold"
-                                        style={{ fill: getPerformanceColor() }}
-                                    >
-                                        {`${performanceData.performance}%`}
-                                    </text>
-                                    );
-                                }
-                                }}
-                            />
-                          </Pie>
-                        </PieChart>
-                      </ResponsiveContainer>
-                    </ChartContainer>
-                  </div>
-                  <p className="text-lg font-medium text-center mt-2">Overall Performance</p>
-              </div>
-
+               <div className="md:col-span-1 flex flex-col items-center justify-center">
+                    <div className="relative h-48 w-48">
+                         <ChartContainer config={chartConfig}>
+                            <ResponsiveContainer width="100%" height="100%">
+                                <PieChart>
+                                <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
+                                <Pie
+                                    data={complianceData}
+                                    cx="50%"
+                                    cy="50%"
+                                    innerRadius="70%"
+                                    outerRadius="85%"
+                                    paddingAngle={0}
+                                    dataKey="value"
+                                    stroke="none"
+                                >
+                                    {complianceData.map((entry, index) => (
+                                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                    ))}
+                                    <Label
+                                        content={({ viewBox }) => {
+                                        if (viewBox && 'cx' in viewBox && 'cy' in viewBox) {
+                                            return (
+                                            <text
+                                                x={viewBox.cx}
+                                                y={viewBox.cy}
+                                                textAnchor="middle"
+                                                dominantBaseline="middle"
+                                                className="fill-foreground text-2xl font-bold"
+                                                style={{ fill: getPerformanceColor() }}
+                                            >
+                                                {`${performanceData.performance}%`}
+                                            </text>
+                                            );
+                                        }
+                                        }}
+                                    />
+                                </Pie>
+                                </PieChart>
+                            </ResponsiveContainer>
+                        </ChartContainer>
+                    </div>
+                    <p className="text-lg font-medium text-center mt-2">Overall Performance</p>
+                </div>
               <div className="md:col-span-2 h-64">
                 <ChartContainer config={chartConfig}>
                     <ResponsiveContainer>
@@ -628,5 +628,3 @@ export default function AgencyReportPage() {
     </div>
   );
 }
-
-    
