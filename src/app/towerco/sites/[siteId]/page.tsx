@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useParams } from 'next/navigation';
@@ -49,6 +50,7 @@ export default function SiteReportPage() {
   const siteId = params.siteId as string;
   const [selectedTableYear, setSelectedTableYear] = useState('all');
   const [selectedTableMonth, setSelectedTableMonth] = useState('all');
+  const [selectedTableStatus, setSelectedTableStatus] = useState('all');
   const incidentsTableRef = useRef<HTMLDivElement>(null);
   
   const site = sites.find((s) => s.id === siteId);
@@ -86,9 +88,10 @@ export default function SiteReportPage() {
       const incidentDate = new Date(incident.incidentTime);
       const yearMatch = selectedTableYear === 'all' || incidentDate.getFullYear().toString() === selectedTableYear;
       const monthMatch = selectedTableMonth === 'all' || incidentDate.getMonth().toString() === selectedTableMonth;
-      return yearMatch && monthMatch;
+      const statusMatch = selectedTableStatus === 'all' || incident.status.toLowerCase().replace(' ', '-') === selectedTableStatus;
+      return yearMatch && monthMatch && statusMatch;
     });
-  }, [siteIncidents, selectedTableYear, selectedTableMonth]);
+  }, [siteIncidents, selectedTableYear, selectedTableMonth, selectedTableStatus]);
 
   const monthlyIncidentData = useMemo(() => {
     const months = [
@@ -324,6 +327,17 @@ export default function SiteReportPage() {
             <CardDescription className="font-medium">A log of all emergency incidents reported at this site.</CardDescription>
           </div>
           <div className="flex items-center gap-2">
+              <Select value={selectedTableStatus} onValueChange={setSelectedTableStatus}>
+                    <SelectTrigger className="w-[180px] font-medium hover:bg-accent hover:text-accent-foreground">
+                        <SelectValue placeholder="Filter by status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all" className="font-medium">All Statuses</SelectItem>
+                        <SelectItem value="active" className="font-medium">Active</SelectItem>
+                        <SelectItem value="under-review" className="font-medium">Under Review</SelectItem>
+                        <SelectItem value="resolved" className="font-medium">Resolved</SelectItem>
+                    </SelectContent>
+                </Select>
               {availableYears.length > 0 && (
                 <Select value={selectedTableYear} onValueChange={setSelectedTableYear}>
                   <SelectTrigger className="w-[120px] font-medium hover:bg-accent hover:text-accent-foreground">

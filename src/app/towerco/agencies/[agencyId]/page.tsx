@@ -284,6 +284,7 @@ export default function AgencyReportPage() {
   
   const [historySelectedYear, setHistorySelectedYear] = useState<string>('all');
   const [historySelectedMonth, setHistorySelectedMonth] = useState<string>('all');
+  const [historySelectedStatus, setHistorySelectedStatus] = useState<string>('all');
 
   const availableYears = useMemo(() => {
     const yearsFromIncidents = new Set(
@@ -298,9 +299,10 @@ export default function AgencyReportPage() {
       const incidentDate = new Date(incident.incidentTime);
       const yearMatch = historySelectedYear === 'all' || incidentDate.getFullYear().toString() === historySelectedYear;
       const monthMatch = historySelectedMonth === 'all' || incidentDate.getMonth().toString() === historySelectedMonth;
-      return yearMatch && monthMatch;
+      const statusMatch = historySelectedStatus === 'all' || incident.status.toLowerCase().replace(' ', '-') === historySelectedStatus;
+      return yearMatch && monthMatch && statusMatch;
     });
-  }, [agencyIncidents, historySelectedYear, historySelectedMonth]);
+  }, [agencyIncidents, historySelectedYear, historySelectedMonth, historySelectedStatus]);
 
   const getSiteById = (id: string) => sites.find(s => s.id === id);
   const getGuardById = (id: string) => guards.find(g => g.id === id);
@@ -358,7 +360,7 @@ export default function AgencyReportPage() {
 
               <div className="pt-4 border-t">
                 <h4 className="font-semibold mb-4 text-lg">Operational Overview</h4>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm text-center">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-center">
                   <div className="flex flex-col items-center gap-1">
                     <Building2 className="h-8 w-8 text-primary" />
                     <p className="font-medium text-foreground">Sites Assigned</p>
@@ -571,6 +573,17 @@ export default function AgencyReportPage() {
                 </CardDescription>
             </div>
             <div className="flex items-center gap-2">
+                <Select value={historySelectedStatus} onValueChange={setHistorySelectedStatus}>
+                    <SelectTrigger className="w-[180px] font-medium hover:bg-accent hover:text-accent-foreground">
+                        <SelectValue placeholder="Filter by status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all" className="font-medium">All Statuses</SelectItem>
+                        <SelectItem value="active" className="font-medium">Active</SelectItem>
+                        <SelectItem value="under-review" className="font-medium">Under Review</SelectItem>
+                        <SelectItem value="resolved" className="font-medium">Resolved</SelectItem>
+                    </SelectContent>
+                </Select>
                 <Select value={historySelectedYear} onValueChange={setHistorySelectedYear}>
                     <SelectTrigger className="w-[120px] font-medium hover:bg-accent hover:text-accent-foreground">
                     <SelectValue placeholder="Select Year" />
