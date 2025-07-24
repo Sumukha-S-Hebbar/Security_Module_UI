@@ -159,8 +159,8 @@ export function SiteStatusBreakdown({ sites, agencies }: { sites: Site[]; agenci
                             key={site.id} 
                             onClick={selectedSection === 'assigned' ? () => router.push(`/towerco/sites/${site.id}`) : undefined}
                             className={cn(
-                              'group',
-                              selectedSection === 'assigned' && 'cursor-pointer hover:bg-accent'
+                              'group hover:bg-accent hover:text-accent-foreground',
+                              selectedSection === 'assigned' && 'cursor-pointer'
                             )}
                           >
                             <TableCell>
