@@ -4,7 +4,7 @@
 
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import { securityAgencies } from '@/lib/data/security-agencies';
 import { sites } from '@/lib/data/sites';
 import { incidents } from '@/lib/data/incidents';
@@ -110,6 +110,9 @@ export default function AgencyReportPage() {
 
   const agency = securityAgencies.find((a) => a.id === agencyId);
   const loggedInOrg = organizations.find((o) => o.id === LOGGED_IN_ORG_ID);
+
+  const assignedSitesRef = useRef<HTMLDivElement>(null);
+  const incidentsHistoryRef = useRef<HTMLDivElement>(null);
 
 
   if (!agency || !loggedInOrg) {
@@ -307,6 +310,16 @@ export default function AgencyReportPage() {
   const getSiteById = (id: string) => sites.find(s => s.id === id);
   const getGuardById = (id: string) => guards.find(g => g.id === id);
 
+  const handleScrollTo = (ref: React.RefObject<HTMLDivElement>) => {
+    ref.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+  
+  const handleIncidentsFilterAndScroll = (status: string) => {
+    setHistorySelectedStatus(status);
+    handleScrollTo(incidentsHistoryRef);
+  };
+
+
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6">
        <div className="flex flex-wrap items-center justify-between gap-4">
@@ -361,21 +374,21 @@ export default function AgencyReportPage() {
               <div className="pt-4 border-t">
                 <h4 className="font-semibold mb-4 text-lg">Operational Overview</h4>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-center">
-                  <div className="flex flex-col items-center gap-1">
+                  <button onClick={() => handleScrollTo(assignedSitesRef)} className="flex flex-col items-center gap-1 rounded-lg p-2 hover:bg-accent transition-colors">
                     <Building2 className="h-8 w-8 text-primary" />
                     <p className="font-medium text-foreground">Sites Assigned</p>
                     <p className="font-bold text-lg text-foreground">{agencySites.length}</p>
-                  </div>
-                  <div className="flex flex-col items-center gap-1">
+                  </button>
+                  <button onClick={() => handleIncidentsFilterAndScroll('all')} className="flex flex-col items-center gap-1 rounded-lg p-2 hover:bg-accent transition-colors">
                     <ShieldAlert className="h-8 w-8 text-primary" />
                     <p className="font-medium text-foreground">Total Incidents</p>
                     <p className="font-bold text-lg text-foreground">{agencyIncidents.length}</p>
-                  </div>
-                  <div className="flex flex-col items-center gap-1">
+                  </button>
+                  <button onClick={() => handleIncidentsFilterAndScroll('resolved')} className="flex flex-col items-center gap-1 rounded-lg p-2 hover:bg-accent transition-colors">
                     <CheckCircle className="h-8 w-8 text-primary" />
                     <p className="font-medium text-foreground">Incidents Resolved</p>
                     <p className="font-bold text-lg text-foreground">{agencyIncidents.filter((i) => i.status === 'Resolved').length}</p>
-                  </div>
+                  </button>
                 </div>
               </div>
           </CardContent>
@@ -486,7 +499,7 @@ export default function AgencyReportPage() {
         </Card>
       </div>
 
-      <Card>
+      <Card ref={assignedSitesRef}>
         <CardHeader>
           <CardTitle>Assigned Sites</CardTitle>
           <CardDescription className="font-medium">
@@ -564,7 +577,7 @@ export default function AgencyReportPage() {
           )}
         </CardContent>
       </Card>
-      <Card>
+      <Card ref={incidentsHistoryRef}>
         <CardHeader className="flex flex-row items-center justify-between gap-4">
             <div>
                 <CardTitle>Incidents History</CardTitle>
