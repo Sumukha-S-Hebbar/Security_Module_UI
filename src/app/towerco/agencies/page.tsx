@@ -22,7 +22,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -108,7 +107,7 @@ export default function TowercoAgenciesPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
     const [isAddAgencyDialogOpen, setIsAddAgencyDialogOpen] = useState(false);
-    const [isUploading, setIsUploading] = useState(false);
+    const [isUploading, setIsUploading] = useState(isUploading);
     const [isAddingAgency, setIsAddingAgency] = useState(false);
     const [expandedAgencyId, setExpandedAgencyId] = useState<string | null>(null);
     const { toast } = useToast();
@@ -279,7 +278,7 @@ export default function TowercoAgenciesPage() {
             <div className="flex flex-wrap items-center justify-between gap-4">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight">Security Agency Management</h1>
-                    <p className="text-muted-foreground">
+                    <p className="text-muted-foreground font-medium">
                         Add, view, and manage security agencies.
                     </p>
                 </div>
@@ -298,7 +297,7 @@ export default function TowercoAgenciesPage() {
                         <DialogContent>
                             <DialogHeader>
                             <DialogTitle>Upload Agency Profiles</DialogTitle>
-                            <DialogDescription>
+                            <DialogDescription className="font-medium">
                                 Upload an Excel file to add multiple security agency profiles at once.
                             </DialogDescription>
                             </DialogHeader>
@@ -320,7 +319,7 @@ export default function TowercoAgenciesPage() {
                                                     onChange={(e) => field.onChange(e.target.files)}
                                                 />
                                                 </FormControl>
-                                                <FormDescription>
+                                                <FormDescription className="font-medium">
                                                 The Excel file should contain columns: id, name, phone, email, address, city, region.
                                                 </FormDescription>
                                                 <FormMessage />
@@ -358,7 +357,7 @@ export default function TowercoAgenciesPage() {
                         <DialogContent className="max-h-[90vh] overflow-y-auto">
                             <DialogHeader>
                                 <DialogTitle>Add a New Agency</DialogTitle>
-                                <DialogDescription>
+                                <DialogDescription className="font-medium">
                                     Fill in the details below to add a new security agency profile.
                                 </DialogDescription>
                             </DialogHeader>
@@ -500,7 +499,7 @@ export default function TowercoAgenciesPage() {
                 <CardHeader>
                     <div>
                         <CardTitle>All Security Agencies</CardTitle>
-                        <CardDescription>A list of all security service providers.</CardDescription>
+                        <CardDescription className="font-medium">A list of all security service providers.</CardDescription>
                     </div>
                     <div className="flex flex-wrap items-center gap-2 pt-4">
                         <div className="relative flex-1 md:grow-0">
@@ -549,12 +548,12 @@ export default function TowercoAgenciesPage() {
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead>ID</TableHead>
-                                <TableHead>Agency</TableHead>
-                                <TableHead>Contact Info</TableHead>
-                                <TableHead>Location</TableHead>
-                                <TableHead>Sites Assigned</TableHead>
-                                <TableHead>Incidents Occurred</TableHead>
+                                <TableHead className="text-foreground">ID</TableHead>
+                                <TableHead className="text-foreground">Agency</TableHead>
+                                <TableHead className="text-foreground">Contact Info</TableHead>
+                                <TableHead className="text-foreground">Location</TableHead>
+                                <TableHead className="text-foreground">Sites Assigned</TableHead>
+                                <TableHead className="text-foreground">Incidents Occurred</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -575,7 +574,7 @@ export default function TowercoAgenciesPage() {
                                         <Fragment key={agency.id}>
                                             <TableRow onClick={() => handleRowClick(agency.id)} className="cursor-pointer hover:bg-accent hover:text-accent-foreground group">
                                                 <TableCell>
-                                                    <p className="text-primary hover:underline group-hover:text-accent-foreground">{agency.id}</p>
+                                                    <p className="text-primary group-hover:text-accent-foreground">{agency.id}</p>
                                                 </TableCell>
                                                 <TableCell>
                                                     <div className="flex items-center gap-3">
@@ -587,19 +586,19 @@ export default function TowercoAgenciesPage() {
                                                     </div>
                                                 </TableCell>
                                                 <TableCell>
-                                                    <div className="flex items-center gap-2 text-sm text-muted-foreground group-hover:text-accent-foreground">
+                                                    <div className="flex items-center gap-2 text-sm">
                                                         <Mail className="h-4 w-4 flex-shrink-0" />
                                                         <a href={`mailto:${agency.email}`} onClick={(e) => e.stopPropagation()} className="truncate hover:underline">
                                                             {agency.email}
                                                         </a>
                                                     </div>
-                                                    <div className="flex items-center gap-2 text-sm text-muted-foreground group-hover:text-accent-foreground">
+                                                    <div className="flex items-center gap-2 text-sm">
                                                         <Phone className="h-4 w-4 flex-shrink-0" />
                                                         <span>{agency.phone}</span>
                                                     </div>
                                                 </TableCell>
                                                 <TableCell>
-                                                    <div className="text-sm text-muted-foreground group-hover:text-accent-foreground">
+                                                    <div className="text-sm">
                                                         <p>{agency.address}</p>
                                                         <p>{agency.city}, {agency.region}</p>
                                                     </div>
@@ -607,7 +606,7 @@ export default function TowercoAgenciesPage() {
                                                 <TableCell>
                                                     <Button
                                                     variant="link"
-                                                    className="p-0 h-auto flex items-center gap-2 group-hover:text-accent-foreground"
+                                                    className="p-0 h-auto flex items-center gap-2 text-foreground group-hover:text-accent-foreground"
                                                     onClick={(e) => handleExpandClick(e, agency.id)}
                                                     disabled={assignedSitesCount === 0}
                                                     >
@@ -677,7 +676,7 @@ export default function TowercoAgenciesPage() {
                 </CardContent>
                 <CardFooter>
                     <div className="flex items-center justify-between w-full">
-                        <div className="text-sm text-muted-foreground">
+                        <div className="text-sm text-muted-foreground font-medium">
                             Showing {Math.min(filteredAgencies.length, ITEMS_PER_PAGE * currentPage)} of {filteredAgencies.length} agencies.
                         </div>
                         <div className="flex items-center gap-2">
@@ -689,7 +688,7 @@ export default function TowercoAgenciesPage() {
                             >
                                 Previous
                             </Button>
-                            <span className="text-sm">Page {currentPage} of {totalPages}</span>
+                            <span className="text-sm font-medium">Page {currentPage} of {totalPages}</span>
                             <Button
                                 variant="outline"
                                 size="sm"
