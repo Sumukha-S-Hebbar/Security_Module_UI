@@ -12,6 +12,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Building2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 const COLORS = {
   assigned: 'hsl(var(--chart-2))',
@@ -157,22 +158,25 @@ export function SiteStatusBreakdown({ sites, agencies }: { sites: Site[]; agenci
                           <TableRow 
                             key={site.id} 
                             onClick={selectedSection === 'assigned' ? () => router.push(`/towerco/sites/${site.id}`) : undefined}
-                            className={selectedSection === 'assigned' ? 'cursor-pointer' : ''}
+                            className={cn(
+                              'group',
+                              selectedSection === 'assigned' && 'cursor-pointer hover:bg-accent'
+                            )}
                           >
                             <TableCell>
-                                <Button asChild variant="link" className="p-0 h-auto font-medium" onClick={(e) => e.stopPropagation()}>
+                                <Button asChild variant="link" className="p-0 h-auto font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
                                     <Link href={`/towerco/sites/${site.id}`}>{site.id}</Link>
                                 </Button>
                             </TableCell>
-                            <TableCell>
+                            <TableCell className="group-hover:text-accent-foreground">
                               <p className="font-medium">{site.name}</p>
-                              <p className="text-xs text-muted-foreground font-medium">{site.address}</p>
+                              <p className="text-xs text-muted-foreground font-medium group-hover:text-accent-foreground/80">{site.address}</p>
                             </TableCell>
-                            <TableCell>
-                              <Badge variant="outline" className="font-medium">{site.region}</Badge>
+                            <TableCell className="group-hover:text-accent-foreground">
+                              <Badge variant="outline" className="font-medium group-hover:border-accent-foreground/50 group-hover:text-accent-foreground">{site.region}</Badge>
                             </TableCell>
                             {selectedSection === 'assigned' && (
-                                <TableCell className="font-medium">
+                                <TableCell className="font-medium group-hover:text-accent-foreground">
                                     {getAgencyForSite(site.id)?.name || 'N/A'}
                                 </TableCell>
                             )}
