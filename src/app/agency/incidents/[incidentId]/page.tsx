@@ -266,7 +266,6 @@ export default function AgencyIncidentReportPage() {
             <CardContent className="text-sm space-y-2">
               <p className="font-medium">{site.name}</p>
               <p className="font-medium">Address: {site.address}</p>
-              <p className="font-medium">TowerCo: {site.towerco}</p>
             </CardContent>
           </Card>
         )}
