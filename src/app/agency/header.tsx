@@ -23,17 +23,19 @@ export default function AgencyHeader() {
 
   return (
     <header className="bg-[hsl(var(--header-background))] text-[hsl(var(--header-foreground))]">
-      <div className="container mx-auto flex h-16 items-center justify-between px-4 md:px-6">
-        <div className="flex items-center gap-6">
+      <div className="container mx-auto flex h-16 items-center px-4 md:px-6">
+        <div className="flex items-center gap-6 flex-1">
           <Link href="/agency/home" className="flex items-center gap-2">
             <ShieldCheck className="w-8 h-8" />
             <span className="text-xl font-bold">GuardLink</span>
           </Link>
-          <nav className="hidden md:flex items-center gap-2">
-            <NavLinks />
-          </nav>
         </div>
-        <div className="hidden md:flex items-center gap-2">
+        
+        <nav className="hidden md:flex items-center gap-2 justify-center flex-1">
+          <NavLinks />
+        </nav>
+
+        <div className="hidden md:flex items-center gap-2 justify-end flex-1">
            <Button asChild variant="ghost" className="text-base text-header-foreground/70 hover:text-header-foreground hover:bg-header-background/50">
               <Link href="/">
                 <LogOut className="mr-2 h-5 w-5" />
@@ -41,6 +43,7 @@ export default function AgencyHeader() {
               </Link>
             </Button>
         </div>
+        
         <div className="md:hidden">
             <Sheet>
                 <SheetTrigger asChild>
