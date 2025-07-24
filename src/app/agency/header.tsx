@@ -1,6 +1,7 @@
 
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
   ShieldCheck,
@@ -20,9 +21,41 @@ import { cn } from '@/lib/utils';
 
 export default function AgencyHeader() {
   const pathname = usePathname();
+  const [isVisible, setIsVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      if (currentScrollY > lastScrollY && currentScrollY > 100) {
+        setIsVisible(false);
+      } else {
+        setIsVisible(true);
+      }
+      setLastScrollY(currentScrollY);
+    };
+
+    const handleMouseMove = (event: MouseEvent) => {
+        if (event.clientY < 60) {
+            setIsVisible(true);
+        }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('mousemove', handleMouseMove);
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('mousemove', handleMouseMove);
+    };
+  }, [lastScrollY]);
+
 
   return (
-    <header className="bg-header text-header-foreground">
+    <header className={cn(
+        "bg-header text-header-foreground sticky top-0 z-50 transition-transform duration-300",
+        !isVisible && "-translate-y-full"
+    )}>
       <div className="container mx-auto flex h-16 items-center px-4 md:px-6">
         <div className="flex items-center gap-6 flex-1">
           <Link href="/agency/home" className="flex items-center gap-2">
