@@ -319,7 +319,7 @@ export default function AgencyReportPage() {
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <Card className="lg:col-span-1">
           <CardHeader>
           <div className="flex items-center gap-4">
@@ -394,35 +394,42 @@ export default function AgencyReportPage() {
           </CardHeader>
           <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
             <div className="flex flex-col items-center justify-center gap-2">
-              <ChartContainer
-                config={chartConfig}
-                className="mx-auto aspect-square w-full max-w-[250px]"
-              >
-                <PieChart>
-                  <ChartTooltip
-                    cursor={false}
-                    content={<ChartTooltipContent hideLabel />}
-                  />
-                  <Pie
-                    data={complianceData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius="70%"
-                    outerRadius="85%"
-                    paddingAngle={0}
-                    dataKey="value"
-                    stroke="none"
-                  >
-                    {complianceData.map((entry, index) => (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={COLORS[index % COLORS.length]}
-                      />
-                    ))}
-                  </Pie>
-                </PieChart>
-              </ChartContainer>
-              <p className="text-lg font-medium text-center">Overall Performance</p>
+              <div className="relative w-full max-w-[250px] aspect-square mx-auto">
+                <ChartContainer
+                  config={chartConfig}
+                  className="absolute inset-0"
+                >
+                  <PieChart>
+                    <ChartTooltip
+                      cursor={false}
+                      content={<ChartTooltipContent hideLabel />}
+                    />
+                    <Pie
+                      data={complianceData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius="70%"
+                      outerRadius="85%"
+                      paddingAngle={0}
+                      dataKey="value"
+                      stroke="none"
+                    >
+                      {complianceData.map((entry, index) => (
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={COLORS[index % COLORS.length]}
+                        />
+                      ))}
+                    </Pie>
+                  </PieChart>
+                </ChartContainer>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="text-4xl font-bold" style={{ color: getPerformanceColor() }}>
+                    {performanceData.performance}%
+                  </span>
+                </div>
+              </div>
+              <p className="text-lg font-medium text-center mt-2">Overall Performance</p>
             </div>
             <div className="h-full">
               <ChartContainer config={chartConfig} className="w-full h-64">
