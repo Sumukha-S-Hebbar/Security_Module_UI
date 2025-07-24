@@ -163,28 +163,28 @@ export default function SiteReportPage() {
             <div className="flex items-start gap-3">
               <MapPin className="h-5 w-5 mt-0.5 text-primary" />
               <div>
-                <p className="font-semibold text-foreground">Address</p>
+                <p className="text-foreground">Address</p>
                 <p>{site.address}</p>
               </div>
             </div>
             <div className="flex items-start gap-3">
               <Building2 className="h-5 w-5 mt-0.5 text-primary" />
               <div>
-                <p className="font-semibold text-foreground">TowerCo</p>
+                <p className="text-foreground">TowerCo</p>
                 <p>{site.towerco}</p>
               </div>
             </div>
             <div className="flex items-start gap-3">
               <Briefcase className="h-5 w-5 mt-0.5 text-primary" />
               <div>
-                <p className="font-semibold text-foreground">Assigned Agency</p>
+                <p className="text-foreground">Assigned Agency</p>
                 <p>{agency ? agency.name : 'Unassigned'}</p>
               </div>
             </div>
              <div className="flex items-start gap-3">
               <ShieldAlert className="h-5 w-5 mt-0.5 text-primary" />
               <div>
-                <p className="font-semibold text-foreground">Total Incidents</p>
+                <p className="text-foreground">Total Incidents</p>
                 <p>{siteIncidents.length}</p>
               </div>
             </div>
@@ -192,7 +192,7 @@ export default function SiteReportPage() {
               <div className="flex items-start gap-3 sm:col-span-2">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-globe mt-0.5 text-primary"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
                 <div>
-                  <p className="font-semibold text-foreground">Coordinates</p>
+                  <p className="text-foreground">Coordinates</p>
                   <p>Latitude: {site.latitude}, Longitude: {site.longitude}</p>
                 </div>
               </div>
@@ -259,7 +259,7 @@ export default function SiteReportPage() {
                       className="cursor-pointer"
                     >
                       <TableCell>
-                        <Button asChild variant="link" className="p-0 h-auto font-medium" onClick={(e) => e.stopPropagation()}>
+                        <Button asChild variant="link" className="p-0 h-auto" onClick={(e) => e.stopPropagation()}>
                           <Link href={`/towerco/incidents/${incident.id}`}>{incident.id}</Link>
                         </Button>
                       </TableCell>

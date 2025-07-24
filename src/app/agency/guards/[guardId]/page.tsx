@@ -246,7 +246,7 @@ export default function AgencyGuardReportPage() {
                       <h4 className="flex items-center gap-2 text-sm">
                           Perimeter Accuracy
                       </h4>
-                      <span className="font-bold text-muted-foreground">{perimeterAccuracy}%</span>
+                      <span className="text-muted-foreground">{perimeterAccuracy}%</span>
                     </div>
                     <Progress value={perimeterAccuracy} className="h-2" />
                   </div>
@@ -255,7 +255,7 @@ export default function AgencyGuardReportPage() {
                       <h4 className="flex items-center gap-2 text-sm">
                           Selfie Check-in Accuracy
                       </h4>
-                      <span className="font-bold text-muted-foreground">{selfieAccuracy}%</span>
+                      <span className="text-muted-foreground">{selfieAccuracy}%</span>
                     </div>
                     <Progress value={selfieAccuracy} className="h-2" />
                   </div>

@@ -389,12 +389,12 @@ export default function AgencyReportPage() {
                   return (
                     <TableRow key={site.id}>
                        <TableCell>
-                          <Button asChild variant="link" className="p-0 h-auto font-medium">
+                          <Button asChild variant="link" className="p-0 h-auto" onClick={(e) => e.stopPropagation()}>
                             <Link href={`/towerco/sites/${site.id}`}>{site.id}</Link>
                           </Button>
                         </TableCell>
                       <TableCell>
-                        <div className="font-medium">{site.name}</div>
+                        <div>{site.name}</div>
                         <div className="text-sm text-muted-foreground flex items-center gap-1">
                           <MapPin className="w-3 h-3" />
                           {site.address}
@@ -487,7 +487,7 @@ export default function AgencyReportPage() {
                       className="cursor-pointer"
                     >
                       <TableCell>
-                        <Button asChild variant="link" className="p-0 h-auto font-medium" onClick={(e) => e.stopPropagation()}>
+                        <Button asChild variant="link" className="p-0 h-auto" onClick={(e) => e.stopPropagation()}>
                           <Link href={`/towerco/incidents/${incident.id}`}>{incident.id}</Link>
                         </Button>
                       </TableCell>

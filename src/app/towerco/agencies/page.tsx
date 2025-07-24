@@ -575,7 +575,7 @@ export default function TowercoAgenciesPage() {
                                         <Fragment key={agency.id}>
                                             <TableRow onClick={() => handleRowClick(agency.id)} className="cursor-pointer">
                                                 <TableCell>
-                                                    <p className="font-medium text-primary hover:underline">{agency.id}</p>
+                                                    <p className="text-primary hover:underline">{agency.id}</p>
                                                 </TableCell>
                                                 <TableCell>
                                                     <div className="flex items-center gap-3">
@@ -644,7 +644,7 @@ export default function TowercoAgenciesPage() {
                                                                     <TableBody>
                                                                         {assignedSites.map((site) => (
                                                                             <TableRow key={site.id}>
-                                                                                <TableCell className="font-medium">{site.id}</TableCell>
+                                                                                <TableCell>{site.id}</TableCell>
                                                                                 <TableCell>{site.name}</TableCell>
                                                                                 <TableCell>{site.address}</TableCell>
                                                                                 <TableCell>{site.city}</TableCell>
@@ -705,4 +705,3 @@ export default function TowercoAgenciesPage() {
         </div>
     );
 }
-

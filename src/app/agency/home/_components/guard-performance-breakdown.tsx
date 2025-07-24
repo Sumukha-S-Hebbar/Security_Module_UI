@@ -44,7 +44,7 @@ export function GuardPerformanceBreakdown({ guards }: { guards: Guard[] }) {
                 <ShieldCheck className="w-4 h-4 text-primary" />
                 Perimeter Accuracy
             </h4>
-            <span className="font-bold text-muted-foreground">{avgPerimeterAccuracy.toFixed(1)}%</span>
+            <span className="text-muted-foreground">{avgPerimeterAccuracy.toFixed(1)}%</span>
           </div>
           <Progress value={avgPerimeterAccuracy} className="h-2" />
         </div>
@@ -54,7 +54,7 @@ export function GuardPerformanceBreakdown({ guards }: { guards: Guard[] }) {
                 <UserCheck className="w-4 h-4 text-primary" />
                 Selfie Check-in Accuracy
             </h4>
-            <span className="font-bold text-muted-foreground">{avgSelfieAccuracy.toFixed(1)}%</span>
+            <span className="text-muted-foreground">{avgSelfieAccuracy.toFixed(1)}%</span>
           </div>
           <Progress value={avgSelfieAccuracy} className="h-2" />
         </div>

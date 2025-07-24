@@ -178,28 +178,28 @@ export default function AgencyPatrollingOfficerReportPage() {
             <div className="flex items-start gap-3">
               <Phone className="h-5 w-5 mt-0.5 text-primary" />
               <div>
-                <p className="font-semibold text-foreground">Phone</p>
+                <p className="text-foreground">Phone</p>
                 <a href={`tel:${patrollingOfficer.phone}`} className="hover:underline">{patrollingOfficer.phone}</a>
               </div>
             </div>
             <div className="flex items-start gap-3">
               <Mail className="h-5 w-5 mt-0.5 text-primary" />
               <div>
-                <p className="font-semibold text-foreground">Email</p>
+                <p className="text-foreground">Email</p>
                 <a href={`mailto:${patrollingOfficer.email}`} className="hover:underline">{patrollingOfficer.email}</a>
               </div>
             </div>
             <div className="flex items-start gap-3">
               <Users className="h-5 w-5 mt-0.5 text-primary" />
               <div>
-                <p className="font-semibold text-foreground">Total Guards</p>
+                <p className="text-foreground">Total Guards</p>
                 <p>{assignedGuards.length}</p>
               </div>
             </div>
             <div className="flex items-start gap-3">
               <MapPin className="h-5 w-5 mt-0.5 text-primary" />
               <div>
-                <p className="font-semibold text-foreground">Total Sites</p>
+                <p className="text-foreground">Total Sites</p>
                 <p>{assignedSites.length}</p>
               </div>
             </div>
@@ -217,20 +217,20 @@ export default function AgencyPatrollingOfficerReportPage() {
         <CardContent className="space-y-4">
           <div>
             <div className="flex justify-between items-center mb-1">
-              <h4 className="font-medium flex items-center gap-2 text-sm">
+              <h4 className="flex items-center gap-2 text-sm">
                   <Map className="w-4 h-4 text-primary" />
                   Site Visit Accuracy
               </h4>
-              <span className="font-bold text-muted-foreground">{siteVisitAccuracy.toFixed(1)}%</span>
+              <span className="text-muted-foreground">{siteVisitAccuracy.toFixed(1)}%</span>
             </div>
             <Progress value={siteVisitAccuracy} className="h-2" />
           </div>
           <div className="flex items-center justify-between pt-2">
-              <h4 className="font-medium flex items-center gap-2 text-sm">
+              <h4 className="flex items-center gap-2 text-sm">
                   <Clock className="w-4 h-4 text-primary" />
                   Average Response Time
               </h4>
-              <span className="font-bold text-lg text-foreground">{averageResponseTime.toFixed(0)} mins</span>
+              <span className="text-lg text-foreground">{averageResponseTime.toFixed(0)} mins</span>
           </div>
         </CardContent>
       </Card>
@@ -255,11 +255,11 @@ export default function AgencyPatrollingOfficerReportPage() {
                         {assignedSites.map(site => (
                             <TableRow key={site.id}>
                                 <TableCell>
-                                    <Button asChild variant="link" className="p-0 h-auto font-medium">
+                                    <Button asChild variant="link" className="p-0 h-auto">
                                         <Link href={`/agency/sites/${site.id}`}>{site.id}</Link>
                                     </Button>
                                 </TableCell>
-                                <TableCell className="font-medium">{site.name}</TableCell>
+                                <TableCell>{site.name}</TableCell>
                                 <TableCell>{site.address}</TableCell>
                                 <TableCell>{site.guards.length}</TableCell>
                             </TableRow>
@@ -285,7 +285,7 @@ export default function AgencyPatrollingOfficerReportPage() {
                                 <AvatarFallback>{guard.name.charAt(0)}</AvatarFallback>
                             </Avatar>
                             <div>
-                                <Button asChild variant="link" className="p-0 h-auto font-medium text-base">
+                                <Button asChild variant="link" className="p-0 h-auto text-base">
                                   <Link href={`/agency/guards/${guard.id}`}>{guard.name}</Link>
                                 </Button>
                                 <p className="text-sm text-muted-foreground">ID: {guard.id} | Site: {guard.site}</p>
@@ -362,7 +362,7 @@ export default function AgencyPatrollingOfficerReportPage() {
                           className="cursor-pointer"
                         >
                             <TableCell>
-                              <Button asChild variant="link" className="p-0 h-auto font-medium" onClick={(e) => e.stopPropagation()}>
+                              <Button asChild variant="link" className="p-0 h-auto" onClick={(e) => e.stopPropagation()}>
                                 <Link href={`/agency/incidents/${incident.id}`}>{incident.id}</Link>
                               </Button>
                             </TableCell>

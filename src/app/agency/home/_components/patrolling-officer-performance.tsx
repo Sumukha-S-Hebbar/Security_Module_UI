@@ -55,7 +55,7 @@ export function PatrollingOfficerPerformance({
                 <Map className="w-4 h-4 text-primary" />
                 Site Visit Accuracy
             </h4>
-            <span className="font-bold text-muted-foreground">{avgSiteVisitAccuracy.toFixed(1)}%</span>
+            <span className="text-muted-foreground">{avgSiteVisitAccuracy.toFixed(1)}%</span>
           </div>
           <Progress value={avgSiteVisitAccuracy} className="h-2" />
         </div>
@@ -64,7 +64,7 @@ export function PatrollingOfficerPerformance({
                 <Clock className="w-4 h-4 text-primary" />
                 Average Response Time
             </h4>
-            <span className="font-bold text-lg text-foreground">{avgResponseTime.toFixed(0)} mins</span>
+            <span className="text-lg text-foreground">{avgResponseTime.toFixed(0)} mins</span>
         </div>
       </CardContent>
     </Card>

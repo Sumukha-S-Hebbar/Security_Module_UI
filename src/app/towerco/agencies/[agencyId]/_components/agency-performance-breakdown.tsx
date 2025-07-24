@@ -1,3 +1,4 @@
+
 // src/app/towerco/agencies/[agencyId]/_components/agency-performance-breakdown.tsx
 
 'use client';
@@ -101,7 +102,7 @@ export function AgencyPerformanceBreakdown({
       <CardContent className="space-y-4">
         <div className="space-y-2 rounded-lg border p-4">
             <div className="flex justify-between items-center">
-                <p className="font-semibold">Overall Performance Score</p>
+                <p>Overall Performance Score</p>
                 <span className="font-bold text-2xl text-primary">{performanceData.performance}%</span>
             </div>
             <Progress value={performanceData.performance} className="h-2" />

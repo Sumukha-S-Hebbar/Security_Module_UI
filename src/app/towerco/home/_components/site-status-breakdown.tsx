@@ -131,12 +131,12 @@ export function SiteStatusBreakdown({ sites, agencies }: { sites: Site[]; agenci
                             className={selectedSection === 'assigned' ? 'cursor-pointer' : ''}
                           >
                             <TableCell>
-                                <Button asChild variant="link" className="p-0 h-auto font-medium" onClick={(e) => e.stopPropagation()}>
+                                <Button asChild variant="link" className="p-0 h-auto" onClick={(e) => e.stopPropagation()}>
                                     <Link href={`/towerco/sites/${site.id}`}>{site.id}</Link>
                                 </Button>
                             </TableCell>
                             <TableCell>
-                              <p className="font-medium">{site.name}</p>
+                              <p>{site.name}</p>
                               <p className="text-xs text-muted-foreground">{site.address}</p>
                             </TableCell>
                             <TableCell>
