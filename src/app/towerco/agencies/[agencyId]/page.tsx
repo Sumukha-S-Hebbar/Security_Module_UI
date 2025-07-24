@@ -394,28 +394,30 @@ export default function AgencyReportPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="md:col-span-1 flex flex-col items-center justify-center gap-4">
                      <div className="w-56 h-56 relative">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <PieChart>
-                                <ChartTooltip
-                                    cursor={false}
-                                    content={<ChartTooltipContent hideLabel />}
-                                />
-                                <Pie
-                                    data={complianceData}
-                                    cx="50%"
-                                    cy="50%"
-                                    innerRadius="60%"
-                                    outerRadius="80%"
-                                    paddingAngle={0}
-                                    dataKey="value"
-                                    stroke="none"
-                                >
-                                    {complianceData.map((entry, index) => (
-                                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                    ))}
-                                </Pie>
-                            </PieChart>
-                        </ResponsiveContainer>
+                       <ChartContainer config={chartConfig}>
+                          <ResponsiveContainer width="100%" height="100%">
+                              <PieChart>
+                                  <ChartTooltip
+                                      cursor={false}
+                                      content={<ChartTooltipContent hideLabel />}
+                                  />
+                                  <Pie
+                                      data={complianceData}
+                                      cx="50%"
+                                      cy="50%"
+                                      innerRadius="60%"
+                                      outerRadius="80%"
+                                      paddingAngle={0}
+                                      dataKey="value"
+                                      stroke="none"
+                                  >
+                                      {complianceData.map((entry, index) => (
+                                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                      ))}
+                                  </Pie>
+                              </PieChart>
+                          </ResponsiveContainer>
+                       </ChartContainer>
                          <div className="absolute inset-0 flex items-center justify-center">
                             <span className="text-3xl font-bold" style={{ color: getPerformanceColor() }}>
                                 {performanceData.performance}%
@@ -440,16 +442,16 @@ export default function AgencyReportPage() {
                                     content={<ChartTooltipContent hideLabel />}
                                 />
                                 <ChartLegend content={<ChartLegendContent />} />
-                                <Bar dataKey="incidentResolutionRate" name="Incident Resolution" fill={chartConfig.incidentResolutionRate.color} radius={4}>
+                                <Bar dataKey="incidentResolutionRate" name="Incident Resolution" fill="var(--color-incidentResolutionRate)" radius={4}>
                                     <LabelList dataKey="incidentResolutionRate" position="right" offset={8} formatter={(v: number) => `${v}%`} />
                                 </Bar>
-                                <Bar dataKey="officerSiteVisitRate" name="Site Visit Accuracy" fill={chartConfig.officerSiteVisitRate.color} radius={4}>
+                                <Bar dataKey="officerSiteVisitRate" name="Site Visit Accuracy" fill="var(--color-officerSiteVisitRate)" radius={4}>
                                     <LabelList dataKey="officerSiteVisitRate" position="right" offset={8} formatter={(v: number) => `${v}%`} />
                                 </Bar>
-                                <Bar dataKey="guardPerimeterAccuracy" name="Guard Check-in Accuracy" fill={chartConfig.guardPerimeterAccuracy.color} radius={4}>
+                                <Bar dataKey="guardPerimeterAccuracy" name="Guard Check-in Accuracy" fill="var(--color-guardPerimeterAccuracy)" radius={4}>
                                     <LabelList dataKey="guardPerimeterAccuracy" position="right" offset={8} formatter={(v: number) => `${v}%`} />
                                 </Bar>
-                                <Bar dataKey="guardSelfieAccuracy" name="Selfie Check-in Accuracy" fill={chartConfig.guardSelfieAccuracy.color} radius={4}>
+                                <Bar dataKey="guardSelfieAccuracy" name="Selfie Check-in Accuracy" fill="var(--color-guardSelfieAccuracy)" radius={4}>
                                     <LabelList dataKey="guardSelfieAccuracy" position="right" offset={8} formatter={(v: number) => `${v}%`} />
                                 </Bar>
                             </BarChart>
