@@ -285,7 +285,7 @@ export default function TowercoAgenciesPage() {
                     </p>
                 </div>
                 <div className="flex items-center gap-2">
-                    <Button variant="outline" onClick={handleDownloadTemplate}>
+                    <Button onClick={handleDownloadTemplate}>
                         <FileDown className="mr-2 h-4 w-4" />
                         Download Excel Template
                     </Button>
@@ -351,7 +351,7 @@ export default function TowercoAgenciesPage() {
 
                     <Dialog open={isAddAgencyDialogOpen} onOpenChange={setIsAddAgencyDialogOpen}>
                         <DialogTrigger asChild>
-                            <Button variant="outline">
+                            <Button>
                                 <PlusCircle className="mr-2 h-4 w-4" />
                                 Add Agency
                             </Button>
@@ -708,3 +708,4 @@ export default function TowercoAgenciesPage() {
         </div>
     );
 }
+
