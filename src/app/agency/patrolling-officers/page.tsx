@@ -140,7 +140,7 @@ export default function AgencyPatrollingOfficersPage() {
             <div className="flex flex-wrap items-center justify-between gap-4">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight">Patrolling Officer Management</h1>
-                    <p className="text-muted-foreground">
+                    <p className="text-muted-foreground font-medium">
                         Add, view, and manage patrolling officers.
                     </p>
                 </div>
@@ -159,7 +159,7 @@ export default function AgencyPatrollingOfficersPage() {
                         <DialogContent>
                             <DialogHeader>
                             <DialogTitle>Upload Patrolling Officer Profiles</DialogTitle>
-                            <DialogDescription>
+                            <DialogDescription className="font-medium">
                                 Upload an Excel file to add multiple patrolling officer profiles at once.
                             </DialogDescription>
                             </DialogHeader>
@@ -180,7 +180,7 @@ export default function AgencyPatrollingOfficersPage() {
                                                     onChange={(e) => field.onChange(e.target.files)}
                                                 />
                                                 </FormControl>
-                                                <FormDescription>
+                                                <FormDescription className="font-medium">
                                                 The Excel file should contain columns: name, phone, email.
                                                 </FormDescription>
                                                 <FormMessage />
@@ -217,7 +217,7 @@ export default function AgencyPatrollingOfficersPage() {
                         <DialogContent>
                             <DialogHeader>
                                 <DialogTitle>Add a New Patrolling Officer</DialogTitle>
-                                <DialogDescription>
+                                <DialogDescription className="font-medium">
                                     Fill in the details below to add a new patrolling officer.
                                 </DialogDescription>
                             </DialogHeader>
@@ -286,7 +286,7 @@ export default function AgencyPatrollingOfficersPage() {
                     <div className="flex flex-wrap items-center justify-between gap-4">
                         <div>
                             <CardTitle>All Patrolling Officers</CardTitle>
-                            <CardDescription>A list of all patrolling officers in your agency.</CardDescription>
+                            <CardDescription className="font-medium">A list of all patrolling officers in your agency.</CardDescription>
                         </div>
                     </div>
                     <div className="relative pt-4">
@@ -327,7 +327,7 @@ export default function AgencyPatrollingOfficersPage() {
                                   className="cursor-pointer"
                                 >
                                   <TableCell>
-                                    <Button asChild variant="link" className="p-0 h-auto" onClick={(e) => e.stopPropagation()}>
+                                    <Button asChild variant="link" className="p-0 h-auto font-medium" onClick={(e) => e.stopPropagation()}>
                                       <Link href={`/agency/patrolling-officers/${patrollingOfficer.id}`}>{patrollingOfficer.id}</Link>
                                     </Button>
                                   </TableCell>
@@ -337,17 +337,17 @@ export default function AgencyPatrollingOfficersPage() {
                                             <AvatarImage src={patrollingOfficer.avatar} alt={patrollingOfficer.name} />
                                             <AvatarFallback>{patrollingOfficer.name.charAt(0)}</AvatarFallback>
                                         </Avatar>
-                                        <p>{patrollingOfficer.name}</p>
+                                        <p className="font-medium">{patrollingOfficer.name}</p>
                                     </div>
                                   </TableCell>
                                   <TableCell>
                                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                           <Phone className="h-4 w-4 flex-shrink-0" />
-                                          <a href={`tel:${patrollingOfficer.phone}`} className="hover:underline" onClick={(e) => e.stopPropagation()}>{patrollingOfficer.phone}</a>
+                                          <a href={`tel:${patrollingOfficer.phone}`} className="hover:underline font-medium" onClick={(e) => e.stopPropagation()}>{patrollingOfficer.phone}</a>
                                       </div>
                                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                           <Mail className="h-4 w-4 flex-shrink-0" />
-                                          <a href={`mailto:${patrollingOfficer.email}`} className="truncate hover:underline" onClick={(e) => e.stopPropagation()}>
+                                          <a href={`mailto:${patrollingOfficer.email}`} className="truncate hover:underline font-medium" onClick={(e) => e.stopPropagation()}>
                                               {patrollingOfficer.email}
                                           </a>
                                       </div>
@@ -355,27 +355,27 @@ export default function AgencyPatrollingOfficersPage() {
                                   <TableCell>
                                       <div className="flex items-center gap-2 text-sm">
                                           <Map className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
-                                          <span>{assignedSites.length} Sites</span>
+                                          <span className="font-medium">{assignedSites.length} Sites</span>
                                       </div>
                                       <div className="flex items-center gap-2 text-sm">
                                           <Users className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
-                                          <span>{assignedGuardsCount} Guards</span>
+                                          <span className="font-medium">{assignedGuardsCount} Guards</span>
                                       </div>
                                   </TableCell>
                                   <TableCell>
                                       <div className="flex items-center gap-2">
                                           <Progress value={siteVisitAccuracy} className="w-24 h-2" />
-                                          <span className="text-sm text-muted-foreground">{siteVisitAccuracy}%</span>
+                                          <span className="text-sm text-muted-foreground font-medium">{siteVisitAccuracy}%</span>
                                       </div>
                                   </TableCell>
                                   <TableCell>
-                                      <span className="text-sm">{patrollingOfficer.averageResponseTime} mins</span>
+                                      <span className="text-sm font-medium">{patrollingOfficer.averageResponseTime} mins</span>
                                   </TableCell>
                                 </TableRow>
                             )})
                         ) : (
                             <TableRow>
-                              <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">
+                              <TableCell colSpan={6} className="h-24 text-center text-muted-foreground font-medium">
                                   No patrolling officers found.
                               </TableCell>
                             </TableRow>

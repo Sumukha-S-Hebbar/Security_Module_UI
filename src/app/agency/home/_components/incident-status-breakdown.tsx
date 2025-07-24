@@ -93,7 +93,7 @@ export function IncidentStatusBreakdown({
     switch (status) {
       case 'Active':
         return (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 font-medium">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-destructive"></span>
@@ -103,7 +103,7 @@ export function IncidentStatusBreakdown({
         );
       case 'Under Review':
         return (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 font-medium">
             <span className="relative flex h-2 w-2">
               <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
             </span>
@@ -112,7 +112,7 @@ export function IncidentStatusBreakdown({
         );
       case 'Resolved':
         return (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 font-medium">
             <span className="relative flex h-2 w-2">
               <span className="relative inline-flex rounded-full h-2 w-2 bg-chart-2"></span>
             </span>
@@ -121,7 +121,7 @@ export function IncidentStatusBreakdown({
         );
       default:
         return (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 font-medium">
             <span className="relative flex h-2 w-2">
               <span className="relative inline-flex rounded-full h-2 w-2 bg-muted-foreground"></span>
             </span>
@@ -164,20 +164,20 @@ export function IncidentStatusBreakdown({
       <CardHeader className="flex flex-row items-center justify-between">
         <div>
             <CardTitle>Incident Status Breakdown</CardTitle>
-            <CardDescription>
+            <CardDescription className="font-medium">
             Click a status to see the list of incidents.
             </CardDescription>
         </div>
         <div className="flex items-center gap-2">
             {availableYears.length > 0 && (
                 <Select value={selectedYear} onValueChange={setSelectedYear}>
-                  <SelectTrigger className="w-[120px]">
+                  <SelectTrigger className="w-[120px] font-medium">
                     <SelectValue placeholder="Select Year" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Years</SelectItem>
+                    <SelectItem value="all" className="font-medium">All Years</SelectItem>
                     {availableYears.map((year) => (
-                      <SelectItem key={year} value={year}>
+                      <SelectItem key={year} value={year} className="font-medium">
                         {year}
                       </SelectItem>
                     ))}
@@ -185,13 +185,13 @@ export function IncidentStatusBreakdown({
                 </Select>
               )}
               <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-                <SelectTrigger className="w-[140px]">
+                <SelectTrigger className="w-[140px] font-medium">
                   <SelectValue placeholder="Select Month" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Months</SelectItem>
+                  <SelectItem value="all" className="font-medium">All Months</SelectItem>
                   {Array.from({ length: 12 }, (_, i) => (
-                    <SelectItem key={i} value={i.toString()}>
+                    <SelectItem key={i} value={i.toString()} className="font-medium">
                       {new Date(0, i).toLocaleString('default', { month: 'long' })}
                     </SelectItem>
                   ))}
@@ -215,7 +215,7 @@ export function IncidentStatusBreakdown({
             >
               <item.icon className="h-8 w-8" />
               <div>
-                <p>{item.status}</p>
+                <p className="font-medium">{item.status}</p>
                 <p className="text-2xl font-bold">{item.count}</p>
               </div>
             </div>
@@ -253,7 +253,7 @@ export function IncidentStatusBreakdown({
                         <Button
                           asChild
                           variant="link"
-                          className="h-auto p-0"
+                          className="h-auto p-0 font-medium"
                           onClick={(e) => e.stopPropagation()}
                         >
                           <Link href={`/agency/incidents/${incident.id}`}>
@@ -261,18 +261,18 @@ export function IncidentStatusBreakdown({
                           </Link>
                         </Button>
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="font-medium">
                         {new Date(incident.incidentTime).toLocaleDateString()}
                       </TableCell>
-                      <TableCell>{getSiteName(incident.siteId)}</TableCell>
-                      <TableCell>{getGuardName(incident.raisedByGuardId)}</TableCell>
+                      <TableCell className="font-medium">{getSiteName(incident.siteId)}</TableCell>
+                      <TableCell className="font-medium">{getGuardName(incident.raisedByGuardId)}</TableCell>
                       <TableCell>{getStatusIndicator(incident.status)}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
               </Table>
             ) : (
-              <p className="text-center text-sm text-muted-foreground">
+              <p className="text-center text-sm text-muted-foreground font-medium">
                 No incidents with status "{selectedStatus}" {selectedYear !== 'all' || selectedMonth !== 'all' ? 'in the selected period' : ''}.
               </p>
             )}

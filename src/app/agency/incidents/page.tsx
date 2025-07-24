@@ -148,7 +148,7 @@ export default function AgencyIncidentsPage() {
     switch (status) {
       case 'Active':
         return (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 font-medium">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-destructive"></span>
@@ -158,7 +158,7 @@ export default function AgencyIncidentsPage() {
         );
       case 'Under Review':
         return (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 font-medium">
             <span className="relative flex h-2 w-2">
               <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
             </span>
@@ -167,7 +167,7 @@ export default function AgencyIncidentsPage() {
         );
       case 'Resolved':
         return (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 font-medium">
             <span className="relative flex h-2 w-2">
               <span className="relative inline-flex rounded-full h-2 w-2 bg-chart-2"></span>
             </span>
@@ -176,7 +176,7 @@ export default function AgencyIncidentsPage() {
         );
       default:
         return (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 font-medium">
             <span className="relative flex h-2 w-2">
               <span className="relative inline-flex rounded-full h-2 w-2 bg-muted-foreground"></span>
             </span>
@@ -190,7 +190,7 @@ export default function AgencyIncidentsPage() {
     <div className="p-4 sm:p-6 lg:p-8 space-y-6">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Incidents</h1>
-        <p className="text-muted-foreground">
+        <p className="text-muted-foreground font-medium">
           A log of all emergency incidents reported across your sites.
         </p>
       </div>
@@ -204,7 +204,7 @@ export default function AgencyIncidentsPage() {
       <Card>
         <CardHeader>
           <CardTitle>Incident Log</CardTitle>
-          <CardDescription>
+          <CardDescription className="font-medium">
             Review and monitor all high-priority alerts.
           </CardDescription>
           <div className="flex flex-wrap items-center gap-2 pt-4">
@@ -219,24 +219,24 @@ export default function AgencyIncidentsPage() {
               />
             </div>
             <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-              <SelectTrigger className="w-full sm:w-[180px]">
+              <SelectTrigger className="w-full sm:w-[180px] font-medium">
                 <SelectValue placeholder="Filter by status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Statuses</SelectItem>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="under-review">Under Review</SelectItem>
-                <SelectItem value="resolved">Resolved</SelectItem>
+                <SelectItem value="all" className="font-medium">All Statuses</SelectItem>
+                <SelectItem value="active" className="font-medium">Active</SelectItem>
+                <SelectItem value="under-review" className="font-medium">Under Review</SelectItem>
+                <SelectItem value="resolved" className="font-medium">Resolved</SelectItem>
               </SelectContent>
             </Select>
             <Select value={selectedMonth} onValueChange={(value) => setSelectedMonth(value)}>
-              <SelectTrigger className="w-full sm:w-[180px]">
+              <SelectTrigger className="w-full sm:w-[180px] font-medium">
                 <SelectValue placeholder="Filter by month" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Months</SelectItem>
+                <SelectItem value="all" className="font-medium">All Months</SelectItem>
                 {Array.from({ length: 12 }, (_, i) => (
-                  <SelectItem key={i + 1} value={(i + 1).toString()}>
+                  <SelectItem key={i + 1} value={(i + 1).toString()} className="font-medium">
                     {new Date(0, i).toLocaleString('default', {
                       month: 'long',
                     })}
@@ -249,7 +249,7 @@ export default function AgencyIncidentsPage() {
                 <Button
                   variant={'outline'}
                   className={cn(
-                    'w-full sm:w-[240px] justify-start text-left font-normal',
+                    'w-full sm:w-[240px] justify-start text-left font-medium',
                     !selectedDate && 'text-muted-foreground'
                   )}
                 >
@@ -297,14 +297,14 @@ export default function AgencyIncidentsPage() {
                       className="cursor-pointer"
                     >
                       <TableCell>
-                        <Button asChild variant="link" className="p-0 h-auto" onClick={(e) => e.stopPropagation()}>
+                        <Button asChild variant="link" className="p-0 h-auto font-medium" onClick={(e) => e.stopPropagation()}>
                           <Link href={`/agency/incidents/${incident.id}`}>{incident.id}</Link>
                         </Button>
                       </TableCell>
-                      <TableCell>{new Date(incident.incidentTime).toLocaleString()}</TableCell>
-                      <TableCell>{site?.name || 'N/A'}</TableCell>
-                      <TableCell>{guard?.name || 'N/A'}</TableCell>
-                      <TableCell>
+                      <TableCell className="font-medium">{new Date(incident.incidentTime).toLocaleString()}</TableCell>
+                      <TableCell className="font-medium">{site?.name || 'N/A'}</TableCell>
+                      <TableCell className="font-medium">{guard?.name || 'N/A'}</TableCell>
+                      <TableCell className="font-medium">
                         {patrollingOfficer?.name || 'N/A'}
                       </TableCell>
                       <TableCell>{getStatusIndicator(incident.status)}</TableCell>
@@ -315,7 +315,7 @@ export default function AgencyIncidentsPage() {
                 <TableRow>
                   <TableCell
                     colSpan={6}
-                    className="text-center text-muted-foreground"
+                    className="text-center text-muted-foreground font-medium"
                   >
                     No incidents found for the current filter.
                   </TableCell>
@@ -326,7 +326,7 @@ export default function AgencyIncidentsPage() {
         </CardContent>
         <CardFooter>
             <div className="flex items-center justify-between w-full">
-                <div className="text-sm text-muted-foreground">
+                <div className="text-sm text-muted-foreground font-medium">
                     Showing {paginatedIncidents.length} of {filteredIncidents.length} incidents.
                 </div>
                 <div className="flex items-center gap-2">
@@ -338,7 +338,7 @@ export default function AgencyIncidentsPage() {
                     >
                         Previous
                     </Button>
-                    <span className="text-sm">Page {currentPage} of {totalPages || 1}</span>
+                    <span className="text-sm font-medium">Page {currentPage} of {totalPages || 1}</span>
                     <Button
                         variant="outline"
                         size="sm"

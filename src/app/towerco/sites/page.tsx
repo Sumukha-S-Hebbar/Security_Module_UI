@@ -352,7 +352,7 @@ export default function TowercoSitesPage() {
   if (!loggedInOrg) {
      return (
       <div className="p-4 sm:p-6 lg:p-8">
-        <p>Could not load organization data.</p>
+        <p className="font-medium">Could not load organization data.</p>
       </div>
     )
   }
@@ -362,7 +362,7 @@ export default function TowercoSitesPage() {
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Site Management</h1>
-          <p className="text-muted-foreground">
+          <p className="text-muted-foreground font-medium">
             Add, view, and manage operational sites for {loggedInOrg.name}.
           </p>
         </div>
@@ -384,7 +384,7 @@ export default function TowercoSitesPage() {
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Upload Site Profiles</DialogTitle>
-                <DialogDescription>
+                <DialogDescription className="font-medium">
                   Upload an Excel file to add multiple sites at once.
                 </DialogDescription>
               </DialogHeader>
@@ -408,7 +408,7 @@ export default function TowercoSitesPage() {
                               }
                             />
                           </FormControl>
-                          <FormDescription>
+                          <FormDescription className="font-medium">
                             The Excel file should contain columns: name, address.
                             The TowerCo will be set to {loggedInOrg.name}.
                           </FormDescription>
@@ -449,7 +449,7 @@ export default function TowercoSitesPage() {
             <DialogContent className="max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>Add a New Site</DialogTitle>
-                <DialogDescription>
+                <DialogDescription className="font-medium">
                   Fill in the details below to add a new site for{' '}
                   {loggedInOrg.name}.
                 </DialogDescription>
@@ -584,7 +584,7 @@ export default function TowercoSitesPage() {
         <Card>
           <CardHeader>
             <CardTitle>Assigned Sites</CardTitle>
-            <CardDescription>
+            <CardDescription className="font-medium">
               A list of all your sites with an assigned security agency.
             </CardDescription>
              <div className="flex flex-wrap items-center gap-2 pt-4">
@@ -599,26 +599,26 @@ export default function TowercoSitesPage() {
                   />
                 </div>
                 <Select value={selectedAgency} onValueChange={setSelectedAgency}>
-                  <SelectTrigger className="w-full sm:w-[180px]">
+                  <SelectTrigger className="w-full sm:w-[180px] font-medium">
                     <SelectValue placeholder="Filter by agency" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Agencies</SelectItem>
+                    <SelectItem value="all" className="font-medium">All Agencies</SelectItem>
                     {agenciesOnSites.map((agency) => (
-                      <SelectItem key={agency.id} value={agency.id}>
+                      <SelectItem key={agency.id} value={agency.id} className="font-medium">
                         {agency.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
                 <Select value={assignedSelectedRegion} onValueChange={handleAssignedRegionChange}>
-                  <SelectTrigger className="w-full sm:w-[180px]">
+                  <SelectTrigger className="w-full sm:w-[180px] font-medium">
                     <SelectValue placeholder="Filter by region" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Regions</SelectItem>
+                    <SelectItem value="all" className="font-medium">All Regions</SelectItem>
                     {allAssignedRegions.map((region) => (
-                      <SelectItem key={region} value={region}>
+                      <SelectItem key={region} value={region} className="font-medium">
                         {region}
                       </SelectItem>
                     ))}
@@ -629,13 +629,13 @@ export default function TowercoSitesPage() {
                   onValueChange={setAssignedSelectedCity}
                   disabled={assignedSelectedRegion === 'all'}
                 >
-                  <SelectTrigger className="w-full sm:w-[180px]">
+                  <SelectTrigger className="w-full sm:w-[180px] font-medium">
                     <SelectValue placeholder="Filter by city" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Cities</SelectItem>
+                    <SelectItem value="all" className="font-medium">All Cities</SelectItem>
                     {assignedCitiesForFilter.map((city) => (
-                      <SelectItem key={city} value={city}>
+                      <SelectItem key={city} value={city} className="font-medium">
                         {city}
                       </SelectItem>
                     ))}
@@ -665,25 +665,25 @@ export default function TowercoSitesPage() {
                                   className="cursor-pointer"
                                 >
                                     <TableCell>
-                                      <Button asChild variant="link" className="p-0 h-auto" onClick={(e) => e.stopPropagation()}>
+                                      <Button asChild variant="link" className="p-0 h-auto font-medium" onClick={(e) => e.stopPropagation()}>
                                         <Link href={`/towerco/sites/${site.id}`}>{site.id}</Link>
                                       </Button>
                                     </TableCell>
                                     <TableCell>
-                                        <div>{site.name}</div>
-                                        <div className="text-sm text-muted-foreground flex items-center gap-1">
+                                        <div className="font-medium">{site.name}</div>
+                                        <div className="text-sm text-muted-foreground flex items-center gap-1 font-medium">
                                             <MapPin className="w-3 h-3" />
                                             {site.address}
                                         </div>
                                     </TableCell>
                                     <TableCell>
-                                        <div className="flex items-center gap-2">
+                                        <div className="flex items-center gap-2 font-medium">
                                             <Briefcase className="h-4 w-4 text-muted-foreground" />
                                             <span>{agency?.name || 'N/A'}</span>
                                         </div>
                                     </TableCell>
                                     <TableCell>
-                                        <div className="flex items-center gap-2">
+                                        <div className="flex items-center gap-2 font-medium">
                                             <ShieldAlert className="h-4 w-4 text-muted-foreground" />
                                             <span>{incidentsCount}</span>
                                         </div>
@@ -693,7 +693,7 @@ export default function TowercoSitesPage() {
                         })
                     ) : (
                          <TableRow>
-                            <TableCell colSpan={4} className="text-center text-muted-foreground py-10">
+                            <TableCell colSpan={4} className="text-center text-muted-foreground py-10 font-medium">
                                 No assigned sites found for the current filter.
                             </TableCell>
                         </TableRow>
@@ -703,7 +703,7 @@ export default function TowercoSitesPage() {
           </CardContent>
             <CardFooter>
                 <div className="flex items-center justify-between w-full">
-                    <div className="text-sm text-muted-foreground">
+                    <div className="text-sm text-muted-foreground font-medium">
                         Showing {paginatedAssignedSites.length} of {filteredAssignedSites.length} sites.
                     </div>
                     <div className="flex items-center gap-2">
@@ -715,7 +715,7 @@ export default function TowercoSitesPage() {
                         >
                             Previous
                         </Button>
-                        <span className="text-sm">Page {assignedCurrentPage} of {totalAssignedPages || 1}</span>
+                        <span className="text-sm font-medium">Page {assignedCurrentPage} of {totalAssignedPages || 1}</span>
                         <Button
                             variant="outline"
                             size="sm"
@@ -733,7 +733,7 @@ export default function TowercoSitesPage() {
           <Card>
             <CardHeader>
               <CardTitle>Unassigned Sites</CardTitle>
-              <CardDescription>
+              <CardDescription className="font-medium">
                 Sites that need a security agency to be assigned.
               </CardDescription>
                <div className="flex flex-wrap items-center gap-2 pt-4">
@@ -748,13 +748,13 @@ export default function TowercoSitesPage() {
                   />
                 </div>
                  <Select value={unassignedSelectedRegion} onValueChange={handleUnassignedRegionChange}>
-                  <SelectTrigger className="w-full sm:w-[180px]">
+                  <SelectTrigger className="w-full sm:w-[180px] font-medium">
                     <SelectValue placeholder="Filter by region" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Regions</SelectItem>
+                    <SelectItem value="all" className="font-medium">All Regions</SelectItem>
                     {allUnassignedRegions.map((region) => (
-                      <SelectItem key={region} value={region}>
+                      <SelectItem key={region} value={region} className="font-medium">
                         {region}
                       </SelectItem>
                     ))}
@@ -765,13 +765,13 @@ export default function TowercoSitesPage() {
                   onValueChange={setUnassignedSelectedCity}
                   disabled={unassignedSelectedRegion === 'all'}
                 >
-                  <SelectTrigger className="w-full sm:w-[180px]">
+                  <SelectTrigger className="w-full sm:w-[180px] font-medium">
                     <SelectValue placeholder="Filter by city" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Cities</SelectItem>
+                    <SelectItem value="all" className="font-medium">All Cities</SelectItem>
                     {unassignedCitiesForFilter.map((city) => (
-                      <SelectItem key={city} value={city}>
+                      <SelectItem key={city} value={city} className="font-medium">
                         {city}
                       </SelectItem>
                     ))}
@@ -801,10 +801,10 @@ export default function TowercoSitesPage() {
                           key={site.id} 
                           ref={(el) => unassignedSitesRef.current.set(site.id, el)}
                         >
-                          <TableCell>{site.id}</TableCell>
+                          <TableCell className="font-medium">{site.id}</TableCell>
                           <TableCell>
-                            <p>{site.name}</p>
-                            <div className="text-sm text-muted-foreground flex items-center gap-1">
+                            <p className="font-medium">{site.name}</p>
+                            <div className="text-sm text-muted-foreground flex items-center gap-1 font-medium">
                               <MapPin className="w-3 h-3" />
                               {site.address}
                             </div>
@@ -826,18 +826,18 @@ export default function TowercoSitesPage() {
                               }
                                onClick={(e) => e.stopPropagation()}
                             >
-                              <SelectTrigger className="w-[200px]">
+                              <SelectTrigger className="w-[200px] font-medium">
                                 <SelectValue placeholder="Select an agency" />
                               </SelectTrigger>
                               <SelectContent>
                                 {agenciesInRegion.length > 0 ? (
                                   agenciesInRegion.map((agency) => (
-                                    <SelectItem key={agency.id} value={agency.id}>
+                                    <SelectItem key={agency.id} value={agency.id} className="font-medium">
                                       {agency.name}
                                     </SelectItem>
                                   ))
                                 ) : (
-                                  <div className="px-2 py-1.5 text-sm text-muted-foreground">
+                                  <div className="px-2 py-1.5 text-sm text-muted-foreground font-medium">
                                     No agencies in this region
                                   </div>
                                 )}
@@ -861,7 +861,7 @@ export default function TowercoSitesPage() {
                     })
                   ) : (
                       <TableRow>
-                          <TableCell colSpan={5} className="text-center text-muted-foreground">
+                          <TableCell colSpan={5} className="text-center text-muted-foreground font-medium">
                               No unassigned sites found for the current filter.
                           </TableCell>
                       </TableRow>
@@ -871,7 +871,7 @@ export default function TowercoSitesPage() {
             </CardContent>
              <CardFooter>
                 <div className="flex items-center justify-between w-full">
-                    <div className="text-sm text-muted-foreground">
+                    <div className="text-sm text-muted-foreground font-medium">
                         Showing {paginatedUnassignedSites.length} of {filteredUnassignedSites.length} sites.
                     </div>
                     <div className="flex items-center gap-2">
@@ -883,7 +883,7 @@ export default function TowercoSitesPage() {
                         >
                             Previous
                         </Button>
-                        <span className="text-sm">Page {unassignedCurrentPage} of {totalUnassignedPages || 1}</span>
+                        <span className="text-sm font-medium">Page {unassignedCurrentPage} of {totalUnassignedPages || 1}</span>
                         <Button
                             variant="outline"
                             size="sm"

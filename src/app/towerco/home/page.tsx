@@ -178,7 +178,7 @@ export default function TowercoHomePage() {
   if (!data || !data.currentUserOrg) {
     return (
         <div className="p-4 sm:p-6 lg:p-8">
-            <p>Could not load dashboard data for your organization.</p>
+            <p className="font-medium">Could not load dashboard data for your organization.</p>
         </div>
     )
   }
@@ -190,7 +190,7 @@ export default function TowercoHomePage() {
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">{portalName} Dashboard</h1>
-          <p className="text-muted-foreground">
+          <p className="text-muted-foreground font-medium">
             Welcome, {data.currentUserOrg.name}! Here's a high-level overview of your assets.
           </p>
         </div>
@@ -199,7 +199,7 @@ export default function TowercoHomePage() {
       <Card className="border-destructive bg-destructive/10">
           <CardHeader className="flex flex-row items-center gap-2">
           <AlertTriangle className="w-6 h-6 text-destructive" />
-          <CardTitle className="text-foreground">Active Emergency Incidents ({activeEmergencies.length})</CardTitle>
+          <CardTitle style={{color: '#2F2F2F'}}>Active Emergency Incidents ({activeEmergencies.length})</CardTitle>
           </CardHeader>
           <CardContent>
           {activeEmergencies.length > 0 ? (
@@ -207,13 +207,13 @@ export default function TowercoHomePage() {
                   <Table>
                       <TableHeader>
                           <TableRow className="border-destructive/20">
-                          <TableHead className="text-foreground">Incident ID</TableHead>
-                          <TableHead className="text-foreground">Site Name</TableHead>
-                          <TableHead className="text-foreground">Agency</TableHead>
-                          <TableHead className="text-foreground">Patrolling Officer</TableHead>
-                          <TableHead className="text-foreground">Guard</TableHead>
-                          <TableHead className="text-foreground">Time</TableHead>
-                          <TableHead className="text-right text-foreground">Contact</TableHead>
+                          <TableHead style={{color: '#2F2F2F'}}>Incident ID</TableHead>
+                          <TableHead style={{color: '#2F2F2F'}}>Site Name</TableHead>
+                          <TableHead style={{color: '#2F2F2F'}}>Agency</TableHead>
+                          <TableHead style={{color: '#2F2F2F'}}>Patrolling Officer</TableHead>
+                          <TableHead style={{color: '#2F2F2F'}}>Guard</TableHead>
+                          <TableHead style={{color: '#2F2F2F'}}>Time</TableHead>
+                          <TableHead className="text-right" style={{color: '#2F2F2F'}}>Contact</TableHead>
                           </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -233,19 +233,19 @@ export default function TowercoHomePage() {
                                 className="cursor-pointer border-destructive/20"
                               >
                               <TableCell>
-                                <Button asChild variant="link" className="p-0 h-auto text-foreground hover:text-foreground/80" onClick={(e) => e.stopPropagation()}>
+                                <Button asChild variant="link" className="p-0 h-auto font-medium" style={{color: '#2F2F2F'}} onClick={(e) => e.stopPropagation()}>
                                   <Link href={`/towerco/incidents/${incident.id}`}>{incident.id}</Link>
                                 </Button>
                               </TableCell>
-                              <TableCell>
+                              <TableCell className="font-medium" style={{color: '#2F2F2F'}}>
                                   {siteDetails?.name || 'N/A'}
                               </TableCell>
-                              <TableCell>{agencyDetails?.name || 'N/A'}</TableCell>
-                              <TableCell>
+                              <TableCell className="font-medium" style={{color: '#2F2F2F'}}>{agencyDetails?.name || 'N/A'}</TableCell>
+                              <TableCell className="font-medium" style={{color: '#2F2F2F'}}>
                                   {patrollingOfficerDetails?.name || 'N/A'}
                               </TableCell>
-                              <TableCell>{guardDetails?.name || 'N/A'}</TableCell>
-                              <TableCell>{incidentDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</TableCell>
+                              <TableCell className="font-medium" style={{color: '#2F2F2F'}}>{guardDetails?.name || 'N/A'}</TableCell>
+                              <TableCell className="font-medium" style={{color: '#2F2F2F'}}>{incidentDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</TableCell>
                               <TableCell className="text-right">
                                   <DropdownMenu>
                                   <DropdownMenuTrigger asChild>
@@ -288,7 +288,7 @@ export default function TowercoHomePage() {
                   </Table>
               </div>
           ) : (
-              <p className="text-center py-4 text-foreground">
+              <p className="text-center py-4 font-medium" style={{color: '#2F2F2F'}}>
               No active emergency incidents. All systems are normal.
               </p>
           )}

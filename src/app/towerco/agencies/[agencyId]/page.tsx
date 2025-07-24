@@ -90,7 +90,7 @@ export default function AgencyReportPage() {
       <div className="p-4 sm:p-6 lg:p-8">
         <Card>
           <CardContent className="pt-6">
-            <p>Agency or Organization not found.</p>
+            <p className="font-medium">Agency or Organization not found.</p>
           </CardContent>
         </Card>
       </div>
@@ -124,7 +124,7 @@ export default function AgencyReportPage() {
     switch (status) {
       case 'Active':
         return (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 font-medium">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-destructive"></span>
@@ -134,7 +134,7 @@ export default function AgencyReportPage() {
         );
       case 'Under Review':
         return (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 font-medium">
             <span className="relative flex h-2 w-2">
               <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
             </span>
@@ -143,7 +143,7 @@ export default function AgencyReportPage() {
         );
       case 'Resolved':
         return (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 font-medium">
             <span className="relative flex h-2 w-2">
               <span className="relative inline-flex rounded-full h-2 w-2 bg-chart-2"></span>
             </span>
@@ -152,7 +152,7 @@ export default function AgencyReportPage() {
         );
       default:
         return (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 font-medium">
             <span className="relative flex h-2 w-2">
               <span className="relative inline-flex rounded-full h-2 w-2 bg-muted-foreground"></span>
             </span>
@@ -218,7 +218,7 @@ export default function AgencyReportPage() {
           </Button>
           <div>
               <h1 className="text-3xl font-bold tracking-tight">Agency Report</h1>
-              <p className="text-muted-foreground">Detailed overview for {agency.name} on {loggedInOrg.name}.</p>
+              <p className="text-muted-foreground font-medium">Detailed overview for {agency.name} on {loggedInOrg.name}.</p>
           </div>
         </div>
         <Button onClick={() => handleGenerateReport(agency.name, 'Agency')}>
@@ -240,18 +240,18 @@ export default function AgencyReportPage() {
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
-            <div className="text-sm text-muted-foreground mt-2 space-y-2">
+            <div className="text-sm mt-2 space-y-2">
                 <div className="flex items-center gap-2">
                     <Mail className="h-4 w-4" />
-                    <span>{agency.email}</span>
+                    <span className="font-medium">{agency.email}</span>
                 </div>
                 <div className="flex items-center gap-2">
                     <Phone className="h-4 w-4" />
-                    <span>{agency.phone}</span>
+                    <span className="font-medium">{agency.phone}</span>
                 </div>
                 <div className="flex items-center gap-2">
                     <MapPin className="h-4 w-4" />
-                    <span>{agency.address}</span>
+                    <span className="font-medium">{agency.address}</span>
                 </div>
             </div>
 
@@ -266,14 +266,14 @@ export default function AgencyReportPage() {
                         <p className="font-bold text-lg">
                         {agencySites.length}
                         </p>
-                        <p className="text-muted-foreground">Sites Assigned</p>
+                        <p className="text-muted-foreground font-medium">Sites Assigned</p>
                     </div>
                     </div>
                     <div className="flex items-center gap-3">
                     <ShieldAlert className="h-8 w-8 text-primary" />
                     <div>
                         <p className="font-bold text-lg">{totalIncidents}</p>
-                        <p className="text-muted-foreground">
+                        <p className="text-muted-foreground font-medium">
                         Total Incidents
                         </p>
                     </div>
@@ -284,7 +284,7 @@ export default function AgencyReportPage() {
                         <p className="font-bold text-lg">
                         {resolvedIncidents}
                         </p>
-                        <p className="text-muted-foreground">
+                        <p className="text-muted-foreground font-medium">
                         Incidents Resolved
                         </p>
                     </div>
@@ -304,17 +304,17 @@ export default function AgencyReportPage() {
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <div>
             <CardTitle>Incident Trend</CardTitle>
-            <CardDescription>
+            <CardDescription className="font-medium">
               Monthly emergency incidents for {trendSelectedYear}.
             </CardDescription>
           </div>
           <Select value={trendSelectedYear} onValueChange={setTrendSelectedYear}>
-            <SelectTrigger className="w-[120px]">
+            <SelectTrigger className="w-[120px] font-medium">
               <SelectValue placeholder="Select Year" />
             </SelectTrigger>
             <SelectContent>
               {availableYears.map((year) => (
-                <SelectItem key={year} value={year}>
+                <SelectItem key={year} value={year} className="font-medium">
                   {year}
                 </SelectItem>
               ))}
@@ -334,6 +334,7 @@ export default function AgencyReportPage() {
                 axisLine={false}
                 tickMargin={8}
                 fontSize={12}
+                className="font-medium"
               />
               <YAxis
                 tickLine={false}
@@ -341,6 +342,7 @@ export default function AgencyReportPage() {
                 tickMargin={8}
                 allowDecimals={false}
                 fontSize={12}
+                className="font-medium"
               />
               <ChartTooltip
                 cursor={true}
@@ -361,7 +363,7 @@ export default function AgencyReportPage() {
       <Card>
         <CardHeader>
           <CardTitle>Assigned Sites</CardTitle>
-          <CardDescription>
+          <CardDescription className="font-medium">
             A detailed list of all sites assigned to {agency.name}.
           </CardDescription>
         </CardHeader>
@@ -389,28 +391,28 @@ export default function AgencyReportPage() {
                   return (
                     <TableRow key={site.id}>
                        <TableCell>
-                          <Button asChild variant="link" className="p-0 h-auto" onClick={(e) => e.stopPropagation()}>
+                          <Button asChild variant="link" className="p-0 h-auto font-medium" onClick={(e) => e.stopPropagation()}>
                             <Link href={`/towerco/sites/${site.id}`}>{site.id}</Link>
                           </Button>
                         </TableCell>
                       <TableCell>
-                        <div>{site.name}</div>
-                        <div className="text-sm text-muted-foreground flex items-center gap-1">
+                        <div className="font-medium">{site.name}</div>
+                        <div className="text-sm text-muted-foreground flex items-center gap-1 font-medium">
                           <MapPin className="w-3 h-3" />
                           {site.address}
                         </div>
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="font-medium">
                         {site.assignedOn
                           ? new Date(site.assignedOn).toLocaleDateString()
                           : 'N/A'}
                       </TableCell>
-                      <TableCell className="text-center">
+                      <TableCell className="text-center font-medium">
                         <Badge variant="secondary">
                           {siteIncidents.length}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-center">
+                      <TableCell className="text-center font-medium">
                         <Badge className="bg-chart-2 text-primary-foreground hover:bg-chart-2/90">
                           {resolvedCount}
                         </Badge>
@@ -421,7 +423,7 @@ export default function AgencyReportPage() {
               </TableBody>
             </Table>
           ) : (
-            <p className="text-muted-foreground text-center py-4">
+            <p className="text-muted-foreground text-center py-4 font-medium">
               No sites are currently assigned to this agency.
             </p>
           )}
@@ -431,32 +433,32 @@ export default function AgencyReportPage() {
         <CardHeader className="flex flex-row items-center justify-between gap-4">
             <div>
                 <CardTitle>Incidents History</CardTitle>
-                <CardDescription>
+                <CardDescription className="font-medium">
                 A log of emergency incidents at sites managed by {agency.name}.
                 </CardDescription>
             </div>
             <div className="flex items-center gap-2">
                 <Select value={historySelectedYear} onValueChange={setHistorySelectedYear}>
-                    <SelectTrigger className="w-[120px]">
+                    <SelectTrigger className="w-[120px] font-medium">
                     <SelectValue placeholder="Select Year" />
                     </SelectTrigger>
                     <SelectContent>
-                    <SelectItem value="all">All Years</SelectItem>
+                    <SelectItem value="all" className="font-medium">All Years</SelectItem>
                     {availableYears.map((year) => (
-                        <SelectItem key={year} value={year}>
+                        <SelectItem key={year} value={year} className="font-medium">
                         {year}
                         </SelectItem>
                     ))}
                     </SelectContent>
                 </Select>
                 <Select value={historySelectedMonth} onValueChange={setHistorySelectedMonth}>
-                    <SelectTrigger className="w-[140px]">
+                    <SelectTrigger className="w-[140px] font-medium">
                     <SelectValue placeholder="Select Month" />
                     </SelectTrigger>
                     <SelectContent>
-                    <SelectItem value="all">All Months</SelectItem>
+                    <SelectItem value="all" className="font-medium">All Months</SelectItem>
                     {Array.from({ length: 12 }, (_, i) => (
-                        <SelectItem key={i} value={i.toString()}>
+                        <SelectItem key={i} value={i.toString()} className="font-medium">
                         {new Date(0, i).toLocaleString('default', { month: 'long' })}
                         </SelectItem>
                     ))}
@@ -487,13 +489,13 @@ export default function AgencyReportPage() {
                       className="cursor-pointer"
                     >
                       <TableCell>
-                        <Button asChild variant="link" className="p-0 h-auto" onClick={(e) => e.stopPropagation()}>
+                        <Button asChild variant="link" className="p-0 h-auto font-medium" onClick={(e) => e.stopPropagation()}>
                           <Link href={`/towerco/incidents/${incident.id}`}>{incident.id}</Link>
                         </Button>
                       </TableCell>
-                      <TableCell>{new Date(incident.incidentTime).toLocaleString()}</TableCell>
-                      <TableCell>{site?.name || 'N/A'}</TableCell>
-                      <TableCell>{guard?.name || 'N/A'}</TableCell>
+                      <TableCell className="font-medium">{new Date(incident.incidentTime).toLocaleString()}</TableCell>
+                      <TableCell className="font-medium">{site?.name || 'N/A'}</TableCell>
+                      <TableCell className="font-medium">{guard?.name || 'N/A'}</TableCell>
                       <TableCell>{getStatusIndicator(incident.status)}</TableCell>
                     </TableRow>
                   )
@@ -501,7 +503,7 @@ export default function AgencyReportPage() {
               </TableBody>
             </Table>
           ) : (
-            <p className="text-muted-foreground text-center py-4">
+            <p className="text-muted-foreground text-center py-4 font-medium">
               No incidents found for the selected period.
             </p>
           )}

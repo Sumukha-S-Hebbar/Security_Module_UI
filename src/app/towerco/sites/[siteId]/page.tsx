@@ -46,7 +46,7 @@ export default function SiteReportPage() {
       <div className="p-4 sm:p-6 lg:p-8">
         <Card>
           <CardContent className="pt-6">
-            <p>Site not found.</p>
+            <p className="font-medium">Site not found.</p>
           </CardContent>
         </Card>
       </div>
@@ -88,7 +88,7 @@ export default function SiteReportPage() {
     switch (status) {
       case 'Active':
         return (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 font-medium">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-destructive"></span>
@@ -98,7 +98,7 @@ export default function SiteReportPage() {
         );
       case 'Under Review':
         return (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 font-medium">
             <span className="relative flex h-2 w-2">
               <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
             </span>
@@ -107,7 +107,7 @@ export default function SiteReportPage() {
         );
       case 'Resolved':
         return (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 font-medium">
             <span className="relative flex h-2 w-2">
               <span className="relative inline-flex rounded-full h-2 w-2 bg-chart-2"></span>
             </span>
@@ -116,7 +116,7 @@ export default function SiteReportPage() {
         );
       default:
         return (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 font-medium">
             <span className="relative flex h-2 w-2">
               <span className="relative inline-flex rounded-full h-2 w-2 bg-muted-foreground"></span>
             </span>
@@ -140,7 +140,7 @@ export default function SiteReportPage() {
           </Button>
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Site Report</h1>
-            <p className="text-muted-foreground">Detailed overview for {site.name}.</p>
+            <p className="text-muted-foreground font-medium">Detailed overview for {site.name}.</p>
           </div>
         </div>
         <Button onClick={handleDownloadReport}>
@@ -159,41 +159,41 @@ export default function SiteReportPage() {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="text-sm text-muted-foreground mt-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="text-sm mt-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="flex items-start gap-3">
               <MapPin className="h-5 w-5 mt-0.5 text-primary" />
               <div>
-                <p className="text-foreground">Address</p>
-                <p>{site.address}</p>
+                <p className="font-semibold">Address</p>
+                <p className="font-medium text-muted-foreground">{site.address}</p>
               </div>
             </div>
             <div className="flex items-start gap-3">
               <Building2 className="h-5 w-5 mt-0.5 text-primary" />
               <div>
-                <p className="text-foreground">TowerCo</p>
-                <p>{site.towerco}</p>
+                <p className="font-semibold">TowerCo</p>
+                <p className="font-medium text-muted-foreground">{site.towerco}</p>
               </div>
             </div>
             <div className="flex items-start gap-3">
               <Briefcase className="h-5 w-5 mt-0.5 text-primary" />
               <div>
-                <p className="text-foreground">Assigned Agency</p>
-                <p>{agency ? agency.name : 'Unassigned'}</p>
+                <p className="font-semibold">Assigned Agency</p>
+                <p className="font-medium text-muted-foreground">{agency ? agency.name : 'Unassigned'}</p>
               </div>
             </div>
              <div className="flex items-start gap-3">
               <ShieldAlert className="h-5 w-5 mt-0.5 text-primary" />
               <div>
-                <p className="text-foreground">Total Incidents</p>
-                <p>{siteIncidents.length}</p>
+                <p className="font-semibold">Total Incidents</p>
+                <p className="font-medium text-muted-foreground">{siteIncidents.length}</p>
               </div>
             </div>
             {site.latitude && site.longitude && (
               <div className="flex items-start gap-3 sm:col-span-2">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-globe mt-0.5 text-primary"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
                 <div>
-                  <p className="text-foreground">Coordinates</p>
-                  <p>Latitude: {site.latitude}, Longitude: {site.longitude}</p>
+                  <p className="font-semibold">Coordinates</p>
+                  <p className="font-medium text-muted-foreground">Latitude: {site.latitude}, Longitude: {site.longitude}</p>
                 </div>
               </div>
             )}
@@ -205,18 +205,18 @@ export default function SiteReportPage() {
         <CardHeader className="flex flex-row items-center justify-between gap-4">
           <div>
             <CardTitle>Incidents at {site.name}</CardTitle>
-            <CardDescription>A log of all emergency incidents reported at this site.</CardDescription>
+            <CardDescription className="font-medium">A log of all emergency incidents reported at this site.</CardDescription>
           </div>
           <div className="flex items-center gap-2">
               {availableYears.length > 0 && (
                 <Select value={selectedYear} onValueChange={setSelectedYear}>
-                  <SelectTrigger className="w-[120px]">
+                  <SelectTrigger className="w-[120px] font-medium">
                     <SelectValue placeholder="Select Year" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Years</SelectItem>
+                    <SelectItem value="all" className="font-medium">All Years</SelectItem>
                     {availableYears.map((year) => (
-                      <SelectItem key={year} value={year}>
+                      <SelectItem key={year} value={year} className="font-medium">
                         {year}
                       </SelectItem>
                     ))}
@@ -224,13 +224,13 @@ export default function SiteReportPage() {
                 </Select>
               )}
               <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-                <SelectTrigger className="w-[140px]">
+                <SelectTrigger className="w-[140px] font-medium">
                   <SelectValue placeholder="Select Month" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Months</SelectItem>
+                  <SelectItem value="all" className="font-medium">All Months</SelectItem>
                   {Array.from({ length: 12 }, (_, i) => (
-                    <SelectItem key={i} value={i.toString()}>
+                    <SelectItem key={i} value={i.toString()} className="font-medium">
                       {new Date(0, i).toLocaleString('default', { month: 'long' })}
                     </SelectItem>
                   ))}
@@ -259,12 +259,12 @@ export default function SiteReportPage() {
                       className="cursor-pointer"
                     >
                       <TableCell>
-                        <Button asChild variant="link" className="p-0 h-auto" onClick={(e) => e.stopPropagation()}>
+                        <Button asChild variant="link" className="p-0 h-auto font-medium" onClick={(e) => e.stopPropagation()}>
                           <Link href={`/towerco/incidents/${incident.id}`}>{incident.id}</Link>
                         </Button>
                       </TableCell>
-                      <TableCell>{new Date(incident.incidentTime).toLocaleString()}</TableCell>
-                      <TableCell>{guard?.name || 'N/A'}</TableCell>
+                      <TableCell className="font-medium">{new Date(incident.incidentTime).toLocaleString()}</TableCell>
+                      <TableCell className="font-medium">{guard?.name || 'N/A'}</TableCell>
                       <TableCell>{getStatusIndicator(incident.status)}</TableCell>
                     </TableRow>
                   )
@@ -272,7 +272,7 @@ export default function SiteReportPage() {
               </TableBody>
             </Table>
           ) : (
-            <p className="text-muted-foreground text-center py-4">No emergency incidents have been reported for this site {selectedYear !== 'all' || selectedMonth !== 'all' ? 'in the selected period' : ''}.</p>
+            <p className="text-muted-foreground text-center py-4 font-medium">No emergency incidents have been reported for this site {selectedYear !== 'all' || selectedMonth !== 'all' ? 'in the selected period' : ''}.</p>
           )}
         </CardContent>
       </Card>

@@ -50,7 +50,7 @@ export default function AgencyPatrollingOfficerReportPage() {
       <div className="p-4 sm:p-6 lg:p-8">
         <Card>
           <CardContent className="pt-6">
-            <p>Patrolling Officer not found.</p>
+            <p className="font-medium">Patrolling Officer not found.</p>
           </CardContent>
         </Card>
       </div>
@@ -101,7 +101,7 @@ export default function AgencyPatrollingOfficerReportPage() {
     switch (status) {
       case 'Active':
         return (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 font-medium">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-destructive"></span>
@@ -111,7 +111,7 @@ export default function AgencyPatrollingOfficerReportPage() {
         );
       case 'Under Review':
         return (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 font-medium">
             <span className="relative flex h-2 w-2">
               <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
             </span>
@@ -120,7 +120,7 @@ export default function AgencyPatrollingOfficerReportPage() {
         );
       case 'Resolved':
         return (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 font-medium">
             <span className="relative flex h-2 w-2">
               <span className="relative inline-flex rounded-full h-2 w-2 bg-chart-2"></span>
             </span>
@@ -129,7 +129,7 @@ export default function AgencyPatrollingOfficerReportPage() {
         );
       default:
         return (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 font-medium">
             <span className="relative flex h-2 w-2">
               <span className="relative inline-flex rounded-full h-2 w-2 bg-muted-foreground"></span>
             </span>
@@ -151,7 +151,7 @@ export default function AgencyPatrollingOfficerReportPage() {
           </Button>
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Patrolling Officer Report</h1>
-            <p className="text-muted-foreground">Detailed overview for {patrollingOfficer.name}.</p>
+            <p className="text-muted-foreground font-medium">Detailed overview for {patrollingOfficer.name}.</p>
           </div>
         </div>
         <Button onClick={handleDownloadReport}>
@@ -174,33 +174,33 @@ export default function AgencyPatrollingOfficerReportPage() {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="text-sm text-muted-foreground mt-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="text-sm mt-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="flex items-start gap-3">
               <Phone className="h-5 w-5 mt-0.5 text-primary" />
               <div>
-                <p className="text-foreground">Phone</p>
-                <a href={`tel:${patrollingOfficer.phone}`} className="hover:underline">{patrollingOfficer.phone}</a>
+                <p className="font-semibold">Phone</p>
+                <a href={`tel:${patrollingOfficer.phone}`} className="hover:underline text-muted-foreground font-medium">{patrollingOfficer.phone}</a>
               </div>
             </div>
             <div className="flex items-start gap-3">
               <Mail className="h-5 w-5 mt-0.5 text-primary" />
               <div>
-                <p className="text-foreground">Email</p>
-                <a href={`mailto:${patrollingOfficer.email}`} className="hover:underline">{patrollingOfficer.email}</a>
+                <p className="font-semibold">Email</p>
+                <a href={`mailto:${patrollingOfficer.email}`} className="hover:underline text-muted-foreground font-medium">{patrollingOfficer.email}</a>
               </div>
             </div>
             <div className="flex items-start gap-3">
               <Users className="h-5 w-5 mt-0.5 text-primary" />
               <div>
-                <p className="text-foreground">Total Guards</p>
-                <p>{assignedGuards.length}</p>
+                <p className="font-semibold">Total Guards</p>
+                <p className="font-medium">{assignedGuards.length}</p>
               </div>
             </div>
             <div className="flex items-start gap-3">
               <MapPin className="h-5 w-5 mt-0.5 text-primary" />
               <div>
-                <p className="text-foreground">Total Sites</p>
-                <p>{assignedSites.length}</p>
+                <p className="font-semibold">Total Sites</p>
+                <p className="font-medium">{assignedSites.length}</p>
               </div>
             </div>
           </div>
@@ -210,27 +210,27 @@ export default function AgencyPatrollingOfficerReportPage() {
       <Card>
         <CardHeader>
           <CardTitle>Performance Metrics</CardTitle>
-           <CardDescription>
+           <CardDescription className="font-medium">
             Key performance indicators for this patrolling officer.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
             <div className="flex justify-between items-center mb-1">
-              <h4 className="flex items-center gap-2 text-sm">
+              <h4 className="flex items-center gap-2 text-sm font-medium">
                   <Map className="w-4 h-4 text-primary" />
                   Site Visit Accuracy
               </h4>
-              <span className="text-muted-foreground">{siteVisitAccuracy.toFixed(1)}%</span>
+              <span className="text-muted-foreground font-medium">{siteVisitAccuracy.toFixed(1)}%</span>
             </div>
             <Progress value={siteVisitAccuracy} className="h-2" />
           </div>
           <div className="flex items-center justify-between pt-2">
-              <h4 className="flex items-center gap-2 text-sm">
+              <h4 className="flex items-center gap-2 text-sm font-medium">
                   <Clock className="w-4 h-4 text-primary" />
                   Average Response Time
               </h4>
-              <span className="text-lg text-foreground">{averageResponseTime.toFixed(0)} mins</span>
+              <span className="text-lg font-medium">{averageResponseTime.toFixed(0)} mins</span>
           </div>
         </CardContent>
       </Card>
@@ -255,19 +255,19 @@ export default function AgencyPatrollingOfficerReportPage() {
                         {assignedSites.map(site => (
                             <TableRow key={site.id}>
                                 <TableCell>
-                                    <Button asChild variant="link" className="p-0 h-auto">
+                                    <Button asChild variant="link" className="p-0 h-auto font-medium">
                                         <Link href={`/agency/sites/${site.id}`}>{site.id}</Link>
                                     </Button>
                                 </TableCell>
-                                <TableCell>{site.name}</TableCell>
-                                <TableCell>{site.address}</TableCell>
-                                <TableCell>{site.guards.length}</TableCell>
+                                <TableCell className="font-medium">{site.name}</TableCell>
+                                <TableCell className="font-medium">{site.address}</TableCell>
+                                <TableCell className="font-medium">{site.guards.length}</TableCell>
                             </TableRow>
                         ))}
                     </TableBody>
                 </Table>
             ) : (
-                <p className="text-sm text-muted-foreground">No sites are assigned to this patrolling officer.</p>
+                <p className="text-sm text-muted-foreground font-medium">No sites are assigned to this patrolling officer.</p>
             )}
           </CardContent>
         </Card>
@@ -285,16 +285,16 @@ export default function AgencyPatrollingOfficerReportPage() {
                                 <AvatarFallback>{guard.name.charAt(0)}</AvatarFallback>
                             </Avatar>
                             <div>
-                                <Button asChild variant="link" className="p-0 h-auto text-base">
+                                <Button asChild variant="link" className="p-0 h-auto text-base font-medium">
                                   <Link href={`/agency/guards/${guard.id}`}>{guard.name}</Link>
                                 </Button>
-                                <p className="text-sm text-muted-foreground">ID: {guard.id} | Site: {guard.site}</p>
+                                <p className="text-sm text-muted-foreground font-medium">ID: {guard.id} | Site: {guard.site}</p>
                             </div>
                         </div>
                     ))}
                 </div>
             ) : (
-                <p className="text-sm text-muted-foreground">No guards are assigned to this patrolling officer's sites.</p>
+                <p className="text-sm text-muted-foreground font-medium">No guards are assigned to this patrolling officer's sites.</p>
             )}
           </CardContent>
         </Card>
@@ -304,18 +304,18 @@ export default function AgencyPatrollingOfficerReportPage() {
         <CardHeader className="flex flex-row items-start justify-between gap-4">
           <div className="flex-grow">
             <CardTitle>Recent Incidents</CardTitle>
-            <CardDescription>A log of emergency incidents at sites managed by {patrollingOfficer.name}.</CardDescription>
+            <CardDescription className="font-medium">A log of emergency incidents at sites managed by {patrollingOfficer.name}.</CardDescription>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
             {availableYears.length > 0 && (
               <Select value={selectedYear} onValueChange={setSelectedYear}>
-                <SelectTrigger className="w-[120px]">
+                <SelectTrigger className="w-[120px] font-medium">
                   <SelectValue placeholder="Select Year" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Years</SelectItem>
+                  <SelectItem value="all" className="font-medium">All Years</SelectItem>
                   {availableYears.map((year) => (
-                    <SelectItem key={year} value={year}>
+                    <SelectItem key={year} value={year} className="font-medium">
                       {year}
                     </SelectItem>
                   ))}
@@ -323,13 +323,13 @@ export default function AgencyPatrollingOfficerReportPage() {
               </Select>
             )}
             <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-              <SelectTrigger className="w-[140px]">
+              <SelectTrigger className="w-[140px] font-medium">
                 <SelectValue placeholder="Select Month" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Months</SelectItem>
+                <SelectItem value="all" className="font-medium">All Months</SelectItem>
                 {Array.from({ length: 12 }, (_, i) => (
-                  <SelectItem key={i} value={i.toString()}>
+                  <SelectItem key={i} value={i.toString()} className="font-medium">
                     {new Date(0, i).toLocaleString('default', {
                       month: 'long',
                     })}
@@ -362,13 +362,13 @@ export default function AgencyPatrollingOfficerReportPage() {
                           className="cursor-pointer"
                         >
                             <TableCell>
-                              <Button asChild variant="link" className="p-0 h-auto" onClick={(e) => e.stopPropagation()}>
+                              <Button asChild variant="link" className="p-0 h-auto font-medium" onClick={(e) => e.stopPropagation()}>
                                 <Link href={`/agency/incidents/${incident.id}`}>{incident.id}</Link>
                               </Button>
                             </TableCell>
-                            <TableCell>{new Date(incident.incidentTime).toLocaleString()}</TableCell>
-                            <TableCell>{site?.name || 'N/A'}</TableCell>
-                            <TableCell>{guard?.name || 'N/A'}</TableCell>
+                            <TableCell className="font-medium">{new Date(incident.incidentTime).toLocaleString()}</TableCell>
+                            <TableCell className="font-medium">{site?.name || 'N/A'}</TableCell>
+                            <TableCell className="font-medium">{guard?.name || 'N/A'}</TableCell>
                             <TableCell>{getStatusIndicator(incident.status)}</TableCell>
                         </TableRow>
                     )
@@ -376,7 +376,7 @@ export default function AgencyPatrollingOfficerReportPage() {
               </TableBody>
             </Table>
           ) : (
-            <p className="text-muted-foreground text-center py-4">No recent incidents for this patrolling officer's sites {selectedYear !== 'all' || selectedMonth !== 'all' ? 'in the selected period' : ''}.</p>
+            <p className="text-muted-foreground text-center py-4 font-medium">No recent incidents for this patrolling officer's sites {selectedYear !== 'all' || selectedMonth !== 'all' ? 'in the selected period' : ''}.</p>
           )}
         </CardContent>
       </Card>

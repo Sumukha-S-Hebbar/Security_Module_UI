@@ -65,7 +65,7 @@ export function SiteStatusBreakdown({ sites, agencies }: { sites: Site[]; agenci
     const percentage = totalSites > 0 ? ((data.value / totalSites) * 100).toFixed(1) : 0;
     
     return (
-      <div className="rounded-lg border bg-background p-2 text-sm shadow-sm">
+      <div className="rounded-lg border bg-background p-2 text-sm shadow-sm font-medium">
         <div className="font-bold">{data.name}</div>
         <div>
           {data.value} Sites ({percentage}%)
@@ -78,7 +78,7 @@ export function SiteStatusBreakdown({ sites, agencies }: { sites: Site[]; agenci
     <Card>
       <CardHeader>
         <CardTitle>Site Status Overview</CardTitle>
-        <CardDescription>A real-time overview of site assignments. Click a slice to see details.</CardDescription>
+        <CardDescription className="font-medium">A real-time overview of site assignments. Click a slice to see details.</CardDescription>
       </CardHeader>
       <CardContent>
          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -131,16 +131,16 @@ export function SiteStatusBreakdown({ sites, agencies }: { sites: Site[]; agenci
                             className={selectedSection === 'assigned' ? 'cursor-pointer' : ''}
                           >
                             <TableCell>
-                                <Button asChild variant="link" className="p-0 h-auto" onClick={(e) => e.stopPropagation()}>
+                                <Button asChild variant="link" className="p-0 h-auto font-medium" onClick={(e) => e.stopPropagation()}>
                                     <Link href={`/towerco/sites/${site.id}`}>{site.id}</Link>
                                 </Button>
                             </TableCell>
                             <TableCell>
-                              <p>{site.name}</p>
-                              <p className="text-xs text-muted-foreground">{site.address}</p>
+                              <p className="font-medium">{site.name}</p>
+                              <p className="text-xs text-muted-foreground font-medium">{site.address}</p>
                             </TableCell>
                             <TableCell>
-                              <Badge variant="outline">{site.region}</Badge>
+                              <Badge variant="outline" className="font-medium">{site.region}</Badge>
                             </TableCell>
                             {selectedSection === 'unassigned' && (
                               <TableCell className="text-right">
@@ -161,7 +161,7 @@ export function SiteStatusBreakdown({ sites, agencies }: { sites: Site[]; agenci
                     </Table>
                   </ScrollArea>
                    <div className="flex items-center justify-between w-full pt-4">
-                        <div className="text-sm text-muted-foreground">
+                        <div className="text-sm text-muted-foreground font-medium">
                             Showing {paginatedSites.length} of {selectedSites.length} sites.
                         </div>
                         <div className="flex items-center gap-2">
@@ -173,7 +173,7 @@ export function SiteStatusBreakdown({ sites, agencies }: { sites: Site[]; agenci
                             >
                                 Previous
                             </Button>
-                            <span className="text-sm">Page {currentPage} of {totalPages || 1}</span>
+                            <span className="text-sm font-medium">Page {currentPage} of {totalPages || 1}</span>
                             <Button
                                 variant="outline"
                                 size="sm"
@@ -189,7 +189,7 @@ export function SiteStatusBreakdown({ sites, agencies }: { sites: Site[]; agenci
                 <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground">
                     <Building2 className="h-12 w-12 mb-4" />
                     <p className="font-semibold">Select a section of the chart</p>
-                    <p className="text-sm">Click on a pie slice to view the list of sites.</p>
+                    <p className="text-sm font-medium">Click on a pie slice to view the list of sites.</p>
                 </div>
               )}
             </div>

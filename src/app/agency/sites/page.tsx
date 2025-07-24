@@ -334,7 +334,7 @@ export default function AgencySitesPage() {
       });
       
     return (
-        <DropdownMenuContent className="w-64">
+        <DropdownMenuContent className="w-64 font-medium">
             <DropdownMenuLabel>Available Guards</DropdownMenuLabel>
             <DropdownMenuSeparator />
             {guardsInCity.length > 0 && (
@@ -351,7 +351,7 @@ export default function AgencySitesPage() {
                 </>
             )}
             {unassignedGuards.length === 0 && (
-                <div className="px-2 py-1.5 text-sm text-muted-foreground">No unassigned guards</div>
+                <div className="px-2 py-1.5 text-sm text-muted-foreground font-medium">No unassigned guards</div>
             )}
       </DropdownMenuContent>
     )
@@ -369,6 +369,7 @@ export default function AgencySitesPage() {
         <SelectItem
           key={po.id}
           value={po.id}
+          className="font-medium"
         >
           {po.name}
         </SelectItem>
@@ -397,7 +398,7 @@ export default function AgencySitesPage() {
     <div className="p-4 sm:p-6 lg:p-8 space-y-6">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Site Management</h1>
-        <p className="text-muted-foreground">
+        <p className="text-muted-foreground font-medium">
           Comprehensive overview of all operational sites.
         </p>
       </div>
@@ -405,7 +406,7 @@ export default function AgencySitesPage() {
       <Card>
         <CardHeader>
           <CardTitle>Assigned Sites</CardTitle>
-          <CardDescription>
+          <CardDescription className="font-medium">
             A list of all sites with an assigned patrolling officer.
           </CardDescription>
           <div className="flex flex-wrap items-center gap-2 pt-4">
@@ -423,13 +424,13 @@ export default function AgencySitesPage() {
               value={selectedPatrollingOfficerFilter}
               onValueChange={setSelectedPatrollingOfficerFilter}
             >
-              <SelectTrigger className="w-full sm:w-[220px]">
+              <SelectTrigger className="w-full sm:w-[220px] font-medium">
                 <SelectValue placeholder="Filter by Patrolling Officer" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Patrolling Officers</SelectItem>
+                <SelectItem value="all" className="font-medium">All Patrolling Officers</SelectItem>
                 {assignedSitesPatrollingOfficers.map((po) => (
-                  <SelectItem key={po.id} value={po.id}>
+                  <SelectItem key={po.id} value={po.id} className="font-medium">
                     {po.name}
                   </SelectItem>
                 ))}
@@ -439,13 +440,13 @@ export default function AgencySitesPage() {
               value={assignedSelectedRegion}
               onValueChange={handleAssignedRegionChange}
             >
-              <SelectTrigger className="w-full sm:w-[180px]">
+              <SelectTrigger className="w-full sm:w-[180px] font-medium">
                 <SelectValue placeholder="Filter by region" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Regions</SelectItem>
+                <SelectItem value="all" className="font-medium">All Regions</SelectItem>
                 {assignedRegions.map((region) => (
-                  <SelectItem key={region} value={region}>
+                  <SelectItem key={region} value={region} className="font-medium">
                     {region}
                   </SelectItem>
                 ))}
@@ -456,13 +457,13 @@ export default function AgencySitesPage() {
               onValueChange={setAssignedSelectedCity}
               disabled={assignedSelectedRegion === 'all'}
             >
-              <SelectTrigger className="w-full sm:w-[180px]">
+              <SelectTrigger className="w-full sm:w-[180px] font-medium">
                 <SelectValue placeholder="Filter by city" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Cities</SelectItem>
+                <SelectItem value="all" className="font-medium">All Cities</SelectItem>
                 {assignedCities.map((city) => (
-                  <SelectItem key={city} value={city}>
+                  <SelectItem key={city} value={city} className="font-medium">
                     {city}
                   </SelectItem>
                 ))}
@@ -493,23 +494,23 @@ export default function AgencySitesPage() {
                     className="cursor-pointer"
                   >
                     <TableCell>
-                      <Button asChild variant="link" className="p-0 h-auto" onClick={(e) => e.stopPropagation()}>
+                      <Button asChild variant="link" className="p-0 h-auto font-medium" onClick={(e) => e.stopPropagation()}>
                         <Link href={`/agency/sites/${site.id}`}>{site.id}</Link>
                       </Button>
                     </TableCell>
                     <TableCell>
-                      <p>{site.name}</p>
-                      <p className="text-sm text-muted-foreground">{site.address}</p>
+                      <p className="font-medium">{site.name}</p>
+                      <p className="text-sm text-muted-foreground font-medium">{site.address}</p>
                     </TableCell>
-                    <TableCell>{patrollingOfficer?.name || 'N/A'}</TableCell>
-                    <TableCell>{site.guards.length}</TableCell>
-                    <TableCell>{incidentsCount}</TableCell>
+                    <TableCell className="font-medium">{patrollingOfficer?.name || 'N/A'}</TableCell>
+                    <TableCell className="font-medium">{site.guards.length}</TableCell>
+                    <TableCell className="font-medium">{incidentsCount}</TableCell>
                   </TableRow>
                 )
               })
             ) : (
               <TableRow>
-                <TableCell colSpan={5} className="text-center text-muted-foreground py-10">
+                <TableCell colSpan={5} className="text-center text-muted-foreground py-10 font-medium">
                   No assigned sites found for the current filter.
                 </TableCell>
               </TableRow>
@@ -523,7 +524,7 @@ export default function AgencySitesPage() {
         <Card>
           <CardHeader>
             <CardTitle>Unassigned Sites</CardTitle>
-            <CardDescription>
+            <CardDescription className="font-medium">
               A list of sites that do not have a patrolling officer assigned.
             </CardDescription>
             <div className="flex flex-wrap items-center gap-2 pt-4">
@@ -538,13 +539,13 @@ export default function AgencySitesPage() {
                   />
                 </div>
                 <Select value={unassignedSelectedRegion} onValueChange={handleUnassignedRegionChange}>
-                  <SelectTrigger className="w-full sm:w-[180px]">
+                  <SelectTrigger className="w-full sm:w-[180px] font-medium">
                     <SelectValue placeholder="Filter by region" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Regions</SelectItem>
+                    <SelectItem value="all" className="font-medium">All Regions</SelectItem>
                     {unassignedRegions.map((region) => (
-                      <SelectItem key={region} value={region}>
+                      <SelectItem key={region} value={region} className="font-medium">
                         {region}
                       </SelectItem>
                     ))}
@@ -555,13 +556,13 @@ export default function AgencySitesPage() {
                   onValueChange={setUnassignedSelectedCity}
                   disabled={unassignedSelectedRegion === 'all'}
                 >
-                  <SelectTrigger className="w-full sm:w-[180px]">
+                  <SelectTrigger className="w-full sm:w-[180px] font-medium">
                     <SelectValue placeholder="Filter by city" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Cities</SelectItem>
+                    <SelectItem value="all" className="font-medium">All Cities</SelectItem>
                     {unassignedCities.map((city) => (
-                      <SelectItem key={city} value={city}>
+                      <SelectItem key={city} value={city} className="font-medium">
                         {city}
                       </SelectItem>
                     ))}
@@ -586,7 +587,7 @@ export default function AgencySitesPage() {
                   <TableRow key={site.id}>
                     <TableCell className="align-top py-4">
                       <div className="font-medium">{site.name}</div>
-                      <div className="text-sm text-muted-foreground flex items-center gap-1">
+                      <div className="text-sm text-muted-foreground flex items-center gap-1 font-medium">
                         <MapPin className="w-3 h-3" />
                         {site.address}
                       </div>
@@ -606,14 +607,14 @@ export default function AgencySitesPage() {
                       <div className='flex flex-col items-start gap-2'>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="outline" className="w-[180px]">
+                            <Button variant="outline" className="w-[180px] font-medium">
                               <Users className="mr-2 h-4 w-4" />
                               Select Guards ({selectedGuards[site.id]?.length || 0})
                             </Button>
                           </DropdownMenuTrigger>
                           {renderGuardSelection(site)}
                         </DropdownMenu>
-                        {site.guardsRequired && <p className="text-xs text-muted-foreground">Guards Required: <span className="font-bold">{site.guardsRequired}</span></p>}
+                        {site.guardsRequired && <p className="text-xs text-muted-foreground font-medium">Guards Required: <span className="font-bold">{site.guardsRequired}</span></p>}
                       </div>
                     </TableCell>
                     <TableCell className="align-top py-4">
@@ -623,7 +624,7 @@ export default function AgencySitesPage() {
                           handlePatrollingOfficerSelect(site.id, value)
                         }
                       >
-                        <SelectTrigger className="w-[180px]">
+                        <SelectTrigger className="w-[180px] font-medium">
                           <SelectValue placeholder="Select Patrolling Officer" />
                         </SelectTrigger>
                         {renderPatrollingOfficerSelection(site)}
@@ -646,7 +647,7 @@ export default function AgencySitesPage() {
                 ))
               ) : (
                 <TableRow>
-                    <TableCell colSpan={5} className="text-center text-muted-foreground">
+                    <TableCell colSpan={5} className="text-center text-muted-foreground font-medium">
                         No unassigned sites found for the current filter.
                     </TableCell>
                 </TableRow>

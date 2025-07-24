@@ -171,7 +171,7 @@ export default function AgencyGuardsPage() {
         <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
               <h1 className="text-3xl font-bold tracking-tight">Security Guard Management</h1>
-              <p className="text-muted-foreground">Add, view, and manage guard profiles and their assignments.</p>
+              <p className="text-muted-foreground font-medium">Add, view, and manage guard profiles and their assignments.</p>
             </div>
              <div className="flex items-center gap-2">
                 <Button variant="outline" onClick={handleDownloadTemplate}>
@@ -188,7 +188,7 @@ export default function AgencyGuardsPage() {
                     <DialogContent>
                         <DialogHeader>
                         <DialogTitle>Upload Guard Profiles</DialogTitle>
-                        <DialogDescription>
+                        <DialogDescription className="font-medium">
                             Upload an Excel file to add multiple security guard profiles at once.
                         </DialogDescription>
                         </DialogHeader>
@@ -210,7 +210,7 @@ export default function AgencyGuardsPage() {
                                                 onChange={(e) => field.onChange(e.target.files)}
                                             />
                                             </FormControl>
-                                            <FormDescription>
+                                            <FormDescription className="font-medium">
                                             The Excel file should contain columns: name, phone, site.
                                             </FormDescription>
                                             <FormMessage />
@@ -247,7 +247,7 @@ export default function AgencyGuardsPage() {
                     <DialogContent>
                         <DialogHeader>
                             <DialogTitle>Add a New Guard</DialogTitle>
-                            <DialogDescription>
+                            <DialogDescription className="font-medium">
                                 Fill in the details below to add a new security guard.
                             </DialogDescription>
                         </DialogHeader>
@@ -325,7 +325,7 @@ export default function AgencyGuardsPage() {
         <Card>
           <CardHeader>
             <CardTitle>All Guard Details</CardTitle>
-            <CardDescription>A list of all guards in your agency.</CardDescription>
+            <CardDescription className="font-medium">A list of all guards in your agency.</CardDescription>
             <div className="flex flex-wrap items-center gap-2 pt-4">
               <div className="relative flex-1 md:grow-0">
                   <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -338,30 +338,30 @@ export default function AgencyGuardsPage() {
                   />
               </div>
               <Select value={selectedSiteFilter} onValueChange={setSelectedSiteFilter}>
-                  <SelectTrigger className="w-full sm:w-[180px]">
+                  <SelectTrigger className="w-full sm:w-[180px] font-medium">
                       <SelectValue placeholder="Filter by site" />
                   </SelectTrigger>
                   <SelectContent>
-                      <SelectItem value="all">All Sites</SelectItem>
+                      <SelectItem value="all" className="font-medium">All Sites</SelectItem>
                       {uniqueSites.map((site) => (
-                          <SelectItem key={site} value={site}>
+                          <SelectItem key={site} value={site} className="font-medium">
                               {site}
                           </SelectItem>
                       ))}
                   </SelectContent>
               </Select>
               <Select value={selectedPatrollingOfficerFilter} onValueChange={setSelectedPatrollingOfficerFilter}>
-                  <SelectTrigger className="w-full sm:w-[180px]">
+                  <SelectTrigger className="w-full sm:w-[180px] font-medium">
                       <SelectValue placeholder="Filter by Patrolling Officer" />
                   </SelectTrigger>
                   <SelectContent>
-                      <SelectItem value="all">All Patrolling Officers</SelectItem>
+                      <SelectItem value="all" className="font-medium">All Patrolling Officers</SelectItem>
                       {uniquePatrollingOfficers.map((po) => (
-                          <SelectItem key={po.id} value={po.id}>
+                          <SelectItem key={po.id} value={po.id} className="font-medium">
                               {po.name}
                           </SelectItem>
                       ))}
-                      <SelectItem value="unassigned">Unassigned</SelectItem>
+                      <SelectItem value="unassigned" className="font-medium">Unassigned</SelectItem>
                   </SelectContent>
               </Select>
             </div>
@@ -392,7 +392,7 @@ export default function AgencyGuardsPage() {
                         className="cursor-pointer"
                       >
                         <TableCell>
-                          <Button asChild variant="link" className="p-0 h-auto" onClick={(e) => e.stopPropagation()}>
+                          <Button asChild variant="link" className="p-0 h-auto font-medium" onClick={(e) => e.stopPropagation()}>
                             <Link href={`/agency/guards/${guard.id}`}>{guard.id}</Link>
                           </Button>
                         </TableCell>
@@ -403,16 +403,16 @@ export default function AgencyGuardsPage() {
                               <AvatarFallback>{guard.name.charAt(0)}</AvatarFallback>
                             </Avatar>
                             <div>
-                              <p>{guard.name}</p>
+                              <p className="font-medium">{guard.name}</p>
                             </div>
                           </div>
                         </TableCell>
-                        <TableCell>{guard.site}</TableCell>
-                        <TableCell>{patrollingOfficer?.name || <span className="text-muted-foreground">Unassigned</span>}</TableCell>
+                        <TableCell className="font-medium">{guard.site}</TableCell>
+                        <TableCell className="font-medium">{patrollingOfficer?.name || <span className="text-muted-foreground">Unassigned</span>}</TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2">
                             <Progress value={compliance} className="w-24 h-2" />
-                            <span className="text-sm text-muted-foreground">{compliance}%</span>
+                            <span className="text-sm text-muted-foreground font-medium">{compliance}%</span>
                           </div>
                         </TableCell>
                       </TableRow>
@@ -420,7 +420,7 @@ export default function AgencyGuardsPage() {
                   })
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center text-muted-foreground py-10">
+                    <TableCell colSpan={5} className="text-center text-muted-foreground py-10 font-medium">
                       No guards found for the current filter.
                     </TableCell>
                   </TableRow>

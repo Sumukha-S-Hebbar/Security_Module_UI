@@ -55,7 +55,7 @@ export default function AgencyGuardReportPage() {
       <div className="p-4 sm:p-6 lg:p-8">
         <Card>
           <CardContent className="pt-6">
-            <p>Guard not found.</p>
+            <p className="font-medium">Guard not found.</p>
           </CardContent>
         </Card>
       </div>
@@ -95,7 +95,7 @@ export default function AgencyGuardReportPage() {
     switch (status) {
       case 'Active':
         return (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 font-medium">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-destructive"></span>
@@ -105,7 +105,7 @@ export default function AgencyGuardReportPage() {
         );
       case 'Under Review':
         return (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 font-medium">
             <span className="relative flex h-2 w-2">
               <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
             </span>
@@ -114,7 +114,7 @@ export default function AgencyGuardReportPage() {
         );
       case 'Resolved':
         return (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 font-medium">
             <span className="relative flex h-2 w-2">
               <span className="relative inline-flex rounded-full h-2 w-2 bg-chart-2"></span>
             </span>
@@ -123,7 +123,7 @@ export default function AgencyGuardReportPage() {
         );
       default:
         return (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 font-medium">
             <span className="relative flex h-2 w-2">
               <span className="relative inline-flex rounded-full h-2 w-2 bg-muted-foreground"></span>
             </span>
@@ -155,7 +155,7 @@ export default function AgencyGuardReportPage() {
           </Button>
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Security Guard Report</h1>
-            <p className="text-muted-foreground">Detailed overview for ${guard.name}.</p>
+            <p className="text-muted-foreground font-medium">Detailed overview for ${guard.name}.</p>
           </div>
         </div>
         <Button onClick={handleDownloadReport}>
@@ -178,20 +178,20 @@ export default function AgencyGuardReportPage() {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="text-sm text-muted-foreground mt-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="text-sm mt-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="flex items-start gap-3">
               <Phone className="h-5 w-5 mt-0.5 text-primary" />
               <div>
-                <p className="text-foreground">Phone</p>
-                <a href={`tel:${guard.phone}`} className="hover:underline">{guard.phone}</a>
+                <p className="font-semibold">Phone</p>
+                <a href={`tel:${guard.phone}`} className="hover:underline text-muted-foreground font-medium">{guard.phone}</a>
               </div>
             </div>
             {site && (
               <div className="flex items-start gap-3">
                 <MapPin className="h-5 w-5 mt-0.5 text-primary" />
                 <div>
-                  <p className="text-foreground">Assigned Site</p>
-                  <p>{site.name}</p>
+                  <p className="font-semibold">Assigned Site</p>
+                  <p className="text-muted-foreground font-medium">{site.name}</p>
                 </div>
               </div>
             )}
@@ -199,8 +199,8 @@ export default function AgencyGuardReportPage() {
               <div className="flex items-start gap-3">
                 <UserCheck className="h-5 w-5 mt-0.5 text-primary" />
                 <div>
-                  <p className="text-foreground">Patrolling Officer</p>
-                  <p>{patrollingOfficer.name}</p>
+                  <p className="font-semibold">Patrolling Officer</p>
+                  <p className="text-muted-foreground font-medium">{patrollingOfficer.name}</p>
                 </div>
               </div>
             )}
@@ -235,31 +235,31 @@ export default function AgencyGuardReportPage() {
                           </PieChart>
                       </ResponsiveContainer>
                       <div className="absolute inset-0 flex items-center justify-center">
-                          <span className="text-3xl font-bold text-foreground">{compliance}%</span>
+                          <span className="text-3xl font-bold">{compliance}%</span>
                       </div>
                   </div>
-                  <p className="text-lg text-center">Overall Compliance</p>
+                  <p className="text-lg text-center font-medium">Overall Compliance</p>
               </div>
               <div className="space-y-4 pt-6 border-t">
                   <div>
                     <div className="flex justify-between items-center mb-1">
-                      <h4 className="flex items-center gap-2 text-sm">
+                      <h4 className="flex items-center gap-2 text-sm font-medium">
                           Perimeter Accuracy
                       </h4>
-                      <span className="text-muted-foreground">{perimeterAccuracy}%</span>
+                      <span className="text-muted-foreground font-medium">{perimeterAccuracy}%</span>
                     </div>
                     <Progress value={perimeterAccuracy} className="h-2" />
                   </div>
                   <div>
                     <div className="flex justify-between items-center mb-1">
-                      <h4 className="flex items-center gap-2 text-sm">
+                      <h4 className="flex items-center gap-2 text-sm font-medium">
                           Selfie Check-in Accuracy
                       </h4>
-                      <span className="text-muted-foreground">{selfieAccuracy}%</span>
+                      <span className="text-muted-foreground font-medium">{selfieAccuracy}%</span>
                     </div>
                     <Progress value={selfieAccuracy} className="h-2" />
                   </div>
-                  <div className="text-sm text-muted-foreground">
+                  <div className="text-sm text-muted-foreground font-medium">
                       <p>Total Selfie Requests: {guard.totalSelfieRequests}</p>
                       <p>Missed Selfies: {guard.missedSelfieCount}</p>
                   </div>
@@ -273,12 +273,12 @@ export default function AgencyGuardReportPage() {
               <CardTitle className="flex items-center gap-2"><MapPin className="h-5 w-5"/>Site Details</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              <p>{site.name}</p>
-              <p className="text-sm text-muted-foreground">{site.address}</p>
+              <p className="font-medium">{site.name}</p>
+              <p className="text-sm text-muted-foreground font-medium">{site.address}</p>
               {site.geofencePerimeter && (
-                <p className="text-sm text-muted-foreground">Geofence: {site.geofencePerimeter}m</p>
+                <p className="text-sm text-muted-foreground font-medium">Geofence: {site.geofencePerimeter}m</p>
               )}
-              <Button asChild variant="link" className="p-0 h-auto">
+              <Button asChild variant="link" className="p-0 h-auto font-medium">
                 <Link href={`/agency/sites/${site.id}`}>View Full Site Report</Link>
               </Button>
             </CardContent>
@@ -290,18 +290,18 @@ export default function AgencyGuardReportPage() {
         <CardHeader className="flex flex-row items-start justify-between gap-4">
           <div className="flex-grow">
             <CardTitle>Recent Incidents</CardTitle>
-            <CardDescription>A log of emergency incidents involving {guard.name}.</CardDescription>
+            <CardDescription className="font-medium">A log of emergency incidents involving {guard.name}.</CardDescription>
           </div>
            <div className="flex items-center gap-2 flex-shrink-0">
               {availableYears.length > 0 && (
                 <Select value={selectedYear} onValueChange={setSelectedYear}>
-                  <SelectTrigger className="w-[120px]">
+                  <SelectTrigger className="w-[120px] font-medium">
                     <SelectValue placeholder="Select Year" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Years</SelectItem>
+                    <SelectItem value="all" className="font-medium">All Years</SelectItem>
                     {availableYears.map((year) => (
-                      <SelectItem key={year} value={year}>
+                      <SelectItem key={year} value={year} className="font-medium">
                         {year}
                       </SelectItem>
                     ))}
@@ -309,13 +309,13 @@ export default function AgencyGuardReportPage() {
                 </Select>
               )}
               <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-                <SelectTrigger className="w-[140px]">
+                <SelectTrigger className="w-[140px] font-medium">
                   <SelectValue placeholder="Select Month" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Months</SelectItem>
+                  <SelectItem value="all" className="font-medium">All Months</SelectItem>
                   {Array.from({ length: 12 }, (_, i) => (
-                    <SelectItem key={i} value={i.toString()}>
+                    <SelectItem key={i} value={i.toString()} className="font-medium">
                       {new Date(0, i).toLocaleString('default', { month: 'long' })}
                     </SelectItem>
                   ))}
@@ -342,19 +342,19 @@ export default function AgencyGuardReportPage() {
                     className="cursor-pointer"
                   >
                     <TableCell>
-                      <Button asChild variant="link" className="p-0 h-auto" onClick={(e) => e.stopPropagation()}>
+                      <Button asChild variant="link" className="p-0 h-auto font-medium" onClick={(e) => e.stopPropagation()}>
                         <Link href={`/agency/incidents/${incident.id}`}>{incident.id}</Link>
                       </Button>
                     </TableCell>
-                    <TableCell>{new Date(incident.incidentTime).toLocaleString()}</TableCell>
-                    <TableCell>{incident.siteId}</TableCell>
+                    <TableCell className="font-medium">{new Date(incident.incidentTime).toLocaleString()}</TableCell>
+                    <TableCell className="font-medium">{incident.siteId}</TableCell>
                     <TableCell>{getStatusIndicator(incident.status)}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
           ) : (
-            <p className="text-muted-foreground text-center py-4">No recent emergency incidents for this guard {selectedYear !== 'all' || selectedMonth !== 'all' ? 'in the selected period' : ''}.</p>
+            <p className="text-muted-foreground text-center py-4 font-medium">No recent emergency incidents for this guard {selectedYear !== 'all' || selectedMonth !== 'all' ? 'in the selected period' : ''}.</p>
           )}
         </CardContent>
       </Card>
