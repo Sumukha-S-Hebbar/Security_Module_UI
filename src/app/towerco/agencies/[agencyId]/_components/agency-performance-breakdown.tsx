@@ -91,8 +91,8 @@ export function AgencyPerformanceBreakdown({
   }, [agency, sites, incidents]);
   
   const getPerformanceColor = () => {
+    if (performanceData.performance >= 95) return 'hsl(var(--chart-2))';
     if (performanceData.performance >= 65) return 'hsl(var(--chart-3))';
-    if (performanceData.performance > 95) return 'hsl(var(--chart-2))';
     return 'hsl(var(--destructive))';
   };
 
