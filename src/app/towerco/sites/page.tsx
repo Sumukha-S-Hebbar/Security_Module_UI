@@ -600,7 +600,7 @@ export default function TowercoSitesPage() {
                   />
                 </div>
                 <Select value={selectedAgency} onValueChange={setSelectedAgency}>
-                  <SelectTrigger className="w-full sm:w-[180px] font-medium">
+                  <SelectTrigger className="w-full sm:w-[180px] font-medium hover:bg-accent hover:text-accent-foreground">
                     <SelectValue placeholder="Filter by agency" />
                   </SelectTrigger>
                   <SelectContent>
@@ -613,7 +613,7 @@ export default function TowercoSitesPage() {
                   </SelectContent>
                 </Select>
                 <Select value={assignedSelectedRegion} onValueChange={handleAssignedRegionChange}>
-                  <SelectTrigger className="w-full sm:w-[180px] font-medium">
+                  <SelectTrigger className="w-full sm:w-[180px] font-medium hover:bg-accent hover:text-accent-foreground">
                     <SelectValue placeholder="Filter by region" />
                   </SelectTrigger>
                   <SelectContent>
@@ -630,7 +630,7 @@ export default function TowercoSitesPage() {
                   onValueChange={setAssignedSelectedCity}
                   disabled={assignedSelectedRegion === 'all'}
                 >
-                  <SelectTrigger className="w-full sm:w-[180px] font-medium">
+                  <SelectTrigger className="w-full sm:w-[180px] font-medium hover:bg-accent hover:text-accent-foreground">
                     <SelectValue placeholder="Filter by city" />
                   </SelectTrigger>
                   <SelectContent>
@@ -749,7 +749,7 @@ export default function TowercoSitesPage() {
                   />
                 </div>
                  <Select value={unassignedSelectedRegion} onValueChange={handleUnassignedRegionChange}>
-                  <SelectTrigger className="w-full sm:w-[180px] font-medium">
+                  <SelectTrigger className="w-full sm:w-[180px] font-medium hover:bg-accent hover:text-accent-foreground">
                     <SelectValue placeholder="Filter by region" />
                   </SelectTrigger>
                   <SelectContent>
@@ -766,7 +766,7 @@ export default function TowercoSitesPage() {
                   onValueChange={setUnassignedSelectedCity}
                   disabled={unassignedSelectedRegion === 'all'}
                 >
-                  <SelectTrigger className="w-full sm:w-[180px] font-medium">
+                  <SelectTrigger className="w-full sm:w-[180px] font-medium hover:bg-accent hover:text-accent-foreground">
                     <SelectValue placeholder="Filter by city" />
                   </SelectTrigger>
                   <SelectContent>
