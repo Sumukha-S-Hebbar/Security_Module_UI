@@ -20,7 +20,7 @@ export function TowercoAnalyticsDashboard({
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       <Link href="/towerco/incidents?status=active">
-        <Card className="transition-all hover:shadow-md">
+        <Card className="transition-all hover:bg-accent/10">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Active Incidents</CardTitle>
             <ShieldAlert className="h-4 w-4 text-muted-foreground" />
@@ -33,7 +33,7 @@ export function TowercoAnalyticsDashboard({
           </CardContent>
         </Card>
       </Link>
-      <Card className="transition-all hover:shadow-md cursor-pointer">
+      <Card className="transition-all hover:bg-accent/10 cursor-pointer">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Total Guards</CardTitle>
           <Users className="h-4 w-4 text-muted-foreground" />
@@ -46,7 +46,7 @@ export function TowercoAnalyticsDashboard({
         </CardContent>
       </Card>
       <Link href="/towerco/sites">
-        <Card className="transition-all hover:shadow-md">
+        <Card className="transition-all hover:bg-accent/10">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Sites</CardTitle>
             <Building2 className="h-4 w-4 text-muted-foreground" />
@@ -60,7 +60,7 @@ export function TowercoAnalyticsDashboard({
         </Card>
       </Link>
       <Link href="/towerco/agencies">
-        <Card className="transition-all hover:shadow-md">
+        <Card className="transition-all hover:bg-accent/10">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
               Security Agencies
