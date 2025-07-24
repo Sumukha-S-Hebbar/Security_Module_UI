@@ -573,9 +573,9 @@ export default function TowercoAgenciesPage() {
 
                                     return (
                                         <Fragment key={agency.id}>
-                                            <TableRow onClick={() => handleRowClick(agency.id)} className="cursor-pointer">
+                                            <TableRow onClick={() => handleRowClick(agency.id)} className="cursor-pointer hover:bg-accent hover:text-accent-foreground group">
                                                 <TableCell>
-                                                    <p className="text-primary hover:underline">{agency.id}</p>
+                                                    <p className="text-primary hover:underline group-hover:text-accent-foreground">{agency.id}</p>
                                                 </TableCell>
                                                 <TableCell>
                                                     <div className="flex items-center gap-3">
@@ -587,19 +587,19 @@ export default function TowercoAgenciesPage() {
                                                     </div>
                                                 </TableCell>
                                                 <TableCell>
-                                                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                                    <div className="flex items-center gap-2 text-sm text-muted-foreground group-hover:text-accent-foreground">
                                                         <Mail className="h-4 w-4 flex-shrink-0" />
                                                         <a href={`mailto:${agency.email}`} onClick={(e) => e.stopPropagation()} className="truncate hover:underline">
                                                             {agency.email}
                                                         </a>
                                                     </div>
-                                                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                                    <div className="flex items-center gap-2 text-sm text-muted-foreground group-hover:text-accent-foreground">
                                                         <Phone className="h-4 w-4 flex-shrink-0" />
                                                         <span>{agency.phone}</span>
                                                     </div>
                                                 </TableCell>
                                                 <TableCell>
-                                                    <div className="text-sm text-muted-foreground">
+                                                    <div className="text-sm text-muted-foreground group-hover:text-accent-foreground">
                                                         <p>{agency.address}</p>
                                                         <p>{agency.city}, {agency.region}</p>
                                                     </div>
@@ -607,7 +607,7 @@ export default function TowercoAgenciesPage() {
                                                 <TableCell>
                                                     <Button
                                                     variant="link"
-                                                    className="p-0 h-auto flex items-center gap-2"
+                                                    className="p-0 h-auto flex items-center gap-2 group-hover:text-accent-foreground"
                                                     onClick={(e) => handleExpandClick(e, agency.id)}
                                                     disabled={assignedSitesCount === 0}
                                                     >
