@@ -50,6 +50,10 @@ import {
   XAxis,
   YAxis,
   CartesianGrid,
+  PieChart,
+  Pie,
+  Cell,
+  ResponsiveContainer
 } from 'recharts';
 import {
   ChartContainer,
@@ -66,6 +70,7 @@ import {
 } from '@/components/ui/select';
 import { AgencyPerformanceBreakdown } from './_components/agency-performance-breakdown';
 import { useRouter } from 'next/navigation';
+import { patrollingOfficers } from '@/lib/data/patrolling-officers';
 
 const LOGGED_IN_ORG_ID = 'TCO01'; // Simulate logged-in user
 
@@ -120,6 +125,85 @@ export default function AgencyReportPage() {
   const resolvedIncidents = agencyIncidents.filter(
     (i) => i.status === 'Resolved'
   ).length;
+
+    const performanceData = useMemo(() => {
+    const agencySiteIds = new Set(agency.siteIds);
+    const agencySites = sites.filter(s => agencySiteIds.has(s.id));
+    
+    // 1. Incident Resolution Rate
+    const agencyIncidents = incidents.filter(
+      (incident) => agencySiteIds.has(incident.siteId)
+    );
+    const totalIncidents = agencyIncidents.length;
+    const resolvedIncidents = agencyIncidents.filter(i => i.status === 'Resolved').length;
+    const incidentResolutionRate = totalIncidents > 0 ? (resolvedIncidents / totalIncidents) * 100 : 100;
+
+    // 2. Guard Performance
+    const agencyGuardIds = new Set(agencySites.flatMap(s => s.guards));
+    const agencyGuards = guards.filter(g => agencyGuardIds.has(g.id));
+    let totalPerimeterAccuracy = 0;
+    let totalSelfieAccuracy = 0;
+
+    if (agencyGuards.length > 0) {
+      agencyGuards.forEach(guard => {
+        totalPerimeterAccuracy += guard.performance?.perimeterAccuracy || 0;
+        const selfieAccuracy = guard.totalSelfieRequests > 0
+          ? ((guard.totalSelfieRequests - guard.missedSelfieCount) / guard.totalSelfieRequests) * 100
+          : 100;
+        totalSelfieAccuracy += selfieAccuracy;
+      });
+    }
+    const guardPerimeterAccuracy = agencyGuards.length > 0 ? totalPerimeterAccuracy / agencyGuards.length : 100;
+    const guardSelfieAccuracy = agencyGuards.length > 0 ? totalSelfieAccuracy / agencyGuards.length : 100;
+
+    // 3. Patrolling Officer Performance
+    const agencyPatrollingOfficerIds = new Set(agencySites.map(s => s.patrollingOfficerId).filter(Boolean));
+    const agencyPatrollingOfficers = patrollingOfficers.filter(po => agencyPatrollingOfficerIds.has(po.id));
+    let totalSiteVisitRate = 0;
+    if (agencyPatrollingOfficers.length > 0) {
+        agencyPatrollingOfficers.forEach(po => {
+            const poSites = agencySites.filter(s => s.patrollingOfficerId === po.id);
+            if (poSites.length > 0) {
+                const visitedCount = poSites.filter(s => s.visited).length;
+                totalSiteVisitRate += (visitedCount / poSites.length) * 100;
+            } else {
+                totalSiteVisitRate += 100; // If no sites, they haven't missed any.
+            }
+        });
+    }
+    const officerSiteVisitRate = agencyPatrollingOfficers.length > 0 ? totalSiteVisitRate / agencyPatrollingOfficers.length : 100;
+    
+    const performanceComponents = [
+      incidentResolutionRate,
+      guardPerimeterAccuracy,
+      guardSelfieAccuracy,
+      officerSiteVisitRate,
+    ];
+    const performance = performanceComponents.reduce((a, b) => a + b, 0) / performanceComponents.length;
+
+    return {
+      performance: Math.round(performance),
+      incidentResolutionRate: Math.round(incidentResolutionRate),
+      guardPerimeterAccuracy: Math.round(guardPerimeterAccuracy),
+      guardSelfieAccuracy: Math.round(guardSelfieAccuracy),
+      officerSiteVisitRate: Math.round(officerSiteVisitRate),
+    };
+  }, [agency, sites, incidents]);
+
+  const performanceChartData = useMemo(() => {
+    return [
+      { name: 'Performance', value: performanceData.performance },
+      { name: 'Remaining', value: 100 - performanceData.performance },
+    ]
+  }, [performanceData.performance]);
+
+  const getPerformanceColor = () => {
+    if (performanceData.performance > 95) return 'hsl(var(--chart-2))'; // Green
+    if (performanceData.performance >= 65) return 'hsl(var(--chart-3))'; // Yellow
+    return 'hsl(var(--destructive))'; // Orange/Red
+  }
+  
+  const PERFORMANCE_COLORS = [getPerformanceColor(), 'hsl(var(--muted))'];
 
   const getStatusIndicator = (status: Incident['status']) => {
     switch (status) {
@@ -227,73 +311,107 @@ export default function AgencyReportPage() {
           Download Full Report
         </Button>
       </div>
-      <Card>
-        <CardHeader>
-          <div className="flex items-center gap-4">
-              <Avatar className="h-16 w-16">
-                  <AvatarImage src={agency.avatar} alt={agency.name} />
-                  <AvatarFallback>{agency.name.charAt(0)}</AvatarFallback>
-              </Avatar>
-              <div>
-                <CardTitle className="text-2xl">{agency.name}</CardTitle>
-                <CardDescription>ID: {agency.id}</CardDescription>
-              </div>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-6">
-            <div className="text-sm mt-2 space-y-2">
-                <div className="flex items-center gap-2">
-                    <Mail className="h-4 w-4" />
-                    <span className="font-medium">{agency.email}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                    <Phone className="h-4 w-4" />
-                    <span className="font-medium">{agency.phone}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                    <MapPin className="h-4 w-4" />
-                    <span className="font-medium">{agency.address}</span>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <Card className="lg:col-span-2">
+            <CardHeader>
+            <div className="flex items-center gap-4">
+                <Avatar className="h-16 w-16">
+                    <AvatarImage src={agency.avatar} alt={agency.name} />
+                    <AvatarFallback>{agency.name.charAt(0)}</AvatarFallback>
+                </Avatar>
+                <div>
+                    <CardTitle className="text-2xl">{agency.name}</CardTitle>
+                    <CardDescription>ID: {agency.id}</CardDescription>
                 </div>
             </div>
+            </CardHeader>
+            <CardContent className="space-y-6">
+                <div className="text-sm mt-2 space-y-2">
+                    <div className="flex items-center gap-2">
+                        <Mail className="h-4 w-4" />
+                        <span className="font-medium">{agency.email}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Phone className="h-4 w-4" />
+                        <span className="font-medium">{agency.phone}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <MapPin className="h-4 w-4" />
+                        <span className="font-medium">{agency.address}</span>
+                    </div>
+                </div>
 
-            <div className="pt-4 border-t">
-                <h4 className="font-semibold mb-4 text-lg">
-                    Operational Overview
-                </h4>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-6 text-sm">
-                    <div className="flex items-center gap-3">
-                    <Building2 className="h-8 w-8 text-primary" />
-                    <div>
-                        <p className="font-bold text-lg">
-                        {agencySites.length}
-                        </p>
-                        <p className="text-muted-foreground font-medium">Sites Assigned</p>
-                    </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                    <ShieldAlert className="h-8 w-8 text-primary" />
-                    <div>
-                        <p className="font-bold text-lg">{totalIncidents}</p>
-                        <p className="text-muted-foreground font-medium">
-                        Total Incidents
-                        </p>
-                    </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                    <CheckCircle className="h-8 w-8 text-primary" />
-                    <div>
-                        <p className="font-bold text-lg">
-                        {resolvedIncidents}
-                        </p>
-                        <p className="text-muted-foreground font-medium">
-                        Incidents Resolved
-                        </p>
-                    </div>
+                <div className="pt-4 border-t">
+                    <h4 className="font-semibold mb-4 text-lg">
+                        Operational Overview
+                    </h4>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-6 text-sm">
+                        <div className="flex items-center gap-3">
+                        <Building2 className="h-8 w-8 text-primary" />
+                        <div>
+                            <p className="font-bold text-lg">
+                            {agencySites.length}
+                            </p>
+                            <p className="text-muted-foreground font-medium">Sites Assigned</p>
+                        </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                        <ShieldAlert className="h-8 w-8 text-primary" />
+                        <div>
+                            <p className="font-bold text-lg">{totalIncidents}</p>
+                            <p className="text-muted-foreground font-medium">
+                            Total Incidents
+                            </p>
+                        </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                        <CheckCircle className="h-8 w-8 text-primary" />
+                        <div>
+                            <p className="font-bold text-lg">
+                            {resolvedIncidents}
+                            </p>
+                            <p className="text-muted-foreground font-medium">
+                            Incidents Resolved
+                            </p>
+                        </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </CardContent>
-      </Card>
+            </CardContent>
+        </Card>
+        <Card>
+            <CardHeader>
+                <CardTitle>Overall Performance</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <div className="w-full h-64 flex items-center justify-center">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                            <Pie
+                                data={performanceChartData}
+                                cx="50%"
+                                cy="50%"
+                                innerRadius="70%"
+                                outerRadius="85%"
+                                paddingAngle={0}
+                                dataKey="value"
+                                stroke="none"
+                            >
+                                {performanceChartData.map((entry, index) => (
+                                    <Cell key={`cell-${index}`} fill={PERFORMANCE_COLORS[index % PERFORMANCE_COLORS.length]} />
+                                ))}
+                            </Pie>
+                        </PieChart>
+                    </ResponsiveContainer>
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                        <span className="text-4xl font-bold" style={{ color: getPerformanceColor() }}>
+                            {performanceData.performance}%
+                        </span>
+                    </div>
+                </div>
+            </CardContent>
+        </Card>
+      </div>
 
       <AgencyPerformanceBreakdown
         agency={agency}
