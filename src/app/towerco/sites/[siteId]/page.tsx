@@ -190,7 +190,7 @@ export default function SiteReportPage() {
             <div className="flex flex-wrap justify-between items-start gap-4">
               <div>
                 <CardTitle className="text-2xl">{site.name}</CardTitle>
-                <p className="text-sm font-medium">ID: {site.id}</p>
+                <p className="font-medium">ID: {site.id}</p>
               </div>
             </div>
           </CardHeader>
@@ -232,7 +232,7 @@ export default function SiteReportPage() {
             <CardContent className="space-y-4">
                 <div>
                     <p className="font-semibold text-base">{agency.name}</p>
-                    <p className="text-sm font-medium">ID: {agency.id}</p>
+                    <p className="font-medium">ID: {agency.id}</p>
                 </div>
                 <div className="text-sm space-y-2 pt-2 border-t">
                   <div className="flex items-center gap-2"><Phone className="h-4 w-4" /> <a href={`tel:${agency.phone}`} className="hover:underline">{agency.phone}</a></div>
@@ -260,8 +260,8 @@ export default function SiteReportPage() {
                                     <AvatarFallback>{guard.name.charAt(0)}</AvatarFallback>
                                 </Avatar>
                                 <div>
-                                    <p className="font-semibold text-base">{guard.name}</p>
-                                    <p className="text-sm font-medium">ID: {guard.id}</p>
+                                    <Link href="#" className="font-semibold text-base text-accent hover:underline">{guard.name}</Link>
+                                    <p className="font-medium">ID: {guard.id}</p>
                                 </div>
                             </div>
                         ))}
