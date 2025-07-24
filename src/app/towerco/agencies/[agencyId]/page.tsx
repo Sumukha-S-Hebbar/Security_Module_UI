@@ -394,35 +394,33 @@ export default function AgencyReportPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="md:col-span-1 flex flex-col items-center justify-center gap-4">
                      <div className="w-56 h-56 relative">
-                        <ChartContainer config={chartConfig} className="w-full h-full">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <PieChart>
-                                    <ChartTooltip
-                                        cursor={false}
-                                        content={<ChartTooltipContent hideLabel />}
-                                    />
-                                    <Pie
-                                        data={complianceData}
-                                        cx="50%"
-                                        cy="50%"
-                                        innerRadius="60%"
-                                        outerRadius="80%"
-                                        paddingAngle={0}
-                                        dataKey="value"
-                                        stroke="none"
-                                    >
-                                        {complianceData.map((entry, index) => (
-                                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                        ))}
-                                    </Pie>
-                                </PieChart>
-                            </ResponsiveContainer>
-                             <div className="absolute inset-0 flex items-center justify-center">
-                                <span className="text-4xl font-bold" style={{ color: getPerformanceColor() }}>
-                                    {performanceData.performance}%
-                                </span>
-                            </div>
-                        </ChartContainer>
+                        <ResponsiveContainer width="100%" height="100%">
+                            <PieChart>
+                                <ChartTooltip
+                                    cursor={false}
+                                    content={<ChartTooltipContent hideLabel />}
+                                />
+                                <Pie
+                                    data={complianceData}
+                                    cx="50%"
+                                    cy="50%"
+                                    innerRadius="60%"
+                                    outerRadius="80%"
+                                    paddingAngle={0}
+                                    dataKey="value"
+                                    stroke="none"
+                                >
+                                    {complianceData.map((entry, index) => (
+                                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                    ))}
+                                </Pie>
+                            </PieChart>
+                        </ResponsiveContainer>
+                         <div className="absolute inset-0 flex items-center justify-center">
+                            <span className="text-3xl font-bold" style={{ color: getPerformanceColor() }}>
+                                {performanceData.performance}%
+                            </span>
+                        </div>
                      </div>
                      <p className="text-lg font-medium text-center">Overall Performance</p>
                 </div>
