@@ -142,24 +142,31 @@ export default function AgencyReportPage() {
     (incident) =>
       agencySiteIds.has(incident.siteId)
   );
-  const totalIncidents = agencyIncidents.length;
-  const resolvedIncidents = agencyIncidents.filter(
-    (i) => i.status === 'Resolved'
-  ).length;
+  
+  const [performanceSelectedYear, setPerformanceSelectedYear] = useState<string>('all');
+  const [performanceSelectedMonth, setPerformanceSelectedMonth] = useState<string>('all');
 
     const performanceData = useMemo(() => {
     const agencySiteIds = new Set(agency.siteIds);
     const agencySites = sites.filter(s => agencySiteIds.has(s.id));
     
     // 1. Incident Resolution Rate
-    const agencyIncidents = incidents.filter(
+    const allAgencyIncidents = incidents.filter(
       (incident) => agencySiteIds.has(incident.siteId)
     );
-    const totalIncidents = agencyIncidents.length;
-    const resolvedIncidents = agencyIncidents.filter(i => i.status === 'Resolved').length;
+
+    const filteredAgencyIncidents = allAgencyIncidents.filter(incident => {
+      const incidentDate = new Date(incident.incidentTime);
+      const yearMatch = performanceSelectedYear === 'all' || incidentDate.getFullYear().toString() === performanceSelectedYear;
+      const monthMatch = performanceSelectedMonth === 'all' || incidentDate.getMonth().toString() === performanceSelectedMonth;
+      return yearMatch && monthMatch;
+    });
+
+    const totalIncidents = filteredAgencyIncidents.length;
+    const resolvedIncidents = filteredAgencyIncidents.filter(i => i.status === 'Resolved').length;
     const incidentResolutionRate = totalIncidents > 0 ? (resolvedIncidents / totalIncidents) * 100 : 100;
 
-    // 2. Guard Performance
+    // 2. Guard Performance (not time-based, so no date filtering)
     const agencyGuardIds = new Set(agencySites.flatMap(s => s.guards));
     const agencyGuards = guards.filter(g => agencyGuardIds.has(g.id));
     let totalPerimeterAccuracy = 0;
@@ -177,7 +184,7 @@ export default function AgencyReportPage() {
     const guardPerimeterAccuracy = agencyGuards.length > 0 ? totalPerimeterAccuracy / agencyGuards.length : 100;
     const guardSelfieAccuracy = agencyGuards.length > 0 ? totalSelfieAccuracy / agencyGuards.length : 100;
 
-    // 3. Patrolling Officer Performance
+    // 3. Patrolling Officer Performance (not time-based, so no date filtering)
     const agencyPatrollingOfficerIds = new Set(agencySites.map(s => s.patrollingOfficerId).filter(Boolean));
     const agencyPatrollingOfficers = patrollingOfficers.filter(po => agencyPatrollingOfficerIds.has(po.id));
     let totalSiteVisitRate = 0;
@@ -209,7 +216,7 @@ export default function AgencyReportPage() {
       guardSelfieAccuracy: Math.round(guardSelfieAccuracy),
       officerSiteVisitRate: Math.round(officerSiteVisitRate),
     };
-  }, [agency, sites, incidents]);
+  }, [agency, sites, incidents, performanceSelectedYear, performanceSelectedMonth]);
   
   const complianceData = [
     { name: 'performance', value: performanceData.performance },
@@ -366,7 +373,7 @@ export default function AgencyReportPage() {
                       <div className="flex items-center gap-3">
                       <ShieldAlert className="h-8 w-8 text-primary" />
                       <div>
-                          <p className="font-bold text-lg">{totalIncidents}</p>
+                          <p className="font-bold text-lg">{agencyIncidents.length}</p>
                           <p className="text-muted-foreground font-medium">
                           Total Incidents
                           </p>
@@ -376,7 +383,7 @@ export default function AgencyReportPage() {
                       <CheckCircle className="h-8 w-8 text-primary" />
                       <div>
                           <p className="font-bold text-lg">
-                          {resolvedIncidents}
+                          {agencyIncidents.filter(i => i.status === 'Resolved').length}
                           </p>
                           <p className="text-muted-foreground font-medium">
                           Incidents Resolved
@@ -389,47 +396,73 @@ export default function AgencyReportPage() {
         </Card>
 
         <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle>Agency Performance</CardTitle>
+          <CardHeader className="flex flex-row items-center justify-between gap-2">
+              <CardTitle>Agency Performance</CardTitle>
+              <div className="flex items-center gap-2">
+                <Select value={performanceSelectedYear} onValueChange={setPerformanceSelectedYear}>
+                    <SelectTrigger className="w-[120px] font-medium">
+                    <SelectValue placeholder="Select Year" />
+                    </SelectTrigger>
+                    <SelectContent>
+                    <SelectItem value="all" className="font-medium">All Years</SelectItem>
+                    {availableYears.map((year) => (
+                        <SelectItem key={year} value={year} className="font-medium">
+                        {year}
+                        </SelectItem>
+                    ))}
+                    </SelectContent>
+                </Select>
+                <Select value={performanceSelectedMonth} onValueChange={setPerformanceSelectedMonth}>
+                    <SelectTrigger className="w-[140px] font-medium">
+                    <SelectValue placeholder="Select Month" />
+                    </SelectTrigger>
+                    <SelectContent>
+                    <SelectItem value="all" className="font-medium">All Months</SelectItem>
+                    {Array.from({ length: 12 }, (_, i) => (
+                        <SelectItem key={i} value={(i).toString()} className="font-medium">
+                        {new Date(0, i).toLocaleString('default', { month: 'long' })}
+                        </SelectItem>
+                    ))}
+                    </SelectContent>
+                </Select>
+            </div>
           </CardHeader>
           <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-            <div className="flex flex-col items-center justify-center gap-2">
-                <div className="relative w-full max-w-[250px] aspect-square">
-                  <ChartContainer
-                    config={chartConfig}
-                    className="w-full h-full"
-                  >
-                    <PieChart>
-                        <ChartTooltip
-                        cursor={false}
-                        content={<ChartTooltipContent hideLabel />}
+            <div className="relative w-full max-w-[250px] aspect-square mx-auto">
+              <ChartContainer
+                config={chartConfig}
+                className="w-full h-full"
+              >
+                <PieChart>
+                    <ChartTooltip
+                    cursor={false}
+                    content={<ChartTooltipContent hideLabel />}
+                    />
+                    <Pie
+                    data={complianceData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius="70%"
+                    outerRadius="85%"
+                    paddingAngle={0}
+                    dataKey="value"
+                    stroke="none"
+                    >
+                    {complianceData.map((entry, index) => (
+                        <Cell
+                        key={`cell-${index}`}
+                        fill={COLORS[index % COLORS.length]}
                         />
-                        <Pie
-                        data={complianceData}
-                        cx="50%"
-                        cy="50%"
-                        innerRadius="70%"
-                        outerRadius="85%"
-                        paddingAngle={0}
-                        dataKey="value"
-                        stroke="none"
-                        >
-                        {complianceData.map((entry, index) => (
-                            <Cell
-                            key={`cell-${index}`}
-                            fill={COLORS[index % COLORS.length]}
-                            />
-                        ))}
-                        </Pie>
-                    </PieChart>
-                  </ChartContainer>
-                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                    <span className="text-4xl font-bold" style={{ color: getPerformanceColor() }}>
-                        {performanceData.performance}%
-                    </span>
-                  </div>
-                </div>
-                <p className="text-lg font-medium text-center mt-2">Overall Performance</p>
+                    ))}
+                    </Pie>
+                </PieChart>
+              </ChartContainer>
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <span className="text-4xl font-bold" style={{ color: getPerformanceColor() }}>
+                    {performanceData.performance}%
+                </span>
+              </div>
+              <p className="text-lg font-medium text-center mt-2">Overall Performance</p>
             </div>
             <div className="h-full">
               <ChartContainer config={chartConfig} className="w-full h-64">
