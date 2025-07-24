@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useMemo, useEffect, useRef, Fragment } from 'react';
@@ -23,7 +22,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -550,12 +548,12 @@ export default function TowercoAgenciesPage() {
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead className="text-foreground font-bold">ID</TableHead>
-                                <TableHead className="text-foreground font-bold">Agency</TableHead>
-                                <TableHead className="text-foreground font-bold">Contact Info</TableHead>
-                                <TableHead className="text-foreground font-bold">Location</TableHead>
-                                <TableHead className="text-foreground font-bold">Sites Assigned</TableHead>
-                                <TableHead className="text-foreground font-bold">Incidents Occurred</TableHead>
+                                <TableHead className="font-bold">ID</TableHead>
+                                <TableHead className="font-bold">Agency</TableHead>
+                                <TableHead className="font-bold">Contact Info</TableHead>
+                                <TableHead className="font-bold">Location</TableHead>
+                                <TableHead className="font-bold">Sites Assigned</TableHead>
+                                <TableHead className="font-bold">Incidents Occurred</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -604,7 +602,7 @@ export default function TowercoAgenciesPage() {
                                                 <TableCell>
                                                     <div className="text-sm">
                                                         <p className="font-medium">{agency.address}</p>
-                                                        <p className="text-muted-foreground font-medium group-hover:text-accent-foreground">{agency.city}, {agency.region}</p>
+                                                        <p className="font-medium text-muted-foreground group-hover:text-accent-foreground">{agency.city}, {agency.region}</p>
                                                     </div>
                                                 </TableCell>
                                                 <TableCell>
@@ -646,8 +644,16 @@ export default function TowercoAgenciesPage() {
                                                                     </TableHeader>
                                                                     <TableBody>
                                                                         {assignedSites.map((site) => (
-                                                                            <TableRow key={site.id}>
-                                                                                <TableCell>{site.id}</TableCell>
+                                                                            <TableRow 
+                                                                              key={site.id} 
+                                                                              onClick={() => router.push(`/towerco/sites/${site.id}`)}
+                                                                              className="cursor-pointer hover:bg-accent hover:text-accent-foreground group"
+                                                                            >
+                                                                                <TableCell>
+                                                                                    <Button asChild variant="link" className="p-0 h-auto font-medium text-accent group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
+                                                                                      <Link href={`/towerco/sites/${site.id}`}>{site.id}</Link>
+                                                                                    </Button>
+                                                                                </TableCell>
                                                                                 <TableCell>{site.name}</TableCell>
                                                                                 <TableCell>{site.address}</TableCell>
                                                                                 <TableCell>{site.city}</TableCell>
@@ -709,3 +715,4 @@ export default function TowercoAgenciesPage() {
     );
 }
 
+    
