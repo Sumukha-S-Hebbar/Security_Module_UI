@@ -400,7 +400,7 @@ export default function AgencyReportPage() {
               <CardTitle>Agency Performance</CardTitle>
               <div className="flex items-center gap-2">
                 <Select value={performanceSelectedYear} onValueChange={setPerformanceSelectedYear}>
-                    <SelectTrigger className="w-[120px] font-medium">
+                    <SelectTrigger className="w-[120px] font-medium hover:bg-accent hover:text-accent-foreground">
                     <SelectValue placeholder="Select Year" />
                     </SelectTrigger>
                     <SelectContent>
@@ -413,7 +413,7 @@ export default function AgencyReportPage() {
                     </SelectContent>
                 </Select>
                 <Select value={performanceSelectedMonth} onValueChange={setPerformanceSelectedMonth}>
-                    <SelectTrigger className="w-[140px] font-medium">
+                    <SelectTrigger className="w-[140px] font-medium hover:bg-accent hover:text-accent-foreground">
                     <SelectValue placeholder="Select Month" />
                     </SelectTrigger>
                     <SelectContent>
@@ -530,7 +530,7 @@ export default function AgencyReportPage() {
                     (incident) => incident.status === 'Resolved'
                   ).length;
                   return (
-                    <TableRow key={site.id} className="hover:bg-accent hover:text-accent-foreground group">
+                    <TableRow key={site.id} onClick={() => router.push(`/towerco/sites/${site.id}`)} className="cursor-pointer hover:bg-accent hover:text-accent-foreground group">
                        <TableCell>
                           <Button asChild variant="link" className="p-0 h-auto font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
                             <Link href={`/towerco/sites/${site.id}`}>{site.id}</Link>
@@ -588,7 +588,7 @@ export default function AgencyReportPage() {
             </div>
             <div className="flex items-center gap-2">
                 <Select value={historySelectedYear} onValueChange={setHistorySelectedYear}>
-                    <SelectTrigger className="w-[120px] font-medium">
+                    <SelectTrigger className="w-[120px] font-medium hover:bg-accent hover:text-accent-foreground">
                     <SelectValue placeholder="Select Year" />
                     </SelectTrigger>
                     <SelectContent>
@@ -601,7 +601,7 @@ export default function AgencyReportPage() {
                     </SelectContent>
                 </Select>
                 <Select value={historySelectedMonth} onValueChange={setHistorySelectedMonth}>
-                    <SelectTrigger className="w-[140px] font-medium">
+                    <SelectTrigger className="w-[140px] font-medium hover:bg-accent hover:text-accent-foreground">
                     <SelectValue placeholder="Select Month" />
                     </SelectTrigger>
                     <SelectContent>
