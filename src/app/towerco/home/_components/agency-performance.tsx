@@ -156,6 +156,15 @@ export function AgencyPerformance({
     }).sort((a, b) => a.name.localeCompare(b.name));
   }, [agencies, sites, incidents, selectedYear, selectedMonth]);
 
+  const handleBarClick = (data: any) => {
+    if (data && data.activePayload && data.activePayload.length > 0) {
+      const agencyId = data.activePayload[0].payload.id;
+      if (agencyId) {
+        router.push(`/towerco/agencies/${agencyId}`);
+      }
+    }
+  };
+
 
   return (
     <Card>
@@ -200,7 +209,7 @@ export function AgencyPerformance({
       <CardContent>
         <ChartContainer config={chartConfig} className="h-[300px] w-full">
           <ResponsiveContainer>
-            <BarChart data={performanceData} margin={{ top: 20 }}>
+            <BarChart data={performanceData} margin={{ top: 20 }} onClick={handleBarClick}>
               <CartesianGrid vertical={false} />
               <XAxis
                 dataKey="name"
@@ -224,16 +233,16 @@ export function AgencyPerformance({
               />
               <ChartLegend content={<ChartLegendContent />} />
               
-              <Bar dataKey="incidentResolution" fill="var(--color-incidentResolution)" radius={4}>
+              <Bar dataKey="incidentResolution" fill="var(--color-incidentResolution)" radius={4} cursor="pointer">
                  <LabelList dataKey="incidentResolution" position="top" offset={5} fontSize={12} formatter={(value: number) => `${value}%`} />
               </Bar>
-              <Bar dataKey="siteVisits" fill="var(--color-siteVisits)" radius={4}>
+              <Bar dataKey="siteVisits" fill="var(--color-siteVisits)" radius={4} cursor="pointer">
                  <LabelList dataKey="siteVisits" position="top" offset={5} fontSize={12} formatter={(value: number) => `${value}%`} />
               </Bar>
-              <Bar dataKey="perimeterAccuracy" fill="var(--color-perimeterAccuracy)" radius={4}>
+              <Bar dataKey="perimeterAccuracy" fill="var(--color-perimeterAccuracy)" radius={4} cursor="pointer">
                  <LabelList dataKey="perimeterAccuracy" position="top" offset={5} fontSize={12} formatter={(value: number) => `${value}%`} />
               </Bar>
-              <Bar dataKey="selfieAccuracy" fill="var(--color-selfieAccuracy)" radius={4}>
+              <Bar dataKey="selfieAccuracy" fill="var(--color-selfieAccuracy)" radius={4} cursor="pointer">
                 <LabelList dataKey="selfieAccuracy" position="top" offset={5} fontSize={12} formatter={(value: number) => `${value}%`} />
               </Bar>
 
