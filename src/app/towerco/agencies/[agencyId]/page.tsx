@@ -374,21 +374,30 @@ export default function AgencyReportPage() {
               <div className="pt-4 border-t">
                 <h4 className="font-semibold mb-4 text-lg">Operational Overview</h4>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-center">
-                  <button onClick={() => handleScrollTo(assignedSitesRef)} className="flex flex-col items-center gap-1 rounded-lg p-2 hover:bg-accent transition-colors">
+                  <div
+                    onClick={() => handleScrollTo(assignedSitesRef)}
+                    className="flex flex-col items-center gap-1 cursor-pointer group"
+                  >
                     <Building2 className="h-8 w-8 text-primary" />
-                    <p className="font-medium text-foreground">Sites Assigned</p>
+                    <p className="font-medium text-foreground group-hover:underline">Sites Assigned</p>
                     <p className="font-bold text-lg text-foreground">{agencySites.length}</p>
-                  </button>
-                  <button onClick={() => handleIncidentsFilterAndScroll('all')} className="flex flex-col items-center gap-1 rounded-lg p-2 hover:bg-accent transition-colors">
+                  </div>
+                  <div
+                    onClick={() => handleIncidentsFilterAndScroll('all')}
+                    className="flex flex-col items-center gap-1 cursor-pointer group"
+                  >
                     <ShieldAlert className="h-8 w-8 text-primary" />
-                    <p className="font-medium text-foreground">Total Incidents</p>
+                    <p className="font-medium text-foreground group-hover:underline">Total Incidents</p>
                     <p className="font-bold text-lg text-foreground">{agencyIncidents.length}</p>
-                  </button>
-                  <button onClick={() => handleIncidentsFilterAndScroll('resolved')} className="flex flex-col items-center gap-1 rounded-lg p-2 hover:bg-accent transition-colors">
+                  </div>
+                  <div
+                    onClick={() => handleIncidentsFilterAndScroll('resolved')}
+                    className="flex flex-col items-center gap-1 cursor-pointer group"
+                  >
                     <CheckCircle className="h-8 w-8 text-primary" />
-                    <p className="font-medium text-foreground">Incidents Resolved</p>
+                    <p className="font-medium text-foreground group-hover:underline">Incidents Resolved</p>
                     <p className="font-bold text-lg text-foreground">{agencyIncidents.filter((i) => i.status === 'Resolved').length}</p>
-                  </button>
+                  </div>
                 </div>
               </div>
           </CardContent>
