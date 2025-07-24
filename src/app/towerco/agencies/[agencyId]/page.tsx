@@ -531,9 +531,7 @@ export default function AgencyReportPage() {
                   return (
                     <TableRow key={site.id} className="hover:bg-accent hover:text-accent-foreground group">
                        <TableCell>
-                          <Button asChild variant="link" className="p-0 h-auto font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
-                            <Link href={`/towerco/sites/${site.id}`}>{site.id}</Link>
-                          </Button>
+                          <Link href={`/towerco/sites/${site.id}`} className="hover:underline" onClick={(e) => e.stopPropagation()}>{site.id}</Link>
                         </TableCell>
                       <TableCell>
                         <div className="font-medium">{site.name}</div>
@@ -629,9 +627,7 @@ export default function AgencyReportPage() {
                       className="cursor-pointer hover:bg-accent hover:text-accent-foreground group"
                     >
                       <TableCell>
-                        <Button asChild variant="link" className="p-0 h-auto font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
-                          <Link href={`/towerco/incidents/${incident.id}`}>{incident.id}</Link>
-                        </Button>
+                        <Link href={`/towerco/incidents/${incident.id}`} className="hover:underline" onClick={(e) => e.stopPropagation()}>{incident.id}</Link>
                       </TableCell>
                       <TableCell className="font-medium">
                         <ClientDate date={incident.incidentTime} />
@@ -654,3 +650,4 @@ export default function AgencyReportPage() {
     </div>
   );
 }
+
