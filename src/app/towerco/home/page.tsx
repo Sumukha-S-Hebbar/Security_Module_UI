@@ -255,7 +255,7 @@ export default function TowercoHomePage() {
                                   </DropdownMenuTrigger>
                                   <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
                                       {guardDetails && (
-                                      <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                      <DropdownMenuItem asChild className="focus:bg-destructive/90">
                                           <a href={`tel:${guardDetails.phone}`} className="flex items-center gap-2 w-full">
                                               <Phone className="mr-2 h-4 w-4" />
                                               <span>Guard: {guardDetails.phone}</span>
@@ -263,7 +263,7 @@ export default function TowercoHomePage() {
                                       </DropdownMenuItem>
                                       )}
                                       {patrollingOfficerDetails && (
-                                      <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                      <DropdownMenuItem asChild className="focus:bg-destructive/90">
                                           <a href={`tel:${patrollingOfficerDetails.phone}`} className="flex items-center gap-2 w-full">
                                               <Phone className="mr-2 h-4 w-4" />
                                               <span>P. Officer: {patrollingOfficerDetails.phone}</span>
@@ -271,7 +271,7 @@ export default function TowercoHomePage() {
                                       </DropdownMenuItem>
                                       )}
                                       {agencyDetails && (
-                                      <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                      <DropdownMenuItem asChild className="focus:bg-destructive/90">
                                           <a href={`tel:${agencyDetails.phone}`} className="flex items-center gap-2 w-full">
                                               <Phone className="mr-2 h-4 w-4" />
                                               <span>Agency: {agencyDetails.phone}</span>

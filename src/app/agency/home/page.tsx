@@ -146,7 +146,7 @@ export default function AgencyHomePage() {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
                             {guardDetails && (
-                              <DropdownMenuItem asChild>
+                              <DropdownMenuItem asChild className="focus:bg-destructive/90">
                                 <a href={`tel:${guardDetails.phone}`}>
                                   <Phone className="mr-2 h-4 w-4" />
                                   Contact Guard
@@ -154,7 +154,7 @@ export default function AgencyHomePage() {
                               </DropdownMenuItem>
                             )}
                             {patrollingOfficerDetails && (
-                              <DropdownMenuItem asChild>
+                              <DropdownMenuItem asChild className="focus:bg-destructive/90">
                                 <a href={`tel:${patrollingOfficerDetails.phone}`}>
                                   <Phone className="mr-2 h-4 w-4" />
                                   Contact Patrolling Officer
