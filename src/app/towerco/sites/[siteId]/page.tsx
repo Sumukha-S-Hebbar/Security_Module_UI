@@ -217,18 +217,18 @@ export default function SiteReportPage() {
                   </div>
                 </div>
               )}
-              <div className="flex items-start gap-3">
-                <button
-                  onClick={handleScrollToIncidents}
-                  className="flex items-start gap-3 text-left text-accent hover:underline"
-                >
-                  <ShieldAlert className="mt-0.5 text-primary" />
-                  <div>
-                    <span className="font-semibold">Total Incidents</span>
-                    <p className="font-medium text-base">{siteIncidents.length}</p>
-                  </div>
-                </button>
-              </div>
+               <div className="flex items-start gap-3">
+                  <button
+                    onClick={handleScrollToIncidents}
+                    className="flex items-start gap-3 text-left text-accent hover:underline"
+                  >
+                    <ShieldAlert className="mt-0.5 text-primary" />
+                    <div>
+                      <span className="font-semibold">Total Incidents</span>
+                      <p className="font-medium text-base">{siteIncidents.length}</p>
+                    </div>
+                  </button>
+                </div>
             </div>
           </CardContent>
         </Card>
@@ -291,7 +291,7 @@ export default function SiteReportPage() {
                 <CardDescription>Monthly incident counts for {site.name}.</CardDescription>
             </div>
             <Select value={selectedChartYear} onValueChange={setSelectedChartYear}>
-                <SelectTrigger className="w-[120px] font-medium">
+                <SelectTrigger className="w-[120px] font-medium hover:bg-accent hover:text-accent-foreground">
                     <SelectValue placeholder="Select Year" />
                 </SelectTrigger>
                 <SelectContent>
@@ -327,7 +327,7 @@ export default function SiteReportPage() {
           <div className="flex items-center gap-2">
               {availableYears.length > 0 && (
                 <Select value={selectedTableYear} onValueChange={setSelectedTableYear}>
-                  <SelectTrigger className="w-[120px] font-medium">
+                  <SelectTrigger className="w-[120px] font-medium hover:bg-accent hover:text-accent-foreground">
                     <SelectValue placeholder="Select Year" />
                   </SelectTrigger>
                   <SelectContent>
@@ -341,7 +341,7 @@ export default function SiteReportPage() {
                 </Select>
               )}
               <Select value={selectedTableMonth} onValueChange={setSelectedTableMonth}>
-                <SelectTrigger className="w-[140px] font-medium">
+                <SelectTrigger className="w-[140px] font-medium hover:bg-accent hover:text-accent-foreground">
                   <SelectValue placeholder="Select Month" />
                 </SelectTrigger>
                 <SelectContent>
