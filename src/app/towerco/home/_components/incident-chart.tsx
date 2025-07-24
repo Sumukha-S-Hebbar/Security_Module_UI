@@ -298,7 +298,7 @@ export function IncidentChart({
       <CardContent className="pt-4">
         <ChartContainer config={chartConfig} className="h-[300px] w-full">
           <ResponsiveContainer>
-            <BarChart data={monthlyIncidentData} barGap={6}>
+            <BarChart data={monthlyIncidentData} barCategoryGap="20%">
               <CartesianGrid vertical={false} strokeDasharray="3 3" />
               <XAxis
                 dataKey="month"
