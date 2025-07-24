@@ -81,8 +81,8 @@ export function SiteStatusBreakdown({ sites, agencies }: { sites: Site[]; agenci
         <CardDescription className="font-medium">A real-time overview of site assignments. Click a slice to see details.</CardDescription>
       </CardHeader>
       <CardContent>
-         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="w-full h-80">
+         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="w-full h-80 md:col-span-1">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Tooltip content={customTooltipContent} />
@@ -106,7 +106,7 @@ export function SiteStatusBreakdown({ sites, agencies }: { sites: Site[]; agenci
                 </PieChart>
               </ResponsiveContainer>
             </div>
-            <div className="border-l border-border pl-4 md:pl-8 flex flex-col">
+            <div className="md:col-span-2 border-l border-border pl-4 md:pl-8 flex flex-col">
               {selectedSection ? (
                 <>
                   <div className="flex items-center gap-2 mb-4">
