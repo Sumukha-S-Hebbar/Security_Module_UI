@@ -395,42 +395,47 @@ export default function AgencyReportPage() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-              <div className="relative flex flex-col items-center justify-center gap-2">
-                <ChartContainer
-                  config={chartConfig}
-                  className="mx-auto aspect-square h-48 w-48"
-                >
-                  <PieChart>
-                    <ChartTooltip
-                      cursor={false}
-                      content={<ChartTooltipContent hideLabel nameKey="name" />}
-                    />
-                    <Pie
-                      data={complianceData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius="70%"
-                      outerRadius="85%"
-                      paddingAngle={0}
-                      dataKey="value"
-                      stroke="none"
+              <div className="flex flex-col items-center justify-center text-center gap-2">
+                <div className="relative h-48 w-48">
+                  <ChartContainer
+                    config={chartConfig}
+                    className="absolute inset-0"
+                  >
+                    <PieChart>
+                      <ChartTooltip
+                        cursor={false}
+                        content={<ChartTooltipContent hideLabel nameKey="name" />}
+                      />
+                      <Pie
+                        data={complianceData}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius="70%"
+                        outerRadius="85%"
+                        paddingAngle={0}
+                        dataKey="value"
+                        stroke="none"
+                      >
+                        {complianceData.map((entry, index) => (
+                          <Cell
+                            key={`cell-${index}`}
+                            fill={COLORS[index % COLORS.length]}
+                            className="outline-none"
+                          />
+                        ))}
+                      </Pie>
+                    </PieChart>
+                  </ChartContainer>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <p 
+                      className="text-4xl font-bold"
+                      style={{ color: getPerformanceColor() }}
                     >
-                      {complianceData.map((entry, index) => (
-                        <Cell
-                          key={`cell-${index}`}
-                          fill={COLORS[index % COLORS.length]}
-                          className="outline-none"
-                        />
-                      ))}
-                    </Pie>
-                  </PieChart>
-                </ChartContainer>
-                <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                  <p className="text-lg font-medium">Overall Performance</p>
-                  <p className="text-4xl font-bold">
-                    {performanceData.performance}%
-                  </p>
+                      {performanceData.performance}%
+                    </p>
+                  </div>
                 </div>
+                <p className="text-lg font-medium">Overall Performance</p>
               </div>
               <div className="w-full h-full min-h-[300px]">
                 <ChartContainer config={chartConfig} className="w-full h-full">
