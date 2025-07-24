@@ -94,20 +94,20 @@ export default function AgencyHomePage() {
       <Card className="border-destructive bg-destructive/10">
         <CardHeader className="flex flex-row items-center gap-2">
           <AlertTriangle className="w-6 h-6 text-destructive" />
-          <CardTitle style={{color: '#2F2F2F'}}>Active Emergency Incidents</CardTitle>
+          <CardTitle style={{color: '#2F2F2F'}} className='font-bold'>Active Emergency Incidents</CardTitle>
         </CardHeader>
         <CardContent>
           {activeEmergencies.length > 0 ? (
             <Table>
               <TableHeader>
                 <TableRow className="border-destructive/20">
-                  <TableHead style={{color: '#2F2F2F'}}>Incident ID</TableHead>
-                  <TableHead style={{color: '#2F2F2F'}}>Site Name</TableHead>
-                  <TableHead style={{color: '#2F2F2F'}}>Guard</TableHead>
-                  <TableHead style={{color: '#2F2F2F'}}>Patrolling Officer</TableHead>
-                  <TableHead style={{color: '#2F2F2F'}}>Date</TableHead>
-                  <TableHead style={{color: '#2F2F2F'}}>Time</TableHead>
-                  <TableHead style={{color: '#2F2F2F'}}>Contact</TableHead>
+                  <TableHead style={{color: '#2F2F2F'}} className="font-bold">Incident ID</TableHead>
+                  <TableHead style={{color: '#2F2F2F'}} className="font-bold">Site Name</TableHead>
+                  <TableHead style={{color: '#2F2F2F'}} className="font-bold">Guard</TableHead>
+                  <TableHead style={{color: '#2F2F2F'}} className="font-bold">Patrolling Officer</TableHead>
+                  <TableHead style={{color: '#2F2F2F'}} className="font-bold">Date</TableHead>
+                  <TableHead style={{color: '#2F2F2F'}} className="font-bold">Time</TableHead>
+                  <TableHead style={{color: '#2F2F2F'}} className="font-bold">Contact</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -124,19 +124,19 @@ export default function AgencyHomePage() {
                       className="cursor-pointer border-destructive/20"
                     >
                       <TableCell>
-                        <Button asChild variant="link" className="p-0 h-auto font-medium" style={{color: '#2F2F2F'}} onClick={(e) => e.stopPropagation()}>
-                          <Link href={`/agency/incidents/${incident.id}`}>{incident.id}</Link>
+                        <Button asChild variant="link" className="p-0 h-auto" style={{color: '#2F2F2F'}} onClick={(e) => e.stopPropagation()}>
+                          <Link href={`/agency/incidents/${incident.id}`} className='font-medium'>{incident.id}</Link>
                         </Button>
                       </TableCell>
-                      <TableCell className="font-medium" style={{color: '#2F2F2F'}}>
+                      <TableCell style={{color: '#2F2F2F'}} className='font-medium'>
                         {siteDetails?.name || 'N/A'}
                       </TableCell>
-                      <TableCell className="font-medium" style={{color: '#2F2F2F'}}>{guardDetails?.name || 'N/A'}</TableCell>
-                      <TableCell className="font-medium" style={{color: '#2F2F2F'}}>
+                      <TableCell style={{color: '#2F2F2F'}} className='font-medium'>{guardDetails?.name || 'N/A'}</TableCell>
+                      <TableCell style={{color: '#2F2F2F'}} className='font-medium'>
                         {patrollingOfficerDetails?.name || 'N/A'}
                       </TableCell>
-                      <TableCell className="font-medium" style={{color: '#2F2F2F'}}>{incidentDate.toLocaleDateString()}</TableCell>
-                      <TableCell className="font-medium" style={{color: '#2F2F2F'}}>{incidentDate.toLocaleTimeString()}</TableCell>
+                      <TableCell style={{color: '#2F2F2F'}} className='font-medium'>{incidentDate.toLocaleDateString()}</TableCell>
+                      <TableCell style={{color: '#2F2F2F'}} className='font-medium'>{incidentDate.toLocaleTimeString()}</TableCell>
                       <TableCell>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>

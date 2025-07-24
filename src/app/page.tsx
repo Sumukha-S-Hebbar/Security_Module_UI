@@ -98,15 +98,15 @@ export default function RootPage() {
           <ul className="space-y-4 text-lg">
             <li className="flex items-center gap-3">
               <CheckIcon className="w-6 h-6" />
-              <span>It's Secure & Free</span>
+              <span className='font-medium'>It's Secure & Free</span>
             </li>
             <li className="flex items-center gap-3">
               <CheckIcon className="w-6 h-6" />
-              <span>One Platform For Everyone</span>
+              <span className='font-medium'>One Platform For Everyone</span>
             </li>
             <li className="flex items-center gap-3">
               <CheckIcon className="w-6 h-6" />
-              <span>Centralized Resource Management</span>
+              <span className='font-medium'>Centralized Resource Management</span>
             </li>
           </ul>
         </div>
@@ -123,7 +123,7 @@ export default function RootPage() {
               <Card className="border-0 shadow-none">
                 <form onSubmit={handleSignIn}>
                   <CardHeader>
-                    <CardTitle className="text-2xl">Sign In</CardTitle>
+                    <CardTitle className="text-2xl font-bold">Sign In</CardTitle>
                     <CardDescription>
                       Enter your credentials to access your portal.
                     </CardDescription>
@@ -167,7 +167,7 @@ export default function RootPage() {
             <TabsContent value="signup" className="mt-8">
                <Card className="border-0 shadow-none">
                 <CardHeader>
-                    <CardTitle className="text-2xl">Sign Up</CardTitle>
+                    <CardTitle className="text-2xl font-bold">Sign Up</CardTitle>
                     <CardDescription>
                     Create an account to get started with Secure Buddy.
                     </CardDescription>
@@ -213,7 +213,7 @@ export default function RootPage() {
                         <Checkbox id="terms" />
                         <label
                             htmlFor="terms"
-                            className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-blue-600 hover:underline"
+                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-blue-600 hover:underline"
                         >
                             Terms & Conditions
                         </label>
