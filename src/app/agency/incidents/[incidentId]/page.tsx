@@ -264,7 +264,7 @@ export default function AgencyIncidentReportPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="text-sm space-y-3">
-              <div>
+               <div>
                   <div className="text-xl font-bold">{site.name}</div>
                   <p className="font-medium">ID: {site.id}</p>
               </div>
@@ -341,7 +341,6 @@ export default function AgencyIncidentReportPage() {
             <div>
               <CardTitle className="text-2xl flex items-center gap-3">
                 Incident #{incident.id}
-                {incident.incidentType && <Badge variant="destructive">{incident.incidentType}</Badge>}
                 {getStatusIndicator(incident.status)}
               </CardTitle>
               <CardDescription className="flex items-center gap-2 pt-2">
@@ -349,6 +348,12 @@ export default function AgencyIncidentReportPage() {
                 {new Date(incident.incidentTime).toLocaleString()}
               </CardDescription>
             </div>
+            {incident.incidentType && (
+              <div className="text-right">
+                <p className="text-sm text-muted-foreground font-semibold">Incident Type</p>
+                <Badge variant="destructive" className="mt-1">{incident.incidentType}</Badge>
+              </div>
+            )}
           </div>
         </CardHeader>
         <CardContent className="space-y-6 divide-y">
