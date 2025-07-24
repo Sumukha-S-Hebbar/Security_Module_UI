@@ -300,7 +300,7 @@ export default function IncidentReportPage() {
             </div>
             {incident.incidentType && (
               <div className="text-right">
-                <p className="text-sm text-muted-foreground font-semibold">Incident Type</p>
+                <CardTitle className="text-xl font-bold">Incident Type</CardTitle>
                 <Badge variant="destructive" className="mt-1">{incident.incidentType}</Badge>
               </div>
             )}
