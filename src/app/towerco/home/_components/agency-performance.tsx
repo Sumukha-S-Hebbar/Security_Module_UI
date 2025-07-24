@@ -218,6 +218,7 @@ export function AgencyPerformance({
                 tickMargin={8}
                 fontSize={12}
                 interval={0}
+                className="fill-[#2F2F2F]"
               />
               <YAxis
                 tickFormatter={(value) => `${value}%`}
@@ -226,6 +227,7 @@ export function AgencyPerformance({
                 axisLine={false}
                 tickMargin={8}
                 fontSize={12}
+                className="fill-[#2F2F2F]"
               />
               <ChartTooltip
                 cursor={true}
