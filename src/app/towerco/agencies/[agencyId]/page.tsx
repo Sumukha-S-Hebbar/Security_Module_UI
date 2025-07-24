@@ -318,163 +318,166 @@ export default function AgencyReportPage() {
           Download Full Report
         </Button>
       </div>
-      <Card>
-        <CardHeader>
-        <div className="flex items-center gap-4">
-            <Avatar className="h-16 w-16">
-                <AvatarImage src={agency.avatar} alt={agency.name} />
-                <AvatarFallback>{agency.name.charAt(0)}</AvatarFallback>
-            </Avatar>
-            <div>
-                <CardTitle className="text-2xl">{agency.name}</CardTitle>
-                <CardDescription>ID: {agency.id}</CardDescription>
-            </div>
-        </div>
-        </CardHeader>
-        <CardContent className="space-y-6">
-            <div className="text-sm mt-2 space-y-2">
-                <div className="flex items-center gap-2">
-                    <Mail className="h-4 w-4" />
-                    <span className="font-medium">{agency.email}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                    <Phone className="h-4 w-4" />
-                    <span className="font-medium">{agency.phone}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                    <MapPin className="h-4 w-4" />
-                    <span className="font-medium">{agency.address}</span>
-                </div>
-            </div>
 
-            <div className="pt-4 border-t">
-                <h4 className="font-semibold mb-4 text-lg">
-                    Operational Overview
-                </h4>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-6 text-sm">
-                    <div className="flex items-center gap-3">
-                    <Building2 className="h-8 w-8 text-primary" />
-                    <div>
-                        <p className="font-bold text-lg">
-                        {agencySites.length}
-                        </p>
-                        <p className="text-muted-foreground font-medium">Sites Assigned</p>
-                    </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                    <ShieldAlert className="h-8 w-8 text-primary" />
-                    <div>
-                        <p className="font-bold text-lg">{totalIncidents}</p>
-                        <p className="text-muted-foreground font-medium">
-                        Total Incidents
-                        </p>
-                    </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                    <CheckCircle className="h-8 w-8 text-primary" />
-                    <div>
-                        <p className="font-bold text-lg">
-                        {resolvedIncidents}
-                        </p>
-                        <p className="text-muted-foreground font-medium">
-                        Incidents Resolved
-                        </p>
-                    </div>
-                    </div>
-                </div>
-            </div>
-        </CardContent>
-      </Card>
-
-      <Card>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card>
           <CardHeader>
-            <CardTitle>Agency Performance</CardTitle>
+          <div className="flex items-center gap-4">
+              <Avatar className="h-16 w-16">
+                  <AvatarImage src={agency.avatar} alt={agency.name} />
+                  <AvatarFallback>{agency.name.charAt(0)}</AvatarFallback>
+              </Avatar>
+              <div>
+                  <CardTitle className="text-2xl">{agency.name}</CardTitle>
+                  <CardDescription>ID: {agency.id}</CardDescription>
+              </div>
+          </div>
           </CardHeader>
-          <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="md:col-span-1 flex flex-col items-center justify-center gap-4">
-              <div className="w-48 h-48">
-                <ChartContainer config={chartConfig}>
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
+          <CardContent className="space-y-6">
+              <div className="text-sm mt-2 space-y-2">
+                  <div className="flex items-center gap-2">
+                      <Mail className="h-4 w-4" />
+                      <span className="font-medium">{agency.email}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                      <Phone className="h-4 w-4" />
+                      <span className="font-medium">{agency.phone}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                      <MapPin className="h-4 w-4" />
+                      <span className="font-medium">{agency.address}</span>
+                  </div>
+              </div>
+
+              <div className="pt-4 border-t">
+                  <h4 className="font-semibold mb-4 text-lg">
+                      Operational Overview
+                  </h4>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-6 text-sm">
+                      <div className="flex items-center gap-3">
+                      <Building2 className="h-8 w-8 text-primary" />
+                      <div>
+                          <p className="font-bold text-lg">
+                          {agencySites.length}
+                          </p>
+                          <p className="text-muted-foreground font-medium">Sites Assigned</p>
+                      </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                      <ShieldAlert className="h-8 w-8 text-primary" />
+                      <div>
+                          <p className="font-bold text-lg">{totalIncidents}</p>
+                          <p className="text-muted-foreground font-medium">
+                          Total Incidents
+                          </p>
+                      </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                      <CheckCircle className="h-8 w-8 text-primary" />
+                      <div>
+                          <p className="font-bold text-lg">
+                          {resolvedIncidents}
+                          </p>
+                          <p className="text-muted-foreground font-medium">
+                          Incidents Resolved
+                          </p>
+                      </div>
+                      </div>
+                  </div>
+              </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+            <CardHeader>
+              <CardTitle>Agency Performance</CardTitle>
+            </CardHeader>
+            <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="md:col-span-1 flex flex-col items-center justify-center gap-4">
+                <div className="w-48 h-48">
+                  <ChartContainer config={chartConfig}>
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <ChartTooltip
+                          cursor={false}
+                          content={<ChartTooltipContent hideLabel />}
+                        />
+                        <Pie
+                          data={complianceData}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius="60%"
+                          outerRadius="80%"
+                          paddingAngle={0}
+                          dataKey="value"
+                          stroke="none"
+                        >
+                          {complianceData.map((entry, index) => (
+                            <Cell
+                              key={`cell-${index}`}
+                              fill={COLORS[index % COLORS.length]}
+                            />
+                          ))}
+                          <Label
+                            content={({ viewBox }) => {
+                              if (viewBox && 'cx' in viewBox && 'cy' in viewBox) {
+                                return (
+                                  <text
+                                    x={viewBox.cx}
+                                    y={viewBox.cy}
+                                    textAnchor="middle"
+                                    dominantBaseline="middle"
+                                    className="text-3xl font-bold"
+                                    style={{ fill: getPerformanceColor() }}
+                                  >
+                                    {`${performanceData.performance}%`}
+                                  </text>
+                                );
+                              }
+                            }}
+                          />
+                        </Pie>
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </ChartContainer>
+                </div>
+                <p className="text-lg font-medium text-center">Overall Performance</p>
+              </div>
+              <div className="md:col-span-2 flex items-center">
+                <ChartContainer config={chartConfig} className="w-full h-64">
+                  <ResponsiveContainer>
+                    <BarChart
+                      data={performanceBreakdownChartData}
+                      layout="vertical"
+                      margin={{ left: 50, right: 20 }}
+                    >
+                      <CartesianGrid horizontal={false} />
+                      <XAxis type="number" domain={[0, 100]} hide />
+                      <YAxis type="category" dataKey="name" hide />
                       <ChartTooltip
                         cursor={false}
                         content={<ChartTooltipContent hideLabel />}
                       />
-                      <Pie
-                        data={complianceData}
-                        cx="50%"
-                        cy="50%"
-                        innerRadius="60%"
-                        outerRadius="80%"
-                        paddingAngle={0}
-                        dataKey="value"
-                        stroke="none"
-                      >
-                        {complianceData.map((entry, index) => (
-                          <Cell
-                            key={`cell-${index}`}
-                            fill={COLORS[index % COLORS.length]}
-                          />
-                        ))}
-                        <Label
-                          content={({ viewBox }) => {
-                            if (viewBox && 'cx' in viewBox && 'cy' in viewBox) {
-                              return (
-                                <text
-                                  x={viewBox.cx}
-                                  y={viewBox.cy}
-                                  textAnchor="middle"
-                                  dominantBaseline="middle"
-                                  className="text-3xl font-bold"
-                                  style={{ fill: getPerformanceColor() }}
-                                >
-                                  {`${performanceData.performance}%`}
-                                </text>
-                              );
-                            }
-                          }}
-                        />
-                      </Pie>
-                    </PieChart>
+                      <ChartLegend content={<ChartLegendContent />} />
+                      <Bar dataKey="incidentResolutionRate" fill="var(--color-incidentResolutionRate)" radius={4}>
+                        <LabelList dataKey="incidentResolutionRate" position="right" offset={8} formatter={(v: number) => `${v}%`} />
+                      </Bar>
+                      <Bar dataKey="officerSiteVisitRate" fill="var(--color-officerSiteVisitRate)" radius={4}>
+                        <LabelList dataKey="officerSiteVisitRate" position="right" offset={8} formatter={(v: number) => `${v}%`} />
+                      </Bar>
+                      <Bar dataKey="guardPerimeterAccuracy" fill="var(--color-guardPerimeterAccuracy)" radius={4}>
+                        <LabelList dataKey="guardPerimeterAccuracy" position="right" offset={8} formatter={(v: number) => `${v}%`} />
+                      </Bar>
+                      <Bar dataKey="guardSelfieAccuracy" fill="var(--color-guardSelfieAccuracy)" radius={4}>
+                        <LabelList dataKey="guardSelfieAccuracy" position="right" offset={8} formatter={(v: number) => `${v}%`} />
+                      </Bar>
+                    </BarChart>
                   </ResponsiveContainer>
                 </ChartContainer>
               </div>
-              <p className="text-lg font-medium text-center">Overall Performance</p>
-            </div>
-            <div className="md:col-span-2 flex items-center">
-              <ChartContainer config={chartConfig} className="w-full h-64">
-                <ResponsiveContainer>
-                  <BarChart
-                    data={performanceBreakdownChartData}
-                    layout="vertical"
-                    margin={{ left: 50, right: 20 }}
-                  >
-                    <CartesianGrid horizontal={false} />
-                    <XAxis type="number" domain={[0, 100]} hide />
-                    <YAxis type="category" dataKey="name" hide />
-                    <ChartTooltip
-                      cursor={false}
-                      content={<ChartTooltipContent hideLabel />}
-                    />
-                    <ChartLegend content={<ChartLegendContent />} />
-                    <Bar dataKey="incidentResolutionRate" fill="var(--color-incidentResolutionRate)" radius={4}>
-                      <LabelList dataKey="incidentResolutionRate" position="right" offset={8} formatter={(v: number) => `${v}%`} />
-                    </Bar>
-                    <Bar dataKey="officerSiteVisitRate" fill="var(--color-officerSiteVisitRate)" radius={4}>
-                      <LabelList dataKey="officerSiteVisitRate" position="right" offset={8} formatter={(v: number) => `${v}%`} />
-                    </Bar>
-                    <Bar dataKey="guardPerimeterAccuracy" fill="var(--color-guardPerimeterAccuracy)" radius={4}>
-                      <LabelList dataKey="guardPerimeterAccuracy" position="right" offset={8} formatter={(v: number) => `${v}%`} />
-                    </Bar>
-                    <Bar dataKey="guardSelfieAccuracy" fill="var(--color-guardSelfieAccuracy)" radius={4}>
-                      <LabelList dataKey="guardSelfieAccuracy" position="right" offset={8} formatter={(v: number) => `${v}%`} />
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              </ChartContainer>
-            </div>
-          </CardContent>
-      </Card>
+            </CardContent>
+        </Card>
+      </div>
 
       <Card>
         <CardHeader>
