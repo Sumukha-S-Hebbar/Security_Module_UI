@@ -379,24 +379,24 @@ export default function AgencyReportPage() {
                     className="flex flex-col items-center gap-1 cursor-pointer group"
                   >
                     <Building2 className="h-8 w-8 text-primary" />
-                    <p className="font-medium text-foreground group-hover:underline">Sites Assigned</p>
-                    <p className="font-bold text-lg text-foreground">{agencySites.length}</p>
+                    <p className="font-medium text-[#00B4D8] group-hover:underline">Sites Assigned</p>
+                    <p className="font-bold text-lg text-[#00B4D8] group-hover:underline">{agencySites.length}</p>
                   </div>
                   <div
                     onClick={() => handleIncidentsFilterAndScroll('all')}
                     className="flex flex-col items-center gap-1 cursor-pointer group"
                   >
                     <ShieldAlert className="h-8 w-8 text-primary" />
-                    <p className="font-medium text-foreground group-hover:underline">Total Incidents</p>
-                    <p className="font-bold text-lg text-foreground">{agencyIncidents.length}</p>
+                    <p className="font-medium text-[#00B4D8] group-hover:underline">Total Incidents</p>
+                    <p className="font-bold text-lg text-[#00B4D8] group-hover:underline">{agencyIncidents.length}</p>
                   </div>
                   <div
                     onClick={() => handleIncidentsFilterAndScroll('resolved')}
                     className="flex flex-col items-center gap-1 cursor-pointer group"
                   >
                     <CheckCircle className="h-8 w-8 text-primary" />
-                    <p className="font-medium text-foreground group-hover:underline">Incidents Resolved</p>
-                    <p className="font-bold text-lg text-foreground">{agencyIncidents.filter((i) => i.status === 'Resolved').length}</p>
+                    <p className="font-medium text-[#00B4D8] group-hover:underline">Incidents Resolved</p>
+                    <p className="font-bold text-lg text-[#00B4D8] group-hover:underline">{agencyIncidents.filter((i) => i.status === 'Resolved').length}</p>
                   </div>
                 </div>
               </div>
