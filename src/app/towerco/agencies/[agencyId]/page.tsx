@@ -81,19 +81,19 @@ const LOGGED_IN_ORG_ID = 'TCO01'; // Simulate logged-in user
 
 const chartConfig = {
   incidentResolutionRate: {
-    label: 'Resolution Rate',
+    label: 'Incident Resolution',
     color: 'hsl(var(--chart-1))',
   },
   guardPerimeterAccuracy: {
-    label: 'Perimeter Accuracy',
+    label: 'Guard Check-in Accuracy',
     color: 'hsl(var(--chart-2))',
   },
   guardSelfieAccuracy: {
-    label: 'Selfie Accuracy',
+    label: 'Selfie Check-in Accuracy',
     color: 'hsl(var(--chart-3))',
   },
   officerSiteVisitRate: {
-    label: 'Site Visits',
+    label: 'Site Visit Accuracy',
     color: 'hsl(var(--chart-5))',
   },
    performance: {
@@ -434,9 +434,9 @@ export default function AgencyReportPage() {
               </div>
               <div className="w-full h-full min-h-[300px]">
                 <ChartContainer config={chartConfig} className="w-full h-full">
-                  <BarChart data={performanceBreakdownChartData} margin={{ top: 20, right: 0, bottom: 20, left: 0 }}>
+                  <BarChart data={performanceBreakdownChartData} margin={{ top: 20, right: 20, bottom: 20, left: 0 }}>
                     <CartesianGrid vertical={false} />
-                    <XAxis dataKey="name" tick={false} axisLine={false} />
+                    <XAxis dataKey="name" hide/>
                     <YAxis domain={[0, 100]} tickFormatter={(value) => `${value}%`} />
                     <ChartTooltip
                       cursor={{ fill: 'hsl(var(--accent) / 0.1)' }}
