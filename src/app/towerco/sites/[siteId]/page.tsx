@@ -216,7 +216,9 @@ export default function SiteReportPage() {
                 <ShieldAlert className="h-5 w-5 mt-0.5 text-primary" />
                 <div>
                   <p className="font-semibold">Total Incidents</p>
-                  <p className="font-medium">{siteIncidents.length}</p>
+                  <Button asChild variant="link" className="p-0 h-auto font-medium text-base">
+                    <Link href={`/towerco/incidents?siteId=${site.id}`}>{siteIncidents.length}</Link>
+                  </Button>
                 </div>
               </div>
             </div>

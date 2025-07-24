@@ -64,6 +64,7 @@ export default function TowercoIncidentsPage() {
   const router = useRouter();
   const monthFromQuery = searchParams.get('month');
   const statusFromQuery = searchParams.get('status');
+  const siteIdFromQuery = searchParams.get('siteId');
   
   const [incidents, setIncidents] = useState(incidentStore.getIncidents());
   
@@ -71,6 +72,7 @@ export default function TowercoIncidentsPage() {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [selectedMonth, setSelectedMonth] = useState(monthFromQuery || 'all');
   const [selectedStatus, setSelectedStatus] = useState(statusFromQuery || 'all');
+  const [selectedSite, setSelectedSite] = useState(siteIdFromQuery || 'all');
   const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
@@ -80,10 +82,13 @@ export default function TowercoIncidentsPage() {
     return () => unsubscribe();
   }, []);
 
-  const towercoSiteIds = useMemo(() => {
-    const towercoSites = sites.filter((site) => site.towerco === LOGGED_IN_TOWERCO);
-    return new Set(towercoSites.map((site) => site.id));
+  const towercoSites = useMemo(() => {
+    return sites.filter((site) => site.towerco === LOGGED_IN_TOWERCO);
   }, []);
+
+  const towercoSiteIds = useMemo(() => {
+    return new Set(towercoSites.map((site) => site.id));
+  }, [towercoSites]);
 
   const getGuardById = (id: string): Guard | undefined => {
     return guards.find((g) => g.id === id);
@@ -123,6 +128,8 @@ export default function TowercoIncidentsPage() {
 
       const matchesStatus =
         selectedStatus === 'all' || incident.status.toLowerCase().replace(' ', '-') === selectedStatus;
+
+      const matchesSite = selectedSite === 'all' || incident.siteId === selectedSite;
       
       const incidentDate = new Date(incident.incidentTime);
       const matchesDate =
@@ -133,11 +140,11 @@ export default function TowercoIncidentsPage() {
         selectedMonth === 'all' ||
         (incidentDate.getMonth() + 1).toString() === selectedMonth;
 
-      return matchesSearch && matchesStatus && matchesDate && matchesMonth;
+      return matchesSearch && matchesStatus && matchesDate && matchesMonth && matchesSite;
     });
     setCurrentPage(1);
     return filtered;
-  }, [searchQuery, selectedStatus, selectedDate, selectedMonth, incidents, towercoSiteIds]);
+  }, [searchQuery, selectedStatus, selectedDate, selectedMonth, incidents, towercoSiteIds, selectedSite]);
 
   const paginatedIncidents = useMemo(() => {
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -240,6 +247,17 @@ export default function TowercoIncidentsPage() {
                 <SelectItem value="active" className="font-medium">Active</SelectItem>
                 <SelectItem value="under-review" className="font-medium">Under Review</SelectItem>
                 <SelectItem value="resolved" className="font-medium">Resolved</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={selectedSite} onValueChange={setSelectedSite}>
+              <SelectTrigger className="w-full sm:w-[180px] font-medium">
+                <SelectValue placeholder="Filter by site" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all" className="font-medium">All Sites</SelectItem>
+                {towercoSites.map(site => (
+                  <SelectItem key={site.id} value={site.id} className="font-medium">{site.name}</SelectItem>
+                ))}
               </SelectContent>
             </Select>
             <Select value={selectedMonth} onValueChange={setSelectedMonth}>
