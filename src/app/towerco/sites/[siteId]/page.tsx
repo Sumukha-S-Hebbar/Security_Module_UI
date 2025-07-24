@@ -38,7 +38,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 const chartConfig = {
   incidents: {
     label: "Incidents",
-    color: "hsl(var(--chart-1))",
+    color: "#FF8200",
   },
 } satisfies ChartConfig;
 
@@ -270,8 +270,8 @@ export default function SiteReportPage() {
                                     <AvatarFallback>{guard.name.charAt(0)}</AvatarFallback>
                                 </Avatar>
                                 <div>
-                                    <Link href="#" className="font-semibold text-base text-accent hover:underline">{guard.name}</Link>
-                                    <p className="font-medium">ID: {guard.id}</p>
+                                    <p className="font-semibold text-base">{guard.name}</p>
+                                    <p className="font-medium">ID: <Link href="#" className="text-accent hover:underline">{guard.id}</Link></p>
                                 </div>
                             </div>
                         ))}
