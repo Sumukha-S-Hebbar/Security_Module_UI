@@ -1,4 +1,3 @@
-
 // src/app/towerco/home/_components/agency-performance.tsx
 'use client';
 
@@ -42,7 +41,7 @@ import { patrollingOfficers } from '@/lib/data/patrolling-officers';
 const chartConfig = {
   incidentResolution: {
     label: 'Incident Resolution',
-    color: 'hsl(var(--chart-1))',
+    color: 'hsl(var(--chart-3))',
   },
   perimeterAccuracy: {
     label: 'Guard Check-in Accuracy',
@@ -50,11 +49,11 @@ const chartConfig = {
   },
   selfieAccuracy: {
     label: 'Selfie Check-in Accuracy',
-    color: 'hsl(var(--chart-3))',
+    color: 'hsl(var(--chart-4))',
   },
   siteVisits: {
     label: 'Site Visit Accuracy',
-    color: 'hsl(var(--chart-4))',
+    color: 'hsl(var(--chart-1))',
   },
 } satisfies ChartConfig;
 
