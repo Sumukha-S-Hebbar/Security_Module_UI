@@ -25,10 +25,13 @@ export function SiteStatusBreakdown({ sites, agencies }: { sites: Site[]; agenci
   const [currentPage, setCurrentPage] = useState(1);
   const router = useRouter();
 
+  const getAgencyForSite = (siteId: string) => {
+    return agencies.find(a => a.siteIds.includes(siteId));
+  }
+
   const { chartData, totalSites, assignedSites, unassignedSites } = useMemo(() => {
-    const agencySiteIds = new Set(agencies.flatMap(a => a.siteIds));
-    const assigned = sites.filter((site) => agencySiteIds.has(site.id));
-    const unassigned = sites.filter((site) => !agencySiteIds.has(site.id));
+    const assigned = sites.filter((site) => getAgencyForSite(site.id));
+    const unassigned = sites.filter((site) => !getAgencyForSite(site.id));
     
     const data = [
       { name: 'Assigned', value: assigned.length, color: COLORS.assigned, key: 'assigned' },
@@ -145,6 +148,7 @@ export function SiteStatusBreakdown({ sites, agencies }: { sites: Site[]; agenci
                           <TableHead className="text-foreground">Site ID</TableHead>
                           <TableHead className="text-foreground">Site Name</TableHead>
                           <TableHead className="text-foreground">Region</TableHead>
+                          {selectedSection === 'assigned' && <TableHead className="text-foreground">Agency</TableHead>}
                           {selectedSection === 'unassigned' && <TableHead className="text-right text-foreground">Action</TableHead>}
                         </TableRow>
                       </TableHeader>
@@ -167,6 +171,11 @@ export function SiteStatusBreakdown({ sites, agencies }: { sites: Site[]; agenci
                             <TableCell>
                               <Badge variant="outline" className="font-medium">{site.region}</Badge>
                             </TableCell>
+                            {selectedSection === 'assigned' && (
+                                <TableCell className="font-medium">
+                                    {getAgencyForSite(site.id)?.name || 'N/A'}
+                                </TableCell>
+                            )}
                             {selectedSection === 'unassigned' && (
                               <TableCell className="text-right">
                                 <Button 
