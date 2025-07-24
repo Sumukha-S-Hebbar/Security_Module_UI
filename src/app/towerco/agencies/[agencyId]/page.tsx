@@ -54,12 +54,15 @@ import {
   XAxis,
   YAxis,
   Tooltip,
+  Legend,
 } from 'recharts';
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
   ChartConfig,
+  ChartLegend,
+  ChartLegendContent,
 } from '@/components/ui/chart';
 import {
   Select,
@@ -71,7 +74,6 @@ import {
 import { useRouter } from 'next/navigation';
 import { patrollingOfficers } from '@/lib/data/patrolling-officers';
 import { Progress } from '@/components/ui/progress';
-import { AgencyPerformanceBreakdown } from './_components/agency-performance-breakdown';
 
 const LOGGED_IN_ORG_ID = 'TCO01'; // Simulate logged-in user
 
@@ -216,10 +218,13 @@ export default function AgencyReportPage() {
   ];
 
   const performanceBreakdownChartData = [
-    { name: 'Resolution', value: performanceData.incidentResolutionRate, fill: 'var(--color-incidentResolutionRate)' },
-    { name: 'Perimeter', value: performanceData.guardPerimeterAccuracy, fill: 'var(--color-guardPerimeterAccuracy)' },
-    { name: 'Selfie', value: performanceData.guardSelfieAccuracy, fill: 'var(--color-guardSelfieAccuracy)' },
-    { name: 'Site Visits', value: performanceData.officerSiteVisitRate, fill: 'var(--color-officerSiteVisitRate)' },
+    {
+      name: 'Metrics',
+      incidentResolutionRate: performanceData.incidentResolutionRate,
+      guardPerimeterAccuracy: performanceData.guardPerimeterAccuracy,
+      guardSelfieAccuracy: performanceData.guardSelfieAccuracy,
+      officerSiteVisitRate: performanceData.officerSiteVisitRate
+    },
   ];
   
   const getPerformanceColor = () => {
@@ -393,55 +398,59 @@ export default function AgencyReportPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-             <ChartContainer config={chartConfig} className="w-full h-[250px]">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 h-full">
-                  <div className="md:col-span-1 flex flex-col items-center justify-center gap-2">
-                      <ResponsiveContainer width="100%" height={150}>
-                          <PieChart>
-                              <Pie
-                                  data={complianceData}
-                                  cx="50%"
-                                  cy="50%"
-                                  innerRadius="70%"
-                                  outerRadius="85%"
-                                  paddingAngle={0}
-                                  dataKey="value"
-                                  stroke="none"
-                              >
-                                  {complianceData.map((entry, index) => (
-                                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                  ))}
-                              </Pie>
-                               <ChartTooltip
-                                  cursor={false}
-                                  content={<ChartTooltipContent hideLabel />}
-                                />
-                          </PieChart>
-                      </ResponsiveContainer>
-                      <div className="text-center">
-                          <p className="text-lg font-medium">Overall Performance</p>
-                          <p className="text-4xl font-bold">{performanceData.performance}%</p>
-                      </div>
-                  </div>
-                  <div className="md:col-span-2">
-                      <ResponsiveContainer width="100%" height="100%">
-                         <BarChart data={performanceBreakdownChartData} layout="vertical" margin={{ left: 20, right: 20 }}>
-                            <XAxis type="number" domain={[0, 100]} hide />
-                            <YAxis type="category" dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12 }} width={80} />
-                            <Tooltip
-                                cursor={{ fill: 'hsl(var(--accent) / 0.2)' }}
-                                content={<ChartTooltipContent indicator="dot" />}
-                            />
-                            <Bar dataKey="value" radius={4}>
-                                 {performanceBreakdownChartData.map((entry, index) => (
-                                    <Cell key={`cell-${index}`} fill={entry.fill} />
-                                 ))}
-                            </Bar>
-                          </BarChart>
-                      </ResponsiveContainer>
-                  </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 h-full">
+              <div className="md:col-span-1 flex flex-col items-center justify-center gap-2">
+                <ResponsiveContainer width="100%" height={150}>
+                  <PieChart>
+                    <Pie
+                      data={complianceData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius="70%"
+                      outerRadius="85%"
+                      paddingAngle={0}
+                      dataKey="value"
+                      stroke="none"
+                    >
+                      {complianceData.map((entry, index) => (
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={COLORS[index % COLORS.length]}
+                        />
+                      ))}
+                    </Pie>
+                    <ChartTooltip
+                      cursor={false}
+                      content={<ChartTooltipContent hideLabel />}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+                <div className="text-center">
+                  <p className="text-lg font-medium">Overall Performance</p>
+                  <p className="text-4xl font-bold">
+                    {performanceData.performance}%
+                  </p>
                 </div>
-            </ChartContainer>
+              </div>
+              <div className="md:col-span-2">
+                <ChartContainer config={chartConfig} className="w-full h-full">
+                  <BarChart data={performanceBreakdownChartData} margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+                    <CartesianGrid vertical={false} />
+                    <XAxis dataKey="name" hide/>
+                    <YAxis domain={[0, 100]} tickFormatter={(value) => `${value}%`} />
+                    <Tooltip
+                      cursor={{ fill: 'hsl(var(--accent) / 0.1)' }}
+                      content={<ChartTooltipContent indicator="dot" />}
+                    />
+                    <Legend content={<ChartLegendContent />} />
+                    <Bar dataKey="incidentResolutionRate" name={chartConfig.incidentResolutionRate.label} fill={chartConfig.incidentResolutionRate.color} radius={4} />
+                    <Bar dataKey="guardPerimeterAccuracy" name={chartConfig.guardPerimeterAccuracy.label} fill={chartConfig.guardPerimeterAccuracy.color} radius={4} />
+                    <Bar dataKey="guardSelfieAccuracy" name={chartConfig.guardSelfieAccuracy.label} fill={chartConfig.guardSelfieAccuracy.color} radius={4} />
+                    <Bar dataKey="officerSiteVisitRate" name={chartConfig.officerSiteVisitRate.label} fill={chartConfig.officerSiteVisitRate.color} radius={4} />
+                  </BarChart>
+                </ChartContainer>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>
