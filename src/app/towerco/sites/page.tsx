@@ -368,7 +368,7 @@ export default function TowercoSitesPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={handleDownloadTemplate}>
+          <Button className="bg-[#00B4D8] hover:bg-[#00B4D8]/90" onClick={handleDownloadTemplate}>
             <FileDown className="mr-2 h-4 w-4" />
             Download Excel Template
           </Button>
@@ -442,7 +442,7 @@ export default function TowercoSitesPage() {
             onOpenChange={setIsAddSiteDialogOpen}
           >
             <DialogTrigger asChild>
-              <Button variant="outline">
+              <Button className="bg-[#00B4D8] hover:bg-[#00B4D8]/90">
                 <PlusCircle className="mr-2 h-4 w-4" />
                 Add Site
               </Button>
