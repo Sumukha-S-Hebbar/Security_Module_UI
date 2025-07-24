@@ -62,13 +62,14 @@ export default function TowercoIncidentsPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const monthFromQuery = searchParams.get('month');
+  const statusFromQuery = searchParams.get('status');
   
   const [incidents, setIncidents] = useState(incidentStore.getIncidents());
   
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [selectedMonth, setSelectedMonth] = useState(monthFromQuery || 'all');
-  const [selectedStatus, setSelectedStatus] = useState('all');
+  const [selectedStatus, setSelectedStatus] = useState(statusFromQuery || 'all');
   const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
