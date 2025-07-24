@@ -53,7 +53,10 @@ import {
   PieChart,
   Pie,
   Cell,
-  ResponsiveContainer
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  LabelList,
 } from 'recharts';
 import {
   ChartContainer,
@@ -68,12 +71,33 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { AgencyPerformanceBreakdown } from './_components/agency-performance-breakdown';
 import { useRouter } from 'next/navigation';
 import { patrollingOfficers } from '@/lib/data/patrolling-officers';
 import { Progress } from '@/components/ui/progress';
 
 const LOGGED_IN_ORG_ID = 'TCO01'; // Simulate logged-in user
+
+const performanceChartConfig = {
+  value: {
+    label: 'Performance',
+  },
+  incidentResolution: {
+    label: 'Incident Resolution',
+    color: '#FF8200',
+  },
+  siteVisits: {
+    label: 'Site Visit Accuracy',
+    color: 'hsl(var(--chart-1))',
+  },
+  perimeterAccuracy: {
+    label: 'Guard Check-in Accuracy',
+    color: 'hsl(var(--chart-2))',
+  },
+  selfieAccuracy: {
+    label: 'Selfie Check-in Accuracy',
+    color: '#FFC107',
+  },
+} satisfies ChartConfig;
 
 const chartConfig = {
   incidents: {
@@ -193,19 +217,13 @@ export default function AgencyReportPage() {
 
   const performanceChartData = useMemo(() => {
     return [
-      { name: 'Performance', value: performanceData.performance },
-      { name: 'Remaining', value: 100 - performanceData.performance },
-    ]
-  }, [performanceData.performance]);
-
-  const getPerformanceColor = () => {
-    if (performanceData.performance > 95) return 'hsl(var(--chart-2))'; // Green
-    if (performanceData.performance >= 65) return 'hsl(var(--chart-3))'; // Yellow
-    return 'hsl(var(--destructive))'; // Orange/Red
-  }
+      { metric: 'Incident Resolution', value: performanceData.incidentResolutionRate, fill: 'var(--color-incidentResolution)' },
+      { metric: 'Site Visits', value: performanceData.officerSiteVisitRate, fill: 'var(--color-siteVisits)' },
+      { metric: 'Perimeter Accuracy', value: performanceData.guardPerimeterAccuracy, fill: 'var(--color-perimeterAccuracy)' },
+      { metric: 'Selfie Accuracy', value: performanceData.guardSelfieAccuracy, fill: 'var(--color-selfieAccuracy)' },
+    ];
+  }, [performanceData]);
   
-  const PERFORMANCE_COLORS = [getPerformanceColor(), 'hsl(var(--muted))'];
-
   const getStatusIndicator = (status: Incident['status']) => {
     switch (status) {
       case 'Active':
@@ -383,66 +401,50 @@ export default function AgencyReportPage() {
         
         <Card className="lg:col-span-2">
           <CardHeader>
-            <CardTitle>Agency Performance</CardTitle>
+              <div className="flex justify-between items-start">
+                  <div>
+                      <CardTitle>Agency Performance</CardTitle>
+                      <CardDescription>
+                          Overall score and breakdown of key performance indicators.
+                      </CardDescription>
+                  </div>
+                  <div className="text-right">
+                      <p className="text-sm text-muted-foreground">Overall Performance</p>
+                      <p className="text-3xl font-bold text-primary">{performanceData.performance}%</p>
+                  </div>
+              </div>
           </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
-              <div className="w-full h-40 flex items-center justify-center relative">
-                  <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                          <Pie
-                              data={performanceChartData}
-                              cx="50%"
-                              cy="50%"
-                              innerRadius="70%"
-                              outerRadius="85%"
-                              paddingAngle={0}
-                              dataKey="value"
-                              stroke="none"
-                          >
-                              {performanceChartData.map((entry, index) => (
-                                  <Cell key={`cell-${index}`} fill={PERFORMANCE_COLORS[index % PERFORMANCE_COLORS.length]} />
-                              ))}
-                          </Pie>
-                      </PieChart>
-                  </ResponsiveContainer>
-                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                      <span className="text-4xl font-bold" style={{ color: getPerformanceColor() }}>
-                          {performanceData.performance}%
-                      </span>
-                  </div>
-              </div>
-              <div className="space-y-4 text-sm">
-                  <div>
-                      <div className="flex justify-between items-center mb-1">
-                          <span className="text-muted-foreground">Incident Resolution Rate</span>
-                          <span className="font-medium">{performanceData.incidentResolutionRate}%</span>
-                      </div>
-                      <Progress value={performanceData.incidentResolutionRate} className="h-2" />
-                  </div>
-                  <div>
-                      <div className="flex justify-between items-center mb-1">
-                          <span className="text-muted-foreground">Guard Perimeter Accuracy</span>
-                          <span className="font-medium">{performanceData.guardPerimeterAccuracy}%</span>
-                      </div>
-                      <Progress value={performanceData.guardPerimeterAccuracy} className="h-2" />
-                  </div>
-                  <div>
-                      <div className="flex justify-between items-center mb-1">
-                          <span className="text-muted-foreground">Guard Selfie Accuracy</span>
-                          <span className="font-medium">{performanceData.guardSelfieAccuracy}%</span>
-                      </div>
-                      <Progress value={performanceData.guardSelfieAccuracy} className="h-2" />
-                  </div>
-                  <div>
-                      <div className="flex justify-between items-center mb-1">
-                          <span className="text-muted-foreground">Officer Site Visit Rate</span>
-                          <span className="font-medium">{performanceData.officerSiteVisitRate}%</span>
-                      </div>
-                      <Progress value={performanceData.officerSiteVisitRate} className="h-2" />
-                  </div>
-              </div>
-            </div>
+          <CardContent className="h-[250px]">
+            <ChartContainer config={performanceChartConfig} className="h-full w-full">
+                <BarChart data={performanceChartData} layout="vertical" margin={{ left: 20 }}>
+                  <CartesianGrid horizontal={false} />
+                  <XAxis type="number" domain={[0, 100]} hide />
+                  <YAxis 
+                    dataKey="metric" 
+                    type="category" 
+                    tickLine={false} 
+                    axisLine={false} 
+                    tick={{ fontSize: 12 }}
+                    width={150}
+                   />
+                  <ChartTooltip
+                    cursor={false}
+                    content={<ChartTooltipContent indicator="dot" />}
+                  />
+                  <Bar dataKey="value" radius={5}>
+                    <LabelList 
+                      dataKey="value" 
+                      position="right" 
+                      offset={8} 
+                      className="fill-foreground font-semibold"
+                      formatter={(value: number) => `${value}%`}
+                    />
+                    {performanceChartData.map((entry) => (
+                      <Cell key={entry.metric} fill={entry.fill} />
+                    ))}
+                  </Bar>
+                </BarChart>
+            </ChartContainer>
           </CardContent>
         </Card>
       </div>
