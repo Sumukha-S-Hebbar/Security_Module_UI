@@ -27,8 +27,8 @@
     --chart-1: 195 91% 47%;
     --chart-2: 145 63% 49%;
     --chart-3: 45 93% 53%;
-    --chart-4: #FFC107;
-    --chart-5: #FF8200;
+    --chart-4: 45 93% 53%;
+    --chart-5: 25 95% 53%;
     --radius: 0.5rem;
     --header-background: 216 42% 18%;
     --header-foreground: 210 60% 98%;
@@ -55,8 +55,8 @@
     --chart-1: 195 91% 47%;
     --chart-2: 145 63% 49%;
     --chart-3: 45 93% 53%;
-    --chart-4: #FFC107;
-    --chart-5: #FF8200;
+    --chart-4: 45 93% 53%;
+    --chart-5: 25 95% 53%;
     --header-background: 216 42% 18%;
     --header-foreground: 210 60% 98%;
   }

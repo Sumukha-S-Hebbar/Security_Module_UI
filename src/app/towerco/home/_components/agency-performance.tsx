@@ -41,7 +41,7 @@ import { patrollingOfficers } from '@/lib/data/patrolling-officers';
 const chartConfig = {
   incidentResolution: {
     label: 'Incident Resolution',
-    color: 'hsl(var(--chart-5))',
+    color: '#FF8200',
   },
   siteVisits: {
     label: 'Site Visit Accuracy',
@@ -53,7 +53,7 @@ const chartConfig = {
   },
   selfieAccuracy: {
     label: 'Selfie Check-in Accuracy',
-    color: 'hsl(var(--chart-4))',
+    color: '#FFC107',
   },
 } satisfies ChartConfig;
 
