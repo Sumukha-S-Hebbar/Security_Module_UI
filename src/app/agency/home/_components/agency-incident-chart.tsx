@@ -22,6 +22,8 @@ import {
   ChartTooltip,
   ChartTooltipContent,
   ChartConfig,
+  ChartLegend,
+  ChartLegendContent,
 } from '@/components/ui/chart';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, LabelList, LineChart, Line } from 'recharts';
 import { useRouter } from 'next/navigation';
@@ -301,6 +303,7 @@ export function AgencyIncidentChart({
                     return null;
                 }}
               />
+               <ChartLegend content={<ChartLegendContent />} />
               <Bar yAxisId="left" dataKey="total" fill="var(--color-total)" radius={4} onClick={handleBarClick} cursor="pointer">
                   <LabelList dataKey="total" position="top" offset={5} fontSize={12} />
               </Bar>
