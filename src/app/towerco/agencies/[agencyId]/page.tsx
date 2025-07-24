@@ -56,6 +56,7 @@ import {
   Tooltip,
   CartesianGrid,
   LabelList,
+  Label,
 } from 'recharts';
 import {
   ChartContainer,
@@ -390,13 +391,12 @@ export default function AgencyReportPage() {
           <CardHeader>
             <CardTitle>Agency Performance</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
-              <div className="md:col-span-1 flex flex-col items-center justify-center gap-2">
-                <div className="w-40 h-40">
-                  <ChartContainer config={chartConfig} className="w-full h-full">
-                    <ResponsiveContainer>
-                      <PieChart>
+          <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+            <div className="flex flex-col items-center justify-center">
+              <div className="h-56 w-56">
+                <ChartContainer config={chartConfig} className="w-full h-full">
+                  <ResponsiveContainer>
+                    <PieChart>
                         <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
                         <Pie
                             data={complianceData}
@@ -430,44 +430,43 @@ export default function AgencyReportPage() {
                                 }}
                             />
                         </Pie>
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </ChartContainer>
-                </div>
-                <p className="text-lg font-medium text-center">Overall Performance</p>
-              </div>
-              <div className="md:col-span-2 h-64">
-                <ChartContainer config={chartConfig} className="w-full h-full">
-                    <ResponsiveContainer>
-                        <BarChart data={performanceBreakdownChartData} layout="vertical" margin={{ left: 50, right: 20 }}>
-                            <CartesianGrid horizontal={false} />
-                            <XAxis type="number" domain={[0, 100]} hide />
-                            <YAxis 
-                            type="category" 
-                            dataKey="name" 
-                            hide
-                            />
-                            <ChartTooltip
-                                cursor={false}
-                                content={<ChartTooltipContent hideLabel />}
-                            />
-                            <ChartLegend content={<ChartLegendContent />} />
-                            <Bar dataKey="incidentResolutionRate" fill="var(--color-incidentResolutionRate)" radius={4}>
-                                <LabelList dataKey="incidentResolutionRate" position="right" offset={8} formatter={(v: number) => `${v}%`} />
-                            </Bar>
-                            <Bar dataKey="officerSiteVisitRate" fill="var(--color-officerSiteVisitRate)" radius={4}>
-                                <LabelList dataKey="officerSiteVisitRate" position="right" offset={8} formatter={(v: number) => `${v}%`} />
-                            </Bar>
-                            <Bar dataKey="guardPerimeterAccuracy" fill="var(--color-guardPerimeterAccuracy)" radius={4}>
-                                <LabelList dataKey="guardPerimeterAccuracy" position="right" offset={8} formatter={(v: number) => `${v}%`} />
-                            </Bar>
-                            <Bar dataKey="guardSelfieAccuracy" fill="var(--color-guardSelfieAccuracy)" radius={4}>
-                                <LabelList dataKey="guardSelfieAccuracy" position="right" offset={8} formatter={(v: number) => `${v}%`} />
-                            </Bar>
-                        </BarChart>
-                    </ResponsiveContainer>
+                    </PieChart>
+                  </ResponsiveContainer>
                 </ChartContainer>
               </div>
+              <p className="text-lg font-medium text-center mt-2">Overall Performance</p>
+            </div>
+            <div className="md:col-span-2 h-64">
+              <ChartContainer config={chartConfig} className="w-full h-full">
+                  <ResponsiveContainer>
+                      <BarChart data={performanceBreakdownChartData} layout="vertical" margin={{ left: 50, right: 20 }}>
+                          <CartesianGrid horizontal={false} />
+                          <XAxis type="number" domain={[0, 100]} hide />
+                          <YAxis 
+                          type="category" 
+                          dataKey="name" 
+                          hide
+                          />
+                          <ChartTooltip
+                              cursor={false}
+                              content={<ChartTooltipContent hideLabel />}
+                          />
+                          <ChartLegend content={<ChartLegendContent />} />
+                          <Bar dataKey="incidentResolutionRate" fill="var(--color-incidentResolutionRate)" radius={4}>
+                              <LabelList dataKey="incidentResolutionRate" position="right" offset={8} formatter={(v: number) => `${v}%`} />
+                          </Bar>
+                          <Bar dataKey="officerSiteVisitRate" fill="var(--color-officerSiteVisitRate)" radius={4}>
+                              <LabelList dataKey="officerSiteVisitRate" position="right" offset={8} formatter={(v: number) => `${v}%`} />
+                          </Bar>
+                          <Bar dataKey="guardPerimeterAccuracy" fill="var(--color-guardPerimeterAccuracy)" radius={4}>
+                              <LabelList dataKey="guardPerimeterAccuracy" position="right" offset={8} formatter={(v: number) => `${v}%`} />
+                          </Bar>
+                          <Bar dataKey="guardSelfieAccuracy" fill="var(--color-guardSelfieAccuracy)" radius={4}>
+                              <LabelList dataKey="guardSelfieAccuracy" position="right" offset={8} formatter={(v: number) => `${v}%`} />
+                          </Bar>
+                      </BarChart>
+                  </ResponsiveContainer>
+              </ChartContainer>
             </div>
           </CardContent>
         </Card>
