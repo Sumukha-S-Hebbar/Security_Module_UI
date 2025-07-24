@@ -171,6 +171,7 @@ export function SiteStatusBreakdown({ sites, agencies }: { sites: Site[]; agenci
                               <TableCell className="text-right">
                                 <Button 
                                   size="sm"
+                                  className="bg-[#00B4D8] hover:bg-[#00a2c2] text-white"
                                   onClick={(e) => {
                                       e.stopPropagation();
                                       router.push(`/towerco/sites?focusSite=${site.id}`);
