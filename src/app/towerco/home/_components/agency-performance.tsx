@@ -1,4 +1,3 @@
-
 // src/app/towerco/home/_components/agency-performance.tsx
 'use client';
 
@@ -42,7 +41,7 @@ import { patrollingOfficers } from '@/lib/data/patrolling-officers';
 const chartConfig = {
   incidentResolution: {
     label: 'Incident Resolution',
-    color: 'hsl(var(--chart-3))',
+    color: 'hsl(var(--chart-5))',
   },
   siteVisits: {
     label: 'Site Visit Accuracy',
