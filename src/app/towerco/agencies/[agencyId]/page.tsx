@@ -312,7 +312,7 @@ export default function AgencyReportPage() {
         </Button>
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card className="lg:col-span-2">
+        <Card>
             <CardHeader>
             <div className="flex items-center gap-4">
                 <Avatar className="h-16 w-16">
@@ -411,13 +411,12 @@ export default function AgencyReportPage() {
                 </div>
             </CardContent>
         </Card>
+         <AgencyPerformanceBreakdown
+          agency={agency}
+          sites={sites}
+          incidents={incidents}
+        />
       </div>
-
-      <AgencyPerformanceBreakdown
-        agency={agency}
-        sites={sites}
-        incidents={incidents}
-      />
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
