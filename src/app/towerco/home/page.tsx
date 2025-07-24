@@ -237,15 +237,15 @@ export default function TowercoHomePage() {
                                   <Link href={`/towerco/incidents/${incident.id}`}>{incident.id}</Link>
                                 </Button>
                               </TableCell>
-                              <TableCell className="text-foreground">
+                              <TableCell>
                                   {siteDetails?.name || 'N/A'}
                               </TableCell>
-                              <TableCell className="text-foreground">{agencyDetails?.name || 'N/A'}</TableCell>
-                              <TableCell className="text-foreground">
+                              <TableCell>{agencyDetails?.name || 'N/A'}</TableCell>
+                              <TableCell>
                                   {patrollingOfficerDetails?.name || 'N/A'}
                               </TableCell>
-                              <TableCell className="text-foreground">{guardDetails?.name || 'N/A'}</TableCell>
-                              <TableCell className="text-foreground">{incidentDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</TableCell>
+                              <TableCell>{guardDetails?.name || 'N/A'}</TableCell>
+                              <TableCell>{incidentDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</TableCell>
                               <TableCell className="text-right">
                                   <DropdownMenu>
                                   <DropdownMenuTrigger asChild>
@@ -288,7 +288,7 @@ export default function TowercoHomePage() {
                   </Table>
               </div>
           ) : (
-              <p className="text-center py-4 text-foreground">
+              <p className="text-center py-4">
               No active emergency incidents. All systems are normal.
               </p>
           )}

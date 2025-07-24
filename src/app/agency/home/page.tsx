@@ -128,15 +128,15 @@ export default function AgencyHomePage() {
                           <Link href={`/agency/incidents/${incident.id}`}>{incident.id}</Link>
                         </Button>
                       </TableCell>
-                      <TableCell className="text-foreground">
+                      <TableCell>
                         {siteDetails?.name || 'N/A'}
                       </TableCell>
-                      <TableCell className="text-foreground">{guardDetails?.name || 'N/A'}</TableCell>
-                      <TableCell className="text-foreground">
+                      <TableCell>{guardDetails?.name || 'N/A'}</TableCell>
+                      <TableCell>
                         {patrollingOfficerDetails?.name || 'N/A'}
                       </TableCell>
-                      <TableCell className="text-foreground">{incidentDate.toLocaleDateString()}</TableCell>
-                      <TableCell className="text-foreground">{incidentDate.toLocaleTimeString()}</TableCell>
+                      <TableCell>{incidentDate.toLocaleDateString()}</TableCell>
+                      <TableCell>{incidentDate.toLocaleTimeString()}</TableCell>
                       <TableCell>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
@@ -170,7 +170,7 @@ export default function AgencyHomePage() {
               </TableBody>
             </Table>
           ) : (
-            <p className="text-center py-4 text-foreground">
+            <p className="text-center py-4">
               No active emergency incidents. All systems are normal.
             </p>
           )}
