@@ -301,6 +301,7 @@ export function IncidentChart({
             <BarChart 
               data={monthlyIncidentData} 
               margin={{ top: 20, right: 20, left: -20, bottom: 5 }}
+              barCategoryGap="20%"
             >
               <CartesianGrid vertical={false} strokeDasharray="3 3" />
               <XAxis
