@@ -184,83 +184,49 @@ export default function SiteReportPage() {
         </Button>
       </div>
 
-      <Card>
-        <CardHeader>
-          <div className="flex flex-wrap justify-between items-start gap-4">
-            <div>
-              <CardTitle className="text-2xl">{site.name}</CardTitle>
-              <CardDescription>ID: {site.id}</CardDescription>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="text-sm mt-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="flex items-start gap-3">
-              <MapPin className="h-5 w-5 mt-0.5 text-primary" />
-              <div>
-                <p className="font-semibold">Address</p>
-                <p className="font-medium text-muted-foreground">{site.address}</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <Briefcase className="h-5 w-5 mt-0.5 text-primary" />
-              <div>
-                <p className="font-semibold">Assigned Agency</p>
-                <p className="font-medium text-muted-foreground">{agency ? agency.name : 'Unassigned'}</p>
-              </div>
-            </div>
-             <div className="flex items-start gap-3">
-              <ShieldAlert className="h-5 w-5 mt-0.5 text-primary" />
-              <div>
-                <p className="font-semibold">Total Incidents</p>
-                <p className="font-medium text-muted-foreground">{siteIncidents.length}</p>
-              </div>
-            </div>
-            {site.latitude && site.longitude && (
-              <div className="flex items-start gap-3 sm:col-span-2">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-globe mt-0.5 text-primary"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
-                <div>
-                  <p className="font-semibold">Coordinates</p>
-                  <p className="font-medium text-muted-foreground">Latitude: {site.latitude}, Longitude: {site.longitude}</p>
-                </div>
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-      
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between gap-4">
+          <CardHeader>
+            <div className="flex flex-wrap justify-between items-start gap-4">
               <div>
-                  <CardTitle>Incident Trend</CardTitle>
-                  <CardDescription>Monthly incident counts for {site.name}.</CardDescription>
+                <CardTitle className="text-2xl">{site.name}</CardTitle>
+                <CardDescription>ID: {site.id}</CardDescription>
               </div>
-              <Select value={selectedChartYear} onValueChange={setSelectedChartYear}>
-                  <SelectTrigger className="w-[120px] font-medium">
-                      <SelectValue placeholder="Select Year" />
-                  </SelectTrigger>
-                  <SelectContent>
-                      {availableYears.map((year) => (
-                      <SelectItem key={year} value={year} className="font-medium">
-                          {year}
-                      </SelectItem>
-                      ))}
-                  </SelectContent>
-              </Select>
+            </div>
           </CardHeader>
           <CardContent>
-              <ChartContainer config={chartConfig} className="h-[250px] w-full">
-                  <ResponsiveContainer>
-                      <LineChart data={monthlyIncidentData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="month" fontSize={12} tickLine={false} axisLine={false} />
-                          <YAxis fontSize={12} tickLine={false} axisLine={false} allowDecimals={false} />
-                          <ChartTooltip content={<ChartTooltipContent />} />
-                          <Line type="monotone" dataKey="incidents" stroke="var(--color-incidents)" strokeWidth={2} dot={{ r: 4 }} />
-                      </LineChart>
-                  </ResponsiveContainer>
-              </ChartContainer>
+            <div className="text-sm mt-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="flex items-start gap-3">
+                <MapPin className="h-5 w-5 mt-0.5 text-primary" />
+                <div>
+                  <p className="font-semibold">Address</p>
+                  <p className="font-medium text-muted-foreground">{site.address}</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <Briefcase className="h-5 w-5 mt-0.5 text-primary" />
+                <div>
+                  <p className="font-semibold">Assigned Agency</p>
+                  <p className="font-medium text-muted-foreground">{agency ? agency.name : 'Unassigned'}</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <ShieldAlert className="h-5 w-5 mt-0.5 text-primary" />
+                <div>
+                  <p className="font-semibold">Total Incidents</p>
+                  <p className="font-medium text-muted-foreground">{siteIncidents.length}</p>
+                </div>
+              </div>
+              {site.latitude && site.longitude && (
+                <div className="flex items-start gap-3 sm:col-span-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-globe mt-0.5 text-primary"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+                  <div>
+                    <p className="font-semibold">Coordinates</p>
+                    <p className="font-medium text-muted-foreground">Latitude: {site.latitude}, Longitude: {site.longitude}</p>
+                  </div>
+                </div>
+              )}
+            </div>
           </CardContent>
         </Card>
         
@@ -292,6 +258,40 @@ export default function SiteReportPage() {
         </Card>
       </div>
 
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between gap-4">
+            <div>
+                <CardTitle>Incident Trend</CardTitle>
+                <CardDescription>Monthly incident counts for {site.name}.</CardDescription>
+            </div>
+            <Select value={selectedChartYear} onValueChange={setSelectedChartYear}>
+                <SelectTrigger className="w-[120px] font-medium">
+                    <SelectValue placeholder="Select Year" />
+                </SelectTrigger>
+                <SelectContent>
+                    {availableYears.map((year) => (
+                    <SelectItem key={year} value={year} className="font-medium">
+                        {year}
+                    </SelectItem>
+                    ))}
+                </SelectContent>
+            </Select>
+        </CardHeader>
+        <CardContent>
+            <ChartContainer config={chartConfig} className="h-[250px] w-full">
+                <ResponsiveContainer>
+                    <LineChart data={monthlyIncidentData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="month" fontSize={12} tickLine={false} axisLine={false} />
+                        <YAxis fontSize={12} tickLine={false} axisLine={false} allowDecimals={false} />
+                        <ChartTooltip content={<ChartTooltipContent />} />
+                        <Line type="monotone" dataKey="incidents" stroke="var(--color-incidents)" strokeWidth={2} dot={{ r: 4 }} />
+                    </LineChart>
+                </ResponsiveContainer>
+            </ChartContainer>
+        </CardContent>
+      </Card>
+      
       <Card>
         <CardHeader className="flex flex-row items-center justify-between gap-4">
           <div>
