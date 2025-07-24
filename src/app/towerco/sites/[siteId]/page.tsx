@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useParams } from 'next/navigation';
@@ -361,7 +360,8 @@ export default function SiteReportPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Incident ID</TableHead>
-                  <TableHead>Date & Time</TableHead>
+                  <TableHead>Incident Date</TableHead>
+                  <TableHead>Incident Time</TableHead>
                   <TableHead>Guard</TableHead>
                   <TableHead>Status</TableHead>
                 </TableRow>
@@ -380,7 +380,8 @@ export default function SiteReportPage() {
                           <Link href={`/towerco/incidents/${incident.id}`}>{incident.id}</Link>
                         </Button>
                       </TableCell>
-                      <TableCell className="font-medium">{new Date(incident.incidentTime).toLocaleString()}</TableCell>
+                      <TableCell className="font-medium">{new Date(incident.incidentTime).toLocaleDateString()}</TableCell>
+                      <TableCell className="font-medium">{new Date(incident.incidentTime).toLocaleTimeString()}</TableCell>
                       <TableCell className="font-medium">{guard?.name || 'N/A'}</TableCell>
                       <TableCell>{getStatusIndicator(incident.status)}</TableCell>
                     </TableRow>
