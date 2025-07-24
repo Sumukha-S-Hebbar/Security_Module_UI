@@ -127,6 +127,7 @@ export function SiteStatusBreakdown({ sites, agencies }: { sites: Site[]; agenci
                     strokeWidth={2}
                     onClick={handlePieClick}
                     className="cursor-pointer"
+                    style={{ outline: 'none' }}
                   >
                     {chartData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.color} name={entry.name} />
@@ -159,7 +160,7 @@ export function SiteStatusBreakdown({ sites, agencies }: { sites: Site[]; agenci
                             key={site.id} 
                             onClick={selectedSection === 'assigned' ? () => router.push(`/towerco/sites/${site.id}`) : undefined}
                             className={cn(
-                              'group hover:bg-accent hover:text-accent-foreground',
+                              'group hover:bg-[#00B4D8] hover:text-accent-foreground',
                               selectedSection === 'assigned' && 'cursor-pointer'
                             )}
                           >
