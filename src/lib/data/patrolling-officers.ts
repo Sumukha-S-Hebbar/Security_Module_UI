@@ -28,4 +28,13 @@ export const patrollingOfficers: PatrollingOfficer[] = [
     routes: ['Industrial Zone Route'],
     averageResponseTime: 18,
   },
+  {
+    id: 'PO04',
+    name: 'Tony Stark',
+    phone: '555-100-2003',
+    email: 'tony.s@guardlink.com',
+    avatar: 'https://placehold.co/100x100.png',
+    routes: ['Downtown Core Route'],
+    averageResponseTime: 10,
+  }
 ];

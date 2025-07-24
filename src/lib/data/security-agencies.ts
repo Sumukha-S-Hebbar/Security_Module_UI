@@ -37,4 +37,16 @@ export const securityAgencies: SecurityAgency[] = [
     avatar: 'https://placehold.co/100x100.png',
     siteIds: ['SITE05', 'SITE06'],
   },
+  {
+    id: 'AGY04',
+    name: 'Omega Security',
+    phone: '555-004-0004',
+    email: 'ops@omegasec.com',
+    address: '100 Omega Point, Central City, CA',
+    city: 'Central City',
+    region: 'CA',
+    country: 'USA',
+    avatar: 'https://placehold.co/100x100.png',
+    siteIds: ['SITE13', 'SITE14'],
+  }
 ];

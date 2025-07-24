@@ -155,5 +155,27 @@ export const incidents: Incident[] = [
       initialIncidentMediaUrl: [],
       attendedByPatrollingOfficerId: 'PO01',
       incidentType: 'Safety Hazard'
+    },
+    {
+      id: 'INC014',
+      incidentTime: '2024-07-25T01:00:00Z',
+      description: 'Power outage reported at City Core Tower.',
+      status: 'Active',
+      raisedByGuardId: 'GL018',
+      siteId: 'SITE13',
+      initialIncidentMediaUrl: [],
+      attendedByPatrollingOfficerId: 'PO04',
+      incidentType: 'SOS'
+    },
+    {
+      id: 'INC015',
+      incidentTime: '2024-07-24T16:00:00Z',
+      description: 'Unauthorized vehicle parked in the loading bay.',
+      status: 'Under Review',
+      raisedByGuardId: 'GL019',
+      siteId: 'SITE14',
+      initialIncidentMediaUrl: ['https://placehold.co/600x400.png'],
+      attendedByPatrollingOfficerId: 'PO04',
+      incidentType: 'Trespassing'
     }
 ];
