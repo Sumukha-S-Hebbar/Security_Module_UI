@@ -297,7 +297,6 @@ export function IncidentChart({
       </CardHeader>
       <CardContent className="pt-4">
         <ChartContainer config={chartConfig} className="h-[300px] w-full">
-          <ResponsiveContainer>
             <BarChart data={monthlyIncidentData} barCategoryGap="20%">
               <CartesianGrid vertical={false} strokeDasharray="3 3" />
               <XAxis
@@ -375,7 +374,6 @@ export function IncidentChart({
                   <LabelList dataKey="closureTimeFormatted" position="top" offset={8} fontSize={10} />
               </Line>
             </BarChart>
-          </ResponsiveContainer>
         </ChartContainer>
       </CardContent>
 
