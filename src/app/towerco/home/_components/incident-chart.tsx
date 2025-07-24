@@ -56,7 +56,11 @@ const chartConfig = {
   underReview: {
       label: 'Under Review',
       color: 'hsl(var(--chart-3))',
-  }
+  },
+  active: {
+    label: 'Active',
+    color: 'hsl(var(--destructive))',
+  },
 } satisfies ChartConfig;
 
 export function IncidentChart({
@@ -89,8 +93,8 @@ export function IncidentChart({
       'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
       'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
     ];
-    const monthlyData: { month: string; total: number; resolved: number; underReview: number; }[] = months.map(
-      (month) => ({ month, total: 0, resolved: 0, underReview: 0 })
+    const monthlyData: { month: string; total: number; resolved: number; underReview: number; active: number }[] = months.map(
+      (month) => ({ month, total: 0, resolved: 0, underReview: 0, active: 0 })
     );
 
     const siteToAgencyMap = new Map<string, string | undefined>();
@@ -116,6 +120,9 @@ export function IncidentChart({
         }
         if (incident.status === 'Under Review') {
             monthlyData[monthIndex].underReview += 1;
+        }
+        if (incident.status === 'Active') {
+          monthlyData[monthIndex].active += 1;
         }
       }
     });
@@ -280,6 +287,9 @@ export function IncidentChart({
              <Bar dataKey="underReview" fill="var(--color-underReview)" radius={4} onClick={handleBarClick} cursor="pointer">
                 <LabelList dataKey="underReview" position="top" offset={5} fontSize={12} />
             </Bar>
+             <Bar dataKey="active" fill="var(--color-active)" radius={4} onClick={handleBarClick} cursor="pointer">
+                <LabelList dataKey="active" position="top" offset={5} fontSize={12} />
+            </Bar>
           </BarChart>
         </ChartContainer>
       </CardContent>
@@ -311,7 +321,7 @@ export function IncidentChart({
                                   className="cursor-pointer"
                                 >
                                     <TableCell>
-                                        <Button asChild variant="link" className="p-0 h-auto font-medium" onClick={(e) => e.stopPropagation()}>
+                                        <Button asChild variant="link" className="p-0 h-auto" onClick={(e) => e.stopPropagation()}>
                                           <Link href={`/towerco/incidents/${incident.id}`}>{incident.id}</Link>
                                         </Button>
                                     </TableCell>
