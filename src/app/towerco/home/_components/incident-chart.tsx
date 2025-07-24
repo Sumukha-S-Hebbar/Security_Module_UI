@@ -268,25 +268,25 @@ export function IncidentChart({
             </div>
             <div className="flex items-center gap-2">
             <Select value={selectedCompany} onValueChange={setSelectedCompany}>
-                <SelectTrigger className="w-full sm:w-[180px]">
+                <SelectTrigger className="w-full sm:w-[180px] font-medium hover:bg-accent hover:text-accent-foreground">
                 <SelectValue placeholder="Select Company" />
                 </SelectTrigger>
                 <SelectContent>
-                <SelectItem value="all">All Companies</SelectItem>
+                <SelectItem value="all" className="font-medium">All Companies</SelectItem>
                 {securityAgencies.map((agency) => (
-                    <SelectItem key={agency.id} value={agency.id}>
+                    <SelectItem key={agency.id} value={agency.id} className="font-medium">
                     {agency.name}
                     </SelectItem>
                 ))}
                 </SelectContent>
             </Select>
             <Select value={selectedYear} onValueChange={setSelectedYear}>
-                <SelectTrigger className="w-full sm:w-[120px]">
+                <SelectTrigger className="w-full sm:w-[120px] font-medium hover:bg-accent hover:text-accent-foreground">
                 <SelectValue placeholder="Select Year" />
                 </SelectTrigger>
                 <SelectContent>
                 {availableYears.map((year) => (
-                    <SelectItem key={year} value={year}>
+                    <SelectItem key={year} value={year} className="font-medium">
                     {year}
                     </SelectItem>
                 ))}
@@ -297,6 +297,7 @@ export function IncidentChart({
       </CardHeader>
       <CardContent className="pt-4">
         <ChartContainer config={chartConfig} className="h-[300px] w-full">
+          <ResponsiveContainer>
             <BarChart data={monthlyIncidentData} barCategoryGap="20%">
               <CartesianGrid vertical={false} strokeDasharray="3 3" />
               <XAxis
@@ -374,6 +375,7 @@ export function IncidentChart({
                   <LabelList dataKey="closureTimeFormatted" position="top" offset={8} fontSize={10} />
               </Line>
             </BarChart>
+          </ResponsiveContainer>
         </ChartContainer>
       </CardContent>
 
