@@ -336,7 +336,7 @@ export default function AgencyReportPage() {
               </Avatar>
               <div>
                   <CardTitle className="text-2xl">{agency.name}</CardTitle>
-                  <CardDescription>ID: {agency.id}</CardDescription>
+                  <p className="font-medium text-foreground">ID: {agency.id}</p>
               </div>
           </div>
           </CardHeader>
@@ -428,17 +428,17 @@ export default function AgencyReportPage() {
             </div>
           </CardHeader>
           <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-            <div className="relative w-full max-w-[250px] aspect-square mx-auto">
+             <div className="relative w-full max-w-[250px] aspect-square mx-auto">
               <ChartContainer
                 config={chartConfig}
                 className="w-full h-full"
               >
                 <PieChart>
-                    <ChartTooltip
+                  <ChartTooltip
                     cursor={false}
                     content={<ChartTooltipContent hideLabel />}
-                    />
-                    <Pie
+                  />
+                  <Pie
                     data={complianceData}
                     cx="50%"
                     cy="50%"
@@ -447,14 +447,14 @@ export default function AgencyReportPage() {
                     paddingAngle={0}
                     dataKey="value"
                     stroke="none"
-                    >
+                  >
                     {complianceData.map((entry, index) => (
-                        <Cell
+                      <Cell
                         key={`cell-${index}`}
                         fill={COLORS[index % COLORS.length]}
-                        />
+                      />
                     ))}
-                    </Pie>
+                  </Pie>
                 </PieChart>
               </ChartContainer>
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
@@ -531,7 +531,9 @@ export default function AgencyReportPage() {
                   return (
                     <TableRow key={site.id} className="hover:bg-accent hover:text-accent-foreground group">
                        <TableCell>
-                          <Link href={`/towerco/sites/${site.id}`} className="hover:underline" onClick={(e) => e.stopPropagation()}>{site.id}</Link>
+                          <Button asChild variant="link" className="p-0 h-auto font-medium" onClick={(e) => e.stopPropagation()}>
+                            <Link href={`/towerco/sites/${site.id}`}>{site.id}</Link>
+                          </Button>
                         </TableCell>
                       <TableCell>
                         <div className="font-medium">{site.name}</div>
@@ -627,7 +629,9 @@ export default function AgencyReportPage() {
                       className="cursor-pointer hover:bg-accent hover:text-accent-foreground group"
                     >
                       <TableCell>
-                        <Link href={`/towerco/incidents/${incident.id}`} className="hover:underline" onClick={(e) => e.stopPropagation()}>{incident.id}</Link>
+                        <Button asChild variant="link" className="p-0 h-auto font-medium" onClick={(e) => e.stopPropagation()}>
+                         <Link href={`/towerco/incidents/${incident.id}`}>{incident.id}</Link>
+                        </Button>
                       </TableCell>
                       <TableCell className="font-medium">
                         <ClientDate date={incident.incidentTime} />
@@ -650,4 +654,3 @@ export default function AgencyReportPage() {
     </div>
   );
 }
-
