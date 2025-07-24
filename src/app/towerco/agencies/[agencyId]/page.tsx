@@ -428,7 +428,7 @@ export default function AgencyReportPage() {
             </div>
           </CardHeader>
           <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-             <div className="relative w-full max-w-[250px] aspect-square mx-auto">
+            <div className="relative w-full max-w-[250px] aspect-square mx-auto">
               <ChartContainer
                 config={chartConfig}
                 className="w-full h-full"
@@ -531,7 +531,7 @@ export default function AgencyReportPage() {
                   return (
                     <TableRow key={site.id} className="hover:bg-accent hover:text-accent-foreground group">
                        <TableCell>
-                          <Button asChild variant="link" className="p-0 h-auto font-medium" onClick={(e) => e.stopPropagation()}>
+                          <Button asChild variant="link" className="p-0 h-auto font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
                             <Link href={`/towerco/sites/${site.id}`}>{site.id}</Link>
                           </Button>
                         </TableCell>
@@ -629,7 +629,7 @@ export default function AgencyReportPage() {
                       className="cursor-pointer hover:bg-accent hover:text-accent-foreground group"
                     >
                       <TableCell>
-                        <Button asChild variant="link" className="p-0 h-auto font-medium" onClick={(e) => e.stopPropagation()}>
+                        <Button asChild variant="link" className="p-0 h-auto font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
                          <Link href={`/towerco/incidents/${incident.id}`}>{incident.id}</Link>
                         </Button>
                       </TableCell>
