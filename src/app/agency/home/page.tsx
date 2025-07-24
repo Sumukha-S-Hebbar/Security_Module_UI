@@ -101,13 +101,13 @@ export default function AgencyHomePage() {
             <Table>
               <TableHeader>
                 <TableRow className="border-destructive/20">
-                  <TableHead>Incident ID</TableHead>
-                  <TableHead>Site Name</TableHead>
-                  <TableHead>Guard</TableHead>
-                  <TableHead>Patrolling Officer</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Time</TableHead>
-                  <TableHead>Contact</TableHead>
+                  <TableHead className="text-foreground">Incident ID</TableHead>
+                  <TableHead className="text-foreground">Site Name</TableHead>
+                  <TableHead className="text-foreground">Guard</TableHead>
+                  <TableHead className="text-foreground">Patrolling Officer</TableHead>
+                  <TableHead className="text-foreground">Date</TableHead>
+                  <TableHead className="text-foreground">Time</TableHead>
+                  <TableHead className="text-foreground">Contact</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
