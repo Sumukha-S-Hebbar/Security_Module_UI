@@ -17,28 +17,38 @@ import {
   XAxis,
   YAxis,
   ResponsiveContainer,
-  LabelList,
+  CartesianGrid
 } from 'recharts';
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
   ChartConfig,
+  ChartLegend,
+  ChartLegendContent,
 } from '@/components/ui/chart';
 import { guards } from '@/lib/data/guards';
 import { patrollingOfficers } from '@/lib/data/patrolling-officers';
 
 const chartConfig = {
-  score: {
-    label: 'Performance Score',
+  incidentResolution: {
+    label: 'Incident Resolution',
+    color: 'hsl(var(--chart-1))',
+  },
+  perimeterAccuracy: {
+    label: 'Perimeter Accuracy',
+    color: 'hsl(var(--chart-2))',
+  },
+  selfieAccuracy: {
+    label: 'Selfie Accuracy',
+    color: 'hsl(var(--chart-3))',
+  },
+  siteVisits: {
+    label: 'Site Visits',
+    color: 'hsl(var(--chart-4))',
   },
 } satisfies ChartConfig;
 
-const getPerformanceColor = (score: number): string => {
-  if (score >= 90) return 'hsl(var(--chart-2))';
-  if (score >= 75) return 'hsl(var(--chart-4))';
-  return 'hsl(var(--destructive))';
-};
 
 export function AgencyPerformance({
   agencies,
@@ -56,6 +66,7 @@ export function AgencyPerformance({
       const agencySiteIds = new Set(agency.siteIds);
       const agencySites = sites.filter((s) => agencySiteIds.has(s.id));
 
+      // 1. Incident Resolution
       const agencyIncidents = incidents.filter((incident) =>
         agencySiteIds.has(incident.siteId)
       );
@@ -63,128 +74,103 @@ export function AgencyPerformance({
       const resolvedIncidents = agencyIncidents.filter(
         (i) => i.status === 'Resolved'
       ).length;
-      const incidentResolutionRate =
+      const incidentResolution =
         totalIncidents > 0
           ? (resolvedIncidents / totalIncidents) * 100
           : 100;
 
+      // 2. Guard Perimeter Accuracy
       const agencyGuardIds = new Set(agencySites.flatMap((s) => s.guards));
       const agencyGuards = guards.filter((g) => agencyGuardIds.has(g.id));
-      let totalPerimeterAccuracy = 0;
-      let totalSelfiesTaken = 0;
-      let totalSelfieRequests = 0;
+      const totalPerimeterAccuracy = agencyGuards.reduce((acc, guard) => acc + (guard.performance?.perimeterAccuracy || 0), 0);
+      const perimeterAccuracy = agencyGuards.length > 0 ? totalPerimeterAccuracy / agencyGuards.length : 100;
 
-      if (agencyGuards.length > 0) {
-        agencyGuards.forEach((guard) => {
-          totalPerimeterAccuracy += guard.performance?.perimeterAccuracy || 0;
-          totalSelfiesTaken +=
-            guard.totalSelfieRequests - guard.missedSelfieCount;
-          totalSelfieRequests += guard.totalSelfieRequests;
-        });
-      }
-      const guardPerimeterAccuracy =
-        agencyGuards.length > 0
-          ? totalPerimeterAccuracy / agencyGuards.length
-          : 100;
-      const guardSelfieAccuracy =
+      // 3. Guard Selfie Accuracy
+      const { totalSelfiesTaken, totalSelfieRequests } = agencyGuards.reduce(
+        (acc, guard) => {
+          acc.totalSelfiesTaken += guard.totalSelfieRequests - guard.missedSelfieCount;
+          acc.totalSelfieRequests += guard.totalSelfieRequests;
+          return acc;
+        },
+        { totalSelfiesTaken: 0, totalSelfieRequests: 0 }
+      );
+      const selfieAccuracy =
         totalSelfieRequests > 0
           ? (totalSelfiesTaken / totalSelfieRequests) * 100
           : 100;
 
+      // 4. Officer Site Visit Rate
       const agencyPatrollingOfficerIds = new Set(
         agencySites.map((s) => s.patrollingOfficerId).filter(Boolean)
       );
       const agencyPatrollingOfficers = patrollingOfficers.filter((po) =>
         agencyPatrollingOfficerIds.has(po.id)
       );
-      let totalSiteVisits = 0;
-      let totalSitesForOfficers = 0;
-      if (agencyPatrollingOfficers.length > 0) {
-        agencyPatrollingOfficers.forEach((po) => {
-          const poSites = agencySites.filter(
-            (s) => s.patrollingOfficerId === po.id
-          );
-          if (poSites.length > 0) {
-            totalSiteVisits += poSites.filter((s) => s.visited).length;
-            totalSitesForOfficers += poSites.length;
-          }
-        });
-      }
-      const officerSiteVisitRate =
+      const { totalSiteVisits, totalSitesForOfficers } = agencyPatrollingOfficers.reduce(
+          (acc, po) => {
+            const poSites = agencySites.filter(s => s.patrollingOfficerId === po.id);
+            acc.totalSitesForOfficers += poSites.length;
+            acc.totalSiteVisits += poSites.filter(s => s.visited).length;
+            return acc;
+          }, { totalSiteVisits: 0, totalSitesForOfficers: 0 }
+      );
+      const siteVisits =
         totalSitesForOfficers > 0
           ? (totalSiteVisits / totalSitesForOfficers) * 100
           : 100;
 
-      const performanceComponents = [
-        incidentResolutionRate,
-        guardPerimeterAccuracy,
-        guardSelfieAccuracy,
-        officerSiteVisitRate,
-      ];
-      const overallPerformance =
-        performanceComponents.reduce((a, b) => a + b, 0) /
-        performanceComponents.length;
-
       return {
         id: agency.id,
         name: agency.name,
-        score: Math.round(overallPerformance),
-        fill: getPerformanceColor(overallPerformance),
+        incidentResolution: Math.round(incidentResolution),
+        perimeterAccuracy: Math.round(perimeterAccuracy),
+        selfieAccuracy: Math.round(selfieAccuracy),
+        siteVisits: Math.round(siteVisits),
       };
-    }).sort((a, b) => b.score - a.score);
+    }).sort((a, b) => a.name.localeCompare(b.name));
   }, [agencies, sites, incidents]);
 
-  const handleBarClick = (data: any) => {
-    if (data && data.id) {
-      router.push(`/towerco/agencies/${data.id}`);
-    }
-  };
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Agency Performance Overview</CardTitle>
+        <CardTitle>Agency Performance Breakdown</CardTitle>
         <CardDescription>
-          Overall scores based on incidents, guard, and officer performance. Click a bar to view details.
+          Comparison of key performance indicators across all agencies.
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <ChartContainer config={chartConfig} className="h-[250px] w-full">
+        <ChartContainer config={chartConfig} className="h-[300px] w-full">
           <ResponsiveContainer>
-            <BarChart
-              data={performanceData}
-              layout="vertical"
-              margin={{ left: 10, right: 30 }}
-            >
-              <YAxis
+            <BarChart data={performanceData} margin={{ top: 20 }}>
+              <CartesianGrid vertical={false} />
+              <XAxis
                 dataKey="name"
-                type="category"
                 tickLine={false}
                 axisLine={false}
-                tickMargin={10}
-                width={120}
-                className="font-medium"
+                tickMargin={8}
+                fontSize={12}
+                interval={0}
               />
-              <XAxis dataKey="score" type="number" hide />
+              <YAxis
+                tickFormatter={(value) => `${value}%`}
+                domain={[0, 100]}
+                tickLine={false}
+                axisLine={false}
+                tickMargin={8}
+                fontSize={12}
+              />
               <ChartTooltip
-                cursor={false}
-                content={<ChartTooltipContent indicator="line" />}
+                cursor={true}
+                content={<ChartTooltipContent indicator="dot" />}
               />
-              <Bar
-                dataKey="score"
-                radius={5}
-                background={{ fill: 'hsl(var(--muted))', radius: 5 }}
-                onClick={handleBarClick}
-                className="cursor-pointer"
-              >
-                <LabelList
-                  position="right"
-                  offset={10}
-                  className="fill-foreground font-bold"
-                  fontSize={12}
-                  formatter={(value: number) => `${value}%`}
-                />
-              </Bar>
+              <ChartLegend content={<ChartLegendContent />} />
+              
+              <Bar dataKey="incidentResolution" fill="var(--color-incidentResolution)" radius={4} />
+              <Bar dataKey="perimeterAccuracy" fill="var(--color-perimeterAccuracy)" radius={4} />
+              <Bar dataKey="selfieAccuracy" fill="var(--color-selfieAccuracy)" radius={4} />
+              <Bar dataKey="siteVisits" fill="var(--color-siteVisits)" radius={4} />
+
             </BarChart>
           </ResponsiveContainer>
         </ChartContainer>
