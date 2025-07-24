@@ -215,7 +215,7 @@ export default function SiteReportPage() {
               <div className="flex items-start gap-3">
                 <ShieldAlert className="h-5 w-5 mt-0.5 text-primary" />
                 <div>
-                  <p className="font-semibold">Total Incidents</p>
+                  <Link href={`/towerco/incidents?siteId=${site.id}`} className="font-semibold text-accent hover:underline">Total Incidents</Link>
                   <Button asChild variant="link" className="p-0 h-auto font-medium text-base">
                     <Link href={`/towerco/incidents?siteId=${site.id}`}>{siteIncidents.length}</Link>
                   </Button>
