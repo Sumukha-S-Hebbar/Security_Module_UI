@@ -16,8 +16,8 @@
     --secondary: 240 4.8% 95.9%;
     --secondary-foreground: 0 0% 18.4%;
     --muted: 0 0% 94%;
-    --muted-foreground: 210 8% 48%;
-    --accent: 194 95% 43%;
+    --muted-foreground: 212 8% 43%;
+    --accent: 191 100% 42%;
     --accent-foreground: 0 0% 100%;
     --destructive: 30 100% 50%;
     --destructive-foreground: 0 0% 100%;
@@ -44,8 +44,8 @@
     --secondary: 240 3.7% 15.9%;
     --secondary-foreground: 0 0% 98%;
     --muted: 0 0% 85%;
-    --muted-foreground: 210 8% 48%;
-    --accent: 194 95% 43%;
+    --muted-foreground: 212 8% 43%;
+    --accent: 191 100% 42%;
     --accent-foreground: 0 0% 100%;
     --destructive: 30 100% 50%;
     --destructive-foreground: 0 0% 98%;
@@ -68,6 +68,15 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+  h1, h2, h3, h4, h5, h6 {
+      @apply font-bold;
+  }
+  p, div, span, label, a, button, input, select, textarea, th, td {
+      @apply font-medium;
+  }
+  a {
+      @apply text-accent;
   }
 }
 
