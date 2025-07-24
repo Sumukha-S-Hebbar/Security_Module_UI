@@ -17,7 +17,8 @@ import {
   XAxis,
   YAxis,
   ResponsiveContainer,
-  CartesianGrid
+  CartesianGrid,
+  LabelList,
 } from 'recharts';
 import {
   ChartContainer,
@@ -166,10 +167,18 @@ export function AgencyPerformance({
               />
               <ChartLegend content={<ChartLegendContent />} />
               
-              <Bar dataKey="incidentResolution" fill="var(--color-incidentResolution)" radius={4} />
-              <Bar dataKey="perimeterAccuracy" fill="var(--color-perimeterAccuracy)" radius={4} />
-              <Bar dataKey="selfieAccuracy" fill="var(--color-selfieAccuracy)" radius={4} />
-              <Bar dataKey="siteVisits" fill="var(--color-siteVisits)" radius={4} />
+              <Bar dataKey="incidentResolution" fill="var(--color-incidentResolution)" radius={4}>
+                 <LabelList dataKey="incidentResolution" position="top" offset={5} fontSize={12} formatter={(value: number) => `${value}%`} />
+              </Bar>
+              <Bar dataKey="perimeterAccuracy" fill="var(--color-perimeterAccuracy)" radius={4}>
+                 <LabelList dataKey="perimeterAccuracy" position="top" offset={5} fontSize={12} formatter={(value: number) => `${value}%`} />
+              </Bar>
+              <Bar dataKey="selfieAccuracy" fill="var(--color-selfieAccuracy)" radius={4}>
+                <LabelList dataKey="selfieAccuracy" position="top" offset={5} fontSize={12} formatter={(value: number) => `${value}%`} />
+              </Bar>
+              <Bar dataKey="siteVisits" fill="var(--color-siteVisits)" radius={4}>
+                 <LabelList dataKey="siteVisits" position="top" offset={5} fontSize={12} formatter={(value: number) => `${value}%`} />
+              </Bar>
 
             </BarChart>
           </ResponsiveContainer>
