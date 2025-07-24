@@ -49,6 +49,11 @@ import {
   Pie,
   Cell,
   ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
 } from 'recharts';
 import {
   ChartContainer,
@@ -74,6 +79,25 @@ const chartConfig = {
   incidents: {
     label: 'Incidents',
     color: 'hsl(var(--destructive))',
+  },
+  performance: {
+    label: 'Performance',
+  },
+  incidentResolutionRate: {
+    label: 'Resolution Rate',
+    color: 'hsl(var(--chart-1))',
+  },
+  guardPerimeterAccuracy: {
+    label: 'Perimeter Accuracy',
+    color: 'hsl(var(--chart-2))',
+  },
+  guardSelfieAccuracy: {
+    label: 'Selfie Accuracy',
+    color: 'hsl(var(--chart-3))',
+  },
+  officerSiteVisitRate: {
+    label: 'Site Visits',
+    color: 'hsl(var(--chart-5))',
   },
 } satisfies ChartConfig;
 
@@ -189,6 +213,13 @@ export default function AgencyReportPage() {
   const complianceData = [
     { name: 'Performance', value: performanceData.performance },
     { name: 'Remaining', value: 100 - performanceData.performance },
+  ];
+
+  const performanceBreakdownChartData = [
+    { name: 'Resolution', value: performanceData.incidentResolutionRate, fill: 'var(--color-incidentResolutionRate)' },
+    { name: 'Perimeter', value: performanceData.guardPerimeterAccuracy, fill: 'var(--color-guardPerimeterAccuracy)' },
+    { name: 'Selfie', value: performanceData.guardSelfieAccuracy, fill: 'var(--color-guardSelfieAccuracy)' },
+    { name: 'Site Visits', value: performanceData.officerSiteVisitRate, fill: 'var(--color-officerSiteVisitRate)' },
   ];
   
   const getPerformanceColor = () => {
@@ -362,10 +393,10 @@ export default function AgencyReportPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
-              <div className="flex flex-col items-center gap-2">
-                  <div className="w-48 h-48 relative">
-                      <ResponsiveContainer width="100%" height="100%">
+             <ChartContainer config={chartConfig} className="w-full h-[250px]">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 h-full">
+                  <div className="md:col-span-1 flex flex-col items-center justify-center gap-2">
+                      <ResponsiveContainer width="100%" height={150}>
                           <PieChart>
                               <Pie
                                   data={complianceData}
@@ -381,45 +412,36 @@ export default function AgencyReportPage() {
                                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                                   ))}
                               </Pie>
+                               <ChartTooltip
+                                  cursor={false}
+                                  content={<ChartTooltipContent hideLabel />}
+                                />
                           </PieChart>
                       </ResponsiveContainer>
-                      <div className="absolute inset-0 flex items-center justify-center">
-                          <span className="text-4xl font-bold">{performanceData.performance}%</span>
+                      <div className="text-center">
+                          <p className="text-lg font-medium">Overall Performance</p>
+                          <p className="text-4xl font-bold">{performanceData.performance}%</p>
                       </div>
                   </div>
-                  <p className="text-lg text-center font-medium">Overall Performance</p>
-              </div>
-              <div className="space-y-4">
-                  <div className="text-sm">
-                      <div className="flex justify-between items-center mb-1">
-                          <span className="text-muted-foreground">Incident Resolution Rate</span>
-                          <span className="font-medium">{performanceData.incidentResolutionRate}%</span>
-                      </div>
-                      <Progress value={performanceData.incidentResolutionRate} className="h-2" />
+                  <div className="md:col-span-2">
+                      <ResponsiveContainer width="100%" height="100%">
+                         <BarChart data={performanceBreakdownChartData} layout="vertical" margin={{ left: 20, right: 20 }}>
+                            <XAxis type="number" domain={[0, 100]} hide />
+                            <YAxis type="category" dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12 }} width={80} />
+                            <Tooltip
+                                cursor={{ fill: 'hsl(var(--accent) / 0.2)' }}
+                                content={<ChartTooltipContent indicator="dot" />}
+                            />
+                            <Bar dataKey="value" radius={4}>
+                                 {performanceBreakdownChartData.map((entry, index) => (
+                                    <Cell key={`cell-${index}`} fill={entry.fill} />
+                                 ))}
+                            </Bar>
+                          </BarChart>
+                      </ResponsiveContainer>
                   </div>
-                  <div className="text-sm">
-                      <div className="flex justify-between items-center mb-1">
-                          <span className="text-muted-foreground">Guard Perimeter Accuracy</span>
-                          <span className="font-medium">{performanceData.guardPerimeterAccuracy}%</span>
-                      </div>
-                      <Progress value={performanceData.guardPerimeterAccuracy} className="h-2" />
-                  </div>
-                  <div className="text-sm">
-                      <div className="flex justify-between items-center mb-1">
-                          <span className="text-muted-foreground">Guard Selfie Accuracy</span>
-                          <span className="font-medium">{performanceData.guardSelfieAccuracy}%</span>
-                      </div>
-                      <Progress value={performanceData.guardSelfieAccuracy} className="h-2" />
-                  </div>
-                  <div className="text-sm">
-                      <div className="flex justify-between items-center mb-1">
-                          <span className="text-muted-foreground">Officer Site Visit Rate</span>
-                          <span className="font-medium">{performanceData.officerSiteVisitRate}%</span>
-                      </div>
-                      <Progress value={performanceData.officerSiteVisitRate} className="h-2" />
-                  </div>
-              </div>
-            </div>
+                </div>
+            </ChartContainer>
           </CardContent>
         </Card>
       </div>
