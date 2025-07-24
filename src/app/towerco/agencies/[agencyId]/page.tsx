@@ -334,6 +334,7 @@ export default function AgencyReportPage() {
                 axisLine={false}
                 tickMargin={8}
                 fontSize={12}
+                tick={{ fill: '#2F2F2F' }}
                 className="font-medium"
               />
               <YAxis
@@ -342,6 +343,7 @@ export default function AgencyReportPage() {
                 tickMargin={8}
                 allowDecimals={false}
                 fontSize={12}
+                tick={{ fill: '#2F2F2F' }}
                 className="font-medium"
               />
               <ChartTooltip

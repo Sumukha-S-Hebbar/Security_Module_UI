@@ -252,6 +252,7 @@ export function AgencyIncidentChart({
                 axisLine={false}
                 tickMargin={8}
                 fontSize={12}
+                tick={{ fill: '#2F2F2F' }}
               />
               <YAxis
                 yAxisId="left"
@@ -260,6 +261,7 @@ export function AgencyIncidentChart({
                 tickMargin={8}
                 allowDecimals={false}
                 fontSize={12}
+                tick={{ fill: '#2F2F2F' }}
               />
               <YAxis
                 yAxisId="right"
@@ -270,6 +272,7 @@ export function AgencyIncidentChart({
                 tickFormatter={(value) => `${value}h`}
                 allowDecimals={false}
                 fontSize={12}
+                tick={{ fill: '#2F2F2F' }}
               />
               <ChartTooltip
                 cursor={false}
