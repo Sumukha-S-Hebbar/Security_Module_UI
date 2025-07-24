@@ -54,7 +54,6 @@ import {
   XAxis,
   YAxis,
   Tooltip,
-  Legend,
   CartesianGrid,
 } from 'recharts';
 import {
@@ -75,17 +74,11 @@ import {
 import { useRouter } from 'next/navigation';
 import { patrollingOfficers } from '@/lib/data/patrolling-officers';
 import { Progress } from '@/components/ui/progress';
+import { ClientDate } from './_components/client-date';
 
 const LOGGED_IN_ORG_ID = 'TCO01'; // Simulate logged-in user
 
 const chartConfig = {
-  incidents: {
-    label: 'Incidents',
-    color: 'hsl(var(--destructive))',
-  },
-  performance: {
-    label: 'Performance',
-  },
   incidentResolutionRate: {
     label: 'Resolution Rate',
     color: 'hsl(var(--chart-1))',
@@ -219,10 +212,10 @@ export default function AgencyReportPage() {
   ];
 
   const performanceBreakdownChartData = [
-    { name: 'Resolution', value: performanceData.incidentResolutionRate, fill: 'var(--color-incidentResolutionRate)' },
-    { name: 'Perimeter', value: performanceData.guardPerimeterAccuracy, fill: 'var(--color-guardPerimeterAccuracy)' },
-    { name: 'Selfie', value: performanceData.guardSelfieAccuracy, fill: 'var(--color-guardSelfieAccuracy)' },
-    { name: 'Site Visits', value: performanceData.officerSiteVisitRate, fill: 'var(--color-officerSiteVisitRate)' },
+    { name: 'Resolution', value: performanceData.incidentResolutionRate },
+    { name: 'Perimeter', value: performanceData.guardPerimeterAccuracy },
+    { name: 'Selfie', value: performanceData.guardSelfieAccuracy },
+    { name: 'Site Visits', value: performanceData.officerSiteVisitRate },
   ];
   
   const getPerformanceColor = () => {
@@ -396,8 +389,8 @@ export default function AgencyReportPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 h-full">
-              <div className="md:col-span-1 flex flex-col items-center justify-center gap-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+              <div className="flex flex-col items-center justify-center gap-2">
                 <ResponsiveContainer width="100%" height={150}>
                   <PieChart>
                     <Pie
@@ -430,8 +423,8 @@ export default function AgencyReportPage() {
                   </p>
                 </div>
               </div>
-              <div className="md:col-span-2">
-                <ChartContainer config={chartConfig} className="w-full h-full">
+              <div>
+                <ChartContainer config={chartConfig} className="w-full h-[200px]">
                   <BarChart data={performanceBreakdownChartData} margin={{ top: 20, right: 20, bottom: 20, left: 20 }} barSize={30}>
                     <CartesianGrid vertical={false} />
                     <XAxis dataKey="name" tickLine={false} axisLine={false} tickMargin={8} fontSize={12} />
@@ -440,10 +433,9 @@ export default function AgencyReportPage() {
                       cursor={{ fill: 'hsl(var(--accent) / 0.1)' }}
                       content={<ChartTooltipContent indicator="dot" />}
                     />
-                    <ChartLegend content={<ChartLegendContent />} />
-                    <Bar dataKey="value" name={chartConfig.incidentResolutionRate.label} fill="var(--color-incidentResolutionRate)" radius={4}>
+                    <Bar dataKey="value" fill="var(--color-incidentResolutionRate)" radius={4}>
                       {performanceBreakdownChartData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.fill} />
+                          <Cell key={`cell-${index}`} fill={chartConfig[Object.keys(chartConfig)[index] as keyof typeof chartConfig]?.color} />
                       ))}
                     </Bar>
                   </BarChart>
@@ -587,7 +579,9 @@ export default function AgencyReportPage() {
                           <Link href={`/towerco/incidents/${incident.id}`}>{incident.id}</Link>
                         </Button>
                       </TableCell>
-                      <TableCell className="font-medium">{new Date(incident.incidentTime).toLocaleString()}</TableCell>
+                      <TableCell className="font-medium">
+                        <ClientDate date={incident.incidentTime} />
+                      </TableCell>
                       <TableCell className="font-medium">{site?.name || 'N/A'}</TableCell>
                       <TableCell className="font-medium">{guard?.name || 'N/A'}</TableCell>
                       <TableCell>{getStatusIndicator(incident.status)}</TableCell>
