@@ -55,6 +55,7 @@ import {
   YAxis,
   Tooltip,
   CartesianGrid,
+  LabelList,
 } from 'recharts';
 import {
   ChartContainer,
@@ -445,6 +446,7 @@ export default function AgencyReportPage() {
                       {performanceBreakdownChartData.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={entry.fill} />
                       ))}
+                      <LabelList dataKey="value" position="top" offset={5} fontSize={12} formatter={(value: number) => `${value}%`} />
                     </Bar>
                   </BarChart>
                 </ChartContainer>
@@ -608,4 +610,3 @@ export default function AgencyReportPage() {
     </div>
   );
 }
-
