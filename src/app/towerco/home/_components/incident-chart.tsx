@@ -395,11 +395,11 @@ export function IncidentChart({
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead>Incident ID</TableHead>
-                                <TableHead>Date</TableHead>
-                                <TableHead>Site</TableHead>
-                                <TableHead>Agency</TableHead>
-                                <TableHead>Status</TableHead>
+                                <TableHead className="text-foreground">Incident ID</TableHead>
+                                <TableHead className="text-foreground">Date</TableHead>
+                                <TableHead className="text-foreground">Site</TableHead>
+                                <TableHead className="text-foreground">Agency</TableHead>
+                                <TableHead className="text-foreground">Status</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -407,10 +407,10 @@ export function IncidentChart({
                                 <TableRow 
                                   key={incident.id}
                                   onClick={() => router.push(`/towerco/incidents/${incident.id}`)}
-                                  className="cursor-pointer"
+                                  className="cursor-pointer group hover:bg-accent hover:text-accent-foreground"
                                 >
                                     <TableCell>
-                                        <Button asChild variant="link" className="p-0 h-auto" onClick={(e) => e.stopPropagation()}>
+                                        <Button asChild variant="link" className="p-0 h-auto group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
                                           <Link href={`/towerco/incidents/${incident.id}`}>{incident.id}</Link>
                                         </Button>
                                     </TableCell>
