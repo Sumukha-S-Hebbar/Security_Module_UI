@@ -203,13 +203,6 @@ export default function SiteReportPage() {
                   <p className="font-medium">{site.address}</p>
                 </div>
               </div>
-              <div className="flex items-start gap-3">
-                <ShieldAlert className="h-5 w-5 mt-0.5 text-primary" />
-                <div>
-                  <p className="font-semibold">Total Incidents</p>
-                  <p className="font-medium">{siteIncidents.length}</p>
-                </div>
-              </div>
               {site.latitude && site.longitude && (
                 <div className="flex items-start gap-3">
                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-globe mt-0.5 text-primary"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
@@ -219,6 +212,13 @@ export default function SiteReportPage() {
                   </div>
                 </div>
               )}
+              <div className="flex items-start gap-3">
+                <ShieldAlert className="h-5 w-5 mt-0.5 text-primary" />
+                <div>
+                  <p className="font-semibold">Total Incidents</p>
+                  <p className="font-medium">{siteIncidents.length}</p>
+                </div>
+              </div>
             </div>
           </CardContent>
         </Card>
