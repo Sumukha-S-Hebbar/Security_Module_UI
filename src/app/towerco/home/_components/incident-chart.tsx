@@ -38,7 +38,7 @@ import {
 } from '@/components/ui/collapsible';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, LabelList } from 'recharts';
 import { useRouter } from 'next/navigation';
 import { Eye } from 'lucide-react';
 import { guards } from '@/lib/data/guards';
@@ -47,12 +47,16 @@ import { guards } from '@/lib/data/guards';
 const chartConfig = {
   total: {
     label: 'Total Incidents',
-    color: 'hsl(var(--destructive))',
+    color: 'hsl(var(--chart-1))',
   },
   resolved: {
     label: 'Resolved',
     color: 'hsl(var(--chart-2))',
   },
+  underReview: {
+      label: 'Under Review',
+      color: 'hsl(var(--chart-3))',
+  }
 } satisfies ChartConfig;
 
 export function IncidentChart({
@@ -85,8 +89,8 @@ export function IncidentChart({
       'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
       'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
     ];
-    const monthlyData: { month: string; total: number; resolved: number }[] = months.map(
-      (month) => ({ month, total: 0, resolved: 0 })
+    const monthlyData: { month: string; total: number; resolved: number; underReview: number; }[] = months.map(
+      (month) => ({ month, total: 0, resolved: 0, underReview: 0 })
     );
 
     const siteToAgencyMap = new Map<string, string | undefined>();
@@ -109,6 +113,9 @@ export function IncidentChart({
         monthlyData[monthIndex].total += 1;
         if (incident.status === 'Resolved') {
           monthlyData[monthIndex].resolved += 1;
+        }
+        if (incident.status === 'Under Review') {
+            monthlyData[monthIndex].underReview += 1;
         }
       }
     });
@@ -244,8 +251,8 @@ export function IncidentChart({
       </CardHeader>
       <CardContent className="pt-4">
         <ChartContainer config={chartConfig} className="h-[300px] w-full">
-          <BarChart data={monthlyIncidentData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
-            <CartesianGrid vertical={false} />
+          <BarChart data={monthlyIncidentData} margin={{ top: 20, right: 20, left: -10, bottom: 5 }} barGap={6}>
+            <CartesianGrid vertical={false} strokeDasharray="3 3" />
             <XAxis
               dataKey="month"
               tickLine={false}
@@ -264,8 +271,15 @@ export function IncidentChart({
               cursor={false}
               content={<ChartTooltipContent />}
             />
-            <Bar dataKey="total" fill="var(--color-total)" radius={4} onClick={handleBarClick} cursor="pointer" />
-            <Bar dataKey="resolved" fill="var(--color-resolved)" radius={4} onClick={handleBarClick} cursor="pointer" />
+            <Bar dataKey="total" fill="var(--color-total)" radius={4} onClick={handleBarClick} cursor="pointer">
+                <LabelList dataKey="total" position="top" offset={5} fontSize={12} />
+            </Bar>
+            <Bar dataKey="resolved" fill="var(--color-resolved)" radius={4} onClick={handleBarClick} cursor="pointer">
+                <LabelList dataKey="resolved" position="top" offset={5} fontSize={12} />
+            </Bar>
+             <Bar dataKey="underReview" fill="var(--color-underReview)" radius={4} onClick={handleBarClick} cursor="pointer">
+                <LabelList dataKey="underReview" position="top" offset={5} fontSize={12} />
+            </Bar>
           </BarChart>
         </ChartContainer>
       </CardContent>
