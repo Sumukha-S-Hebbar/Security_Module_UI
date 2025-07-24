@@ -270,7 +270,7 @@ export default function SiteReportPage() {
                                 </Avatar>
                                 <div>
                                     <p className="font-semibold text-base">{guard.name}</p>
-                                    <p className="font-medium">{guard.phone}</p>
+                                    <p className="font-medium"><a href={`tel:${guard.phone}`} className="text-accent hover:underline">{guard.phone}</a></p>
                                 </div>
                             </div>
                         ))}
