@@ -396,7 +396,7 @@ export default function AgencyReportPage() {
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
               <div className="flex flex-col items-center justify-center text-center gap-2">
-                <div className="relative h-48 w-48">
+                <div className="relative h-56 w-56">
                   <ChartContainer
                     config={chartConfig}
                     className="absolute inset-0"
@@ -410,8 +410,8 @@ export default function AgencyReportPage() {
                         data={complianceData}
                         cx="50%"
                         cy="50%"
-                        innerRadius="70%"
-                        outerRadius="85%"
+                        innerRadius="60%"
+                        outerRadius="80%"
                         paddingAngle={0}
                         dataKey="value"
                         stroke="none"
