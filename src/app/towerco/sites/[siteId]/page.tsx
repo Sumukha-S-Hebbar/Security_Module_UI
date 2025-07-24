@@ -223,6 +223,28 @@ export default function SiteReportPage() {
           </CardContent>
         </Card>
         
+        {agency && (
+          <Card>
+            <CardHeader>
+                <CardTitle className="flex items-center gap-2"><Briefcase className="h-5 w-5"/>Agency Details</CardTitle>
+                <CardDescription>Security provider for this site.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+                <div>
+                    <p className="font-semibold text-base">{agency.name}</p>
+                    <p className="text-sm text-muted-foreground font-medium">ID: {agency.id}</p>
+                </div>
+                <div className="text-sm space-y-2 pt-2 border-t">
+                  <div className="flex items-center gap-2"><Phone className="h-4 w-4" /> <a href={`tel:${agency.phone}`} className="hover:underline">{agency.phone}</a></div>
+                  <div className="flex items-center gap-2"><Mail className="h-4 w-4" /> <a href={`mailto:${agency.email}`} className="hover:underline">{agency.email}</a></div>
+                </div>
+                 <Button asChild variant="link" className="p-0 h-auto font-medium">
+                    <Link href={`/towerco/agencies/${agency.id}`}>View Full Agency Report</Link>
+                </Button>
+            </CardContent>
+          </Card>
+        )}
+
         <Card>
             <CardHeader>
                 <CardTitle className="flex items-center gap-2"><Users className="h-5 w-5"/>Assigned Guards</CardTitle>
@@ -249,28 +271,6 @@ export default function SiteReportPage() {
                 )}
             </CardContent>
         </Card>
-
-        {agency && (
-          <Card>
-            <CardHeader>
-                <CardTitle className="flex items-center gap-2"><Briefcase className="h-5 w-5"/>Agency Details</CardTitle>
-                <CardDescription>Security provider for this site.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-                <div>
-                    <p className="font-semibold text-base">{agency.name}</p>
-                    <p className="text-sm text-muted-foreground font-medium">ID: {agency.id}</p>
-                </div>
-                <div className="text-sm space-y-2 pt-2 border-t">
-                  <div className="flex items-center gap-2"><Phone className="h-4 w-4" /> <a href={`tel:${agency.phone}`} className="hover:underline">{agency.phone}</a></div>
-                  <div className="flex items-center gap-2"><Mail className="h-4 w-4" /> <a href={`mailto:${agency.email}`} className="hover:underline">{agency.email}</a></div>
-                </div>
-                 <Button asChild variant="link" className="p-0 h-auto font-medium">
-                    <Link href={`/towerco/agencies/${agency.id}`}>View Full Agency Report</Link>
-                </Button>
-            </CardContent>
-          </Card>
-        )}
       </div>
 
 
