@@ -344,11 +344,11 @@ export default function AgencyReportPage() {
               <div className="text-sm mt-2 space-y-2">
                   <div className="flex items-center gap-2">
                       <Mail className="h-4 w-4" />
-                      <span className="font-medium">{agency.email}</span>
+                      <a href={`mailto:${agency.email}`} className="font-medium hover:underline">{agency.email}</a>
                   </div>
                   <div className="flex items-center gap-2">
                       <Phone className="h-4 w-4" />
-                      <span className="font-medium">{agency.phone}</span>
+                      <a href={`tel:${agency.phone}`} className="font-medium hover:underline">{agency.phone}</a>
                   </div>
                   <div className="flex items-center gap-2">
                       <MapPin className="h-4 w-4" />
