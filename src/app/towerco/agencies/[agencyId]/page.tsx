@@ -515,6 +515,7 @@ export default function AgencyReportPage() {
                   <TableHead className="text-foreground">Site ID</TableHead>
                   <TableHead className="text-foreground">Site</TableHead>
                   <TableHead className="text-foreground">Assigned On</TableHead>
+                  <TableHead className="text-center text-foreground">Guards</TableHead>
                   <TableHead className="text-center text-foreground">Incidents</TableHead>
                   <TableHead className="text-center text-foreground">Resolved</TableHead>
                 </TableRow>
@@ -546,6 +547,12 @@ export default function AgencyReportPage() {
                         {site.assignedOn
                           ? new Date(site.assignedOn).toLocaleDateString()
                           : 'N/A'}
+                      </TableCell>
+                       <TableCell className="text-center">
+                        <div className="flex items-center justify-center gap-2 font-medium">
+                            <Users className="h-4 w-4 text-muted-foreground group-hover:text-accent-foreground" />
+                            <span>{site.guards.length}</span>
+                        </div>
                       </TableCell>
                       <TableCell className="text-center">
                         <div className="flex items-center justify-center gap-2 font-medium">
