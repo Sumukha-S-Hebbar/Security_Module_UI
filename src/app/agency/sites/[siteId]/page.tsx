@@ -166,28 +166,28 @@ export default function AgencySiteReportPage() {
             <div className="flex items-start gap-3">
               <MapPin className="h-5 w-5 mt-0.5 text-primary" />
               <div>
-                <p className="font-semibold text-foreground">Address</p>
+                <p className="text-foreground">Address</p>
                 <p>{site.address}</p>
               </div>
             </div>
             <div className="flex items-start gap-3">
               <UserCheck className="h-5 w-5 mt-0.5 text-primary" />
               <div>
-                <p className="font-semibold text-foreground">Patrolling Officer</p>
+                <p className="text-foreground">Patrolling Officer</p>
                 <p>{patrollingOfficer ? patrollingOfficer.name : 'Unassigned'}</p>
               </div>
             </div>
              <div className="flex items-start gap-3">
               <Fence className="h-5 w-5 mt-0.5 text-primary" />
               <div>
-                <p className="font-semibold text-foreground">Geofence Perimeter</p>
+                <p className="text-foreground">Geofence Perimeter</p>
                 <p>{site.geofencePerimeter ? `${site.geofencePerimeter}m` : 'Not set'}</p>
               </div>
             </div>
              <div className="flex items-start gap-3">
               <ShieldAlert className="h-5 w-5 mt-0.5 text-primary" />
               <div>
-                <p className="font-semibold text-foreground">Total Incidents</p>
+                <p className="text-foreground">Total Incidents</p>
                 <p>{siteIncidents.length}</p>
               </div>
             </div>
@@ -210,7 +210,7 @@ export default function AgencySiteReportPage() {
                                     <AvatarFallback>{guard.name.charAt(0)}</AvatarFallback>
                                 </Avatar>
                                 <div>
-                                    <Button asChild variant="link" className="p-0 h-auto font-medium text-base">
+                                    <Button asChild variant="link" className="p-0 h-auto text-base">
                                         <Link href={`/agency/guards/${guard.id}`}>{guard.name}</Link>
                                     </Button>
                                     <p className="text-sm text-muted-foreground">ID: {guard.id}</p>
@@ -281,7 +281,7 @@ export default function AgencySiteReportPage() {
                           className="cursor-pointer"
                         >
                           <TableCell>
-                            <Button asChild variant="link" className="p-0 h-auto font-medium" onClick={(e) => e.stopPropagation()}>
+                            <Button asChild variant="link" className="p-0 h-auto" onClick={(e) => e.stopPropagation()}>
                               <Link href={`/agency/incidents/${incident.id}`}>{incident.id}</Link>
                             </Button>
                           </TableCell>
@@ -302,5 +302,3 @@ export default function AgencySiteReportPage() {
 
     </div>
   );
-
-    

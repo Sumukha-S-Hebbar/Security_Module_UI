@@ -51,7 +51,7 @@ export function PatrollingOfficerPerformance({
       <CardContent className="space-y-4">
         <div>
           <div className="flex justify-between items-center mb-1">
-            <h4 className="font-medium flex items-center gap-2 text-sm">
+            <h4 className="flex items-center gap-2 text-sm">
                 <Map className="w-4 h-4 text-primary" />
                 Site Visit Accuracy
             </h4>
@@ -60,7 +60,7 @@ export function PatrollingOfficerPerformance({
           <Progress value={avgSiteVisitAccuracy} className="h-2" />
         </div>
         <div className="flex items-center justify-between pt-2">
-            <h4 className="font-medium flex items-center gap-2 text-sm">
+            <h4 className="flex items-center gap-2 text-sm">
                 <Clock className="w-4 h-4 text-primary" />
                 Average Response Time
             </h4>

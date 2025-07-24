@@ -297,7 +297,7 @@ export default function AgencyIncidentsPage() {
                       className="cursor-pointer"
                     >
                       <TableCell>
-                        <Button asChild variant="link" className="p-0 h-auto font-medium" onClick={(e) => e.stopPropagation()}>
+                        <Button asChild variant="link" className="p-0 h-auto" onClick={(e) => e.stopPropagation()}>
                           <Link href={`/agency/incidents/${incident.id}`}>{incident.id}</Link>
                         </Button>
                       </TableCell>

@@ -327,7 +327,7 @@ export default function AgencyPatrollingOfficersPage() {
                                   className="cursor-pointer"
                                 >
                                   <TableCell>
-                                    <Button asChild variant="link" className="p-0 h-auto font-medium" onClick={(e) => e.stopPropagation()}>
+                                    <Button asChild variant="link" className="p-0 h-auto" onClick={(e) => e.stopPropagation()}>
                                       <Link href={`/agency/patrolling-officers/${patrollingOfficer.id}`}>{patrollingOfficer.id}</Link>
                                     </Button>
                                   </TableCell>
@@ -337,7 +337,7 @@ export default function AgencyPatrollingOfficersPage() {
                                             <AvatarImage src={patrollingOfficer.avatar} alt={patrollingOfficer.name} />
                                             <AvatarFallback>{patrollingOfficer.name.charAt(0)}</AvatarFallback>
                                         </Avatar>
-                                        <p className="font-medium">{patrollingOfficer.name}</p>
+                                        <p>{patrollingOfficer.name}</p>
                                     </div>
                                   </TableCell>
                                   <TableCell>
@@ -365,11 +365,11 @@ export default function AgencyPatrollingOfficersPage() {
                                   <TableCell>
                                       <div className="flex items-center gap-2">
                                           <Progress value={siteVisitAccuracy} className="w-24 h-2" />
-                                          <span className="font-medium text-sm text-muted-foreground">{siteVisitAccuracy}%</span>
+                                          <span className="text-sm text-muted-foreground">{siteVisitAccuracy}%</span>
                                       </div>
                                   </TableCell>
                                   <TableCell>
-                                      <span className="font-medium text-sm">{patrollingOfficer.averageResponseTime} mins</span>
+                                      <span className="text-sm">{patrollingOfficer.averageResponseTime} mins</span>
                                   </TableCell>
                                 </TableRow>
                             )})

@@ -392,7 +392,7 @@ export default function AgencyGuardsPage() {
                         className="cursor-pointer"
                       >
                         <TableCell>
-                          <Button asChild variant="link" className="p-0 h-auto font-medium" onClick={(e) => e.stopPropagation()}>
+                          <Button asChild variant="link" className="p-0 h-auto" onClick={(e) => e.stopPropagation()}>
                             <Link href={`/agency/guards/${guard.id}`}>{guard.id}</Link>
                           </Button>
                         </TableCell>
@@ -403,7 +403,7 @@ export default function AgencyGuardsPage() {
                               <AvatarFallback>{guard.name.charAt(0)}</AvatarFallback>
                             </Avatar>
                             <div>
-                              <p className="font-medium">{guard.name}</p>
+                              <p>{guard.name}</p>
                             </div>
                           </div>
                         </TableCell>
@@ -412,7 +412,7 @@ export default function AgencyGuardsPage() {
                         <TableCell>
                           <div className="flex items-center gap-2">
                             <Progress value={compliance} className="w-24 h-2" />
-                            <span className="font-medium text-sm text-muted-foreground">{compliance}%</span>
+                            <span className="text-sm text-muted-foreground">{compliance}%</span>
                           </div>
                         </TableCell>
                       </TableRow>

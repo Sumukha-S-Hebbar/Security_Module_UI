@@ -215,7 +215,7 @@ export function IncidentStatusBreakdown({
             >
               <item.icon className="h-8 w-8" />
               <div>
-                <p className="font-semibold">{item.status}</p>
+                <p>{item.status}</p>
                 <p className="text-2xl font-bold">{item.count}</p>
               </div>
             </div>
@@ -253,7 +253,7 @@ export function IncidentStatusBreakdown({
                         <Button
                           asChild
                           variant="link"
-                          className="h-auto p-0 font-medium"
+                          className="h-auto p-0"
                           onClick={(e) => e.stopPropagation()}
                         >
                           <Link href={`/agency/incidents/${incident.id}`}>

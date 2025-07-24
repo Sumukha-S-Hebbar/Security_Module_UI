@@ -1,3 +1,4 @@
+
 'use client';
 
 import type { Guard } from '@/types';
@@ -39,7 +40,7 @@ export function GuardPerformanceBreakdown({ guards }: { guards: Guard[] }) {
       <CardContent className="space-y-4">
         <div>
           <div className="flex justify-between items-center mb-1">
-            <h4 className="font-medium flex items-center gap-2 text-sm">
+            <h4 className="flex items-center gap-2 text-sm">
                 <ShieldCheck className="w-4 h-4 text-primary" />
                 Perimeter Accuracy
             </h4>
@@ -49,7 +50,7 @@ export function GuardPerformanceBreakdown({ guards }: { guards: Guard[] }) {
         </div>
         <div>
           <div className="flex justify-between items-center mb-1">
-            <h4 className="font-medium flex items-center gap-2 text-sm">
+            <h4 className="flex items-center gap-2 text-sm">
                 <UserCheck className="w-4 h-4 text-primary" />
                 Selfie Check-in Accuracy
             </h4>

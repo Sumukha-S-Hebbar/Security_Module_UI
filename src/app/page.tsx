@@ -213,7 +213,7 @@ export default function RootPage() {
                         <Checkbox id="terms" />
                         <label
                             htmlFor="terms"
-                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-blue-600 hover:underline"
+                            className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-blue-600 hover:underline"
                         >
                             Terms & Conditions
                         </label>

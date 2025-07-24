@@ -493,12 +493,12 @@ export default function AgencySitesPage() {
                     className="cursor-pointer"
                   >
                     <TableCell>
-                      <Button asChild variant="link" className="p-0 h-auto font-medium" onClick={(e) => e.stopPropagation()}>
+                      <Button asChild variant="link" className="p-0 h-auto" onClick={(e) => e.stopPropagation()}>
                         <Link href={`/agency/sites/${site.id}`}>{site.id}</Link>
                       </Button>
                     </TableCell>
                     <TableCell>
-                      <p className="font-medium">{site.name}</p>
+                      <p>{site.name}</p>
                       <p className="text-sm text-muted-foreground">{site.address}</p>
                     </TableCell>
                     <TableCell>{patrollingOfficer?.name || 'N/A'}</TableCell>

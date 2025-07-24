@@ -155,7 +155,7 @@ export default function AgencyGuardReportPage() {
           </Button>
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Security Guard Report</h1>
-            <p className="text-muted-foreground">Detailed overview for {guard.name}.</p>
+            <p className="text-muted-foreground">Detailed overview for ${guard.name}.</p>
           </div>
         </div>
         <Button onClick={handleDownloadReport}>
@@ -182,7 +182,7 @@ export default function AgencyGuardReportPage() {
             <div className="flex items-start gap-3">
               <Phone className="h-5 w-5 mt-0.5 text-primary" />
               <div>
-                <p className="font-semibold text-foreground">Phone</p>
+                <p className="text-foreground">Phone</p>
                 <a href={`tel:${guard.phone}`} className="hover:underline">{guard.phone}</a>
               </div>
             </div>
@@ -190,7 +190,7 @@ export default function AgencyGuardReportPage() {
               <div className="flex items-start gap-3">
                 <MapPin className="h-5 w-5 mt-0.5 text-primary" />
                 <div>
-                  <p className="font-semibold text-foreground">Assigned Site</p>
+                  <p className="text-foreground">Assigned Site</p>
                   <p>{site.name}</p>
                 </div>
               </div>
@@ -199,7 +199,7 @@ export default function AgencyGuardReportPage() {
               <div className="flex items-start gap-3">
                 <UserCheck className="h-5 w-5 mt-0.5 text-primary" />
                 <div>
-                  <p className="font-semibold text-foreground">Patrolling Officer</p>
+                  <p className="text-foreground">Patrolling Officer</p>
                   <p>{patrollingOfficer.name}</p>
                 </div>
               </div>
@@ -238,12 +238,12 @@ export default function AgencyGuardReportPage() {
                           <span className="text-3xl font-bold text-foreground">{compliance}%</span>
                       </div>
                   </div>
-                  <p className="font-medium text-lg text-center">Overall Compliance</p>
+                  <p className="text-lg text-center">Overall Compliance</p>
               </div>
               <div className="space-y-4 pt-6 border-t">
                   <div>
                     <div className="flex justify-between items-center mb-1">
-                      <h4 className="font-medium flex items-center gap-2 text-sm">
+                      <h4 className="flex items-center gap-2 text-sm">
                           Perimeter Accuracy
                       </h4>
                       <span className="font-bold text-muted-foreground">{perimeterAccuracy}%</span>
@@ -252,7 +252,7 @@ export default function AgencyGuardReportPage() {
                   </div>
                   <div>
                     <div className="flex justify-between items-center mb-1">
-                      <h4 className="font-medium flex items-center gap-2 text-sm">
+                      <h4 className="flex items-center gap-2 text-sm">
                           Selfie Check-in Accuracy
                       </h4>
                       <span className="font-bold text-muted-foreground">{selfieAccuracy}%</span>
@@ -273,7 +273,7 @@ export default function AgencyGuardReportPage() {
               <CardTitle className="flex items-center gap-2"><MapPin className="h-5 w-5"/>Site Details</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              <p className="font-medium">{site.name}</p>
+              <p>{site.name}</p>
               <p className="text-sm text-muted-foreground">{site.address}</p>
               {site.geofencePerimeter && (
                 <p className="text-sm text-muted-foreground">Geofence: {site.geofencePerimeter}m</p>
@@ -342,7 +342,7 @@ export default function AgencyGuardReportPage() {
                     className="cursor-pointer"
                   >
                     <TableCell>
-                      <Button asChild variant="link" className="p-0 h-auto font-medium" onClick={(e) => e.stopPropagation()}>
+                      <Button asChild variant="link" className="p-0 h-auto" onClick={(e) => e.stopPropagation()}>
                         <Link href={`/agency/incidents/${incident.id}`}>{incident.id}</Link>
                       </Button>
                     </TableCell>
