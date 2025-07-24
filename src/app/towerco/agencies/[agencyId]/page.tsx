@@ -312,8 +312,8 @@ export default function AgencyReportPage() {
           Download Full Report
         </Button>
       </div>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <Card className="lg:col-span-2">
             <CardHeader>
             <div className="flex items-center gap-4">
                 <Avatar className="h-16 w-16">
@@ -381,16 +381,13 @@ export default function AgencyReportPage() {
             </CardContent>
         </Card>
         
-        <Card>
+        <Card className="lg:col-span-1">
           <CardHeader>
             <CardTitle>Agency Performance</CardTitle>
-            <CardDescription>
-              Overall score and breakdown of key performance indicators.
-            </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
-              <div className="w-full h-48 md:h-full flex items-center justify-center relative">
+            <div className="grid grid-cols-1 gap-6 items-center">
+              <div className="w-full h-40 flex items-center justify-center relative">
                   <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
                           <Pie
@@ -610,7 +607,7 @@ export default function AgencyReportPage() {
                     <SelectContent>
                     <SelectItem value="all" className="font-medium">All Months</SelectItem>
                     {Array.from({ length: 12 }, (_, i) => (
-                        <SelectItem key={i} value={i.toString()} className="font-medium">
+                        <SelectItem key={i} value={(i).toString()} className="font-medium">
                         {new Date(0, i).toLocaleString('default', { month: 'long' })}
                         </SelectItem>
                     ))}
@@ -664,4 +661,3 @@ export default function AgencyReportPage() {
     </div>
   );
 }
-
