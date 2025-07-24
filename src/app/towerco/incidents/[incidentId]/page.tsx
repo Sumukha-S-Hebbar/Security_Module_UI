@@ -207,14 +207,20 @@ export default function IncidentReportPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <MapPin className="h-5 w-5 text-primary" />
-                Site Details
+                {site.name}
               </CardTitle>
+              <CardDescription>ID: {site.id}</CardDescription>
             </CardHeader>
             <CardContent className="text-sm space-y-2">
-              <p className="font-medium">{site.name}</p>
-              <p className="font-medium">Address: {site.address}</p>
+               <div>
+                  <p className="font-semibold">Address</p>
+                  <p className="font-medium">{site.address}</p>
+                </div>
               {site.latitude && site.longitude && (
-                <p className="font-medium">Coords: {site.latitude}, {site.longitude}</p>
+                 <div>
+                  <p className="font-semibold">Coordinates</p>
+                  <p className="font-medium">{site.latitude}, {site.longitude}</p>
+                </div>
               )}
             </CardContent>
           </Card>
@@ -224,11 +230,11 @@ export default function IncidentReportPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Briefcase className="h-5 w-5 text-primary" />
-                Agency Details
+                {agency.name}
               </CardTitle>
+               <CardDescription>ID: {agency.id}</CardDescription>
             </CardHeader>
             <CardContent className="text-sm space-y-2">
-              <p className="font-medium">{agency.name}</p>
               <div className="flex items-center gap-2 font-medium"><Phone className="h-4 w-4" /> <a href={`tel:${agency.phone}`} className="hover:underline">{agency.phone}</a></div>
               <div className="flex items-center gap-2 font-medium"><Mail className="h-4 w-4" /> <a href={`mailto:${agency.email}`} className="hover:underline">{agency.email}</a></div>
             </CardContent>
