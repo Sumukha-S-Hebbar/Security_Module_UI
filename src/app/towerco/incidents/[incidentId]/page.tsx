@@ -211,7 +211,7 @@ export default function IncidentReportPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="text-sm space-y-3">
-              <div className="font-medium">
+              <div>
                 <div className="text-xl font-bold">{site.name}</div>
                 <p className="font-medium">ID: {site.id}</p>
               </div>
@@ -238,7 +238,7 @@ export default function IncidentReportPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="text-sm space-y-2">
-              <div className="font-medium">
+              <div>
                   <div className="text-xl font-bold">{agency.name}</div>
                   <p className="font-medium">ID: {agency.id}</p>
               </div>
@@ -259,7 +259,7 @@ export default function IncidentReportPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="text-sm space-y-2">
-              <div className="font-medium">
+              <div>
                 <div className="text-xl font-bold">{patrollingOfficer.name}</div>
               </div>
               <div className="flex items-center gap-2 font-medium pt-2 border-t"><Phone className="h-4 w-4" /> <a href={`tel:${patrollingOfficer.phone}`} className="hover:underline">{patrollingOfficer.phone}</a></div>
@@ -276,7 +276,7 @@ export default function IncidentReportPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="text-sm space-y-2">
-              <div className="font-medium">
+              <div>
                 <div className="text-xl font-bold">{guard.name}</div>
               </div>
               <div className="flex items-center gap-2 font-medium pt-2 border-t"><Phone className="h-4 w-4" /> <a href={`tel:${guard.phone}`} className="hover:underline">{guard.phone}</a></div>
@@ -291,6 +291,7 @@ export default function IncidentReportPage() {
             <div>
               <CardTitle className="text-2xl flex items-center gap-3">
                 Incident #{incident.id}
+                {incident.incidentType && <Badge variant="destructive">{incident.incidentType}</Badge>}
                 {getStatusIndicator(incident.status)}
               </CardTitle>
               <CardDescription className="flex items-center gap-2 pt-2">
@@ -303,15 +304,6 @@ export default function IncidentReportPage() {
         <CardContent className="space-y-6 divide-y">
             
             <div className="pt-6 space-y-6">
-                {incident.incidentType && (
-                    <div>
-                        <h4 className="font-semibold mb-2 text-lg flex items-center gap-2">
-                            <AlertTriangle className="h-5 w-5 text-destructive" />
-                            Incident Type
-                        </h4>
-                        <p className="text-muted-foreground">{incident.incidentType}</p>
-                    </div>
-                )}
                 {incident.description && (
                      <div>
                         <h4 className="font-semibold mb-2 text-lg">
