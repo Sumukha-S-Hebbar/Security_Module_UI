@@ -144,45 +144,71 @@ export function SiteStatusBreakdown({ sites, agencies }: { sites: Site[]; agenci
                      <h3 className="text-lg font-semibold">{selectedSection === 'assigned' ? 'Assigned Sites' : 'Unassigned Sites'} ({selectedSites.length})</h3>
                   </div>
                   <ScrollArea className="h-80 flex-grow">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead className="text-foreground">Site ID</TableHead>
-                          <TableHead className="text-foreground">Site Name</TableHead>
-                          <TableHead className="text-foreground">Region</TableHead>
-                          {selectedSection === 'assigned' && <TableHead className="text-foreground">Agency</TableHead>}
-                          {selectedSection === 'unassigned' && <TableHead className="text-right text-foreground">Action</TableHead>}
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {paginatedSites.map(site => (
-                          <TableRow 
-                            key={site.id} 
-                            onClick={selectedSection === 'assigned' ? () => router.push(`/towerco/sites/${site.id}`) : undefined}
-                            className={cn(
-                              'group hover:bg-[#00B4D8] hover:text-accent-foreground',
-                              selectedSection === 'assigned' && 'cursor-pointer'
-                            )}
-                          >
-                            <TableCell>
-                                <Button asChild variant="link" className="p-0 h-auto font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
-                                    <Link href={`/towerco/sites/${site.id}`}>{site.id}</Link>
-                                </Button>
-                            </TableCell>
-                            <TableCell className="group-hover:text-accent-foreground">
-                              <p className="font-medium">{site.name}</p>
-                              <p className="text-xs text-muted-foreground font-medium group-hover:text-accent-foreground/80">{site.address}</p>
-                            </TableCell>
-                            <TableCell className="group-hover:text-accent-foreground">
-                              <Badge variant="outline" className="font-medium group-hover:border-accent-foreground/50 group-hover:text-accent-foreground">{site.region}</Badge>
-                            </TableCell>
-                            {selectedSection === 'assigned' && (
-                                <TableCell className="font-medium group-hover:text-accent-foreground">
-                                    {getAgencyForSite(site.id)?.name || 'N/A'}
-                                </TableCell>
-                            )}
-                            {selectedSection === 'unassigned' && (
-                              <TableCell className="text-right">
+                    {selectedSection === 'assigned' ? (
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead className="text-foreground px-2">Site ID</TableHead>
+                            <TableHead className="text-foreground px-2">Site Name</TableHead>
+                            <TableHead className="text-foreground px-2">Region</TableHead>
+                            <TableHead className="text-foreground px-2">Agency</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {paginatedSites.map(site => (
+                            <TableRow 
+                              key={site.id} 
+                              onClick={() => router.push(`/towerco/sites/${site.id}`)}
+                              className="group cursor-pointer hover:bg-[#00B4D8] hover:text-accent-foreground"
+                            >
+                              <TableCell className="px-2">
+                                  <Button asChild variant="link" className="p-0 h-auto font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
+                                      <Link href={`/towerco/sites/${site.id}`}>{site.id}</Link>
+                                  </Button>
+                              </TableCell>
+                              <TableCell className="group-hover:text-accent-foreground px-2">
+                                <p className="font-medium">{site.name}</p>
+                                <p className="text-xs text-muted-foreground font-medium group-hover:text-accent-foreground/80">{site.address}</p>
+                              </TableCell>
+                              <TableCell className="group-hover:text-accent-foreground px-2">
+                                <Badge variant="outline" className="font-medium group-hover:border-accent-foreground/50 group-hover:text-accent-foreground">{site.region}</Badge>
+                              </TableCell>
+                              <TableCell className="font-medium group-hover:text-accent-foreground px-2">
+                                  {getAgencyForSite(site.id)?.name || 'N/A'}
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    ) : (
+                       <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead className="text-foreground px-2">Site ID</TableHead>
+                            <TableHead className="text-foreground px-2">Site Name</TableHead>
+                            <TableHead className="text-foreground px-2">Region</TableHead>
+                            <TableHead className="text-right text-foreground px-2">Action</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {paginatedSites.map(site => (
+                            <TableRow 
+                              key={site.id} 
+                              className="group hover:bg-[#00B4D8] hover:text-accent-foreground"
+                            >
+                              <TableCell className="px-2">
+                                  <Button asChild variant="link" className="p-0 h-auto font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
+                                      <Link href={`/towerco/sites/${site.id}`}>{site.id}</Link>
+                                  </Button>
+                              </TableCell>
+                              <TableCell className="group-hover:text-accent-foreground px-2">
+                                <p className="font-medium">{site.name}</p>
+                                <p className="text-xs text-muted-foreground font-medium group-hover:text-accent-foreground/80">{site.address}</p>
+                              </TableCell>
+                              <TableCell className="group-hover:text-accent-foreground px-2">
+                                <Badge variant="outline" className="font-medium group-hover:border-accent-foreground/50 group-hover:text-accent-foreground">{site.region}</Badge>
+                              </TableCell>
+                              <TableCell className="text-right px-2">
                                 <Button 
                                   size="sm"
                                   className="bg-[#00B4D8] hover:bg-[#00a2c2] text-white"
@@ -194,11 +220,11 @@ export function SiteStatusBreakdown({ sites, agencies }: { sites: Site[]; agenci
                                   Assign Agency
                                 </Button>
                               </TableCell>
-                            )}
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    )}
                   </ScrollArea>
                    <div className="flex items-center justify-between w-full pt-4">
                         <div className="text-sm text-muted-foreground font-medium">
