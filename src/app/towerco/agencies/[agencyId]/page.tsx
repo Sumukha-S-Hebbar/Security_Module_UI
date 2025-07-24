@@ -45,18 +45,10 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
   PieChart,
   Pie,
   Cell,
   ResponsiveContainer,
-  BarChart,
-  Bar,
-  LabelList,
 } from 'recharts';
 import {
   ChartContainer,
@@ -74,30 +66,9 @@ import {
 import { useRouter } from 'next/navigation';
 import { patrollingOfficers } from '@/lib/data/patrolling-officers';
 import { Progress } from '@/components/ui/progress';
+import { AgencyPerformanceBreakdown } from './_components/agency-performance-breakdown';
 
 const LOGGED_IN_ORG_ID = 'TCO01'; // Simulate logged-in user
-
-const performanceChartConfig = {
-  value: {
-    label: 'Performance',
-  },
-  incidentResolution: {
-    label: 'Incident Resolution',
-    color: '#FF8200',
-  },
-  siteVisits: {
-    label: 'Site Visit Accuracy',
-    color: 'hsl(var(--chart-1))',
-  },
-  perimeterAccuracy: {
-    label: 'Guard Check-in Accuracy',
-    color: 'hsl(var(--chart-2))',
-  },
-  selfieAccuracy: {
-    label: 'Selfie Check-in Accuracy',
-    color: '#FFC107',
-  },
-} satisfies ChartConfig;
 
 const chartConfig = {
   incidents: {
@@ -214,15 +185,20 @@ export default function AgencyReportPage() {
       officerSiteVisitRate: Math.round(officerSiteVisitRate),
     };
   }, [agency, sites, incidents]);
+  
+  const complianceData = [
+    { name: 'Performance', value: performanceData.performance },
+    { name: 'Remaining', value: 100 - performanceData.performance },
+  ];
+  
+  const getPerformanceColor = () => {
+    if (performanceData.performance > 95) return 'hsl(var(--chart-2))'; // Green
+    if (performanceData.performance >= 65) return 'hsl(var(--chart-3))'; // Yellow
+    return 'hsl(var(--destructive))'; // Orange/Red
+  };
 
-  const performanceChartData = useMemo(() => {
-    return [
-      { metric: 'Incident Resolution', value: performanceData.incidentResolutionRate, fill: 'var(--color-incidentResolution)' },
-      { metric: 'Site Visits', value: performanceData.officerSiteVisitRate, fill: 'var(--color-siteVisits)' },
-      { metric: 'Perimeter Accuracy', value: performanceData.guardPerimeterAccuracy, fill: 'var(--color-perimeterAccuracy)' },
-      { metric: 'Selfie Accuracy', value: performanceData.guardSelfieAccuracy, fill: 'var(--color-selfieAccuracy)' },
-    ];
-  }, [performanceData]);
+  const COLORS = [getPerformanceColor(), 'hsl(var(--muted))'];
+
   
   const getStatusIndicator = (status: Incident['status']) => {
     switch (status) {
@@ -266,7 +242,6 @@ export default function AgencyReportPage() {
     }
   };
   
-  const [trendSelectedYear, setTrendSelectedYear] = useState<string>(new Date().getFullYear().toString());
   const [historySelectedYear, setHistorySelectedYear] = useState<string>('all');
   const [historySelectedMonth, setHistorySelectedMonth] = useState<string>('all');
 
@@ -277,26 +252,6 @@ export default function AgencyReportPage() {
     yearsFromIncidents.add(new Date().getFullYear().toString());
     return Array.from(yearsFromIncidents).sort((a, b) => parseInt(b) - parseInt(a));
   }, [agencyIncidents]);
-
-  const monthlyIncidentData = useMemo(() => {
-    const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-    ];
-    const monthlyData: { month: string; incidents: number }[] = months.map(
-      (month) => ({ month, incidents: 0 })
-    );
-
-    agencyIncidents.forEach((incident) => {
-      const incidentDate = new Date(incident.incidentTime);
-      if (incidentDate.getFullYear().toString() === trendSelectedYear) {
-        const monthIndex = incidentDate.getMonth();
-        monthlyData[monthIndex].incidents += 1;
-      }
-    });
-
-    return monthlyData;
-  }, [agencyIncidents, trendSelectedYear]);
 
   const filteredIncidents = useMemo(() => {
     return agencyIncidents.filter(incident => {
@@ -401,115 +356,73 @@ export default function AgencyReportPage() {
         
         <Card className="lg:col-span-2">
           <CardHeader>
-              <div className="flex justify-between items-start">
-                  <div>
-                      <CardTitle>Agency Performance</CardTitle>
-                      <CardDescription>
-                          Overall score and breakdown of key performance indicators.
-                      </CardDescription>
+            <CardTitle>Agency Performance</CardTitle>
+            <CardDescription>
+              Overall score and breakdown of key performance indicators.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+              <div className="flex flex-col items-center gap-2">
+                  <div className="w-48 h-48 relative">
+                      <ResponsiveContainer width="100%" height="100%">
+                          <PieChart>
+                              <Pie
+                                  data={complianceData}
+                                  cx="50%"
+                                  cy="50%"
+                                  innerRadius="70%"
+                                  outerRadius="85%"
+                                  paddingAngle={0}
+                                  dataKey="value"
+                                  stroke="none"
+                              >
+                                  {complianceData.map((entry, index) => (
+                                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                  ))}
+                              </Pie>
+                          </PieChart>
+                      </ResponsiveContainer>
+                      <div className="absolute inset-0 flex items-center justify-center">
+                          <span className="text-4xl font-bold">{performanceData.performance}%</span>
+                      </div>
                   </div>
-                  <div className="text-right">
-                      <p className="text-sm text-muted-foreground">Overall Performance</p>
-                      <p className="text-3xl font-bold text-primary">{performanceData.performance}%</p>
+                  <p className="text-lg text-center font-medium">Overall Performance</p>
+              </div>
+              <div className="space-y-4">
+                  <div className="text-sm">
+                      <div className="flex justify-between items-center mb-1">
+                          <span className="text-muted-foreground">Incident Resolution Rate</span>
+                          <span className="font-medium">{performanceData.incidentResolutionRate}%</span>
+                      </div>
+                      <Progress value={performanceData.incidentResolutionRate} className="h-2" />
+                  </div>
+                  <div className="text-sm">
+                      <div className="flex justify-between items-center mb-1">
+                          <span className="text-muted-foreground">Guard Perimeter Accuracy</span>
+                          <span className="font-medium">{performanceData.guardPerimeterAccuracy}%</span>
+                      </div>
+                      <Progress value={performanceData.guardPerimeterAccuracy} className="h-2" />
+                  </div>
+                  <div className="text-sm">
+                      <div className="flex justify-between items-center mb-1">
+                          <span className="text-muted-foreground">Guard Selfie Accuracy</span>
+                          <span className="font-medium">{performanceData.guardSelfieAccuracy}%</span>
+                      </div>
+                      <Progress value={performanceData.guardSelfieAccuracy} className="h-2" />
+                  </div>
+                  <div className="text-sm">
+                      <div className="flex justify-between items-center mb-1">
+                          <span className="text-muted-foreground">Officer Site Visit Rate</span>
+                          <span className="font-medium">{performanceData.officerSiteVisitRate}%</span>
+                      </div>
+                      <Progress value={performanceData.officerSiteVisitRate} className="h-2" />
                   </div>
               </div>
-          </CardHeader>
-          <CardContent className="h-[250px]">
-            <ChartContainer config={performanceChartConfig} className="h-full w-full">
-                <BarChart data={performanceChartData} layout="vertical" margin={{ left: 20 }}>
-                  <CartesianGrid horizontal={false} />
-                  <XAxis type="number" domain={[0, 100]} hide />
-                  <YAxis 
-                    dataKey="metric" 
-                    type="category" 
-                    tickLine={false} 
-                    axisLine={false} 
-                    tick={{ fontSize: 12 }}
-                    width={150}
-                   />
-                  <ChartTooltip
-                    cursor={false}
-                    content={<ChartTooltipContent indicator="dot" />}
-                  />
-                  <Bar dataKey="value" radius={5}>
-                    <LabelList 
-                      dataKey="value" 
-                      position="right" 
-                      offset={8} 
-                      className="fill-foreground font-semibold"
-                      formatter={(value: number) => `${value}%`}
-                    />
-                    {performanceChartData.map((entry) => (
-                      <Cell key={entry.metric} fill={entry.fill} />
-                    ))}
-                  </Bar>
-                </BarChart>
-            </ChartContainer>
+            </div>
           </CardContent>
         </Card>
       </div>
-
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <div>
-            <CardTitle>Incident Trend</CardTitle>
-            <CardDescription className="font-medium">
-              Monthly emergency incidents for {trendSelectedYear}.
-            </CardDescription>
-          </div>
-          <Select value={trendSelectedYear} onValueChange={setTrendSelectedYear}>
-            <SelectTrigger className="w-[120px] font-medium">
-              <SelectValue placeholder="Select Year" />
-            </SelectTrigger>
-            <SelectContent>
-              {availableYears.map((year) => (
-                <SelectItem key={year} value={year} className="font-medium">
-                  {year}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </CardHeader>
-        <CardContent>
-          <ChartContainer config={chartConfig} className="h-[250px] w-full">
-            <LineChart
-              data={monthlyIncidentData}
-              margin={{ top: 5, right: 20, left: -10, bottom: 5 }}
-            >
-              <CartesianGrid vertical={false} />
-              <XAxis
-                dataKey="month"
-                tickLine={false}
-                axisLine={false}
-                tickMargin={8}
-                fontSize={12}
-                tick={{ fill: '#2F2F2F' }}
-                className="font-medium"
-              />
-              <YAxis
-                tickLine={false}
-                axisLine={false}
-                tickMargin={8}
-                allowDecimals={false}
-                fontSize={12}
-                tick={{ fill: '#2F2F2F' }}
-                className="font-medium"
-              />
-              <ChartTooltip
-                cursor={true}
-                content={<ChartTooltipContent />}
-              />
-              <Line
-                type="monotone"
-                dataKey="incidents"
-                stroke="var(--color-incidents)"
-                strokeWidth={2}
-                dot={true}
-              />
-            </LineChart>
-          </ChartContainer>
-        </CardContent>
-      </Card>
 
       <Card>
         <CardHeader>
