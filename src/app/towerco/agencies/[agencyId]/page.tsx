@@ -55,6 +55,7 @@ import {
   YAxis,
   Tooltip,
   Legend,
+  CartesianGrid,
 } from 'recharts';
 import {
   ChartContainer,
@@ -218,13 +219,10 @@ export default function AgencyReportPage() {
   ];
 
   const performanceBreakdownChartData = [
-    {
-      name: 'Metrics',
-      incidentResolutionRate: performanceData.incidentResolutionRate,
-      guardPerimeterAccuracy: performanceData.guardPerimeterAccuracy,
-      guardSelfieAccuracy: performanceData.guardSelfieAccuracy,
-      officerSiteVisitRate: performanceData.officerSiteVisitRate
-    },
+    { name: 'Resolution', value: performanceData.incidentResolutionRate, fill: 'var(--color-incidentResolutionRate)' },
+    { name: 'Perimeter', value: performanceData.guardPerimeterAccuracy, fill: 'var(--color-guardPerimeterAccuracy)' },
+    { name: 'Selfie', value: performanceData.guardSelfieAccuracy, fill: 'var(--color-guardSelfieAccuracy)' },
+    { name: 'Site Visits', value: performanceData.officerSiteVisitRate, fill: 'var(--color-officerSiteVisitRate)' },
   ];
   
   const getPerformanceColor = () => {
@@ -398,7 +396,7 @@ export default function AgencyReportPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 h-full">
+             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 h-full">
               <div className="md:col-span-1 flex flex-col items-center justify-center gap-2">
                 <ResponsiveContainer width="100%" height={150}>
                   <PieChart>
@@ -434,19 +432,20 @@ export default function AgencyReportPage() {
               </div>
               <div className="md:col-span-2">
                 <ChartContainer config={chartConfig} className="w-full h-full">
-                  <BarChart data={performanceBreakdownChartData} margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+                  <BarChart data={performanceBreakdownChartData} margin={{ top: 20, right: 20, bottom: 20, left: 20 }} barSize={30}>
                     <CartesianGrid vertical={false} />
-                    <XAxis dataKey="name" hide/>
+                    <XAxis dataKey="name" tickLine={false} axisLine={false} tickMargin={8} fontSize={12} />
                     <YAxis domain={[0, 100]} tickFormatter={(value) => `${value}%`} />
                     <Tooltip
                       cursor={{ fill: 'hsl(var(--accent) / 0.1)' }}
                       content={<ChartTooltipContent indicator="dot" />}
                     />
-                    <Legend content={<ChartLegendContent />} />
-                    <Bar dataKey="incidentResolutionRate" name={chartConfig.incidentResolutionRate.label} fill={chartConfig.incidentResolutionRate.color} radius={4} />
-                    <Bar dataKey="guardPerimeterAccuracy" name={chartConfig.guardPerimeterAccuracy.label} fill={chartConfig.guardPerimeterAccuracy.color} radius={4} />
-                    <Bar dataKey="guardSelfieAccuracy" name={chartConfig.guardSelfieAccuracy.label} fill={chartConfig.guardSelfieAccuracy.color} radius={4} />
-                    <Bar dataKey="officerSiteVisitRate" name={chartConfig.officerSiteVisitRate.label} fill={chartConfig.officerSiteVisitRate.color} radius={4} />
+                    <ChartLegend content={<ChartLegendContent />} />
+                    <Bar dataKey="value" name={chartConfig.incidentResolutionRate.label} fill="var(--color-incidentResolutionRate)" radius={4}>
+                      {performanceBreakdownChartData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.fill} />
+                      ))}
+                    </Bar>
                   </BarChart>
                 </ChartContainer>
               </div>
