@@ -359,11 +359,11 @@ export default function SiteReportPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Incident ID</TableHead>
-                  <TableHead>Incident Date</TableHead>
-                  <TableHead>Incident Time</TableHead>
-                  <TableHead>Guard</TableHead>
-                  <TableHead>Status</TableHead>
+                  <TableHead className="text-foreground">Incident ID</TableHead>
+                  <TableHead className="text-foreground">Incident Date</TableHead>
+                  <TableHead className="text-foreground">Incident Time</TableHead>
+                  <TableHead className="text-foreground">Guard</TableHead>
+                  <TableHead className="text-foreground">Status</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
