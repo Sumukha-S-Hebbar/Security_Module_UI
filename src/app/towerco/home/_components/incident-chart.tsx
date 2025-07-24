@@ -191,7 +191,8 @@ export function IncidentChart({
     });
   }, [selectedMonthIndex, selectedYear, selectedCompany, incidents, securityAgencies]);
 
-  const handleBarClick = (data: any, index: number) => {
+  const handleBarClick = (data: any) => {
+    const index = data.activeTooltipIndex;
     if (selectedMonthIndex === index) {
       setSelectedMonthIndex(null); // Collapse if clicking the same month
     } else {
@@ -296,12 +297,12 @@ export function IncidentChart({
         </div>
       </CardHeader>
       <CardContent className="pt-4">
-        <ChartContainer config={chartConfig} className="h-[300px] w-full">
+        <ChartContainer config={chartConfig} className="h-[300px] w-full cursor-pointer">
           <ResponsiveContainer>
             <BarChart 
               data={monthlyIncidentData} 
-              margin={{ top: 20, right: 20, left: -20, bottom: 5 }}
-              barCategoryGap="20%"
+              margin={{ top: 20, right: 20, left: -10, bottom: 5 }}
+              onClick={handleBarClick}
             >
               <CartesianGrid vertical={false} strokeDasharray="3 3" />
               <XAxis
@@ -366,13 +367,13 @@ export function IncidentChart({
                   }}
               />
               <ChartLegend content={<ChartLegendContent />} />
-              <Bar yAxisId="left" dataKey="total" fill="var(--color-total)" radius={4} onClick={handleBarClick} cursor="pointer">
+              <Bar yAxisId="left" dataKey="total" fill="var(--color-total)" radius={4}>
                   <LabelList dataKey="total" position="top" offset={5} fontSize={12} />
               </Bar>
-              <Bar yAxisId="left" dataKey="resolved" fill="var(--color-resolved)" radius={4} onClick={handleBarClick} cursor="pointer">
+              <Bar yAxisId="left" dataKey="resolved" fill="var(--color-resolved)" radius={4}>
                   <LabelList dataKey="resolved" position="top" offset={5} fontSize={12} />
               </Bar>
-              <Bar yAxisId="left" dataKey="underReview" fill="var(--color-underReview)" radius={4} onClick={handleBarClick} cursor="pointer">
+              <Bar yAxisId="left" dataKey="underReview" fill="var(--color-underReview)" radius={4}>
                   <LabelList dataKey="underReview" position="top" offset={5} fontSize={12} />
               </Bar>
               <Line yAxisId="right" type="monotone" dataKey="avgClosure" stroke="var(--color-avgClosure)" strokeWidth={2} dot={{ r: 4 }}>
