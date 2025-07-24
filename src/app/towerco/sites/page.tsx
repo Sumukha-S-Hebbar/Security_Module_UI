@@ -33,6 +33,7 @@ import {
   Loader2,
   Eye,
   FileDown,
+  Users,
 } from 'lucide-react';
 import {
   Dialog,
@@ -651,6 +652,7 @@ export default function TowercoSitesPage() {
                         <TableHead>Site ID</TableHead>
                         <TableHead>Site Name</TableHead>
                         <TableHead>Agency</TableHead>
+                        <TableHead>Guards</TableHead>
                         <TableHead>Incidents</TableHead>
                     </TableRow>
                 </TableHeader>
@@ -684,6 +686,12 @@ export default function TowercoSitesPage() {
                                         </div>
                                     </TableCell>
                                     <TableCell>
+                                      <div className="flex items-center gap-2 font-medium">
+                                        <Users className="h-4 w-4 text-muted-foreground group-hover:text-accent-foreground" />
+                                        <span>{site.guards.length}</span>
+                                      </div>
+                                    </TableCell>
+                                    <TableCell>
                                         <div className="flex items-center gap-2 font-medium">
                                             <ShieldAlert className="h-4 w-4 text-muted-foreground group-hover:text-accent-foreground" />
                                             <span>{incidentsCount}</span>
@@ -694,7 +702,7 @@ export default function TowercoSitesPage() {
                         })
                     ) : (
                          <TableRow>
-                            <TableCell colSpan={4} className="text-center text-muted-foreground py-10 font-medium">
+                            <TableCell colSpan={5} className="text-center text-muted-foreground py-10 font-medium">
                                 No assigned sites found for the current filter.
                             </TableCell>
                         </TableRow>
