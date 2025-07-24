@@ -30,7 +30,7 @@
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
     --header-background: 216 42% 18%;
-    --header-foreground: 210 20% 98%;
+    --header-foreground: 210 60% 98%;
   }
 
   .dark {
@@ -57,7 +57,7 @@
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
     --header-background: 216 42% 18%;
-    --header-foreground: 0 0% 98%;
+    --header-foreground: 210 60% 98%;
   }
 }
 
