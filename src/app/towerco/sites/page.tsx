@@ -564,7 +564,7 @@ export default function TowercoSitesPage() {
                     />
                   </div>
                   <DialogFooter>
-                    <Button type="submit" disabled={isAddingSite}>
+                    <Button type="submit" disabled={isAddingSite} className="bg-[#00B4D8] hover:bg-[#00B4D8]/90">
                       {isAddingSite ? (
                         <>
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />{' '}

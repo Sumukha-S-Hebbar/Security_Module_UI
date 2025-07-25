@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useMemo, useEffect, useRef, Fragment } from 'react';
@@ -479,7 +480,7 @@ export default function TowercoAgenciesPage() {
                                         )}
                                     />
                                     <DialogFooter>
-                                        <Button type="submit" disabled={isAddingAgency}>
+                                        <Button type="submit" disabled={isAddingAgency} className="bg-[#00B4D8] hover:bg-[#00B4D8]/90">
                                         {isAddingAgency ? (
                                             <>
                                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
