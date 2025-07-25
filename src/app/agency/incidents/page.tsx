@@ -220,7 +220,7 @@ export default function AgencyIncidentsPage() {
               />
             </div>
             <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-              <SelectTrigger className="w-full sm:w-[180px] font-medium">
+              <SelectTrigger className="w-full sm:w-[180px] font-medium hover:bg-accent hover:text-accent-foreground">
                 <SelectValue placeholder="Filter by status" />
               </SelectTrigger>
               <SelectContent>
@@ -231,7 +231,7 @@ export default function AgencyIncidentsPage() {
               </SelectContent>
             </Select>
             <Select value={selectedMonth} onValueChange={(value) => setSelectedMonth(value)}>
-              <SelectTrigger className="w-full sm:w-[180px] font-medium">
+              <SelectTrigger className="w-full sm:w-[180px] font-medium hover:bg-accent hover:text-accent-foreground">
                 <SelectValue placeholder="Filter by month" />
               </SelectTrigger>
               <SelectContent>
@@ -250,7 +250,7 @@ export default function AgencyIncidentsPage() {
                 <Button
                   variant={'outline'}
                   className={cn(
-                    'w-full sm:w-[240px] justify-start text-left font-medium',
+                    'w-full sm:w-[240px] justify-start text-left font-medium hover:bg-accent hover:text-accent-foreground',
                     !selectedDate && 'text-muted-foreground'
                   )}
                 >

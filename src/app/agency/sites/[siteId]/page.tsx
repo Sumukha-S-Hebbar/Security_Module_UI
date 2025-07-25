@@ -40,6 +40,7 @@ export default function AgencySiteReportPage() {
   const siteId = params.siteId as string;
   const [selectedMonth, setSelectedMonth] = useState('all');
   const [selectedYear, setSelectedYear] = useState('all');
+  const [selectedStatus, setSelectedStatus] = useState('all');
 
   const site = sites.find((s) => s.id === siteId);
 
@@ -75,9 +76,10 @@ export default function AgencySiteReportPage() {
       const incidentDate = new Date(incident.incidentTime);
       const yearMatch = selectedYear === 'all' || incidentDate.getFullYear().toString() === selectedYear;
       const monthMatch = selectedMonth === 'all' || incidentDate.getMonth().toString() === selectedMonth;
-      return yearMatch && monthMatch;
+      const statusMatch = selectedStatus === 'all' || incident.status.toLowerCase().replace(' ', '-') === selectedStatus;
+      return yearMatch && monthMatch && statusMatch;
     });
-  }, [siteIncidents, selectedYear, selectedMonth]);
+  }, [siteIncidents, selectedYear, selectedMonth, selectedStatus]);
 
 
   const handleDownloadReport = () => {
@@ -147,7 +149,7 @@ export default function AgencySiteReportPage() {
             <p className="text-muted-foreground font-medium">Detailed overview for {site.name}.</p>
           </div>
         </div>
-        <Button onClick={handleDownloadReport}>
+        <Button onClick={handleDownloadReport} className="bg-[#00B4D8] hover:bg-[#00B4D8]/90">
           <FileDown className="mr-2 h-4 w-4" />
           Download Full Report
         </Button>
@@ -231,9 +233,20 @@ export default function AgencySiteReportPage() {
                 <CardDescription className="font-medium">A log of all emergency incidents reported at this site.</CardDescription>
               </div>
               <div className="flex items-center gap-2 flex-shrink-0">
+                <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+                    <SelectTrigger className="w-[180px] font-medium hover:bg-accent hover:text-accent-foreground">
+                        <SelectValue placeholder="Filter by status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all" className="font-medium">All Statuses</SelectItem>
+                        <SelectItem value="active" className="font-medium">Active</SelectItem>
+                        <SelectItem value="under-review" className="font-medium">Under Review</SelectItem>
+                        <SelectItem value="resolved" className="font-medium">Resolved</SelectItem>
+                    </SelectContent>
+                </Select>
                 {availableYears.length > 0 && (
                   <Select value={selectedYear} onValueChange={setSelectedYear}>
-                    <SelectTrigger className="w-[120px] font-medium">
+                    <SelectTrigger className="w-[120px] font-medium hover:bg-accent hover:text-accent-foreground">
                       <SelectValue placeholder="Select Year" />
                     </SelectTrigger>
                     <SelectContent>
@@ -247,7 +260,7 @@ export default function AgencySiteReportPage() {
                   </Select>
                 )}
                 <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-                  <SelectTrigger className="w-[140px] font-medium">
+                  <SelectTrigger className="w-[140px] font-medium hover:bg-accent hover:text-accent-foreground">
                     <SelectValue placeholder="Select Month" />
                   </SelectTrigger>
                   <SelectContent>

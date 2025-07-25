@@ -175,13 +175,13 @@ export default function AgencyGuardsPage() {
               <p className="text-muted-foreground font-medium">Add, view, and manage guard profiles and their assignments.</p>
             </div>
              <div className="flex items-center gap-2">
-                <Button variant="outline" onClick={handleDownloadTemplate}>
+                <Button variant="outline" onClick={handleDownloadTemplate} className="bg-[#00B4D8] hover:bg-[#00B4D8]/90 text-white">
                     <FileDown className="mr-2 h-4 w-4" />
                     Download Excel Template
                 </Button>
                 <Dialog open={isUploadDialogOpen} onOpenChange={setIsUploadDialogOpen}>
                     <DialogTrigger asChild>
-                        <Button>
+                        <Button className="bg-[#00B4D8] hover:bg-[#00B4D8]/90">
                             <Upload className="mr-2 h-4 w-4" />
                             Upload Excel
                         </Button>
@@ -220,7 +220,7 @@ export default function AgencyGuardsPage() {
                                     />
                                 </div>
                                 <DialogFooter>
-                                    <Button type="submit" disabled={isUploading}>
+                                    <Button type="submit" disabled={isUploading} className="bg-[#00B4D8] hover:bg-[#00B4D8]/90">
                                     {isUploading ? (
                                         <>
                                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -240,7 +240,7 @@ export default function AgencyGuardsPage() {
                 </Dialog>
                 <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
                     <DialogTrigger asChild>
-                        <Button variant="outline">
+                        <Button variant="outline" className="bg-[#00B4D8] hover:bg-[#00B4D8]/90 text-white">
                             <PlusCircle className="mr-2 h-4 w-4" />
                             Add Guard
                         </Button>
@@ -305,7 +305,7 @@ export default function AgencyGuardsPage() {
                                     )}
                                 />
                                 <DialogFooter>
-                                    <Button type="submit" disabled={isAdding}>
+                                    <Button type="submit" disabled={isAdding} className="bg-[#00B4D8] hover:bg-[#00B4D8]/90">
                                     {isAdding ? (
                                         <>
                                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -339,7 +339,7 @@ export default function AgencyGuardsPage() {
                   />
               </div>
               <Select value={selectedSiteFilter} onValueChange={setSelectedSiteFilter}>
-                  <SelectTrigger className="w-full sm:w-[180px] font-medium">
+                  <SelectTrigger className="w-full sm:w-[180px] font-medium hover:bg-accent hover:text-accent-foreground">
                       <SelectValue placeholder="Filter by site" />
                   </SelectTrigger>
                   <SelectContent>
@@ -352,7 +352,7 @@ export default function AgencyGuardsPage() {
                   </SelectContent>
               </Select>
               <Select value={selectedPatrollingOfficerFilter} onValueChange={setSelectedPatrollingOfficerFilter}>
-                  <SelectTrigger className="w-full sm:w-[180px] font-medium">
+                  <SelectTrigger className="w-full sm:w-[180px] font-medium hover:bg-accent hover:text-accent-foreground">
                       <SelectValue placeholder="Filter by Patrolling Officer" />
                   </SelectTrigger>
                   <SelectContent>

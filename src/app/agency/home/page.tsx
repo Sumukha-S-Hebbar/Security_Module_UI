@@ -1,7 +1,8 @@
 
+
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useRef } from 'react';
 import { incidents } from '@/lib/data/incidents';
 import { guards } from '@/lib/data/guards';
 import { sites } from '@/lib/data/sites';
@@ -42,6 +43,9 @@ const LOGGED_IN_AGENCY_ID = 'AGY01'; // Simulate logged-in agency
 
 export default function AgencyHomePage() {
   const router = useRouter();
+  const guardsRef = useRef<HTMLDivElement>(null);
+  const officersRef = useRef<HTMLDivElement>(null);
+  const sitesRef = useRef<HTMLDivElement>(null);
 
   const agencySiteIds = useMemo(() => {
     const agency = securityAgencies.find(a => a.id === LOGGED_IN_AGENCY_ID);
@@ -79,13 +83,23 @@ export default function AgencyHomePage() {
     return agencyPatrollingOfficers.find((p) => p.id === id);
   };
 
+  const handleDashboardCardClick = (refId: 'guards' | 'officers' | 'sites') => {
+    if (refId === 'guards') {
+      router.push('/agency/guards');
+    } else if (refId === 'officers') {
+      router.push('/agency/patrolling-officers');
+    } else if (refId === 'sites') {
+      router.push('/agency/sites');
+    }
+  };
+
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Agency Dashboard</h1>
-          <p className="text-muted-foreground">
+          <p className="text-muted-foreground font-medium">
             Welcome! Here's a high-level overview of your operations.
           </p>
         </div>
@@ -170,7 +184,7 @@ export default function AgencyHomePage() {
               </TableBody>
             </Table>
           ) : (
-            <p className="text-center py-4">
+            <p className="text-center py-4 font-medium">
               No active emergency incidents. All systems are normal.
             </p>
           )}
@@ -181,6 +195,7 @@ export default function AgencyHomePage() {
         guards={agencyGuards}
         sites={agencySites}
         patrollingOfficers={agencyPatrollingOfficers}
+        onCardClick={handleDashboardCardClick}
       />
 
       <IncidentStatusBreakdown incidents={agencyIncidents} />

@@ -172,7 +172,7 @@ export function IncidentStatusBreakdown({
         <div className="flex items-center gap-2">
             {availableYears.length > 0 && (
                 <Select value={selectedYear} onValueChange={setSelectedYear}>
-                  <SelectTrigger className="w-[120px] font-medium">
+                  <SelectTrigger className="w-[120px] font-medium hover:bg-accent hover:text-accent-foreground">
                     <SelectValue placeholder="Select Year" />
                   </SelectTrigger>
                   <SelectContent>
@@ -186,7 +186,7 @@ export function IncidentStatusBreakdown({
                 </Select>
               )}
               <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-                <SelectTrigger className="w-[140px] font-medium">
+                <SelectTrigger className="w-[140px] font-medium hover:bg-accent hover:text-accent-foreground">
                   <SelectValue placeholder="Select Month" />
                 </SelectTrigger>
                 <SelectContent>

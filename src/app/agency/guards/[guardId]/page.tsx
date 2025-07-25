@@ -159,7 +159,7 @@ export default function AgencyGuardReportPage() {
             <p className="text-muted-foreground font-medium">Detailed overview for ${guard.name}.</p>
           </div>
         </div>
-        <Button onClick={handleDownloadReport}>
+        <Button onClick={handleDownloadReport} className="bg-[#00B4D8] hover:bg-[#00B4D8]/90">
           <FileDown className="mr-2 h-4 w-4" />
           Download Full Report
         </Button>
@@ -296,7 +296,7 @@ export default function AgencyGuardReportPage() {
            <div className="flex items-center gap-2 flex-shrink-0">
               {availableYears.length > 0 && (
                 <Select value={selectedYear} onValueChange={setSelectedYear}>
-                  <SelectTrigger className="w-[120px] font-medium">
+                  <SelectTrigger className="w-[120px] font-medium hover:bg-accent hover:text-accent-foreground">
                     <SelectValue placeholder="Select Year" />
                   </SelectTrigger>
                   <SelectContent>
@@ -310,7 +310,7 @@ export default function AgencyGuardReportPage() {
                 </Select>
               )}
               <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-                <SelectTrigger className="w-[140px] font-medium">
+                <SelectTrigger className="w-[140px] font-medium hover:bg-accent hover:text-accent-foreground">
                   <SelectValue placeholder="Select Month" />
                 </SelectTrigger>
                 <SelectContent>

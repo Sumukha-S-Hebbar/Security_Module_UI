@@ -425,7 +425,7 @@ export default function AgencySitesPage() {
               value={selectedPatrollingOfficerFilter}
               onValueChange={setSelectedPatrollingOfficerFilter}
             >
-              <SelectTrigger className="w-full sm:w-[220px] font-medium">
+              <SelectTrigger className="w-full sm:w-[220px] font-medium hover:bg-accent hover:text-accent-foreground">
                 <SelectValue placeholder="Filter by Patrolling Officer" />
               </SelectTrigger>
               <SelectContent>
@@ -441,7 +441,7 @@ export default function AgencySitesPage() {
               value={assignedSelectedRegion}
               onValueChange={handleAssignedRegionChange}
             >
-              <SelectTrigger className="w-full sm:w-[180px] font-medium">
+              <SelectTrigger className="w-full sm:w-[180px] font-medium hover:bg-accent hover:text-accent-foreground">
                 <SelectValue placeholder="Filter by region" />
               </SelectTrigger>
               <SelectContent>
@@ -458,7 +458,7 @@ export default function AgencySitesPage() {
               onValueChange={setAssignedSelectedCity}
               disabled={assignedSelectedRegion === 'all'}
             >
-              <SelectTrigger className="w-full sm:w-[180px] font-medium">
+              <SelectTrigger className="w-full sm:w-[180px] font-medium hover:bg-accent hover:text-accent-foreground">
                 <SelectValue placeholder="Filter by city" />
               </SelectTrigger>
               <SelectContent>
@@ -540,7 +540,7 @@ export default function AgencySitesPage() {
                   />
                 </div>
                 <Select value={unassignedSelectedRegion} onValueChange={handleUnassignedRegionChange}>
-                  <SelectTrigger className="w-full sm:w-[180px] font-medium">
+                  <SelectTrigger className="w-full sm:w-[180px] font-medium hover:bg-accent hover:text-accent-foreground">
                     <SelectValue placeholder="Filter by region" />
                   </SelectTrigger>
                   <SelectContent>
@@ -557,7 +557,7 @@ export default function AgencySitesPage() {
                   onValueChange={setUnassignedSelectedCity}
                   disabled={unassignedSelectedRegion === 'all'}
                 >
-                  <SelectTrigger className="w-full sm:w-[180px] font-medium">
+                  <SelectTrigger className="w-full sm:w-[180px] font-medium hover:bg-accent hover:text-accent-foreground">
                     <SelectValue placeholder="Filter by city" />
                   </SelectTrigger>
                   <SelectContent>
@@ -640,6 +640,7 @@ export default function AgencySitesPage() {
                           !geofencePerimeters[site.id] ||
                           !selectedGuards[site.id]?.length
                         }
+                        className="bg-[#00B4D8] hover:bg-[#00B4D8]/90"
                       >
                         Assign
                       </Button>
