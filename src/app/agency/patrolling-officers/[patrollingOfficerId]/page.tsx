@@ -232,11 +232,11 @@ export default function AgencyPatrollingOfficerReportPage() {
                     <div className="text-sm mt-2 space-y-2">
                       <div className="flex items-start gap-3">
                         <Phone className="h-4 w-4 mt-1 text-primary" />
-                        <a href={`tel:${patrollingOfficer.phone}`} className="hover:underline text-muted-foreground font-medium">{patrollingOfficer.phone}</a>
+                        <a href={`tel:${patrollingOfficer.phone}`} className="hover:underline font-medium">{patrollingOfficer.phone}</a>
                       </div>
                       <div className="flex items-start gap-3">
                         <Mail className="h-4 w-4 mt-1 text-primary" />
-                        <a href={`mailto:${patrollingOfficer.email}`} className="hover:underline text-muted-foreground font-medium">{patrollingOfficer.email}</a>
+                        <a href={`mailto:${patrollingOfficer.email}`} className="hover:underline font-medium">{patrollingOfficer.email}</a>
                       </div>
                     </div>
                      <div className="pt-4 mt-4 border-t">
