@@ -159,7 +159,7 @@ export default function IncidentReportPage() {
       return null;
     }
     return (
-      <div className="pt-6">
+      <div>
           <h4 className="font-semibold mb-4 text-lg">
               Incident Media Evidence
           </h4>
@@ -320,7 +320,6 @@ export default function IncidentReportPage() {
                      </div>
                 )}
                 
-
                 {incident.status === 'Active' && (
                   <div className="pt-6">
                     <Alert variant="destructive">
@@ -365,8 +364,8 @@ export default function IncidentReportPage() {
                         )}
                     </div>
                 ) : incident.status === 'Under Review' ? (
-                    <form onSubmit={handleResolveIncident}>
-                        <div className="pt-6 space-y-4">
+                    <form onSubmit={handleResolveIncident} className="pt-6">
+                        <div className="space-y-4">
                             <Separator />
                             <div className="pt-4 space-y-4">
                                 <h3 className="text-xl font-semibold">Resolve Incident</h3>

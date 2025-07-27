@@ -15,6 +15,7 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
+  CardFooter
 } from '@/components/ui/card';
 import {
   Table,
@@ -40,12 +41,14 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 const LOGGED_IN_AGENCY_ID = 'AGY01'; // Simulate logged-in agency
+const ACTIVE_INCIDENTS_PER_PAGE = 4;
 
 export default function AgencyHomePage() {
   const router = useRouter();
   const guardsRef = useRef<HTMLDivElement>(null);
   const officersRef = useRef<HTMLDivElement>(null);
   const sitesRef = useRef<HTMLDivElement>(null);
+  const [activeIncidentsCurrentPage, setActiveIncidentsCurrentPage] = useState(1);
 
   const agencySiteIds = useMemo(() => {
     const agency = securityAgencies.find(a => a.id === LOGGED_IN_AGENCY_ID);
@@ -69,6 +72,13 @@ export default function AgencyHomePage() {
   const activeEmergencies = useMemo(() => agencyIncidents.filter(
     (incident) => incident.status === 'Active'
   ), [agencyIncidents]);
+  
+  const paginatedActiveEmergencies = useMemo(() => {
+    const startIndex = (activeIncidentsCurrentPage - 1) * ACTIVE_INCIDENTS_PER_PAGE;
+    return activeEmergencies.slice(startIndex, startIndex + ACTIVE_INCIDENTS_PER_PAGE);
+  }, [activeEmergencies, activeIncidentsCurrentPage]);
+  
+  const totalActiveIncidentPages = Math.ceil(activeEmergencies.length / ACTIVE_INCIDENTS_PER_PAGE);
 
   const getGuardById = (id: string): Guard | undefined => {
     return agencyGuards.find((g) => g.id === id);
@@ -108,7 +118,7 @@ export default function AgencyHomePage() {
       <Card className="border-destructive bg-destructive/10">
         <CardHeader className="flex flex-row items-center gap-2">
           <AlertTriangle className="w-6 h-6 text-destructive" />
-          <CardTitle>Active Emergency Incidents</CardTitle>
+          <CardTitle>Active Emergency Incidents ({activeEmergencies.length})</CardTitle>
         </CardHeader>
         <CardContent>
           {activeEmergencies.length > 0 ? (
@@ -125,7 +135,7 @@ export default function AgencyHomePage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {activeEmergencies.map((incident) => {
+                {paginatedActiveEmergencies.map((incident) => {
                   const siteDetails = getSiteById(incident.siteId);
                   const guardDetails = getGuardById(incident.raisedByGuardId);
                   const patrollingOfficerDetails = getPatrollingOfficerById(incident.attendedByPatrollingOfficerId);
@@ -135,7 +145,7 @@ export default function AgencyHomePage() {
                     <TableRow 
                       key={incident.id}
                       onClick={() => router.push(`/agency/incidents/${incident.id}`)}
-                      className="cursor-pointer border-destructive/20"
+                      className="cursor-pointer border-destructive/20 hover:bg-destructive/20"
                     >
                       <TableCell>
                         <Button asChild variant="link" className="p-0 h-auto" onClick={(e) => e.stopPropagation()}>
@@ -189,6 +199,34 @@ export default function AgencyHomePage() {
             </p>
           )}
         </CardContent>
+         {activeEmergencies.length > 0 && (
+            <CardFooter>
+                 <div className="flex items-center justify-between w-full">
+                    <div className="text-sm text-destructive font-medium">
+                        Showing {paginatedActiveEmergencies.length} of {activeEmergencies.length} active incidents.
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setActiveIncidentsCurrentPage(prev => Math.max(prev - 1, 1))}
+                            disabled={activeIncidentsCurrentPage === 1}
+                        >
+                            Previous
+                        </Button>
+                        <span className="text-sm font-medium text-destructive">Page {activeIncidentsCurrentPage} of {totalActiveIncidentPages || 1}</span>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setActiveIncidentsCurrentPage(prev => Math.min(prev + 1, totalActiveIncidentPages))}
+                            disabled={activeIncidentsCurrentPage === totalActiveIncidentPages || totalActiveIncidentPages === 0}
+                        >
+                            Next
+                        </Button>
+                    </div>
+                </div>
+            </CardFooter>
+          )}
       </Card>
 
       <AgencyAnalyticsDashboard

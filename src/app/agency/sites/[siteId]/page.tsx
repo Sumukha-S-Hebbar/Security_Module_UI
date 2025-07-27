@@ -30,7 +30,7 @@ import { ArrowLeft, MapPin, UserCheck, ShieldAlert, FileDown, Fence, Users } fro
 import { useToast } from '@/hooks/use-toast';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useRouter } from 'next/navigation';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useRef } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export default function AgencySiteReportPage() {
@@ -41,6 +41,8 @@ export default function AgencySiteReportPage() {
   const [selectedMonth, setSelectedMonth] = useState('all');
   const [selectedYear, setSelectedYear] = useState('all');
   const [selectedStatus, setSelectedStatus] = useState('all');
+  const incidentsTableRef = useRef<HTMLDivElement>(null);
+
 
   const site = sites.find((s) => s.id === siteId);
 
@@ -88,6 +90,17 @@ export default function AgencySiteReportPage() {
       description: `Generating a detailed report for site ${site.name}.`,
     });
     // In a real app, this would trigger a download.
+  };
+
+  const handleScrollToIncidents = () => {
+    const element = incidentsTableRef.current;
+    if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        element.classList.add('highlight-row');
+        setTimeout(() => {
+            element.classList.remove('highlight-row');
+        }, 2000);
+    }
   };
   
   const getStatusIndicator = (status: Incident['status']) => {
@@ -188,11 +201,16 @@ export default function AgencySiteReportPage() {
               </div>
             </div>
              <div className="flex items-start gap-3">
-              <ShieldAlert className="h-5 w-5 mt-0.5 text-primary" />
-              <div>
-                <p className="font-semibold">Total Incidents</p>
-                <p className="font-medium text-muted-foreground">{siteIncidents.length}</p>
-              </div>
+               <button
+                  onClick={handleScrollToIncidents}
+                  className="flex items-start gap-3 text-left text-accent hover:underline"
+                >
+                <ShieldAlert className="h-5 w-5 mt-0.5 text-primary" />
+                <div>
+                  <p className="font-semibold">Total Incidents</p>
+                  <p className="font-medium text-base">{siteIncidents.length}</p>
+                </div>
+              </button>
             </div>
           </div>
         </CardContent>
@@ -226,7 +244,7 @@ export default function AgencySiteReportPage() {
                 )}
             </CardContent>
           </Card>
-          <Card>
+          <Card ref={incidentsTableRef}>
             <CardHeader className="flex flex-row items-start justify-between gap-4">
               <div className="flex-grow">
                 <CardTitle>Incidents at {site.name}</CardTitle>

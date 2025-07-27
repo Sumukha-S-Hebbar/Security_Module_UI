@@ -30,7 +30,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ArrowLeft, FileDown, Phone, Mail, MapPin, Users, ShieldAlert, Map, Clock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Progress } from '@/components/ui/progress';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useRef } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useRouter } from 'next/navigation';
 
@@ -43,6 +43,8 @@ export default function AgencyPatrollingOfficerReportPage() {
   const patrollingOfficerId = params.patrollingOfficerId as string;
   const [selectedMonth, setSelectedMonth] = useState('all');
   const [selectedYear, setSelectedYear] = useState('all');
+
+  const incidentsTableRef = useRef<HTMLDivElement>(null);
 
   const patrollingOfficer = patrollingOfficers.find((p) => p.id === patrollingOfficerId);
 
@@ -96,6 +98,17 @@ export default function AgencyPatrollingOfficerReportPage() {
       title: 'Report Generation Started',
       description: `Generating a detailed report for ${patrollingOfficer.name}.`,
     });
+  };
+
+  const handleScrollToIncidents = () => {
+    const element = incidentsTableRef.current;
+    if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        element.classList.add('highlight-row');
+        setTimeout(() => {
+            element.classList.remove('highlight-row');
+        }, 2000);
+    }
   };
 
   const getStatusIndicator = (status: Incident['status']) => {
@@ -204,6 +217,18 @@ export default function AgencyPatrollingOfficerReportPage() {
                 <p className="font-medium">{assignedSites.length}</p>
               </div>
             </div>
+            <div className="flex items-start gap-3">
+               <button
+                  onClick={handleScrollToIncidents}
+                  className="flex items-start gap-3 text-left text-accent hover:underline"
+                >
+                  <ShieldAlert className="mt-0.5 text-primary" />
+                  <div>
+                    <span className="font-semibold">Total Incidents</span>
+                    <p className="font-medium text-base">{assignedIncidents.length}</p>
+                  </div>
+                </button>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -301,7 +326,7 @@ export default function AgencyPatrollingOfficerReportPage() {
         </Card>
       </div>
 
-      <Card>
+      <Card ref={incidentsTableRef}>
         <CardHeader className="flex flex-row items-start justify-between gap-4">
           <div className="flex-grow">
             <CardTitle>Recent Incidents</CardTitle>

@@ -212,7 +212,7 @@ export default function AgencyIncidentReportPage() {
       return null;
     }
     return (
-      <div className="pt-6">
+      <div>
           <h4 className="font-semibold mb-4 text-lg">
               Incident Media Evidence
           </h4>
