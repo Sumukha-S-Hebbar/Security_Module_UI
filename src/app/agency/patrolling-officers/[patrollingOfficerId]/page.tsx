@@ -201,70 +201,70 @@ export default function AgencyPatrollingOfficerReportPage() {
         </Button>
       </div>
       
-       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-6">
-          <Card className="xl:col-span-1">
-              <CardHeader>
-                <div className="flex items-center gap-4">
-                  <Avatar className="h-16 w-16">
-                    <AvatarImage src={patrollingOfficer.avatar} alt={patrollingOfficer.name} />
-                    <AvatarFallback>{patrollingOfficer.name.charAt(0)}</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <CardTitle className="text-2xl">{patrollingOfficer.name}</CardTitle>
-                    <CardDescription>ID: {patrollingOfficer.id}</CardDescription>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-sm mt-2 space-y-2">
-                  <div className="flex items-start gap-3">
-                    <Phone className="h-4 w-4 mt-1 text-primary" />
-                    <a href={`tel:${patrollingOfficer.phone}`} className="hover:underline text-muted-foreground font-medium">{patrollingOfficer.phone}</a>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <Mail className="h-4 w-4 mt-1 text-primary" />
-                    <a href={`mailto:${patrollingOfficer.email}`} className="hover:underline text-muted-foreground font-medium">{patrollingOfficer.email}</a>
-                  </div>
-                </div>
-              </CardContent>
-          </Card>
-          
-          <Card className="xl:col-span-1">
-             <CardHeader>
-                <CardTitle>Assignments</CardTitle>
-                <CardDescription>Sites and incidents overview.</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Building2 className="h-5 w-5 text-primary"/>
-                        <p className="font-semibold">Total Sites</p>
+       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-1 space-y-6">
+              <Card>
+                  <CardHeader>
+                    <div className="flex items-center gap-4">
+                      <Avatar className="h-16 w-16">
+                        <AvatarImage src={patrollingOfficer.avatar} alt={patrollingOfficer.name} />
+                        <AvatarFallback>{patrollingOfficer.name.charAt(0)}</AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <CardTitle className="text-2xl">{patrollingOfficer.name}</CardTitle>
+                        <CardDescription>ID: {patrollingOfficer.id}</CardDescription>
                       </div>
-                      <p className="font-bold text-lg">{assignedSites.length}</p>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-sm mt-2 space-y-2">
+                      <div className="flex items-start gap-3">
+                        <Phone className="h-4 w-4 mt-1 text-primary" />
+                        <a href={`tel:${patrollingOfficer.phone}`} className="hover:underline text-muted-foreground font-medium">{patrollingOfficer.phone}</a>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <Mail className="h-4 w-4 mt-1 text-primary" />
+                        <a href={`mailto:${patrollingOfficer.email}`} className="hover:underline text-muted-foreground font-medium">{patrollingOfficer.email}</a>
+                      </div>
+                    </div>
+                  </CardContent>
+              </Card>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Operational Overview</CardTitle>
+                  <CardDescription>A summary of assignments and incidents.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Building2 className="h-5 w-5 text-primary" />
+                      <p className="font-semibold">Total Sites</p>
+                    </div>
+                    <p className="font-bold text-lg">{assignedSites.length}</p>
                   </div>
                   <div className="flex items-center justify-between">
-                      <button
-                        onClick={handleScrollToIncidents}
-                        className="flex items-center gap-2 text-accent hover:underline w-full justify-between"
-                      >
-                         <div className="flex items-center gap-2">
-                            <ShieldAlert className="h-5 w-5 text-primary"/>
-                            <p className="font-semibold">Total Incidents</p>
-                          </div>
-                          <p className="font-bold text-lg">{assignedIncidents.length}</p>
-                      </button>
+                    <button
+                      onClick={handleScrollToIncidents}
+                      className="flex items-center gap-2 text-accent hover:underline w-full justify-between"
+                    >
+                      <div className="flex items-center gap-2">
+                        <ShieldAlert className="h-5 w-5 text-primary" />
+                        <p className="font-semibold">Total Incidents</p>
+                      </div>
+                      <p className="font-bold text-lg">{assignedIncidents.length}</p>
+                    </button>
                   </div>
-              </CardContent>
-          </Card>
-
-          <Card className="xl:col-span-2">
+                </CardContent>
+              </Card>
+          </div>
+          <Card className="lg:col-span-2">
             <CardHeader>
               <CardTitle>Performance Metrics</CardTitle>
               <CardDescription className="font-medium">
                 Key performance indicators for this patrolling officer.
               </CardDescription>
             </CardHeader>
-            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center justify-items-center">
+            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center justify-items-center pt-6">
                 <div className="flex flex-col items-center gap-2">
                     <div className="w-32 h-32 relative">
                         <ResponsiveContainer width="100%" height="100%">
