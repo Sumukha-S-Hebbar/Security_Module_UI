@@ -3,8 +3,11 @@
 
 import type { Guard } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
 import { ShieldCheck, UserCheck } from 'lucide-react';
+import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
+
+const COLORS_CHECKIN = ['hsl(var(--chart-1))', 'hsl(var(--muted))'];
+const COLORS_SELFIE = ['hsl(var(--chart-2))', 'hsl(var(--muted))'];
 
 export function GuardPerformanceBreakdown({ guards }: { guards: Guard[] }) {
   const totalGuards = guards.length;
@@ -29,6 +32,16 @@ export function GuardPerformanceBreakdown({ guards }: { guards: Guard[] }) {
       ? (performanceData.totalSelfiesTaken / performanceData.totalSelfieRequests) * 100
       : 0;
 
+  const perimeterAccuracyData = [
+    { name: 'Accuracy', value: Math.round(avgPerimeterAccuracy) },
+    { name: 'Remaining', value: 100 - Math.round(avgPerimeterAccuracy) },
+  ];
+  
+  const selfieAccuracyData = [
+    { name: 'Accuracy', value: Math.round(avgSelfieAccuracy) },
+    { name: 'Remaining', value: 100 - Math.round(avgSelfieAccuracy) },
+  ];
+
   return (
     <Card>
       <CardHeader>
@@ -37,26 +50,67 @@ export function GuardPerformanceBreakdown({ guards }: { guards: Guard[] }) {
           Average performance metrics across all assigned guards.
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div>
-          <div className="flex justify-between items-center mb-1">
-            <h4 className="flex items-center gap-2 text-sm">
-                <ShieldCheck className="w-4 h-4 text-primary" />
-                Guard Check-in Accuracy
-            </h4>
-            <span className="text-muted-foreground">{avgPerimeterAccuracy.toFixed(1)}%</span>
-          </div>
-          <Progress value={avgPerimeterAccuracy} className="h-2" />
-        </div>
-        <div>
-          <div className="flex justify-between items-center mb-1">
-            <h4 className="flex items-center gap-2 text-sm">
-                <UserCheck className="w-4 h-4 text-primary" />
-                Selfie Check-in Accuracy
-            </h4>
-            <span className="text-muted-foreground">{avgSelfieAccuracy.toFixed(1)}%</span>
-          </div>
-          <Progress value={avgSelfieAccuracy} className="h-2" />
+      <CardContent>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center justify-items-center">
+            <div className="flex flex-col items-center gap-2">
+                <div className="w-32 h-32 relative">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                            <Pie
+                                data={perimeterAccuracyData}
+                                cx="50%"
+                                cy="50%"
+                                innerRadius="70%"
+                                outerRadius="85%"
+                                paddingAngle={0}
+                                dataKey="value"
+                                stroke="none"
+                            >
+                                {perimeterAccuracyData.map((entry, index) => (
+                                    <Cell key={`cell-${index}`} fill={COLORS_CHECKIN[index % COLORS_CHECKIN.length]} />
+                                ))}
+                            </Pie>
+                        </PieChart>
+                    </ResponsiveContainer>
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                        <span className="text-3xl font-bold">{Math.round(avgPerimeterAccuracy)}%</span>
+                    </div>
+                </div>
+                <p className="flex items-center gap-2 text-center font-medium">
+                  <ShieldCheck className="w-4 h-4 text-primary" />
+                  Guard Check-in Accuracy
+                </p>
+            </div>
+            
+            <div className="flex flex-col items-center gap-2">
+                <div className="w-32 h-32 relative">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                            <Pie
+                                data={selfieAccuracyData}
+                                cx="50%"
+                                cy="50%"
+                                innerRadius="70%"
+                                outerRadius="85%"
+                                paddingAngle={0}
+                                dataKey="value"
+                                stroke="none"
+                            >
+                                {selfieAccuracyData.map((entry, index) => (
+                                    <Cell key={`cell-${index}`} fill={COLORS_SELFIE[index % COLORS_SELFIE.length]} />
+                                ))}
+                            </Pie>
+                        </PieChart>
+                    </ResponsiveContainer>
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                        <span className="text-3xl font-bold">{Math.round(avgSelfieAccuracy)}%</span>
+                    </div>
+                </div>
+                 <p className="flex items-center gap-2 text-center font-medium">
+                  <UserCheck className="w-4 h-4 text-primary" />
+                  Selfie Check-in Accuracy
+                </p>
+            </div>
         </div>
       </CardContent>
     </Card>
