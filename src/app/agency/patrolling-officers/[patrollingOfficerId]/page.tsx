@@ -369,43 +369,43 @@ export default function AgencyPatrollingOfficerReportPage() {
                               {isExpanded && (
                                 <TableRow className="bg-muted/50 hover:bg-muted/50">
                                     <TableCell colSpan={4} className="p-0">
-                                      <div className="p-4 space-y-3">
-                                          <Table>
-                                              <TableHeader>
-                                                  <TableRow className="hover:bg-transparent border-b-primary/20">
-                                                      <TableHead>Guard ID</TableHead>
-                                                      <TableHead>Guard</TableHead>
-                                                      <TableHead>Contact</TableHead>
-                                                  </TableRow>
-                                              </TableHeader>
-                                              <TableBody>
-                                                  {siteGuards.map(guard => (
-                                                      <TableRow key={guard.id} className="hover:bg-transparent">
-                                                          <TableCell>
-                                                              <Button asChild variant="link" className="p-0 h-auto text-sm font-medium text-accent">
-                                                                <Link href={`/agency/guards/${guard.id}`}>{guard.id}</Link>
-                                                              </Button>
-                                                          </TableCell>
-                                                          <TableCell>
-                                                              <div className="flex items-center gap-3">
-                                                                  <Avatar className="h-10 w-10">
-                                                                      <AvatarImage src={guard.avatar} alt={guard.name} />
-                                                                      <AvatarFallback>{guard.name.charAt(0)}</AvatarFallback>
-                                                                  </Avatar>
-                                                                  <p className="font-semibold">{guard.name}</p>
-                                                              </div>
-                                                          </TableCell>
-                                                          <TableCell>
-                                                              <div className="flex items-center gap-2">
-                                                                  <Phone className="h-4 w-4" />
-                                                                  <a href={`tel:${guard.phone}`} className="hover:underline font-medium">{guard.phone}</a>
-                                                              </div>
-                                                          </TableCell>
-                                                      </TableRow>
-                                                  ))}
-                                              </TableBody>
-                                          </Table>
-                                      </div>
+                                        <div className="p-4">
+                                            <Table>
+                                                <TableHeader>
+                                                    <TableRow className="border-b-primary/20 hover:bg-transparent">
+                                                        <TableHead>Guard ID</TableHead>
+                                                        <TableHead>Guard</TableHead>
+                                                        <TableHead>Contact</TableHead>
+                                                    </TableRow>
+                                                </TableHeader>
+                                                <TableBody>
+                                                    {siteGuards.map(guard => (
+                                                        <TableRow key={guard.id} className="hover:bg-transparent">
+                                                            <TableCell>
+                                                                <Button asChild variant="link" className="p-0 h-auto text-sm font-medium text-accent">
+                                                                  <Link href={`/agency/guards/${guard.id}`}>{guard.id}</Link>
+                                                                </Button>
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                <div className="flex items-center gap-3">
+                                                                    <Avatar className="h-10 w-10">
+                                                                        <AvatarImage src={guard.avatar} alt={guard.name} />
+                                                                        <AvatarFallback>{guard.name.charAt(0)}</AvatarFallback>
+                                                                    </Avatar>
+                                                                    <p className="font-semibold">{guard.name}</p>
+                                                                </div>
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                <div className="flex items-center gap-2">
+                                                                    <Phone className="h-4 w-4" />
+                                                                    <a href={`tel:${guard.phone}`} className="hover:underline font-medium">{guard.phone}</a>
+                                                                </div>
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    ))}
+                                                </TableBody>
+                                            </Table>
+                                        </div>
                                     </TableCell>
                                 </TableRow>
                               )}
