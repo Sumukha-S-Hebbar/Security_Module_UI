@@ -311,7 +311,14 @@ export default function AgencyReportPage() {
   const getGuardById = (id: string) => guards.find(g => g.id === id);
 
   const handleScrollTo = (ref: React.RefObject<HTMLDivElement>) => {
-    ref.current?.scrollIntoView({ behavior: 'smooth' });
+    const element = ref.current;
+    if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        element.classList.add('highlight-row');
+        setTimeout(() => {
+            element.classList.remove('highlight-row');
+        }, 2000);
+    }
   };
   
   const handleIncidentsFilterAndScroll = (status: string) => {
