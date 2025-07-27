@@ -105,3 +105,8 @@
 .animate-slide-in {
   animation: slide-in 0.3s ease-out forwards;
 }
+
+.recharts-bar-rectangle:hover {
+  opacity: 0.8;
+  transition: opacity 0.2s;
+}
