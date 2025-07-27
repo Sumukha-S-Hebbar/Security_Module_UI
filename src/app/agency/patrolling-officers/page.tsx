@@ -9,6 +9,7 @@ import * as z from 'zod';
 import { patrollingOfficers } from '@/lib/data/patrolling-officers';
 import { guards } from '@/lib/data/guards';
 import { sites } from '@/lib/data/sites';
+import { incidents } from '@/lib/data/incidents';
 import type { PatrollingOfficer, Site } from '@/types';
 import {
   Card,
@@ -20,7 +21,7 @@ import {
 } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Users, Phone, Map, Upload, PlusCircle, Loader2, Search, Mail, Eye, FileDown } from 'lucide-react';
+import { Users, Phone, Map, Upload, PlusCircle, Loader2, Search, Mail, Eye, FileDown, ShieldAlert } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import {
   Dialog,
@@ -75,15 +76,14 @@ export default function AgencyPatrollingOfficersPage() {
 
     const agencySites = useMemo(() => sites.filter(site => site.agencyId === LOGGED_IN_AGENCY_ID), []);
 
-    const getAssignedGuardsCount = (patrollingOfficerId: string) => {
-        const sitesForPO = agencySites.filter(s => s.patrollingOfficerId === patrollingOfficerId);
-        const siteNamesForPO = new Set(sitesForPO.map(s => s.name));
-        return guards.filter(g => siteNamesForPO.has(g.site)).length;
-    };
-
     const getAssignedSitesForPO = (patrollingOfficerId: string) => {
         return agencySites.filter(s => s.patrollingOfficerId === patrollingOfficerId);
     }
+    
+    const getIncidentCountForPO = (patrollingOfficerId: string) => {
+      const officerSiteIds = new Set(getAssignedSitesForPO(patrollingOfficerId).map(s => s.id));
+      return incidents.filter(i => officerSiteIds.has(i.siteId)).length;
+    };
 
     const uploadForm = useForm<z.infer<typeof uploadFormSchema>>({
         resolver: zodResolver(uploadFormSchema),
@@ -308,14 +308,15 @@ export default function AgencyPatrollingOfficersPage() {
                         <TableHead>ID</TableHead>
                         <TableHead>Name</TableHead>
                         <TableHead>Contact Info</TableHead>
-                        <TableHead>Assignments</TableHead>
+                        <TableHead>Sites Assigned</TableHead>
+                        <TableHead>Incidents Occurred</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                         {filteredPatrollingOfficers.length > 0 ? (
                             filteredPatrollingOfficers.map((patrollingOfficer) => {
-                                const assignedGuardsCount = getAssignedGuardsCount(patrollingOfficer.id);
                                 const assignedSites = getAssignedSitesForPO(patrollingOfficer.id);
+                                const incidentCount = getIncidentCountForPO(patrollingOfficer.id);
                                 
                                 return (
                                 <TableRow 
@@ -352,18 +353,20 @@ export default function AgencyPatrollingOfficersPage() {
                                   <TableCell>
                                       <div className="flex items-center gap-2 text-sm">
                                           <Map className="h-4 w-4 flex-shrink-0 text-muted-foreground group-hover:text-accent-foreground" />
-                                          <span className="font-medium">{assignedSites.length} Sites</span>
+                                          <span className="font-medium">{assignedSites.length}</span>
                                       </div>
+                                  </TableCell>
+                                   <TableCell>
                                       <div className="flex items-center gap-2 text-sm">
-                                          <Users className="h-4 w-4 flex-shrink-0 text-muted-foreground group-hover:text-accent-foreground" />
-                                          <span className="font-medium">{assignedGuardsCount} Guards</span>
+                                          <ShieldAlert className="h-4 w-4 flex-shrink-0 text-muted-foreground group-hover:text-accent-foreground" />
+                                          <span className="font-medium">{incidentCount}</span>
                                       </div>
                                   </TableCell>
                                 </TableRow>
                             )})
                         ) : (
                             <TableRow>
-                              <TableCell colSpan={4} className="h-24 text-center text-muted-foreground font-medium">
+                              <TableCell colSpan={5} className="h-24 text-center text-muted-foreground font-medium">
                                   No patrolling officers found.
                               </TableCell>
                             </TableRow>
