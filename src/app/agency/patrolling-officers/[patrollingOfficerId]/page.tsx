@@ -224,7 +224,7 @@ export default function AgencyPatrollingOfficerReportPage() {
                       </Avatar>
                       <div>
                         <CardTitle className="text-2xl">{patrollingOfficer.name}</CardTitle>
-                        <CardDescription>ID: {patrollingOfficer.id}</CardDescription>
+                        <p className="font-medium text-foreground">ID: {patrollingOfficer.id}</p>
                       </div>
                     </div>
                   </CardHeader>
@@ -373,9 +373,9 @@ export default function AgencyPatrollingOfficerReportPage() {
                                             <Table>
                                                 <TableHeader>
                                                     <TableRow className="border-b-primary/20 hover:bg-transparent">
-                                                        <TableHead>Guard ID</TableHead>
-                                                        <TableHead>Guard</TableHead>
-                                                        <TableHead>Contact</TableHead>
+                                                        <TableHead className="text-foreground">Guard ID</TableHead>
+                                                        <TableHead className="text-foreground">Guard</TableHead>
+                                                        <TableHead className="text-foreground">Contact</TableHead>
                                                     </TableRow>
                                                 </TableHeader>
                                                 <TableBody>
