@@ -6,8 +6,15 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { ShieldCheck, UserCheck } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 
-const COLORS_CHECKIN = ['hsl(var(--chart-1))', 'hsl(var(--muted))'];
-const COLORS_SELFIE = ['hsl(var(--chart-2))', 'hsl(var(--muted))'];
+const getPerformanceColor = (value: number) => {
+  if (value >= 95) {
+    return 'hsl(var(--chart-2))'; // Green
+  } else if (value >= 65) {
+    return 'hsl(var(--chart-3))'; // Yellow
+  } else {
+    return 'hsl(var(--destructive))'; // Orange
+  }
+};
 
 export function GuardPerformanceBreakdown({ guards }: { guards: Guard[] }) {
   const totalGuards = guards.length;
@@ -31,16 +38,26 @@ export function GuardPerformanceBreakdown({ guards }: { guards: Guard[] }) {
     performanceData.totalSelfieRequests > 0
       ? (performanceData.totalSelfiesTaken / performanceData.totalSelfieRequests) * 100
       : 0;
+      
+  const roundedPerimeterAccuracy = Math.round(avgPerimeterAccuracy);
+  const roundedSelfieAccuracy = Math.round(avgSelfieAccuracy);
 
   const perimeterAccuracyData = [
-    { name: 'Accuracy', value: Math.round(avgPerimeterAccuracy) },
-    { name: 'Remaining', value: 100 - Math.round(avgPerimeterAccuracy) },
+    { name: 'Accuracy', value: roundedPerimeterAccuracy },
+    { name: 'Remaining', value: 100 - roundedPerimeterAccuracy },
   ];
   
   const selfieAccuracyData = [
-    { name: 'Accuracy', value: Math.round(avgSelfieAccuracy) },
-    { name: 'Remaining', value: 100 - Math.round(avgSelfieAccuracy) },
+    { name: 'Accuracy', value: roundedSelfieAccuracy },
+    { name: 'Remaining', value: 100 - roundedSelfieAccuracy },
   ];
+
+  const perimeterColor = getPerformanceColor(roundedPerimeterAccuracy);
+  const selfieColor = getPerformanceColor(roundedSelfieAccuracy);
+  
+  const COLORS_CHECKIN = [perimeterColor, 'hsl(var(--muted))'];
+  const COLORS_SELFIE = [selfieColor, 'hsl(var(--muted))'];
+
 
   return (
     <Card>
@@ -73,7 +90,9 @@ export function GuardPerformanceBreakdown({ guards }: { guards: Guard[] }) {
                         </PieChart>
                     </ResponsiveContainer>
                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                        <span className="text-3xl font-bold">{Math.round(avgPerimeterAccuracy)}%</span>
+                        <span className="text-3xl font-bold" style={{ color: perimeterColor }}>
+                            {roundedPerimeterAccuracy}%
+                        </span>
                     </div>
                 </div>
                 <p className="flex items-center gap-2 text-center font-medium">
@@ -103,7 +122,9 @@ export function GuardPerformanceBreakdown({ guards }: { guards: Guard[] }) {
                         </PieChart>
                     </ResponsiveContainer>
                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                        <span className="text-3xl font-bold">{Math.round(avgSelfieAccuracy)}%</span>
+                         <span className="text-3xl font-bold" style={{ color: selfieColor }}>
+                            {roundedSelfieAccuracy}%
+                         </span>
                     </div>
                 </div>
                  <p className="flex items-center gap-2 text-center font-medium">
