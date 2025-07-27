@@ -50,7 +50,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 const LOGGED_IN_ORG_ID = 'TCO01'; // Simulate logged-in user
-const ACTIVE_INCIDENTS_PER_PAGE = 5;
+const ACTIVE_INCIDENTS_PER_PAGE = 4;
 
 interface DashboardData {
   sites: Site[];
