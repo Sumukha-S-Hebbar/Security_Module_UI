@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useParams } from 'next/navigation';
@@ -173,93 +172,98 @@ export default function AgencyPatrollingOfficerReportPage() {
           Download Full Report
         </Button>
       </div>
-
-      <Card>
-        <CardHeader>
-          <div className="flex items-center gap-4">
-            <Avatar className="h-16 w-16">
-              <AvatarImage src={patrollingOfficer.avatar} alt={patrollingOfficer.name} />
-              <AvatarFallback>{patrollingOfficer.name.charAt(0)}</AvatarFallback>
-            </Avatar>
-            <div>
-              <CardTitle className="text-2xl">{patrollingOfficer.name}</CardTitle>
-              <CardDescription>ID: {patrollingOfficer.id}</CardDescription>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="text-sm mt-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="flex items-start gap-3">
-              <Phone className="h-5 w-5 mt-0.5 text-primary" />
-              <div>
-                <p className="font-semibold">Phone</p>
-                <a href={`tel:${patrollingOfficer.phone}`} className="hover:underline text-muted-foreground font-medium">{patrollingOfficer.phone}</a>
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <Mail className="h-5 w-5 mt-0.5 text-primary" />
-              <div>
-                <p className="font-semibold">Email</p>
-                <a href={`mailto:${patrollingOfficer.email}`} className="hover:underline text-muted-foreground font-medium">{patrollingOfficer.email}</a>
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <Users className="h-5 w-5 mt-0.5 text-primary" />
-              <div>
-                <p className="font-semibold">Total Guards</p>
-                <p className="font-medium">{assignedGuards.length}</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <MapPin className="h-5 w-5 mt-0.5 text-primary" />
-              <div>
-                <p className="font-semibold">Total Sites</p>
-                <p className="font-medium">{assignedSites.length}</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-               <button
-                  onClick={handleScrollToIncidents}
-                  className="flex items-start gap-3 text-left text-accent hover:underline"
-                >
-                  <ShieldAlert className="mt-0.5 text-primary" />
-                  <div>
-                    <span className="font-semibold">Total Incidents</span>
-                    <p className="font-medium text-base">{assignedIncidents.length}</p>
-                  </div>
-                </button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
       
-      <Card>
-        <CardHeader>
-          <CardTitle>Performance Metrics</CardTitle>
-           <CardDescription className="font-medium">
-            Key performance indicators for this patrolling officer.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <div className="flex justify-between items-center mb-1">
-              <h4 className="flex items-center gap-2 text-sm font-medium">
-                  <Map className="w-4 h-4 text-primary" />
-                  Site Visit Accuracy
-              </h4>
-              <span className="text-muted-foreground font-medium">{siteVisitAccuracy.toFixed(1)}%</span>
-            </div>
-            <Progress value={siteVisitAccuracy} className="h-2" />
-          </div>
-          <div className="flex items-center justify-between pt-2">
-              <h4 className="flex items-center gap-2 text-sm font-medium">
-                  <Clock className="w-4 h-4 text-primary" />
-                  Average Response Time
-              </h4>
-              <span className="text-lg font-medium">{averageResponseTime.toFixed(0)} mins</span>
-          </div>
-        </CardContent>
-      </Card>
+       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-6">
+          <Card className="xl:col-span-1">
+              <CardHeader>
+                <div className="flex items-center gap-4">
+                  <Avatar className="h-16 w-16">
+                    <AvatarImage src={patrollingOfficer.avatar} alt={patrollingOfficer.name} />
+                    <AvatarFallback>{patrollingOfficer.name.charAt(0)}</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <CardTitle className="text-2xl">{patrollingOfficer.name}</CardTitle>
+                    <CardDescription>ID: {patrollingOfficer.id}</CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-sm mt-2 space-y-2">
+                  <div className="flex items-start gap-3">
+                    <Phone className="h-4 w-4 mt-1 text-primary" />
+                    <a href={`tel:${patrollingOfficer.phone}`} className="hover:underline text-muted-foreground font-medium">{patrollingOfficer.phone}</a>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <Mail className="h-4 w-4 mt-1 text-primary" />
+                    <a href={`mailto:${patrollingOfficer.email}`} className="hover:underline text-muted-foreground font-medium">{patrollingOfficer.email}</a>
+                  </div>
+                </div>
+              </CardContent>
+          </Card>
+          
+          <Card className="xl:col-span-1">
+             <CardHeader>
+                <CardTitle>Assignments</CardTitle>
+                <CardDescription>Sites and guards managed by this officer.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <MapPin className="h-5 w-5 text-primary"/>
+                        <p className="font-semibold">Total Sites</p>
+                      </div>
+                      <p className="font-bold text-lg">{assignedSites.length}</p>
+                  </div>
+                   <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Users className="h-5 w-5 text-primary"/>
+                        <p className="font-semibold">Total Guards</p>
+                      </div>
+                      <p className="font-bold text-lg">{assignedGuards.length}</p>
+                  </div>
+                  <div className="flex items-center justify-between">
+                      <button
+                        onClick={handleScrollToIncidents}
+                        className="flex items-center gap-2 text-accent hover:underline w-full justify-between"
+                      >
+                         <div className="flex items-center gap-2">
+                            <ShieldAlert className="h-5 w-5 text-primary"/>
+                            <p className="font-semibold">Total Incidents</p>
+                          </div>
+                          <p className="font-bold text-lg">{assignedIncidents.length}</p>
+                      </button>
+                  </div>
+              </CardContent>
+          </Card>
+
+          <Card className="xl:col-span-2">
+            <CardHeader>
+              <CardTitle>Performance Metrics</CardTitle>
+              <CardDescription className="font-medium">
+                Key performance indicators for this patrolling officer.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="grid grid-cols-1 md:grid-cols-2 items-center gap-4">
+              <div className="space-y-4">
+                <div className="flex justify-between items-center mb-1">
+                  <h4 className="flex items-center gap-2 text-sm font-medium">
+                      <Map className="w-4 h-4 text-primary" />
+                      Site Visit Accuracy
+                  </h4>
+                  <span className="text-muted-foreground font-medium">{siteVisitAccuracy.toFixed(1)}%</span>
+                </div>
+                <Progress value={siteVisitAccuracy} className="h-2" />
+              </div>
+              <div className="flex items-center justify-center gap-2 pt-2">
+                  <Clock className="w-10 h-10 text-primary" />
+                  <div>
+                      <h4 className="text-sm font-medium">Avg. Response Time</h4>
+                      <p className="text-3xl font-bold">{averageResponseTime.toFixed(0)} <span className="text-lg text-muted-foreground font-medium">mins</span></p>
+                  </div>
+              </div>
+            </CardContent>
+          </Card>
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
@@ -299,7 +303,7 @@ export default function AgencyPatrollingOfficerReportPage() {
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2"><Users className="h-5 w-5"/>Guards managed by him</CardTitle>
+            <CardTitle className="flex items-center gap-2"><Users className="h-5 w-5"/>Guards Managed</CardTitle>
           </CardHeader>
           <CardContent>
             {assignedGuards.length > 0 ? (

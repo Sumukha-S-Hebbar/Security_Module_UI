@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useParams } from 'next/navigation';
@@ -156,7 +155,7 @@ export default function AgencyGuardReportPage() {
           </Button>
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Security Guard Report</h1>
-            <p className="text-muted-foreground font-medium">Detailed overview for ${guard.name}.</p>
+            <p className="text-muted-foreground font-medium">Detailed overview for {guard.name}.</p>
           </div>
         </div>
         <Button onClick={handleDownloadReport} className="bg-[#00B4D8] hover:bg-[#00B4D8]/90">
@@ -164,53 +163,59 @@ export default function AgencyGuardReportPage() {
           Download Full Report
         </Button>
       </div>
-
-      <Card>
-        <CardHeader>
-          <div className="flex items-center gap-4">
-            <Avatar className="h-16 w-16">
-              <AvatarImage src={guard.avatar} alt={guard.name} />
-              <AvatarFallback>{guard.name.charAt(0)}</AvatarFallback>
-            </Avatar>
-            <div>
-              <CardTitle className="text-2xl">{guard.name}</CardTitle>
-              <CardDescription>ID: {guard.id}</CardDescription>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="text-sm mt-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="flex items-start gap-3">
-              <Phone className="h-5 w-5 mt-0.5 text-primary" />
-              <div>
-                <p className="font-semibold">Phone</p>
-                <a href={`tel:${guard.phone}`} className="hover:underline text-muted-foreground font-medium">{guard.phone}</a>
-              </div>
-            </div>
-            {site && (
-              <div className="flex items-start gap-3">
-                <MapPin className="h-5 w-5 mt-0.5 text-primary" />
-                <div>
-                  <p className="font-semibold">Assigned Site</p>
-                  <p className="text-muted-foreground font-medium">{site.name}</p>
-                </div>
-              </div>
-            )}
-            {patrollingOfficer && (
-              <div className="flex items-start gap-3">
-                <UserCheck className="h-5 w-5 mt-0.5 text-primary" />
-                <div>
-                  <p className="font-semibold">Patrolling Officer</p>
-                  <p className="text-muted-foreground font-medium">{patrollingOfficer.name}</p>
-                </div>
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
       
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <Card className="lg:col-span-1">
+          <CardHeader>
+            <div className="flex items-center gap-4">
+              <Avatar className="h-16 w-16">
+                <AvatarImage src={guard.avatar} alt={guard.name} />
+                <AvatarFallback>{guard.name.charAt(0)}</AvatarFallback>
+              </Avatar>
+              <div>
+                <CardTitle className="text-2xl">{guard.name}</CardTitle>
+                <CardDescription>ID: {guard.id}</CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="text-sm mt-2 space-y-4">
+              <div className="flex items-start gap-3">
+                <Phone className="h-5 w-5 mt-0.5 text-primary" />
+                <div>
+                  <p className="font-semibold">Phone</p>
+                  <a href={`tel:${guard.phone}`} className="hover:underline text-muted-foreground font-medium">{guard.phone}</a>
+                </div>
+              </div>
+              {site && (
+                <div className="flex items-start gap-3">
+                  <MapPin className="h-5 w-5 mt-0.5 text-primary" />
+                  <div>
+                    <p className="font-semibold">Assigned Site</p>
+                    <p className="text-muted-foreground font-medium">{site.name}</p>
+                     <Button asChild variant="link" className="p-0 h-auto font-medium -ml-1">
+                      <Link href={`/agency/sites/${site.id}`}>View Site Report</Link>
+                    </Button>
+                  </div>
+                </div>
+              )}
+              {patrollingOfficer && (
+                <div className="flex items-start gap-3">
+                  <UserCheck className="h-5 w-5 mt-0.5 text-primary" />
+                  <div>
+                    <p className="font-semibold">Patrolling Officer</p>
+                    <p className="text-muted-foreground font-medium">{patrollingOfficer.name}</p>
+                    <Button asChild variant="link" className="p-0 h-auto font-medium -ml-1">
+                      <Link href={`/agency/patrolling-officers/${patrollingOfficer.id}`}>View Officer Report</Link>
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="lg:col-span-2">
           <CardHeader>
               <CardTitle className="flex items-center gap-2"><ShieldCheck className="h-5 w-5"/>Performance Metrics</CardTitle>
           </CardHeader>
@@ -267,24 +272,6 @@ export default function AgencyGuardReportPage() {
               </div>
           </CardContent>
         </Card>
-        
-        {site && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2"><MapPin className="h-5 w-5"/>Site Details</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <p className="font-medium">{site.name}</p>
-              <p className="text-sm text-muted-foreground font-medium">{site.address}</p>
-              {site.geofencePerimeter && (
-                <p className="text-sm text-muted-foreground font-medium">Geofence: {site.geofencePerimeter}m</p>
-              )}
-              <Button asChild variant="link" className="p-0 h-auto font-medium">
-                <Link href={`/agency/sites/${site.id}`}>View Full Site Report</Link>
-              </Button>
-            </CardContent>
-          </Card>
-        )}
       </div>
 
       <Card>
