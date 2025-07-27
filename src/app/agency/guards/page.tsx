@@ -83,10 +83,8 @@ export default function AgencyGuardsPage() {
 
   const agencyGuards = useMemo(() => guards.filter(guard => agencySiteNames.has(guard.site)), [agencySiteNames]);
 
-  const agencyPatrollingOfficers = useMemo(() => {
-    const poIds = new Set(agencySites.map(s => s.patrollingOfficerId).filter(Boolean));
-    return patrollingOfficers.filter(po => poIds.has(po.id));
-  }, [agencySites]);
+  // Use all patrolling officers for lookup, not just ones already assigned to a site.
+  const agencyPatrollingOfficers = patrollingOfficers;
 
   const getPatrollingOfficerForGuard = (guard: Guard): PatrollingOfficer | undefined => {
     const site = agencySites.find(s => s.name === guard.site);
@@ -157,7 +155,7 @@ export default function AgencyGuardsPage() {
 
       return matchesSearch && matchesSite && matchesPatrollingOfficer;
     });
-  }, [searchQuery, selectedSiteFilter, selectedPatrollingOfficerFilter, agencyGuards]);
+  }, [searchQuery, selectedSiteFilter, selectedPatrollingOfficerFilter, agencyGuards, getPatrollingOfficerForGuard]);
   
   const guardIncidentCounts = useMemo(() => {
     return incidents.reduce((acc, incident) => {
@@ -170,7 +168,7 @@ export default function AgencyGuardsPage() {
   const uniquePatrollingOfficers = useMemo(() => {
     const poIds = new Set(agencyGuards.map(g => getPatrollingOfficerForGuard(g)?.id).filter(Boolean));
     return agencyPatrollingOfficers.filter(po => poIds.has(po.id));
-  }, [agencyGuards, agencyPatrollingOfficers]);
+  }, [agencyGuards, agencyPatrollingOfficers, getPatrollingOfficerForGuard]);
 
   return (
     <>
@@ -455,5 +453,3 @@ export default function AgencyGuardsPage() {
     </>
   );
 }
-
-    
