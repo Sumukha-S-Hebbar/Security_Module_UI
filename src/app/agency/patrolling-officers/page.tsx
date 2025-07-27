@@ -20,7 +20,7 @@ import {
 } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Users, Phone, Map, Upload, PlusCircle, Loader2, Search, Mail, Eye, FileDown, ShieldAlert, ChevronDown } from 'lucide-react';
+import { Users, Phone, Building2, Upload, PlusCircle, Loader2, Search, Mail, Eye, FileDown, ShieldAlert, ChevronDown } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import {
   Dialog,
@@ -369,7 +369,7 @@ export default function AgencyPatrollingOfficersPage() {
                                         onClick={(e) => handleExpandClick(e, patrollingOfficer.id)}
                                         disabled={assignedSites.length === 0}
                                         >
-                                            <Map className="h-4 w-4" />
+                                            <Building2 className="h-4 w-4" />
                                             {assignedSites.length}
                                             {assignedSites.length > 0 && (
                                                 <ChevronDown className={cn("h-4 w-4 transition-transform", isExpanded && "rotate-180")} />
