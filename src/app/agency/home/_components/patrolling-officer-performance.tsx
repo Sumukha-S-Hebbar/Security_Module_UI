@@ -156,14 +156,17 @@ export function PatrollingOfficerPerformance({
             </p>
         </div>
         
-        <div className="flex flex-col items-center gap-2 w-full">
-            <div className="flex items-center justify-between pt-2 w-full max-w-[200px]">
-                <h4 className="flex items-center gap-2 text-sm font-medium">
-                    <Clock className="w-4 h-4 text-primary" />
-                    Avg. Response Time
-                </h4>
-                <span className="text-lg text-foreground font-semibold">{performanceData.avgResponseTime.toFixed(0)} mins</span>
+        <div className="flex flex-col items-center gap-2">
+            <div className="flex items-center gap-4 text-foreground">
+                <Clock className="w-12 h-12 text-primary" />
+                <div>
+                    <span className="text-4xl font-bold">{performanceData.avgResponseTime.toFixed(0)}</span>
+                    <span className="text-lg text-muted-foreground ml-1">mins</span>
+                </div>
             </div>
+            <p className="text-center font-medium mt-2">
+                Average Response Time
+            </p>
         </div>
       </CardContent>
     </Card>
