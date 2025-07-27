@@ -288,7 +288,7 @@ export function AgencyIncidentChart({
                 tick={{ fill: '#2F2F2F' }}
               />
               <ChartTooltip
-                cursor={false}
+                cursor={true}
                 content={({ active, payload, label }) => {
                     if (active && payload && payload.length) {
                         const data = payload[0].payload;
