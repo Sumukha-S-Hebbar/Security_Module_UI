@@ -83,21 +83,21 @@ const LOGGED_IN_ORG_ID = 'TCO01'; // Simulate logged-in user
 const chartConfig = {
   incidentResolutionRate: {
     label: 'Incident Resolution',
-    color: 'hsl(var(--chart-1))',
-  },
-  guardPerimeterAccuracy: {
-    label: 'Guard Check-in Accuracy',
-    color: 'hsl(var(--chart-2))',
-  },
-  guardSelfieAccuracy: {
-    label: 'Selfie Check-in Accuracy',
-    color: 'hsl(var(--chart-3))',
+    color: '#1B2A41',
   },
   officerSiteVisitRate: {
     label: 'Site Visit Accuracy',
-    color: 'hsl(var(--chart-5))',
+    color: '#3A506B',
   },
-   performance: {
+  guardPerimeterAccuracy: {
+    label: 'Guard Check-in Accuracy',
+    color: '#5C7595',
+  },
+  guardSelfieAccuracy: {
+    label: 'Selfie Check-in Accuracy',
+    color: '#8E9BAF',
+  },
+  performance: {
     label: 'Performance',
   },
 } satisfies ChartConfig;
