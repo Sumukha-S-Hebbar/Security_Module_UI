@@ -356,11 +356,11 @@ export default function AgencyIncidentReportPage() {
             )}
           </div>
         </CardHeader>
-        <CardContent className="space-y-6 divide-y">
-            <div className="pt-6 space-y-6">
+        <CardContent>
+            <div className="space-y-6 divide-y">
               {incident.status === 'Active' && (
-                 <form onSubmit={handleSaveIncidentDetails}>
-                    <Alert variant="default" className="text-left mb-6">
+                 <form onSubmit={handleSaveIncidentDetails} className="pt-6 space-y-6">
+                    <Alert variant="default" className="text-left">
                         <Info className="h-4 w-4" />
                         <AlertTitle>Incident is Active</AlertTitle>
                         <AlertDescription>
@@ -385,7 +385,7 @@ export default function AgencyIncidentReportPage() {
                       </div>
                    </div>
 
-                   <div className="pt-6 space-y-4">
+                   <div className="space-y-4">
                       <h3 className="text-xl font-semibold">Initial Incident Report</h3>
                        <div>
                         <Label htmlFor="incident-type" className="text-base">Incident Type</Label>
@@ -423,15 +423,15 @@ export default function AgencyIncidentReportPage() {
               )}
               
               {(incident.status === 'Under Review') && (
-                <>
-                  <div className="pt-6">
+                <div className="pt-6 space-y-6">
+                  <div>
                       <h4 className="font-semibold mb-2 text-lg">
                           Incident Summary
                       </h4>
                       <p className="text-muted-foreground">{incident.description}</p>
                   </div>
                   {renderMediaGallery()}
-                  <div className="pt-6">
+                  <div>
                       <Alert variant="default">
                         <Info className="h-4 w-4" />
                         <AlertTitle>Awaiting Resolution</AlertTitle>
@@ -440,13 +440,13 @@ export default function AgencyIncidentReportPage() {
                         </AlertDescription>
                       </Alert>
                   </div>
-                </>
+                </div>
               )}
 
               {incident.status === 'Resolved' && (
-                  <>
+                  <div className="pt-6 space-y-6">
                       {incident.description && (
-                        <div className="pt-6">
+                        <div>
                             <h4 className="font-semibold mb-2 text-lg">
                                 Incident Summary
                             </h4>
@@ -482,7 +482,7 @@ export default function AgencyIncidentReportPage() {
                               </div>
                           </div>
                       )}
-                  </>
+                  </div>
               )}
             </div>
         </CardContent>

@@ -306,101 +306,102 @@ export default function IncidentReportPage() {
             )}
           </div>
         </CardHeader>
-        <CardContent className="space-y-6 divide-y">
-            
-            <div className="pt-6 space-y-6">
+        <CardContent>
+            <div className="space-y-6 divide-y">
                 {incident.description && (
-                     <div>
-                        <h4 className="font-semibold mb-2 text-lg">
-                            Incident Summary
-                        </h4>
-                        <p className="text-muted-foreground">{incident.description}</p>
-                    </div>
+                     <div className="pt-6 space-y-6">
+                        <div>
+                          <h4 className="font-semibold mb-2 text-lg">
+                              Incident Summary
+                          </h4>
+                          <p className="text-muted-foreground">{incident.description}</p>
+                        </div>
+                        {renderMediaGallery()}
+                     </div>
                 )}
-                {renderMediaGallery()}
-            </div>
+                
 
-            {incident.status === 'Active' && (
-              <div className="pt-6">
-                <Alert variant="destructive">
-                  <Info className="h-4 w-4" />
-                  <AlertTitle>Incident Active</AlertTitle>
-                  <AlertDescription>
-                    This incident is active and awaiting review from the assigned security agency.
-                  </AlertDescription>
-                </Alert>
-              </div>
-            )}
-            
-            {incident.status === 'Resolved' ? (
-                 <div className="pt-6 space-y-6">
-                    {incident.resolutionNotes && (
-                        <div>
-                            <h4 className="font-semibold mb-2 text-lg">
-                                Resolution Notes
-                            </h4>
-                            <p className="text-muted-foreground">{incident.resolutionNotes}</p>
-                        </div>
-                    )}
-                     {incident.resolvedIncidentMediaUrl && incident.resolvedIncidentMediaUrl.length > 0 && (
-                        <div>
-                            <h4 className="font-semibold mb-4 text-lg">
-                                Resolution Media Evidence
-                            </h4>
-                            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
-                                {incident.resolvedIncidentMediaUrl.map((src, index) => (
-                                    <div key={index} className="relative aspect-video">
-                                    <Image
-                                        src={src}
-                                        alt={`Resolution evidence ${index + 1}`}
-                                        fill
-                                        className="rounded-md object-cover"
-                                        data-ai-hint={'report document'}
-                                    />
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-                 </div>
-            ) : incident.status === 'Under Review' ? (
-                <form onSubmit={handleResolveIncident}>
-                    <div className="pt-6 space-y-4">
-                        <Separator />
-                         <div className="pt-4 space-y-4">
-                            <h3 className="text-xl font-semibold">Resolve Incident</h3>
+                {incident.status === 'Active' && (
+                  <div className="pt-6">
+                    <Alert variant="destructive">
+                      <Info className="h-4 w-4" />
+                      <AlertTitle>Incident Active</AlertTitle>
+                      <AlertDescription>
+                        This incident is active and awaiting review from the assigned security agency.
+                      </AlertDescription>
+                    </Alert>
+                  </div>
+                )}
+                
+                {incident.status === 'Resolved' ? (
+                    <div className="pt-6 space-y-6">
+                        {incident.resolutionNotes && (
                             <div>
-                                <Label htmlFor="resolution-notes" className="text-base">Resolution Notes</Label>
-                                <Textarea 
-                                    id="resolution-notes" 
-                                    className="mt-2" 
-                                    placeholder="Describe the steps taken to resolve the incident, the final outcome, and any recommendations..." 
-                                    value={resolutionNotes}
-                                    onChange={(e) => setResolutionNotes(e.target.value)}
-                                    rows={5}
-                                />
+                                <h4 className="font-semibold mb-2 text-lg">
+                                    Resolution Notes
+                                </h4>
+                                <p className="text-muted-foreground">{incident.resolutionNotes}</p>
                             </div>
+                        )}
+                        {incident.resolvedIncidentMediaUrl && incident.resolvedIncidentMediaUrl.length > 0 && (
                             <div>
-                                <Label htmlFor="resolution-photos" className="text-base">Resolution Media Evidence (Optional)</Label>
-                                <Input 
-                                    id="resolution-photos" 
-                                    type="file" 
-                                    multiple
-                                    className="mt-2"
-                                    onChange={(e) => setResolutionFiles(e.target.files)}
-                                    accept="image/*,video/*,.pdf"
-                                />
+                                <h4 className="font-semibold mb-4 text-lg">
+                                    Resolution Media Evidence
+                                </h4>
+                                <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
+                                    {incident.resolvedIncidentMediaUrl.map((src, index) => (
+                                        <div key={index} className="relative aspect-video">
+                                        <Image
+                                            src={src}
+                                            alt={`Resolution evidence ${index + 1}`}
+                                            fill
+                                            className="rounded-md object-cover"
+                                            data-ai-hint={'report document'}
+                                        />
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
-                        </div>
+                        )}
                     </div>
-                    <CardFooter className="px-0 pt-6 justify-end">
-                        <Button type="submit" disabled={!resolutionNotes}>
-                            Mark as Resolved
-                        </Button>
-                    </CardFooter>
-                </form>
-            ) : null}
-
+                ) : incident.status === 'Under Review' ? (
+                    <form onSubmit={handleResolveIncident}>
+                        <div className="pt-6 space-y-4">
+                            <Separator />
+                            <div className="pt-4 space-y-4">
+                                <h3 className="text-xl font-semibold">Resolve Incident</h3>
+                                <div>
+                                    <Label htmlFor="resolution-notes" className="text-base">Resolution Notes</Label>
+                                    <Textarea 
+                                        id="resolution-notes" 
+                                        className="mt-2" 
+                                        placeholder="Describe the steps taken to resolve the incident, the final outcome, and any recommendations..." 
+                                        value={resolutionNotes}
+                                        onChange={(e) => setResolutionNotes(e.target.value)}
+                                        rows={5}
+                                    />
+                                </div>
+                                <div>
+                                    <Label htmlFor="resolution-photos" className="text-base">Resolution Media Evidence (Optional)</Label>
+                                    <Input 
+                                        id="resolution-photos" 
+                                        type="file" 
+                                        multiple
+                                        className="mt-2"
+                                        onChange={(e) => setResolutionFiles(e.target.files)}
+                                        accept="image/*,video/*,.pdf"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                        <CardFooter className="px-0 pt-6 justify-end">
+                            <Button type="submit" disabled={!resolutionNotes}>
+                                Mark as Resolved
+                            </Button>
+                        </CardFooter>
+                    </form>
+                ) : null}
+            </div>
         </CardContent>
       </Card>
     </div>
