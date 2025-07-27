@@ -58,6 +58,7 @@ export default function AgencyPatrollingOfficerReportPage() {
   const [expandedSiteId, setExpandedSiteId] = useState<string | null>(null);
 
   const incidentsTableRef = useRef<HTMLDivElement>(null);
+  const assignedSitesTableRef = useRef<HTMLDivElement>(null);
 
   const patrollingOfficer = patrollingOfficers.find((p) => p.id === patrollingOfficerId);
 
@@ -124,6 +125,17 @@ export default function AgencyPatrollingOfficerReportPage() {
 
   const handleScrollToIncidents = () => {
     const element = incidentsTableRef.current;
+    if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        element.classList.add('highlight-row');
+        setTimeout(() => {
+            element.classList.remove('highlight-row');
+        }, 2000);
+    }
+  };
+
+  const handleScrollToAssignedSites = () => {
+    const element = assignedSitesTableRef.current;
     if (element) {
         element.scrollIntoView({ behavior: 'smooth', block: 'start' });
         element.classList.add('highlight-row');
@@ -235,11 +247,14 @@ export default function AgencyPatrollingOfficerReportPage() {
                               <p className="font-medium text-muted-foreground">Total Guards</p>
                               <p className="font-bold text-lg">{assignedGuards.length}</p>
                           </div>
-                          <div className="flex flex-col items-center gap-1">
+                          <button
+                            onClick={handleScrollToAssignedSites}
+                            className="flex flex-col items-center gap-1 group"
+                          >
                               <Building2 className="h-8 w-8 text-primary" />
-                              <p className="font-medium text-muted-foreground">Total Sites</p>
-                              <p className="font-bold text-lg">{assignedSites.length}</p>
-                          </div>
+                              <p className="font-medium text-[#00B4D8] group-hover:underline">Total Sites</p>
+                              <p className="font-bold text-lg text-[#00B4D8] group-hover:underline">{assignedSites.length}</p>
+                          </button>
                           <button
                             onClick={handleScrollToIncidents}
                             className="flex flex-col items-center gap-1 group"
@@ -309,7 +324,7 @@ export default function AgencyPatrollingOfficerReportPage() {
           </Card>
       </div>
 
-      <Card>
+      <Card ref={assignedSitesTableRef}>
         <CardHeader>
           <CardTitle className="flex items-center gap-2"><MapPin className="h-5 w-5"/>Assigned Sites</CardTitle>
         </CardHeader>
