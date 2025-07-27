@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useMemo } from 'react';
@@ -10,6 +9,7 @@ import type { Site, Guard, PatrollingOfficer } from '@/types';
 import { guards } from '@/lib/data/guards';
 import { patrollingOfficers } from '@/lib/data/patrolling-officers';
 import { sites } from '@/lib/data/sites';
+import { incidents } from '@/lib/data/incidents';
 import {
   Table,
   TableBody,
@@ -36,7 +36,7 @@ import {
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { FileDown, Upload, Loader2, Search, PlusCircle } from 'lucide-react';
+import { FileDown, Upload, Loader2, Search, PlusCircle, ShieldAlert } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -49,7 +49,6 @@ import {
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import Link from 'next/link';
-import { Progress } from '@/components/ui/progress';
 import { useRouter } from 'next/navigation';
 
 
@@ -159,6 +158,13 @@ export default function AgencyGuardsPage() {
       return matchesSearch && matchesSite && matchesPatrollingOfficer;
     });
   }, [searchQuery, selectedSiteFilter, selectedPatrollingOfficerFilter, agencyGuards]);
+  
+  const guardIncidentCounts = useMemo(() => {
+    return incidents.reduce((acc, incident) => {
+      acc[incident.raisedByGuardId] = (acc[incident.raisedByGuardId] || 0) + 1;
+      return acc;
+    }, {} as {[key: string]: number});
+  }, [incidents]);
 
   const uniqueSites = useMemo(() => [...new Set(agencyGuards.map(g => g.site))], [agencyGuards]);
   const uniquePatrollingOfficers = useMemo(() => {
@@ -375,16 +381,14 @@ export default function AgencyGuardsPage() {
                   <TableHead>Guard</TableHead>
                   <TableHead>Site</TableHead>
                   <TableHead>Patrolling Officer</TableHead>
-                  <TableHead>Overall Compliance</TableHead>
+                  <TableHead>Incidents Occurred</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredGuards.length > 0 ? (
                   filteredGuards.map((guard) => {
                     const patrollingOfficer = getPatrollingOfficerForGuard(guard);
-                    const selfieAccuracy = guard.totalSelfieRequests > 0 ? Math.round(((guard.totalSelfieRequests - guard.missedSelfieCount) / guard.totalSelfieRequests) * 100) : 100;
-                    const perimeterAccuracy = guard.performance?.perimeterAccuracy || 0;
-                    const compliance = Math.round((perimeterAccuracy + selfieAccuracy) / 2);
+                    const incidentCount = guardIncidentCounts[guard.id] || 0;
                     
                     return (
                       <TableRow 
@@ -412,8 +416,8 @@ export default function AgencyGuardsPage() {
                         <TableCell className="font-medium">{patrollingOfficer?.name || <span className="text-muted-foreground group-hover:text-accent-foreground">Unassigned</span>}</TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2">
-                            <Progress value={compliance} className="w-24 h-2" />
-                            <span className="text-sm text-muted-foreground font-medium group-hover:text-accent-foreground">{compliance}%</span>
+                            <ShieldAlert className="h-4 w-4 text-muted-foreground group-hover:text-accent-foreground" />
+                            <span className="font-medium">{incidentCount}</span>
                           </div>
                         </TableCell>
                       </TableRow>
@@ -434,3 +438,5 @@ export default function AgencyGuardsPage() {
     </>
   );
 }
+
+    
