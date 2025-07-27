@@ -309,8 +309,6 @@ export default function AgencyPatrollingOfficersPage() {
                         <TableHead>Name</TableHead>
                         <TableHead>Contact Info</TableHead>
                         <TableHead>Assignments</TableHead>
-                        <TableHead>Site Visit Accuracy</TableHead>
-                        <TableHead>Avg. Response Time</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -318,9 +316,7 @@ export default function AgencyPatrollingOfficersPage() {
                             filteredPatrollingOfficers.map((patrollingOfficer) => {
                                 const assignedGuardsCount = getAssignedGuardsCount(patrollingOfficer.id);
                                 const assignedSites = getAssignedSitesForPO(patrollingOfficer.id);
-                                const visitedSites = assignedSites.filter(s => s.visited).length;
-                                const siteVisitAccuracy = assignedSites.length > 0 ? Math.round((visitedSites / assignedSites.length) * 100) : 100;
-
+                                
                                 return (
                                 <TableRow 
                                   key={patrollingOfficer.id}
@@ -363,20 +359,11 @@ export default function AgencyPatrollingOfficersPage() {
                                           <span className="font-medium">{assignedGuardsCount} Guards</span>
                                       </div>
                                   </TableCell>
-                                  <TableCell>
-                                      <div className="flex items-center gap-2">
-                                          <Progress value={siteVisitAccuracy} className="w-24 h-2" />
-                                          <span className="text-sm text-muted-foreground font-medium group-hover:text-accent-foreground">{siteVisitAccuracy}%</span>
-                                      </div>
-                                  </TableCell>
-                                  <TableCell>
-                                      <span className="text-sm font-medium">{patrollingOfficer.averageResponseTime} mins</span>
-                                  </TableCell>
                                 </TableRow>
                             )})
                         ) : (
                             <TableRow>
-                              <TableCell colSpan={6} className="h-24 text-center text-muted-foreground font-medium">
+                              <TableCell colSpan={4} className="h-24 text-center text-muted-foreground font-medium">
                                   No patrolling officers found.
                               </TableCell>
                             </TableRow>
