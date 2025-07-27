@@ -310,7 +310,7 @@ export default function TowercoHomePage() {
           {activeEmergencies.length > 0 && (
             <CardFooter>
                  <div className="flex items-center justify-between w-full">
-                    <div className="text-sm text-destructive-foreground font-medium">
+                    <div className="text-sm text-destructive font-medium">
                         Showing {paginatedActiveEmergencies.length} of {activeEmergencies.length} active incidents.
                     </div>
                     <div className="flex items-center gap-2">
@@ -322,7 +322,7 @@ export default function TowercoHomePage() {
                         >
                             Previous
                         </Button>
-                        <span className="text-sm font-medium text-destructive-foreground">Page {activeIncidentsCurrentPage} of {totalActiveIncidentPages || 1}</span>
+                        <span className="text-sm font-medium text-destructive">Page {activeIncidentsCurrentPage} of {totalActiveIncidentPages || 1}</span>
                         <Button
                             variant="outline"
                             size="sm"
