@@ -123,7 +123,14 @@ export default function SiteReportPage() {
   };
 
   const handleScrollToIncidents = () => {
-    incidentsTableRef.current?.scrollIntoView({ behavior: 'smooth' });
+    const element = incidentsTableRef.current;
+    if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        element.classList.add('highlight-row');
+        setTimeout(() => {
+            element.classList.remove('highlight-row');
+        }, 2000);
+    }
   };
   
   const getStatusIndicator = (status: Incident['status']) => {
@@ -411,3 +418,4 @@ export default function SiteReportPage() {
     </div>
   );
 }
+
