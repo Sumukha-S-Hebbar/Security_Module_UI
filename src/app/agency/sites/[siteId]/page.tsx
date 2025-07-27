@@ -8,7 +8,7 @@ import { sites } from '@/lib/data/sites';
 import { incidents } from '@/lib/data/incidents';
 import { guards } from '@/lib/data/guards';
 import { patrollingOfficers } from '@/lib/data/patrolling-officers';
-import type { Incident } from '@/types';
+import type { Incident, Guard } from '@/types';
 import {
   Card,
   CardContent,
@@ -26,12 +26,22 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, MapPin, UserCheck, ShieldAlert, FileDown, Fence, Users } from 'lucide-react';
+import { ArrowLeft, MapPin, UserCheck, ShieldAlert, FileDown, Fence, Users, Phone, Mail } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useRouter } from 'next/navigation';
 import { useMemo, useState, useRef } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartConfig } from '@/components/ui/chart';
+
+const chartConfig = {
+  incidents: {
+    label: "Incidents",
+    color: "#FF8200",
+  },
+} satisfies ChartConfig;
+
 
 export default function AgencySiteReportPage() {
   const params = useParams();
@@ -72,6 +82,9 @@ export default function AgencySiteReportPage() {
     if (years.size > 0) years.add(new Date().getFullYear().toString());
     return Array.from(years).sort((a, b) => parseInt(b) - parseInt(a));
   }, [siteIncidents]);
+  
+  const [selectedChartYear, setSelectedChartYear] = useState<string>(availableYears[0] || new Date().getFullYear().toString());
+
 
   const filteredIncidents = useMemo(() => {
     return siteIncidents.filter(incident => {
@@ -82,6 +95,26 @@ export default function AgencySiteReportPage() {
       return yearMatch && monthMatch && statusMatch;
     });
   }, [siteIncidents, selectedYear, selectedMonth, selectedStatus]);
+
+  const monthlyIncidentData = useMemo(() => {
+    const months = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+    ];
+    const monthlyData: { month: string; incidents: number }[] = months.map(
+      (month) => ({ month, incidents: 0 })
+    );
+
+    siteIncidents.forEach((incident) => {
+      const incidentDate = new Date(incident.incidentTime);
+      if (incidentDate.getFullYear().toString() === selectedChartYear) {
+        const monthIndex = incidentDate.getMonth();
+        monthlyData[monthIndex].incidents += 1;
+      }
+    });
+
+    return monthlyData;
+  }, [siteIncidents, selectedChartYear]);
 
 
   const handleDownloadReport = () => {
@@ -168,58 +201,74 @@ export default function AgencySiteReportPage() {
         </Button>
       </div>
 
-      <Card>
-        <CardHeader>
-          <div className="flex flex-wrap justify-between items-start gap-4">
-            <div>
-              <CardTitle className="text-2xl">{site.name}</CardTitle>
-              <CardDescription>ID: {site.id}</CardDescription>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="text-sm mt-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="flex items-start gap-3">
-              <MapPin className="h-5 w-5 mt-0.5 text-primary" />
-              <div>
-                <p className="font-semibold">Address</p>
-                <p className="font-medium text-muted-foreground">{site.address}</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <UserCheck className="h-5 w-5 mt-0.5 text-primary" />
-              <div>
-                <p className="font-semibold">Patrolling Officer</p>
-                <p className="font-medium text-muted-foreground">{patrollingOfficer ? patrollingOfficer.name : 'Unassigned'}</p>
-              </div>
-            </div>
-             <div className="flex items-start gap-3">
-              <Fence className="h-5 w-5 mt-0.5 text-primary" />
-              <div>
-                <p className="font-semibold">Geofence Perimeter</p>
-                <p className="font-medium text-muted-foreground">{site.geofencePerimeter ? `${site.geofencePerimeter}m` : 'Not set'}</p>
-              </div>
-            </div>
-             <div className="flex items-start gap-3">
-               <button
-                  onClick={handleScrollToIncidents}
-                  className="flex items-start gap-3 text-left text-accent hover:underline"
-                >
-                <ShieldAlert className="h-5 w-5 mt-0.5 text-primary" />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <Card>
+          <CardHeader>
+              <div className="flex flex-wrap justify-between items-start gap-4">
                 <div>
-                  <p className="font-semibold">Total Incidents</p>
-                  <p className="font-medium text-base">{siteIncidents.length}</p>
+                  <CardTitle className="text-2xl">{site.name}</CardTitle>
+                  <p className="font-medium">ID: {site.id}</p>
                 </div>
-              </button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-      
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              </div>
+          </CardHeader>
+          <CardContent>
+              <div className="text-sm mt-2 grid grid-cols-1 gap-4">
+                <div className="flex items-start gap-3">
+                  <MapPin className="h-5 w-5 mt-0.5 text-primary" />
+                  <div>
+                    <p className="font-semibold">Address</p>
+                    <p className="font-medium">{site.address}</p>
+                  </div>
+                </div>
+                 <div className="flex items-start gap-3">
+                  <Fence className="h-5 w-5 mt-0.5 text-primary" />
+                  <div>
+                    <p className="font-semibold">Geofence Perimeter</p>
+                    <p className="font-medium">{site.geofencePerimeter ? `${site.geofencePerimeter}m` : 'Not set'}</p>
+                  </div>
+                </div>
+                 <div className="flex items-start gap-3">
+                   <button
+                      onClick={handleScrollToIncidents}
+                      className="flex items-start gap-3 text-left text-accent hover:underline"
+                    >
+                    <ShieldAlert className="h-5 w-5 mt-0.5 text-primary" />
+                    <div>
+                      <p className="font-semibold">Total Incidents</p>
+                      <p className="font-medium text-base">{siteIncidents.length}</p>
+                    </div>
+                  </button>
+                </div>
+              </div>
+          </CardContent>
+        </Card>
+
+        {patrollingOfficer && (
           <Card>
             <CardHeader>
+                <CardTitle className="flex items-center gap-2"><UserCheck className="h-5 w-5"/>Patrolling Officer</CardTitle>
+                <CardDescription>Officer overseeing this site.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+                <div>
+                    <p className="font-semibold text-base">{patrollingOfficer.name}</p>
+                    <p className="font-medium">ID: {patrollingOfficer.id}</p>
+                </div>
+                <div className="text-sm space-y-2 pt-2 border-t">
+                  <div className="flex items-center gap-2"><Phone className="h-4 w-4" /> <a href={`tel:${patrollingOfficer.phone}`} className="hover:underline">{patrollingOfficer.phone}</a></div>
+                  <div className="flex items-center gap-2"><Mail className="h-4 w-4" /> <a href={`mailto:${patrollingOfficer.email}`} className="hover:underline">{patrollingOfficer.email}</a></div>
+                </div>
+                 <Button asChild variant="link" className="p-0 h-auto font-medium">
+                    <Link href={`/agency/patrolling-officers/${patrollingOfficer.id}`}>View Full Officer Report</Link>
+                </Button>
+            </CardContent>
+          </Card>
+        )}
+
+        <Card>
+            <CardHeader>
                 <CardTitle className="flex items-center gap-2"><Users className="h-5 w-5"/>Assigned Guards</CardTitle>
+                <CardDescription>Guards currently assigned to {site.name}.</CardDescription>
             </CardHeader>
             <CardContent>
                 {siteGuards.length > 0 ? (
@@ -243,94 +292,130 @@ export default function AgencySiteReportPage() {
                     <p className="text-sm text-muted-foreground font-medium">No guards are assigned to this site.</p>
                 )}
             </CardContent>
-          </Card>
-          <Card ref={incidentsTableRef}>
-            <CardHeader className="flex flex-row items-start justify-between gap-4">
-              <div className="flex-grow">
-                <CardTitle>Incidents at {site.name}</CardTitle>
-                <CardDescription className="font-medium">A log of all emergency incidents reported at this site.</CardDescription>
-              </div>
-              <div className="flex items-center gap-2 flex-shrink-0">
-                <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-                    <SelectTrigger className="w-[180px] font-medium hover:bg-accent hover:text-accent-foreground">
-                        <SelectValue placeholder="Filter by status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="all" className="font-medium">All Statuses</SelectItem>
-                        <SelectItem value="active" className="font-medium">Active</SelectItem>
-                        <SelectItem value="under-review" className="font-medium">Under Review</SelectItem>
-                        <SelectItem value="resolved" className="font-medium">Resolved</SelectItem>
-                    </SelectContent>
-                </Select>
-                {availableYears.length > 0 && (
-                  <Select value={selectedYear} onValueChange={setSelectedYear}>
-                    <SelectTrigger className="w-[120px] font-medium hover:bg-accent hover:text-accent-foreground">
-                      <SelectValue placeholder="Select Year" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all" className="font-medium">All Years</SelectItem>
-                      {availableYears.map((year) => (
-                        <SelectItem key={year} value={year} className="font-medium">
-                          {year}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-                <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-                  <SelectTrigger className="w-[140px] font-medium hover:bg-accent hover:text-accent-foreground">
-                    <SelectValue placeholder="Select Month" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all" className="font-medium">All Months</SelectItem>
-                    {Array.from({ length: 12 }, (_, i) => (
-                      <SelectItem key={i} value={i.toString()} className="font-medium">
-                        {new Date(0, i).toLocaleString('default', { month: 'long' })}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </CardHeader>
-            <CardContent>
-              {filteredIncidents.length > 0 ? (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Incident ID</TableHead>
-                      <TableHead>Date & Time</TableHead>
-                      <TableHead>Guard</TableHead>
-                      <TableHead>Status</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredIncidents.map((incident) => {
-                      const guard = getGuardById(incident.raisedByGuardId);
-                      return (
-                        <TableRow 
-                          key={incident.id}
-                          onClick={() => router.push(`/agency/incidents/${incident.id}`)}
-                          className="cursor-pointer hover:bg-accent hover:text-accent-foreground group"
-                        >
-                          <TableCell>
-                            <Button asChild variant="link" className="p-0 h-auto font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
-                              <Link href={`/agency/incidents/${incident.id}`}>{incident.id}</Link>
-                            </Button>
-                          </TableCell>
-                          <TableCell className="font-medium">{new Date(incident.incidentTime).toLocaleString()}</TableCell>
-                          <TableCell className="font-medium">{guard?.name || 'N/A'}</TableCell>
-                          <TableCell>{getStatusIndicator(incident.status)}</TableCell>
-                        </TableRow>
-                      )
-                    })}
-                  </TableBody>
-                </Table>
-              ) : (
-                <p className="text-muted-foreground text-center py-4 font-medium">No emergency incidents have been reported for this site {selectedYear !== 'all' || selectedMonth !== 'all' ? 'in the selected period' : ''}.</p>
-              )}
-            </CardContent>
-          </Card>
+        </Card>
       </div>
 
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between gap-4">
+            <div>
+                <CardTitle>Incident Trend</CardTitle>
+                <CardDescription>Monthly incident counts for {site.name}.</CardDescription>
+            </div>
+            <Select value={selectedChartYear} onValueChange={setSelectedChartYear}>
+                <SelectTrigger className="w-[120px] font-medium hover:bg-accent hover:text-accent-foreground">
+                    <SelectValue placeholder="Select Year" />
+                </SelectTrigger>
+                <SelectContent>
+                    {availableYears.map((year) => (
+                    <SelectItem key={year} value={year} className="font-medium">
+                        {year}
+                    </SelectItem>
+                    ))}
+                </SelectContent>
+            </Select>
+        </CardHeader>
+        <CardContent>
+            <ChartContainer config={chartConfig} className="h-[250px] w-full">
+                <ResponsiveContainer>
+                    <LineChart data={monthlyIncidentData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="month" fontSize={12} tickLine={false} axisLine={false} />
+                        <YAxis fontSize={12} tickLine={false} axisLine={false} allowDecimals={false} />
+                        <ChartTooltip content={<ChartTooltipContent />} />
+                        <Line type="monotone" dataKey="incidents" stroke="var(--color-incidents)" strokeWidth={2} dot={{ r: 4 }} />
+                    </LineChart>
+                </ResponsiveContainer>
+            </ChartContainer>
+        </CardContent>
+      </Card>
+      
+      <Card ref={incidentsTableRef}>
+        <CardHeader className="flex flex-row items-start justify-between gap-4">
+          <div className="flex-grow">
+            <CardTitle>Incidents at {site.name}</CardTitle>
+            <CardDescription className="font-medium">A log of all emergency incidents reported at this site.</CardDescription>
+          </div>
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+                <SelectTrigger className="w-[180px] font-medium hover:bg-accent hover:text-accent-foreground">
+                    <SelectValue placeholder="Filter by status" />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="all" className="font-medium">All Statuses</SelectItem>
+                    <SelectItem value="active" className="font-medium">Active</SelectItem>
+                    <SelectItem value="under-review" className="font-medium">Under Review</SelectItem>
+                    <SelectItem value="resolved" className="font-medium">Resolved</SelectItem>
+                </SelectContent>
+            </Select>
+            {availableYears.length > 0 && (
+              <Select value={selectedYear} onValueChange={setSelectedYear}>
+                <SelectTrigger className="w-[120px] font-medium hover:bg-accent hover:text-accent-foreground">
+                  <SelectValue placeholder="Select Year" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all" className="font-medium">All Years</SelectItem>
+                  {availableYears.map((year) => (
+                    <SelectItem key={year} value={year} className="font-medium">
+                      {year}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+            <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+              <SelectTrigger className="w-[140px] font-medium hover:bg-accent hover:text-accent-foreground">
+                <SelectValue placeholder="Select Month" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all" className="font-medium">All Months</SelectItem>
+                {Array.from({ length: 12 }, (_, i) => (
+                  <SelectItem key={i} value={i.toString()} className="font-medium">
+                    {new Date(0, i).toLocaleString('default', { month: 'long' })}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {filteredIncidents.length > 0 ? (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Incident ID</TableHead>
+                  <TableHead>Date & Time</TableHead>
+                  <TableHead>Guard</TableHead>
+                  <TableHead>Status</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredIncidents.map((incident) => {
+                  const guard = getGuardById(incident.raisedByGuardId);
+                  return (
+                    <TableRow 
+                      key={incident.id}
+                      onClick={() => router.push(`/agency/incidents/${incident.id}`)}
+                      className="cursor-pointer hover:bg-accent hover:text-accent-foreground group"
+                    >
+                      <TableCell>
+                        <Button asChild variant="link" className="p-0 h-auto font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
+                          <Link href={`/agency/incidents/${incident.id}`}>{incident.id}</Link>
+                        </Button>
+                      </TableCell>
+                      <TableCell className="font-medium">{new Date(incident.incidentTime).toLocaleString()}</TableCell>
+                      <TableCell className="font-medium">{guard?.name || 'N/A'}</TableCell>
+                      <TableCell>{getStatusIndicator(incident.status)}</TableCell>
+                    </TableRow>
+                  )
+                })}
+              </TableBody>
+            </Table>
+          ) : (
+            <p className="text-muted-foreground text-center py-4 font-medium">No emergency incidents have been reported for this site {selectedYear !== 'all' || selectedMonth !== 'all' ? 'in the selected period' : ''}.</p>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
+}
+
