@@ -227,36 +227,28 @@ export default function AgencyPatrollingOfficerReportPage() {
                         <a href={`mailto:${patrollingOfficer.email}`} className="hover:underline text-muted-foreground font-medium">{patrollingOfficer.email}</a>
                       </div>
                     </div>
-                    <div className="pt-4 mt-4 border-t">
+                     <div className="pt-4 mt-4 border-t">
                       <h4 className="font-semibold mb-4 text-lg">Operational Overview</h4>
-                      <div className="space-y-4">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <Building2 className="h-5 w-5 text-primary" />
-                            <p className="font-semibold">Total Sites</p>
+                        <div className="grid grid-cols-3 gap-4 text-center">
+                          <div className="flex flex-col items-center gap-1">
+                              <Building2 className="h-8 w-8 text-primary" />
+                              <p className="font-medium text-muted-foreground">Total Sites</p>
+                              <p className="font-bold text-lg">{assignedSites.length}</p>
                           </div>
-                          <p className="font-bold text-lg">{assignedSites.length}</p>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <Users className="h-5 w-5 text-primary" />
-                            <p className="font-semibold">Total Guards</p>
+                           <div className="flex flex-col items-center gap-1">
+                              <Users className="h-8 w-8 text-primary" />
+                              <p className="font-medium text-muted-foreground">Total Guards</p>
+                              <p className="font-bold text-lg">{assignedGuards.length}</p>
                           </div>
-                          <p className="font-bold text-lg">{assignedGuards.length}</p>
-                        </div>
-                        <div className="flex items-center justify-between">
                           <button
                             onClick={handleScrollToIncidents}
-                            className="flex items-center gap-2 text-accent hover:underline w-full justify-between"
+                            className="flex flex-col items-center gap-1 group"
                           >
-                            <div className="flex items-center gap-2">
-                              <ShieldAlert className="h-5 w-5 text-primary" />
-                              <p className="font-semibold">Total Incidents</p>
-                            </div>
-                            <p className="font-bold text-lg">{assignedIncidents.length}</p>
+                            <ShieldAlert className="h-8 w-8 text-primary" />
+                            <p className="font-medium text-[#00B4D8] group-hover:underline">Total Incidents</p>
+                            <p className="font-bold text-lg text-[#00B4D8] group-hover:underline">{assignedIncidents.length}</p>
                           </button>
                         </div>
-                      </div>
                     </div>
                   </CardContent>
               </Card>
@@ -476,4 +468,3 @@ export default function AgencyPatrollingOfficerReportPage() {
     </div>
   );
 }
-
