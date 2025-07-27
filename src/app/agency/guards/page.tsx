@@ -81,9 +81,8 @@ export default function AgencyGuardsPage() {
   const agencySites = useMemo(() => sites.filter(site => site.agencyId === LOGGED_IN_AGENCY_ID), []);
   
   const agencyGuards = useMemo(() => {
-    // Only include guards from sites that have a patrolling officer assigned.
-    const assignedSiteNames = new Set(agencySites.filter(s => s.patrollingOfficerId).map(s => s.name));
-    return guards.filter(guard => assignedSiteNames.has(guard.site));
+    const agencySiteNames = new Set(agencySites.map(s => s.name));
+    return guards.filter(guard => agencySiteNames.has(guard.site));
   }, [agencySites]);
 
   // Use all patrolling officers for lookup, not just ones already assigned to a site.
