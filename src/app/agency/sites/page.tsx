@@ -504,8 +504,18 @@ export default function AgencySitesPage() {
                       <p className="text-sm text-muted-foreground font-medium group-hover:text-accent-foreground">{site.address}</p>
                     </TableCell>
                     <TableCell className="font-medium">{patrollingOfficer?.name || 'N/A'}</TableCell>
-                    <TableCell className="font-medium">{site.guards.length}</TableCell>
-                    <TableCell className="font-medium">{incidentsCount}</TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2 font-medium">
+                        <Users className="h-4 w-4 text-muted-foreground group-hover:text-accent-foreground" />
+                        <span>{site.guards.length}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2 font-medium">
+                        <ShieldAlert className="h-4 w-4 text-muted-foreground group-hover:text-accent-foreground" />
+                        <span>{incidentsCount}</span>
+                      </div>
+                    </TableCell>
                   </TableRow>
                 )
               })
@@ -662,3 +672,4 @@ export default function AgencySitesPage() {
     </div>
   );
 }
+
