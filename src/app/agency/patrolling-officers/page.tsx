@@ -1,8 +1,7 @@
 
-
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, Fragment } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -21,7 +20,7 @@ import {
 } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Users, Phone, Map, Upload, PlusCircle, Loader2, Search, Mail, Eye, FileDown, ShieldAlert } from 'lucide-react';
+import { Users, Phone, Map, Upload, PlusCircle, Loader2, Search, Mail, Eye, FileDown, ShieldAlert, ChevronDown } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import {
   Dialog,
@@ -45,6 +44,7 @@ import {
 } from '@/components/ui/table';
 import { Progress } from '@/components/ui/progress';
 import { useRouter } from 'next/navigation';
+import { cn } from '@/lib/utils';
 
 const LOGGED_IN_AGENCY_ID = 'AGY01'; // Simulate logged-in agency
 
@@ -69,6 +69,8 @@ export default function AgencyPatrollingOfficersPage() {
     const [isUploading, setIsUploading] = useState(false);
     const [isAdding, setIsAdding] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
+    const [expandedOfficerId, setExpandedOfficerId] = useState<string | null>(null);
+
 
     // In a real app, you'd fetch officers belonging to the logged-in agency.
     // For this prototype, we'll assume all officers are available to the agency.
@@ -134,6 +136,15 @@ export default function AgencyPatrollingOfficersPage() {
             po.phone.includes(searchQuery)
         );
     }, [searchQuery, agencyPatrollingOfficers]);
+
+    const handleRowClick = (officerId: string) => {
+        router.push(`/agency/patrolling-officers/${officerId}`);
+    };
+
+    const handleExpandClick = (e: React.MouseEvent, officerId: string) => {
+        e.stopPropagation();
+        setExpandedOfficerId(prevId => prevId === officerId ? null : officerId);
+    }
 
     return (
       <>
@@ -317,52 +328,103 @@ export default function AgencyPatrollingOfficersPage() {
                             filteredPatrollingOfficers.map((patrollingOfficer) => {
                                 const assignedSites = getAssignedSitesForPO(patrollingOfficer.id);
                                 const incidentCount = getIncidentCountForPO(patrollingOfficer.id);
+                                const isExpanded = expandedOfficerId === patrollingOfficer.id;
                                 
                                 return (
-                                <TableRow 
-                                  key={patrollingOfficer.id}
-                                  onClick={() => router.push(`/agency/patrolling-officers/${patrollingOfficer.id}`)}
-                                  className="cursor-pointer hover:bg-accent hover:text-accent-foreground group"
-                                >
-                                  <TableCell>
-                                    <Button asChild variant="link" className="p-0 h-auto font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
-                                      <Link href={`/agency/patrolling-officers/${patrollingOfficer.id}`}>{patrollingOfficer.id}</Link>
-                                    </Button>
-                                  </TableCell>
-                                  <TableCell>
-                                    <div className="flex items-center gap-3">
-                                        <Avatar className="h-10 w-10">
-                                            <AvatarImage src={patrollingOfficer.avatar} alt={patrollingOfficer.name} />
-                                            <AvatarFallback>{patrollingOfficer.name.charAt(0)}</AvatarFallback>
-                                        </Avatar>
-                                        <p className="font-medium">{patrollingOfficer.name}</p>
-                                    </div>
-                                  </TableCell>
-                                  <TableCell>
-                                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                          <Phone className="h-4 w-4 flex-shrink-0" />
-                                          <a href={`tel:${patrollingOfficer.phone}`} className="hover:underline font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>{patrollingOfficer.phone}</a>
-                                      </div>
-                                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                          <Mail className="h-4 w-4 flex-shrink-0" />
-                                          <a href={`mailto:${patrollingOfficer.email}`} className="truncate hover:underline font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
-                                              {patrollingOfficer.email}
-                                          </a>
-                                      </div>
-                                  </TableCell>
-                                  <TableCell>
-                                      <div className="flex items-center gap-2 text-sm">
-                                          <Map className="h-4 w-4 flex-shrink-0 text-muted-foreground group-hover:text-accent-foreground" />
-                                          <span className="font-medium">{assignedSites.length}</span>
-                                      </div>
-                                  </TableCell>
-                                   <TableCell>
-                                      <div className="flex items-center gap-2 text-sm">
-                                          <ShieldAlert className="h-4 w-4 flex-shrink-0 text-muted-foreground group-hover:text-accent-foreground" />
-                                          <span className="font-medium">{incidentCount}</span>
-                                      </div>
-                                  </TableCell>
-                                </TableRow>
+                                <Fragment key={patrollingOfficer.id}>
+                                    <TableRow 
+                                    onClick={() => handleRowClick(patrollingOfficer.id)}
+                                    className="cursor-pointer hover:bg-accent hover:text-accent-foreground group"
+                                    >
+                                    <TableCell>
+                                        <Button asChild variant="link" className="p-0 h-auto font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
+                                        <Link href={`/agency/patrolling-officers/${patrollingOfficer.id}`}>{patrollingOfficer.id}</Link>
+                                        </Button>
+                                    </TableCell>
+                                    <TableCell>
+                                        <div className="flex items-center gap-3">
+                                            <Avatar className="h-10 w-10">
+                                                <AvatarImage src={patrollingOfficer.avatar} alt={patrollingOfficer.name} />
+                                                <AvatarFallback>{patrollingOfficer.name.charAt(0)}</AvatarFallback>
+                                            </Avatar>
+                                            <p className="font-medium">{patrollingOfficer.name}</p>
+                                        </div>
+                                    </TableCell>
+                                    <TableCell>
+                                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                            <Phone className="h-4 w-4 flex-shrink-0" />
+                                            <a href={`tel:${patrollingOfficer.phone}`} className="hover:underline font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>{patrollingOfficer.phone}</a>
+                                        </div>
+                                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                            <Mail className="h-4 w-4 flex-shrink-0" />
+                                            <a href={`mailto:${patrollingOfficer.email}`} className="truncate hover:underline font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
+                                                {patrollingOfficer.email}
+                                            </a>
+                                        </div>
+                                    </TableCell>
+                                    <TableCell>
+                                      <Button
+                                        variant="link"
+                                        className="p-0 h-auto flex items-center gap-2 text-accent group-hover:text-accent-foreground"
+                                        onClick={(e) => handleExpandClick(e, patrollingOfficer.id)}
+                                        disabled={assignedSites.length === 0}
+                                        >
+                                            <Map className="h-4 w-4" />
+                                            {assignedSites.length}
+                                            {assignedSites.length > 0 && (
+                                                <ChevronDown className={cn("h-4 w-4 transition-transform", isExpanded && "rotate-180")} />
+                                            )}
+                                        </Button>
+                                    </TableCell>
+                                    <TableCell>
+                                        <div className="flex items-center gap-2 text-sm">
+                                            <ShieldAlert className="h-4 w-4 flex-shrink-0 text-muted-foreground group-hover:text-accent-foreground" />
+                                            <span className="font-medium">{incidentCount}</span>
+                                        </div>
+                                    </TableCell>
+                                    </TableRow>
+                                    {isExpanded && (
+                                        <TableRow className="bg-muted/50 hover:bg-muted/50">
+                                            <TableCell colSpan={5} className="p-0">
+                                                <div className="p-4">
+                                                    <h4 className="font-semibold mb-2">Sites Assigned to {patrollingOfficer.name}</h4>
+                                                    {assignedSites.length > 0 ? (
+                                                        <Table>
+                                                            <TableHeader>
+                                                                <TableRow>
+                                                                    <TableHead>Site ID</TableHead>
+                                                                    <TableHead>Site Name</TableHead>
+                                                                    <TableHead>Address</TableHead>
+                                                                </TableRow>
+                                                            </TableHeader>
+                                                            <TableBody>
+                                                                {assignedSites.map((site) => (
+                                                                    <TableRow 
+                                                                    key={site.id} 
+                                                                    onClick={() => router.push(`/agency/sites/${site.id}`)}
+                                                                    className="cursor-pointer hover:bg-accent hover:text-accent-foreground group"
+                                                                    >
+                                                                        <TableCell>
+                                                                            <Button asChild variant="link" className="p-0 h-auto font-medium text-accent group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
+                                                                            <Link href={`/agency/sites/${site.id}`}>{site.id}</Link>
+                                                                            </Button>
+                                                                        </TableCell>
+                                                                        <TableCell>{site.name}</TableCell>
+                                                                        <TableCell>{site.address}</TableCell>
+                                                                    </TableRow>
+                                                                ))}
+                                                            </TableBody>
+                                                        </Table>
+                                                    ) : (
+                                                        <p className="text-sm text-muted-foreground text-center py-4">
+                                                            No sites are assigned to this officer.
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            </TableCell>
+                                        </TableRow>
+                                    )}
+                                </Fragment>
                             )})
                         ) : (
                             <TableRow>
@@ -378,4 +440,5 @@ export default function AgencyPatrollingOfficersPage() {
         </div>
       </>
     );
-}
+
+    
