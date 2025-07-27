@@ -280,10 +280,10 @@ export default function AgencySiteReportPage() {
                                     <AvatarFallback>{guard.name.charAt(0)}</AvatarFallback>
                                 </Avatar>
                                 <div>
-                                    <Button asChild variant="link" className="p-0 h-auto text-base font-medium">
-                                        <Link href={`/agency/guards/${guard.id}`}>{guard.name}</Link>
+                                    <p className="text-base font-semibold">{guard.name}</p>
+                                    <Button asChild variant="link" className="p-0 h-auto text-sm font-medium">
+                                        <Link href={`/agency/guards/${guard.id}`}>ID: {guard.id}</Link>
                                     </Button>
-                                    <p className="text-sm text-muted-foreground font-medium">ID: {guard.id}</p>
                                 </div>
                             </div>
                         ))}
@@ -418,4 +418,3 @@ export default function AgencySiteReportPage() {
     </div>
   );
 }
-
