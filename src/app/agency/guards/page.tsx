@@ -389,6 +389,7 @@ export default function AgencyGuardsPage() {
                   filteredGuards.map((guard) => {
                     const patrollingOfficer = getPatrollingOfficerForGuard(guard);
                     const incidentCount = guardIncidentCounts[guard.id] || 0;
+                    const site = agencySites.find(s => s.name === guard.site);
                     
                     return (
                       <TableRow 
@@ -412,8 +413,24 @@ export default function AgencyGuardsPage() {
                             </div>
                           </div>
                         </TableCell>
-                        <TableCell className="font-medium">{guard.site}</TableCell>
-                        <TableCell className="font-medium">{patrollingOfficer?.name || <span className="text-muted-foreground group-hover:text-accent-foreground">Unassigned</span>}</TableCell>
+                        <TableCell>
+                          {site ? (
+                            <Button asChild variant="link" className="p-0 h-auto font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
+                                <Link href={`/agency/sites/${site.id}`}>{guard.site}</Link>
+                            </Button>
+                           ) : (
+                            <span className="font-medium">{guard.site}</span>
+                           )}
+                        </TableCell>
+                        <TableCell>
+                            {patrollingOfficer ? (
+                               <Button asChild variant="link" className="p-0 h-auto font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
+                                   <Link href={`/agency/patrolling-officers/${patrollingOfficer.id}`}>{patrollingOfficer.name}</Link>
+                               </Button>
+                            ) : (
+                                <span className="text-muted-foreground group-hover:text-accent-foreground font-medium">Unassigned</span>
+                            )}
+                        </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2">
                             <ShieldAlert className="h-4 w-4 text-muted-foreground group-hover:text-accent-foreground" />
