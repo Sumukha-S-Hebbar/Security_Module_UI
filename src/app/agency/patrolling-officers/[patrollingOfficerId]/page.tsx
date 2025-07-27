@@ -238,6 +238,13 @@ export default function AgencyPatrollingOfficerReportPage() {
                           <p className="font-bold text-lg">{assignedSites.length}</p>
                         </div>
                         <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <Users className="h-5 w-5 text-primary" />
+                            <p className="font-semibold">Total Guards</p>
+                          </div>
+                          <p className="font-bold text-lg">{assignedGuards.length}</p>
+                        </div>
+                        <div className="flex items-center justify-between">
                           <button
                             onClick={handleScrollToIncidents}
                             className="flex items-center gap-2 text-accent hover:underline w-full justify-between"
