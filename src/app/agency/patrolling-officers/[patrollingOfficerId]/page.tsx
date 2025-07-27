@@ -230,15 +230,15 @@ export default function AgencyPatrollingOfficerReportPage() {
                      <div className="pt-4 mt-4 border-t">
                       <h4 className="font-semibold mb-4 text-lg">Operational Overview</h4>
                         <div className="grid grid-cols-3 gap-4 text-center">
-                          <div className="flex flex-col items-center gap-1">
-                              <Building2 className="h-8 w-8 text-primary" />
-                              <p className="font-medium text-muted-foreground">Total Sites</p>
-                              <p className="font-bold text-lg">{assignedSites.length}</p>
-                          </div>
                            <div className="flex flex-col items-center gap-1">
                               <Users className="h-8 w-8 text-primary" />
                               <p className="font-medium text-muted-foreground">Total Guards</p>
                               <p className="font-bold text-lg">{assignedGuards.length}</p>
+                          </div>
+                          <div className="flex flex-col items-center gap-1">
+                              <Building2 className="h-8 w-8 text-primary" />
+                              <p className="font-medium text-muted-foreground">Total Sites</p>
+                              <p className="font-bold text-lg">{assignedSites.length}</p>
                           </div>
                           <button
                             onClick={handleScrollToIncidents}
