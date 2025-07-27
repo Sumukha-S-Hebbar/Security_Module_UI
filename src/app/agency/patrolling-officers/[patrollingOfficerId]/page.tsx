@@ -26,12 +26,13 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { ArrowLeft, FileDown, Phone, Mail, MapPin, Users, ShieldAlert, Map, Clock } from 'lucide-react';
+import { ArrowLeft, FileDown, Phone, Mail, MapPin, Users, ShieldAlert, Map, Clock, ChevronDown } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Progress } from '@/components/ui/progress';
-import { useMemo, useState, useRef } from 'react';
+import { useMemo, useState, useRef, Fragment } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useRouter } from 'next/navigation';
+import { cn } from '@/lib/utils';
 
 const LOGGED_IN_AGENCY_ID = 'AGY01'; // Simulate logged-in agency
 
@@ -42,6 +43,7 @@ export default function AgencyPatrollingOfficerReportPage() {
   const patrollingOfficerId = params.patrollingOfficerId as string;
   const [selectedMonth, setSelectedMonth] = useState('all');
   const [selectedYear, setSelectedYear] = useState('all');
+  const [expandedSiteId, setExpandedSiteId] = useState<string | null>(null);
 
   const incidentsTableRef = useRef<HTMLDivElement>(null);
 
@@ -109,6 +111,11 @@ export default function AgencyPatrollingOfficerReportPage() {
         }, 2000);
     }
   };
+  
+  const handleExpandClick = (e: React.MouseEvent, siteId: string) => {
+    e.stopPropagation();
+    setExpandedSiteId(prevId => prevId === siteId ? null : siteId);
+  }
 
   const getStatusIndicator = (status: Incident['status']) => {
     switch (status) {
@@ -164,7 +171,7 @@ export default function AgencyPatrollingOfficerReportPage() {
           </Button>
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Patrolling Officer Report</h1>
-            <p className="text-muted-foreground font-medium">Detailed overview for {patrollingOfficer.name}.</p>
+            <p className="text-muted-foreground font-medium">Detailed overview for ${patrollingOfficer.name}.</p>
           </div>
         </div>
         <Button onClick={handleDownloadReport}>
@@ -265,71 +272,81 @@ export default function AgencyPatrollingOfficerReportPage() {
           </Card>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2"><MapPin className="h-5 w-5"/>Assigned Sites</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {assignedSites.length > 0 ? (
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>Site ID</TableHead>
-                            <TableHead>Site Name</TableHead>
-                            <TableHead>Address</TableHead>
-                            <TableHead>Guards</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {assignedSites.map(site => (
-                            <TableRow key={site.id} className="hover:bg-accent hover:text-accent-foreground group">
-                                <TableCell>
-                                    <Button asChild variant="link" className="p-0 h-auto font-medium group-hover:text-accent-foreground">
-                                        <Link href={`/agency/sites/${site.id}`}>{site.id}</Link>
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2"><MapPin className="h-5 w-5"/>Assigned Sites</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {assignedSites.length > 0 ? (
+              <Table>
+                  <TableHeader>
+                      <TableRow>
+                          <TableHead>Site ID</TableHead>
+                          <TableHead>Site Name</TableHead>
+                          <TableHead>Address</TableHead>
+                          <TableHead>Guards</TableHead>
+                      </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                      {assignedSites.map(site => {
+                          const siteGuards = guards.filter(g => g.site === site.name);
+                          const isExpanded = expandedSiteId === site.id;
+                          return (
+                            <Fragment key={site.id}>
+                              <TableRow className="hover:bg-accent hover:text-accent-foreground group">
+                                  <TableCell>
+                                      <Button asChild variant="link" className="p-0 h-auto font-medium group-hover:text-accent-foreground">
+                                          <Link href={`/agency/sites/${site.id}`}>{site.id}</Link>
+                                      </Button>
+                                  </TableCell>
+                                  <TableCell className="font-medium">{site.name}</TableCell>
+                                  <TableCell className="font-medium">{site.address}</TableCell>
+                                  <TableCell>
+                                     <Button
+                                      variant="link"
+                                      className="p-0 h-auto flex items-center gap-2 text-accent group-hover:text-accent-foreground"
+                                      onClick={(e) => handleExpandClick(e, site.id)}
+                                      disabled={siteGuards.length === 0}
+                                    >
+                                      <Users className="h-4 w-4" />
+                                      {siteGuards.length}
+                                      <ChevronDown className={cn("h-4 w-4 transition-transform", isExpanded && "rotate-180")} />
                                     </Button>
-                                </TableCell>
-                                <TableCell className="font-medium">{site.name}</TableCell>
-                                <TableCell className="font-medium">{site.address}</TableCell>
-                                <TableCell className="font-medium">{site.guards.length}</TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            ) : (
-                <p className="text-sm text-muted-foreground font-medium">No sites are assigned to this patrolling officer.</p>
-            )}
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2"><Users className="h-5 w-5"/>Guards Managed</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {assignedGuards.length > 0 ? (
-                <div className="space-y-3">
-                    {assignedGuards.map(guard => (
-                        <div key={guard.id} className="flex items-center gap-3">
-                            <Avatar className="h-10 w-10">
-                                <AvatarImage src={guard.avatar} alt={guard.name} />
-                                <AvatarFallback>{guard.name.charAt(0)}</AvatarFallback>
-                            </Avatar>
-                            <div>
-                                <Button asChild variant="link" className="p-0 h-auto text-base font-medium">
-                                  <Link href={`/agency/guards/${guard.id}`}>{guard.name}</Link>
-                                </Button>
-                                <p className="text-sm text-muted-foreground font-medium">ID: {guard.id} | Site: {guard.site}</p>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            ) : (
-                <p className="text-sm text-muted-foreground font-medium">No guards are assigned to this patrolling officer's sites.</p>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
+                                  </TableCell>
+                              </TableRow>
+                              {isExpanded && (
+                                <TableRow className="bg-muted/50 hover:bg-muted/50">
+                                  <TableCell colSpan={4} className="p-0">
+                                    <div className="p-4 space-y-3">
+                                      {siteGuards.map(guard => (
+                                          <div key={guard.id} className="flex items-center gap-3">
+                                              <Avatar className="h-10 w-10">
+                                                  <AvatarImage src={guard.avatar} alt={guard.name} />
+                                                  <AvatarFallback>{guard.name.charAt(0)}</AvatarFallback>
+                                              </Avatar>
+                                              <div>
+                                                  <p className="font-semibold">{guard.name}</p>
+                                                  <Button asChild variant="link" className="p-0 h-auto text-sm font-medium text-accent">
+                                                    <Link href={`/agency/guards/${guard.id}`}>{guard.id}</Link>
+                                                  </Button>
+                                              </div>
+                                          </div>
+                                      ))}
+                                    </div>
+                                  </TableCell>
+                                </TableRow>
+                              )}
+                            </Fragment>
+                          )
+                      })}
+                  </TableBody>
+              </Table>
+          ) : (
+              <p className="text-sm text-muted-foreground font-medium">No sites are assigned to this patrolling officer.</p>
+          )}
+        </CardContent>
+      </Card>
+      
       <Card ref={incidentsTableRef}>
         <CardHeader className="flex flex-row items-start justify-between gap-4">
           <div className="flex-grow">
