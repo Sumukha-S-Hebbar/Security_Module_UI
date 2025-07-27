@@ -380,9 +380,9 @@ export default function AgencyPatrollingOfficerReportPage() {
                                                 </TableHeader>
                                                 <TableBody>
                                                     {siteGuards.map(guard => (
-                                                        <TableRow key={guard.id} className="hover:bg-transparent">
+                                                        <TableRow key={guard.id} className="hover:bg-accent hover:text-accent-foreground group cursor-pointer" onClick={() => router.push(`/agency/guards/${guard.id}`)}>
                                                             <TableCell>
-                                                                <Button asChild variant="link" className="p-0 h-auto text-sm font-medium text-accent">
+                                                                <Button asChild variant="link" className="p-0 h-auto text-sm font-medium text-accent group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
                                                                   <Link href={`/agency/guards/${guard.id}`}>{guard.id}</Link>
                                                                 </Button>
                                                             </TableCell>
