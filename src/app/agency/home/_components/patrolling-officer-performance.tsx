@@ -3,7 +3,6 @@
 
 import type { PatrollingOfficer, Site } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
 import { Map, Clock } from 'lucide-react';
 import { useState, useMemo } from 'react';
 import {
@@ -13,6 +12,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
+
+const getPerformanceColor = (value: number) => {
+  if (value >= 95) {
+    return 'hsl(var(--chart-2))'; // Green
+  } else if (value >= 65) {
+    return 'hsl(var(--chart-3))'; // Yellow
+  } else {
+    return 'hsl(var(--destructive))'; // Orange
+  }
+};
 
 export function PatrollingOfficerPerformance({ 
     patrollingOfficers, 
@@ -29,11 +39,17 @@ export function PatrollingOfficerPerformance({
     return Array.from({ length: 5 }, (_, i) => (currentYear - i).toString());
   }, []);
 
-  const totalOfficers = patrollingOfficers.length;
-
   const performanceData = useMemo(() => {
     // NOTE: In a real application, you would filter based on selectedYear and selectedMonth here.
-    return patrollingOfficers.reduce(
+    const totalOfficers = patrollingOfficers.length;
+    if (totalOfficers === 0) {
+      return {
+        avgSiteVisitAccuracy: 0,
+        avgResponseTime: 0,
+      };
+    }
+
+    const perf = patrollingOfficers.reduce(
       (acc, officer) => {
         const assignedSites = sites.filter(s => s.patrollingOfficerId === officer.id);
         const visitedSites = assignedSites.filter(s => s.visited).length;
@@ -54,10 +70,21 @@ export function PatrollingOfficerPerformance({
         totalResponseTime: 0,
       }
     );
+
+    return {
+      avgSiteVisitAccuracy: perf.totalSiteVisitAccuracy / totalOfficers,
+      avgResponseTime: perf.totalResponseTime / totalOfficers,
+    }
   }, [patrollingOfficers, sites, selectedYear, selectedMonth]);
 
-  const avgSiteVisitAccuracy = totalOfficers > 0 ? performanceData.totalSiteVisitAccuracy / totalOfficers : 0;
-  const avgResponseTime = totalOfficers > 0 ? performanceData.totalResponseTime / totalOfficers : 0;
+  const roundedSiteVisitAccuracy = Math.round(performanceData.avgSiteVisitAccuracy);
+  const siteVisitColor = getPerformanceColor(roundedSiteVisitAccuracy);
+
+  const siteVisitAccuracyData = [
+    { name: 'Accuracy', value: roundedSiteVisitAccuracy },
+    { name: 'Remaining', value: 100 - roundedSiteVisitAccuracy },
+  ];
+  const COLORS_SITE_VISIT = [siteVisitColor, 'hsl(var(--muted))'];
 
   return (
     <Card>
@@ -96,23 +123,47 @@ export function PatrollingOfficerPerformance({
             </Select>
         </div>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div>
-          <div className="flex justify-between items-center mb-1">
-            <h4 className="flex items-center gap-2 text-sm font-medium">
-                <Map className="w-4 h-4 text-primary" />
-                Site Visit Accuracy
-            </h4>
-            <span className="text-muted-foreground font-medium">{avgSiteVisitAccuracy.toFixed(1)}%</span>
-          </div>
-          <Progress value={avgSiteVisitAccuracy} className="h-2" />
+      <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center justify-items-center">
+        <div className="flex flex-col items-center gap-2">
+            <div className="w-32 h-32 relative">
+                <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                        <Pie
+                            data={siteVisitAccuracyData}
+                            cx="50%"
+                            cy="50%"
+                            innerRadius="70%"
+                            outerRadius="85%"
+                            paddingAngle={0}
+                            dataKey="value"
+                            stroke="none"
+                        >
+                            {siteVisitAccuracyData.map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={COLORS_SITE_VISIT[index % COLORS_SITE_VISIT.length]} />
+                            ))}
+                        </Pie>
+                    </PieChart>
+                </ResponsiveContainer>
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <span className="text-3xl font-bold" style={{ color: siteVisitColor }}>
+                        {roundedSiteVisitAccuracy}%
+                    </span>
+                </div>
+            </div>
+            <p className="flex items-center gap-2 text-center font-medium">
+              <Map className="w-4 h-4 text-primary" />
+              Site Visit Accuracy
+            </p>
         </div>
-        <div className="flex items-center justify-between pt-2">
-            <h4 className="flex items-center gap-2 text-sm font-medium">
-                <Clock className="w-4 h-4 text-primary" />
-                Average Response Time
-            </h4>
-            <span className="text-lg text-foreground font-medium">{avgResponseTime.toFixed(0)} mins</span>
+        
+        <div className="flex flex-col items-center gap-2 w-full">
+            <div className="flex items-center justify-between pt-2 w-full max-w-[200px]">
+                <h4 className="flex items-center gap-2 text-sm font-medium">
+                    <Clock className="w-4 h-4 text-primary" />
+                    Avg. Response Time
+                </h4>
+                <span className="text-lg text-foreground font-semibold">{performanceData.avgResponseTime.toFixed(0)} mins</span>
+            </div>
         </div>
       </CardContent>
     </Card>
