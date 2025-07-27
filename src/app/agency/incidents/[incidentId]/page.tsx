@@ -359,7 +359,7 @@ export default function AgencyIncidentReportPage() {
         <CardContent>
             <div className="space-y-6 divide-y">
               {incident.status === 'Active' && (
-                 <form onSubmit={handleSaveIncidentDetails} className="pt-6 space-y-6">
+                 <form onSubmit={handleSaveIncidentDetails} className="space-y-6">
                     <Alert variant="default" className="text-left">
                         <Info className="h-4 w-4" />
                         <AlertTitle>Incident is Active</AlertTitle>
@@ -423,7 +423,7 @@ export default function AgencyIncidentReportPage() {
               )}
               
               {(incident.status === 'Under Review') && (
-                <div className="pt-6 space-y-6">
+                <div className="space-y-6">
                   <div>
                       <h4 className="font-semibold mb-2 text-lg">
                           Incident Summary
@@ -444,7 +444,7 @@ export default function AgencyIncidentReportPage() {
               )}
 
               {incident.status === 'Resolved' && (
-                  <div className="pt-6 space-y-6">
+                  <div className="space-y-6">
                       {incident.description && (
                         <div>
                             <h4 className="font-semibold mb-2 text-lg">
