@@ -17,6 +17,7 @@ import {
   CardHeader,
   CardTitle,
   CardDescription,
+  CardFooter,
 } from '@/components/ui/card';
 import {
   Table,
@@ -49,6 +50,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 const LOGGED_IN_ORG_ID = 'TCO01'; // Simulate logged-in user
+const ACTIVE_INCIDENTS_PER_PAGE = 5;
 
 interface DashboardData {
   sites: Site[];
@@ -112,6 +114,8 @@ export default function TowercoHomePage() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
+  const [activeIncidentsCurrentPage, setActiveIncidentsCurrentPage] = useState(1);
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -129,6 +133,14 @@ export default function TowercoHomePage() {
       (incident) => incident.status === 'Active'
     );
   }, [data]);
+
+  const paginatedActiveEmergencies = useMemo(() => {
+    const startIndex = (activeIncidentsCurrentPage - 1) * ACTIVE_INCIDENTS_PER_PAGE;
+    return activeEmergencies.slice(startIndex, startIndex + ACTIVE_INCIDENTS_PER_PAGE);
+  }, [activeEmergencies, activeIncidentsCurrentPage]);
+
+  const totalActiveIncidentPages = Math.ceil(activeEmergencies.length / ACTIVE_INCIDENTS_PER_PAGE);
+
 
   const getGuardById = (id: string): Guard | undefined => {
     return data?.guards.find((g) => g.id === id);
@@ -219,7 +231,7 @@ export default function TowercoHomePage() {
                           </TableRow>
                       </TableHeader>
                       <TableBody>
-                          {activeEmergencies.map((incident) => {
+                          {paginatedActiveEmergencies.map((incident) => {
                           const siteDetails = getSiteById(incident.siteId);
                           const guardDetails = getGuardById(incident.raisedByGuardId);
                           const patrollingOfficerDetails = getPatrollingOfficerById(
@@ -295,6 +307,34 @@ export default function TowercoHomePage() {
               </p>
           )}
           </CardContent>
+          {activeEmergencies.length > 0 && (
+            <CardFooter>
+                 <div className="flex items-center justify-between w-full">
+                    <div className="text-sm text-destructive-foreground font-medium">
+                        Showing {paginatedActiveEmergencies.length} of {activeEmergencies.length} active incidents.
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setActiveIncidentsCurrentPage(prev => Math.max(prev - 1, 1))}
+                            disabled={activeIncidentsCurrentPage === 1}
+                        >
+                            Previous
+                        </Button>
+                        <span className="text-sm font-medium text-destructive-foreground">Page {activeIncidentsCurrentPage} of {totalActiveIncidentPages || 1}</span>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setActiveIncidentsCurrentPage(prev => Math.min(prev + 1, totalActiveIncidentPages))}
+                            disabled={activeIncidentsCurrentPage === totalActiveIncidentPages || totalActiveIncidentPages === 0}
+                        >
+                            Next
+                        </Button>
+                    </div>
+                </div>
+            </CardFooter>
+          )}
       </Card>
       
       <TowercoAnalyticsDashboard
