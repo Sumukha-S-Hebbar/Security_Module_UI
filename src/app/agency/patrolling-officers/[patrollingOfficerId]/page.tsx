@@ -195,7 +195,7 @@ export default function AgencyPatrollingOfficerReportPage() {
             <p className="text-muted-foreground font-medium">Detailed overview for ${patrollingOfficer.name}.</p>
           </div>
         </div>
-        <Button onClick={handleDownloadReport}>
+        <Button onClick={handleDownloadReport} className="bg-[#00B4D8] hover:bg-[#00B4D8]/90">
           <FileDown className="mr-2 h-4 w-4" />
           Download Full Report
         </Button>
@@ -262,7 +262,7 @@ export default function AgencyPatrollingOfficerReportPage() {
             </CardHeader>
             <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center justify-items-center pt-6">
                 <div className="flex flex-col items-center gap-2">
-                    <div className="w-32 h-32 relative">
+                    <div className="w-40 h-40 relative">
                         <ResponsiveContainer width="100%" height="100%">
                             <PieChart>
                                 <Pie
