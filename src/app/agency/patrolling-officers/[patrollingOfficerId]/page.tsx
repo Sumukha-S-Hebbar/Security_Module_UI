@@ -202,7 +202,7 @@ export default function AgencyPatrollingOfficerReportPage() {
       </div>
       
        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-1 space-y-6">
+          <div className="lg:col-span-1">
               <Card>
                   <CardHeader>
                     <div className="flex items-center gap-4">
@@ -227,34 +227,31 @@ export default function AgencyPatrollingOfficerReportPage() {
                         <a href={`mailto:${patrollingOfficer.email}`} className="hover:underline text-muted-foreground font-medium">{patrollingOfficer.email}</a>
                       </div>
                     </div>
-                  </CardContent>
-              </Card>
-              <Card>
-                <CardHeader>
-                  <CardTitle>Operational Overview</CardTitle>
-                  <CardDescription>A summary of assignments and incidents.</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Building2 className="h-5 w-5 text-primary" />
-                      <p className="font-semibold">Total Sites</p>
-                    </div>
-                    <p className="font-bold text-lg">{assignedSites.length}</p>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <button
-                      onClick={handleScrollToIncidents}
-                      className="flex items-center gap-2 text-accent hover:underline w-full justify-between"
-                    >
-                      <div className="flex items-center gap-2">
-                        <ShieldAlert className="h-5 w-5 text-primary" />
-                        <p className="font-semibold">Total Incidents</p>
+                    <div className="pt-4 mt-4 border-t">
+                      <h4 className="font-semibold mb-4 text-lg">Operational Overview</h4>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <Building2 className="h-5 w-5 text-primary" />
+                            <p className="font-semibold">Total Sites</p>
+                          </div>
+                          <p className="font-bold text-lg">{assignedSites.length}</p>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <button
+                            onClick={handleScrollToIncidents}
+                            className="flex items-center gap-2 text-accent hover:underline w-full justify-between"
+                          >
+                            <div className="flex items-center gap-2">
+                              <ShieldAlert className="h-5 w-5 text-primary" />
+                              <p className="font-semibold">Total Incidents</p>
+                            </div>
+                            <p className="font-bold text-lg">{assignedIncidents.length}</p>
+                          </button>
+                        </div>
                       </div>
-                      <p className="font-bold text-lg">{assignedIncidents.length}</p>
-                    </button>
-                  </div>
-                </CardContent>
+                    </div>
+                  </CardContent>
               </Card>
           </div>
           <Card className="lg:col-span-2">
@@ -472,3 +469,4 @@ export default function AgencyPatrollingOfficerReportPage() {
     </div>
   );
 }
+
