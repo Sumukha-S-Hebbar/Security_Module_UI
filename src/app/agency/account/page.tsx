@@ -321,7 +321,7 @@ export default function AgencyAccountPage() {
         </Card>
 
         <div className="mt-6">
-          <Button className="w-full bg-[#1e90ff] hover:bg-[#1c86ee] text-lg py-6">
+          <Button className="w-full bg-[#1e90ff] hover:bg-[#1c86ee] text-white text-lg py-6">
             <KeyRound className="mr-2 h-5 w-5" />
             Change Password
           </Button>
