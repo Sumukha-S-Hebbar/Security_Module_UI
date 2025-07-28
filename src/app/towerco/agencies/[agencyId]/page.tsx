@@ -647,7 +647,8 @@ export default function AgencyReportPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead className="text-foreground">Incident ID</TableHead>
-                  <TableHead className="text-foreground">Date & Time</TableHead>
+                  <TableHead className="text-foreground">Incident Date</TableHead>
+                  <TableHead className="text-foreground">Incident Time</TableHead>
                   <TableHead className="text-foreground">Site</TableHead>
                   <TableHead className="text-foreground">Guard</TableHead>
                   <TableHead className="text-foreground">Status</TableHead>
@@ -669,7 +670,10 @@ export default function AgencyReportPage() {
                         </Button>
                       </TableCell>
                       <TableCell className="font-medium">
-                        <ClientDate date={incident.incidentTime} />
+                        <ClientDate date={incident.incidentTime} format="date" />
+                      </TableCell>
+                      <TableCell className="font-medium">
+                        <ClientDate date={incident.incidentTime} format="time" />
                       </TableCell>
                       <TableCell className="font-medium">{site?.name || 'N/A'}</TableCell>
                       <TableCell className="font-medium">{guard?.name || 'N/A'}</TableCell>
