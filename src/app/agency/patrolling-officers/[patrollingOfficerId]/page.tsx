@@ -55,6 +55,8 @@ export default function AgencyPatrollingOfficerReportPage() {
   const patrollingOfficerId = params.patrollingOfficerId as string;
   const [selectedMonth, setSelectedMonth] = useState('all');
   const [selectedYear, setSelectedYear] = useState('all');
+  const [performanceSelectedYear, setPerformanceSelectedYear] = useState<string>(new Date().getFullYear().toString());
+  const [performanceSelectedMonth, setPerformanceSelectedMonth] = useState<string>('all');
   const [expandedSiteId, setExpandedSiteId] = useState<string | null>(null);
 
   const incidentsTableRef = useRef<HTMLDivElement>(null);
@@ -92,6 +94,12 @@ export default function AgencyPatrollingOfficerReportPage() {
     if (years.size > 0) years.add(new Date().getFullYear().toString());
     return Array.from(years).sort((a, b) => parseInt(b) - parseInt(a));
   }, [assignedIncidents]);
+  
+  const performanceAvailableYears = useMemo(() => {
+    // In a real app, this would be derived from available data time ranges
+    const currentYear = new Date().getFullYear();
+    return Array.from({ length: 5 }, (_, i) => (currentYear - i).toString());
+  }, []);
 
   const filteredIncidents = useMemo(() => {
     return assignedIncidents.filter(incident => {
@@ -269,11 +277,40 @@ export default function AgencyPatrollingOfficerReportPage() {
               </Card>
           </div>
           <Card className="lg:col-span-2">
-            <CardHeader>
-              <CardTitle>Performance Metrics</CardTitle>
-              <CardDescription className="font-medium">
-                Key performance indicators for this patrolling officer.
-              </CardDescription>
+            <CardHeader className="flex-row items-start justify-between">
+                <div>
+                    <CardTitle>Patrolling Officer Performance</CardTitle>
+                    <CardDescription className="font-medium">
+                        Key performance indicators for this patrolling officer.
+                    </CardDescription>
+                </div>
+                <div className="flex items-center gap-2">
+                    <Select value={performanceSelectedYear} onValueChange={setPerformanceSelectedYear}>
+                        <SelectTrigger className="w-[120px] font-medium hover:bg-accent hover:text-accent-foreground">
+                            <SelectValue placeholder="Select Year" />
+                        </SelectTrigger>
+                        <SelectContent>
+                        {performanceAvailableYears.map((year) => (
+                            <SelectItem key={year} value={year} className="font-medium">
+                            {year}
+                            </SelectItem>
+                        ))}
+                        </SelectContent>
+                    </Select>
+                    <Select value={performanceSelectedMonth} onValueChange={setPerformanceSelectedMonth}>
+                        <SelectTrigger className="w-[140px] font-medium hover:bg-accent hover:text-accent-foreground">
+                            <SelectValue placeholder="Select Month" />
+                        </SelectTrigger>
+                        <SelectContent>
+                        <SelectItem value="all" className="font-medium">All Months</SelectItem>
+                        {Array.from({ length: 12 }, (_, i) => (
+                            <SelectItem key={i} value={i.toString()} className="font-medium">
+                            {new Date(0, i).toLocaleString('default', { month: 'long' })}
+                            </SelectItem>
+                        ))}
+                        </SelectContent>
+                    </Select>
+                </div>
             </CardHeader>
             <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center justify-items-center pt-6">
                 <div className="flex flex-col items-center gap-2">
