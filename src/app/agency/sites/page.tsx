@@ -476,11 +476,11 @@ export default function AgencySitesPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Site ID</TableHead>
-                <TableHead>Site Name</TableHead>
-                <TableHead>Patrolling Officer</TableHead>
-                <TableHead>Guards</TableHead>
-                <TableHead>Incidents</TableHead>
+                <TableHead className="text-foreground">Site ID</TableHead>
+                <TableHead className="text-foreground">Site Name</TableHead>
+                <TableHead className="text-foreground">Patrolling Officer</TableHead>
+                <TableHead className="text-foreground">Guards</TableHead>
+                <TableHead className="text-foreground">Incidents</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -585,11 +585,11 @@ export default function AgencySitesPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Site</TableHead>
-                  <TableHead>Geofence (m)</TableHead>
-                  <TableHead>Assign Guards</TableHead>
-                  <TableHead>Assign Patrolling Officer</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead className="text-foreground">Site</TableHead>
+                  <TableHead className="text-foreground">Geofence (m)</TableHead>
+                  <TableHead className="text-foreground">Assign Guards</TableHead>
+                  <TableHead className="text-foreground">Assign Patrolling Officer</TableHead>
+                  <TableHead className="text-right text-foreground">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
