@@ -39,7 +39,7 @@ export function ModuleSwitcher({ portalHome }: { portalHome: '/agency/home' | '/
   return (
     <div className="bg-background border-b">
       <div className="container mx-auto px-4 md:px-6">
-        <nav className="flex items-center gap-4 sm:gap-6 text-sm">
+        <nav className="flex items-center justify-center gap-4 sm:gap-6 text-sm">
           {allModules.map((module) => {
             const enabled = isModuleEnabled(module.name);
             return (
