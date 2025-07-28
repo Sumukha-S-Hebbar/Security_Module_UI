@@ -596,7 +596,7 @@ export default function AgencyReportPage() {
       <Card ref={incidentsHistoryRef}>
         <CardHeader className="flex flex-row items-center justify-between gap-4">
             <div>
-                <CardTitle>Incidents History</CardTitle>
+                <CardTitle>Incidents Log</CardTitle>
                 <CardDescription className="font-medium">
                 A log of emergency incidents at sites managed by {agency.name}.
                 </CardDescription>
