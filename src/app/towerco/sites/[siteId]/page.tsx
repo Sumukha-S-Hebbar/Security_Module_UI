@@ -330,7 +330,7 @@ export default function SiteReportPage() {
       <Card ref={incidentsTableRef}>
         <CardHeader className="flex flex-row items-center justify-between gap-4">
           <div>
-            <CardTitle>Incidents at {site.name}</CardTitle>
+            <CardTitle>Incidents Log</CardTitle>
             <CardDescription className="font-medium">A log of all emergency incidents reported at this site.</CardDescription>
           </div>
           <div className="flex items-center gap-2">

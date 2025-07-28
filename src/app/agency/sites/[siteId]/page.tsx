@@ -332,7 +332,7 @@ export default function AgencySiteReportPage() {
       <Card ref={incidentsTableRef}>
         <CardHeader className="flex flex-row items-start justify-between gap-4">
           <div className="flex-grow">
-            <CardTitle>Incidents at {site.name}</CardTitle>
+            <CardTitle>Incidents Log</CardTitle>
             <CardDescription className="font-medium">A log of all emergency incidents reported at this site.</CardDescription>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
