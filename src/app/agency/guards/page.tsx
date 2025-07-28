@@ -36,7 +36,7 @@ import {
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { FileDown, Upload, Loader2, Search, PlusCircle, ShieldAlert } from 'lucide-react';
+import { FileDown, Upload, Loader2, Search, PlusCircle, ShieldAlert, Phone } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -379,6 +379,7 @@ export default function AgencyGuardsPage() {
                 <TableRow>
                   <TableHead>Guard ID</TableHead>
                   <TableHead>Guard</TableHead>
+                  <TableHead>Contact Info</TableHead>
                   <TableHead>Site</TableHead>
                   <TableHead>Patrolling Officer</TableHead>
                   <TableHead>Incidents Occurred</TableHead>
@@ -414,6 +415,12 @@ export default function AgencyGuardsPage() {
                           </div>
                         </TableCell>
                         <TableCell>
+                           <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                <Phone className="h-4 w-4 flex-shrink-0" />
+                                <a href={`tel:${guard.phone}`} className="hover:underline font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>{guard.phone}</a>
+                            </div>
+                        </TableCell>
+                        <TableCell>
                           {site ? (
                             <Button asChild variant="link" className="p-0 h-auto font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
                                 <Link href={`/agency/sites/${site.id}`}>{guard.site}</Link>
@@ -442,7 +449,7 @@ export default function AgencyGuardsPage() {
                   })
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center text-muted-foreground py-10 font-medium">
+                    <TableCell colSpan={6} className="text-center text-muted-foreground py-10 font-medium">
                       No guards found for the current filter.
                     </TableCell>
                   </TableRow>
