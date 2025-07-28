@@ -196,6 +196,7 @@ export default function AgencyGuardReportPage() {
             <CardContent className="space-y-4">
                 <div>
                     <p className="font-semibold text-base">{site.name}</p>
+                    <p className="font-medium">ID: {site.id}</p>
                     <p className="font-medium text-sm text-muted-foreground">{site.address}</p>
                 </div>
                  <Button asChild variant="link" className="p-0 h-auto font-medium">
