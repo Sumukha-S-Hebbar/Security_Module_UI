@@ -14,8 +14,8 @@ import { Button } from '@/components/ui/button';
 
 export const menuItems = [
   { href: '/towerco/home', label: 'Home', icon: Home },
-  { href: '/towerco/agencies', label: 'Security Agencies', icon: Briefcase },
   { href: '/towerco/sites', label: 'Sites', icon: Building2 },
+  { href: '/towerco/agencies', label: 'Security Agencies', icon: Briefcase },
   { href: '/towerco/incidents', label: 'Incidents', icon: ShieldAlert },
 ];
 
