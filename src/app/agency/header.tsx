@@ -18,6 +18,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
+import { ModuleSwitcher } from '@/components/module-switcher';
 
 export default function AgencyHeader() {
   const pathname = usePathname();
@@ -36,7 +37,7 @@ export default function AgencyHeader() {
     };
 
     const handleMouseMove = (event: MouseEvent) => {
-        if (event.clientY < 60) {
+        if (event.clientY < 100) { // Increased threshold to avoid hiding with the new top bar
             setIsVisible(true);
         }
     };
@@ -56,6 +57,7 @@ export default function AgencyHeader() {
         "bg-header text-header-foreground sticky top-0 z-50 transition-transform duration-300",
         !isVisible && "-translate-y-full"
     )}>
+      <ModuleSwitcher portalHome="/agency/home" />
       <div className="container mx-auto flex h-16 items-center px-4 md:px-6">
         <div className="flex items-center gap-6 flex-1">
           <Link href="/agency/home" className="flex items-center gap-2 text-header-foreground">
@@ -84,7 +86,7 @@ export default function AgencyHeader() {
                         <Menu />
                     </Button>
                 </SheetTrigger>
-                <SheetContent side="left" className="w-[300px] bg-header text-header-foreground">
+                <SheetContent side="left" className="w-[300px] bg-header text-header-foreground p-0">
                      <div className="flex items-center gap-2 p-4 border-b border-white/10">
                         <ShieldCheck className="w-8 h-8" />
                         <div>
