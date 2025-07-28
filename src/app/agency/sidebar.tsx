@@ -10,6 +10,7 @@ import {
   UserCheck,
   ShieldAlert,
   LogOut,
+  UserCog,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -20,6 +21,7 @@ export const menuItems = [
   { href: '/agency/patrolling-officers', label: 'Patrolling Officers', icon: UserCheck },
   { href: '/agency/guards', label: 'Security Guards', icon: Users },
   { href: '/agency/incidents', label: 'Incidents', icon: ShieldAlert },
+  { href: '/agency/account', label: 'Accounts', icon: UserCog },
 ];
 
 export function NavLinks() {

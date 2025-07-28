@@ -8,6 +8,7 @@ import {
   Building2,
   Briefcase,
   ShieldAlert,
+  UserCog,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -17,6 +18,7 @@ export const menuItems = [
   { href: '/towerco/sites', label: 'Sites', icon: Building2 },
   { href: '/towerco/agencies', label: 'Security Agencies', icon: Briefcase },
   { href: '/towerco/incidents', label: 'Incidents', icon: ShieldAlert },
+  { href: '/towerco/account', label: 'Accounts', icon: UserCog },
 ];
 
 
