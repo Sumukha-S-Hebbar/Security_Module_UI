@@ -58,6 +58,7 @@ export default function AgencyGuardReportPage() {
   const guardId = params.guardId as string;
   const [selectedMonth, setSelectedMonth] = useState('all');
   const [selectedYear, setSelectedYear] = useState('all');
+  const [selectedStatus, setSelectedStatus] = useState('all');
   const [performanceSelectedYear, setPerformanceSelectedYear] = useState<string>(new Date().getFullYear().toString());
   const [performanceSelectedMonth, setPerformanceSelectedMonth] = useState<string>('all');
   const incidentsTableRef = useRef<HTMLDivElement>(null);
@@ -99,9 +100,10 @@ export default function AgencyGuardReportPage() {
       const incidentDate = new Date(incident.incidentTime);
       const yearMatch = selectedYear === 'all' || incidentDate.getFullYear().toString() === selectedYear;
       const monthMatch = selectedMonth === 'all' || incidentDate.getMonth().toString() === selectedMonth;
-      return yearMatch && monthMatch;
+      const statusMatch = selectedStatus === 'all' || incident.status.toLowerCase().replace(' ', '-') === selectedStatus;
+      return yearMatch && monthMatch && statusMatch;
     });
-  }, [guardIncidents, selectedYear, selectedMonth]);
+  }, [guardIncidents, selectedYear, selectedMonth, selectedStatus]);
 
 
   const handleDownloadReport = () => {
@@ -403,10 +405,21 @@ export default function AgencyGuardReportPage() {
       <Card ref={incidentsTableRef}>
         <CardHeader className="flex flex-row items-start justify-between gap-4">
           <div className="flex-grow">
-            <CardTitle>Recent Incidents</CardTitle>
+            <CardTitle>Incidents Log</CardTitle>
             <CardDescription className="font-medium">A log of emergency incidents involving {guard.name}.</CardDescription>
           </div>
            <div className="flex items-center gap-2 flex-shrink-0">
+              <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+                <SelectTrigger className="w-[180px] font-medium hover:bg-accent hover:text-accent-foreground">
+                    <SelectValue placeholder="Filter by status" />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="all" className="font-medium">All Statuses</SelectItem>
+                    <SelectItem value="active" className="font-medium">Active</SelectItem>
+                    <SelectItem value="under-review" className="font-medium">Under Review</SelectItem>
+                    <SelectItem value="resolved" className="font-medium">Resolved</SelectItem>
+                </SelectContent>
+            </Select>
               {availableYears.length > 0 && (
                 <Select value={selectedYear} onValueChange={setSelectedYear}>
                   <SelectTrigger className="w-[120px] font-medium hover:bg-accent hover:text-accent-foreground">
@@ -443,7 +456,8 @@ export default function AgencyGuardReportPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Incident ID</TableHead>
-                  <TableHead>Date & Time</TableHead>
+                  <TableHead>Incident Date</TableHead>
+                  <TableHead>Incident Time</TableHead>
                   <TableHead>Site</TableHead>
                   <TableHead>Status</TableHead>
                 </TableRow>
@@ -460,7 +474,8 @@ export default function AgencyGuardReportPage() {
                         <Link href={`/agency/incidents/${incident.id}`}>{incident.id}</Link>
                       </Button>
                     </TableCell>
-                    <TableCell className="font-medium">{new Date(incident.incidentTime).toLocaleString()}</TableCell>
+                    <TableCell className="font-medium">{new Date(incident.incidentTime).toLocaleDateString()}</TableCell>
+                    <TableCell className="font-medium">{new Date(incident.incidentTime).toLocaleTimeString()}</TableCell>
                     <TableCell className="font-medium">{incident.siteId}</TableCell>
                     <TableCell>{getStatusIndicator(incident.status)}</TableCell>
                   </TableRow>
