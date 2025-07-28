@@ -27,7 +27,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { ArrowLeft, FileDown, Phone, MapPin, UserCheck, ShieldCheck, Mail } from 'lucide-react';
+import { ArrowLeft, FileDown, Phone, MapPin, UserCheck, ShieldCheck, Mail, ShieldAlert } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
@@ -65,6 +65,7 @@ export default function AgencyGuardReportPage() {
   const site = sites.find((s) => s.name === guard.site);
   const patrollingOfficer = site ? patrollingOfficers.find(p => p.id === site.patrollingOfficerId) : undefined;
   const guardIncidents = incidents.filter(i => i.raisedByGuardId === guard.id);
+  const resolvedIncidents = guardIncidents.filter(i => i.status === 'Resolved').length;
   
   const availableYears = useMemo(() => {
     const years = new Set(
@@ -184,6 +185,21 @@ export default function AgencyGuardReportPage() {
                 <Phone className="h-4 w-4 mt-1 text-primary" />
                 <a href={`tel:${guard.phone}`} className="hover:underline font-medium">{guard.phone}</a>
               </div>
+            </div>
+             <div className="pt-4 mt-4 border-t">
+              <h4 className="font-semibold mb-4 text-lg">Operational Overview</h4>
+                <div className="grid grid-cols-2 gap-4 text-center">
+                  <div className="flex flex-col items-center gap-1">
+                      <ShieldAlert className="h-8 w-8 text-primary" />
+                      <p className="font-medium text-muted-foreground">Total Incidents</p>
+                      <p className="font-bold text-lg">{guardIncidents.length}</p>
+                  </div>
+                   <div className="flex flex-col items-center gap-1">
+                      <ShieldCheck className="h-8 w-8 text-primary" />
+                      <p className="font-medium text-muted-foreground">Incidents Resolved</p>
+                      <p className="font-bold text-lg">{resolvedIncidents}</p>
+                  </div>
+                </div>
             </div>
           </CardContent>
         </Card>
