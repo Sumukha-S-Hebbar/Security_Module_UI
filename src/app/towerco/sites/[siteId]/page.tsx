@@ -296,8 +296,8 @@ export default function SiteReportPage() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between gap-4">
             <div>
-                <CardTitle>Incident Trend</CardTitle>
-                <CardDescription>Monthly incident counts for {site.name}.</CardDescription>
+                <CardTitle>Incidents Reported Monthly</CardTitle>
+                <CardDescription>A monthly breakdown of incidents reported at {site.name}.</CardDescription>
             </div>
             <Select value={selectedChartYear} onValueChange={setSelectedChartYear}>
                 <SelectTrigger className="w-[120px] font-medium hover:bg-accent hover:text-accent-foreground">
@@ -380,11 +380,11 @@ export default function SiteReportPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="text-foreground">Incident ID</TableHead>
-                  <TableHead className="text-foreground">Incident Date</TableHead>
-                  <TableHead className="text-foreground">Incident Time</TableHead>
-                  <TableHead className="text-foreground">Guard</TableHead>
-                  <TableHead className="text-foreground">Status</TableHead>
+                  <TableHead>Incident ID</TableHead>
+                  <TableHead>Incident Date</TableHead>
+                  <TableHead>Incident Time</TableHead>
+                  <TableHead>Guard</TableHead>
+                  <TableHead>Status</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -418,4 +418,3 @@ export default function SiteReportPage() {
     </div>
   );
 }
-

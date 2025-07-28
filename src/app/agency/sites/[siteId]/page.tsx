@@ -298,8 +298,8 @@ export default function AgencySiteReportPage() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between gap-4">
             <div>
-                <CardTitle>Incident Trend</CardTitle>
-                <CardDescription>Monthly incident counts for {site.name}.</CardDescription>
+                <CardTitle>Incidents Reported Monthly</CardTitle>
+                <CardDescription>A monthly breakdown of incidents reported at {site.name}.</CardDescription>
             </div>
             <Select value={selectedChartYear} onValueChange={setSelectedChartYear}>
                 <SelectTrigger className="w-[120px] font-medium hover:bg-accent hover:text-accent-foreground">
