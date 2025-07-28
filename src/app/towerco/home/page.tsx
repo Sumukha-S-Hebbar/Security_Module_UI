@@ -221,13 +221,13 @@ export default function TowercoHomePage() {
                   <Table>
                       <TableHeader>
                           <TableRow className="border-destructive/20">
-                          <TableHead className="text-foreground font-bold">Incident ID</TableHead>
-                          <TableHead className="text-foreground font-bold">Site Name</TableHead>
-                          <TableHead className="text-foreground font-bold">Agency</TableHead>
-                          <TableHead className="text-foreground font-bold">Patrolling Officer</TableHead>
-                          <TableHead className="text-foreground font-bold">Guard</TableHead>
-                          <TableHead className="text-foreground font-bold">Incident Time</TableHead>
-                          <TableHead className="text-foreground font-bold">Contact</TableHead>
+                          <TableHead>Incident ID</TableHead>
+                          <TableHead>Site Name</TableHead>
+                          <TableHead>Agency</TableHead>
+                          <TableHead>Patrolling Officer</TableHead>
+                          <TableHead>Guard</TableHead>
+                          <TableHead>Incident Time</TableHead>
+                          <TableHead>Contact</TableHead>
                           </TableRow>
                       </TableHeader>
                       <TableBody>
