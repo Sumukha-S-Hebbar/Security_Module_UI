@@ -189,19 +189,29 @@ export default function AgencyGuardReportPage() {
         </Card>
 
         {site && (
-           <Card>
+          <Card>
             <CardHeader>
-                <CardTitle className="flex items-center gap-2"><MapPin className="h-5 w-5"/>Assigned Site</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <MapPin className="h-5 w-5" />
+                Assigned Site
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-                <div>
-                    <p className="font-semibold text-base">{site.name}</p>
-                    <p className="font-medium">ID: {site.id}</p>
-                    <p className="font-medium text-sm text-muted-foreground">{site.address}</p>
-                </div>
-                 <Button asChild variant="link" className="p-0 h-auto font-medium">
-                    <Link href={`/agency/sites/${site.id}`}>View Full Site Report</Link>
-                </Button>
+              <div>
+                <p className="font-semibold text-base">{site.name}</p>
+                <p className="font-medium">ID: {site.id}</p>
+              </div>
+              <div className="text-sm space-y-1 pt-2 border-t">
+                <p className="font-semibold">Address</p>
+                <p className="font-medium text-muted-foreground">
+                  {site.address}
+                </p>
+              </div>
+              <Button asChild variant="link" className="p-0 h-auto font-medium">
+                <Link href={`/agency/sites/${site.id}`}>
+                  View Full Site Report
+                </Link>
+              </Button>
             </CardContent>
           </Card>
         )}
