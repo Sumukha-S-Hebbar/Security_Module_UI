@@ -56,13 +56,11 @@ export function ModuleSwitcher({ portalHome }: { portalHome: '/agency/home' | '/
                 key={module.name}
                 href={enabled ? getModuleHref(module) : '#'}
                 className={cn(
-                  'py-2 font-semibold transition-colors border-b-2',
+                  'px-3 py-1 font-semibold transition-colors rounded-md',
                   enabled
                     ? 'text-primary hover:text-primary/80'
                     : 'text-muted-foreground/60 cursor-not-allowed',
-                  isActive
-                    ? 'border-primary'
-                    : 'border-transparent'
+                  isActive && 'bg-destructive/10 border border-destructive text-destructive'
                 )}
                 aria-disabled={!enabled}
                 onClick={(e) => !enabled && e.preventDefault()}
