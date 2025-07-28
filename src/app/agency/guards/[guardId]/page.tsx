@@ -27,7 +27,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { ArrowLeft, FileDown, Phone, MapPin, UserCheck, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, FileDown, Phone, MapPin, UserCheck, ShieldCheck, Mail } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
@@ -165,7 +165,7 @@ export default function AgencyGuardReportPage() {
       </div>
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card className="lg:col-span-1">
+        <Card>
           <CardHeader>
             <div className="flex items-center gap-4">
               <Avatar className="h-16 w-16">
@@ -179,43 +179,54 @@ export default function AgencyGuardReportPage() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-sm mt-2 space-y-4">
+            <div className="text-sm mt-2 space-y-2">
               <div className="flex items-start gap-3">
-                <Phone className="h-5 w-5 mt-0.5 text-primary" />
-                <div>
-                  <p className="font-semibold">Phone</p>
-                  <a href={`tel:${guard.phone}`} className="hover:underline text-muted-foreground font-medium">{guard.phone}</a>
-                </div>
+                <Phone className="h-4 w-4 mt-1 text-primary" />
+                <a href={`tel:${guard.phone}`} className="hover:underline font-medium">{guard.phone}</a>
               </div>
-              {site && (
-                <div className="flex items-start gap-3">
-                  <MapPin className="h-5 w-5 mt-0.5 text-primary" />
-                  <div>
-                    <p className="font-semibold">Assigned Site</p>
-                    <p className="text-muted-foreground font-medium">{site.name}</p>
-                     <Button asChild variant="link" className="p-0 h-auto font-medium -ml-1">
-                      <Link href={`/agency/sites/${site.id}`}>View Site Report</Link>
-                    </Button>
-                  </div>
-                </div>
-              )}
-              {patrollingOfficer && (
-                <div className="flex items-start gap-3">
-                  <UserCheck className="h-5 w-5 mt-0.5 text-primary" />
-                  <div>
-                    <p className="font-semibold">Patrolling Officer</p>
-                    <p className="text-muted-foreground font-medium">{patrollingOfficer.name}</p>
-                    <Button asChild variant="link" className="p-0 h-auto font-medium -ml-1">
-                      <Link href={`/agency/patrolling-officers/${patrollingOfficer.id}`}>View Officer Report</Link>
-                    </Button>
-                  </div>
-                </div>
-              )}
             </div>
           </CardContent>
         </Card>
-        
-        <Card className="lg:col-span-2">
+
+        {site && (
+           <Card>
+            <CardHeader>
+                <CardTitle className="flex items-center gap-2"><MapPin className="h-5 w-5"/>Assigned Site</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+                <div>
+                    <p className="font-semibold text-base">{site.name}</p>
+                    <p className="font-medium text-sm text-muted-foreground">{site.address}</p>
+                </div>
+                 <Button asChild variant="link" className="p-0 h-auto font-medium">
+                    <Link href={`/agency/sites/${site.id}`}>View Full Site Report</Link>
+                </Button>
+            </CardContent>
+          </Card>
+        )}
+
+        {patrollingOfficer && (
+           <Card>
+            <CardHeader>
+                <CardTitle className="flex items-center gap-2"><UserCheck className="h-5 w-5"/>Patrolling Officer</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+                <div>
+                    <p className="font-semibold text-base">{patrollingOfficer.name}</p>
+                </div>
+                <div className="text-sm space-y-2 pt-2 border-t">
+                  <div className="flex items-center gap-2"><Phone className="h-4 w-4" /> <a href={`tel:${patrollingOfficer.phone}`} className="hover:underline">{patrollingOfficer.phone}</a></div>
+                  <div className="flex items-center gap-2"><Mail className="h-4 w-4" /> <a href={`mailto:${patrollingOfficer.email}`} className="hover:underline">{patrollingOfficer.email}</a></div>
+                </div>
+                 <Button asChild variant="link" className="p-0 h-auto font-medium">
+                    <Link href={`/agency/patrolling-officers/${patrollingOfficer.id}`}>View Full Officer Report</Link>
+                </Button>
+            </CardContent>
+          </Card>
+        )}
+      </div>
+
+       <Card>
           <CardHeader>
               <CardTitle className="flex items-center gap-2"><ShieldCheck className="h-5 w-5"/>Performance Metrics</CardTitle>
           </CardHeader>
@@ -272,7 +283,6 @@ export default function AgencyGuardReportPage() {
               </div>
           </CardContent>
         </Card>
-      </div>
 
       <Card>
         <CardHeader className="flex flex-row items-start justify-between gap-4">
