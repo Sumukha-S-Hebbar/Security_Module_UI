@@ -327,6 +327,7 @@ export default function AgencyPatrollingOfficerReportPage() {
       <Card ref={assignedSitesTableRef}>
         <CardHeader>
           <CardTitle className="flex items-center gap-2"><MapPin className="h-5 w-5"/>Assigned Sites</CardTitle>
+          <CardDescription className="font-medium">A detailed list of all sites assigned to {patrollingOfficer.name}.</CardDescription>
         </CardHeader>
         <CardContent>
           {assignedSites.length > 0 ? (
