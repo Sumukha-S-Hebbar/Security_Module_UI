@@ -58,6 +58,8 @@ export default function AgencyGuardReportPage() {
   const guardId = params.guardId as string;
   const [selectedMonth, setSelectedMonth] = useState('all');
   const [selectedYear, setSelectedYear] = useState('all');
+  const [performanceSelectedYear, setPerformanceSelectedYear] = useState<string>(new Date().getFullYear().toString());
+  const [performanceSelectedMonth, setPerformanceSelectedMonth] = useState<string>('all');
   const incidentsTableRef = useRef<HTMLDivElement>(null);
 
   const guard = guards.find((g) => g.id === guardId);
@@ -86,6 +88,11 @@ export default function AgencyGuardReportPage() {
     if (years.size > 0) years.add(new Date().getFullYear().toString());
     return Array.from(years).sort((a, b) => parseInt(b) - parseInt(a));
   }, [guardIncidents]);
+  
+  const performanceAvailableYears = useMemo(() => {
+    const currentYear = new Date().getFullYear();
+    return Array.from({ length: 5 }, (_, i) => (currentYear - i).toString());
+  }, []);
 
   const filteredIncidents = useMemo(() => {
     return guardIncidents.filter(incident => {
@@ -288,8 +295,38 @@ export default function AgencyGuardReportPage() {
       </div>
 
        <Card>
-          <CardHeader>
-              <CardTitle className="flex items-center gap-2"><ShieldCheck className="h-5 w-5"/>Performance Metrics</CardTitle>
+          <CardHeader className="flex flex-row items-start justify-between">
+              <div>
+                <CardTitle>Guard Performance</CardTitle>
+                <CardDescription>Key performance indicators for this guard.</CardDescription>
+              </div>
+              <div className="flex items-center gap-2">
+                  <Select value={performanceSelectedYear} onValueChange={setPerformanceSelectedYear}>
+                      <SelectTrigger className="w-[120px] font-medium hover:bg-accent hover:text-accent-foreground">
+                          <SelectValue placeholder="Select Year" />
+                      </SelectTrigger>
+                      <SelectContent>
+                      {performanceAvailableYears.map((year) => (
+                          <SelectItem key={year} value={year} className="font-medium">
+                          {year}
+                          </SelectItem>
+                      ))}
+                      </SelectContent>
+                  </Select>
+                  <Select value={performanceSelectedMonth} onValueChange={setPerformanceSelectedMonth}>
+                      <SelectTrigger className="w-[140px] font-medium hover:bg-accent hover:text-accent-foreground">
+                          <SelectValue placeholder="Select Month" />
+                      </SelectTrigger>
+                      <SelectContent>
+                      <SelectItem value="all" className="font-medium">All Months</SelectItem>
+                      {Array.from({ length: 12 }, (_, i) => (
+                          <SelectItem key={i} value={i.toString()} className="font-medium">
+                          {new Date(0, i).toLocaleString('default', { month: 'long' })}
+                          </SelectItem>
+                      ))}
+                      </SelectContent>
+                  </Select>
+              </div>
           </CardHeader>
            <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center justify-items-center">
