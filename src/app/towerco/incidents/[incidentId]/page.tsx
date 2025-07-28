@@ -226,6 +226,9 @@ export default function IncidentReportPage() {
                     </p>
                 </div>
               )}
+              <Button asChild variant="link" className="p-0 h-auto font-medium mt-2">
+                <Link href={`/towerco/sites/${site.id}`}>View Full Site Report</Link>
+              </Button>
             </CardContent>
           </Card>
         )}
