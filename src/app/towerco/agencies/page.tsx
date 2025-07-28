@@ -551,12 +551,12 @@ export default function TowercoAgenciesPage() {
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead className="font-bold">ID</TableHead>
-                                <TableHead className="font-bold">Agency</TableHead>
-                                <TableHead className="font-bold">Contact Info</TableHead>
-                                <TableHead className="font-bold">Location</TableHead>
-                                <TableHead className="font-bold">Sites Assigned</TableHead>
-                                <TableHead className="font-bold">Incidents Occurred</TableHead>
+                                <TableHead>ID</TableHead>
+                                <TableHead>Agency</TableHead>
+                                <TableHead>Contact Info</TableHead>
+                                <TableHead>Location</TableHead>
+                                <TableHead>Sites Assigned</TableHead>
+                                <TableHead>Incidents Occurred</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -717,3 +717,4 @@ export default function TowercoAgenciesPage() {
         </div>
     );
 }
+
