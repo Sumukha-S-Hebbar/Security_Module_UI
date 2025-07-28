@@ -210,10 +210,12 @@ export default function AgencyGuardReportPage() {
            <Card>
             <CardHeader>
                 <CardTitle className="flex items-center gap-2"><UserCheck className="h-5 w-5"/>Patrolling Officer</CardTitle>
+                <CardDescription>Officer overseeing this site.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
                 <div>
                     <p className="font-semibold text-base">{patrollingOfficer.name}</p>
+                    <p className="font-medium">ID: {patrollingOfficer.id}</p>
                 </div>
                 <div className="text-sm space-y-2 pt-2 border-t">
                   <div className="flex items-center gap-2"><Phone className="h-4 w-4" /> <a href={`tel:${patrollingOfficer.phone}`} className="hover:underline">{patrollingOfficer.phone}</a></div>
