@@ -31,7 +31,7 @@ import { ArrowLeft, FileDown, Phone, MapPin, UserCheck, ShieldCheck, Mail, Shiel
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useRef } from 'react';
 import {
   Select,
   SelectContent,
@@ -47,6 +47,7 @@ export default function AgencyGuardReportPage() {
   const guardId = params.guardId as string;
   const [selectedMonth, setSelectedMonth] = useState('all');
   const [selectedYear, setSelectedYear] = useState('all');
+  const incidentsTableRef = useRef<HTMLDivElement>(null);
 
   const guard = guards.find((g) => g.id === guardId);
 
@@ -90,6 +91,17 @@ export default function AgencyGuardReportPage() {
       title: 'Report Generation Started',
       description: `Generating a detailed report for ${guard.name}.`,
     });
+  };
+
+  const handleScrollToIncidents = () => {
+    const element = incidentsTableRef.current;
+    if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        element.classList.add('highlight-row');
+        setTimeout(() => {
+            element.classList.remove('highlight-row');
+        }, 2000);
+    }
   };
 
   const getStatusIndicator = (status: Incident['status']) => {
@@ -189,16 +201,16 @@ export default function AgencyGuardReportPage() {
              <div className="pt-4 mt-4 border-t">
               <h4 className="font-semibold mb-4 text-lg">Operational Overview</h4>
                 <div className="grid grid-cols-2 gap-4 text-center">
-                  <div className="flex flex-col items-center gap-1">
+                  <button onClick={handleScrollToIncidents} className="flex flex-col items-center gap-1 group">
                       <ShieldAlert className="h-8 w-8 text-primary" />
-                      <p className="font-medium text-muted-foreground">Total Incidents</p>
-                      <p className="font-bold text-lg">{guardIncidents.length}</p>
-                  </div>
-                   <div className="flex flex-col items-center gap-1">
+                      <p className="font-medium text-[#00B4D8] group-hover:underline">Total Incidents</p>
+                      <p className="font-bold text-lg text-[#00B4D8] group-hover:underline">{guardIncidents.length}</p>
+                  </button>
+                   <button onClick={handleScrollToIncidents} className="flex flex-col items-center gap-1 group">
                       <ShieldCheck className="h-8 w-8 text-primary" />
-                      <p className="font-medium text-muted-foreground">Incidents Resolved</p>
-                      <p className="font-bold text-lg">{resolvedIncidents}</p>
-                  </div>
+                      <p className="font-medium text-[#00B4D8] group-hover:underline">Incidents Resolved</p>
+                      <p className="font-bold text-lg text-[#00B4D8] group-hover:underline">{resolvedIncidents}</p>
+                  </button>
                 </div>
             </div>
           </CardContent>
@@ -313,7 +325,7 @@ export default function AgencyGuardReportPage() {
           </CardContent>
         </Card>
 
-      <Card>
+      <Card ref={incidentsTableRef}>
         <CardHeader className="flex flex-row items-start justify-between gap-4">
           <div className="flex-grow">
             <CardTitle>Recent Incidents</CardTitle>
