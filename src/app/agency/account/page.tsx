@@ -7,12 +7,14 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useToast } from '@/hooks/use-toast';
 import { securityAgencies } from '@/lib/data/security-agencies';
+import { sites } from '@/lib/data/sites';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Loader2, Upload } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const LOGGED_IN_AGENCY_ID = 'AGY01';
 
@@ -21,8 +23,8 @@ const profileFormSchema = z.object({
   phone: z.string().min(1, 'Phone number is required.'),
   email: z.string().email('Invalid email address.'),
   address: z.string().min(1, 'Address is required.'),
-  city: z.string().min(1, 'City is required.'),
   region: z.string().min(1, 'Region is required.'),
+  city: z.string().min(1, 'City is required.'),
   avatar: z.any().optional(),
 });
 
@@ -35,12 +37,6 @@ export default function AgencyAccountPage() {
 
   const agency = useMemo(() => securityAgencies.find(a => a.id === LOGGED_IN_AGENCY_ID), []);
   
-  useEffect(() => {
-    if (agency?.avatar) {
-      setAvatarPreview(agency.avatar);
-    }
-  }, [agency]);
-
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
@@ -48,11 +44,36 @@ export default function AgencyAccountPage() {
       phone: agency?.phone || '',
       email: agency?.email || '',
       address: agency?.address || '',
-      city: agency?.city || '',
       region: agency?.region || '',
+      city: agency?.city || '',
       avatar: undefined,
     },
   });
+
+  const selectedRegion = form.watch('region');
+
+  const allRegions = useMemo(() => {
+    return [...new Set(sites.map(site => site.region))].sort();
+  }, []);
+
+  const citiesInRegion = useMemo(() => {
+    if (!selectedRegion) return [];
+    return [...new Set(sites.filter(site => site.region === selectedRegion).map(site => site.city))].sort();
+  }, [selectedRegion]);
+  
+  useEffect(() => {
+    if (agency?.avatar) {
+      setAvatarPreview(agency.avatar);
+    }
+  }, [agency]);
+  
+  // When region changes, if the current city is not in the new region's cities, reset it.
+  useEffect(() => {
+      if (selectedRegion && !citiesInRegion.includes(form.getValues('city'))) {
+          form.setValue('city', '');
+      }
+  }, [selectedRegion, citiesInRegion, form]);
+
 
   const handleAvatarChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -192,32 +213,50 @@ export default function AgencyAccountPage() {
                   )}
                 />
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <FormField
-                    control={form.control}
-                    name="city"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>City</FormLabel>
-                        <FormControl>
-                          <Input placeholder="e.g., Safe City" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                   <FormField
-                    control={form.control}
-                    name="region"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>State/Region</FormLabel>
-                        <FormControl>
-                          <Input placeholder="e.g., CA" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                    <FormField
+                      control={form.control}
+                      name="region"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>State/Region</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select a region" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {allRegions.map(region => (
+                                <SelectItem key={region} value={region}>{region}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="city"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>City</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value} disabled={!selectedRegion}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select a city" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {citiesInRegion.map(city => (
+                                <SelectItem key={city} value={city}>{city}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                 </div>
                 <div className="flex justify-end">
                   <Button type="submit" disabled={isSaving}>
