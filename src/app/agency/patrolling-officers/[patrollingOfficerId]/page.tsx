@@ -26,7 +26,7 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { ArrowLeft, FileDown, Phone, Mail, MapPin, Users, ShieldAlert, Map, Clock, ChevronDown, Building2 } from 'lucide-react';
+import { ArrowLeft, FileDown, Phone, Mail, MapPin, Users, ShieldAlert, Map, Clock, ChevronDown, Building2, CheckCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Progress } from '@/components/ui/progress';
 import { useMemo, useState, useRef, Fragment } from 'react';
@@ -375,12 +375,17 @@ export default function AgencyPatrollingOfficerReportPage() {
                           <TableHead>Site Name</TableHead>
                           <TableHead>Address</TableHead>
                           <TableHead>Guards</TableHead>
+                          <TableHead>Incidents</TableHead>
+                          <TableHead>Resolved</TableHead>
                       </TableRow>
                   </TableHeader>
                   <TableBody>
                       {assignedSites.map(site => {
                           const siteGuards = guards.filter(g => g.site === site.name);
                           const isExpanded = expandedSiteId === site.id;
+                          const siteIncidents = incidents.filter(i => i.siteId === site.id);
+                          const resolvedCount = siteIncidents.filter(i => i.status === 'Resolved').length;
+
                           return (
                             <Fragment key={site.id}>
                               <TableRow className="hover:bg-accent hover:text-accent-foreground group">
@@ -403,10 +408,22 @@ export default function AgencyPatrollingOfficerReportPage() {
                                       <ChevronDown className={cn("h-4 w-4 transition-transform", isExpanded && "rotate-180")} />
                                     </Button>
                                   </TableCell>
+                                  <TableCell>
+                                    <div className="flex items-center gap-2 font-medium">
+                                      <ShieldAlert className="h-4 w-4 text-muted-foreground group-hover:text-accent-foreground" />
+                                      <span>{siteIncidents.length}</span>
+                                    </div>
+                                  </TableCell>
+                                  <TableCell>
+                                    <div className="flex items-center gap-2 font-medium">
+                                      <CheckCircle className="h-4 w-4 text-chart-2" />
+                                      <span>{resolvedCount}</span>
+                                    </div>
+                                  </TableCell>
                               </TableRow>
                               {isExpanded && (
                                 <TableRow className="bg-muted/50 hover:bg-muted/50">
-                                    <TableCell colSpan={4} className="p-0">
+                                    <TableCell colSpan={6} className="p-0">
                                         <div className="p-4">
                                             <Table>
                                                 <TableHeader>
