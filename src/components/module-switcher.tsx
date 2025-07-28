@@ -2,6 +2,7 @@
 
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 type Module = {
   name: string;
@@ -21,6 +22,8 @@ const allModules: Module[] = [
 const MOCK_ENABLED_MODULES_FOR_USER = ['Security', 'Incident Management'];
 
 export function ModuleSwitcher({ portalHome }: { portalHome: '/agency/home' | '/towerco/home' }) {
+  const pathname = usePathname();
+
   const isModuleEnabled = (moduleName: string) => {
     return MOCK_ENABLED_MODULES_FOR_USER.includes(moduleName);
   };
@@ -36,21 +39,30 @@ export function ModuleSwitcher({ portalHome }: { portalHome: '/agency/home' | '/
     return module.href;
   }
 
+  const isSecurityModuleActive = () => {
+      return pathname.startsWith('/agency') || pathname.startsWith('/towerco');
+  }
+
   return (
     <div className="bg-background border-b">
       <div className="container mx-auto px-4 md:px-6">
         <nav className="flex items-center justify-center gap-4 sm:gap-6 text-sm">
           {allModules.map((module) => {
             const enabled = isModuleEnabled(module.name);
+            const isActive = module.name === 'Security' && isSecurityModuleActive();
+
             return (
               <Link
                 key={module.name}
                 href={enabled ? getModuleHref(module) : '#'}
                 className={cn(
-                  'py-2 font-semibold transition-colors',
+                  'py-2 font-semibold transition-colors border-b-2',
                   enabled
                     ? 'text-primary hover:text-primary/80'
-                    : 'text-muted-foreground/60 cursor-not-allowed'
+                    : 'text-muted-foreground/60 cursor-not-allowed',
+                  isActive
+                    ? 'border-primary'
+                    : 'border-transparent'
                 )}
                 aria-disabled={!enabled}
                 onClick={(e) => !enabled && e.preventDefault()}
