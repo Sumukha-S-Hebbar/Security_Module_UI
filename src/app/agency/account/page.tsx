@@ -144,8 +144,8 @@ export default function AgencyAccountPage() {
 
   return (
     <div className="p-4 sm:p-6 lg:p-8">
-      <div className="max-w-4xl mx-auto space-y-6">
-        <div className="mb-8">
+      <div className="max-w-5xl mx-auto space-y-6">
+        <div className="mb-6">
           <h1 className="text-3xl font-bold tracking-tight">Account Settings</h1>
           <p className="text-muted-foreground">Manage your agency's profile information.</p>
         </div>
@@ -320,7 +320,7 @@ export default function AgencyAccountPage() {
           </CardContent>
         </Card>
 
-        <div className="mt-6">
+        <div className="mt-4">
           <Button className="w-full bg-[#1e90ff] hover:bg-[#1c86ee] text-white text-lg py-6">
             <KeyRound className="mr-2 h-5 w-5" />
             Change Password
