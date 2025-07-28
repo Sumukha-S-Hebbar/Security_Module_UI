@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -11,7 +11,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Upload } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 const LOGGED_IN_AGENCY_ID = 'AGY01';
 
@@ -22,6 +23,7 @@ const profileFormSchema = z.object({
   address: z.string().min(1, 'Address is required.'),
   city: z.string().min(1, 'City is required.'),
   region: z.string().min(1, 'Region is required.'),
+  avatar: z.any().optional(),
 });
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
@@ -29,8 +31,15 @@ type ProfileFormValues = z.infer<typeof profileFormSchema>;
 export default function AgencyAccountPage() {
   const { toast } = useToast();
   const [isSaving, setIsSaving] = useState(false);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
 
   const agency = useMemo(() => securityAgencies.find(a => a.id === LOGGED_IN_AGENCY_ID), []);
+  
+  useEffect(() => {
+    if (agency?.avatar) {
+      setAvatarPreview(agency.avatar);
+    }
+  }, [agency]);
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
@@ -41,8 +50,21 @@ export default function AgencyAccountPage() {
       address: agency?.address || '',
       city: agency?.city || '',
       region: agency?.region || '',
+      avatar: undefined,
     },
   });
+
+  const handleAvatarChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      form.setValue('avatar', event.target.files);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setAvatarPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   async function onSubmit(values: ProfileFormValues) {
     setIsSaving(true);
@@ -89,6 +111,32 @@ export default function AgencyAccountPage() {
           <CardContent>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                
+                <div className="flex items-center gap-6">
+                    <Avatar className="h-24 w-24">
+                        <AvatarImage src={avatarPreview || undefined} alt={agency.name} />
+                        <AvatarFallback>{agency.name.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                    <FormField
+                      control={form.control}
+                      name="avatar"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Agency Logo</FormLabel>
+                          <FormControl>
+                            <Input 
+                                type="file" 
+                                accept="image/*" 
+                                onChange={handleAvatarChange}
+                                disabled={isSaving}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                </div>
+
                 <FormField
                   control={form.control}
                   name="name"
