@@ -40,6 +40,17 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
+const getPerformanceColor = (value: number) => {
+  if (value >= 95) {
+    return 'hsl(var(--chart-2))'; // Green
+  } else if (value >= 65) {
+    return 'hsl(var(--chart-3))'; // Yellow
+  } else {
+    return 'hsl(var(--destructive))'; // Orange
+  }
+};
+
+
 export default function AgencyGuardReportPage() {
   const params = useParams();
   const router = useRouter();
@@ -148,13 +159,22 @@ export default function AgencyGuardReportPage() {
   
   const selfieAccuracy = guard.totalSelfieRequests > 0 ? Math.round(((guard.totalSelfieRequests - guard.missedSelfieCount) / guard.totalSelfieRequests) * 100) : 100;
   const perimeterAccuracy = guard.performance?.perimeterAccuracy || 0;
-  const compliance = Math.round((perimeterAccuracy + selfieAccuracy) / 2);
-  const complianceData = [
-    { name: 'Compliance', value: compliance },
-    { name: 'Remaining', value: 100 - compliance },
+  
+  const perimeterAccuracyData = [
+    { name: 'Accuracy', value: perimeterAccuracy },
+    { name: 'Remaining', value: 100 - perimeterAccuracy },
   ];
-  const COLORS = ['hsl(var(--chart-2))', 'hsl(var(--muted))'];
+  
+  const selfieAccuracyData = [
+    { name: 'Accuracy', value: selfieAccuracy },
+    { name: 'Remaining', value: 100 - selfieAccuracy },
+  ];
 
+  const perimeterColor = getPerformanceColor(perimeterAccuracy);
+  const selfieColor = getPerformanceColor(selfieAccuracy);
+  
+  const COLORS_CHECKIN = [perimeterColor, 'hsl(var(--muted))'];
+  const COLORS_SELFIE = [selfieColor, 'hsl(var(--muted))'];
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6">
@@ -271,55 +291,73 @@ export default function AgencyGuardReportPage() {
           <CardHeader>
               <CardTitle className="flex items-center gap-2"><ShieldCheck className="h-5 w-5"/>Performance Metrics</CardTitle>
           </CardHeader>
-           <CardContent className="space-y-6">
-              <div className="flex flex-col items-center gap-2 pt-4">
-                  <div className="w-32 h-32 relative">
-                      <ResponsiveContainer width="100%" height="100%">
-                          <PieChart>
-                              <Pie
-                                  data={complianceData}
-                                  cx="50%"
-                                  cy="50%"
-                                  innerRadius="70%"
-                                  outerRadius="85%"
-                                  paddingAngle={0}
-                                  dataKey="value"
-                                  stroke="none"
-                              >
-                                  {complianceData.map((entry, index) => (
-                                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                  ))}
-                              </Pie>
-                          </PieChart>
-                      </ResponsiveContainer>
-                      <div className="absolute inset-0 flex items-center justify-center">
-                          <span className="text-3xl font-bold">{compliance}%</span>
+           <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center justify-items-center">
+                  <div className="flex flex-col items-center gap-2">
+                      <div className="w-32 h-32 relative">
+                          <ResponsiveContainer width="100%" height="100%">
+                              <PieChart>
+                                  <Pie
+                                      data={perimeterAccuracyData}
+                                      cx="50%"
+                                      cy="50%"
+                                      innerRadius="70%"
+                                      outerRadius="85%"
+                                      paddingAngle={0}
+                                      dataKey="value"
+                                      stroke="none"
+                                  >
+                                      {perimeterAccuracyData.map((entry, index) => (
+                                          <Cell key={`cell-${index}`} fill={COLORS_CHECKIN[index % COLORS_CHECKIN.length]} />
+                                      ))}
+                                  </Pie>
+                              </PieChart>
+                          </ResponsiveContainer>
+                          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                              <span className="text-3xl font-bold" style={{ color: perimeterColor }}>
+                                  {perimeterAccuracy}%
+                              </span>
+                          </div>
                       </div>
+                      <p className="flex items-center gap-2 text-center font-medium">
+                        <ShieldCheck className="w-4 h-4 text-primary" />
+                        Guard Check-in Accuracy
+                      </p>
                   </div>
-                  <p className="text-lg text-center font-medium">Overall Compliance</p>
-              </div>
-              <div className="space-y-4 pt-6 border-t">
-                  <div>
-                    <div className="flex justify-between items-center mb-1">
-                      <h4 className="flex items-center gap-2 text-sm font-medium">
-                          Guard Check-in Accuracy
-                      </h4>
-                      <span className="text-muted-foreground font-medium">{perimeterAccuracy}%</span>
-                    </div>
-                    <Progress value={perimeterAccuracy} className="h-2" />
-                  </div>
-                  <div>
-                    <div className="flex justify-between items-center mb-1">
-                      <h4 className="flex items-center gap-2 text-sm font-medium">
-                          Selfie Check-in Accuracy
-                      </h4>
-                      <span className="text-muted-foreground font-medium">{selfieAccuracy}%</span>
-                    </div>
-                    <Progress value={selfieAccuracy} className="h-2" />
-                  </div>
-                  <div className="text-sm text-muted-foreground font-medium">
-                      <p>Total Selfie Requests: {guard.totalSelfieRequests}</p>
-                      <p>Missed Selfies: {guard.missedSelfieCount}</p>
+                  
+                  <div className="flex flex-col items-center gap-2">
+                      <div className="w-32 h-32 relative">
+                          <ResponsiveContainer width="100%" height="100%">
+                              <PieChart>
+                                  <Pie
+                                      data={selfieAccuracyData}
+                                      cx="50%"
+                                      cy="50%"
+                                      innerRadius="70%"
+                                      outerRadius="85%"
+                                      paddingAngle={0}
+                                      dataKey="value"
+                                      stroke="none"
+                                  >
+                                      {selfieAccuracyData.map((entry, index) => (
+                                          <Cell key={`cell-${index}`} fill={COLORS_SELFIE[index % COLORS_SELFIE.length]} />
+                                      ))}
+                                  </Pie>
+                              </PieChart>
+                          </ResponsiveContainer>
+                          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                              <span className="text-3xl font-bold" style={{ color: selfieColor }}>
+                                  {selfieAccuracy}%
+                              </span>
+                          </div>
+                      </div>
+                      <p className="flex items-center gap-2 text-center font-medium">
+                        <UserCheck className="w-4 h-4 text-primary" />
+                        Selfie Check-in Accuracy
+                      </p>
+                      <div className="text-sm text-muted-foreground font-medium text-center mt-1">
+                          <p>Total Requests: {guard.totalSelfieRequests} | Missed: {guard.missedSelfieCount}</p>
+                      </div>
                   </div>
               </div>
           </CardContent>
