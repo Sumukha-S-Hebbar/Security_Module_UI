@@ -9,10 +9,9 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useToast } from '@/hooks/use-toast';
-import { sites } from '@/lib/data/sites';
-import { securityAgencies } from '@/lib/data/security-agencies';
+import { securityAgencies as mockAgencies } from '@/lib/data/security-agencies';
 import { organizations } from '@/lib/data/organizations';
-import { incidents } from '@/lib/data/incidents';
+import { incidents as mockIncidents } from '@/lib/data/incidents';
 import type { Site, SecurityAgency } from '@/types';
 import {
   Card,
@@ -70,6 +69,9 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { cn } from '@/lib/utils';
+import { Skeleton } from '@/components/ui/skeleton';
+import { fetchData } from '@/lib/api';
+
 
 const LOGGED_IN_ORG_ID = 'TCO01'; // Simulate logged-in user
 const ASSIGNED_ITEMS_PER_PAGE = 5;
@@ -94,6 +96,11 @@ const addSiteFormSchema = z.object({
 });
 
 export default function TowercoSitesPage() {
+  const [sites, setSites] = useState<Site[]>([]);
+  const [securityAgencies, setSecurityAgencies] = useState<SecurityAgency[]>([]);
+  const [incidents, setIncidents] = useState<typeof mockIncidents>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
   const [isAddSiteDialogOpen, setIsAddSiteDialogOpen] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -124,9 +131,26 @@ export default function TowercoSitesPage() {
   const loggedInOrg = useMemo(() => organizations.find(o => o.id === LOGGED_IN_ORG_ID), []);
   const unassignedSitesRef = useRef<Map<string, HTMLTableRowElement | null>>(new Map());
 
+  useEffect(() => {
+    async function loadInitialData() {
+        setIsLoading(true);
+        // Fetch all necessary data in parallel
+        const [sitesData, agenciesData, incidentsData] = await Promise.all([
+            fetchData<Site[]>('https://ken.securebuddy.tel:8000/api/v1/sites/'),
+            fetchData<SecurityAgency[]>('https://ken.securebuddy.tel:8000/api/v1/agencies/'),
+            fetchData<typeof mockIncidents>('https://ken.securebuddy.tel:8000/api/v1/incidents/')
+        ]);
+        setSites(sitesData || []);
+        setSecurityAgencies(agenciesData || []);
+        setIncidents(incidentsData || []);
+        setIsLoading(false);
+    }
+    loadInitialData();
+  }, []);
+
   const towercoSites = useMemo(
     () => sites.filter((site) => site.towerco === loggedInOrg?.name),
-    [loggedInOrg]
+    [sites, loggedInOrg]
   );
 
   const getAgencyForSite = (siteId: string): SecurityAgency | undefined => {
@@ -135,12 +159,12 @@ export default function TowercoSitesPage() {
 
   const assignedSites = useMemo(
     () => towercoSites.filter((site) => getAgencyForSite(site.id)),
-    [towercoSites]
+    [towercoSites, securityAgencies]
   );
 
   const unassignedSites = useMemo(
     () => towercoSites.filter((site) => !getAgencyForSite(site.id)),
-    [towercoSites]
+    [towercoSites, securityAgencies]
   );
 
   const uploadForm = useForm<z.infer<typeof uploadFormSchema>>({
@@ -251,7 +275,7 @@ export default function TowercoSitesPage() {
         }
     });
     return securityAgencies.filter((a) => agencyIds.has(a.id));
-  }, [assignedSites]);
+  }, [assignedSites, securityAgencies]);
 
   const allAssignedRegions = useMemo(() => [...new Set(assignedSites.map((site) => site.region))].sort(), [assignedSites]);
   const assignedCitiesForFilter = useMemo(() => {
@@ -301,6 +325,7 @@ export default function TowercoSitesPage() {
     assignedSites,
     assignedSelectedRegion,
     assignedSelectedCity,
+    securityAgencies
   ]);
   
   const paginatedAssignedSites = useMemo(() => {
@@ -349,7 +374,20 @@ export default function TowercoSitesPage() {
         counts[incident.siteId]++;
     });
     return counts;
-  }, []);
+  }, [incidents]);
+
+  if (isLoading) {
+    return (
+        <div className="p-4 sm:p-6 lg:p-8 space-y-6">
+            <div className="space-y-2">
+                <Skeleton className="h-8 w-1/3" />
+                <Skeleton className="h-4 w-1/2" />
+            </div>
+            <Skeleton className="h-64 w-full" />
+            <Skeleton className="h-64 w-full" />
+        </div>
+    );
+  }
 
   if (!loggedInOrg) {
      return (
