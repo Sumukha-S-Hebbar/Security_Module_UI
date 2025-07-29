@@ -1,3 +1,4 @@
+
 'use client';
 
 import { cn } from '@/lib/utils';
@@ -10,16 +11,16 @@ type Module = {
 };
 
 const allModules: Module[] = [
-  { name: 'Real Estate', href: '#' },
+  { name: 'Real Estate', href: 'https://ken.towerbuddy.tel/authorization' },
   { name: 'Security', href: '#' }, // Href will be replaced by portal-specific home
   { name: 'Energy', href: '#' },
-  { name: 'Incident Management', href: '/incidents' }, // Example link
+  { name: 'Incident Management', href: '#' },
   { name: 'Preventive Maintenance', href: '#' },
   { name: 'Site Master', href: '#' },
 ];
 
 // In a real app, this would come from a user context or API call
-const MOCK_ENABLED_MODULES_FOR_USER = ['Security', 'Incident Management'];
+const MOCK_ENABLED_MODULES_FOR_USER = ['Security', 'Real Estate'];
 
 export function ModuleSwitcher({ portalHome }: { portalHome: '/agency/home' | '/towerco/home' }) {
   const pathname = usePathname();
@@ -31,10 +32,6 @@ export function ModuleSwitcher({ portalHome }: { portalHome: '/agency/home' | '/
   const getModuleHref = (module: Module) => {
     if (module.name === 'Security') {
       return portalHome;
-    }
-    if (module.name === 'Incident Management') {
-        const incidentPath = portalHome.startsWith('/agency') ? '/agency/incidents' : '/towerco/incidents';
-        return incidentPath;
     }
     return module.href;
   }
@@ -64,6 +61,8 @@ export function ModuleSwitcher({ portalHome }: { portalHome: '/agency/home' | '/
                 )}
                 aria-disabled={!enabled}
                 onClick={(e) => !enabled && e.preventDefault()}
+                target={module.name === 'Real Estate' ? '_blank' : undefined}
+                rel={module.name === 'Real Estate' ? 'noopener noreferrer' : undefined}
               >
                 {module.name}
               </Link>
