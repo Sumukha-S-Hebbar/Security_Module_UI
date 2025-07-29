@@ -9,10 +9,9 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useToast } from '@/hooks/use-toast';
-import { securityAgencies as mockAgencies } from '@/lib/data/security-agencies';
 import { organizations } from '@/lib/data/organizations';
 import { incidents as mockIncidents } from '@/lib/data/incidents';
-import type { Site, SecurityAgency } from '@/types';
+import type { Site, SecurityAgency, PaginatedSitesResponse } from '@/types';
 import {
   Card,
   CardContent,
@@ -134,13 +133,12 @@ export default function TowercoSitesPage() {
   useEffect(() => {
     async function loadInitialData() {
         setIsLoading(true);
-        // Fetch all necessary data in parallel
-        const [sitesData, agenciesData, incidentsData] = await Promise.all([
-            fetchData<Site[]>('https://ken.securebuddy.tel:8000/api/v1/sites/'),
+        const [sitesResponse, agenciesData, incidentsData] = await Promise.all([
+            fetchData<PaginatedSitesResponse>('https://ken.securebuddy.tel:8000/api/v1/sites/'),
             fetchData<SecurityAgency[]>('https://ken.securebuddy.tel:8000/api/v1/agencies/'),
             fetchData<typeof mockIncidents>('https://ken.securebuddy.tel:8000/api/v1/incidents/')
         ]);
-        setSites(sitesData || []);
+        setSites(sitesResponse?.results || []);
         setSecurityAgencies(agenciesData || []);
         setIncidents(incidentsData || []);
         setIsLoading(false);
@@ -149,22 +147,18 @@ export default function TowercoSitesPage() {
   }, []);
 
   const towercoSites = useMemo(
-    () => sites.filter((site) => site.towerco === loggedInOrg?.name),
+    () => sites.filter((site) => site.org_name === loggedInOrg?.name),
     [sites, loggedInOrg]
   );
 
-  const getAgencyForSite = (siteId: string): SecurityAgency | undefined => {
-    return securityAgencies.find(agency => agency.siteIds.includes(siteId));
-  }
-
   const assignedSites = useMemo(
-    () => towercoSites.filter((site) => getAgencyForSite(site.id)),
-    [towercoSites, securityAgencies]
+    () => towercoSites.filter((site) => site.site_status === 'Assigned'),
+    [towercoSites]
   );
 
   const unassignedSites = useMemo(
-    () => towercoSites.filter((site) => !getAgencyForSite(site.id)),
-    [towercoSites, securityAgencies]
+    () => towercoSites.filter((site) => site.site_status === 'Unassigned'),
+    [towercoSites]
   );
 
   const uploadForm = useForm<z.infer<typeof uploadFormSchema>>({
@@ -233,9 +227,9 @@ export default function TowercoSitesPage() {
     setGuardsRequired((prev) => ({ ...prev, [siteId]: count }));
   };
 
-  const handleAssignAgency = (siteId: string) => {
-    const agencyId = assignments[siteId];
-    const numGuards = guardsRequired[siteId];
+  const handleAssignAgency = (siteId: number) => {
+    const agencyId = assignments[siteId.toString()];
+    const numGuards = guardsRequired[siteId.toString()];
 
     if (!agencyId) {
       toast({
@@ -255,8 +249,8 @@ export default function TowercoSitesPage() {
       return;
     }
 
-    const siteName = sites.find((s) => s.id === siteId)?.name;
-    const agencyName = securityAgencies.find((a) => a.id === agencyId)?.name;
+    const siteName = sites.find((s) => s.id === siteId)?.site_name;
+    const agencyName = securityAgencies.find((a) => a.agency_id === agencyId)?.agency_name;
 
     console.log(`Assigning agency ${agencyId} to site ${siteId} with ${numGuards} guards for TOWERCO ${loggedInOrg?.name}`);
     
@@ -269,12 +263,11 @@ export default function TowercoSitesPage() {
   const agenciesOnSites = useMemo(() => {
     const agencyIds = new Set<string>();
     assignedSites.forEach(site => {
-        const agency = getAgencyForSite(site.id);
-        if(agency) {
-            agencyIds.add(agency.id);
+        if(site.assigned_agency) {
+            agencyIds.add(site.assigned_agency.agency_id);
         }
     });
-    return securityAgencies.filter((a) => agencyIds.has(a.id));
+    return securityAgencies.filter((a) => agencyIds.has(a.agency_id));
   }, [assignedSites, securityAgencies]);
 
   const allAssignedRegions = useMemo(() => [...new Set(assignedSites.map((site) => site.region))].sort(), [assignedSites]);
@@ -303,14 +296,15 @@ export default function TowercoSitesPage() {
   const filteredAssignedSites = useMemo(() => {
     const filtered = assignedSites.filter((site) => {
       const searchLower = assignedSearchQuery.toLowerCase();
+      const fullAddress = `${site.site_address_line1} ${site.site_address_line2 || ''}`.toLowerCase();
       const matchesSearch =
-        site.name.toLowerCase().includes(searchLower) ||
-        site.address.toLowerCase().includes(searchLower) ||
-        site.id.toLowerCase().includes(searchLower);
+        site.site_name.toLowerCase().includes(searchLower) ||
+        fullAddress.includes(searchLower) ||
+        site.org_site_id.toLowerCase().includes(searchLower);
 
-      const agency = getAgencyForSite(site.id);
+      const agency = site.assigned_agency;
       const matchesAgency =
-        selectedAgency === 'all' || agency?.id === selectedAgency;
+        selectedAgency === 'all' || agency?.agency_id === selectedAgency;
 
       const matchesRegion = assignedSelectedRegion === 'all' || site.region === assignedSelectedRegion;
       const matchesCity = assignedSelectedCity === 'all' || site.city === assignedSelectedCity;
@@ -325,7 +319,6 @@ export default function TowercoSitesPage() {
     assignedSites,
     assignedSelectedRegion,
     assignedSelectedCity,
-    securityAgencies
   ]);
   
   const paginatedAssignedSites = useMemo(() => {
@@ -339,9 +332,10 @@ export default function TowercoSitesPage() {
   const filteredUnassignedSites = useMemo(() => {
     const filtered = unassignedSites.filter((site) => {
       const searchLower = unassignedSearchQuery.toLowerCase();
+       const fullAddress = `${site.site_address_line1} ${site.site_address_line2 || ''}`.toLowerCase();
       const matchesSearch =
-        site.name.toLowerCase().includes(searchLower) ||
-        site.address.toLowerCase().includes(searchLower);
+        site.site_name.toLowerCase().includes(searchLower) ||
+        fullAddress.includes(searchLower);
       
       const matchesRegion = unassignedSelectedRegion === 'all' || site.region === unassignedSelectedRegion;
       const matchesCity = unassignedSelectedCity === 'all' || site.city === unassignedSelectedCity;
@@ -358,23 +352,6 @@ export default function TowercoSitesPage() {
   }, [filteredUnassignedSites, unassignedCurrentPage]);
 
   const totalUnassignedPages = Math.ceil(filteredUnassignedSites.length / UNASSIGNED_ITEMS_PER_PAGE);
-
-
-  const getAgencyName = (siteId: string) => {
-    const agency = getAgencyForSite(siteId);
-    return agency ? agency.name : 'Unassigned';
-  };
-
-  const siteIncidentsCount = useMemo(() => {
-    const counts: { [siteId: string]: number } = {};
-    incidents.forEach((incident) => {
-        if (!counts[incident.siteId]) {
-          counts[incident.siteId] = 0;
-        }
-        counts[incident.siteId]++;
-    });
-    return counts;
-  }, [incidents]);
 
   if (isLoading) {
     return (
@@ -645,8 +622,8 @@ export default function TowercoSitesPage() {
                   <SelectContent>
                     <SelectItem value="all" className="font-medium">All Agencies</SelectItem>
                     {agenciesOnSites.map((agency) => (
-                      <SelectItem key={agency.id} value={agency.id} className="font-medium">
-                        {agency.name}
+                      <SelectItem key={agency.id} value={agency.agency_id} className="font-medium">
+                        {agency.agency_name}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -697,8 +674,8 @@ export default function TowercoSitesPage() {
                 <TableBody>
                     {paginatedAssignedSites.length > 0 ? (
                         paginatedAssignedSites.map((site) => {
-                            const agency = getAgencyForSite(site.id);
-                            const incidentsCount = siteIncidentsCount[site.id] || 0;
+                            const agency = site.assigned_agency;
+                            const incidentsCount = site.total_incidents;
                             return (
                                 <TableRow
                                   key={site.id}
@@ -707,26 +684,26 @@ export default function TowercoSitesPage() {
                                 >
                                     <TableCell>
                                       <Button asChild variant="link" className="p-0 h-auto font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
-                                        <Link href={`/towerco/sites/${site.id}`}>{site.id}</Link>
+                                        <Link href={`/towerco/sites/${site.id}`}>{site.org_site_id}</Link>
                                       </Button>
                                     </TableCell>
                                     <TableCell>
-                                        <div className="font-medium">{site.name}</div>
+                                        <div className="font-medium">{site.site_name}</div>
                                         <div className="text-sm text-muted-foreground flex items-center gap-1 font-medium group-hover:text-accent-foreground">
                                             <MapPin className="w-3 h-3" />
-                                            {site.address}
+                                            {site.site_address_line1}
                                         </div>
                                     </TableCell>
                                     <TableCell>
                                         <div className="flex items-center gap-2 font-medium">
                                             <Briefcase className="h-4 w-4 text-muted-foreground group-hover:text-accent-foreground" />
-                                            <span>{agency?.name || 'N/A'}</span>
+                                            <span>{agency?.agency_name || 'N/A'}</span>
                                         </div>
                                     </TableCell>
                                     <TableCell>
                                       <div className="flex items-center gap-2 font-medium">
                                         <Users className="h-4 w-4 text-muted-foreground group-hover:text-accent-foreground" />
-                                        <span>{site.guards.length}</span>
+                                        <span>{site.guards?.length || 0}</span>
                                       </div>
                                     </TableCell>
                                     <TableCell>
@@ -846,14 +823,14 @@ export default function TowercoSitesPage() {
                       return (
                         <TableRow 
                           key={site.id} 
-                          ref={(el) => unassignedSitesRef.current.set(site.id, el)}
+                          ref={(el) => unassignedSitesRef.current.set(site.id.toString(), el)}
                         >
-                          <TableCell className="font-medium">{site.id}</TableCell>
+                          <TableCell className="font-medium">{site.org_site_id}</TableCell>
                           <TableCell>
-                            <p className="font-medium">{site.name}</p>
+                            <p className="font-medium">{site.site_name}</p>
                             <div className="text-sm text-muted-foreground flex items-center gap-1 font-medium">
                               <MapPin className="w-3 h-3" />
-                              {site.address}
+                              {site.site_address_line1}
                             </div>
                           </TableCell>
                           <TableCell>
@@ -861,15 +838,15 @@ export default function TowercoSitesPage() {
                                 type="number"
                                 placeholder="e.g. 2"
                                 className="w-[120px]"
-                                value={guardsRequired[site.id] || ''}
-                                onChange={(e) => handleGuardsRequiredChange(site.id, e.target.value)}
+                                value={guardsRequired[site.id.toString()] || ''}
+                                onChange={(e) => handleGuardsRequiredChange(site.id.toString(), e.target.value)}
                                 onClick={(e) => e.stopPropagation()}
                             />
                           </TableCell>
                           <TableCell>
                             <Select
                               onValueChange={(value) =>
-                                handleAssignmentChange(site.id, value)
+                                handleAssignmentChange(site.id.toString(), value)
                               }
                                onClick={(e) => e.stopPropagation()}
                             >
@@ -879,8 +856,8 @@ export default function TowercoSitesPage() {
                               <SelectContent>
                                 {agenciesInRegion.length > 0 ? (
                                   agenciesInRegion.map((agency) => (
-                                    <SelectItem key={agency.id} value={agency.id} className="font-medium">
-                                      {agency.name}
+                                    <SelectItem key={agency.id} value={agency.agency_id} className="font-medium">
+                                      {agency.agency_name}
                                     </SelectItem>
                                   ))
                                 ) : (
@@ -899,7 +876,7 @@ export default function TowercoSitesPage() {
                                 e.stopPropagation();
                                 handleAssignAgency(site.id);
                               }}
-                              disabled={!assignments[site.id] || !guardsRequired[site.id]}
+                              disabled={!assignments[site.id.toString()] || !guardsRequired[site.id.toString()]}
                             >
                               Assign Agency
                             </Button>
@@ -949,3 +926,4 @@ export default function TowercoSitesPage() {
     </div>
   );
 }
+
