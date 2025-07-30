@@ -265,38 +265,69 @@ export default function TowercoSitesPage() {
     setGuardsRequired((prev) => ({ ...prev, [siteId]: count }));
   };
 
-  const handleAssignAgency = (siteId: number) => {
+  const handleAssignAgency = async (siteId: number) => {
     const agencyId = assignments[siteId.toString()];
     const numGuards = guardsRequired[siteId.toString()];
+    const token = localStorage.getItem('token');
+
+    if (!loggedInOrg || !token) {
+        toast({ variant: 'destructive', title: 'Error', description: 'Authentication details not found. Please log in again.' });
+        return;
+    }
 
     if (!agencyId) {
-      toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: 'Please select an agency to assign.',
-      });
-      return;
+        toast({ variant: 'destructive', title: 'Error', description: 'Please select an agency to assign.' });
+        return;
     }
 
     if (!numGuards || Number(numGuards) <= 0) {
-      toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: 'Please specify the number of guards required.',
-      });
-      return;
+        toast({ variant: 'destructive', title: 'Error', description: 'Please specify the number of guards required.' });
+        return;
     }
 
-    const siteName = sites.find((s) => s.id === siteId)?.site_name;
-    const agencyName = securityAgencies.find((a) => a.agency_id === agencyId)?.agency_name;
+    const agency = securityAgencies.find((a) => a.agency_id === agencyId);
+    if (!agency) {
+        toast({ variant: 'destructive', title: 'Error', description: 'Could not find the selected agency.' });
+        return;
+    }
 
-    console.log(`Assigning agency ${agencyId} to site ${siteId} with ${numGuards} guards for TOWERCO ${loggedInOrg?.name}`);
-    
-    toast({
-      title: 'Agency Assigned',
-      description: `${agencyName} has been assigned to site ${siteName} with a requirement of ${numGuards} guards. This change will be reflected on the next refresh.`,
-    });
-  };
+    const payload = {
+        agency_name: agency.agency_name,
+        number_of_guards: Number(numGuards)
+    };
+
+    try {
+        const response = await fetch(`http://are.towerbuddy.tel:8000/security/api/orgs/${loggedInOrg.code}/sites/${siteId}/assign-agency/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Token ${token}`
+            },
+            body: JSON.stringify(payload)
+        });
+
+        const responseData = await response.json();
+
+        if (!response.ok) {
+            throw new Error(responseData.detail || 'Failed to assign agency.');
+        }
+
+        toast({
+            title: 'Agency Assigned',
+            description: responseData.detail || `${agency.agency_name} has been assigned.`,
+        });
+
+        // Optimistically update UI or re-fetch data
+        setSites(sites.map(s => s.id === siteId ? { ...s, site_status: 'Assigned', assigned_agency: agency } : s));
+
+    } catch (error: any) {
+        toast({
+            variant: 'destructive',
+            title: 'Assignment Failed',
+            description: error.message,
+        });
+    }
+};
 
   const agenciesOnSites = useMemo(() => {
     const agencyIds = new Set<string>();
