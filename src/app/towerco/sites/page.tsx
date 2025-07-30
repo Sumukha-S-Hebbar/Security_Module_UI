@@ -894,9 +894,6 @@ export default function TowercoSitesPage() {
                 <TableBody>
                   {paginatedUnassignedSites.length > 0 ? (
                     paginatedUnassignedSites.map((site) => {
-                      const agenciesInRegion = securityAgencies.filter(
-                        (agency) => agency.region === site.region
-                      );
                       return (
                         <TableRow 
                           key={site.id} 
@@ -931,15 +928,15 @@ export default function TowercoSitesPage() {
                                 <SelectValue placeholder="Select an agency" />
                               </SelectTrigger>
                               <SelectContent>
-                                {agenciesInRegion.length > 0 ? (
-                                  agenciesInRegion.map((agency) => (
+                                {securityAgencies.length > 0 ? (
+                                  securityAgencies.map((agency) => (
                                     <SelectItem key={agency.id} value={agency.agency_id} className="font-medium">
                                       {agency.agency_name}
                                     </SelectItem>
                                   ))
                                 ) : (
                                   <div className="px-2 py-1.5 text-sm text-muted-foreground font-medium">
-                                    No agencies in this region
+                                    No agencies available
                                   </div>
                                 )}
                               </SelectContent>
