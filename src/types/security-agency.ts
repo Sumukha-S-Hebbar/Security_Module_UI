@@ -10,7 +10,7 @@ export type SecurityAgency = {
   city: string;
   region: string;
 
-  // Fields from original mock data that might not be in API
+  // Fields from original mock data that might not be in the final API
   name?: string;
   email?: string;
   country?: string;

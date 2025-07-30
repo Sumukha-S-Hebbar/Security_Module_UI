@@ -13,8 +13,8 @@ export type Site = {
   lat: number;
   lng: number;
   site_address_line1: string;
-  site_address_line2?: string;
-  site_address_line3?: string;
+  site_address_line2?: string | null;
+  site_address_line3?: string | null;
   site_zip_code: string;
   assigned_agency: SecurityAgency | null;
   total_incidents: number;
@@ -33,6 +33,10 @@ export type Site = {
   geofencePerimeter?: number;
   incidents?: Incident[];
   guardsRequired?: number;
+  name?: string; // from old mock data
+  address?: string; // from old mock data
+  latitude?: number; // from old mock data
+  longitude?: number; // from old mock data
 };
 
 export type PaginatedSitesResponse = {

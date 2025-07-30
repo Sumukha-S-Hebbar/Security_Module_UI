@@ -9,8 +9,6 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useToast } from '@/hooks/use-toast';
-import { organizations as mockOrganizations } from '@/lib/data/organizations';
-import { incidents as mockIncidents } from '@/lib/data/incidents';
 import type { Site, SecurityAgency, PaginatedSitesResponse, Organization } from '@/types';
 import {
   Card,
@@ -29,7 +27,6 @@ import {
   Briefcase,
   ShieldAlert,
   Loader2,
-  Eye,
   FileDown,
   Users,
 } from 'lucide-react';
@@ -67,7 +64,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import { fetchData } from '@/lib/api';
 
@@ -100,7 +96,6 @@ const addSiteFormSchema = z.object({
 export default function TowercoSitesPage() {
   const [sites, setSites] = useState<Site[]>([]);
   const [securityAgencies, setSecurityAgencies] = useState<SecurityAgency[]>([]);
-  const [incidents, setIncidents] = useState<typeof mockIncidents>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loggedInOrg, setLoggedInOrg] = useState<Organization | null>(null);
 
@@ -149,15 +144,13 @@ export default function TowercoSitesPage() {
         setIsLoading(true);
         const orgCode = loggedInOrg.code;
 
-        const [sitesResponse, agenciesData, incidentsData] = await Promise.all([
+        const [sitesResponse, agenciesData] = await Promise.all([
             fetchData<PaginatedSitesResponse>(`http://are.towerbuddy.tel:8000/security/api/orgs/${orgCode}/sites/list/`),
-            fetchData<SecurityAgency[]>('http://are.towerbuddy.tel:8000/api/v1/agencies/'), // This might need to be org-specific too
-            fetchData<typeof mockIncidents>('http://are.towerbuddy.tel:8000/api/v1/incidents/') // This might need to be org-specific too
+            fetchData<SecurityAgency[]>('http://are.towerbuddy.tel:8000/api/v1/agencies/'),
         ]);
         
         setSites(sitesResponse?.results || []);
         setSecurityAgencies(agenciesData || []);
-        setIncidents(incidentsData || []);
         setIsLoading(false);
     }
     loadInitialData();
@@ -1008,4 +1001,3 @@ export default function TowercoSitesPage() {
     </div>
   );
 }
-
