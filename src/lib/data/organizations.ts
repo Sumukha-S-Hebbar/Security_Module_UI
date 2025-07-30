@@ -2,37 +2,29 @@ import type { Organization } from '@/types';
 
 export const organizations: Organization[] = [
   {
-    id: 'TCO01',
+    id: 1,
     name: 'TowerCo Alpha',
+    code: 'TCOALPHA',
     role: 'TOWERCO',
-    email: 'contact@towercoalpha.com',
-    phone: '555-800-0001',
-    registered_address_line1: '1 Tower Plaza',
-    city: 'Infrastructure City',
-    state: 'CA',
-    country: 'USA',
-    pincode: '90210',
-    commercial_tax_id: 'CTX12345',
-    commercial_tax_id_proof: '/path/to/tax_proof_alpha.pdf',
-    operating_license_number: 'OLN-ALPHA-987',
-    operating_license_document: '/path/to/license_alpha.pdf',
+    type: 'Tower Company',
     logo: 'https://placehold.co/100x100.png',
+    member: {
+        id: 1,
+        employee_id: 'TCOA001',
+        designation: 'Operations Head'
+    }
   },
   {
-    id: 'MNO01',
+    id: 2,
     name: 'MNO Beta',
+    code: 'MNOBETA',
     role: 'MNO',
-    email: 'support@mnobeta.com',
-    phone: '555-800-0002',
-    registered_address_line1: '2 Network Way',
-    city: 'Connectivity Town',
-    state: 'TX',
-    country: 'USA',
-    pincode: '75001',
-    commercial_tax_id: 'CTX67890',
-    commercial_tax_id_proof: '/path/to/tax_proof_beta.pdf',
-    operating_license_number: 'OLN-BETA-654',
-    operating_license_document: '/path/to/license_beta.pdf',
+    type: 'Mobile Network Operator',
     logo: 'https://placehold.co/100x100.png',
+     member: {
+        id: 2,
+        employee_id: 'MNOB001',
+        designation: 'Regional Manager'
+    }
   },
 ];

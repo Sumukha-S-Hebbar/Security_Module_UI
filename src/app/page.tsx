@@ -36,7 +36,7 @@ interface LoginResponse {
 
 // Mock API responses based on user input
 const MOCK_TOWERCO_RESPONSE: LoginResponse = {
-    "token": "some_towerco_token_string",
+    "token": "a468a11a420ed94ac0fcd91a0593da01064c0a76",
     "user": {
         "id": 2,
         "email": "towerco@i4sight.net",
@@ -59,21 +59,17 @@ const MOCK_TOWERCO_RESPONSE: LoginResponse = {
         }
     },
     "organization": {
-        id: 'TCO01',
-        name: 'TowerCo Alpha',
-        role: 'TOWERCO',
-        email: 'contact@towercoalpha.com',
-        phone: '555-800-0001',
-        registered_address_line1: '1 Tower Plaza',
-        city: 'Infrastructure City',
-        state: 'CA',
-        country: 'USA',
-        pincode: '90210',
-        commercial_tax_id: 'CTX12345',
-        commercial_tax_id_proof: '/path/to/tax_proof_alpha.pdf',
-        operating_license_number: 'OLN-ALPHA-987',
-        operating_license_document: '/path/to/license_alpha.pdf',
-        logo: 'https://placehold.co/100x100.png',
+        "id": 1,
+        "name": "Company of Towers",
+        "code": "COT",
+        "role": "T",
+        "type": "Tower Company",
+        "logo": "https://placehold.co/100x100.png",
+        "member": {
+            "id": 1,
+            "employee_id": "COT001",
+            "designation": "Vice President"
+        }
     },
     "country": {
         "id": 290557,

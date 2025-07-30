@@ -2,7 +2,6 @@
 'use client';
 
 import { useMemo, useState, useEffect } from 'react';
-import { organizations } from '@/lib/data/organizations';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -15,7 +14,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 const LOGGED_IN_ORG_ID = 'TCO01';
 
-// Mock user data since it's not in our data sources
+// Mock user and org data that would come from a login response/context
 const MOCK_USER_RESPONSE = {
     "user": {
         "id": 2,
@@ -37,26 +36,39 @@ const MOCK_USER_RESPONSE = {
             "currency_symbol": "د.إ",
             "phone": "971"
         }
+    },
+    "organization": {
+        "id": 1,
+        "name": "Company of Towers",
+        "code": "COT",
+        "role": "T",
+        "type": "Tower Company",
+        "logo": "https://placehold.co/100x100.png",
+        "member": {
+            "id": 1,
+            "employee_id": "COT001",
+            "designation": "Vice President"
+        }
     }
 };
 
 export default function TowercoAccountPage() {
   const [user, setUser] = useState<User | null>(null);
+  const [organization, setOrganization] = useState<Organization | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const organization = useMemo(() => organizations.find(o => o.id === LOGGED_IN_ORG_ID), []);
 
   useEffect(() => {
-    async function fetchUser() {
+    async function fetchUserAndOrg() {
         setIsLoading(true);
-        // In a real app, you would fetch this from an API
-        // const data = await fetchData<{ user: User }>('/api/v1/user/me');
-        // For now, we'll use the mock data with a delay
+        // In a real app, this data would likely come from a user context
+        // after login, not be fetched on this page directly.
         await new Promise(resolve => setTimeout(resolve, 1000));
         const data = MOCK_USER_RESPONSE;
         setUser(data.user);
+        setOrganization(data.organization);
         setIsLoading(false);
     }
-    fetchUser();
+    fetchUserAndOrg();
   }, []);
 
   if (isLoading) {
@@ -128,7 +140,7 @@ export default function TowercoAccountPage() {
     </svg>
   );
   
-  const userFullName = `${user.first_name} ${user.last_name}`;
+  const userFullName = `${user.first_name} ${user.last_name || ''}`.trim();
 
   return (
     <div className="p-4 sm:p-6 lg:p-8">
@@ -140,8 +152,8 @@ export default function TowercoAccountPage() {
           <CardContent className="space-y-8">
             <div className="flex flex-col sm:flex-row items-center gap-6">
               <Avatar className="h-24 w-24">
-                <AvatarImage src={organization.logo} alt={userFullName} />
-                <AvatarFallback>{user.first_name.charAt(0)}{user.last_name.charAt(0)}</AvatarFallback>
+                <AvatarImage src={organization.logo || undefined} alt={userFullName} />
+                <AvatarFallback>{user.first_name.charAt(0)}{user.last_name?.charAt(0)}</AvatarFallback>
               </Avatar>
               <div className="text-center sm:text-left">
                 <h2 className="text-2xl font-bold">{userFullName}</h2>
@@ -175,10 +187,10 @@ export default function TowercoAccountPage() {
                 <p className="text-muted-foreground font-medium">Organization</p>
                 <p className="font-semibold">{organization.name}</p>
               </div>
-               <div className="space-y-1">
+               {user.country && <div className="space-y-1">
                 <p className="text-muted-foreground font-medium">Country</p>
                 <p className="font-semibold">{user.country.name} ({user.country.code3})</p>
-              </div>
+              </div>}
             </div>
           </CardContent>
         </Card>
