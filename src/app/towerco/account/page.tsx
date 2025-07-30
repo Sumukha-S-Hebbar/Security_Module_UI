@@ -1,29 +1,95 @@
 
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { organizations } from '@/lib/data/organizations';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
-import { Mail, Calendar, Briefcase, KeyRound } from 'lucide-react';
+import { Mail, Calendar, Briefcase, KeyRound, Building } from 'lucide-react';
+import type { Organization, User } from '@/types';
+import { fetchData } from '@/lib/api';
+import { Skeleton } from '@/components/ui/skeleton';
+
 
 const LOGGED_IN_ORG_ID = 'TCO01';
 
 // Mock user data since it's not in our data sources
-const MOCK_USER = {
-  name: 'Tower Co User',
-  employeeId: 'ID102',
-  designation: 'Senior Manager',
-  joinDate: '2023-07-04T00:00:00Z',
-  avatar: 'https://placehold.co/128x128.png',
+const MOCK_USER_RESPONSE = {
+    "user": {
+        "id": 2,
+        "email": "towerco@i4sight.net",
+        "first_name": "TowerCo",
+        "last_name": "User",
+        "middle_name": null,
+        "role": "T",
+        "role_details": "Tower Company",
+        "date_joined": "2025-07-30T07:47:32.371932Z",
+        "last_login": "2025-07-30T07:47:32.371972Z",
+        "has_user_profile": false,
+        "country": {
+            "id": 290557,
+            "name": "United Arab Emirates",
+            "code3": "ARE",
+            "currency": "AED",
+            "currency_name": "Dirham",
+            "currency_symbol": "د.إ",
+            "phone": "971"
+        }
+    }
 };
 
 export default function TowercoAccountPage() {
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const organization = useMemo(() => organizations.find(o => o.id === LOGGED_IN_ORG_ID), []);
 
-  if (!organization) {
+  useEffect(() => {
+    async function fetchUser() {
+        setIsLoading(true);
+        // In a real app, you would fetch this from an API
+        // const data = await fetchData<{ user: User }>('/api/v1/user/me');
+        // For now, we'll use the mock data with a delay
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        const data = MOCK_USER_RESPONSE;
+        setUser(data.user);
+        setIsLoading(false);
+    }
+    fetchUser();
+  }, []);
+
+  if (isLoading) {
+      return (
+          <div className="p-4 sm:p-6 lg:p-8">
+              <div className="max-w-5xl mx-auto space-y-6">
+                <Card>
+                  <CardHeader><Skeleton className="h-8 w-48" /></CardHeader>
+                  <CardContent className="space-y-8">
+                      <div className="flex flex-col sm:flex-row items-center gap-6">
+                          <Skeleton className="h-24 w-24 rounded-full" />
+                          <div className="space-y-2">
+                              <Skeleton className="h-8 w-40" />
+                              <Skeleton className="h-4 w-64" />
+                              <Skeleton className="h-4 w-56" />
+                              <Skeleton className="h-4 w-60" />
+                          </div>
+                      </div>
+                      <Separator />
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-sm">
+                          <div className="space-y-1"><Skeleton className="h-4 w-20" /><Skeleton className="h-5 w-24" /></div>
+                          <div className="space-y-1"><Skeleton className="h-4 w-20" /><Skeleton className="h-5 w-24" /></div>
+                          <div className="space-y-1"><Skeleton className="h-4 w-20" /><Skeleton className="h-5 w-24" /></div>
+                          <div className="space-y-1"><Skeleton className="h-4 w-20" /><Skeleton className="h-5 w-24" /></div>
+                      </div>
+                  </CardContent>
+                </Card>
+              </div>
+          </div>
+      );
+  }
+
+  if (!organization || !user) {
     return (
       <div className="p-4 sm:p-6 lg:p-8">
         <Card>
@@ -31,7 +97,7 @@ export default function TowercoAccountPage() {
             <CardTitle>Error</CardTitle>
           </CardHeader>
           <CardContent>
-            <p>Could not load organization profile. Please try again later.</p>
+            <p>Could not load organization or user profile. Please try again later.</p>
           </CardContent>
         </Card>
       </div>
@@ -61,6 +127,8 @@ export default function TowercoAccountPage() {
       <path fill="#ffb900" d="M12 12h10v10H12z" />
     </svg>
   );
+  
+  const userFullName = `${user.first_name} ${user.last_name}`;
 
   return (
     <div className="p-4 sm:p-6 lg:p-8">
@@ -72,23 +140,23 @@ export default function TowercoAccountPage() {
           <CardContent className="space-y-8">
             <div className="flex flex-col sm:flex-row items-center gap-6">
               <Avatar className="h-24 w-24">
-                <AvatarImage src={MOCK_USER.avatar} alt={MOCK_USER.name} />
-                <AvatarFallback>{MOCK_USER.name.charAt(0)}</AvatarFallback>
+                <AvatarImage src={organization.logo} alt={userFullName} />
+                <AvatarFallback>{user.first_name.charAt(0)}{user.last_name.charAt(0)}</AvatarFallback>
               </Avatar>
               <div className="text-center sm:text-left">
-                <h2 className="text-2xl font-bold">{MOCK_USER.name}</h2>
+                <h2 className="text-2xl font-bold">{userFullName}</h2>
                 <div className="text-muted-foreground mt-2 space-y-1">
                   <div className="flex items-center gap-2">
-                    <Briefcase className="h-4 w-4" />
+                    <Building className="h-4 w-4" />
                     <span>{organization.name}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Calendar className="h-4 w-4" />
-                    <span>Joined on {new Date(MOCK_USER.joinDate).toLocaleDateString()}</span>
+                    <span>Joined on {new Date(user.date_joined).toLocaleDateString()}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Mail className="h-4 w-4" />
-                    <a href={`mailto:${organization.email}`} className="hover:underline">{organization.email}</a>
+                    <a href={`mailto:${user.email}`} className="hover:underline">{user.email}</a>
                   </div>
                 </div>
               </div>
@@ -96,20 +164,20 @@ export default function TowercoAccountPage() {
             <Separator />
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-sm">
               <div className="space-y-1">
-                <p className="text-muted-foreground font-medium">Employee ID</p>
-                <p className="font-semibold">{MOCK_USER.employeeId}</p>
+                <p className="text-muted-foreground font-medium">User ID</p>
+                <p className="font-semibold">{user.id}</p>
               </div>
               <div className="space-y-1">
-                <p className="text-muted-foreground font-medium">Designation</p>
-                <p className="font-semibold">{MOCK_USER.designation}</p>
+                <p className="text-muted-foreground font-medium">Role</p>
+                <p className="font-semibold">{user.role_details}</p>
               </div>
               <div className="space-y-1">
                 <p className="text-muted-foreground font-medium">Organization</p>
                 <p className="font-semibold">{organization.name}</p>
               </div>
-              <div className="space-y-1">
-                <p className="text-muted-foreground font-medium">Organization Type</p>
-                <p className="font-semibold">{organization.role}</p>
+               <div className="space-y-1">
+                <p className="text-muted-foreground font-medium">Country</p>
+                <p className="font-semibold">{user.country.name} ({user.country.code3})</p>
               </div>
             </div>
           </CardContent>
