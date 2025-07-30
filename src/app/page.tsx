@@ -25,6 +25,93 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Checkbox } from '@/components/ui/checkbox';
 import { CheckIcon, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import type { Organization, User } from '@/types';
+
+interface LoginResponse {
+  token: string;
+  user: User;
+  organization: Organization | null;
+  country: any; // The country can be at the root or nested, handle flexibly.
+}
+
+// Mock API responses based on user input
+const MOCK_TOWERCO_RESPONSE: LoginResponse = {
+    "token": "some_towerco_token_string",
+    "user": {
+        "id": 2,
+        "email": "towerco@i4sight.net",
+        "first_name": "TowerCo",
+        "last_name": "User",
+        "middle_name": null,
+        "role": "T",
+        "role_details": "Tower Company",
+        "date_joined": "2025-07-30T07:47:32.371932Z",
+        "last_login": "2025-07-30T07:47:32.371972Z",
+        "has_user_profile": false,
+        "country": {
+            "id": 290557,
+            "name": "United Arab Emirates",
+            "code3": "ARE",
+            "currency": "AED",
+            "currency_name": "Dirham",
+            "currency_symbol": "د.إ",
+            "phone": "971"
+        }
+    },
+    "organization": {
+        id: 'TCO01',
+        name: 'TowerCo Alpha',
+        role: 'TOWERCO',
+        email: 'contact@towercoalpha.com',
+        phone: '555-800-0001',
+        registered_address_line1: '1 Tower Plaza',
+        city: 'Infrastructure City',
+        state: 'CA',
+        country: 'USA',
+        pincode: '90210',
+        commercial_tax_id: 'CTX12345',
+        commercial_tax_id_proof: '/path/to/tax_proof_alpha.pdf',
+        operating_license_number: 'OLN-ALPHA-987',
+        operating_license_document: '/path/to/license_alpha.pdf',
+        logo: 'https://placehold.co/100x100.png',
+    },
+    "country": {
+        "id": 290557,
+        "name": "United Arab Emirates",
+        "code3": "ARE",
+        "currency": "AED",
+        "currency_name": "Dirham",
+        "currency_symbol": "د.إ",
+        "phone": "971"
+    }
+};
+
+const MOCK_AGENCY_RESPONSE: LoginResponse = {
+    "token": "5853a4ac6dd4659f540589e297cf181d2eff1996",
+    "user": {
+        "id": 4,
+        "email": "testsecurity1@i4sight.net",
+        "first_name": "Test Security Agency 1",
+        "middle_name": null,
+        "last_name": null,
+        "role": "SA",
+        "role_details": "Security Agency",
+        "date_joined": "2025-07-30T07:58:42.758101Z",
+        "last_login": "2025-07-30T08:00:24.623352Z",
+        "has_user_profile": false,
+    },
+    "organization": null,
+    "country": {
+        "id": 290557,
+        "name": "United Arab Emirates",
+        "code3": "ARE",
+        "currency": "AED",
+        "currency_name": "Dirham",
+        "currency_symbol": "د.إ",
+        "phone": "971"
+    }
+};
+
 
 export default function RootPage() {
   const router = useRouter();
@@ -45,20 +132,22 @@ export default function RootPage() {
         throw new Error('Email and password are required.');
       }
 
-      // Simulate role-based redirection
-      if (email.toLowerCase().includes('agency')) {
-        toast({
-          title: 'Login Successful',
-          description: 'Redirecting to Agency Portal...',
-        });
-        router.push('/agency/home');
-      } else {
-         toast({
-          title: 'Login Successful',
-          description: 'Redirecting to TOWERCO/MNO Portal...',
-        });
+      // Simulate fetching API and getting a response based on email
+      const isAgencyUser = email.toLowerCase().includes('agency');
+      const response: LoginResponse = isAgencyUser ? MOCK_AGENCY_RESPONSE : MOCK_TOWERCO_RESPONSE;
+
+      toast({
+        title: 'Login Successful',
+        description: `Welcome, ${response.user.first_name}! Redirecting...`,
+      });
+
+      // Redirect based on whether the 'organization' object is present
+      if (response.organization) {
         router.push('/towerco/home');
+      } else {
+        router.push('/agency/home');
       }
+
     } catch (error: any) {
        toast({
             variant: 'destructive',

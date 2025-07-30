@@ -1,16 +1,17 @@
 
+
 export type User = {
     id: number;
     email: string;
     first_name: string;
-    last_name: string;
+    last_name: string | null;
     middle_name: string | null;
     role: string;
     role_details: string;
     date_joined: string;
     last_login: string;
     has_user_profile: boolean;
-    country: {
+    country?: {
         id: number;
         name: string;
         code3: string;
