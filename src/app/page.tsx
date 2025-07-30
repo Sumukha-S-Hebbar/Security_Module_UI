@@ -64,7 +64,7 @@ const MOCK_TOWERCO_RESPONSE: LoginResponse = {
         "code": "COT",
         "role": "T",
         "type": "Tower Company",
-        "logo": "https://placehold.co/100x100.png",
+        "logo": null,
         "member": {
             "id": 1,
             "employee_id": "COT001",
@@ -137,11 +137,15 @@ export default function RootPage() {
         description: `Welcome, ${response.user.first_name}! Redirecting...`,
       });
 
-      // Redirect based on whether the 'organization' object is present
-      if (response.organization) {
+      // Redirect based on the user's role
+      const userRole = response.user.role;
+      if (userRole === 'T' || userRole === 'O') {
         router.push('/towerco/home');
-      } else {
+      } else if (userRole === 'SA') {
         router.push('/agency/home');
+      } else {
+        // Handle other roles or default case if necessary
+        throw new Error('Unknown user role. Cannot redirect.');
       }
 
     } catch (error: any) {
