@@ -31,82 +31,8 @@ interface LoginResponse {
   token: string;
   user: User;
   organization: Organization | null;
-  country: any; // The country can be at the root or nested, handle flexibly.
+  country: any;
 }
-
-// Mock API responses based on user input
-const MOCK_TOWERCO_RESPONSE: LoginResponse = {
-    "token": "a468a11a420ed94ac0fcd91a0593da01064c0a76",
-    "user": {
-        "id": 2,
-        "email": "towerco@i4sight.net",
-        "first_name": "TowerCo",
-        "last_name": "User",
-        "middle_name": null,
-        "role": "T",
-        "role_details": "Tower Company",
-        "date_joined": "2025-07-30T07:47:32.371932Z",
-        "last_login": "2025-07-30T07:47:32.371972Z",
-        "has_user_profile": false,
-        "country": {
-            "id": 290557,
-            "name": "United Arab Emirates",
-            "code3": "ARE",
-            "currency": "AED",
-            "currency_name": "Dirham",
-            "currency_symbol": "د.إ",
-            "phone": "971"
-        }
-    },
-    "organization": {
-        "id": 1,
-        "name": "Company of Towers",
-        "code": "COT",
-        "role": "T",
-        "type": "Tower Company",
-        "logo": null,
-        "member": {
-            "id": 1,
-            "employee_id": "COT001",
-            "designation": "Vice President"
-        }
-    },
-    "country": {
-        "id": 290557,
-        "name": "United Arab Emirates",
-        "code3": "ARE",
-        "currency": "AED",
-        "currency_name": "Dirham",
-        "currency_symbol": "د.إ",
-        "phone": "971"
-    }
-};
-
-const MOCK_AGENCY_RESPONSE: LoginResponse = {
-    "token": "5853a4ac6dd4659f540589e297cf181d2eff1996",
-    "user": {
-        "id": 4,
-        "email": "testsecurity1@i4sight.net",
-        "first_name": "Test Security Agency 1",
-        "middle_name": null,
-        "last_name": null,
-        "role": "SA",
-        "role_details": "Security Agency",
-        "date_joined": "2025-07-30T07:58:42.758101Z",
-        "last_login": "2025-07-30T08:00:24.623352Z",
-        "has_user_profile": false,
-    },
-    "organization": null,
-    "country": {
-        "id": 290557,
-        "name": "United Arab Emirates",
-        "code3": "ARE",
-        "currency": "AED",
-        "currency_name": "Dirham",
-        "currency_symbol": "د.إ",
-        "phone": "971"
-    }
-};
 
 
 export default function RootPage() {
@@ -120,31 +46,40 @@ export default function RootPage() {
     event.preventDefault();
     setIsLoading(true);
 
-    // Simulate a delay for loading state
-    await new Promise((resolve) => setTimeout(resolve, 500));
-
     try {
       if (!email || !password) {
         throw new Error('Email and password are required.');
       }
 
-      // Simulate fetching API and getting a response based on email
-      const isAgencyUser = email.toLowerCase().includes('agency');
-      const response: LoginResponse = isAgencyUser ? MOCK_AGENCY_RESPONSE : MOCK_TOWERCO_RESPONSE;
+      const API_URL = 'http://are.towerbuddy.tel:8000/security/api/users/auth/token/';
+
+      const response = await fetch(API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Login failed. Please check your credentials.');
+      }
+      
+      const data: LoginResponse = await response.json();
 
       toast({
         title: 'Login Successful',
-        description: `Welcome, ${response.user.first_name}! Redirecting...`,
+        description: `Welcome, ${data.user.first_name}! Redirecting...`,
       });
 
       // Redirect based on the user's role
-      const userRole = response.user.role;
+      const userRole = data.user.role;
       if (userRole === 'T' || userRole === 'O') {
         router.push('/towerco/home');
       } else if (userRole === 'SA') {
         router.push('/agency/home');
       } else {
-        // Handle other roles or default case if necessary
         throw new Error('Unknown user role. Cannot redirect.');
       }
 
