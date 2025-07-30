@@ -1,20 +1,15 @@
 
-
 'use client';
 
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { sites } from '@/lib/data/sites';
-import { securityAgencies } from '@/lib/data/security-agencies';
-import { incidents } from '@/lib/data/incidents';
-import { guards } from '@/lib/data/guards';
-import type { Incident, Guard } from '@/types';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
+  CardFooter,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -25,22 +20,63 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { ArrowLeft, MapPin, Briefcase, ShieldAlert, FileDown, Users, Phone, Mail } from 'lucide-react';
+import {
+  ArrowLeft,
+  MapPin,
+  Briefcase,
+  ShieldAlert,
+  FileDown,
+  Users,
+  Phone,
+  Mail,
+} from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { useRouter } from 'next/navigation';
-import { useMemo, useState, useRef } from 'react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartConfig } from '@/components/ui/chart';
+import { useMemo, useState, useRef, useEffect } from 'react';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from 'recharts';
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  ChartConfig,
+} from '@/components/ui/chart';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-
+import { fetchData } from '@/lib/api';
+import type { Site, SecurityAgency, Incident, Guard, Organization } from '@/types';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const chartConfig = {
   incidents: {
-    label: "Incidents",
-    color: "#FF8200",
+    label: 'Incidents',
+    color: 'hsl(var(--chart-1))',
   },
 } satisfies ChartConfig;
+
+type SiteReportData = {
+    id: number;
+    tb_site_id: string;
+    org_site_id: string;
+    site_name: string;
+    site_status: string;
+    lat: number;
+    lng: number;
+    site_address_line1: string;
+    site_address_line2?: string | null;
+    site_address_line3?: string | null;
+    site_zip_code: string;
+    region: string;
+    city: string;
+    total_incidents_count: number;
+    resolved_incidents_count: number;
+    agency_details: SecurityAgency | null;
+    guard_details: Guard[];
+    incident_trend: { month: string; count: number }[];
+    incidents: {
+        count: number;
+        next: string | null;
+        previous: string | null;
+        results: Incident[];
+    };
+};
 
 
 export default function SiteReportPage() {
@@ -48,91 +84,62 @@ export default function SiteReportPage() {
   const router = useRouter();
   const { toast } = useToast();
   const siteId = params.siteId as string;
-  const [selectedTableYear, setSelectedTableYear] = useState('all');
-  const [selectedTableMonth, setSelectedTableMonth] = useState('all');
-  const [selectedTableStatus, setSelectedTableStatus] = useState('all');
-  const incidentsTableRef = useRef<HTMLDivElement>(null);
   
-  const site = sites.find((s) => s.id === siteId);
+  const [reportData, setReportData] = useState<SiteReportData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loggedInOrg, setLoggedInOrg] = useState<Organization | null>(null);
+  const [incidentsCurrentPage, setIncidentsCurrentPage] = useState(1);
 
-  if (!site) {
-    return (
-      <div className="p-4 sm:p-6 lg:p-8">
-        <Card>
-          <CardContent className="pt-6">
-            <p className="font-medium">Site not found.</p>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
 
-  const agency = securityAgencies.find((a) => a.siteIds.includes(site.id));
-  const siteIncidents = incidents.filter(
-    (incident) => incident.siteId === site.id
-  );
-  const siteGuards = guards.filter(g => site.guards.includes(g.id));
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+        const orgData = localStorage.getItem('organization');
+        if (orgData) {
+            setLoggedInOrg(JSON.parse(orgData));
+        }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!loggedInOrg || !siteId) return;
+
+    const fetchReportData = async (page = 1) => {
+        setIsLoading(true);
+        const token = localStorage.getItem('token');
+        const url = `http://are.towerbuddy.tel:8000/security/api/orgs/${loggedInOrg.code}/site/${siteId}/?page=${page}`;
+
+        try {
+            const data = await fetchData<SiteReportData>(url, {
+                headers: { 'Authorization': `Token ${token}` }
+            });
+            setReportData(data);
+        } catch (error) {
+            console.error("Failed to fetch site report:", error);
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: "Could not load site report data.",
+            });
+        } finally {
+            setIsLoading(false);
+        }
+    };
+    fetchReportData(incidentsCurrentPage);
+  }, [loggedInOrg, siteId, incidentsCurrentPage, toast]);
   
-  const availableYears = useMemo(() => {
-    const years = new Set(
-      siteIncidents.map((incident) => new Date(incident.incidentTime).getFullYear().toString())
-    );
-    if (years.size > 0) years.add(new Date().getFullYear().toString());
-    return Array.from(years).sort((a, b) => parseInt(b) - parseInt(a));
-  }, [siteIncidents]);
-  
-  const [selectedChartYear, setSelectedChartYear] = useState<string>(availableYears[0] || new Date().getFullYear().toString());
-
-  const filteredIncidentsForTable = useMemo(() => {
-    return siteIncidents.filter(incident => {
-      const incidentDate = new Date(incident.incidentTime);
-      const yearMatch = selectedTableYear === 'all' || incidentDate.getFullYear().toString() === selectedTableYear;
-      const monthMatch = selectedTableMonth === 'all' || incidentDate.getMonth().toString() === selectedTableMonth;
-      const statusMatch = selectedTableStatus === 'all' || incident.status.toLowerCase().replace(' ', '-') === selectedTableStatus;
-      return yearMatch && monthMatch && statusMatch;
-    });
-  }, [siteIncidents, selectedTableYear, selectedTableMonth, selectedTableStatus]);
-
-  const monthlyIncidentData = useMemo(() => {
-    const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-    ];
-    const monthlyData: { month: string; incidents: number }[] = months.map(
-      (month) => ({ month, incidents: 0 })
-    );
-
-    siteIncidents.forEach((incident) => {
-      const incidentDate = new Date(incident.incidentTime);
-      if (incidentDate.getFullYear().toString() === selectedChartYear) {
-        const monthIndex = incidentDate.getMonth();
-        monthlyData[monthIndex].incidents += 1;
-      }
-    });
-
-    return monthlyData;
-  }, [siteIncidents, selectedChartYear]);
+  const totalIncidentPages = useMemo(() => {
+    if (!reportData) return 1;
+    return Math.ceil(reportData.incidents.count / 10); // Assuming 10 items per page from backend
+  }, [reportData]);
 
 
   const handleDownloadReport = () => {
     toast({
       title: 'Report Generation Started',
-      description: `Generating a detailed report for site ${site.name}.`,
+      description: `Generating a detailed report for site ${reportData?.site_name}.`,
     });
-    // In a real app, this would trigger a download.
   };
 
-  const handleScrollToIncidents = () => {
-    const element = incidentsTableRef.current;
-    if (element) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        element.classList.add('highlight-row');
-        setTimeout(() => {
-            element.classList.remove('highlight-row');
-        }, 2000);
-    }
-  };
-  
   const getStatusIndicator = (status: Incident['status']) => {
     switch (status) {
       case 'Active':
@@ -175,7 +182,42 @@ export default function SiteReportPage() {
     }
   };
 
-  const getGuardById = (id: string) => guards.find(g => g.id === id);
+  if (isLoading) {
+    return (
+        <div className="p-4 sm:p-6 lg:p-8 space-y-6">
+            <div className="flex items-center gap-4">
+                <Skeleton className="h-10 w-10" />
+                <div className="space-y-2">
+                    <Skeleton className="h-8 w-48" />
+                    <Skeleton className="h-4 w-64" />
+                </div>
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <Skeleton className="h-48" />
+                <Skeleton className="h-48" />
+                <Skeleton className="h-48" />
+            </div>
+            <Skeleton className="h-64" />
+            <Skeleton className="h-96" />
+        </div>
+    )
+  }
+
+  if (!reportData) {
+    return (
+      <div className="p-4 sm:p-6 lg:p-8">
+        <Card>
+          <CardContent className="pt-6">
+            <p className="font-medium">Site not found or could not be loaded.</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  const { site_name, org_site_id, site_address_line1, lat, lng, total_incidents_count, agency_details, guard_details, incident_trend, incidents } = reportData;
+  const fullAddress = `${site_address_line1}, ${reportData.city}, ${reportData.region}`;
+
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6">
@@ -189,7 +231,7 @@ export default function SiteReportPage() {
           </Button>
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Site Report</h1>
-            <p className="text-muted-foreground font-medium">Detailed overview for {site.name}.</p>
+            <p className="text-muted-foreground font-medium">Detailed overview for {site_name}.</p>
           </div>
         </div>
         <Button onClick={handleDownloadReport} className="bg-[#00B4D8] hover:bg-[#00B4D8]/90">
@@ -203,8 +245,8 @@ export default function SiteReportPage() {
           <CardHeader>
             <div className="flex flex-wrap justify-between items-start gap-4">
               <div>
-                <CardTitle className="text-2xl">{site.name}</CardTitle>
-                <p className="font-medium">ID: {site.id}</p>
+                <CardTitle className="text-2xl">{site_name}</CardTitle>
+                <p className="font-medium">ID: {org_site_id}</p>
               </div>
             </div>
           </CardHeader>
@@ -214,35 +256,28 @@ export default function SiteReportPage() {
                 <MapPin className="h-5 w-5 mt-0.5 text-primary" />
                 <div>
                   <p className="font-semibold">Address</p>
-                  <p className="font-medium">{site.address}</p>
+                  <p className="font-medium">{fullAddress}</p>
                 </div>
               </div>
-              {site.latitude && site.longitude && (
-                <div className="flex items-start gap-3">
+              <div className="flex items-start gap-3">
                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-globe mt-0.5 text-primary"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
                   <div>
                     <p className="font-semibold">Coordinates</p>
-                    <p className="font-medium">Latitude: {site.latitude}, Longitude: {site.longitude}</p>
+                    <p className="font-medium">Lat: {lat.toFixed(4)}, Lng: {lng.toFixed(4)}</p>
                   </div>
-                </div>
-              )}
+              </div>
                <div className="flex items-start gap-3">
-                  <button
-                    onClick={handleScrollToIncidents}
-                    className="flex items-start gap-3 text-left text-accent hover:underline"
-                  >
-                    <ShieldAlert className="mt-0.5 text-primary" />
-                    <div>
-                      <span className="font-semibold">Total Incidents</span>
-                      <p className="font-medium text-base">{siteIncidents.length}</p>
-                    </div>
-                  </button>
+                <ShieldAlert className="mt-0.5 text-primary" />
+                <div>
+                  <span className="font-semibold">Total Incidents</span>
+                  <p className="font-medium text-base">{total_incidents_count}</p>
                 </div>
+              </div>
             </div>
           </CardContent>
         </Card>
         
-        {agency && (
+        {agency_details ? (
           <Card>
             <CardHeader>
                 <CardTitle className="flex items-center gap-2"><Briefcase className="h-5 w-5"/>Agency Details</CardTitle>
@@ -250,29 +285,38 @@ export default function SiteReportPage() {
             </CardHeader>
             <CardContent className="space-y-4">
                 <div>
-                    <p className="font-semibold text-base">{agency.name}</p>
-                    <p className="font-medium">ID: {agency.id}</p>
+                    <p className="font-semibold text-base">{agency_details.agency_name}</p>
+                    <p className="font-medium">ID: {agency_details.agency_id}</p>
                 </div>
                 <div className="text-sm space-y-2 pt-2 border-t">
-                  <div className="flex items-center gap-2"><Phone className="h-4 w-4" /> <a href={`tel:${agency.phone}`} className="hover:underline">{agency.phone}</a></div>
-                  <div className="flex items-center gap-2"><Mail className="h-4 w-4" /> <a href={`mailto:${agency.email}`} className="hover:underline">{agency.email}</a></div>
+                  <div className="flex items-center gap-2"><Phone className="h-4 w-4" /> <a href={`tel:${agency_details.phone}`} className="hover:underline">{agency_details.phone}</a></div>
+                  <div className="flex items-center gap-2"><Mail className="h-4 w-4" /> <a href={`mailto:${agency_details.communication_email}`} className="hover:underline">{agency_details.communication_email}</a></div>
                 </div>
                  <Button asChild variant="link" className="p-0 h-auto font-medium">
-                    <Link href={`/towerco/agencies/${agency.id}`}>View Full Agency Report</Link>
+                    <Link href={`/towerco/agencies/${agency_details.id}`}>View Full Agency Report</Link>
                 </Button>
             </CardContent>
           </Card>
+        ) : (
+             <Card>
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2"><Briefcase className="h-5 w-5"/>Agency Details</CardTitle>
+                </CardHeader>
+                <CardContent>
+                     <p className="text-sm text-muted-foreground text-center py-4 font-medium">No security agency is assigned to this site.</p>
+                </CardContent>
+             </Card>
         )}
 
         <Card>
             <CardHeader>
                 <CardTitle className="flex items-center gap-2"><Users className="h-5 w-5"/>Assigned Guards</CardTitle>
-                <CardDescription>Guards currently assigned to {site.name}.</CardDescription>
+                <CardDescription>Guards currently assigned to {site_name}.</CardDescription>
             </CardHeader>
             <CardContent>
-                {siteGuards.length > 0 ? (
+                {guard_details.length > 0 ? (
                     <div className="space-y-4">
-                        {siteGuards.map(guard => (
+                        {guard_details.map(guard => (
                             <div key={guard.id} className="flex items-center gap-4">
                                 <Avatar className="h-12 w-12">
                                     <AvatarImage src={guard.avatar} alt={guard.name} />
@@ -292,91 +336,33 @@ export default function SiteReportPage() {
         </Card>
       </div>
 
-
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between gap-4">
-            <div>
-                <CardTitle>Incidents Reported Monthly</CardTitle>
-                <CardDescription>A monthly breakdown of incidents reported at {site.name}.</CardDescription>
-            </div>
-            <Select value={selectedChartYear} onValueChange={setSelectedChartYear}>
-                <SelectTrigger className="w-[120px] font-medium hover:bg-accent hover:text-accent-foreground">
-                    <SelectValue placeholder="Select Year" />
-                </SelectTrigger>
-                <SelectContent>
-                    {availableYears.map((year) => (
-                    <SelectItem key={year} value={year} className="font-medium">
-                        {year}
-                    </SelectItem>
-                    ))}
-                </SelectContent>
-            </Select>
+        <CardHeader>
+            <CardTitle>Incidents Reported Monthly</CardTitle>
+            <CardDescription>A monthly breakdown of incidents reported at {site_name}.</CardDescription>
         </CardHeader>
         <CardContent>
             <ChartContainer config={chartConfig} className="h-[250px] w-full">
                 <ResponsiveContainer>
-                    <LineChart data={monthlyIncidentData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+                    <LineChart data={incident_trend} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis dataKey="month" fontSize={12} tickLine={false} axisLine={false} />
                         <YAxis fontSize={12} tickLine={false} axisLine={false} allowDecimals={false} />
                         <ChartTooltip content={<ChartTooltipContent />} />
-                        <Line type="monotone" dataKey="incidents" stroke="var(--color-incidents)" strokeWidth={2} dot={{ r: 4 }} />
+                        <Line type="monotone" dataKey="count" name="Incidents" stroke="var(--color-incidents)" strokeWidth={2} dot={{ r: 4 }} />
                     </LineChart>
                 </ResponsiveContainer>
             </ChartContainer>
         </CardContent>
       </Card>
       
-      <Card ref={incidentsTableRef}>
-        <CardHeader className="flex flex-row items-center justify-between gap-4">
-          <div>
+      <Card>
+        <CardHeader>
             <CardTitle>Incidents Log</CardTitle>
             <CardDescription className="font-medium">A log of all emergency incidents reported at this site.</CardDescription>
-          </div>
-          <div className="flex items-center gap-2">
-              <Select value={selectedTableStatus} onValueChange={setSelectedTableStatus}>
-                    <SelectTrigger className="w-[180px] font-medium hover:bg-accent hover:text-accent-foreground">
-                        <SelectValue placeholder="Filter by status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="all" className="font-medium">All Statuses</SelectItem>
-                        <SelectItem value="active" className="font-medium">Active</SelectItem>
-                        <SelectItem value="under-review" className="font-medium">Under Review</SelectItem>
-                        <SelectItem value="resolved" className="font-medium">Resolved</SelectItem>
-                    </SelectContent>
-                </Select>
-              {availableYears.length > 0 && (
-                <Select value={selectedTableYear} onValueChange={setSelectedTableYear}>
-                  <SelectTrigger className="w-[120px] font-medium hover:bg-accent hover:text-accent-foreground">
-                    <SelectValue placeholder="Select Year" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all" className="font-medium">All Years</SelectItem>
-                    {availableYears.map((year) => (
-                      <SelectItem key={year} value={year} className="font-medium">
-                        {year}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-              <Select value={selectedTableMonth} onValueChange={setSelectedTableMonth}>
-                <SelectTrigger className="w-[140px] font-medium hover:bg-accent hover:text-accent-foreground">
-                  <SelectValue placeholder="Select Month" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all" className="font-medium">All Months</SelectItem>
-                  {Array.from({ length: 12 }, (_, i) => (
-                    <SelectItem key={i} value={i.toString()} className="font-medium">
-                      {new Date(0, i).toLocaleString('default', { month: 'long' })}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-          </div>
         </CardHeader>
         <CardContent>
-          {filteredIncidentsForTable.length > 0 ? (
+          {incidents.results.length > 0 ? (
             <Table>
               <TableHeader>
                 <TableRow>
@@ -388,8 +374,7 @@ export default function SiteReportPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredIncidentsForTable.map((incident) => {
-                  const guard = getGuardById(incident.raisedByGuardId);
+                {incidents.results.map((incident) => {
                   return (
                     <TableRow 
                       key={incident.id}
@@ -403,7 +388,7 @@ export default function SiteReportPage() {
                       </TableCell>
                       <TableCell className="font-medium">{new Date(incident.incidentTime).toLocaleDateString()}</TableCell>
                       <TableCell className="font-medium">{new Date(incident.incidentTime).toLocaleTimeString()}</TableCell>
-                      <TableCell className="font-medium">{guard?.name || 'N/A'}</TableCell>
+                      <TableCell className="font-medium">{incident.raisedByGuardId || 'N/A'}</TableCell>
                       <TableCell>{getStatusIndicator(incident.status)}</TableCell>
                     </TableRow>
                   )
@@ -411,10 +396,39 @@ export default function SiteReportPage() {
               </TableBody>
             </Table>
           ) : (
-            <p className="text-muted-foreground text-center py-4 font-medium">No emergency incidents have been reported for this site {selectedTableYear !== 'all' || selectedTableMonth !== 'all' ? 'in the selected period' : ''}.</p>
+            <p className="text-muted-foreground text-center py-4 font-medium">No emergency incidents have been reported for this site.</p>
           )}
         </CardContent>
+        {incidents.count > 10 && (
+             <CardFooter>
+                <div className="flex items-center justify-between w-full">
+                    <div className="text-sm text-muted-foreground font-medium">
+                        Showing {incidents.results.length} of {incidents.count} incidents.
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setIncidentsCurrentPage(prev => Math.max(prev - 1, 1))}
+                            disabled={incidentsCurrentPage === 1}
+                        >
+                            Previous
+                        </Button>
+                        <span className="text-sm font-medium">Page {incidentsCurrentPage} of {totalIncidentPages || 1}</span>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setIncidentsCurrentPage(prev => Math.min(prev + 1, totalIncidentPages))}
+                            disabled={incidentsCurrentPage === totalIncidentPages || totalIncidentPages === 0}
+                        >
+                            Next
+                        </Button>
+                    </div>
+                </div>
+            </CardFooter>
+        )}
       </Card>
     </div>
   );
 }
+
