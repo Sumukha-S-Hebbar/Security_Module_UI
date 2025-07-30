@@ -84,14 +84,18 @@ const uploadFormSchema = z.object({
 });
 
 const addSiteFormSchema = z.object({
-  id: z.string().min(1, 'Site ID is required.'),
-  name: z.string().min(1, 'Site name is required.'),
-  address: z.string().min(1, 'Address is required.'),
-  region: z.string().min(1, 'Region is required.'),
-  city: z.string().min(1, 'City is required.'),
-  latitude: z.coerce.number().min(-90).max(90),
-  longitude: z.coerce.number().min(-180).max(180),
+  org_site_id: z.string().min(1, 'Site ID is required.'),
+  site_name: z.string().min(1, 'Site name is required.'),
+  region: z.coerce.number().int(),
+  city: z.coerce.number().int(),
+  lat: z.coerce.number().min(-90).max(90),
+  lng: z.coerce.number().min(-180).max(180),
+  site_address_line1: z.string().min(1, 'Address is required.'),
+  site_address_line2: z.string().optional(),
+  site_address_line3: z.string().optional(),
+  site_zip_code: z.string().min(1, 'Zip code is required.'),
 });
+
 
 export default function TowercoSitesPage() {
   const [sites, setSites] = useState<Site[]>([]);
@@ -175,7 +179,6 @@ export default function TowercoSitesPage() {
 
   const addSiteForm = useForm<z.infer<typeof addSiteFormSchema>>({
     resolver: zodResolver(addSiteFormSchema),
-    defaultValues: { id: '', name: '', address: '', region: '', city: '' },
   });
 
   useEffect(() => {
@@ -208,16 +211,48 @@ export default function TowercoSitesPage() {
   }
 
   async function onAddSiteSubmit(values: z.infer<typeof addSiteFormSchema>) {
+    if (!loggedInOrg) {
+        toast({ variant: 'destructive', title: 'Error', description: 'Organization not found. Please log in again.'});
+        return;
+    }
+
     setIsAddingSite(true);
-    console.log('New site data:', { ...values, towerco: loggedInOrg?.name });
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    toast({
-      title: 'Site Added',
-      description: `Site "${values.name}" has been created successfully for ${loggedInOrg?.name}.`,
-    });
-    addSiteForm.reset();
-    setIsAddingSite(false);
-    setIsAddSiteDialogOpen(false);
+    const token = localStorage.getItem('token');
+
+    try {
+        const response = await fetch(`http://are.towerbuddy.tel:8000/security/api/orgs/${loggedInOrg.code}/sites/add/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Token ${token}`
+            },
+            body: JSON.stringify(values),
+        });
+
+        const responseData = await response.json();
+
+        if (!response.ok) {
+            throw new Error(responseData.detail || 'Failed to add site.');
+        }
+
+        toast({
+            title: 'Site Added',
+            description: responseData.detail,
+        });
+
+        setSites(prev => [...prev, responseData.data]);
+        addSiteForm.reset();
+        setIsAddSiteDialogOpen(false);
+
+    } catch (error: any) {
+        toast({
+            variant: 'destructive',
+            title: 'Error adding site',
+            description: error.message,
+        });
+    } finally {
+        setIsAddingSite(false);
+    }
   }
 
   const handleDownloadTemplate = () => {
@@ -478,13 +513,13 @@ export default function TowercoSitesPage() {
                 >
                   <FormField
                     control={addSiteForm.control}
-                    name="id"
+                    name="org_site_id"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Site ID</FormLabel>
+                        <FormLabel>Organization Site ID</FormLabel>
                         <FormControl>
                           <Input
-                            placeholder="e.g., SITE013"
+                            placeholder="e.g., SITE06"
                             {...field}
                           />
                         </FormControl>
@@ -494,13 +529,13 @@ export default function TowercoSitesPage() {
                   />
                   <FormField
                     control={addSiteForm.control}
-                    name="name"
+                    name="site_name"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Site Name</FormLabel>
                         <FormControl>
                           <Input
-                            placeholder="e.g., North Tower"
+                            placeholder="e.g., Skycrapper"
                             {...field}
                           />
                         </FormControl>
@@ -508,57 +543,15 @@ export default function TowercoSitesPage() {
                       </FormItem>
                     )}
                   />
-                  <FormField
-                    control={addSiteForm.control}
-                    name="address"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Address</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="e.g., 123 Main St, Anytown, USA"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                      control={addSiteForm.control}
-                      name="region"
-                      render={({ field }) => (
-                          <FormItem>
-                              <FormLabel>Region</FormLabel>
-                              <FormControl>
-                                  <Input placeholder="e.g., CA" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                          </FormItem>
-                      )}
-                  />
-                  <FormField
-                      control={addSiteForm.control}
-                      name="city"
-                      render={({ field }) => (
-                          <FormItem>
-                              <FormLabel>City</FormLabel>
-                              <FormControl>
-                                  <Input placeholder="e.g., Sunnyvale" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                          </FormItem>
-                      )}
-                  />
-                  <div className="grid grid-cols-2 gap-4">
-                    <FormField
+                   <div className="grid grid-cols-2 gap-4">
+                     <FormField
                         control={addSiteForm.control}
-                        name="latitude"
+                        name="region"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Latitude</FormLabel>
+                                <FormLabel>Region ID</FormLabel>
                                 <FormControl>
-                                    <Input type="number" placeholder="e.g., 37.4024" {...field} />
+                                    <Input type="number" placeholder="e.g., 192709" {...field} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -566,18 +559,107 @@ export default function TowercoSitesPage() {
                     />
                     <FormField
                         control={addSiteForm.control}
-                        name="longitude"
+                        name="city"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Longitude</FormLabel>
+                                <FormLabel>City ID</FormLabel>
                                 <FormControl>
-                                    <Input type="number" placeholder="e.g., -122.0785" {...field} />
+                                    <Input type="number" placeholder="e.g., 192126" {...field} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
                         )}
                     />
                   </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                        control={addSiteForm.control}
+                        name="lat"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Latitude</FormLabel>
+                                <FormControl>
+                                    <Input type="number" placeholder="e.g., 5.88888888" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={addSiteForm.control}
+                        name="lng"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Longitude</FormLabel>
+                                <FormControl>
+                                    <Input type="number" placeholder="e.g., 54.67676767" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                  </div>
+                  <FormField
+                    control={addSiteForm.control}
+                    name="site_address_line1"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Address Line 1</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="e.g., 10Th Main"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={addSiteForm.control}
+                    name="site_address_line2"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Address Line 2 (Optional)</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="e.g., 5th Cross Road"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={addSiteForm.control}
+                    name="site_address_line3"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Address Line 3 (Optional)</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={addSiteForm.control}
+                    name="site_zip_code"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Zip Code</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="e.g., 560060"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                   <DialogFooter>
                     <Button type="submit" disabled={isAddingSite} className="bg-[#00B4D8] hover:bg-[#00B4D8]/90">
                       {isAddingSite ? (
@@ -926,3 +1008,4 @@ export default function TowercoSitesPage() {
     </div>
   );
 }
+
