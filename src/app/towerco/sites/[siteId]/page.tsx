@@ -74,7 +74,7 @@ type SiteReportData = {
         count: number;
         next: string | null;
         previous: string | null;
-        results: Incident[];
+        results: any[]; // Using any to accommodate the new structure for now
     };
 };
 
@@ -383,13 +383,13 @@ export default function SiteReportPage() {
                     >
                       <TableCell>
                         <Button asChild variant="link" className="p-0 h-auto font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
-                          <Link href={`/towerco/incidents/${incident.id}`}>{incident.id}</Link>
+                          <Link href={`/towerco/incidents/${incident.id}`}>{incident.incident_id}</Link>
                         </Button>
                       </TableCell>
-                      <TableCell className="font-medium">{new Date(incident.incidentTime).toLocaleDateString()}</TableCell>
-                      <TableCell className="font-medium">{new Date(incident.incidentTime).toLocaleTimeString()}</TableCell>
-                      <TableCell className="font-medium">{incident.raisedByGuardId || 'N/A'}</TableCell>
-                      <TableCell>{getStatusIndicator(incident.status)}</TableCell>
+                      <TableCell className="font-medium">{new Date(incident.incident_time).toLocaleDateString()}</TableCell>
+                      <TableCell className="font-medium">{new Date(incident.incident_time).toLocaleTimeString()}</TableCell>
+                      <TableCell className="font-medium">{incident.guard_name || 'N/A'}</TableCell>
+                      <TableCell>{getStatusIndicator(incident.incident_status)}</TableCell>
                     </TableRow>
                   )
                 })}
@@ -431,4 +431,3 @@ export default function SiteReportPage() {
     </div>
   );
 }
-
