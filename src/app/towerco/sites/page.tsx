@@ -146,7 +146,7 @@ export default function TowercoSitesPage() {
 
         const [sitesResponse, agenciesData] = await Promise.all([
             fetchData<PaginatedSitesResponse>(`http://are.towerbuddy.tel:8000/security/api/orgs/${orgCode}/sites/list/`),
-            fetchData<SecurityAgency[]>('http://are.towerbuddy.tel:8000/api/v1/agencies/'),
+            fetchData<SecurityAgency[]>('http://are.towerbuddy.tel:8000/security/api/agencies/list/'),
         ]);
         
         setSites(sitesResponse?.results || []);
