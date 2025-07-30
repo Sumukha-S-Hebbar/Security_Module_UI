@@ -67,6 +67,14 @@ export default function RootPage() {
       }
       
       const data: LoginResponse = await response.json();
+      
+      // Store user and organization data in localStorage
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('user', JSON.stringify(data.user));
+        localStorage.setItem('organization', JSON.stringify(data.organization));
+        localStorage.setItem('token', data.token);
+      }
+
 
       toast({
         title: 'Login Successful',

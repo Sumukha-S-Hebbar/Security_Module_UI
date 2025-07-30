@@ -49,7 +49,6 @@ import { organizations as mockOrganizations } from '@/lib/data/organizations';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
-const LOGGED_IN_ORG_ID = 'TCO01'; // Simulate logged-in user
 const ACTIVE_INCIDENTS_PER_PAGE = 4;
 
 interface DashboardData {
@@ -61,7 +60,7 @@ interface DashboardData {
   currentUserOrg: Organization | undefined;
 }
 
-async function getDashboardData(): Promise<DashboardData> {
+async function getDashboardData(org: Organization | null): Promise<DashboardData> {
   // TODO: Replace with your actual API endpoint.
   // This endpoint should return all the necessary data for the dashboard,
   // filtered for the logged-in TOWERCO/MNO user.
@@ -76,13 +75,12 @@ async function getDashboardData(): Promise<DashboardData> {
     // Simulating network delay and returning mock data for now.
     await new Promise(resolve => setTimeout(resolve, 1000));
     
-    const currentUserOrg = mockOrganizations.find(org => org.id === LOGGED_IN_ORG_ID);
-    if (!currentUserOrg) {
+    if (!org) {
         throw new Error("Logged in organization not found");
     }
 
     const towercoSites = mockSites.filter(
-      (site) => site.towerco === currentUserOrg.name
+      (site) => site.towerco === org.name
     );
     const towercoSiteIds = new Set(towercoSites.map((site) => site.id));
     const towercoIncidents = mockIncidents.filter((incident) =>
@@ -101,7 +99,7 @@ async function getDashboardData(): Promise<DashboardData> {
       incidents: towercoIncidents,
       guards: towercoGuards,
       patrollingOfficers: towercoPatrollingOfficers,
-      currentUserOrg
+      currentUserOrg: org
     };
 
   } catch (error) {
@@ -120,7 +118,9 @@ export default function TowercoHomePage() {
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
-      const dashboardData = await getDashboardData();
+      const orgData = localStorage.getItem('organization');
+      const org = orgData ? JSON.parse(orgData) : null;
+      const dashboardData = await getDashboardData(org);
       setData(dashboardData);
       setIsLoading(false);
     };
@@ -197,7 +197,7 @@ export default function TowercoHomePage() {
     )
   }
   
-  const portalName = data.currentUserOrg.role === 'TOWERCO' ? 'TOWERCO' : 'MNO';
+  const portalName = data.currentUserOrg.role === 'T' ? 'TOWERCO' : 'MNO';
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6">
