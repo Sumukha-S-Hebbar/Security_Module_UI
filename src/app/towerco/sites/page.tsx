@@ -9,9 +9,9 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useToast } from '@/hooks/use-toast';
-import { organizations } from '@/lib/data/organizations';
+import { organizations as mockOrganizations } from '@/lib/data/organizations';
 import { incidents as mockIncidents } from '@/lib/data/incidents';
-import type { Site, SecurityAgency, PaginatedSitesResponse } from '@/types';
+import type { Site, SecurityAgency, PaginatedSitesResponse, Organization } from '@/types';
 import {
   Card,
   CardContent,
@@ -72,7 +72,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { fetchData } from '@/lib/api';
 
 
-const LOGGED_IN_ORG_ID = 'TCO01'; // Simulate logged-in user
 const ASSIGNED_ITEMS_PER_PAGE = 5;
 const UNASSIGNED_ITEMS_PER_PAGE = 5;
 
@@ -99,6 +98,7 @@ export default function TowercoSitesPage() {
   const [securityAgencies, setSecurityAgencies] = useState<SecurityAgency[]>([]);
   const [incidents, setIncidents] = useState<typeof mockIncidents>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [loggedInOrg, setLoggedInOrg] = useState<Organization | null>(null);
 
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
   const [isAddSiteDialogOpen, setIsAddSiteDialogOpen] = useState(false);
@@ -127,38 +127,46 @@ export default function TowercoSitesPage() {
   );
   const [guardsRequired, setGuardsRequired] = useState<{ [siteId: string]: string }>({});
   
-  const loggedInOrg = useMemo(() => organizations.find(o => o.id === LOGGED_IN_ORG_ID), []);
   const unassignedSitesRef = useRef<Map<string, HTMLTableRowElement | null>>(new Map());
 
   useEffect(() => {
+     if (typeof window !== 'undefined') {
+        const orgData = localStorage.getItem('organization');
+        if (orgData) {
+            setLoggedInOrg(JSON.parse(orgData));
+        }
+     }
+  }, []);
+
+  useEffect(() => {
     async function loadInitialData() {
+        if (!loggedInOrg) return;
+
         setIsLoading(true);
+        const orgCode = loggedInOrg.code;
+
         const [sitesResponse, agenciesData, incidentsData] = await Promise.all([
-            fetchData<PaginatedSitesResponse>('https://ken.securebuddy.tel:8000/api/v1/sites/'),
-            fetchData<SecurityAgency[]>('https://ken.securebuddy.tel:8000/api/v1/agencies/'),
-            fetchData<typeof mockIncidents>('https://ken.securebuddy.tel:8000/api/v1/incidents/')
+            fetchData<PaginatedSitesResponse>(`http://are.towerbuddy.tel:8000/security/api/orgs/${orgCode}/sites/list/`),
+            fetchData<SecurityAgency[]>('http://are.towerbuddy.tel:8000/api/v1/agencies/'), // This might need to be org-specific too
+            fetchData<typeof mockIncidents>('http://are.towerbuddy.tel:8000/api/v1/incidents/') // This might need to be org-specific too
         ]);
+        
         setSites(sitesResponse?.results || []);
         setSecurityAgencies(agenciesData || []);
         setIncidents(incidentsData || []);
         setIsLoading(false);
     }
     loadInitialData();
-  }, []);
-
-  const towercoSites = useMemo(
-    () => sites.filter((site) => site.org_name === loggedInOrg?.name),
-    [sites, loggedInOrg]
-  );
+  }, [loggedInOrg]);
 
   const assignedSites = useMemo(
-    () => towercoSites.filter((site) => site.site_status === 'Assigned'),
-    [towercoSites]
+    () => sites.filter((site) => site.site_status === 'Assigned'),
+    [sites]
   );
 
   const unassignedSites = useMemo(
-    () => towercoSites.filter((site) => site.site_status === 'Unassigned'),
-    [towercoSites]
+    () => sites.filter((site) => site.site_status === 'Unassigned'),
+    [sites]
   );
 
   const uploadForm = useForm<z.infer<typeof uploadFormSchema>>({
@@ -182,7 +190,7 @@ export default function TowercoSitesPage() {
             }, 2000);
         }
     }
-  }, [searchParams]);
+  }, [searchParams, sites]); // Rerun when sites are loaded
 
   async function onUploadSubmit(values: z.infer<typeof uploadFormSchema>) {
     setIsUploading(true);
@@ -353,7 +361,7 @@ export default function TowercoSitesPage() {
 
   const totalUnassignedPages = Math.ceil(filteredUnassignedSites.length / UNASSIGNED_ITEMS_PER_PAGE);
 
-  if (isLoading) {
+  if (isLoading || !loggedInOrg) {
     return (
         <div className="p-4 sm:p-6 lg:p-8 space-y-6">
             <div className="space-y-2">
@@ -364,14 +372,6 @@ export default function TowercoSitesPage() {
             <Skeleton className="h-64 w-full" />
         </div>
     );
-  }
-
-  if (!loggedInOrg) {
-     return (
-      <div className="p-4 sm:p-6 lg:p-8">
-        <p className="font-medium">Could not load organization data.</p>
-      </div>
-    )
   }
 
   return (
@@ -926,4 +926,3 @@ export default function TowercoSitesPage() {
     </div>
   );
 }
-
