@@ -38,7 +38,7 @@ interface LoginResponse {
 export default function RootPage() {
   const router = useRouter();
   const { toast } = useToast();
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -47,8 +47,8 @@ export default function RootPage() {
     setIsLoading(true);
 
     try {
-      if (!email || !password) {
-        throw new Error('Email and password are required.');
+      if (!username || !password) {
+        throw new Error('Username and password are required.');
       }
 
       const API_URL = 'http://are.towerbuddy.tel:8000/security/api/users/auth/token/';
@@ -58,7 +58,7 @@ export default function RootPage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ username, password }),
       });
 
       if (!response.ok) {
@@ -154,14 +154,14 @@ export default function RootPage() {
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="email-in">Email</Label>
+                      <Label htmlFor="username-in">Username</Label>
                       <Input 
-                        id="email-in" 
-                        type="email" 
-                        placeholder="your-email@example.com" 
+                        id="username-in" 
+                        type="text" 
+                        placeholder="Enter your username" 
                         required 
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
                         disabled={isLoading}
                       />
                     </div>
