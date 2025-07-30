@@ -146,13 +146,13 @@ export default function TowercoSitesPage() {
         const token = localStorage.getItem('token');
         const authHeader = { 'Authorization': `Token ${token}` };
 
-        const [sitesResponse, agenciesData] = await Promise.all([
+        const [sitesResponse, agenciesResponse] = await Promise.all([
             fetchData<PaginatedSitesResponse>(`http://are.towerbuddy.tel:8000/security/api/orgs/${orgCode}/sites/list/`, { headers: authHeader }),
-            fetchData<SecurityAgency[]>('http://are.towerbuddy.tel:8000/security/api/agencies/list/', { headers: authHeader }),
+            fetchData<{results: SecurityAgency[]}>(`http://are.towerbuddy.tel:8000/security/api/orgs/${orgCode}/security-agencies/list/`, { headers: authHeader }),
         ]);
         
         setSites(sitesResponse?.results || []);
-        setSecurityAgencies(agenciesData || []);
+        setSecurityAgencies(agenciesResponse?.results || []);
         setIsLoading(false);
     }
     loadInitialData();
