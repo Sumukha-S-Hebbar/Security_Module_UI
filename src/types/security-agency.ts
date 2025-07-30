@@ -6,13 +6,13 @@ export type SecurityAgency = {
   contact_person: string;
   communication_email: string;
   phone: string;
+  address: string;
+  city: string;
+  region: string;
 
-  // Fields from original mock data
+  // Fields from original mock data that might not be in API
   name?: string;
   email?: string;
-  address?: string;
-  city?: string;
-  region?: string;
   country?: string;
   avatar?: string;
   siteIds?: string[];

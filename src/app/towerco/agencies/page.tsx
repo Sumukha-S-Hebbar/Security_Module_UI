@@ -9,10 +9,10 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useToast } from '@/hooks/use-toast';
-import { sites } from '@/lib/data/sites';
+import { sites as mockSites } from '@/lib/data/sites';
 import { organizations } from '@/lib/data/organizations';
-import { incidents } from '@/lib/data/incidents';
-import type { SecurityAgency, Site } from '@/types';
+import { incidents as mockIncidents } from '@/lib/data/incidents';
+import type { SecurityAgency, Site, Organization } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -46,6 +46,7 @@ import {
 } from '@/components/ui/select';
 import { securityAgencies as mockAgencies } from '@/lib/data/security-agencies';
 import { cn } from '@/lib/utils';
+import { fetchData } from '@/lib/api';
 
 
 const LOGGED_IN_ORG_ID = 'TCO01'; // Simulate logged-in user
@@ -68,44 +69,26 @@ const addAgencyFormSchema = z.object({
     region: z.string().min(1, { message: 'Region is required.' }),
 });
 
-async function getAgencies(orgId: string): Promise<SecurityAgency[]> {
-    const API_URL = 'https://ken.securebuddy.tel:8000/api/v1/agencies/';
-    
+async function getAgencies(): Promise<SecurityAgency[]> {
+    const API_URL = 'http://are.towerbuddy.tel:8000/api/v1/agencies/';
     try {
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        const org = organizations.find(o => o.id === orgId);
-        if (!org) return [];
-
-        const orgSites = sites.filter(s => s.towerco === org.name);
-        const orgSiteIds = new Set(orgSites.map(s => s.id));
-        
-        const relevantAgencies = mockAgencies.filter(agency => 
-            agency.siteIds.some(siteId => orgSiteIds.has(siteId))
-        );
-
-        return relevantAgencies;
-
+        const data = await fetchData<SecurityAgency[]>(API_URL);
+        return data || [];
     } catch (error) {
         console.error("Could not fetch agencies, returning empty array.", error);
         return [];
     }
 }
 
-async function getRegions(): Promise<string[]> {
-    try {
-         await new Promise(resolve => setTimeout(resolve, 500));
-         const uniqueRegions = [...new Set(mockAgencies.map(agency => agency.region))];
-         return uniqueRegions.sort();
-    } catch (error) {
-        console.error("Could not fetch regions, returning empty array.", error);
-        return [];
-    }
+async function getRegions(agencies: SecurityAgency[]): Promise<string[]> {
+    const uniqueRegions = [...new Set(agencies.map(agency => agency.region))];
+    return uniqueRegions.sort();
 }
 
 
 export default function TowercoAgenciesPage() {
     const [securityAgencies, setSecurityAgencies] = useState<SecurityAgency[]>([]);
+    const [sites, setSites] = useState<Site[]>([]);
     const [regions, setRegions] = useState<string[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
@@ -120,22 +103,37 @@ export default function TowercoAgenciesPage() {
     const [selectedCity, setSelectedCity] = useState('all');
     const [currentPage, setCurrentPage] = useState(1);
     
-    const loggedInOrg = useMemo(() => organizations.find(o => o.id === LOGGED_IN_ORG_ID), []);
-
+    const [loggedInOrg, setLoggedInOrg] = useState<Organization | null>(null);
 
     useEffect(() => {
-        const fetchData = async () => {
+     if (typeof window !== 'undefined') {
+        const orgData = localStorage.getItem('organization');
+        if (orgData) {
+            setLoggedInOrg(JSON.parse(orgData));
+        }
+     }
+    }, []);
+
+    useEffect(() => {
+        if (!loggedInOrg) return;
+
+        const fetchDataForOrg = async () => {
             setIsLoading(true);
-            const [agenciesData, regionsData] = await Promise.all([
-                getAgencies(LOGGED_IN_ORG_ID),
-                getRegions(),
+            const orgCode = loggedInOrg.code;
+            const [agenciesData, sitesData] = await Promise.all([
+                getAgencies(),
+                fetchData<any>(`http://are.towerbuddy.tel:8000/security/api/orgs/${orgCode}/sites/list/`),
             ]);
-            setSecurityAgencies(agenciesData);
-            setRegions(regionsData);
+            
+            const fetchedAgencies = agenciesData || [];
+            setSecurityAgencies(fetchedAgencies);
+            setSites(sitesData?.results || []);
+            setRegions(await getRegions(fetchedAgencies));
             setIsLoading(false);
         };
-        fetchData();
-    }, []);
+
+        fetchDataForOrg();
+    }, [loggedInOrg]);
 
     const uploadForm = useForm<z.infer<typeof uploadFormSchema>>({
         resolver: zodResolver(uploadFormSchema),
@@ -158,12 +156,12 @@ export default function TowercoAgenciesPage() {
 
     const citiesForAddForm = useMemo(() => {
         if (!watchedRegion) return [];
-        const allCities = new Set(mockAgencies
+        const allCities = new Set(securityAgencies
             .filter(agency => agency.region === watchedRegion)
             .map(agency => agency.city)
         );
         return Array.from(allCities).sort();
-    }, [watchedRegion]);
+    }, [watchedRegion, securityAgencies]);
 
     useEffect(() => {
         addAgencyForm.resetField('city');
@@ -193,9 +191,13 @@ export default function TowercoAgenciesPage() {
 
         const newAgency: SecurityAgency = {
             ...values,
-            country: 'USA',
+            id: securityAgencies.length + 1,
+            tb_agency_id: `TB${values.id}`,
+            agency_id: values.id,
+            agency_name: values.name,
+            contact_person: 'N/A',
+            communication_email: values.email,
             avatar: `https://placehold.co/100x100.png?text=${values.name.charAt(0)}`,
-            siteIds: [],
         };
 
         setSecurityAgencies((prevAgencies) => [newAgency, ...prevAgencies]);
@@ -231,10 +233,9 @@ export default function TowercoAgenciesPage() {
         const filtered = securityAgencies.filter((agency) => {
             const searchLower = searchQuery.toLowerCase();
             const matchesSearch = (
-                agency.name.toLowerCase().includes(searchLower) ||
-                agency.id.toLowerCase().includes(searchLower) ||
-                agency.email.toLowerCase().includes(searchLower) ||
-                agency.address.toLowerCase().includes(searchLower)
+                agency.agency_name.toLowerCase().includes(searchLower) ||
+                agency.agency_id.toLowerCase().includes(searchLower) ||
+                agency.communication_email.toLowerCase().includes(searchLower)
             );
             
             const matchesRegion = selectedRegion === 'all' || agency.region === selectedRegion;
@@ -256,19 +257,20 @@ export default function TowercoAgenciesPage() {
 
     const getAssignedSitesForAgency = (agencyId: string) => {
       if (!loggedInOrg) return [];
-      const agency = securityAgencies.find(a => a.id === agencyId);
-      if (!agency) return [];
-      return sites.filter(s => agency.siteIds.includes(s.id) && s.towerco === loggedInOrg.name);
+      return sites.filter(s => s.assigned_agency?.agency_id === agencyId);
     };
 
     const getIncidentCountForAgency = (agencyId: string) => {
       const assignedSites = getAssignedSitesForAgency(agencyId);
-      const siteIds = new Set(assignedSites.map(s => s.id));
-      return incidents.filter(i => siteIds.has(i.siteId)).length;
+      return assignedSites.reduce((acc, site) => acc + (site.total_incidents || 0), 0);
     }
     
     const handleRowClick = (agencyId: string) => {
-        router.push(`/towerco/agencies/${agencyId}`);
+        // This is a placeholder for the actual agency ID from the API
+        const agency = securityAgencies.find(a => a.agency_id === agencyId);
+        if (agency) {
+            router.push(`/towerco/agencies/${agency.id}`);
+        }
     };
 
     const handleExpandClick = (e: React.MouseEvent, agencyId: string) => {
@@ -568,31 +570,31 @@ export default function TowercoAgenciesPage() {
                                 ))
                             ) : paginatedAgencies.length > 0 ? (
                                 paginatedAgencies.map((agency) => {
-                                    const assignedSites = getAssignedSitesForAgency(agency.id);
+                                    const assignedSites = getAssignedSitesForAgency(agency.agency_id);
                                     const assignedSitesCount = assignedSites.length;
-                                    const incidentCount = getIncidentCountForAgency(agency.id);
-                                    const isExpanded = expandedAgencyId === agency.id;
+                                    const incidentCount = getIncidentCountForAgency(agency.agency_id);
+                                    const isExpanded = expandedAgencyId === agency.agency_id;
 
                                     return (
                                         <Fragment key={agency.id}>
-                                            <TableRow onClick={() => handleRowClick(agency.id)} className="cursor-pointer hover:bg-accent hover:text-accent-foreground group">
+                                            <TableRow onClick={() => handleRowClick(agency.agency_id)} className="cursor-pointer hover:bg-accent hover:text-accent-foreground group">
                                                 <TableCell>
-                                                    <p className="text-accent font-semibold group-hover:text-accent-foreground hover:underline">{agency.id}</p>
+                                                    <p className="text-accent font-semibold group-hover:text-accent-foreground hover:underline">{agency.agency_id}</p>
                                                 </TableCell>
                                                 <TableCell>
                                                     <div className="flex items-center gap-3">
                                                         <Avatar className="h-10 w-10">
-                                                            <AvatarImage src={agency.avatar} alt={agency.name} />
-                                                            <AvatarFallback>{agency.name.charAt(0)}</AvatarFallback>
+                                                            <AvatarImage src={agency.avatar} alt={agency.agency_name} />
+                                                            <AvatarFallback>{agency.agency_name.charAt(0)}</AvatarFallback>
                                                         </Avatar>
-                                                        <span className="font-medium">{agency.name}</span>
+                                                        <span className="font-medium">{agency.agency_name}</span>
                                                     </div>
                                                 </TableCell>
                                                 <TableCell>
                                                     <div className="flex items-center gap-2 text-sm">
                                                         <Mail className="h-4 w-4 flex-shrink-0" />
-                                                        <a href={`mailto:${agency.email}`} onClick={(e) => e.stopPropagation()} className="truncate hover:underline text-accent group-hover:text-accent-foreground">
-                                                            {agency.email}
+                                                        <a href={`mailto:${agency.communication_email}`} onClick={(e) => e.stopPropagation()} className="truncate hover:underline text-accent group-hover:text-accent-foreground">
+                                                            {agency.communication_email}
                                                         </a>
                                                     </div>
                                                     <div className="flex items-center gap-2 text-sm">
@@ -612,7 +614,7 @@ export default function TowercoAgenciesPage() {
                                                     <Button
                                                     variant="link"
                                                     className="p-0 h-auto flex items-center gap-2 text-accent group-hover:text-accent-foreground"
-                                                    onClick={(e) => handleExpandClick(e, agency.id)}
+                                                    onClick={(e) => handleExpandClick(e, agency.agency_id)}
                                                     disabled={assignedSitesCount === 0}
                                                     >
                                                         <Building2 className="h-4 w-4" />
@@ -633,7 +635,7 @@ export default function TowercoAgenciesPage() {
                                                 <TableRow className="bg-muted/50 hover:bg-muted/50">
                                                     <TableCell colSpan={6} className="p-0">
                                                         <div className="p-4">
-                                                            <h4 className="font-semibold mb-2">Sites Assigned to {agency.name}</h4>
+                                                            <h4 className="font-semibold mb-2">Sites Assigned to {agency.agency_name}</h4>
                                                             {assignedSites.length > 0 ? (
                                                                 <Table>
                                                                     <TableHeader>
@@ -654,11 +656,11 @@ export default function TowercoAgenciesPage() {
                                                                             >
                                                                                 <TableCell>
                                                                                     <Button asChild variant="link" className="p-0 h-auto font-medium text-accent group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
-                                                                                      <Link href={`/towerco/sites/${site.id}`}>{site.id}</Link>
+                                                                                      <Link href={`/towerco/sites/${site.id}`}>{site.org_site_id}</Link>
                                                                                     </Button>
                                                                                 </TableCell>
-                                                                                <TableCell>{site.name}</TableCell>
-                                                                                <TableCell>{site.address}</TableCell>
+                                                                                <TableCell>{site.site_name}</TableCell>
+                                                                                <TableCell>{site.site_address_line1}</TableCell>
                                                                                 <TableCell>{site.city}</TableCell>
                                                                                 <TableCell>{site.region}</TableCell>
                                                                             </TableRow>
