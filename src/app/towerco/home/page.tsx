@@ -48,6 +48,7 @@ import { sites as mockSites } from '@/lib/data/sites';
 import { organizations as mockOrganizations } from '@/lib/data/organizations';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useDataFetching } from '@/hooks/useDataFetching';
 
 const ACTIVE_INCIDENTS_PER_PAGE = 4;
 
@@ -109,23 +110,20 @@ async function getDashboardData(org: Organization | null): Promise<DashboardData
 }
 
 export default function TowercoHomePage() {
-  const [data, setData] = useState<DashboardData | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const router = useRouter();
   const [activeIncidentsCurrentPage, setActiveIncidentsCurrentPage] = useState(1);
-
+  const router = useRouter();
+  
+  const [org, setOrg] = useState<Organization | null>(null);
 
   useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
       const orgData = localStorage.getItem('organization');
-      const org = orgData ? JSON.parse(orgData) : null;
-      const dashboardData = await getDashboardData(org);
-      setData(dashboardData);
-      setIsLoading(false);
-    };
-    fetchData();
+      if (orgData) {
+        setOrg(JSON.parse(orgData));
+      }
   }, []);
+
+  const { data, isLoading } = useDataFetching<DashboardData>(() => getDashboardData(org), [org]);
+
 
   const activeEmergencies = useMemo(() => {
     if (!data) return [];
