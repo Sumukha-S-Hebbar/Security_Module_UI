@@ -12,7 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { sites as mockSites } from '@/lib/data/sites';
 import { organizations } from '@/lib/data/organizations';
 import { incidents as mockIncidents } from '@/lib/data/incidents';
-import type { SecurityAgency, Site, Organization } from '@/types';
+import type { SecurityAgency, Site, Organization, PaginatedSitesResponse } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -69,17 +69,6 @@ const addAgencyFormSchema = z.object({
     region: z.string().min(1, { message: 'Region is required.' }),
 });
 
-async function getAgencies(): Promise<SecurityAgency[]> {
-    const API_URL = 'http://are.towerbuddy.tel:8000/api/v1/agencies/';
-    try {
-        const data = await fetchData<SecurityAgency[]>(API_URL);
-        return data || [];
-    } catch (error) {
-        console.error("Could not fetch agencies, returning empty array.", error);
-        return [];
-    }
-}
-
 async function getRegions(agencies: SecurityAgency[]): Promise<string[]> {
     const uniqueRegions = [...new Set(agencies.map(agency => agency.region))];
     return uniqueRegions.sort();
@@ -120,12 +109,12 @@ export default function TowercoAgenciesPage() {
         const fetchDataForOrg = async () => {
             setIsLoading(true);
             const orgCode = loggedInOrg.code;
-            const [agenciesData, sitesData] = await Promise.all([
-                getAgencies(),
-                fetchData<any>(`http://are.towerbuddy.tel:8000/security/api/orgs/${orgCode}/sites/list/`),
+            const [agenciesResponse, sitesData] = await Promise.all([
+                fetchData<{results: SecurityAgency[]}>(`http://are.towerbuddy.tel:8000/security/api/orgs/${orgCode}/security-agencies/list/`),
+                fetchData<PaginatedSitesResponse>(`http://are.towerbuddy.tel:8000/security/api/orgs/${orgCode}/sites/list/`),
             ]);
             
-            const fetchedAgencies = agenciesData || [];
+            const fetchedAgencies = agenciesResponse?.results || [];
             setSecurityAgencies(fetchedAgencies);
             setSites(sitesData?.results || []);
             setRegions(await getRegions(fetchedAgencies));
@@ -719,4 +708,5 @@ export default function TowercoAgenciesPage() {
         </div>
     );
 }
+
 
