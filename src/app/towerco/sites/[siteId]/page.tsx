@@ -320,7 +320,7 @@ export default function SiteReportPage() {
                             <div key={guard.id} className="flex items-center gap-4">
                                 <Avatar className="h-12 w-12">
                                     <AvatarImage src={guard.avatar} alt={guard.name} />
-                                    <AvatarFallback>{guard.name.charAt(0)}</AvatarFallback>
+                                    <AvatarFallback>{guard.name ? guard.name.charAt(0) : 'G'}</AvatarFallback>
                                 </Avatar>
                                 <div>
                                     <p className="font-semibold text-base">{guard.name}</p>
