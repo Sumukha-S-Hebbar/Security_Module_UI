@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useMemo, useEffect, useRef, Fragment } from 'react';
@@ -621,18 +622,22 @@ export default function TowercoAgenciesPage() {
                                                     </div>
                                                 </TableCell>
                                                 <TableCell>
-                                                    <Button
-                                                    variant="link"
-                                                    className="p-0 h-auto flex items-center gap-2 text-accent group-hover:text-accent-foreground"
-                                                    onClick={(e) => handleExpandClick(e, agency.agency_id)}
-                                                    disabled={agency.total_sites_assigned === 0}
-                                                    >
-                                                        <Building2 className="h-4 w-4" />
-                                                        {agency.total_sites_assigned}
-                                                        {agency.total_sites_assigned > 0 && (
+                                                    {agency.total_sites_assigned > 0 ? (
+                                                        <Button
+                                                            variant="link"
+                                                            className="p-0 h-auto flex items-center gap-2 text-accent group-hover:text-accent-foreground"
+                                                            onClick={(e) => handleExpandClick(e, agency.agency_id)}
+                                                        >
+                                                            <Building2 className="h-4 w-4" />
+                                                            {agency.total_sites_assigned}
                                                             <ChevronDown className={cn("h-4 w-4 transition-transform", isExpanded && "rotate-180")} />
-                                                        )}
-                                                    </Button>
+                                                        </Button>
+                                                    ) : (
+                                                        <div className="flex items-center gap-2 font-medium">
+                                                            <Building2 className="h-4 w-4 text-muted-foreground group-hover:text-accent-foreground" />
+                                                            {agency.total_sites_assigned}
+                                                        </div>
+                                                    )}
                                                 </TableCell>
                                                 <TableCell>
                                                   <div className="flex items-center gap-2 font-medium">
@@ -729,3 +734,4 @@ export default function TowercoAgenciesPage() {
         </div>
     );
 }
+
