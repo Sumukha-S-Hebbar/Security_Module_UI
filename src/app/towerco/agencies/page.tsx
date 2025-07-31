@@ -9,9 +9,6 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useToast } from '@/hooks/use-toast';
-import { sites as mockSites } from '@/lib/data/sites';
-import { organizations } from '@/lib/data/organizations';
-import { incidents as mockIncidents } from '@/lib/data/incidents';
 import type { SecurityAgency, Site, Organization, PaginatedSitesResponse } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -44,7 +41,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { securityAgencies as mockAgencies } from '@/lib/data/security-agencies';
 import { cn } from '@/lib/utils';
 import { fetchData } from '@/lib/api';
 
@@ -60,13 +56,16 @@ const uploadFormSchema = z.object({
 });
 
 const addAgencyFormSchema = z.object({
-    id: z.string().min(1, { message: 'Agency ID is required.' }),
-    name: z.string().min(1, { message: 'Agency name is required.' }),
+    agency_id: z.string().min(1, { message: 'Agency ID is required.' }),
+    agency_name: z.string().min(1, { message: 'Agency name is required.' }),
+    contact_person: z.string().min(1, { message: 'Contact person is required.' }),
     phone: z.string().min(1, { message: 'Phone is required.' }),
     email: z.string().email({ message: 'Valid email is required.' }),
-    address: z.string().min(1, { message: 'Address is required.' }),
-    city: z.string().min(1, { message: 'City is required.' }),
     region: z.string().min(1, { message: 'Region is required.' }),
+    city: z.string().min(1, { message: 'City is required.' }),
+    registered_address_line1: z.string().min(1, { message: 'Address Line 1 is required.' }),
+    registered_address_line2: z.string().optional(),
+    registered_address_line3: z.string().optional(),
 });
 
 async function getRegions(agencies: SecurityAgency[]): Promise<string[]> {
@@ -109,9 +108,12 @@ export default function TowercoAgenciesPage() {
         const fetchDataForOrg = async () => {
             setIsLoading(true);
             const orgCode = loggedInOrg.code;
+            const token = localStorage.getItem('token');
+            const authHeader = { 'Authorization': `Token ${token}` };
+
             const [agenciesResponse, sitesData] = await Promise.all([
-                fetchData<{results: SecurityAgency[]}>(`http://are.towerbuddy.tel:8000/security/api/orgs/${orgCode}/security-agencies/list/`),
-                fetchData<PaginatedSitesResponse>(`http://are.towerbuddy.tel:8000/security/api/orgs/${orgCode}/sites/list/`),
+                fetchData<{results: SecurityAgency[]}>(`http://are.towerbuddy.tel:8000/security/api/orgs/${orgCode}/security-agencies/list/`, { headers: authHeader }),
+                fetchData<PaginatedSitesResponse>(`http://are.towerbuddy.tel:8000/security/api/orgs/${orgCode}/sites/list/`, { headers: authHeader }),
             ]);
             
             const fetchedAgencies = agenciesResponse?.results || [];
@@ -131,13 +133,16 @@ export default function TowercoAgenciesPage() {
     const addAgencyForm = useForm<z.infer<typeof addAgencyFormSchema>>({
         resolver: zodResolver(addAgencyFormSchema),
         defaultValues: {
-            id: '',
-            name: '',
+            agency_id: '',
+            agency_name: '',
+            contact_person: '',
             phone: '',
             email: '',
-            address: '',
-            city: '',
             region: '',
+            city: '',
+            registered_address_line1: '',
+            registered_address_line2: '',
+            registered_address_line3: '',
         }
     });
 
@@ -173,32 +178,48 @@ export default function TowercoAgenciesPage() {
     }
 
     async function onAddAgencySubmit(values: z.infer<typeof addAgencyFormSchema>) {
+        if (!loggedInOrg) {
+            toast({ variant: 'destructive', title: 'Error', description: 'Organization not found. Please log in again.'});
+            return;
+        }
+
         setIsAddingAgency(true);
-        console.log('New agency data:', values);
+        const token = localStorage.getItem('token');
 
-        await new Promise((resolve) => setTimeout(resolve, 1500));
+        try {
+            const response = await fetch(`http://are.towerbuddy.tel:8000/security/api/orgs/${loggedInOrg.code}/security-agencies/add/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Token ${token}`
+                },
+                body: JSON.stringify(values),
+            });
 
-        const newAgency: SecurityAgency = {
-            ...values,
-            id: securityAgencies.length + 1,
-            tb_agency_id: `TB${values.id}`,
-            agency_id: values.id,
-            agency_name: values.name,
-            contact_person: 'N/A',
-            communication_email: values.email,
-            avatar: `https://placehold.co/100x100.png?text=${values.name.charAt(0)}`,
-        };
+            const responseData = await response.json();
 
-        setSecurityAgencies((prevAgencies) => [newAgency, ...prevAgencies]);
+            if (!response.ok) {
+                throw new Error(responseData.detail || 'Failed to add agency.');
+            }
 
-        toast({
-            title: 'Agency Added',
-            description: `Agency "${values.name}" has been created successfully.`,
-        });
+            setSecurityAgencies((prevAgencies) => [responseData.data, ...prevAgencies]);
 
-        addAgencyForm.reset();
-        setIsAddingAgency(false);
-        setIsAddAgencyDialogOpen(false);
+            toast({
+                title: 'Agency Added',
+                description: `Agency "${values.agency_name}" has been created successfully.`,
+            });
+            
+            addAgencyForm.reset();
+            setIsAddAgencyDialogOpen(false);
+        } catch (error: any) {
+            toast({
+                variant: 'destructive',
+                title: 'Error adding agency',
+                description: error.message,
+            });
+        } finally {
+            setIsAddingAgency(false);
+        }
     }
     
     const handleDownloadTemplate = () => {
@@ -255,7 +276,6 @@ export default function TowercoAgenciesPage() {
     }
     
     const handleRowClick = (agencyId: string) => {
-        // This is a placeholder for the actual agency ID from the API
         const agency = securityAgencies.find(a => a.agency_id === agencyId);
         if (agency) {
             router.push(`/towerco/agencies/${agency.id}`);
@@ -359,7 +379,7 @@ export default function TowercoAgenciesPage() {
                                 <form onSubmit={addAgencyForm.handleSubmit(onAddAgencySubmit)} className="space-y-4">
                                     <FormField
                                         control={addAgencyForm.control}
-                                        name="id"
+                                        name="agency_id"
                                         render={({ field }) => (
                                             <FormItem>
                                                 <FormLabel>Agency ID</FormLabel>
@@ -372,12 +392,25 @@ export default function TowercoAgenciesPage() {
                                     />
                                     <FormField
                                         control={addAgencyForm.control}
-                                        name="name"
+                                        name="agency_name"
                                         render={({ field }) => (
                                             <FormItem>
                                                 <FormLabel>Agency Name</FormLabel>
                                                 <FormControl>
                                                     <Input placeholder="e.g., SecureGuard Inc." {...field} />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                     <FormField
+                                        control={addAgencyForm.control}
+                                        name="contact_person"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Contact Person</FormLabel>
+                                                <FormControl>
+                                                    <Input placeholder="e.g., John Doe" {...field} />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>
@@ -411,10 +444,10 @@ export default function TowercoAgenciesPage() {
                                     />
                                     <FormField
                                         control={addAgencyForm.control}
-                                        name="address"
+                                        name="registered_address_line1"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel>Address</FormLabel>
+                                                <FormLabel>Address Line 1</FormLabel>
                                                 <FormControl>
                                                     <Input placeholder="e.g., 123 Security Blvd" {...field} />
                                                 </FormControl>
@@ -422,54 +455,60 @@ export default function TowercoAgenciesPage() {
                                             </FormItem>
                                         )}
                                     />
-                                    <FormField
+                                     <FormField
                                         control={addAgencyForm.control}
-                                        name="region"
+                                        name="registered_address_line2"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel>Region</FormLabel>
-                                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                    <FormControl>
-                                                        <SelectTrigger>
-                                                            <SelectValue placeholder="Select a region" />
-                                                        </SelectTrigger>
-                                                    </FormControl>
-                                                    <SelectContent>
-                                                        {regions.map((region) => (
-                                                            <SelectItem key={region} value={region}>
-                                                                {region}
-                                                            </SelectItem>
-                                                        ))}
-                                                    </SelectContent>
-                                                </Select>
+                                                <FormLabel>Address Line 2 (Optional)</FormLabel>
+                                                <FormControl>
+                                                    <Input {...field} />
+                                                </FormControl>
                                                 <FormMessage />
                                             </FormItem>
                                         )}
                                     />
-                                    <FormField
+                                     <FormField
                                         control={addAgencyForm.control}
-                                        name="city"
+                                        name="registered_address_line3"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel>City</FormLabel>
-                                                 <Select onValueChange={field.onChange} value={field.value} disabled={!watchedRegion}>
-                                                    <FormControl>
-                                                        <SelectTrigger>
-                                                            <SelectValue placeholder="Select a city" />
-                                                        </SelectTrigger>
-                                                    </FormControl>
-                                                    <SelectContent>
-                                                        {citiesForAddForm.map((city) => (
-                                                            <SelectItem key={city} value={city}>
-                                                                {city}
-                                                            </SelectItem>
-                                                        ))}
-                                                    </SelectContent>
-                                                </Select>
+                                                <FormLabel>Address Line 3 (Optional)</FormLabel>
+                                                <FormControl>
+                                                    <Input {...field} />
+                                                </FormControl>
                                                 <FormMessage />
                                             </FormItem>
                                         )}
                                     />
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <FormField
+                                            control={addAgencyForm.control}
+                                            name="region"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Region</FormLabel>
+                                                    <FormControl>
+                                                        <Input placeholder="e.g., 200573" {...field} />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <FormField
+                                            control={addAgencyForm.control}
+                                            name="city"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>City</FormLabel>
+                                                    <FormControl>
+                                                        <Input placeholder="e.g., 200575" {...field} />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                    </div>
                                     <DialogFooter>
                                         <Button type="submit" disabled={isAddingAgency} className="bg-[#00B4D8] hover:bg-[#00B4D8]/90">
                                         {isAddingAgency ? (
@@ -708,5 +747,3 @@ export default function TowercoAgenciesPage() {
         </div>
     );
 }
-
-
