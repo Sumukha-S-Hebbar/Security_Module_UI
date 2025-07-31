@@ -1,15 +1,9 @@
 
-
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { guards } from '@/lib/data/guards';
-import { sites } from '@/lib/data/sites';
-import { securityAgencies } from '@/lib/data/security-agencies';
-import { patrollingOfficers } from '@/lib/data/patrolling-officers';
-import { incidentStore } from '@/lib/data/incident-store';
-import type { Incident, Guard, PatrollingOfficer, SecurityAgency, Site } from '@/types';
+import type { Incident, Guard, PatrollingOfficer, SecurityAgency, Site, Organization } from '@/types';
 import {
   Card,
   CardContent,
@@ -26,7 +20,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -36,8 +29,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Eye, Search, Calendar as CalendarIcon, ShieldAlert, ChevronDown, CheckCircle } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { Search, Calendar as CalendarIcon } from 'lucide-react';
 import Link from 'next/link';
 import {
   Popover,
@@ -47,122 +39,103 @@ import {
 import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import { IncidentStatusSummary } from './_components/incident-status-summary';
+import { fetchData } from '@/lib/api';
+import { Skeleton } from '@/components/ui/skeleton';
 
-const LOGGED_IN_TOWERCO = 'TowerCo Alpha'; // Simulate logged-in user
+type IncidentListItem = {
+    id: number;
+    incident_id: string;
+    tb_site_id: string;
+    incident_time: string;
+    incident_status: "Active" | "Under Review" | "Resolved";
+    site_name: string;
+    guard_name: string;
+    incident_type: string;
+    incident_description: string;
+};
+
+type PaginatedIncidentsResponse = {
+    count: number;
+    next: string | null;
+    previous: string | null;
+    results: IncidentListItem[];
+};
+
 const ITEMS_PER_PAGE = 10;
 
 export default function TowercoIncidentsPage() {
-  const { toast } = useToast();
   const searchParams = useSearchParams();
   const router = useRouter();
-  const monthFromQuery = searchParams.get('month');
+  
+  const [incidentsData, setIncidentsData] = useState<PaginatedIncidentsResponse | null>(null);
+  const [sites, setSites] = useState<Site[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loggedInOrg, setLoggedInOrg] = useState<Organization | null>(null);
+
   const statusFromQuery = searchParams.get('status');
   const siteIdFromQuery = searchParams.get('siteId');
-  
-  const [incidents, setIncidents] = useState(incidentStore.getIncidents());
-  
+
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
-  const [selectedMonth, setSelectedMonth] = useState(monthFromQuery || 'all');
   const [selectedStatus, setSelectedStatus] = useState(statusFromQuery || 'all');
   const [selectedSite, setSelectedSite] = useState(siteIdFromQuery || 'all');
   const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
-    const unsubscribe = incidentStore.subscribe(() => {
-      setIncidents(incidentStore.getIncidents());
-    });
-    return () => unsubscribe();
-  }, []);
-
-  const towercoSites = useMemo(() => {
-    return sites.filter((site) => site.towerco === LOGGED_IN_TOWERCO);
-  }, []);
-
-  const towercoSiteIds = useMemo(() => {
-    return new Set(towercoSites.map((site) => site.id));
-  }, [towercoSites]);
-
-  const getGuardById = (id: string): Guard | undefined => {
-    return guards.find((g) => g.id === id);
-  };
-
-  const getPatrollingOfficerById = (id?: string): PatrollingOfficer | undefined => {
-    if (!id) return undefined;
-    return patrollingOfficers.find((s) => s.id === id);
-  };
-
-  const getAgencyForSite = (siteId: string): SecurityAgency | undefined => {
-    return securityAgencies.find((a) => a.siteIds.includes(siteId));
-  };
-  
-  const getSiteById = (id: string): Site | undefined => {
-    return sites.find((s) => s.id === id);
-  };
-
-  const filteredIncidents = useMemo(() => {
-    const filtered = incidents.filter((incident) => {
-      // Basic filter: only show incidents for the logged-in TOWERCO
-      if (!towercoSiteIds.has(incident.siteId)) {
-        return false;
+    if (typeof window !== 'undefined') {
+      const orgData = localStorage.getItem('organization');
+      if (orgData) {
+        setLoggedInOrg(JSON.parse(orgData));
       }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!loggedInOrg) return;
+
+    const fetchIncidents = async () => {
+      setIsLoading(true);
+      const token = localStorage.getItem('token');
+      const authHeader = { 'Authorization': `Token ${token}` };
+
+      // Build query params
+      const params = new URLSearchParams();
+      params.append('page', currentPage.toString());
+      if (searchQuery) params.append('search', searchQuery);
+      if (selectedStatus !== 'all') params.append('status', selectedStatus.replace('-', '_').toUpperCase());
+      if (selectedSite !== 'all') params.append('site_id', selectedSite);
+      if (selectedDate) params.append('date', format(selectedDate, 'yyyy-MM-dd'));
+
+      const url = `http://are.towerbuddy.tel:8000/security/api/orgs/${loggedInOrg.code}/incidents/list/?${params.toString()}`;
       
-      const site = getSiteById(incident.siteId);
-      const guard = getGuardById(incident.raisedByGuardId);
-      
-      // An incident is valid if it has a site and a guard.
-      if (!site || !guard) return false;
+      const data = await fetchData<PaginatedIncidentsResponse>(url, { headers: authHeader });
+      setIncidentsData(data);
+      setIsLoading(false);
+    };
 
-      const searchLower = searchQuery.toLowerCase();
-      const matchesSearch =
-        incident.id.toLowerCase().includes(searchLower) ||
-        site.name.toLowerCase().includes(searchLower) ||
-        guard.name.toLowerCase().includes(searchLower);
+    fetchIncidents();
+  }, [loggedInOrg, currentPage, searchQuery, selectedStatus, selectedSite, selectedDate]);
+  
+  useEffect(() => {
+     if (!loggedInOrg) return;
+     const fetchSites = async () => {
+        const token = localStorage.getItem('token');
+        const data = await fetchData<{results: Site[]}>(`http://are.towerbuddy.tel:8000/security/api/orgs/${loggedInOrg.code}/sites/list/`, {
+             headers: { 'Authorization': `Token ${token}` }
+        });
+        setSites(data?.results || []);
+     }
+     fetchSites();
+  }, [loggedInOrg]);
 
-      const matchesStatus =
-        selectedStatus === 'all' || incident.status.toLowerCase().replace(' ', '-') === selectedStatus;
-
-      const matchesSite = selectedSite === 'all' || incident.siteId === selectedSite;
-      
-      const incidentDate = new Date(incident.incidentTime);
-      const matchesDate =
-        !selectedDate ||
-        format(incidentDate, 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd');
-
-      const matchesMonth =
-        selectedMonth === 'all' ||
-        (incidentDate.getMonth() + 1).toString() === selectedMonth;
-
-      return matchesSearch && matchesStatus && matchesDate && matchesMonth && matchesSite;
-    });
-    setCurrentPage(1);
-    return filtered;
-  }, [searchQuery, selectedStatus, selectedDate, selectedMonth, incidents, towercoSiteIds, selectedSite]);
-
-  const paginatedIncidents = useMemo(() => {
-    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-    return filteredIncidents.slice(startIndex, startIndex + ITEMS_PER_PAGE);
-  }, [filteredIncidents, currentPage]);
-
-  const totalPages = Math.ceil(filteredIncidents.length / ITEMS_PER_PAGE);
 
   const handleStatusSelectFromSummary = (status: string) => {
-    // If clicking the same status card again, reset the filter
-    if (selectedStatus === status) {
-      setSelectedStatus('all');
-    } else {
-      setSelectedStatus(status);
-    }
-  }
+    setSelectedStatus((prevStatus) => (prevStatus === status ? 'all' : status));
+    setCurrentPage(1);
+  };
   
-  const getStatusIndicator = (status: Incident['status']) => {
+  const getStatusIndicator = (status: IncidentListItem['incident_status']) => {
     switch (status) {
       case 'Active':
         return (
@@ -204,6 +177,16 @@ export default function TowercoIncidentsPage() {
     }
   };
 
+  const totalPages = incidentsData ? Math.ceil(incidentsData.count / ITEMS_PER_PAGE) : 1;
+
+  if (!loggedInOrg) {
+     return (
+        <div className="p-4 sm:p-6 lg:p-8 space-y-6">
+             <Skeleton className="h-8 w-1/3" />
+             <Skeleton className="h-4 w-1/2" />
+        </div>
+     )
+  }
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6">
@@ -211,17 +194,11 @@ export default function TowercoIncidentsPage() {
         <h1 className="text-3xl font-bold tracking-tight">Incidents</h1>
         <p className="text-muted-foreground font-medium">
           A log of all emergency incidents for sites managed by{' '}
-          {LOGGED_IN_TOWERCO}.
+          {loggedInOrg.name}.
         </p>
       </div>
 
-      <IncidentStatusSummary 
-        incidents={incidents.filter(i => towercoSiteIds.has(i.siteId))} 
-        onStatusSelect={handleStatusSelectFromSummary}
-        selectedStatus={selectedStatus}
-      />
-
-      <Card>
+       <Card>
         <CardHeader>
           <CardTitle>Incident Log</CardTitle>
           <CardDescription className="font-medium">
@@ -245,7 +222,7 @@ export default function TowercoIncidentsPage() {
               <SelectContent>
                 <SelectItem value="all" className="font-medium">All Statuses</SelectItem>
                 <SelectItem value="active" className="font-medium">Active</SelectItem>
-                <SelectItem value="under-review" className="font-medium">Under Review</SelectItem>
+                <SelectItem value="under_review" className="font-medium">Under Review</SelectItem>
                 <SelectItem value="resolved" className="font-medium">Resolved</SelectItem>
               </SelectContent>
             </Select>
@@ -255,23 +232,8 @@ export default function TowercoIncidentsPage() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all" className="font-medium">All Sites</SelectItem>
-                {towercoSites.map(site => (
-                  <SelectItem key={site.id} value={site.id} className="font-medium">{site.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-              <SelectTrigger className="w-full sm:w-[180px] font-medium hover:bg-accent hover:text-accent-foreground">
-                <SelectValue placeholder="Filter by month" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all" className="font-medium">All Months</SelectItem>
-                {Array.from({ length: 12 }, (_, i) => (
-                  <SelectItem key={i + 1} value={(i + 1).toString()} className="font-medium">
-                    {new Date(0, i).toLocaleString('default', {
-                      month: 'long',
-                    })}
-                  </SelectItem>
+                {sites.map(site => (
+                  <SelectItem key={site.id} value={site.id.toString()} className="font-medium">{site.site_name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -304,91 +266,89 @@ export default function TowercoIncidentsPage() {
           </div>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="text-foreground">Incident ID</TableHead>
-                <TableHead className="text-foreground">Incident Date</TableHead>
-                <TableHead className="text-foreground">Incident Time</TableHead>
-                <TableHead className="text-foreground">Site</TableHead>
-                <TableHead className="text-foreground">Agency</TableHead>
-                <TableHead className="text-foreground">Patrolling Officer</TableHead>
-                <TableHead className="text-foreground">Guard</TableHead>
-                <TableHead className="text-foreground">Status</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {paginatedIncidents.length > 0 ? (
-                paginatedIncidents.map((incident) => {
-                  const site = getSiteById(incident.siteId);
-                  const agency = site ? getAgencyForSite(site.id) : undefined;
-                  const guard = getGuardById(incident.raisedByGuardId);
-                  const patrollingOfficer = getPatrollingOfficerById(
-                    incident.attendedByPatrollingOfficerId
-                  );
-                  return (
-                    <TableRow 
-                      key={incident.id}
-                      onClick={() => router.push(`/towerco/incidents/${incident.id}`)}
-                      className="cursor-pointer hover:bg-accent hover:text-accent-foreground group"
-                    >
-                      <TableCell>
-                        <Button asChild variant="link" className="p-0 h-auto font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
-                          <Link href={`/towerco/incidents/${incident.id}`} className="text-accent group-hover:text-accent-foreground">{incident.id}</Link>
-                        </Button>
-                      </TableCell>
-                      <TableCell className="font-medium">{new Date(incident.incidentTime).toLocaleDateString()}</TableCell>
-                      <TableCell className="font-medium">{new Date(incident.incidentTime).toLocaleTimeString()}</TableCell>
-                      <TableCell className="font-medium">{site?.name || 'N/A'}</TableCell>
-                      <TableCell className="font-medium">{agency?.name || 'N/A'}</TableCell>
-                      <TableCell className="font-medium">
-                        {patrollingOfficer?.name || 'N/A'}
-                      </TableCell>
-                      <TableCell className="font-medium">{guard?.name || 'N/A'}</TableCell>
-                      <TableCell>{getStatusIndicator(incident.status)}</TableCell>
-                    </TableRow>
-                  );
-                })
-              ) : (
+          {isLoading ? (
+             <div className="space-y-2">
+                <Skeleton className="h-12 w-full" />
+                <Skeleton className="h-12 w-full" />
+                <Skeleton className="h-12 w-full" />
+                <Skeleton className="h-12 w-full" />
+             </div>
+          ) : (
+            <Table>
+                <TableHeader>
                 <TableRow>
-                  <TableCell
-                    colSpan={8}
-                    className="text-center text-muted-foreground font-medium"
-                  >
-                    No incidents found for the current filter.
-                  </TableCell>
+                    <TableHead className="text-foreground">Incident ID</TableHead>
+                    <TableHead className="text-foreground">Incident Date</TableHead>
+                    <TableHead className="text-foreground">Incident Time</TableHead>
+                    <TableHead className="text-foreground">Site</TableHead>
+                    <TableHead className="text-foreground">Guard</TableHead>
+                    <TableHead className="text-foreground">Status</TableHead>
                 </TableRow>
-              )}
-            </TableBody>
-          </Table>
+                </TableHeader>
+                <TableBody>
+                {incidentsData && incidentsData.results.length > 0 ? (
+                    incidentsData.results.map((incident) => (
+                    <TableRow 
+                        key={incident.id}
+                        onClick={() => router.push(`/towerco/incidents/${incident.id}`)}
+                        className="cursor-pointer hover:bg-accent hover:text-accent-foreground group"
+                    >
+                        <TableCell>
+                        <Button asChild variant="link" className="p-0 h-auto font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
+                            <Link href={`/towerco/incidents/${incident.id}`} className="text-accent group-hover:text-accent-foreground">{incident.incident_id}</Link>
+                        </Button>
+                        </TableCell>
+                        <TableCell className="font-medium">{new Date(incident.incident_time).toLocaleDateString()}</TableCell>
+                        <TableCell className="font-medium">{new Date(incident.incident_time).toLocaleTimeString()}</TableCell>
+                        <TableCell className="font-medium">{incident.site_name || 'N/A'}</TableCell>
+                        <TableCell className="font-medium">{incident.guard_name || 'N/A'}</TableCell>
+                        <TableCell>{getStatusIndicator(incident.incident_status)}</TableCell>
+                    </TableRow>
+                    ))
+                ) : (
+                    <TableRow>
+                    <TableCell
+                        colSpan={6}
+                        className="text-center text-muted-foreground font-medium py-10"
+                    >
+                        No incidents found for the current filter.
+                    </TableCell>
+                    </TableRow>
+                )}
+                </TableBody>
+            </Table>
+          )}
         </CardContent>
-        <CardFooter>
-            <div className="flex items-center justify-between w-full">
-                <div className="text-sm text-muted-foreground font-medium">
-                      Showing {paginatedIncidents.length} of {filteredIncidents.length} incidents.
+        {incidentsData && incidentsData.count > 0 && (
+            <CardFooter>
+                <div className="flex items-center justify-between w-full">
+                    <div className="text-sm text-muted-foreground font-medium">
+                        Showing {incidentsData.results.length} of {incidentsData.count} incidents.
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                            disabled={currentPage === 1}
+                        >
+                            Previous
+                        </Button>
+                        <span className="text-sm font-medium">Page {currentPage} of {totalPages || 1}</span>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                            disabled={currentPage === totalPages || totalPages === 0}
+                        >
+                            Next
+                        </Button>
+                    </div>
                 </div>
-                <div className="flex items-center gap-2">
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                        disabled={currentPage === 1}
-                    >
-                        Previous
-                    </Button>
-                    <span className="text-sm font-medium">Page {currentPage} of {totalPages || 1}</span>
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                        disabled={currentPage === totalPages || totalPages === 0}
-                    >
-                        Next
-                    </Button>
-                </div>
-            </div>
-        </CardFooter>
+            </CardFooter>
+        )}
       </Card>
     </div>
   );
 }
+

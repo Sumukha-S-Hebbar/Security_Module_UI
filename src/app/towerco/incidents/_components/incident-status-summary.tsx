@@ -13,16 +13,16 @@ export function IncidentStatusSummary({
   onStatusSelect,
   selectedStatus,
 }: { 
-  incidents: Incident[];
+  incidents: any[]; // Changed to any to accept API response
   onStatusSelect: (status: string) => void;
   selectedStatus: string;
 }) {
   const summary = useMemo(() => {
     return incidents.reduce(
       (acc, incident) => {
-        if (incident.status === 'Active') acc.active++;
-        if (incident.status === 'Under Review') acc.underReview++;
-        if (incident.status === 'Resolved') acc.resolved++;
+        if (incident.incident_status === 'Active') acc.active++;
+        if (incident.incident_status === 'Under Review') acc.underReview++;
+        if (incident.incident_status === 'Resolved') acc.resolved++;
         return acc;
       },
       { active: 0, underReview: 0, resolved: 0 }
@@ -40,7 +40,7 @@ export function IncidentStatusSummary({
       ring: 'ring-destructive'
     },
     {
-      status: 'under-review',
+      status: 'under_review',
       count: summary.underReview,
       label: 'Under Review',
       icon: ShieldQuestion,
