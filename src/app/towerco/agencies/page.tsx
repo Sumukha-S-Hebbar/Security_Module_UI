@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useMemo, useEffect, useRef, Fragment } from 'react';
@@ -59,8 +58,8 @@ const addAgencyFormSchema = z.object({
     agency_id: z.string().min(1, { message: 'Agency ID is required.' }),
     agency_name: z.string().min(1, { message: 'Agency name is required.' }),
     contact_person: z.string().min(1, { message: 'Contact person is required.' }),
-    phone: z.string().min(1, { message: 'Phone is required.' }),
     email: z.string().email({ message: 'Valid email is required.' }),
+    phone: z.string().min(1, { message: 'Phone is required.' }),
     region: z.string().min(1, { message: 'Region is required.' }),
     city: z.string().min(1, { message: 'City is required.' }),
     registered_address_line1: z.string().min(1, { message: 'Address Line 1 is required.' }),
@@ -111,14 +110,10 @@ export default function TowercoAgenciesPage() {
             const token = localStorage.getItem('token');
             const authHeader = { 'Authorization': `Token ${token}` };
 
-            const [agenciesResponse, sitesData] = await Promise.all([
-                fetchData<{results: SecurityAgency[]}>(`http://are.towerbuddy.tel:8000/security/api/orgs/${orgCode}/security-agencies/list/`, { headers: authHeader }),
-                fetchData<PaginatedSitesResponse>(`http://are.towerbuddy.tel:8000/security/api/orgs/${orgCode}/sites/list/`, { headers: authHeader }),
-            ]);
+            const agenciesResponse = await fetchData<{results: SecurityAgency[]}>(`http://are.towerbuddy.tel:8000/security/api/orgs/${orgCode}/security-agencies/list`, { headers: authHeader });
             
             const fetchedAgencies = agenciesResponse?.results || [];
             setSecurityAgencies(fetchedAgencies);
-            setSites(sitesData?.results || []);
             setRegions(await getRegions(fetchedAgencies));
             setIsLoading(false);
         };
@@ -264,16 +259,6 @@ export default function TowercoAgenciesPage() {
     }, [filteredAgencies, currentPage]);
     
     const totalPages = Math.ceil(filteredAgencies.length / ITEMS_PER_PAGE);
-
-    const getAssignedSitesForAgency = (agencyId: string) => {
-      if (!loggedInOrg) return [];
-      return sites.filter(s => s.assigned_agency?.agency_id === agencyId);
-    };
-
-    const getIncidentCountForAgency = (agencyId: string) => {
-      const assignedSites = getAssignedSitesForAgency(agencyId);
-      return assignedSites.reduce((acc, site) => acc + (site.total_incidents || 0), 0);
-    }
     
     const handleRowClick = (agencyId: string) => {
         const agency = securityAgencies.find(a => a.agency_id === agencyId);
@@ -487,7 +472,7 @@ export default function TowercoAgenciesPage() {
                                             name="region"
                                             render={({ field }) => (
                                                 <FormItem>
-                                                    <FormLabel>Region</FormLabel>
+                                                    <FormLabel>Region ID</FormLabel>
                                                     <FormControl>
                                                         <Input placeholder="e.g., 200573" {...field} />
                                                     </FormControl>
@@ -500,7 +485,7 @@ export default function TowercoAgenciesPage() {
                                             name="city"
                                             render={({ field }) => (
                                                 <FormItem>
-                                                    <FormLabel>City</FormLabel>
+                                                    <FormLabel>City ID</FormLabel>
                                                     <FormControl>
                                                         <Input placeholder="e.g., 200575" {...field} />
                                                     </FormControl>
@@ -598,9 +583,6 @@ export default function TowercoAgenciesPage() {
                                 ))
                             ) : paginatedAgencies.length > 0 ? (
                                 paginatedAgencies.map((agency) => {
-                                    const assignedSites = getAssignedSitesForAgency(agency.agency_id);
-                                    const assignedSitesCount = assignedSites.length;
-                                    const incidentCount = getIncidentCountForAgency(agency.agency_id);
                                     const isExpanded = expandedAgencyId === agency.agency_id;
 
                                     return (
@@ -612,7 +594,7 @@ export default function TowercoAgenciesPage() {
                                                 <TableCell>
                                                     <div className="flex items-center gap-3">
                                                         <Avatar className="h-10 w-10">
-                                                            <AvatarImage src={agency.avatar} alt={agency.agency_name} />
+                                                            <AvatarImage src={agency.logo || undefined} alt={agency.agency_name} />
                                                             <AvatarFallback>{agency.agency_name.charAt(0)}</AvatarFallback>
                                                         </Avatar>
                                                         <span className="font-medium">{agency.agency_name}</span>
@@ -634,7 +616,7 @@ export default function TowercoAgenciesPage() {
                                                 </TableCell>
                                                 <TableCell>
                                                     <div className="text-sm">
-                                                        <p className="font-medium">{agency.address}</p>
+                                                        <p className="font-medium">{agency.registered_address_line1}</p>
                                                         <p className="font-medium text-muted-foreground group-hover:text-accent-foreground">{agency.city}, {agency.region}</p>
                                                     </div>
                                                 </TableCell>
@@ -643,11 +625,11 @@ export default function TowercoAgenciesPage() {
                                                     variant="link"
                                                     className="p-0 h-auto flex items-center gap-2 text-accent group-hover:text-accent-foreground"
                                                     onClick={(e) => handleExpandClick(e, agency.agency_id)}
-                                                    disabled={assignedSitesCount === 0}
+                                                    disabled={agency.total_sites_assigned === 0}
                                                     >
                                                         <Building2 className="h-4 w-4" />
-                                                        {assignedSitesCount}
-                                                        {assignedSitesCount > 0 && (
+                                                        {agency.total_sites_assigned}
+                                                        {agency.total_sites_assigned > 0 && (
                                                             <ChevronDown className={cn("h-4 w-4 transition-transform", isExpanded && "rotate-180")} />
                                                         )}
                                                     </Button>
@@ -655,7 +637,7 @@ export default function TowercoAgenciesPage() {
                                                 <TableCell>
                                                   <div className="flex items-center gap-2 font-medium">
                                                     <ShieldAlert className="h-4 w-4 text-muted-foreground group-hover:text-accent-foreground" />
-                                                    {incidentCount}
+                                                    {agency.total_number_of_incidents}
                                                   </div>
                                                 </TableCell>
                                             </TableRow>
@@ -664,7 +646,7 @@ export default function TowercoAgenciesPage() {
                                                     <TableCell colSpan={6} className="p-0">
                                                         <div className="p-4">
                                                             <h4 className="font-semibold mb-2">Sites Assigned to {agency.agency_name}</h4>
-                                                            {assignedSites.length > 0 ? (
+                                                            {agency.assigned_sites_details.length > 0 ? (
                                                                 <Table>
                                                                     <TableHeader>
                                                                         <TableRow>
@@ -676,21 +658,21 @@ export default function TowercoAgenciesPage() {
                                                                         </TableRow>
                                                                     </TableHeader>
                                                                     <TableBody>
-                                                                        {assignedSites.map((site) => (
+                                                                        {agency.assigned_sites_details.map((siteDetail) => (
                                                                             <TableRow 
-                                                                              key={site.id} 
-                                                                              onClick={() => router.push(`/towerco/sites/${site.id}`)}
+                                                                              key={siteDetail.site_details.id} 
+                                                                              onClick={() => router.push(`/towerco/sites/${siteDetail.site_details.id}`)}
                                                                               className="cursor-pointer hover:bg-accent hover:text-accent-foreground group"
                                                                             >
                                                                                 <TableCell>
                                                                                     <Button asChild variant="link" className="p-0 h-auto font-medium text-accent group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
-                                                                                      <Link href={`/towerco/sites/${site.id}`}>{site.org_site_id}</Link>
+                                                                                      <Link href={`/towerco/sites/${siteDetail.site_details.id}`}>{siteDetail.site_details.org_site_id}</Link>
                                                                                     </Button>
                                                                                 </TableCell>
-                                                                                <TableCell>{site.site_name}</TableCell>
-                                                                                <TableCell>{site.site_address_line1}</TableCell>
-                                                                                <TableCell>{site.city}</TableCell>
-                                                                                <TableCell>{site.region}</TableCell>
+                                                                                <TableCell>{siteDetail.site_details.site_name}</TableCell>
+                                                                                <TableCell>{siteDetail.site_details.site_address_line1}</TableCell>
+                                                                                <TableCell>{siteDetail.site_details.city}</TableCell>
+                                                                                <TableCell>{siteDetail.site_details.region}</TableCell>
                                                                             </TableRow>
                                                                         ))}
                                                                     </TableBody>
@@ -720,7 +702,7 @@ export default function TowercoAgenciesPage() {
                 <CardFooter>
                     <div className="flex items-center justify-between w-full">
                         <div className="text-sm text-muted-foreground font-medium">
-                            Showing {Math.min(filteredAgencies.length, ITEMS_PER_PAGE * currentPage)} of {filteredAgencies.length} agencies.
+                            Showing {paginatedAgencies.length} of {filteredAgencies.length} agencies.
                         </div>
                         <div className="flex items-center gap-2">
                             <Button
@@ -731,12 +713,12 @@ export default function TowercoAgenciesPage() {
                             >
                                 Previous
                             </Button>
-                            <span className="text-sm font-medium">Page {currentPage} of {totalPages}</span>
+                            <span className="text-sm font-medium">Page {currentPage} of {totalPages || 1}</span>
                             <Button
                                 variant="outline"
                                 size="sm"
                                 onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                                disabled={currentPage === totalPages}
+                                disabled={currentPage === totalPages || totalPages === 0}
                             >
                                 Next
                             </Button>
