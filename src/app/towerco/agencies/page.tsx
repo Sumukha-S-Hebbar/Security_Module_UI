@@ -261,16 +261,24 @@ export default function TowercoAgenciesPage() {
     
     const totalPages = Math.ceil(filteredAgencies.length / ITEMS_PER_PAGE);
     
-    const handleRowClick = (agencyId: string) => {
+    const handleRowClick = (e: React.MouseEvent, agencyId: string) => {
+        const target = e.target as HTMLElement;
+        // Prevent navigation if the click is on the expand button or within it
+        if (target.closest('[data-expand-button]')) {
+            return;
+        }
+        
         const agency = securityAgencies.find(a => a.agency_id === agencyId);
         if (agency) {
             router.push(`/towerco/agencies/${agency.id}`);
         }
     };
 
-    const handleExpandClick = (e: React.MouseEvent, agencyId: string) => {
+    const handleExpandClick = (e: React.MouseEvent, agencyId: string, siteCount: number) => {
         e.stopPropagation();
-        setExpandedAgencyId(prevId => prevId === agencyId ? null : agencyId);
+        if (siteCount > 0) {
+            setExpandedAgencyId(prevId => prevId === agencyId ? null : agencyId);
+        }
     }
 
     return (
@@ -588,7 +596,7 @@ export default function TowercoAgenciesPage() {
 
                                     return (
                                         <Fragment key={agency.id}>
-                                            <TableRow onClick={() => handleRowClick(agency.agency_id)} className="cursor-pointer hover:bg-accent hover:text-accent-foreground group">
+                                            <TableRow onClick={(e) => handleRowClick(e, agency.agency_id)} className="cursor-pointer hover:bg-accent hover:text-accent-foreground group">
                                                 <TableCell>
                                                     <p className="text-accent font-semibold group-hover:text-accent-foreground hover:underline">{agency.agency_id}</p>
                                                 </TableCell>
@@ -624,9 +632,10 @@ export default function TowercoAgenciesPage() {
                                                 <TableCell>
                                                     {agency.total_sites_assigned > 0 ? (
                                                         <Button
+                                                            data-expand-button="true"
                                                             variant="link"
                                                             className="p-0 h-auto flex items-center gap-2 text-accent group-hover:text-accent-foreground"
-                                                            onClick={(e) => handleExpandClick(e, agency.agency_id)}
+                                                            onClick={(e) => handleExpandClick(e, agency.agency_id, agency.total_sites_assigned)}
                                                         >
                                                             <Building2 className="h-4 w-4" />
                                                             {agency.total_sites_assigned}
@@ -734,4 +743,3 @@ export default function TowercoAgenciesPage() {
         </div>
     );
 }
-
