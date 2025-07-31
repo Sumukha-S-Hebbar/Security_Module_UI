@@ -68,7 +68,7 @@ type SiteReportData = {
     total_incidents_count: number;
     resolved_incidents_count: number;
     agency_details: SecurityAgency | null;
-    guard_details: Guard[];
+    guard_details: (Guard & { first_name: string, last_name: string | null })[];
     incident_trend: { month: string; count: number }[];
     incidents: {
         count: number;
@@ -316,18 +316,19 @@ export default function SiteReportPage() {
             <CardContent>
                 {guard_details.length > 0 ? (
                     <div className="space-y-4">
-                        {guard_details.map(guard => (
+                        {guard_details.map(guard => {
+                          const guardName = `${guard.first_name} ${guard.last_name || ''}`.trim();
+                          return (
                             <div key={guard.id} className="flex items-center gap-4">
                                 <Avatar className="h-12 w-12">
-                                    <AvatarImage src={guard.avatar} alt={guard.name} />
-                                    <AvatarFallback>{guard.name ? guard.name.charAt(0) : 'G'}</AvatarFallback>
+                                    <AvatarFallback>{guard.first_name ? guard.first_name.charAt(0) : 'G'}</AvatarFallback>
                                 </Avatar>
                                 <div>
-                                    <p className="font-semibold text-base">{guard.name}</p>
+                                    <p className="font-semibold text-base">{guardName}</p>
                                     <p className="font-medium"><a href={`tel:${guard.phone}`} className="text-accent hover:underline">{guard.phone}</a></p>
                                 </div>
                             </div>
-                        ))}
+                        )})}
                     </div>
                 ) : (
                     <p className="text-sm text-muted-foreground text-center py-4 font-medium">No guards are currently assigned to this site.</p>
