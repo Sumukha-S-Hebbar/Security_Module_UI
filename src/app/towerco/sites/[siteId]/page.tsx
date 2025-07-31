@@ -68,7 +68,7 @@ type SiteReportData = {
     total_incidents_count: number;
     resolved_incidents_count: number;
     agency_details: SecurityAgency | null;
-    guard_details: (Guard & { first_name: string, last_name: string | null })[];
+    guard_details: (Partial<Guard> & { id: number, guard_id: string, first_name: string, last_name: string | null, phone: string, profile_picture?: string })[];
     incident_trend: { month: string; count: number }[];
     incidents: {
         count: number;
@@ -321,7 +321,8 @@ export default function SiteReportPage() {
                           return (
                             <div key={guard.id} className="flex items-center gap-4">
                                 <Avatar className="h-12 w-12">
-                                    <AvatarFallback>{guard.first_name ? guard.first_name.charAt(0) : 'G'}</AvatarFallback>
+                                     <AvatarImage src={guard.profile_picture ? `http://are.towerbuddy.tel:8000${guard.profile_picture}` : undefined} alt={guardName} />
+                                     <AvatarFallback>{guard.first_name ? guard.first_name.charAt(0) : 'G'}</AvatarFallback>
                                 </Avatar>
                                 <div>
                                     <p className="font-semibold text-base">{guardName}</p>
