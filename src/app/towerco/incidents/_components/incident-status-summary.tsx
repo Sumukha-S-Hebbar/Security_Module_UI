@@ -1,4 +1,3 @@
-
 // src/app/towerco/incidents/_components/incident-status-summary.tsx
 'use client';
 
@@ -40,7 +39,7 @@ export function IncidentStatusSummary({
       ring: 'ring-destructive'
     },
     {
-      status: 'under_review',
+      status: 'under-review',
       count: summary.underReview,
       label: 'Under Review',
       icon: ShieldQuestion,
