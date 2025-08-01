@@ -83,7 +83,7 @@ const addSiteFormSchema = z.object({
   org_site_id: z.string().min(1, 'Site ID is required.'),
   site_name: z.string().min(1, 'Site name is required.'),
   region: z.string().min(1, 'Region is required.'),
-  city: z.coerce.number().int(),
+  city: z.string().min(1, "City is required."),
   lat: z.coerce.number().min(-90).max(90),
   lng: z.coerce.number().min(-180).max(180),
   site_address_line1: z.string().min(1, 'Address is required.'),
@@ -96,6 +96,11 @@ type ApiRegion = {
   id: number;
   name: string;
 };
+
+type ApiCity = {
+    id: number;
+    name: string;
+}
 
 export default function TowercoSitesPage() {
   const [sites, setSites] = useState<Site[]>([]);
@@ -113,6 +118,9 @@ export default function TowercoSitesPage() {
   const router = useRouter();
 
   const [apiRegions, setApiRegions] = useState<ApiRegion[]>([]);
+  const [apiCities, setApiCities] = useState<ApiCity[]>([]);
+  const [isCitiesLoading, setIsCitiesLoading] = useState(false);
+
 
   // State for filters
   const [assignedSearchQuery, setAssignedSearchQuery] = useState('');
@@ -212,6 +220,43 @@ export default function TowercoSitesPage() {
   const addSiteForm = useForm<z.infer<typeof addSiteFormSchema>>({
     resolver: zodResolver(addSiteFormSchema),
   });
+  
+  const watchedRegion = addSiteForm.watch('region');
+
+  useEffect(() => {
+    async function fetchCities() {
+        if (!watchedRegion || !loggedInUser || !loggedInUser.country) {
+            setApiCities([]);
+            return;
+        }
+        
+        setIsCitiesLoading(true);
+        const token = localStorage.getItem('token');
+        const countryId = loggedInUser.country.id;
+        const url = `http://are.towerbuddy.tel:8000/security/api/cities/?country=${countryId}&region=${watchedRegion}`;
+
+        try {
+            const data = await fetchData<{ cities: ApiCity[] }>(url, {
+                headers: { 'Authorization': `Token ${token}` }
+            });
+            setApiCities(data?.cities || []);
+        } catch (error) {
+            console.error("Failed to fetch cities:", error);
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: "Could not load cities for the selected region.",
+            });
+            setApiCities([]);
+        } finally {
+            setIsCitiesLoading(false);
+        }
+    }
+
+    addSiteForm.resetField('city');
+    fetchCities();
+  }, [watchedRegion, loggedInUser, toast, addSiteForm]);
+
 
   useEffect(() => {
     const focusSiteId = searchParams.get('focusSite');
@@ -258,7 +303,11 @@ export default function TowercoSitesPage() {
                 'Content-Type': 'application/json',
                 'Authorization': `Token ${token}`
             },
-            body: JSON.stringify({...values, region: Number(values.region)}),
+            body: JSON.stringify({
+              ...values, 
+              region: Number(values.region),
+              city: Number(values.city)
+            }),
         });
 
         const responseData = await response.json();
@@ -636,10 +685,21 @@ export default function TowercoSitesPage() {
                         name="city"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>City ID</FormLabel>
-                                <FormControl>
-                                    <Input type="number" placeholder="e.g., 192126" {...field} />
-                                </FormControl>
+                                <FormLabel>City</FormLabel>
+                                 <Select onValueChange={field.onChange} value={field.value} disabled={!watchedRegion || isCitiesLoading}>
+                                    <FormControl>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder={isCitiesLoading ? "Loading cities..." : "Select a city"} />
+                                        </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                        {apiCities.map(city => (
+                                            <SelectItem key={city.id} value={city.id.toString()}>
+                                                {city.name}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
                                 <FormMessage />
                             </FormItem>
                         )}
