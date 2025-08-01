@@ -93,6 +93,7 @@ export default function SiteReportPage() {
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [selectedYear, setSelectedYear] = useState('all');
   const [selectedMonth, setSelectedMonth] = useState('all');
+  const incidentsTableRef = useRef<HTMLDivElement>(null);
 
 
   useEffect(() => {
@@ -158,6 +159,17 @@ export default function SiteReportPage() {
       title: 'Report Generation Started',
       description: `Generating a detailed report for site ${reportData?.site_name}.`,
     });
+  };
+
+  const handleScrollToIncidents = () => {
+    const element = incidentsTableRef.current;
+    if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        element.classList.add('highlight-row');
+        setTimeout(() => {
+            element.classList.remove('highlight-row');
+        }, 2000);
+    }
   };
 
   const getStatusIndicator = (status: Incident['status']) => {
@@ -286,12 +298,14 @@ export default function SiteReportPage() {
                     <p className="font-medium">Lat: {lat.toFixed(4)}, Lng: {lng.toFixed(4)}</p>
                   </div>
               </div>
-               <div className="flex items-start gap-3">
-                <ShieldAlert className="mt-0.5 text-primary" />
-                <div>
-                  <span className="font-semibold">Total Incidents</span>
-                  <p className="font-medium text-base">{total_incidents_count}</p>
-                </div>
+              <div className="flex items-start gap-3">
+                <button onClick={handleScrollToIncidents} className="flex items-start gap-3 w-full text-left text-accent hover:underline">
+                    <ShieldAlert className="mt-0.5 text-primary" />
+                    <div>
+                        <p className="font-semibold">Total Incidents</p>
+                        <p className="font-medium text-base">{total_incidents_count}</p>
+                    </div>
+                </button>
               </div>
             </div>
           </CardContent>
@@ -378,7 +392,7 @@ export default function SiteReportPage() {
         </CardContent>
       </Card>
       
-      <Card>
+      <Card ref={incidentsTableRef}>
         <CardHeader>
            <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
