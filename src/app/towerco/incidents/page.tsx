@@ -141,13 +141,29 @@ export default function TowercoIncidentsPage() {
      fetchSites();
   }, [loggedInOrg]);
 
-  // Reset page to 1 when filters change
-  useEffect(() => {
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
     setCurrentPage(1);
-  }, [searchQuery, selectedStatus, selectedSite, selectedDate]);
+  };
+
+  const handleStatusChange = (status: string) => {
+    setSelectedStatus(status);
+    setCurrentPage(1);
+  };
+
+  const handleSiteChange = (siteId: string) => {
+    setSelectedSite(siteId);
+    setCurrentPage(1);
+  };
+
+  const handleDateChange = (date: Date | undefined) => {
+    setSelectedDate(date);
+    setCurrentPage(1);
+  };
 
   const handleStatusSelectFromSummary = (status: string) => {
-    setSelectedStatus((prevStatus) => (prevStatus === status ? 'all' : status));
+    const newStatus = selectedStatus === status ? 'all' : status;
+    handleStatusChange(newStatus);
   };
   
   const getStatusIndicator = (status: IncidentListItem['incident_status']) => {
@@ -232,11 +248,11 @@ export default function TowercoIncidentsPage() {
                 type="search"
                 placeholder="Search incidents..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={handleSearchChange}
                 className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[320px]"
               />
             </div>
-            <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+            <Select value={selectedStatus} onValueChange={handleStatusChange}>
               <SelectTrigger className="w-full sm:w-[180px] font-medium hover:bg-accent hover:text-accent-foreground">
                 <SelectValue placeholder="Filter by status" />
               </SelectTrigger>
@@ -247,7 +263,7 @@ export default function TowercoIncidentsPage() {
                 <SelectItem value="resolved" className="font-medium">Resolved</SelectItem>
               </SelectContent>
             </Select>
-            <Select value={selectedSite} onValueChange={setSelectedSite}>
+            <Select value={selectedSite} onValueChange={handleSiteChange}>
               <SelectTrigger className="w-full sm:w-[180px] font-medium hover:bg-accent hover:text-accent-foreground">
                 <SelectValue placeholder="Filter by site" />
               </SelectTrigger>
@@ -279,7 +295,7 @@ export default function TowercoIncidentsPage() {
                 <Calendar
                   mode="single"
                   selected={selectedDate}
-                  onSelect={setSelectedDate}
+                  onSelect={handleDateChange}
                   initialFocus
                 />
               </PopoverContent>
