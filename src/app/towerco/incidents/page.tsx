@@ -141,10 +141,13 @@ export default function TowercoIncidentsPage() {
      fetchSites();
   }, [loggedInOrg]);
 
+  // Reset page to 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, selectedStatus, selectedSite, selectedDate]);
 
   const handleStatusSelectFromSummary = (status: string) => {
     setSelectedStatus((prevStatus) => (prevStatus === status ? 'all' : status));
-    setCurrentPage(1);
   };
   
   const getStatusIndicator = (status: IncidentListItem['incident_status']) => {
@@ -368,4 +371,3 @@ export default function TowercoIncidentsPage() {
       </Card>
     </div>
   );
-}
