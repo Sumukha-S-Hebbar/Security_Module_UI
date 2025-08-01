@@ -103,7 +103,13 @@ export default function TowercoIncidentsPage() {
       const params = new URLSearchParams();
       params.append('page', currentPage.toString());
       if (searchQuery) params.append('search', searchQuery);
-      if (selectedStatus !== 'all') params.append('status', selectedStatus.replace('-', '_').toUpperCase());
+      if (selectedStatus !== 'all') {
+        const formattedStatus = selectedStatus
+            .split('-')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(' ');
+        params.append('status', formattedStatus);
+      }
       if (selectedSite !== 'all') params.append('site_id', selectedSite);
       if (selectedDate) params.append('date', format(selectedDate, 'yyyy-MM-dd'));
 
