@@ -153,9 +153,9 @@ export default function AgencyReportPage() {
   const [performanceSelectedYear, setPerformanceSelectedYear] = useState<string>('all');
   const [performanceSelectedMonth, setPerformanceSelectedMonth] = useState<string>('all');
   
-  const [assignedSitesSearchQuery, setAssignedSitesSearchQuery] = useState('');
-  const [incidentsSearchQuery, setIncidentsSearchQuery] = useState('');
   const [incidentsStatusFilter, setIncidentsStatusFilter] = useState('all');
+  const [incidentsYearFilter, setIncidentsYearFilter] = useState('all');
+  const [incidentsMonthFilter, setIncidentsMonthFilter] = useState('all');
 
   const assignedSitesRef = useRef<HTMLDivElement>(null);
   const incidentsHistoryRef = useRef<HTMLDivElement>(null);
@@ -219,28 +219,27 @@ export default function AgencyReportPage() {
       selfie: parseInt(performance.selfie_checkin_accuracy.replace('%', '')),
     };
   }, [reportData]);
-  
-  const filteredAssignedSites = useMemo(() => {
-    if (!reportData) return [];
-    return reportData.assigned_sites.filter(site => 
-        site.site_name.toLowerCase().includes(assignedSitesSearchQuery.toLowerCase()) ||
-        site.org_site_id.toLowerCase().includes(assignedSitesSearchQuery.toLowerCase())
-    );
-  }, [reportData, assignedSitesSearchQuery]);
 
+  const incidentAvailableYears = useMemo(() => {
+    if (!reportData) return [];
+    const years = new Set(
+      reportData.incidents.map((incident) => new Date(incident.incident_time).getFullYear().toString())
+    );
+    return Array.from(years).sort((a, b) => parseInt(b) - parseInt(a));
+  }, [reportData]);
+  
   const filteredIncidents = useMemo(() => {
     if (!reportData) return [];
     return reportData.incidents.filter(incident => {
-        const searchMatch = 
-            incident.incident_id.toLowerCase().includes(incidentsSearchQuery.toLowerCase()) ||
-            incident.site_name.toLowerCase().includes(incidentsSearchQuery.toLowerCase()) ||
-            incident.guard_name.toLowerCase().includes(incidentsSearchQuery.toLowerCase());
+        const incidentDate = new Date(incident.incident_time);
         
         const statusMatch = incidentsStatusFilter === 'all' || incident.incident_status.toLowerCase().replace(' ', '_') === incidentsStatusFilter;
+        const yearMatch = incidentsYearFilter === 'all' || incidentDate.getFullYear().toString() === incidentsYearFilter;
+        const monthMatch = incidentsMonthFilter === 'all' || incidentDate.getMonth().toString() === incidentsMonthFilter;
 
-        return searchMatch && statusMatch;
+        return statusMatch && yearMatch && monthMatch;
     });
-  }, [reportData, incidentsSearchQuery, incidentsStatusFilter]);
+  }, [reportData, incidentsStatusFilter, incidentsYearFilter, incidentsMonthFilter]);
 
 
   const complianceData = useMemo(() => [
@@ -514,24 +513,12 @@ export default function AgencyReportPage() {
       <Card ref={assignedSitesRef}>
         <CardHeader>
           <CardTitle>Assigned Sites</CardTitle>
-          <div className="flex flex-wrap items-center justify-between gap-4">
-              <CardDescription className="font-medium flex-1">
-                A detailed list of all sites assigned to {agency_name}.
-              </CardDescription>
-              <div className="relative">
-                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                  <Input
-                  type="search"
-                  placeholder="Search sites..."
-                  value={assignedSitesSearchQuery}
-                  onChange={(e) => setAssignedSitesSearchQuery(e.target.value)}
-                  className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[320px]"
-                  />
-              </div>
-          </div>
+          <CardDescription className="font-medium flex-1">
+            A detailed list of all sites assigned to {agency_name}.
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          {filteredAssignedSites.length > 0 ? (
+          {assigned_sites.length > 0 ? (
             <Table>
               <TableHeader>
                 <TableRow>
@@ -544,7 +531,7 @@ export default function AgencyReportPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredAssignedSites.map((site) => (
+                {assigned_sites.map((site) => (
                     <TableRow key={site.id} onClick={() => router.push(`/towerco/sites/${site.id}`)} className="cursor-pointer hover:bg-accent hover:text-accent-foreground group">
                        <TableCell>
                           <Button asChild variant="link" className="p-0 h-auto font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
@@ -589,34 +576,52 @@ export default function AgencyReportPage() {
       </Card>
       <Card ref={incidentsHistoryRef}>
         <CardHeader>
-          <CardTitle>Incidents Log</CardTitle>
-           <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <CardTitle>Incidents Log</CardTitle>
               <CardDescription className="font-medium flex-1">
                 A log of emergency incidents at sites managed by {agency_name}.
               </CardDescription>
-              <div className="flex items-center gap-2">
-                  <div className="relative">
-                      <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                      <Input
-                      type="search"
-                      placeholder="Search incidents..."
-                      value={incidentsSearchQuery}
-                      onChange={(e) => setIncidentsSearchQuery(e.target.value)}
-                      className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[260px]"
-                      />
-                  </div>
-                   <Select value={incidentsStatusFilter} onValueChange={setIncidentsStatusFilter}>
-                      <SelectTrigger className="w-[180px] font-medium hover:bg-accent hover:text-accent-foreground">
-                          <SelectValue placeholder="Filter by status" />
-                      </SelectTrigger>
-                      <SelectContent>
-                          <SelectItem value="all" className="font-medium">All Statuses</SelectItem>
-                          <SelectItem value="active" className="font-medium">Active</SelectItem>
-                          <SelectItem value="under_review" className="font-medium">Under Review</SelectItem>
-                          <SelectItem value="resolved" className="font-medium">Resolved</SelectItem>
-                      </SelectContent>
-                  </Select>
-              </div>
+            </div>
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <Select value={incidentsStatusFilter} onValueChange={setIncidentsStatusFilter}>
+                  <SelectTrigger className="w-[180px] font-medium hover:bg-accent hover:text-accent-foreground">
+                      <SelectValue placeholder="Filter by status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                      <SelectItem value="all" className="font-medium">All Statuses</SelectItem>
+                      <SelectItem value="active" className="font-medium">Active</SelectItem>
+                      <SelectItem value="under_review" className="font-medium">Under Review</SelectItem>
+                      <SelectItem value="resolved" className="font-medium">Resolved</SelectItem>
+                  </SelectContent>
+              </Select>
+              <Select value={incidentsYearFilter} onValueChange={setIncidentsYearFilter}>
+                <SelectTrigger className="w-[120px] font-medium hover:bg-accent hover:text-accent-foreground">
+                  <SelectValue placeholder="Select Year" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all" className="font-medium">All Years</SelectItem>
+                  {incidentAvailableYears.map((year) => (
+                    <SelectItem key={year} value={year} className="font-medium">
+                      {year}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={incidentsMonthFilter} onValueChange={setIncidentsMonthFilter}>
+                <SelectTrigger className="w-[140px] font-medium hover:bg-accent hover:text-accent-foreground">
+                  <SelectValue placeholder="Select Month" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all" className="font-medium">All Months</SelectItem>
+                  {Array.from({ length: 12 }, (_, i) => (
+                    <SelectItem key={i} value={i.toString()} className="font-medium">
+                      {new Date(0, i).toLocaleString('default', { month: 'long' })}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
