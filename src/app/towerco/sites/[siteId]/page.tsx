@@ -43,6 +43,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { fetchData } from '@/lib/api';
 import type { Site, SecurityAgency, Incident, Guard, Organization } from '@/types';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const chartConfig = {
   incidents: {
@@ -89,6 +90,9 @@ export default function SiteReportPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [loggedInOrg, setLoggedInOrg] = useState<Organization | null>(null);
   const [incidentsCurrentPage, setIncidentsCurrentPage] = useState(1);
+  const [selectedStatus, setSelectedStatus] = useState('all');
+  const [selectedYear, setSelectedYear] = useState('all');
+  const [selectedMonth, setSelectedMonth] = useState('all');
 
 
   useEffect(() => {
@@ -106,7 +110,8 @@ export default function SiteReportPage() {
     const fetchReportData = async (page = 1) => {
         setIsLoading(true);
         const token = localStorage.getItem('token');
-        const url = `http://are.towerbuddy.tel:8000/security/api/orgs/${loggedInOrg.code}/site/${siteId}/?page=${page}`;
+        // Fetch all incidents by not including page param for client-side filtering
+        const url = `http://are.towerbuddy.tel:8000/security/api/orgs/${loggedInOrg.code}/site/${siteId}/`;
 
         try {
             const data = await fetchData<SiteReportData>(url, {
@@ -124,13 +129,28 @@ export default function SiteReportPage() {
             setIsLoading(false);
         }
     };
-    fetchReportData(incidentsCurrentPage);
-  }, [loggedInOrg, siteId, incidentsCurrentPage, toast]);
+    fetchReportData();
+  }, [loggedInOrg, siteId, toast]);
   
-  const totalIncidentPages = useMemo(() => {
-    if (!reportData) return 1;
-    return Math.ceil(reportData.incidents.count / 10); // Assuming 10 items per page from backend
+  const availableYears = useMemo(() => {
+    if (!reportData) return [];
+    const years = new Set(
+      reportData.incidents.results.map((incident: any) => new Date(incident.incident_time).getFullYear().toString())
+    );
+    if (years.size > 0) years.add(new Date().getFullYear().toString());
+    return Array.from(years).sort((a, b) => parseInt(b) - parseInt(a));
   }, [reportData]);
+
+  const filteredIncidents = useMemo(() => {
+    if (!reportData) return [];
+    return reportData.incidents.results.filter((incident: any) => {
+      const incidentDate = new Date(incident.incident_time);
+      const yearMatch = selectedYear === 'all' || incidentDate.getFullYear().toString() === selectedYear;
+      const monthMatch = selectedMonth === 'all' || incidentDate.getMonth().toString() === selectedMonth;
+      const statusMatch = selectedStatus === 'all' || incident.incident_status.toLowerCase().replace(' ', '-') === selectedStatus;
+      return yearMatch && monthMatch && statusMatch;
+    });
+  }, [reportData, selectedYear, selectedMonth, selectedStatus]);
 
 
   const handleDownloadReport = () => {
@@ -293,7 +313,7 @@ export default function SiteReportPage() {
                   <div className="flex items-center gap-2"><Mail className="h-4 w-4" /> <a href={`mailto:${agency_details.communication_email}`} className="hover:underline">{agency_details.communication_email}</a></div>
                 </div>
                  <Button asChild variant="link" className="p-0 h-auto font-medium">
-                    <Link href={`/towerco/agencies/${agency_details.id}`}>View Full Agency Report</Link>
+                    <Link href={`/towerco/agencies/${agency_details.id}`}>{`View Full Agency Report`}</Link>
                 </Button>
             </CardContent>
           </Card>
@@ -360,11 +380,54 @@ export default function SiteReportPage() {
       
       <Card>
         <CardHeader>
-            <CardTitle>Incidents Log</CardTitle>
-            <CardDescription className="font-medium">A log of all emergency incidents reported at this site.</CardDescription>
+           <div className="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <CardTitle>Incidents Log</CardTitle>
+              <CardDescription className="font-medium">A log of all emergency incidents reported at this site.</CardDescription>
+            </div>
+             <div className="flex items-center gap-2 flex-shrink-0">
+              <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+                  <SelectTrigger className="w-[180px] font-medium hover:bg-accent hover:text-accent-foreground">
+                      <SelectValue placeholder="Filter by status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                      <SelectItem value="all" className="font-medium">All Statuses</SelectItem>
+                      <SelectItem value="active" className="font-medium">Active</SelectItem>
+                      <SelectItem value="under-review" className="font-medium">Under Review</SelectItem>
+                      <SelectItem value="resolved" className="font-medium">Resolved</SelectItem>
+                  </SelectContent>
+              </Select>
+              <Select value={selectedYear} onValueChange={setSelectedYear}>
+                <SelectTrigger className="w-[120px] font-medium hover:bg-accent hover:text-accent-foreground">
+                  <SelectValue placeholder="Select Year" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all" className="font-medium">All Years</SelectItem>
+                  {availableYears.map((year) => (
+                    <SelectItem key={year} value={year} className="font-medium">
+                      {year}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+                <SelectTrigger className="w-[140px] font-medium hover:bg-accent hover:text-accent-foreground">
+                  <SelectValue placeholder="Select Month" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all" className="font-medium">All Months</SelectItem>
+                  {Array.from({ length: 12 }, (_, i) => (
+                    <SelectItem key={i} value={i.toString()} className="font-medium">
+                      {new Date(0, i).toLocaleString('default', { month: 'long' })}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
-          {incidents.results.length > 0 ? (
+          {filteredIncidents.length > 0 ? (
             <Table>
               <TableHeader>
                 <TableRow>
@@ -376,7 +439,7 @@ export default function SiteReportPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {incidents.results.map((incident) => {
+                {filteredIncidents.map((incident) => {
                   return (
                     <TableRow 
                       key={incident.id}
@@ -398,37 +461,9 @@ export default function SiteReportPage() {
               </TableBody>
             </Table>
           ) : (
-            <p className="text-muted-foreground text-center py-4 font-medium">No emergency incidents have been reported for this site.</p>
+            <p className="text-muted-foreground text-center py-4 font-medium">No emergency incidents found for the selected filters.</p>
           )}
         </CardContent>
-        {incidents.count > 10 && (
-             <CardFooter>
-                <div className="flex items-center justify-between w-full">
-                    <div className="text-sm text-muted-foreground font-medium">
-                        Showing {incidents.results.length} of {incidents.count} incidents.
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setIncidentsCurrentPage(prev => Math.max(prev - 1, 1))}
-                            disabled={incidentsCurrentPage === 1}
-                        >
-                            Previous
-                        </Button>
-                        <span className="text-sm font-medium">Page {incidentsCurrentPage} of {totalIncidentPages || 1}</span>
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setIncidentsCurrentPage(prev => Math.min(prev + 1, totalIncidentPages))}
-                            disabled={incidentsCurrentPage === totalIncidentPages || totalIncidentPages === 0}
-                        >
-                            Next
-                        </Button>
-                    </div>
-                </div>
-            </CardFooter>
-        )}
       </Card>
     </div>
   );
