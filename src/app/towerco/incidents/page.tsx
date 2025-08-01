@@ -95,32 +95,35 @@ export default function TowercoIncidentsPage() {
     if (!loggedInOrg) return;
 
     const fetchIncidents = async () => {
-      // Clear previous data and set loading state before fetching
       setIsLoading(true);
       setIncidentsData(null);
       
-      const token = localStorage.getItem('token');
-      const authHeader = { 'Authorization': `Token ${token}` };
+      try {
+        const token = localStorage.getItem('token');
+        const authHeader = { 'Authorization': `Token ${token}` };
 
-      // Build query params
-      const params = new URLSearchParams();
-      params.append('page', currentPage.toString());
-      if (searchQuery) params.append('search', searchQuery);
-      if (selectedStatus !== 'all') {
-        const formattedStatus = selectedStatus
-            .split('-')
-            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-            .join(' ');
-        params.append('status', formattedStatus);
+        const params = new URLSearchParams();
+        params.append('page', currentPage.toString());
+        if (searchQuery) params.append('search', searchQuery);
+        if (selectedStatus !== 'all') {
+          const formattedStatus = selectedStatus
+              .split('-')
+              .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+              .join(' ');
+          params.append('status', formattedStatus);
+        }
+        if (selectedSite !== 'all') params.append('site_id', selectedSite);
+        if (selectedDate) params.append('date', format(selectedDate, 'yyyy-MM-dd'));
+
+        const url = `http://are.towerbuddy.tel:8000/security/api/orgs/${loggedInOrg.code}/incidents/list/?${params.toString()}`;
+        
+        const data = await fetchData<PaginatedIncidentsResponse>(url, { headers: authHeader });
+        setIncidentsData(data);
+      } catch (error) {
+        console.error("Failed to fetch incidents:", error);
+      } finally {
+        setIsLoading(false);
       }
-      if (selectedSite !== 'all') params.append('site_id', selectedSite);
-      if (selectedDate) params.append('date', format(selectedDate, 'yyyy-MM-dd'));
-
-      const url = `http://are.towerbuddy.tel:8000/security/api/orgs/${loggedInOrg.code}/incidents/list/?${params.toString()}`;
-      
-      const data = await fetchData<PaginatedIncidentsResponse>(url, { headers: authHeader });
-      setIncidentsData(data);
-      setIsLoading(false);
     };
 
     fetchIncidents();
