@@ -9,7 +9,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useToast } from '@/hooks/use-toast';
-import type { Site, SecurityAgency, PaginatedSitesResponse, Organization } from '@/types';
+import type { Site, SecurityAgency, PaginatedSitesResponse, Organization, User } from '@/types';
 import {
   Card,
   CardContent,
@@ -82,7 +82,7 @@ const uploadFormSchema = z.object({
 const addSiteFormSchema = z.object({
   org_site_id: z.string().min(1, 'Site ID is required.'),
   site_name: z.string().min(1, 'Site name is required.'),
-  region: z.coerce.number().int(),
+  region: z.string().min(1, 'Region is required.'),
   city: z.coerce.number().int(),
   lat: z.coerce.number().min(-90).max(90),
   lng: z.coerce.number().min(-180).max(180),
@@ -92,12 +92,17 @@ const addSiteFormSchema = z.object({
   site_zip_code: z.string().min(1, 'Zip code is required.'),
 });
 
+type ApiRegion = {
+  id: number;
+  name: string;
+};
 
 export default function TowercoSitesPage() {
   const [sites, setSites] = useState<Site[]>([]);
   const [securityAgencies, setSecurityAgencies] = useState<SecurityAgency[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loggedInOrg, setLoggedInOrg] = useState<Organization | null>(null);
+  const [loggedInUser, setLoggedInUser] = useState<User | null>(null);
 
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
   const [isAddSiteDialogOpen, setIsAddSiteDialogOpen] = useState(false);
@@ -106,6 +111,8 @@ export default function TowercoSitesPage() {
   const { toast } = useToast();
   const searchParams = useSearchParams();
   const router = useRouter();
+
+  const [apiRegions, setApiRegions] = useState<ApiRegion[]>([]);
 
   // State for filters
   const [assignedSearchQuery, setAssignedSearchQuery] = useState('');
@@ -131,8 +138,12 @@ export default function TowercoSitesPage() {
   useEffect(() => {
      if (typeof window !== 'undefined') {
         const orgData = localStorage.getItem('organization');
+        const userData = localStorage.getItem('user');
         if (orgData) {
             setLoggedInOrg(JSON.parse(orgData));
+        }
+        if (userData) {
+            setLoggedInUser(JSON.parse(userData));
         }
      }
   }, []);
@@ -157,6 +168,32 @@ export default function TowercoSitesPage() {
     }
     loadInitialData();
   }, [loggedInOrg]);
+  
+   useEffect(() => {
+    async function fetchRegions() {
+      if (!loggedInUser || !loggedInUser.country) return;
+
+      const token = localStorage.getItem('token');
+      const countryId = loggedInUser.country.id;
+      const url = `http://are.towerbuddy.tel:8000/security/api/regions/?country=${countryId}`;
+      
+      try {
+        const data = await fetchData<{ regions: ApiRegion[] }>(url, {
+          headers: { 'Authorization': `Token ${token}` }
+        });
+        setApiRegions(data?.regions || []);
+      } catch (error) {
+        console.error("Failed to fetch regions:", error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Could not load regions for the selection.",
+        });
+      }
+    }
+    fetchRegions();
+  }, [loggedInUser, toast]);
+
 
   const assignedSites = useMemo(
     () => sites.filter((site) => site.site_status === 'Assigned'),
@@ -221,7 +258,7 @@ export default function TowercoSitesPage() {
                 'Content-Type': 'application/json',
                 'Authorization': `Token ${token}`
             },
-            body: JSON.stringify(values),
+            body: JSON.stringify({...values, region: Number(values.region)}),
         });
 
         const responseData = await response.json();
@@ -575,10 +612,21 @@ export default function TowercoSitesPage() {
                         name="region"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Region ID</FormLabel>
-                                <FormControl>
-                                    <Input type="number" placeholder="e.g., 192709" {...field} />
-                                </FormControl>
+                                <FormLabel>Region</FormLabel>
+                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <FormControl>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select a region" />
+                                        </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                        {apiRegions.map(region => (
+                                            <SelectItem key={region.id} value={region.id.toString()}>
+                                                {region.name}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
                                 <FormMessage />
                             </FormItem>
                         )}
