@@ -68,7 +68,7 @@ export default function TowercoIncidentsPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
   
-  const [incidentsData, setIncidentsData] = useState<PaginatedIncidentsResponse | null>(null);
+  const [allIncidents, setAllIncidents] = useState<IncidentListItem[]>([]);
   const [sites, setSites] = useState<Site[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loggedInOrg, setLoggedInOrg] = useState<Organization | null>(null);
@@ -94,76 +94,73 @@ export default function TowercoIncidentsPage() {
   useEffect(() => {
     if (!loggedInOrg) return;
 
-    const fetchIncidents = async () => {
+    const fetchAllData = async () => {
       setIsLoading(true);
-      setIncidentsData(null);
       
       try {
         const token = localStorage.getItem('token');
         const authHeader = { 'Authorization': `Token ${token}` };
 
-        const params = new URLSearchParams();
-        params.append('page', currentPage.toString());
-        if (searchQuery) params.append('search', searchQuery);
-        if (selectedStatus !== 'all') {
-          const formattedStatus = selectedStatus
-              .split('-')
-              .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-              .join(' ');
-          params.append('status', formattedStatus);
-        }
-        if (selectedSite !== 'all') params.append('site_id', selectedSite);
-        if (selectedDate) params.append('date', format(selectedDate, 'yyyy-MM-dd'));
+        // Fetch all incidents - API returns paginated but we need all for client-side filtering
+        const incidentsUrl = `http://are.towerbuddy.tel:8000/security/api/orgs/${loggedInOrg.code}/incidents/list/`;
+        const incidentsData = await fetchData<PaginatedIncidentsResponse>(incidentsUrl, { headers: authHeader });
+        setAllIncidents(incidentsData?.results || []);
 
-        const url = `http://are.towerbuddy.tel:8000/security/api/orgs/${loggedInOrg.code}/incidents/list/?${params.toString()}`;
-        
-        const data = await fetchData<PaginatedIncidentsResponse>(url, { headers: authHeader });
-        setIncidentsData(data);
+        const sitesUrl = `http://are.towerbuddy.tel:8000/security/api/orgs/${loggedInOrg.code}/sites/list/`;
+        const sitesData = await fetchData<{results: Site[]}>(sitesUrl, { headers: authHeader });
+        setSites(sitesData?.results || []);
+
       } catch (error) {
-        console.error("Failed to fetch incidents:", error);
+        console.error("Failed to fetch data:", error);
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchIncidents();
-  }, [loggedInOrg, currentPage, searchQuery, selectedStatus, selectedSite, selectedDate]);
-  
-  useEffect(() => {
-     if (!loggedInOrg) return;
-     const fetchSites = async () => {
-        const token = localStorage.getItem('token');
-        const data = await fetchData<{results: Site[]}>(`http://are.towerbuddy.tel:8000/security/api/orgs/${loggedInOrg.code}/sites/list/`, {
-             headers: { 'Authorization': `Token ${token}` }
-        });
-        setSites(data?.results || []);
-     }
-     fetchSites();
+    fetchAllData();
   }, [loggedInOrg]);
+  
+  const filteredIncidents = useMemo(() => {
+    const filtered = allIncidents.filter((incident) => {
+      const searchLower = searchQuery.toLowerCase();
+      const matchesSearch =
+        incident.incident_id.toLowerCase().includes(searchLower) ||
+        incident.site_name.toLowerCase().includes(searchLower) ||
+        incident.guard_name.toLowerCase().includes(searchLower);
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
-    setCurrentPage(1);
-  };
+      const matchesStatus =
+        selectedStatus === 'all' || incident.incident_status.toLowerCase().replace(' ', '-') === selectedStatus;
+      
+      const incidentDate = new Date(incident.incident_time);
+      const matchesDate =
+        !selectedDate ||
+        format(incidentDate, 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd');
 
-  const handleStatusChange = (status: string) => {
-    setSelectedStatus(status);
-    setCurrentPage(1);
-  };
+      const matchesSite =
+        selectedSite === 'all' ||
+        incident.tb_site_id === selectedSite;
 
-  const handleSiteChange = (siteId: string) => {
-    setSelectedSite(siteId);
-    setCurrentPage(1);
-  };
+      return matchesSearch && matchesStatus && matchesDate && matchesSite;
+    });
+    return filtered;
+  }, [searchQuery, selectedStatus, selectedDate, selectedSite, allIncidents]);
 
-  const handleDateChange = (date: Date | undefined) => {
-    setSelectedDate(date);
+  useEffect(() => {
     setCurrentPage(1);
-  };
+  }, [searchQuery, selectedStatus, selectedDate, selectedSite]);
+
+
+  const paginatedIncidents = useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredIncidents.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  }, [filteredIncidents, currentPage]);
+
+  const totalPages = Math.ceil(filteredIncidents.length / ITEMS_PER_PAGE);
+
 
   const handleStatusSelectFromSummary = (status: string) => {
     const newStatus = selectedStatus === status ? 'all' : status;
-    handleStatusChange(newStatus);
+    setSelectedStatus(newStatus);
   };
   
   const getStatusIndicator = (status: IncidentListItem['incident_status']) => {
@@ -208,7 +205,6 @@ export default function TowercoIncidentsPage() {
     }
   };
 
-  const totalPages = incidentsData ? Math.ceil(incidentsData.count / ITEMS_PER_PAGE) : 1;
 
   if (!loggedInOrg) {
      return (
@@ -230,7 +226,7 @@ export default function TowercoIncidentsPage() {
       </div>
 
       <IncidentStatusSummary 
-        incidents={incidentsData?.results || []} 
+        incidents={allIncidents || []} 
         onStatusSelect={handleStatusSelectFromSummary}
         selectedStatus={selectedStatus}
       />
@@ -248,11 +244,11 @@ export default function TowercoIncidentsPage() {
                 type="search"
                 placeholder="Search incidents..."
                 value={searchQuery}
-                onChange={handleSearchChange}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[320px]"
               />
             </div>
-            <Select value={selectedStatus} onValueChange={handleStatusChange}>
+            <Select value={selectedStatus} onValueChange={setSelectedStatus}>
               <SelectTrigger className="w-full sm:w-[180px] font-medium hover:bg-accent hover:text-accent-foreground">
                 <SelectValue placeholder="Filter by status" />
               </SelectTrigger>
@@ -263,14 +259,14 @@ export default function TowercoIncidentsPage() {
                 <SelectItem value="resolved" className="font-medium">Resolved</SelectItem>
               </SelectContent>
             </Select>
-            <Select value={selectedSite} onValueChange={handleSiteChange}>
+            <Select value={selectedSite} onValueChange={setSelectedSite}>
               <SelectTrigger className="w-full sm:w-[180px] font-medium hover:bg-accent hover:text-accent-foreground">
                 <SelectValue placeholder="Filter by site" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all" className="font-medium">All Sites</SelectItem>
                 {sites.map(site => (
-                  <SelectItem key={site.id} value={site.id.toString()} className="font-medium">{site.site_name}</SelectItem>
+                  <SelectItem key={site.id} value={site.tb_site_id} className="font-medium">{site.site_name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -295,7 +291,7 @@ export default function TowercoIncidentsPage() {
                 <Calendar
                   mode="single"
                   selected={selectedDate}
-                  onSelect={handleDateChange}
+                  onSelect={setSelectedDate}
                   initialFocus
                 />
               </PopoverContent>
@@ -323,8 +319,8 @@ export default function TowercoIncidentsPage() {
                 </TableRow>
                 </TableHeader>
                 <TableBody>
-                {incidentsData && incidentsData.results.length > 0 ? (
-                    incidentsData.results.map((incident) => (
+                {paginatedIncidents && paginatedIncidents.length > 0 ? (
+                    paginatedIncidents.map((incident) => (
                     <TableRow 
                         key={incident.id}
                         onClick={() => router.push(`/towerco/incidents/${incident.id}`)}
@@ -356,11 +352,11 @@ export default function TowercoIncidentsPage() {
             </Table>
           )}
         </CardContent>
-        {incidentsData && incidentsData.count > 0 && (
+        {filteredIncidents && filteredIncidents.length > 0 && (
             <CardFooter>
                 <div className="flex items-center justify-between w-full">
                     <div className="text-sm text-muted-foreground font-medium">
-                        Showing {incidentsData.results.length} of {incidentsData.count} incidents.
+                        Showing {paginatedIncidents.length} of {filteredIncidents.length} incidents.
                     </div>
                     <div className="flex items-center gap-2">
                         <Button
@@ -387,3 +383,4 @@ export default function TowercoIncidentsPage() {
       </Card>
     </div>
   );
+}
