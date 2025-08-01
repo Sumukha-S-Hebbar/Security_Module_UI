@@ -9,7 +9,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useToast } from '@/hooks/use-toast';
-import type { SecurityAgency, Site, Organization, PaginatedSitesResponse } from '@/types';
+import type { SecurityAgency, Site, Organization, PaginatedSitesResponse, User } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -68,6 +68,16 @@ const addAgencyFormSchema = z.object({
     registered_address_line3: z.string().optional(),
 });
 
+type ApiRegion = {
+  id: number;
+  name: string;
+};
+
+type ApiCity = {
+    id: number;
+    name: string;
+}
+
 async function getRegions(agencies: SecurityAgency[]): Promise<string[]> {
     const uniqueRegions = [...new Set(agencies.map(agency => agency.region))];
     return uniqueRegions.sort();
@@ -92,12 +102,20 @@ export default function TowercoAgenciesPage() {
     const [currentPage, setCurrentPage] = useState(1);
     
     const [loggedInOrg, setLoggedInOrg] = useState<Organization | null>(null);
+    const [loggedInUser, setLoggedInUser] = useState<User | null>(null);
+    const [apiRegions, setApiRegions] = useState<ApiRegion[]>([]);
+    const [apiCities, setApiCities] = useState<ApiCity[]>([]);
+    const [isCitiesLoading, setIsCitiesLoading] = useState(false);
 
     useEffect(() => {
      if (typeof window !== 'undefined') {
         const orgData = localStorage.getItem('organization');
+        const userData = localStorage.getItem('user');
         if (orgData) {
             setLoggedInOrg(JSON.parse(orgData));
+        }
+        if (userData) {
+            setLoggedInUser(JSON.parse(userData));
         }
      }
     }, []);
@@ -144,18 +162,64 @@ export default function TowercoAgenciesPage() {
 
     const watchedRegion = addAgencyForm.watch('region');
 
-    const citiesForAddForm = useMemo(() => {
-        if (!watchedRegion) return [];
-        const allCities = new Set(securityAgencies
-            .filter(agency => agency.region === watchedRegion)
-            .map(agency => agency.city)
-        );
-        return Array.from(allCities).sort();
-    }, [watchedRegion, securityAgencies]);
+    useEffect(() => {
+        async function fetchRegions() {
+            if (!loggedInUser || !loggedInUser.country) return;
+
+            const token = localStorage.getItem('token');
+            const countryId = loggedInUser.country.id;
+            const url = `http://are.towerbuddy.tel:8000/security/api/regions/?country=${countryId}`;
+            
+            try {
+                const data = await fetchData<{ regions: ApiRegion[] }>(url, {
+                headers: { 'Authorization': `Token ${token}` }
+                });
+                setApiRegions(data?.regions || []);
+            } catch (error) {
+                console.error("Failed to fetch regions:", error);
+                toast({
+                variant: "destructive",
+                title: "Error",
+                description: "Could not load regions for the selection.",
+                });
+            }
+        }
+        fetchRegions();
+    }, [loggedInUser, toast]);
 
     useEffect(() => {
+        async function fetchCities() {
+            if (!watchedRegion || !loggedInUser || !loggedInUser.country) {
+                setApiCities([]);
+                return;
+            }
+            
+            setIsCitiesLoading(true);
+            const token = localStorage.getItem('token');
+            const countryId = loggedInUser.country.id;
+            const url = `http://are.towerbuddy.tel:8000/security/api/cities/?country=${countryId}&region=${watchedRegion}`;
+
+            try {
+                const data = await fetchData<{ cities: ApiCity[] }>(url, {
+                    headers: { 'Authorization': `Token ${token}` }
+                });
+                setApiCities(data?.cities || []);
+            } catch (error) {
+                console.error("Failed to fetch cities:", error);
+                toast({
+                    variant: "destructive",
+                    title: "Error",
+                    description: "Could not load cities for the selected region.",
+                });
+                setApiCities([]);
+            } finally {
+                setIsCitiesLoading(false);
+            }
+        }
+
         addAgencyForm.resetField('city');
-    }, [watchedRegion, addAgencyForm]);
+        fetchCities();
+    }, [watchedRegion, loggedInUser, toast, addAgencyForm]);
 
     async function onUploadSubmit(values: z.infer<typeof uploadFormSchema>) {
         setIsUploading(true);
@@ -189,7 +253,11 @@ export default function TowercoAgenciesPage() {
                     'Content-Type': 'application/json',
                     'Authorization': `Token ${token}`
                 },
-                body: JSON.stringify(values),
+                body: JSON.stringify({
+                    ...values, 
+                    region: Number(values.region),
+                    city: Number(values.city)
+                }),
             });
 
             const responseData = await response.json();
@@ -480,10 +548,21 @@ export default function TowercoAgenciesPage() {
                                             name="region"
                                             render={({ field }) => (
                                                 <FormItem>
-                                                    <FormLabel>Region ID</FormLabel>
-                                                    <FormControl>
-                                                        <Input placeholder="e.g., 200573" {...field} />
-                                                    </FormControl>
+                                                    <FormLabel>Region</FormLabel>
+                                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                        <FormControl>
+                                                            <SelectTrigger>
+                                                                <SelectValue placeholder="Select a region" />
+                                                            </SelectTrigger>
+                                                        </FormControl>
+                                                        <SelectContent>
+                                                            {apiRegions.map(region => (
+                                                                <SelectItem key={region.id} value={region.id.toString()}>
+                                                                    {region.name}
+                                                                </SelectItem>
+                                                            ))}
+                                                        </SelectContent>
+                                                    </Select>
                                                     <FormMessage />
                                                 </FormItem>
                                             )}
@@ -493,10 +572,21 @@ export default function TowercoAgenciesPage() {
                                             name="city"
                                             render={({ field }) => (
                                                 <FormItem>
-                                                    <FormLabel>City ID</FormLabel>
-                                                    <FormControl>
-                                                        <Input placeholder="e.g., 200575" {...field} />
-                                                    </FormControl>
+                                                    <FormLabel>City</FormLabel>
+                                                    <Select onValueChange={field.onChange} value={field.value} disabled={!watchedRegion || isCitiesLoading}>
+                                                        <FormControl>
+                                                            <SelectTrigger>
+                                                                <SelectValue placeholder={isCitiesLoading ? "Loading cities..." : "Select a city"} />
+                                                            </SelectTrigger>
+                                                        </FormControl>
+                                                        <SelectContent>
+                                                            {apiCities.map(city => (
+                                                                <SelectItem key={city.id} value={city.id.toString()}>
+                                                                    {city.name}
+                                                                </SelectItem>
+                                                            ))}
+                                                        </SelectContent>
+                                                    </Select>
                                                     <FormMessage />
                                                 </FormItem>
                                             )}
