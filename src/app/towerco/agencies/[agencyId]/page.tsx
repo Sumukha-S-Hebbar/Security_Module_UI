@@ -308,7 +308,14 @@ export default function AgencyReportPage() {
   };
 
   const handleScrollTo = (ref: React.RefObject<HTMLDivElement>) => {
-    ref.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    const element = ref.current;
+    if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        element.classList.add('highlight-row');
+        setTimeout(() => {
+            element.classList.remove('highlight-row');
+        }, 2000);
+    }
   };
   
    if (isLoading) {
@@ -405,22 +412,22 @@ export default function AgencyReportPage() {
               <div className="pt-4 border-t">
                 <h4 className="font-semibold mb-4 text-lg">Operational Overview</h4>
                 <div className="grid grid-cols-3 gap-4 text-center">
-                  <div
+                  <button
                     onClick={() => handleScrollTo(assignedSitesRef)}
                     className="flex flex-col items-center gap-1 cursor-pointer group"
                   >
                     <Building2 className="h-8 w-8 text-primary" />
                     <p className="font-medium text-[#00B4D8] group-hover:underline">Sites Assigned</p>
                     <p className="font-bold text-lg text-[#00B4D8] group-hover:underline">{assigned_sites_count}</p>
-                  </div>
-                  <div
+                  </button>
+                  <button
                     onClick={() => handleScrollTo(incidentsHistoryRef)}
                     className="flex flex-col items-center gap-1 cursor-pointer group"
                   >
                     <ShieldAlert className="h-8 w-8 text-primary" />
                     <p className="font-medium text-[#00B4D8] group-hover:underline">Total Incidents</p>
                     <p className="font-bold text-lg text-[#00B4D8] group-hover:underline">{total_incidents_count}</p>
-                  </div>
+                  </button>
                   <div
                     className="flex flex-col items-center gap-1"
                   >
