@@ -142,6 +142,40 @@ export default function SiteReportPage() {
     return Array.from(years).sort((a, b) => parseInt(b) - parseInt(a));
   }, [reportData]);
 
+  const [selectedChartYear, setSelectedChartYear] = useState<string>(() => {
+    const currentYear = new Date().getFullYear().toString();
+    const years = reportData ? new Set(reportData.incidents.results.map((incident: any) => new Date(incident.incident_time).getFullYear().toString())) : new Set();
+    return years.has(currentYear) ? currentYear : (Array.from(years).sort((a,b) => parseInt(b) - parseInt(a))[0] || currentYear);
+  });
+
+  useEffect(() => {
+    if (reportData && availableYears.length > 0 && !availableYears.includes(selectedChartYear)) {
+      setSelectedChartYear(availableYears[0]);
+    }
+  }, [reportData, availableYears, selectedChartYear]);
+
+  const monthlyIncidentData = useMemo(() => {
+    if (!reportData) return [];
+    const months = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+    ];
+    const monthlyData: { month: string; incidents: number }[] = months.map(
+      (month) => ({ month, incidents: 0 })
+    );
+
+    reportData.incidents.results.forEach((incident) => {
+      const incidentDate = new Date(incident.incident_time);
+      if (incidentDate.getFullYear().toString() === selectedChartYear) {
+        const monthIndex = incidentDate.getMonth();
+        monthlyData[monthIndex].incidents += 1;
+      }
+    });
+
+    return monthlyData;
+  }, [reportData, selectedChartYear]);
+
+
   const filteredIncidents = useMemo(() => {
     if (!reportData) return [];
     return reportData.incidents.results.filter((incident: any) => {
@@ -373,19 +407,33 @@ export default function SiteReportPage() {
       </div>
 
       <Card>
-        <CardHeader>
-            <CardTitle>Incidents Reported Monthly</CardTitle>
-            <CardDescription>A monthly breakdown of incidents reported at {site_name}.</CardDescription>
+        <CardHeader className="flex flex-row items-center justify-between gap-4">
+            <div>
+                <CardTitle>Incidents Reported Monthly</CardTitle>
+                <CardDescription>A monthly breakdown of incidents reported at {site_name}.</CardDescription>
+            </div>
+             <Select value={selectedChartYear} onValueChange={setSelectedChartYear}>
+                <SelectTrigger className="w-[120px] font-medium hover:bg-accent hover:text-accent-foreground">
+                    <SelectValue placeholder="Select Year" />
+                </SelectTrigger>
+                <SelectContent>
+                    {availableYears.map((year) => (
+                    <SelectItem key={year} value={year} className="font-medium">
+                        {year}
+                    </SelectItem>
+                    ))}
+                </SelectContent>
+            </Select>
         </CardHeader>
         <CardContent>
             <ChartContainer config={chartConfig} className="h-[250px] w-full">
                 <ResponsiveContainer>
-                    <LineChart data={incident_trend} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+                    <LineChart data={monthlyIncidentData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis dataKey="month" fontSize={12} tickLine={false} axisLine={false} />
                         <YAxis fontSize={12} tickLine={false} axisLine={false} allowDecimals={false} />
                         <ChartTooltip content={<ChartTooltipContent />} />
-                        <Line type="monotone" dataKey="count" name="Incidents" stroke="var(--color-incidents)" strokeWidth={2} dot={{ r: 4 }} />
+                        <Line type="monotone" dataKey="incidents" name="Incidents" stroke="var(--color-incidents)" strokeWidth={2} dot={{ r: 4 }} />
                     </LineChart>
                 </ResponsiveContainer>
             </ChartContainer>
