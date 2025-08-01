@@ -263,7 +263,6 @@ export default function TowercoAgenciesPage() {
     
     const handleRowClick = (e: React.MouseEvent, agencyId: string) => {
         const target = e.target as HTMLElement;
-        // Prevent navigation if the click is on the expand button or within it
         if (target.closest('[data-expand-button]')) {
             return;
         }
@@ -655,12 +654,11 @@ export default function TowercoAgenciesPage() {
                                                   </div>
                                                 </TableCell>
                                             </TableRow>
-                                            {isExpanded && (
+                                            {isExpanded && agency.total_sites_assigned > 0 && (
                                                 <TableRow className="bg-muted/50 hover:bg-muted/50">
                                                     <TableCell colSpan={6} className="p-0">
                                                         <div className="p-4">
                                                             <h4 className="font-semibold mb-2">Sites Assigned to {agency.agency_name}</h4>
-                                                            {agency.assigned_sites_details.length > 0 ? (
                                                                 <Table>
                                                                     <TableHeader>
                                                                         <TableRow>
@@ -691,11 +689,6 @@ export default function TowercoAgenciesPage() {
                                                                         ))}
                                                                     </TableBody>
                                                                 </Table>
-                                                            ) : (
-                                                                <p className="text-sm text-muted-foreground text-center py-4">
-                                                                    No sites from {loggedInOrg?.name} are assigned to this agency.
-                                                                </p>
-                                                            )}
                                                         </div>
                                                     </TableCell>
                                                 </TableRow>
