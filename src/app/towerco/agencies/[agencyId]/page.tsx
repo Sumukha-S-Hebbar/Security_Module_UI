@@ -25,6 +25,7 @@ import {
   ArrowLeft,
   ShieldAlert,
   Search,
+  Users,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -550,16 +551,19 @@ export default function AgencyReportPage() {
                       </TableCell>
                        <TableCell className="text-center">
                         <div className="flex items-center justify-center gap-2 font-medium">
+                            <Users className="h-4 w-4 text-muted-foreground group-hover:text-accent-foreground" />
                             <span>{site.number_of_guards}</span>
                         </div>
                       </TableCell>
                       <TableCell className="text-center">
                         <div className="flex items-center justify-center gap-2 font-medium">
+                            <ShieldAlert className="h-4 w-4 text-muted-foreground group-hover:text-accent-foreground" />
                             <span>{site.total_incidents_count}</span>
                         </div>
                       </TableCell>
                       <TableCell className="text-center">
                         <div className="flex items-center justify-center gap-2 font-medium">
+                          <CheckCircle className="h-4 w-4 text-muted-foreground group-hover:text-accent-foreground" />
                           <span>{site.resolved_incidents_count}</span>
                         </div>
                       </TableCell>
