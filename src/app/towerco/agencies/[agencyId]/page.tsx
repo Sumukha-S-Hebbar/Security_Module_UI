@@ -24,6 +24,7 @@ import {
   FileDown,
   ArrowLeft,
   ShieldAlert,
+  Search,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -65,6 +66,7 @@ import {
 import { ClientDate } from './_components/client-date';
 import { fetchData } from '@/lib/api';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Input } from '@/components/ui/input';
 
 
 type AgencyReportData = {
@@ -151,6 +153,10 @@ export default function AgencyReportPage() {
   const [performanceSelectedYear, setPerformanceSelectedYear] = useState<string>('all');
   const [performanceSelectedMonth, setPerformanceSelectedMonth] = useState<string>('all');
   
+  const [assignedSitesSearchQuery, setAssignedSitesSearchQuery] = useState('');
+  const [incidentsSearchQuery, setIncidentsSearchQuery] = useState('');
+  const [incidentsStatusFilter, setIncidentsStatusFilter] = useState('all');
+
   const assignedSitesRef = useRef<HTMLDivElement>(null);
   const incidentsHistoryRef = useRef<HTMLDivElement>(null);
 
@@ -213,6 +219,29 @@ export default function AgencyReportPage() {
       selfie: parseInt(performance.selfie_checkin_accuracy.replace('%', '')),
     };
   }, [reportData]);
+  
+  const filteredAssignedSites = useMemo(() => {
+    if (!reportData) return [];
+    return reportData.assigned_sites.filter(site => 
+        site.site_name.toLowerCase().includes(assignedSitesSearchQuery.toLowerCase()) ||
+        site.org_site_id.toLowerCase().includes(assignedSitesSearchQuery.toLowerCase())
+    );
+  }, [reportData, assignedSitesSearchQuery]);
+
+  const filteredIncidents = useMemo(() => {
+    if (!reportData) return [];
+    return reportData.incidents.filter(incident => {
+        const searchMatch = 
+            incident.incident_id.toLowerCase().includes(incidentsSearchQuery.toLowerCase()) ||
+            incident.site_name.toLowerCase().includes(incidentsSearchQuery.toLowerCase()) ||
+            incident.guard_name.toLowerCase().includes(incidentsSearchQuery.toLowerCase());
+        
+        const statusMatch = incidentsStatusFilter === 'all' || incident.incident_status.toLowerCase().replace(' ', '_') === incidentsStatusFilter;
+
+        return searchMatch && statusMatch;
+    });
+  }, [reportData, incidentsSearchQuery, incidentsStatusFilter]);
+
 
   const complianceData = useMemo(() => [
     { name: 'performance', value: performanceMetrics?.overall || 0 },
@@ -485,12 +514,24 @@ export default function AgencyReportPage() {
       <Card ref={assignedSitesRef}>
         <CardHeader>
           <CardTitle>Assigned Sites</CardTitle>
-          <CardDescription className="font-medium">
-            A detailed list of all sites assigned to {agency_name}.
-          </CardDescription>
+          <div className="flex flex-wrap items-center justify-between gap-4">
+              <CardDescription className="font-medium flex-1">
+                A detailed list of all sites assigned to {agency_name}.
+              </CardDescription>
+              <div className="relative">
+                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input
+                  type="search"
+                  placeholder="Search sites..."
+                  value={assignedSitesSearchQuery}
+                  onChange={(e) => setAssignedSitesSearchQuery(e.target.value)}
+                  className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[320px]"
+                  />
+              </div>
+          </div>
         </CardHeader>
         <CardContent>
-          {assigned_sites.length > 0 ? (
+          {filteredAssignedSites.length > 0 ? (
             <Table>
               <TableHeader>
                 <TableRow>
@@ -503,7 +544,7 @@ export default function AgencyReportPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {assigned_sites.map((site) => (
+                {filteredAssignedSites.map((site) => (
                     <TableRow key={site.id} onClick={() => router.push(`/towerco/sites/${site.id}`)} className="cursor-pointer hover:bg-accent hover:text-accent-foreground group">
                        <TableCell>
                           <Button asChild variant="link" className="p-0 h-auto font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
@@ -548,13 +589,38 @@ export default function AgencyReportPage() {
       </Card>
       <Card ref={incidentsHistoryRef}>
         <CardHeader>
-            <CardTitle>Incidents Log</CardTitle>
-            <CardDescription className="font-medium">
-            A log of emergency incidents at sites managed by {agency_name}.
-            </CardDescription>
+          <CardTitle>Incidents Log</CardTitle>
+           <div className="flex flex-wrap items-center justify-between gap-4">
+              <CardDescription className="font-medium flex-1">
+                A log of emergency incidents at sites managed by {agency_name}.
+              </CardDescription>
+              <div className="flex items-center gap-2">
+                  <div className="relative">
+                      <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                      <Input
+                      type="search"
+                      placeholder="Search incidents..."
+                      value={incidentsSearchQuery}
+                      onChange={(e) => setIncidentsSearchQuery(e.target.value)}
+                      className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[260px]"
+                      />
+                  </div>
+                   <Select value={incidentsStatusFilter} onValueChange={setIncidentsStatusFilter}>
+                      <SelectTrigger className="w-[180px] font-medium hover:bg-accent hover:text-accent-foreground">
+                          <SelectValue placeholder="Filter by status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                          <SelectItem value="all" className="font-medium">All Statuses</SelectItem>
+                          <SelectItem value="active" className="font-medium">Active</SelectItem>
+                          <SelectItem value="under_review" className="font-medium">Under Review</SelectItem>
+                          <SelectItem value="resolved" className="font-medium">Resolved</SelectItem>
+                      </SelectContent>
+                  </Select>
+              </div>
+          </div>
         </CardHeader>
         <CardContent>
-          {incidents.length > 0 ? (
+          {filteredIncidents.length > 0 ? (
             <Table>
               <TableHeader>
                 <TableRow>
@@ -567,7 +633,7 @@ export default function AgencyReportPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {incidents.map((incident) => (
+                {filteredIncidents.map((incident) => (
                     <TableRow key={incident.id} onClick={() => router.push(`/towerco/incidents/${incident.id}`)} className="cursor-pointer hover:bg-accent hover:text-accent-foreground group">
                       <TableCell>
                         <Button asChild variant="link" className="p-0 h-auto font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
@@ -589,7 +655,7 @@ export default function AgencyReportPage() {
             </Table>
           ) : (
             <p className="text-muted-foreground text-center py-4 font-medium">
-              No incidents found for this agency.
+              No incidents found for this agency based on the current filters.
             </p>
           )}
         </CardContent>
