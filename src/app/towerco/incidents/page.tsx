@@ -95,7 +95,10 @@ export default function TowercoIncidentsPage() {
     if (!loggedInOrg) return;
 
     const fetchIncidents = async () => {
+      // Clear previous data and set loading state before fetching
       setIsLoading(true);
+      setIncidentsData(null);
+      
       const token = localStorage.getItem('token');
       const authHeader = { 'Authorization': `Token ${token}` };
 
