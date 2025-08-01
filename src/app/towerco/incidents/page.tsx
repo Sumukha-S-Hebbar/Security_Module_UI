@@ -198,6 +198,12 @@ export default function TowercoIncidentsPage() {
         </p>
       </div>
 
+      <IncidentStatusSummary 
+        incidents={incidentsData?.results || []} 
+        onStatusSelect={handleStatusSelectFromSummary}
+        selectedStatus={selectedStatus}
+      />
+
        <Card>
         <CardHeader>
           <CardTitle>Incident Log</CardTitle>
@@ -351,4 +357,3 @@ export default function TowercoIncidentsPage() {
     </div>
   );
 }
-
