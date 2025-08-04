@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
@@ -182,7 +183,7 @@ export default function SiteReportPage() {
       const incidentDate = new Date(incident.incident_time);
       const yearMatch = selectedYear === 'all' || incidentDate.getFullYear().toString() === selectedYear;
       const monthMatch = selectedMonth === 'all' || incidentDate.getMonth().toString() === selectedMonth;
-      const statusMatch = selectedStatus === 'all' || incident.incident_status.toLowerCase().replace(' ', '-') === selectedStatus;
+      const statusMatch = selectedStatus === 'all' || incident.incident_status.toLowerCase().replace(' ', '_') === selectedStatus;
       return yearMatch && monthMatch && statusMatch;
     });
   }, [reportData, selectedYear, selectedMonth, selectedStatus]);
