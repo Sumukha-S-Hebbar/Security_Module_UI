@@ -96,13 +96,14 @@ export default function TowercoIncidentsPage() {
 
     const fetchAllData = async () => {
       setIsLoading(true);
+      setAllIncidents([]);
       
       try {
         const token = localStorage.getItem('token');
         const authHeader = { 'Authorization': `Token ${token}` };
 
         // Fetch all incidents - API returns paginated but we need all for client-side filtering
-        const incidentsUrl = `http://are.towerbuddy.tel:8000/security/api/orgs/${loggedInOrg.code}/incidents/list/`;
+        const incidentsUrl = `http://are.towerbuddy.tel:8000/security/api/orgs/${loggedInOrg.code}/incidents/`;
         const incidentsData = await fetchData<PaginatedIncidentsResponse>(incidentsUrl, { headers: authHeader });
         setAllIncidents(incidentsData?.results || []);
 
@@ -126,7 +127,7 @@ export default function TowercoIncidentsPage() {
       const matchesSearch =
         incident.incident_id.toLowerCase().includes(searchLower) ||
         incident.site_name.toLowerCase().includes(searchLower) ||
-        incident.guard_name.toLowerCase().includes(searchLower);
+        (incident.guard_name && incident.guard_name.toLowerCase().includes(searchLower));
 
       const matchesStatus =
         selectedStatus === 'all' || incident.incident_status.toLowerCase().replace(' ', '-') === selectedStatus;
@@ -161,6 +162,7 @@ export default function TowercoIncidentsPage() {
   const handleStatusSelectFromSummary = (status: string) => {
     const newStatus = selectedStatus === status ? 'all' : status;
     setSelectedStatus(newStatus);
+    setCurrentPage(1);
   };
   
   const getStatusIndicator = (status: IncidentListItem['incident_status']) => {
@@ -244,11 +246,17 @@ export default function TowercoIncidentsPage() {
                 type="search"
                 placeholder="Search incidents..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setCurrentPage(1);
+                }}
                 className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[320px]"
               />
             </div>
-            <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+            <Select value={selectedStatus} onValueChange={(value) => {
+                setSelectedStatus(value);
+                setCurrentPage(1);
+              }}>
               <SelectTrigger className="w-full sm:w-[180px] font-medium hover:bg-accent hover:text-accent-foreground">
                 <SelectValue placeholder="Filter by status" />
               </SelectTrigger>
@@ -259,7 +267,10 @@ export default function TowercoIncidentsPage() {
                 <SelectItem value="resolved" className="font-medium">Resolved</SelectItem>
               </SelectContent>
             </Select>
-            <Select value={selectedSite} onValueChange={setSelectedSite}>
+            <Select value={selectedSite} onValueChange={(value) => {
+                setSelectedSite(value);
+                setCurrentPage(1);
+              }}>
               <SelectTrigger className="w-full sm:w-[180px] font-medium hover:bg-accent hover:text-accent-foreground">
                 <SelectValue placeholder="Filter by site" />
               </SelectTrigger>
@@ -291,7 +302,10 @@ export default function TowercoIncidentsPage() {
                 <Calendar
                   mode="single"
                   selected={selectedDate}
-                  onSelect={setSelectedDate}
+                  onSelect={(date) => {
+                    setSelectedDate(date);
+                    setCurrentPage(1);
+                  }}
                   initialFocus
                 />
               </PopoverContent>
