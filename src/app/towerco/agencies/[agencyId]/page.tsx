@@ -602,7 +602,7 @@ export default function AgencyReportPage() {
                   <SelectContent>
                       <SelectItem value="all" className="font-medium">All Statuses</SelectItem>
                       <SelectItem value="active" className="font-medium">Active</SelectItem>
-                      <SelectItem value="under_review" className="font-medium">Under Review</SelectItem>
+                      <SelectItem value="under-review" className="font-medium">Under Review</SelectItem>
                       <SelectItem value="resolved" className="font-medium">Resolved</SelectItem>
                   </SelectContent>
               </Select>
