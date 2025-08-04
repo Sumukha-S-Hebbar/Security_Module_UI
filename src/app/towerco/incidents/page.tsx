@@ -96,33 +96,20 @@ export default function TowercoIncidentsPage() {
   useEffect(() => {
     if (!loggedInOrg) return;
 
-    const fetchAllData = async () => {
-      setIsLoading(true);
-      
-      try {
+    const fetchAllDataForSummary = async () => {
         const token = localStorage.getItem('token');
         const authHeader = { 'Authorization': `Token ${token}` };
-
-        // Fetch for summary card without filters
+        
         const summaryIncidentsUrl = `http://are.towerbuddy.tel:8000/security/api/orgs/${loggedInOrg.code}/incidents/list/`;
         const summaryData = await fetchData<PaginatedIncidentsResponse>(summaryIncidentsUrl, { headers: authHeader });
         setAllIncidentsForSummary(summaryData?.results || []);
 
-        // Fetch sites for filter dropdown
         const sitesUrl = `http://are.towerbuddy.tel:8000/security/api/orgs/${loggedInOrg.code}/sites/list/`;
         const sitesData = await fetchData<{results: Site[]}>(sitesUrl, { headers: authHeader });
         setSites(sitesData?.results || []);
-
-      } catch (error) {
-        console.error("Failed to fetch initial data:", error);
-        setAllIncidentsForSummary([]);
-        setSites([]);
-      } finally {
-        setIsLoading(false);
-      }
     };
 
-    fetchAllData();
+    fetchAllDataForSummary();
   }, [loggedInOrg]);
   
    useEffect(() => {
@@ -135,7 +122,9 @@ export default function TowercoIncidentsPage() {
       
       const params = new URLSearchParams();
       if (selectedStatus !== 'all') {
-        const apiStatus = selectedStatus.charAt(0).toUpperCase() + selectedStatus.slice(1).replace('_', ' ');
+        const apiStatus = selectedStatus === 'under_review' 
+            ? 'Under Review' 
+            : selectedStatus.charAt(0).toUpperCase() + selectedStatus.slice(1);
         params.append('incident_status', apiStatus);
       }
       if (searchQuery) params.append('search', searchQuery);
@@ -364,7 +353,7 @@ export default function TowercoIncidentsPage() {
             </Table>
           )}
         </CardContent>
-        {totalCount > 0 && (
+        {totalCount > 0 && !isLoading && (
             <CardFooter>
                 <div className="flex items-center justify-between w-full">
                     <div className="text-sm text-muted-foreground font-medium">
