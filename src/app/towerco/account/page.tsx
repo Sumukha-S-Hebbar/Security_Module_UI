@@ -116,7 +116,7 @@ export default function TowercoAccountPage() {
     
     try {
         const response = await fetch('http://are.towerbuddy.tel:8000/security/api/users/account/password/change/', {
-            method: 'PATCH',
+            method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Token ${token}`
@@ -326,4 +326,3 @@ export default function TowercoAccountPage() {
     </div>
   );
 }
-
