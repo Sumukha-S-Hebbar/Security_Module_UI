@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
@@ -190,14 +189,13 @@ export default function IncidentReportPage() {
   
   const handleResolveIncident = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!incident) return;
 
     if (!resolutionNotes) {
         toast({ variant: 'destructive', title: 'Error', description: 'Resolution notes are required to resolve.' });
         return;
     }
     
-    if (!loggedInOrg) return;
+    if (!loggedInOrg || !incident) return;
 
     setIsResolving(true);
     const token = localStorage.getItem('token');
@@ -535,7 +533,7 @@ export default function IncidentReportPage() {
                             </div>
                         </div>
                         <CardFooter className="px-0 pt-6 justify-end">
-                            <Button type="submit" disabled={!resolutionNotes || isResolving}>
+                            <Button type="submit" disabled={!resolutionNotes || isResolving} className="bg-[#00B4D8] hover:bg-[#00B4D8]/90">
                                 Mark as Resolved
                             </Button>
                         </CardFooter>
