@@ -91,7 +91,7 @@ export default function IncidentReportPage() {
   const params = useParams();
   const router = useRouter();
   const { toast } = useToast();
-  const incidentId = params.incidentId as string;
+  const incidentIdParam = params.incidentId as string;
   
   const [incident, setIncident] = useState<IncidentReport | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -110,12 +110,13 @@ export default function IncidentReportPage() {
   }, []);
 
   useEffect(() => {
-    if (!loggedInOrg || !incidentId) return;
+    const id = parseInt(incidentIdParam, 10);
+    if (!loggedInOrg || !incidentIdParam || isNaN(id)) return;
 
     const fetchIncidentReport = async () => {
         setIsLoading(true);
         const token = localStorage.getItem('token');
-        const url = `http://are.towerbuddy.tel:8000/security/api/orgs/${loggedInOrg.code}/incidents/${incidentId}/`;
+        const url = `http://are.towerbuddy.tel:8000/security/api/orgs/${loggedInOrg.code}/incidents/${id}/`;
 
         try {
             const response = await fetchData<{data: IncidentReport}>(url, {
@@ -139,7 +140,7 @@ export default function IncidentReportPage() {
         }
     };
     fetchIncidentReport();
-  }, [loggedInOrg, incidentId, toast]);
+  }, [loggedInOrg, incidentIdParam, toast]);
 
   if (isLoading) {
       return (
@@ -498,3 +499,5 @@ export default function IncidentReportPage() {
     </div>
   );
 }
+
+    
