@@ -195,7 +195,10 @@ export default function IncidentReportPage() {
         return;
     }
     
-    if (!loggedInOrg || !incident) return;
+    if (!loggedInOrg || !incidentIdParam) {
+       toast({ variant: 'destructive', title: 'Error', description: 'Cannot resolve incident: missing organization or incident ID.' });
+       return;
+    };
 
     setIsResolving(true);
     const token = localStorage.getItem('token');
@@ -211,7 +214,7 @@ export default function IncidentReportPage() {
     }
 
     try {
-        const response = await fetch(`http://are.towerbuddy.tel:8000/security/api/orgs/${loggedInOrg.code}/incident/${incident.id}/`, {
+        const response = await fetch(`http://are.towerbuddy.tel:8000/security/api/orgs/${loggedInOrg.code}/incident/${incidentIdParam}/`, {
             method: 'PATCH',
             headers: {
                 'Authorization': `Token ${token}`
