@@ -28,6 +28,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import type { Organization } from '@/types';
 
 type IncidentReport = {
+    id: number;
     incident_id: string;
     incident_time: string;
     incident_type: 'SOS' | 'Suspicious Activity' | 'Theft' | 'Vandalism' | 'Trespassing' | 'Safety Hazard' | 'Other';
@@ -96,6 +97,7 @@ export default function IncidentReportPage() {
   
   const [incident, setIncident] = useState<IncidentReport | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isResolving, setIsResolving] = useState(false);
   const [loggedInOrg, setLoggedInOrg] = useState<Organization | null>(null);
 
   const [resolutionNotes, setResolutionNotes] = useState('');
@@ -186,25 +188,58 @@ export default function IncidentReportPage() {
     });
   };
   
-  const handleResolveIncident = (e: React.FormEvent) => {
+  const handleResolveIncident = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!resolutionNotes) {
         toast({ variant: 'destructive', title: 'Error', description: 'Resolution notes are required to resolve.' });
         return;
     }
     
-    // In a real app, this would be an API call
-    console.log({
-        resolutionNotes,
-        resolutionFiles,
-    });
-    
-    // For now, simulate success and navigate away
-    toast({
-        title: "Incident Resolved",
-        description: `Incident #${incident.incident_id} has been marked as resolved.`
-    });
-    router.push('/towerco/incidents');
+    if (!loggedInOrg || !incident) return;
+
+    setIsResolving(true);
+    const token = localStorage.getItem('token');
+    const formData = new FormData();
+    formData.append('resolution_notes', resolutionNotes);
+
+    if (resolutionFiles) {
+        Array.from(resolutionFiles).forEach((file, index) => {
+            if (index < 4) { // Max 4 files
+                formData.append(`resolved_incident_image_${index + 1}`, file);
+            }
+        });
+    }
+
+    try {
+        const response = await fetch(`http://are.towerbuddy.tel:8000/security/api/orgs/${loggedInOrg.code}/incidents/${incident.id}/`, {
+            method: 'PATCH',
+            headers: {
+                'Authorization': `Token ${token}`
+            },
+            body: formData,
+        });
+
+        const responseData = await response.json();
+
+        if (!response.ok) {
+            throw new Error(responseData.detail || 'Failed to resolve incident.');
+        }
+
+        toast({
+            title: "Incident Resolved",
+            description: `Incident #${incident.incident_id} has been marked as resolved.`
+        });
+        router.push('/towerco/incidents');
+
+    } catch(error: any) {
+         toast({
+            variant: 'destructive',
+            title: 'Resolution Failed',
+            description: error.message,
+        });
+    } finally {
+        setIsResolving(false);
+    }
   }
 
   const getStatusIndicator = (status: IncidentReport['incident_status']) => {
@@ -317,9 +352,9 @@ export default function IncidentReportPage() {
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-6">
         {incident.site_details && (
-          <Card>
+          <Card className="xl:col-span-1">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <MapPin className="h-5 w-5 text-primary" />
@@ -349,7 +384,7 @@ export default function IncidentReportPage() {
           </Card>
         )}
         {incident.agency_details && (
-          <Card>
+          <Card className="xl:col-span-1">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Briefcase className="h-5 w-5 text-primary" />
@@ -370,7 +405,7 @@ export default function IncidentReportPage() {
           </Card>
         )}
         {incident.raised_by_guard_details && (
-          <Card>
+          <Card className="xl:col-span-1">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <User className="h-5 w-5 text-primary" />
@@ -385,7 +420,7 @@ export default function IncidentReportPage() {
             </CardContent>
           </Card>
         )}
-        <Card>
+        <Card className="xl:col-span-1">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <UserCheck className="h-5 w-5 text-primary" />
@@ -498,7 +533,7 @@ export default function IncidentReportPage() {
                             </div>
                         </div>
                         <CardFooter className="px-0 pt-6 justify-end">
-                            <Button type="submit" disabled={!resolutionNotes}>
+                            <Button type="submit" disabled={!resolutionNotes || isResolving}>
                                 Mark as Resolved
                             </Button>
                         </CardFooter>
