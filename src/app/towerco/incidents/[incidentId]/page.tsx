@@ -188,8 +188,10 @@ export default function IncidentReportPage() {
     });
   };
   
-  const handleResolveIncident = async (e: React.FormEvent, incidentId: number) => {
+  const handleResolveIncident = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!incident) return;
+
     if (!resolutionNotes) {
         toast({ variant: 'destructive', title: 'Error', description: 'Resolution notes are required to resolve.' });
         return;
@@ -211,7 +213,7 @@ export default function IncidentReportPage() {
     }
 
     try {
-        const response = await fetch(`http://are.towerbuddy.tel:8000/security/api/orgs/${loggedInOrg.code}/incident/${incidentId}/`, {
+        const response = await fetch(`http://are.towerbuddy.tel:8000/security/api/orgs/${loggedInOrg.code}/incident/${incident.id}/`, {
             method: 'PATCH',
             headers: {
                 'Authorization': `Token ${token}`
@@ -503,7 +505,7 @@ export default function IncidentReportPage() {
                         {renderMediaGallery(resolvedMediaUrls, "Resolution Media Evidence", 'report document')}
                     </div>
                 ) : incident.incident_status === 'Under Review' ? (
-                    <form onSubmit={(e) => handleResolveIncident(e, incident.id)} className="pt-6">
+                    <form onSubmit={handleResolveIncident} className="pt-6">
                         <div className="space-y-4">
                             <Separator />
                             <div className="pt-4 space-y-4">
