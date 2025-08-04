@@ -116,7 +116,7 @@ export default function IncidentReportPage() {
     const fetchIncidentReport = async () => {
         setIsLoading(true);
         const token = localStorage.getItem('token');
-        const url = `http://are.towerbuddy.tel:8000/security/api/orgs/${loggedInOrg.code}/incidents/${id}/`;
+        const url = `http://are.towerbuddy.tel:8000/security/api/orgs/${loggedInOrg.code}/incident/${id}/`;
 
         try {
             const response = await fetchData<{data: IncidentReport}>(url, {
@@ -499,5 +499,7 @@ export default function IncidentReportPage() {
     </div>
   );
 }
+
+    
 
     
