@@ -2,17 +2,34 @@
 'use client';
 
 import { useMemo, useState, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
-import { Mail, Calendar, Briefcase, KeyRound, Building } from 'lucide-react';
+import { Mail, Calendar, Briefcase, KeyRound, Building, Loader2 } from 'lucide-react';
 import type { Organization, User } from '@/types';
 import { fetchData } from '@/lib/api';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { useToast } from '@/hooks/use-toast';
 
 
-const LOGGED_IN_ORG_ID = 'TCO01';
+const passwordFormSchema = z.object({
+  old_password: z.string().min(1, 'Old password is required.'),
+  new_password1: z.string().min(8, 'New password must be at least 8 characters.'),
+  new_password2: z.string(),
+}).refine(data => data.new_password1 === data.new_password2, {
+  message: 'New passwords do not match.',
+  path: ['new_password2'],
+});
+
+type PasswordFormValues = z.infer<typeof passwordFormSchema>;
+
 
 // Mock user and org data that would come from a login response/context
 const MOCK_USER_RESPONSE = {
@@ -53,9 +70,21 @@ const MOCK_USER_RESPONSE = {
 };
 
 export default function TowercoAccountPage() {
+  const { toast } = useToast();
   const [user, setUser] = useState<User | null>(null);
   const [organization, setOrganization] = useState<Organization | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isPasswordFormVisible, setIsPasswordFormVisible] = useState(false);
+  const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
+  
+  const passwordForm = useForm<PasswordFormValues>({
+    resolver: zodResolver(passwordFormSchema),
+    defaultValues: {
+        old_password: '',
+        new_password1: '',
+        new_password2: ''
+    }
+  });
 
   useEffect(() => {
     async function fetchUserAndOrg() {
@@ -70,6 +99,45 @@ export default function TowercoAccountPage() {
     }
     fetchUserAndOrg();
   }, []);
+  
+  async function onPasswordSubmit(values: PasswordFormValues) {
+    setIsUpdatingPassword(true);
+    const token = localStorage.getItem('token');
+    
+    try {
+        const response = await fetch('http://are.towerbuddy.tel:8000/security/api/users/account/password/change/', {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Token ${token}`
+            },
+            body: JSON.stringify(values)
+        });
+
+        const responseData = await response.json();
+
+        if (!response.ok) {
+            throw new Error(responseData.detail || 'Failed to change password.');
+        }
+        
+        toast({
+            title: 'Password Updated',
+            description: 'Your password has been changed successfully.',
+        });
+        passwordForm.reset();
+        setIsPasswordFormVisible(false);
+
+    } catch (error: any) {
+         toast({
+            variant: 'destructive',
+            title: 'Update Failed',
+            description: error.message || 'An error occurred.',
+        });
+    } finally {
+        setIsUpdatingPassword(false);
+    }
+  }
+
 
   if (isLoading) {
       return (
@@ -115,30 +183,6 @@ export default function TowercoAccountPage() {
       </div>
     );
   }
-
-  const GoogleIcon = () => (
-    <svg className="w-5 h-5" viewBox="0 0 48 48">
-      <path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8c-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4C12.955 4 4 12.955 4 24s8.955 20 20 20s20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z" />
-      <path fill="#FF3D00" d="M6.306 14.691c-1.346 2.536-2.074 5.46-2.074 8.529s.728 5.994 2.074 8.529l-5.645 5.645C1.123 34.12 0 29.268 0 24s1.123-10.12 2.661-13.835l5.645-5.645z" />
-      <path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-5.657-5.657C30.072 34.777 27.218 36 24 36c-5.223 0-9.657-3.343-11.303-8H2.697v8.309C6.393 40.023 14.61 44 24 44z" />
-      <path fill="#1976D2" d="M43.611 20.083H24v8h11.303c-.792 2.237-2.231 4.16-4.087 5.571l5.657 5.657C40.072 35.817 44 30.138 44 24c0-1.341-.138-2.65-.389-3.917z" />
-    </svg>
-  );
-
-  const FacebookIcon = () => (
-    <svg className="w-5 h-5" fill="#1877F2" viewBox="0 0 24 24">
-      <path d="M22.675 0h-21.35C.59 0 0 .59 0 1.325v21.35C0 23.41.59 24 1.325 24H12.82V14.706H9.692V11.084h3.128V8.413c0-3.1 1.893-4.788 4.659-4.788 1.325 0 2.463.099 2.795.143v3.24l-1.918.001c-1.504 0-1.795.715-1.795 1.763v2.313h3.587l-.467 3.622h-3.12V24h6.116c.735 0 1.325-.59 1.325-1.325V1.325C24 .59 23.405 0 22.675 0z" />
-    </svg>
-  );
-
-  const MicrosoftIcon = () => (
-    <svg className="w-5 h-5" viewBox="0 0 23 23">
-      <path fill="#f25022" d="M1 1h10v10H1z" />
-      <path fill="#7fba00" d="M12 1h10v10H12z" />
-      <path fill="#00a4ef" d="M1 12h10v10H1z" />
-      <path fill="#ffb900" d="M12 12h10v10H12z" />
-    </svg>
-  );
   
   const userFullName = `${user.first_name} ${user.last_name || ''}`.trim();
 
@@ -176,8 +220,8 @@ export default function TowercoAccountPage() {
             <Separator />
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-sm">
               <div className="space-y-1">
-                <p className="text-muted-foreground font-medium">User ID</p>
-                <p className="font-semibold">{user.id}</p>
+                <p className="text-muted-foreground font-medium">EMP ID</p>
+                <p className="font-semibold">{organization.member?.employee_id || 'N/A'}</p>
               </div>
               <div className="space-y-1">
                 <p className="text-muted-foreground font-medium">Role</p>
@@ -195,32 +239,79 @@ export default function TowercoAccountPage() {
           </CardContent>
         </Card>
 
-        <Card className="mt-6">
-          <CardHeader>
-            <CardTitle>LINK SOCIAL ACCOUNT</CardTitle>
-          </CardHeader>
-          <CardContent className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <Button variant="outline" className="justify-center">
-              <GoogleIcon />
-              <span className="ml-2">Google</span>
+        <Collapsible open={isPasswordFormVisible} onOpenChange={setIsPasswordFormVisible}>
+          <CollapsibleTrigger asChild>
+            <Button className="w-full bg-[#1e90ff] hover:bg-[#1c86ee] text-lg py-6">
+                <KeyRound className="mr-2 h-5 w-5" />
+                Change Password
             </Button>
-            <Button variant="outline" className="justify-center">
-              <FacebookIcon />
-              <span className="ml-2">Facebook</span>
-            </Button>
-            <Button variant="outline" className="justify-center">
-              <MicrosoftIcon />
-              <span className="ml-2">Microsoft</span>
-            </Button>
-          </CardContent>
-        </Card>
-
-        <div className="mt-4">
-          <Button className="w-full bg-[#1e90ff] hover:bg-[#1c86ee] text-lg py-6">
-            <KeyRound className="mr-2 h-5 w-5" />
-            Change Password
-          </Button>
-        </div>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <Card className="mt-4">
+                <CardHeader>
+                    <CardTitle>Change Your Password</CardTitle>
+                    <CardDescription>Enter your old password and a new password below.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <Form {...passwordForm}>
+                        <form onSubmit={passwordForm.handleSubmit(onPasswordSubmit)} className="space-y-4">
+                            <FormField
+                                control={passwordForm.control}
+                                name="old_password"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Old Password</FormLabel>
+                                        <FormControl>
+                                            <Input type="password" placeholder="Enter your current password" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                             <FormField
+                                control={passwordForm.control}
+                                name="new_password1"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>New Password</FormLabel>
+                                        <FormControl>
+                                            <Input type="password" placeholder="Enter new password" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                             <FormField
+                                control={passwordForm.control}
+                                name="new_password2"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Confirm New Password</FormLabel>
+                                        <FormControl>
+                                            <Input type="password" placeholder="Re-enter new password" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <div className="flex justify-end pt-4">
+                                <Button type="submit" disabled={isUpdatingPassword}>
+                                    {isUpdatingPassword ? (
+                                        <>
+                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                        Updating...
+                                        </>
+                                    ) : (
+                                        'Update Password'
+                                    )}
+                                </Button>
+                            </div>
+                        </form>
+                    </Form>
+                </CardContent>
+            </Card>
+          </CollapsibleContent>
+        </Collapsible>
       </div>
     </div>
   );
