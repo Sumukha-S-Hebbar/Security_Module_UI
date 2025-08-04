@@ -112,6 +112,8 @@ export default function TowercoIncidentsPage() {
 
       } catch (error) {
         console.error("Failed to fetch data:", error);
+        setAllIncidents([]);
+        setSites([]);
       } finally {
         setIsLoading(false);
       }
@@ -121,7 +123,9 @@ export default function TowercoIncidentsPage() {
   }, [loggedInOrg]);
   
   const filteredIncidents = useMemo(() => {
-    const filtered = allIncidents.filter((incident) => {
+    if (isLoading) return [];
+    
+    return allIncidents.filter((incident) => {
       const searchLower = searchQuery.toLowerCase();
       const matchesSearch =
         incident.incident_id.toLowerCase().includes(searchLower) ||
@@ -129,7 +133,7 @@ export default function TowercoIncidentsPage() {
         (incident.guard_name && incident.guard_name.toLowerCase().includes(searchLower));
 
       const matchesStatus =
-        selectedStatus === 'all' || incident.incident_status.toLowerCase().replace(' ', '-') === selectedStatus;
+        selectedStatus === 'all' || incident.incident_status.toLowerCase().replace(' ', '_') === selectedStatus;
       
       const incidentDate = new Date(incident.incident_time);
       const matchesDate =
@@ -142,8 +146,7 @@ export default function TowercoIncidentsPage() {
 
       return matchesSearch && matchesStatus && matchesDate && matchesSite;
     });
-    return filtered;
-  }, [searchQuery, selectedStatus, selectedDate, selectedSite, allIncidents]);
+  }, [searchQuery, selectedStatus, selectedDate, selectedSite, allIncidents, isLoading]);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -255,7 +258,7 @@ export default function TowercoIncidentsPage() {
               <SelectContent>
                 <SelectItem value="all" className="font-medium">All Statuses</SelectItem>
                 <SelectItem value="active" className="font-medium">Active</SelectItem>
-                <SelectItem value="under-review" className="font-medium">Under Review</SelectItem>
+                <SelectItem value="under_review" className="font-medium">Under Review</SelectItem>
                 <SelectItem value="resolved" className="font-medium">Resolved</SelectItem>
               </SelectContent>
             </Select>
