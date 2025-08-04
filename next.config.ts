@@ -17,6 +17,12 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/**',
       },
+      {
+        protocol: 'http',
+        hostname: 'are.towerbuddy.tel',
+        port: '8000',
+        pathname: '/**',
+      },
     ],
   },
 };
