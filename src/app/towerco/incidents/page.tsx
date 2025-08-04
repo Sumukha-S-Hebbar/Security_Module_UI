@@ -96,17 +96,15 @@ export default function TowercoIncidentsPage() {
 
     const fetchAllData = async () => {
       setIsLoading(true);
-      setAllIncidents([]);
       
       try {
         const token = localStorage.getItem('token');
         const authHeader = { 'Authorization': `Token ${token}` };
 
-        const incidentsUrl = `http://are.towerbuddy.tel:8000/security/api/orgs/${loggedInOrg.code}/incidents/`;
+        const incidentsUrl = `http://are.towerbuddy.tel:8000/security/api/orgs/${loggedInOrg.code}/incidents/list/`;
         const incidentsData = await fetchData<PaginatedIncidentsResponse>(incidentsUrl, { headers: authHeader });
-        if (incidentsData?.results) {
-            setAllIncidents(incidentsData.results);
-        }
+        
+        setAllIncidents(incidentsData?.results || []);
 
         const sitesUrl = `http://are.towerbuddy.tel:8000/security/api/orgs/${loggedInOrg.code}/sites/list/`;
         const sitesData = await fetchData<{results: Site[]}>(sitesUrl, { headers: authHeader });
