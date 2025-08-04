@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -76,6 +76,7 @@ export default function TowercoAccountPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isPasswordFormVisible, setIsPasswordFormVisible] = useState(false);
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
+  const passwordFormRef = useRef<HTMLDivElement>(null);
   
   const passwordForm = useForm<PasswordFormValues>({
     resolver: zodResolver(passwordFormSchema),
@@ -100,6 +101,15 @@ export default function TowercoAccountPage() {
     fetchUserAndOrg();
   }, []);
   
+  useEffect(() => {
+    if (isPasswordFormVisible && passwordFormRef.current) {
+        const timer = setTimeout(() => {
+             passwordFormRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 100);
+        return () => clearTimeout(timer);
+    }
+  }, [isPasswordFormVisible]);
+
   async function onPasswordSubmit(values: PasswordFormValues) {
     setIsUpdatingPassword(true);
     const token = localStorage.getItem('token');
@@ -247,7 +257,7 @@ export default function TowercoAccountPage() {
             </Button>
           </CollapsibleTrigger>
           <CollapsibleContent>
-            <Card className="mt-4">
+            <Card className="mt-4" ref={passwordFormRef}>
                 <CardHeader>
                     <CardTitle>Change Your Password</CardTitle>
                     <CardDescription>Enter your old password and a new password below.</CardDescription>
@@ -295,7 +305,7 @@ export default function TowercoAccountPage() {
                                 )}
                             />
                             <div className="flex justify-end pt-4">
-                                <Button type="submit" disabled={isUpdatingPassword}>
+                                <Button type="submit" disabled={isUpdatingPassword} className="bg-[#1e90ff] hover:bg-[#1c86ee]">
                                     {isUpdatingPassword ? (
                                         <>
                                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -316,3 +326,4 @@ export default function TowercoAccountPage() {
     </div>
   );
 }
+
