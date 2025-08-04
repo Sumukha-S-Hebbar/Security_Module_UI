@@ -67,7 +67,11 @@ type IncidentReport = {
         region: string;
         city: string | null;
     } | null;
-    attended_by_officer_details: any; // Assuming 'any' as it was null in examples
+    attended_by_officer_details: {
+      name: string;
+      phone: string;
+      email: string;
+    } | null; 
     incident_description: string | null;
     initial_incident_image_1: string | null;
     initial_incident_image_2: string | null;
@@ -365,23 +369,6 @@ export default function IncidentReportPage() {
             </CardContent>
           </Card>
         )}
-        {incident.attended_by_officer_details && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <UserCheck className="h-5 w-5 text-primary" />
-                Patrolling Officer
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="text-sm space-y-2">
-              <div>
-                <div className="text-xl font-bold">{incident.attended_by_officer_details.name}</div>
-              </div>
-              <div className="flex items-center gap-2 font-medium pt-2 border-t"><Phone className="h-4 w-4" /> <a href={`tel:${incident.attended_by_officer_details.phone}`} className="hover:underline">{incident.attended_by_officer_details.phone}</a></div>
-              <div className="flex items-center gap-2 font-medium"><Mail className="h-4 w-4" /> <a href={`mailto:${incident.attended_by_officer_details.email}`} className="hover:underline">{incident.attended_by_officer_details.email}</a></div>
-            </CardContent>
-          </Card>
-        )}
         {incident.raised_by_guard_details && (
           <Card>
             <CardHeader>
@@ -398,6 +385,27 @@ export default function IncidentReportPage() {
             </CardContent>
           </Card>
         )}
+        <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <UserCheck className="h-5 w-5 text-primary" />
+                Patrolling Officer
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="text-sm space-y-2">
+              {incident.attended_by_officer_details ? (
+                <>
+                  <div>
+                    <div className="text-xl font-bold">{incident.attended_by_officer_details.name}</div>
+                  </div>
+                  <div className="flex items-center gap-2 font-medium pt-2 border-t"><Phone className="h-4 w-4" /> <a href={`tel:${incident.attended_by_officer_details.phone}`} className="hover:underline">{incident.attended_by_officer_details.phone}</a></div>
+                  <div className="flex items-center gap-2 font-medium"><Mail className="h-4 w-4" /> <a href={`mailto:${incident.attended_by_officer_details.email}`} className="hover:underline">{incident.attended_by_officer_details.email}</a></div>
+                </>
+              ) : (
+                <p className="text-muted-foreground font-medium text-center py-8">Not yet assigned.</p>
+              )}
+            </CardContent>
+          </Card>
       </div>
 
       <Card>
