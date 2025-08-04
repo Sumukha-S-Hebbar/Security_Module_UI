@@ -68,8 +68,9 @@ export default function TowercoIncidentsPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
   
-  const [allIncidents, setAllIncidents] = useState<IncidentListItem[]>([]);
+  const [incidents, setIncidents] = useState<IncidentListItem[]>([]);
   const [sites, setSites] = useState<Site[]>([]);
+  const [allIncidentsForSummary, setAllIncidentsForSummary] = useState<IncidentListItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loggedInOrg, setLoggedInOrg] = useState<Organization | null>(null);
 
@@ -81,6 +82,7 @@ export default function TowercoIncidentsPage() {
   const [selectedStatus, setSelectedStatus] = useState(statusFromQuery || 'all');
   const [selectedSite, setSelectedSite] = useState(siteIdFromQuery || 'all');
   const [currentPage, setCurrentPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -101,18 +103,19 @@ export default function TowercoIncidentsPage() {
         const token = localStorage.getItem('token');
         const authHeader = { 'Authorization': `Token ${token}` };
 
-        const incidentsUrl = `http://are.towerbuddy.tel:8000/security/api/orgs/${loggedInOrg.code}/incidents/list/`;
-        const incidentsData = await fetchData<PaginatedIncidentsResponse>(incidentsUrl, { headers: authHeader });
-        
-        setAllIncidents(incidentsData?.results || []);
+        // Fetch for summary card without filters
+        const summaryIncidentsUrl = `http://are.towerbuddy.tel:8000/security/api/orgs/${loggedInOrg.code}/incidents/list/`;
+        const summaryData = await fetchData<PaginatedIncidentsResponse>(summaryIncidentsUrl, { headers: authHeader });
+        setAllIncidentsForSummary(summaryData?.results || []);
 
+        // Fetch sites for filter dropdown
         const sitesUrl = `http://are.towerbuddy.tel:8000/security/api/orgs/${loggedInOrg.code}/sites/list/`;
         const sitesData = await fetchData<{results: Site[]}>(sitesUrl, { headers: authHeader });
         setSites(sitesData?.results || []);
 
       } catch (error) {
-        console.error("Failed to fetch data:", error);
-        setAllIncidents([]);
+        console.error("Failed to fetch initial data:", error);
+        setAllIncidentsForSummary([]);
         setSites([]);
       } finally {
         setIsLoading(false);
@@ -122,43 +125,49 @@ export default function TowercoIncidentsPage() {
     fetchAllData();
   }, [loggedInOrg]);
   
-  const filteredIncidents = useMemo(() => {
-    if (isLoading) return [];
-    
-    return allIncidents.filter((incident) => {
-      const searchLower = searchQuery.toLowerCase();
-      const matchesSearch =
-        incident.incident_id.toLowerCase().includes(searchLower) ||
-        incident.site_name.toLowerCase().includes(searchLower) ||
-        (incident.guard_name && incident.guard_name.toLowerCase().includes(searchLower));
+   useEffect(() => {
+    if (!loggedInOrg) return;
 
-      const matchesStatus =
-        selectedStatus === 'all' || incident.incident_status.toLowerCase().replace(' ', '_') === selectedStatus;
+    const fetchFilteredIncidents = async () => {
+      setIsLoading(true);
+      const token = localStorage.getItem('token');
+      const authHeader = { 'Authorization': `Token ${token}` };
       
-      const incidentDate = new Date(incident.incident_time);
-      const matchesDate =
-        !selectedDate ||
-        format(incidentDate, 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd');
+      const params = new URLSearchParams();
+      if (selectedStatus !== 'all') {
+        const apiStatus = selectedStatus.charAt(0).toUpperCase() + selectedStatus.slice(1).replace('_', ' ');
+        params.append('incident_status', apiStatus);
+      }
+      if (searchQuery) params.append('search', searchQuery);
+      if (selectedSite !== 'all') params.append('site_id', selectedSite);
+      if (selectedDate) params.append('date', format(selectedDate, 'yyyy-MM-dd'));
+      params.append('page', currentPage.toString());
+      params.append('page_size', ITEMS_PER_PAGE.toString());
+      
+      const incidentsUrl = `http://are.towerbuddy.tel:8000/security/api/orgs/${loggedInOrg.code}/incidents/list/?${params.toString()}`;
 
-      const matchesSite =
-        selectedSite === 'all' ||
-        incident.tb_site_id === selectedSite;
+      try {
+        const data = await fetchData<PaginatedIncidentsResponse>(incidentsUrl, { headers: authHeader });
+        setIncidents(data?.results || []);
+        setTotalCount(data?.count || 0);
+      } catch (error) {
+        console.error("Failed to fetch filtered incidents:", error);
+        setIncidents([]);
+        setTotalCount(0);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-      return matchesSearch && matchesStatus && matchesDate && matchesSite;
-    });
-  }, [searchQuery, selectedStatus, selectedDate, selectedSite, allIncidents, isLoading]);
+    fetchFilteredIncidents();
+  }, [loggedInOrg, selectedStatus, searchQuery, selectedSite, selectedDate, currentPage]);
 
   useEffect(() => {
     setCurrentPage(1);
   }, [searchQuery, selectedStatus, selectedDate, selectedSite]);
 
 
-  const paginatedIncidents = useMemo(() => {
-    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-    return filteredIncidents.slice(startIndex, startIndex + ITEMS_PER_PAGE);
-  }, [filteredIncidents, currentPage]);
-
-  const totalPages = Math.ceil(filteredIncidents.length / ITEMS_PER_PAGE);
+  const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
 
 
   const handleStatusSelectFromSummary = (status: string) => {
@@ -229,7 +238,7 @@ export default function TowercoIncidentsPage() {
       </div>
 
       <IncidentStatusSummary 
-        incidents={allIncidents || []} 
+        incidents={allIncidentsForSummary} 
         onStatusSelect={handleStatusSelectFromSummary}
         selectedStatus={selectedStatus}
       />
@@ -322,8 +331,8 @@ export default function TowercoIncidentsPage() {
                 </TableRow>
                 </TableHeader>
                 <TableBody>
-                {paginatedIncidents && paginatedIncidents.length > 0 ? (
-                    paginatedIncidents.map((incident) => (
+                {incidents && incidents.length > 0 ? (
+                    incidents.map((incident) => (
                     <TableRow 
                         key={incident.id}
                         onClick={() => router.push(`/towerco/incidents/${incident.id}`)}
@@ -355,11 +364,11 @@ export default function TowercoIncidentsPage() {
             </Table>
           )}
         </CardContent>
-        {filteredIncidents && filteredIncidents.length > 0 && (
+        {totalCount > 0 && (
             <CardFooter>
                 <div className="flex items-center justify-between w-full">
                     <div className="text-sm text-muted-foreground font-medium">
-                        Showing {paginatedIncidents.length} of {filteredIncidents.length} incidents.
+                        Showing {incidents.length} of {totalCount} incidents.
                     </div>
                     <div className="flex items-center gap-2">
                         <Button
