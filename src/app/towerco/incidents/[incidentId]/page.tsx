@@ -1,14 +1,10 @@
 
+
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { sites } from '@/lib/data/sites';
-import { securityAgencies } from '@/lib/data/security-agencies';
-import { guards } from '@/lib/data/guards';
-import { patrollingOfficers } from '@/lib/data/patrolling-officers';
-import type { Incident, Site, SecurityAgency, Guard, PatrollingOfficer, Organization } from '@/types';
 import {
   Card,
   CardContent,
@@ -19,7 +15,7 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, MapPin, Briefcase, UserCheck, User, Calendar, FileDown, Phone, Mail, Upload, Info, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, MapPin, Briefcase, UserCheck, User, Calendar, FileDown, Phone, Mail, Upload, Info, AlertTriangle, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -29,6 +25,7 @@ import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { fetchData } from '@/lib/api';
 import { Skeleton } from '@/components/ui/skeleton';
+import type { Organization } from '@/types';
 
 type IncidentReport = {
     incident_id: string;
@@ -99,6 +96,8 @@ export default function IncidentReportPage() {
 
   const [resolutionNotes, setResolutionNotes] = useState('');
   const [resolutionFiles, setResolutionFiles] = useState<FileList | null>(null);
+  const [lightboxImage, setLightboxImage] = useState<string | null>(null);
+
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -274,14 +273,17 @@ export default function IncidentReportPage() {
           </h4>
           <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
               {urls.map((src, index) => (
-                  <div key={index} className="relative aspect-video">
-                  <Image
-                      src={src}
-                      alt={`${title} evidence ${index + 1}`}
-                      fill
-                      className="rounded-md object-cover"
-                      data-ai-hint={hint}
-                  />
+                  <div key={index} className="relative aspect-video cursor-pointer group" onClick={() => setLightboxImage(src)}>
+                    <Image
+                        src={src}
+                        alt={`${title} evidence ${index + 1}`}
+                        fill
+                        className="rounded-md object-cover transition-transform group-hover:scale-105"
+                        data-ai-hint={hint}
+                    />
+                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        <p className="text-white font-bold">View Image</p>
+                    </div>
                   </div>
               ))}
           </div>
@@ -290,6 +292,7 @@ export default function IncidentReportPage() {
   };
 
   return (
+    <>
     <div className="p-4 sm:p-6 lg:p-8 space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-4">
@@ -310,7 +313,7 @@ export default function IncidentReportPage() {
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
         {incident.site_details && (
           <Card>
             <CardHeader>
@@ -497,9 +500,28 @@ export default function IncidentReportPage() {
         </CardContent>
       </Card>
     </div>
+    {lightboxImage && (
+      <div 
+        className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4 animate-in fade-in-0"
+        onClick={() => setLightboxImage(null)}
+      >
+        <button 
+            className="absolute top-4 right-4 text-white hover:text-white/80 transition-opacity"
+            onClick={() => setLightboxImage(null)}
+        >
+            <X className="h-8 w-8" />
+        </button>
+        <div className="relative max-w-4xl max-h-full" onClick={(e) => e.stopPropagation()}>
+            <Image 
+                src={lightboxImage} 
+                alt="Enlarged incident evidence" 
+                width={1200}
+                height={800}
+                className="rounded-lg object-contain max-w-full max-h-[90vh]"
+            />
+        </div>
+      </div>
+    )}
+    </>
   );
 }
-
-    
-
-    
