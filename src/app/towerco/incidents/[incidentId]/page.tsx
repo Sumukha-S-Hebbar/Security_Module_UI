@@ -69,7 +69,7 @@ type IncidentReport = {
         city: string | null;
     } | null;
     attended_by_officer_details: {
-      name: string;
+      patrol_officer_id: string;
       phone: string;
       email: string;
     } | null; 
@@ -431,7 +431,7 @@ export default function IncidentReportPage() {
               {incident.attended_by_officer_details ? (
                 <>
                   <div>
-                    <div className="text-xl font-bold">{incident.attended_by_officer_details.name}</div>
+                    <div className="text-xl font-bold">{incident.attended_by_officer_details.patrol_officer_id}</div>
                   </div>
                   <div className="flex items-center gap-2 font-medium pt-2 border-t"><Phone className="h-4 w-4" /> <a href={`tel:${incident.attended_by_officer_details.phone}`} className="hover:underline">{incident.attended_by_officer_details.phone}</a></div>
                   <div className="flex items-center gap-2 font-medium"><Mail className="h-4 w-4" /> <a href={`mailto:${incident.attended_by_officer_details.email}`} className="hover:underline">{incident.attended_by_officer_details.email}</a></div>
