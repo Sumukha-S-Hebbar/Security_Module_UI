@@ -1,16 +1,14 @@
 
-
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { incidentStore } from '@/lib/data/incident-store';
 import { sites } from '@/lib/data/sites';
 import { securityAgencies } from '@/lib/data/security-agencies';
 import { guards } from '@/lib/data/guards';
 import { patrollingOfficers } from '@/lib/data/patrolling-officers';
-import type { Incident, Site, SecurityAgency, Guard, PatrollingOfficer } from '@/types';
+import type { Incident, Site, SecurityAgency, Guard, PatrollingOfficer, Organization } from '@/types';
 import {
   Card,
   CardContent,
@@ -29,6 +27,64 @@ import { Input } from '@/components/ui/input';
 import { useState, useEffect } from 'react';
 import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { fetchData } from '@/lib/api';
+import { Skeleton } from '@/components/ui/skeleton';
+
+type IncidentReport = {
+    incident_id: string;
+    incident_time: string;
+    incident_type: 'SOS' | 'Suspicious Activity' | 'Theft' | 'Vandalism' | 'Trespassing' | 'Safety Hazard' | 'Other';
+    incident_status: 'Active' | 'Under Review' | 'Resolved';
+    site_details: {
+        id: number;
+        tb_site_id: string;
+        org_name: string;
+        org_site_id: string;
+        site_name: string;
+        site_status: string;
+        region: string;
+        city: string;
+        lat: number;
+        lng: number;
+        site_address_line1: string;
+        site_address_line2: string | null;
+        site_address_line3: string | null;
+        site_zip_code: string;
+    };
+    agency_details: {
+        id: number;
+        tb_agency_id: string;
+        agency_id: string;
+        agency_name: string;
+        contact_person: string;
+        communication_email: string;
+        phone: string;
+    } | null;
+    raised_by_guard_details: {
+        id: number;
+        guard_id: string;
+        first_name: string;
+        last_name: string | null;
+        tb_agency_id: string;
+        phone: string;
+        region: string;
+        city: string | null;
+    } | null;
+    attended_by_officer_details: any; // Assuming 'any' as it was null in examples
+    incident_description: string | null;
+    initial_incident_image_1: string | null;
+    initial_incident_image_2: string | null;
+    initial_incident_image_3: string | null;
+    initial_incident_image_4: string | null;
+    resolution_notes: string | null;
+    resolved_incident_image_1: string | null;
+    resolved_incident_image_2: string | null;
+    resolved_incident_image_3: string | null;
+    resolved_incident_image_4: string | null;
+    resolved_at: string | null;
+    resolved_by: number | null;
+    resolution_duration: string | null;
+};
 
 
 export default function IncidentReportPage() {
@@ -37,27 +93,74 @@ export default function IncidentReportPage() {
   const { toast } = useToast();
   const incidentId = params.incidentId as string;
   
-  const [incident, setIncident] = useState(incidentStore.getIncidentById(incidentId));
-  const [resolutionNotes, setResolutionNotes] = useState(incident?.resolutionNotes || '');
+  const [incident, setIncident] = useState<IncidentReport | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loggedInOrg, setLoggedInOrg] = useState<Organization | null>(null);
+
+  const [resolutionNotes, setResolutionNotes] = useState('');
   const [resolutionFiles, setResolutionFiles] = useState<FileList | null>(null);
 
   useEffect(() => {
-    const unsubscribe = incidentStore.subscribe(() => {
-      const updatedIncident = incidentStore.getIncidentById(incidentId);
-      setIncident(updatedIncident);
-      if (updatedIncident) {
-        setResolutionNotes(updatedIncident.resolutionNotes || '');
-      }
-    });
-    
-    // Set initial state from store
-    const currentIncident = incidentStore.getIncidentById(incidentId);
-    if (currentIncident) {
-        setResolutionNotes(currentIncident.resolutionNotes || '');
+    if (typeof window !== 'undefined') {
+        const orgData = localStorage.getItem('organization');
+        if (orgData) {
+            setLoggedInOrg(JSON.parse(orgData));
+        }
     }
+  }, []);
 
-    return () => unsubscribe();
-  }, [incidentId]);
+  useEffect(() => {
+    if (!loggedInOrg || !incidentId) return;
+
+    const fetchIncidentReport = async () => {
+        setIsLoading(true);
+        const token = localStorage.getItem('token');
+        const url = `http://are.towerbuddy.tel:8000/security/api/orgs/${loggedInOrg.code}/incidents/${incidentId}/`;
+
+        try {
+            const response = await fetchData<{data: IncidentReport}>(url, {
+                headers: { 'Authorization': `Token ${token}` }
+            });
+            if (response?.data) {
+                setIncident(response.data);
+                setResolutionNotes(response.data.resolution_notes || '');
+            } else {
+                throw new Error("Incident data not found in response.");
+            }
+        } catch (error) {
+            console.error("Failed to fetch incident report:", error);
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: "Could not load incident report data.",
+            });
+        } finally {
+            setIsLoading(false);
+        }
+    };
+    fetchIncidentReport();
+  }, [loggedInOrg, incidentId, toast]);
+
+  if (isLoading) {
+      return (
+          <div className="p-4 sm:p-6 lg:p-8 space-y-6">
+              <div className="flex items-center gap-4">
+                  <Skeleton className="h-10 w-10" />
+                  <div className="space-y-2">
+                      <Skeleton className="h-8 w-48" />
+                      <Skeleton className="h-4 w-64" />
+                  </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  <Skeleton className="h-48" />
+                  <Skeleton className="h-48" />
+                  <Skeleton className="h-48" />
+                  <Skeleton className="h-48" />
+              </div>
+              <Skeleton className="h-96" />
+          </div>
+      )
+  }
 
   if (!incident) {
     return (
@@ -71,15 +174,11 @@ export default function IncidentReportPage() {
     );
   }
 
-  const site = sites.find((s) => s.id === incident.siteId);
-  const agency = site ? securityAgencies.find((a) => a.siteIds.includes(site.id)) : undefined;
-  const guard = guards.find((g) => g.id === incident.raisedByGuardId);
-  const patrollingOfficer = patrollingOfficers.find((p) => p.id === incident.attendedByPatrollingOfficerId);
 
   const handleDownloadReport = () => {
     toast({
       title: 'Report Generation Started',
-      description: `Generating a detailed report for incident #${incident.id}.`,
+      description: `Generating a detailed report for incident #${incident.incident_id}.`,
     });
   };
   
@@ -90,18 +189,21 @@ export default function IncidentReportPage() {
         return;
     }
     
-    const mediaUrls = resolutionFiles ? Array.from(resolutionFiles).map(file => `https://placehold.co/600x400.png?text=${encodeURIComponent(file.name)}`) : [];
-
-    incidentStore.updateIncident(incident.id, { resolutionNotes, status: 'Resolved', resolvedIncidentMediaUrl: mediaUrls });
-
+    // In a real app, this would be an API call
+    console.log({
+        resolutionNotes,
+        resolutionFiles,
+    });
+    
+    // For now, simulate success and navigate away
     toast({
         title: "Incident Resolved",
-        description: `Incident #${incident.id} has been marked as resolved.`
+        description: `Incident #${incident.incident_id} has been marked as resolved.`
     });
     router.push('/towerco/incidents');
   }
 
-  const getStatusIndicator = (status: Incident['status']) => {
+  const getStatusIndicator = (status: IncidentReport['incident_status']) => {
     switch (status) {
       case 'Active':
         return (
@@ -131,21 +233,12 @@ export default function IncidentReportPage() {
             <span>Resolved</span>
           </div>
         );
-      default:
-        return (
-           <div className="flex items-center gap-2 text-muted-foreground">
-            <span className="relative flex h-2 w-2">
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-muted-foreground"></span>
-            </span>
-            <span>{status}</span>
-          </div>
-        );
     }
   };
   
-  const getHintForIncident = (incident: Incident) => {
-    const details = incident.description?.toLowerCase() || '';
-    if (details.includes('break-in')) {
+  const getHintForIncident = (incident: IncidentReport) => {
+    const details = incident.incident_description?.toLowerCase() || '';
+    if (details.includes('break-in') || details.includes('thief')) {
       return 'security camera';
     }
     if (details.includes('fire')) {
@@ -154,24 +247,39 @@ export default function IncidentReportPage() {
     return 'incident evidence';
   };
 
-  const renderMediaGallery = () => {
-    if (!incident.initialIncidentMediaUrl || incident.initialIncidentMediaUrl.length === 0) {
+  const initialMediaUrls = [
+      incident.initial_incident_image_1,
+      incident.initial_incident_image_2,
+      incident.initial_incident_image_3,
+      incident.initial_incident_image_4,
+  ].filter((url): url is string => url !== null);
+  
+  const resolvedMediaUrls = [
+      incident.resolved_incident_image_1,
+      incident.resolved_incident_image_2,
+      incident.resolved_incident_image_3,
+      incident.resolved_incident_image_4,
+  ].filter((url): url is string => url !== null);
+
+
+  const renderMediaGallery = (urls: string[], title: string, hint: string) => {
+    if (urls.length === 0) {
       return null;
     }
     return (
-      <div>
+      <div className="pt-6">
           <h4 className="font-semibold mb-4 text-lg">
-              Incident Media Evidence
+              {title}
           </h4>
           <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
-              {incident.initialIncidentMediaUrl.map((src, index) => (
+              {urls.map((src, index) => (
                   <div key={index} className="relative aspect-video">
                   <Image
                       src={src}
-                      alt={`Incident evidence ${index + 1}`}
+                      alt={`${title} evidence ${index + 1}`}
                       fill
                       className="rounded-md object-cover"
-                      data-ai-hint={getHintForIncident(incident)}
+                      data-ai-hint={hint}
                   />
                   </div>
               ))}
@@ -192,7 +300,7 @@ export default function IncidentReportPage() {
           </Button>
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Incident Report</h1>
-            <p className="text-muted-foreground">Detailed overview for Incident #{incident.id}.</p>
+            <p className="text-muted-foreground">Detailed overview for Incident #{incident.incident_id}.</p>
           </div>
         </div>
         <Button onClick={handleDownloadReport} className="bg-[#00B4D8] hover:bg-[#00B4D8]/90">
@@ -202,7 +310,7 @@ export default function IncidentReportPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {site && (
+        {incident.site_details && (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -212,27 +320,27 @@ export default function IncidentReportPage() {
             </CardHeader>
             <CardContent className="text-sm space-y-3">
               <div>
-                <div className="text-xl font-bold">{site.name}</div>
-                <p className="font-medium">ID: {site.id}</p>
+                <div className="text-xl font-bold">{incident.site_details.site_name}</div>
+                <p className="font-medium">ID: {incident.site_details.org_site_id}</p>
               </div>
               <div className='font-medium pt-2 border-t'>
-                <p className='flex items-start gap-2'><MapPin className="h-4 w-4 mt-0.5" /><span>{site.address}</span></p>
+                <p className='flex items-start gap-2'><MapPin className="h-4 w-4 mt-0.5" /><span>{incident.site_details.site_address_line1}, {incident.site_details.city}</span></p>
               </div>
-              {site.latitude && site.longitude && (
+              {incident.site_details.lat && incident.site_details.lng && (
                 <div className='font-medium'>
                     <p className='flex items-start gap-2'>
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-globe mt-0.5 shrink-0"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
-                        <span>{site.latitude}, {site.longitude}</span>
+                        <span>{incident.site_details.lat}, {incident.site_details.lng}</span>
                     </p>
                 </div>
               )}
               <Button asChild variant="link" className="p-0 h-auto font-medium mt-2">
-                <Link href={`/towerco/sites/${site.id}`}>View Full Site Report</Link>
+                <Link href={`/towerco/sites/${incident.site_details.id}`}>View Full Site Report</Link>
               </Button>
             </CardContent>
           </Card>
         )}
-        {agency && (
+        {incident.agency_details && (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -242,18 +350,18 @@ export default function IncidentReportPage() {
             </CardHeader>
             <CardContent className="text-sm space-y-2">
               <div>
-                  <div className="text-xl font-bold">{agency.name}</div>
-                  <p className="font-medium">ID: {agency.id}</p>
+                  <div className="text-xl font-bold">{incident.agency_details.agency_name}</div>
+                  <p className="font-medium">ID: {incident.agency_details.agency_id}</p>
               </div>
-              <div className="flex items-center gap-2 font-medium pt-2 border-t"><Phone className="h-4 w-4" /> <a href={`tel:${agency.phone}`} className="hover:underline">{agency.phone}</a></div>
-              <div className="flex items-center gap-2 font-medium"><Mail className="h-4 w-4" /> <a href={`mailto:${agency.email}`} className="hover:underline">{agency.email}</a></div>
+              <div className="flex items-center gap-2 font-medium pt-2 border-t"><Phone className="h-4 w-4" /> <a href={`tel:${incident.agency_details.phone}`} className="hover:underline">{incident.agency_details.phone}</a></div>
+              <div className="flex items-center gap-2 font-medium"><Mail className="h-4 w-4" /> <a href={`mailto:${incident.agency_details.communication_email}`} className="hover:underline">{incident.agency_details.communication_email}</a></div>
                <Button asChild variant="link" className="p-0 h-auto font-medium mt-2">
-                  <Link href={`/towerco/agencies/${agency.id}`}>View Full Agency Report</Link>
+                  <Link href={`/towerco/agencies/${incident.agency_details.id}`}>View Full Agency Report</Link>
               </Button>
             </CardContent>
           </Card>
         )}
-        {patrollingOfficer && (
+        {incident.attended_by_officer_details && (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -263,14 +371,14 @@ export default function IncidentReportPage() {
             </CardHeader>
             <CardContent className="text-sm space-y-2">
               <div>
-                <div className="text-xl font-bold">{patrollingOfficer.name}</div>
+                <div className="text-xl font-bold">{incident.attended_by_officer_details.name}</div>
               </div>
-              <div className="flex items-center gap-2 font-medium pt-2 border-t"><Phone className="h-4 w-4" /> <a href={`tel:${patrollingOfficer.phone}`} className="hover:underline">{patrollingOfficer.phone}</a></div>
-              <div className="flex items-center gap-2 font-medium"><Mail className="h-4 w-4" /> <a href={`mailto:${patrollingOfficer.email}`} className="hover:underline">{patrollingOfficer.email}</a></div>
+              <div className="flex items-center gap-2 font-medium pt-2 border-t"><Phone className="h-4 w-4" /> <a href={`tel:${incident.attended_by_officer_details.phone}`} className="hover:underline">{incident.attended_by_officer_details.phone}</a></div>
+              <div className="flex items-center gap-2 font-medium"><Mail className="h-4 w-4" /> <a href={`mailto:${incident.attended_by_officer_details.email}`} className="hover:underline">{incident.attended_by_officer_details.email}</a></div>
             </CardContent>
           </Card>
         )}
-        {guard && (
+        {incident.raised_by_guard_details && (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -280,9 +388,9 @@ export default function IncidentReportPage() {
             </CardHeader>
             <CardContent className="text-sm space-y-2">
               <div>
-                <div className="text-xl font-bold">{guard.name}</div>
+                <div className="text-xl font-bold">{`${incident.raised_by_guard_details.first_name} ${incident.raised_by_guard_details.last_name || ''}`}</div>
               </div>
-              <div className="flex items-center gap-2 font-medium pt-2 border-t"><Phone className="h-4 w-4" /> <a href={`tel:${guard.phone}`} className="hover:underline">{guard.phone}</a></div>
+              <div className="flex items-center gap-2 font-medium pt-2 border-t"><Phone className="h-4 w-4" /> <a href={`tel:${incident.raised_by_guard_details.phone}`} className="hover:underline">{incident.raised_by_guard_details.phone}</a></div>
             </CardContent>
           </Card>
         )}
@@ -293,37 +401,37 @@ export default function IncidentReportPage() {
           <div className="flex flex-wrap justify-between items-start gap-4">
             <div>
               <CardTitle className="text-2xl flex items-center gap-3">
-                Incident #{incident.id}
-                {getStatusIndicator(incident.status)}
+                Incident #{incident.incident_id}
+                {getStatusIndicator(incident.incident_status)}
               </CardTitle>
               <CardDescription className="flex items-center gap-2 pt-2">
                 <Calendar className="w-4 h-4" />
-                {new Date(incident.incidentTime).toLocaleString()}
+                {new Date(incident.incident_time).toLocaleString()}
               </CardDescription>
             </div>
-            {incident.incidentType && (
+            {incident.incident_type && (
               <div className="text-right">
                 <CardTitle className="text-xl font-bold">Incident Type</CardTitle>
-                <Badge variant="destructive" className="mt-1">{incident.incidentType}</Badge>
+                <Badge variant="destructive" className="mt-1">{incident.incident_type}</Badge>
               </div>
             )}
           </div>
         </CardHeader>
         <CardContent>
             <div className="space-y-6 divide-y">
-                {incident.description && (
+                {incident.incident_description && (
                      <div className="space-y-6">
                         <div>
                           <h4 className="font-semibold mb-2 text-lg">
                               Incident Summary
                           </h4>
-                          <p className="text-muted-foreground">{incident.description}</p>
+                          <p className="text-muted-foreground">{incident.incident_description}</p>
                         </div>
-                        {renderMediaGallery()}
+                        {renderMediaGallery(initialMediaUrls, "Incident Media Evidence", getHintForIncident(incident))}
                      </div>
                 )}
                 
-                {incident.status === 'Active' && (
+                {incident.incident_status === 'Active' && (
                   <div className="pt-6">
                     <Alert variant="destructive">
                       <Info className="h-4 w-4" />
@@ -335,38 +443,19 @@ export default function IncidentReportPage() {
                   </div>
                 )}
                 
-                {incident.status === 'Resolved' ? (
+                {incident.incident_status === 'Resolved' ? (
                     <div className="pt-6 space-y-6">
-                        {incident.resolutionNotes && (
+                        {incident.resolution_notes && (
                             <div>
                                 <h4 className="font-semibold mb-2 text-lg">
                                     Resolution Notes
                                 </h4>
-                                <p className="text-muted-foreground">{incident.resolutionNotes}</p>
+                                <p className="text-muted-foreground">{incident.resolution_notes}</p>
                             </div>
                         )}
-                        {incident.resolvedIncidentMediaUrl && incident.resolvedIncidentMediaUrl.length > 0 && (
-                            <div>
-                                <h4 className="font-semibold mb-4 text-lg">
-                                    Resolution Media Evidence
-                                </h4>
-                                <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
-                                    {incident.resolvedIncidentMediaUrl.map((src, index) => (
-                                        <div key={index} className="relative aspect-video">
-                                        <Image
-                                            src={src}
-                                            alt={`Resolution evidence ${index + 1}`}
-                                            fill
-                                            className="rounded-md object-cover"
-                                            data-ai-hint={'report document'}
-                                        />
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
+                        {renderMediaGallery(resolvedMediaUrls, "Resolution Media Evidence", 'report document')}
                     </div>
-                ) : incident.status === 'Under Review' ? (
+                ) : incident.incident_status === 'Under Review' ? (
                     <form onSubmit={handleResolveIncident} className="pt-6">
                         <div className="space-y-4">
                             <Separator />
