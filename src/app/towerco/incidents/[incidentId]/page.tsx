@@ -211,7 +211,7 @@ export default function IncidentReportPage() {
     }
 
     try {
-        const response = await fetch(`http://are.towerbuddy.tel:8000/security/api/orgs/${loggedInOrg.code}/incidents/${incident.id}/`, {
+        const response = await fetch(`http://are.towerbuddy.tel:8000/security/api/orgs/${loggedInOrg.code}/incident/${incident.id}/`, {
             method: 'PATCH',
             headers: {
                 'Authorization': `Token ${token}`
