@@ -120,23 +120,29 @@ export default function TowercoIncidentsPage() {
       const token = localStorage.getItem('token');
       const authHeader = { 'Authorization': `Token ${token}` };
       
+      let url = `http://are.towerbuddy.tel:8000/security/api/orgs/${loggedInOrg.code}/incidents/list/?`;
       const params = new URLSearchParams();
+      
       if (selectedStatus !== 'all') {
-        const apiStatus = selectedStatus === 'under_review' 
-            ? 'Under Review' 
-            : selectedStatus.charAt(0).toUpperCase() + selectedStatus.slice(1);
+        let apiStatus = '';
+        if (selectedStatus === 'under-review') {
+          apiStatus = 'Under Review';
+        } else {
+          apiStatus = selectedStatus.charAt(0).toUpperCase() + selectedStatus.slice(1);
+        }
         params.append('incident_status', apiStatus);
       }
+      
       if (searchQuery) params.append('search', searchQuery);
       if (selectedSite !== 'all') params.append('site_id', selectedSite);
       if (selectedDate) params.append('date', format(selectedDate, 'yyyy-MM-dd'));
       params.append('page', currentPage.toString());
       params.append('page_size', ITEMS_PER_PAGE.toString());
       
-      const incidentsUrl = `http://are.towerbuddy.tel:8000/security/api/orgs/${loggedInOrg.code}/incidents/list/?${params.toString()}`;
+      url += params.toString().replace(/\+/g, '%20');
 
       try {
-        const data = await fetchData<PaginatedIncidentsResponse>(incidentsUrl, { headers: authHeader });
+        const data = await fetchData<PaginatedIncidentsResponse>(url, { headers: authHeader });
         setIncidents(data?.results || []);
         setTotalCount(data?.count || 0);
       } catch (error) {
@@ -256,7 +262,7 @@ export default function TowercoIncidentsPage() {
               <SelectContent>
                 <SelectItem value="all" className="font-medium">All Statuses</SelectItem>
                 <SelectItem value="active" className="font-medium">Active</SelectItem>
-                <SelectItem value="under_review" className="font-medium">Under Review</SelectItem>
+                <SelectItem value="under-review" className="font-medium">Under Review</SelectItem>
                 <SelectItem value="resolved" className="font-medium">Resolved</SelectItem>
               </SelectContent>
             </Select>
