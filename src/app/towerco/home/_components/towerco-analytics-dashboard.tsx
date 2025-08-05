@@ -1,22 +1,22 @@
 
 
 import Link from 'next/link';
-import type { Site, SecurityAgency, Incident, Guard } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Building2, Briefcase, ShieldAlert, Users } from 'lucide-react';
 
+type BasicCounts = {
+  active_incidents_count: number;
+  total_guards_count: number;
+  total_sites_count: number;
+  total_agencies_count: number;
+};
+
+
 export function TowercoAnalyticsDashboard({
-  sites,
-  agencies,
-  incidents,
-  guards,
+  counts,
 }: {
-  sites: Site[];
-  agencies: SecurityAgency[];
-  incidents: Incident[];
-  guards: Guard[];
+  counts: BasicCounts;
 }) {
-  const activeIncidents = incidents.filter(i => i.status === 'Active').length;
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -27,7 +27,7 @@ export function TowercoAnalyticsDashboard({
             <ShieldAlert className="h-4 w-4 text-muted-foreground group-hover:text-accent-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{activeIncidents}</div>
+            <div className="text-2xl font-bold">{counts.active_incidents_count}</div>
             <p className="text-xs text-muted-foreground font-medium group-hover:text-accent-foreground">
               Ongoing emergency incidents
             </p>
@@ -40,7 +40,7 @@ export function TowercoAnalyticsDashboard({
           <Users className="h-4 w-4 text-muted-foreground group-hover:text-accent-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{guards.length}</div>
+          <div className="text-2xl font-bold">{counts.total_guards_count}</div>
           <p className="text-xs text-muted-foreground font-medium group-hover:text-accent-foreground">
             Personnel across all agencies
           </p>
@@ -53,7 +53,7 @@ export function TowercoAnalyticsDashboard({
             <Building2 className="h-4 w-4 text-muted-foreground group-hover:text-accent-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{sites.length}</div>
+            <div className="text-2xl font-bold">{counts.total_sites_count}</div>
             <p className="text-xs text-muted-foreground font-medium group-hover:text-accent-foreground">
               All sites under your portfolio.
             </p>
@@ -69,7 +69,7 @@ export function TowercoAnalyticsDashboard({
             <Briefcase className="h-4 w-4 text-muted-foreground group-hover:text-accent-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{agencies.length}</div>
+            <div className="text-2xl font-bold">{counts.total_agencies_count}</div>
             <p className="text-xs text-muted-foreground font-medium group-hover:text-accent-foreground">
               Contracted security partners
             </p>

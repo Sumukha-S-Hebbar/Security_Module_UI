@@ -1,10 +1,10 @@
 
+
 'use client';
 
 import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import type { Site, SecurityAgency } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -21,30 +21,33 @@ const COLORS = {
 
 const ITEMS_PER_PAGE = 5;
 
-export function SiteStatusBreakdown({ sites, agencies }: { sites: Site[]; agencies: SecurityAgency[] }) {
+type SiteStatusData = {
+    assigned_sites_count: number;
+    unassigned_sites_count: number;
+    assigned_sites: { results: { id: number; tb_site_id: string; site_name: string; region: string; agency_name: string }[] };
+    unassigned_sites: any; // Assuming it can be null or an object with results
+};
+
+export function SiteStatusBreakdown({ siteStatusData }: { siteStatusData: SiteStatusData }) {
   const [selectedSection, setSelectedSection] = useState<'assigned' | 'unassigned'>('assigned');
   const [currentPage, setCurrentPage] = useState(1);
   const router = useRouter();
 
-  const getAgencyForSite = (siteId: string) => {
-    return agencies.find(a => a.siteIds.includes(siteId));
-  }
-
   const { chartData, totalSites, assignedSites, unassignedSites } = useMemo(() => {
-    const assigned = sites.filter((site) => getAgencyForSite(site.id));
-    const unassigned = sites.filter((site) => !getAgencyForSite(site.id));
+    const assigned = siteStatusData.assigned_sites?.results || [];
+    const unassigned = siteStatusData.unassigned_sites?.results || [];
     
     const data = [
-      { name: 'Assigned', value: assigned.length, color: COLORS.assigned, key: 'assigned' },
-      { name: 'Unassigned', value: unassigned.length, color: COLORS.unassigned, key: 'unassigned' },
+      { name: 'Assigned', value: siteStatusData.assigned_sites_count, color: COLORS.assigned, key: 'assigned' },
+      { name: 'Unassigned', value: siteStatusData.unassigned_sites_count, color: COLORS.unassigned, key: 'unassigned' },
     ];
     return {
       chartData: data,
-      totalSites: sites.length,
+      totalSites: siteStatusData.assigned_sites_count + siteStatusData.unassigned_sites_count,
       assignedSites: assigned,
       unassignedSites: unassigned,
     };
-  }, [sites, agencies]);
+  }, [siteStatusData]);
 
   const handlePieClick = (data: any) => {
     const section = data.payload.key as 'assigned' | 'unassigned';
@@ -148,7 +151,6 @@ export function SiteStatusBreakdown({ sites, agencies }: { sites: Site[]; agenci
                       <Table>
                         <TableHeader>
                           <TableRow>
-                            <TableHead className="text-foreground px-2">Site ID</TableHead>
                             <TableHead className="text-foreground px-2">Site Name</TableHead>
                             <TableHead className="text-foreground px-2">Region</TableHead>
                             <TableHead className="text-foreground px-2">Agency</TableHead>
@@ -161,20 +163,16 @@ export function SiteStatusBreakdown({ sites, agencies }: { sites: Site[]; agenci
                               onClick={() => router.push(`/towerco/sites/${site.id}`)}
                               className="group cursor-pointer hover:bg-[#00B4D8] hover:text-accent-foreground"
                             >
-                              <TableCell className="px-2">
-                                  <Button asChild variant="link" className="p-0 h-auto font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
-                                      <Link href={`/towerco/sites/${site.id}`}>{site.id}</Link>
-                                  </Button>
-                              </TableCell>
                               <TableCell className="group-hover:text-accent-foreground px-2">
-                                <p className="font-medium">{site.name}</p>
-                                <p className="text-xs text-muted-foreground font-medium group-hover:text-accent-foreground/80">{site.address}</p>
+                                <Button asChild variant="link" className="p-0 h-auto font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
+                                      <Link href={`/towerco/sites/${site.id}`}>{site.site_name}</Link>
+                                </Button>
                               </TableCell>
                               <TableCell className="group-hover:text-accent-foreground px-2">
                                 <Badge variant="outline" className="font-medium group-hover:border-accent-foreground/50 group-hover:text-accent-foreground">{site.region}</Badge>
                               </TableCell>
                               <TableCell className="font-medium group-hover:text-accent-foreground px-2">
-                                  {getAgencyForSite(site.id)?.name || 'N/A'}
+                                  {site.agency_name || 'N/A'}
                               </TableCell>
                             </TableRow>
                           ))}
@@ -184,7 +182,6 @@ export function SiteStatusBreakdown({ sites, agencies }: { sites: Site[]; agenci
                        <Table>
                         <TableHeader>
                           <TableRow>
-                            <TableHead className="text-foreground px-2">Site ID</TableHead>
                             <TableHead className="text-foreground px-2">Site Name</TableHead>
                             <TableHead className="text-foreground px-2">Region</TableHead>
                             <TableHead className="text-right text-foreground px-2">Action</TableHead>
@@ -196,14 +193,10 @@ export function SiteStatusBreakdown({ sites, agencies }: { sites: Site[]; agenci
                               key={site.id} 
                               className="group hover:bg-[#00B4D8] hover:text-accent-foreground"
                             >
-                              <TableCell className="px-2">
-                                  <Button asChild variant="link" className="p-0 h-auto font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
-                                      <Link href={`/towerco/sites/${site.id}`}>{site.id}</Link>
-                                  </Button>
-                              </TableCell>
                               <TableCell className="group-hover:text-accent-foreground px-2">
-                                <p className="font-medium">{site.name}</p>
-                                <p className="text-xs text-muted-foreground font-medium group-hover:text-accent-foreground/80">{site.address}</p>
+                                <Button asChild variant="link" className="p-0 h-auto font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
+                                      <Link href={`/towerco/sites/${site.id}`}>{site.site_name}</Link>
+                                </Button>
                               </TableCell>
                               <TableCell className="group-hover:text-accent-foreground px-2">
                                 <Badge variant="outline" className="font-medium group-hover:border-accent-foreground/50 group-hover:text-accent-foreground">{site.region}</Badge>

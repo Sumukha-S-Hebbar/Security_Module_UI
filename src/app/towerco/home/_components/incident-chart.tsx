@@ -2,7 +2,6 @@
 'use client';
 
 import { useState, useMemo, useRef, useEffect } from 'react';
-import type { Incident, Site, SecurityAgency } from '@/types';
 import Link from 'next/link';
 import {
   Card,
@@ -61,34 +60,21 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-const formatClosureTime = (hours: number | null): string => {
-    if (hours === null || hours === 0) return 'N/A';
-    const days = Math.floor(hours / 24);
-    const remainingHours = Math.round(hours % 24);
-    if (days > 0) {
-        return `${days}d ${remainingHours}h`;
-    }
-    return `${remainingHours}h`;
+type IncidentTrendData = {
+    month: string;
+    total: number;
+    resolved: number;
+    active: number;
+    under_review: number;
+    resolution_duration: string;
 };
 
-
 export function IncidentChart({
-  incidents,
-  sites,
-  securityAgencies,
+  incidentTrend
 }: {
-  incidents: Incident[];
-  sites: Site[];
-  securityAgencies: SecurityAgency[];
+  incidentTrend: IncidentTrendData[];
 }) {
   const router = useRouter();
-  const availableYears = useMemo(() => {
-    const years = new Set(
-      incidents.map((incident) => new Date(incident.incidentTime).getFullYear().toString())
-    );
-    years.add(new Date().getFullYear().toString());
-    return Array.from(years).sort((a, b) => parseInt(b) - parseInt(a));
-  }, [incidents]);
 
   const [selectedYear, setSelectedYear] = useState<string>(
     new Date().getFullYear().toString()
@@ -99,106 +85,28 @@ export function IncidentChart({
   const collapsibleRef = useRef<HTMLDivElement>(null);
 
   const monthlyIncidentData = useMemo(() => {
-    const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-    ];
-    const monthlyData: { 
-        month: string; 
-        total: number; 
-        resolved: number; 
-        underReview: number;
-        avgClosure: number | null;
-        closureTimeFormatted: string;
-    }[] = months.map(
-      (month) => ({ month, total: 0, resolved: 0, underReview: 0, avgClosure: null, closureTimeFormatted: 'N/A' })
-    );
-
-    const siteToAgencyMap = new Map<string, string | undefined>();
-    securityAgencies.forEach((agency) => {
-        agency.siteIds.forEach(siteId => {
-            siteToAgencyMap.set(siteId, agency.id);
-        });
-    });
-
-    incidents.forEach((incident) => {
-      const incidentDate = new Date(incident.incidentTime);
-      const incidentAgencyId = siteToAgencyMap.get(incident.siteId);
-
-      const yearMatch = incidentDate.getFullYear().toString() === selectedYear;
-      const companyMatch =
-        selectedCompany === 'all' || incidentAgencyId === selectedCompany;
-
-      if (yearMatch && companyMatch) {
-        const monthIndex = incidentDate.getMonth();
-        monthlyData[monthIndex].total += 1;
-        if (incident.status === 'Resolved') {
-          monthlyData[monthIndex].resolved += 1;
-        }
-        if (incident.status === 'Under Review') {
-            monthlyData[monthIndex].underReview += 1;
-        }
-      }
-    });
-
-    // Calculate average closure time for each month
-    for (let i = 0; i < 12; i++) {
-        const monthIncidents = incidents.filter(incident => {
-            const incidentDate = new Date(incident.incidentTime);
-            const incidentAgencyId = siteToAgencyMap.get(incident.siteId);
-            const companyMatch = selectedCompany === 'all' || incidentAgencyId === selectedCompany;
-
-            return incidentDate.getFullYear().toString() === selectedYear && 
-                   incidentDate.getMonth() === i && 
-                   companyMatch &&
-                   incident.status === 'Resolved' && 
-                   incident.resolvedTime;
-        });
-
-        if (monthIncidents.length > 0) {
-            const totalClosureMillis = monthIncidents.reduce((acc, inc) => {
-                const startTime = new Date(inc.incidentTime).getTime();
-                const endTime = new Date(inc.resolvedTime!).getTime();
-                return acc + (endTime - startTime);
-            }, 0);
-            const avgClosureHours = (totalClosureMillis / monthIncidents.length) / (1000 * 60 * 60);
-            monthlyData[i].avgClosure = avgClosureHours;
-            monthlyData[i].closureTimeFormatted = formatClosureTime(avgClosureHours);
-        }
-    }
-
-    return monthlyData;
-  }, [incidents, securityAgencies, selectedYear, selectedCompany]);
+    return incidentTrend.map(monthData => ({
+        month: monthData.month,
+        total: monthData.total,
+        resolved: monthData.resolved,
+        underReview: monthData.under_review,
+        avgClosure: null, // This part is tricky without raw incident data.
+        closureTimeFormatted: monthData.resolution_duration,
+    }));
+  }, [incidentTrend]);
   
-  const incidentsInSelectedMonth = useMemo(() => {
-    if (selectedMonthIndex === null) return [];
-    
-    const siteToAgencyMap = new Map<string, string | undefined>();
-    securityAgencies.forEach((agency) => {
-        agency.siteIds.forEach(siteId => {
-            siteToAgencyMap.set(siteId, agency.id);
-        });
-    });
-
-    return incidents.filter(incident => {
-        const incidentDate = new Date(incident.incidentTime);
-        const incidentAgencyId = siteToAgencyMap.get(incident.siteId);
-
-        const yearMatch = incidentDate.getFullYear().toString() === selectedYear;
-        const companyMatch = selectedCompany === 'all' || incidentAgencyId === selectedCompany;
-        const monthMatch = incidentDate.getMonth() === selectedMonthIndex;
-        
-        return yearMatch && companyMatch && monthMatch;
-    });
-  }, [selectedMonthIndex, selectedYear, selectedCompany, incidents, securityAgencies]);
+  // Note: incidentsInSelectedMonth cannot be calculated without raw incident data.
+  // The collapsible section will be disabled for now.
+  const incidentsInSelectedMonth: any[] = []; 
 
   const handleBarClick = (data: any) => {
-    const index = data.activeTooltipIndex;
-    if (selectedMonthIndex === index) {
-      setSelectedMonthIndex(null); // Collapse if clicking the same month
-    } else {
-      setSelectedMonthIndex(index);
-    }
+    // Disabled since we don't have the raw incidents to show details.
+    // const index = data.activeTooltipIndex;
+    // if (selectedMonthIndex === index) {
+    //   setSelectedMonthIndex(null); // Collapse if clicking the same month
+    // } else {
+    //   setSelectedMonthIndex(index);
+    // }
   };
 
   useEffect(() => {
@@ -209,55 +117,6 @@ export function IncidentChart({
     }
   }, [selectedMonthIndex]);
 
-  const getSiteName = (siteId: string) => sites.find(s => s.id === siteId)?.name || 'N/A';
-  const getAgencyName = (siteId: string) => {
-      const agency = securityAgencies.find(a => a.siteIds.includes(siteId));
-      return agency?.name || 'N/A';
-  }
-  
-  const getStatusIndicator = (status: Incident['status']) => {
-    switch (status) {
-      case 'Active':
-        return (
-          <div className="flex items-center gap-2">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-destructive"></span>
-            </span>
-            <span>Active</span>
-          </div>
-        );
-      case 'Under Review':
-        return (
-          <div className="flex items-center gap-2">
-            <span className="relative flex h-2 w-2">
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-[#FFC107]"></span>
-            </span>
-            <span>Under Review</span>
-          </div>
-        );
-      case 'Resolved':
-        return (
-          <div className="flex items-center gap-2">
-            <span className="relative flex h-2 w-2">
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-chart-2"></span>
-            </span>
-            <span>Resolved</span>
-          </div>
-        );
-      default:
-        return (
-          <div className="flex items-center gap-2">
-            <span className="relative flex h-2 w-2">
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-muted-foreground"></span>
-            </span>
-            <span>{status}</span>
-          </div>
-        );
-    }
-  };
-
-
   return (
     <Card ref={collapsibleRef}>
       <CardHeader>
@@ -265,33 +124,24 @@ export function IncidentChart({
             <div>
                 <CardTitle>Incident Trend</CardTitle>
                 <CardDescription>
-                    Monthly total vs. resolved incidents. Click a bar to see details.
+                    Monthly total vs. resolved incidents.
                 </CardDescription>
             </div>
             <div className="flex items-center gap-2">
-            <Select value={selectedCompany} onValueChange={setSelectedCompany}>
+            <Select value={selectedCompany} onValueChange={setSelectedCompany} disabled>
                 <SelectTrigger className="w-full sm:w-[180px] font-medium hover:bg-accent hover:text-accent-foreground">
                 <SelectValue placeholder="Select Company" />
                 </SelectTrigger>
                 <SelectContent>
                 <SelectItem value="all" className="font-medium">All Companies</SelectItem>
-                {securityAgencies.map((agency) => (
-                    <SelectItem key={agency.id} value={agency.id} className="font-medium">
-                    {agency.name}
-                    </SelectItem>
-                ))}
                 </SelectContent>
             </Select>
-            <Select value={selectedYear} onValueChange={setSelectedYear}>
+            <Select value={selectedYear} onValueChange={setSelectedYear} disabled>
                 <SelectTrigger className="w-full sm:w-[120px] font-medium hover:bg-accent hover:text-accent-foreground">
                 <SelectValue placeholder="Select Year" />
                 </SelectTrigger>
                 <SelectContent>
-                {availableYears.map((year) => (
-                    <SelectItem key={year} value={year} className="font-medium">
-                    {year}
-                    </SelectItem>
-                ))}
+                 <SelectItem value={new Date().getFullYear().toString()} className="font-medium">{new Date().getFullYear()}</SelectItem>
                 </SelectContent>
             </Select>
             </div>
@@ -401,40 +251,7 @@ export function IncidentChart({
                 </CardTitle>
             </CardHeader>
             <CardContent>
-                {incidentsInSelectedMonth.length > 0 ? (
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead className="text-foreground">Incident ID</TableHead>
-                                <TableHead className="text-foreground">Date</TableHead>
-                                <TableHead className="text-foreground">Site</TableHead>
-                                <TableHead className="text-foreground">Agency</TableHead>
-                                <TableHead className="text-foreground">Status</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {incidentsInSelectedMonth.map(incident => (
-                                <TableRow 
-                                  key={incident.id}
-                                  onClick={() => router.push(`/towerco/incidents/${incident.id}`)}
-                                  className="cursor-pointer group hover:bg-accent hover:text-accent-foreground"
-                                >
-                                    <TableCell>
-                                        <Button asChild variant="link" className="p-0 h-auto group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
-                                          <Link href={`/towerco/incidents/${incident.id}`}>{incident.id}</Link>
-                                        </Button>
-                                    </TableCell>
-                                    <TableCell>{new Date(incident.incidentTime).toLocaleDateString()}</TableCell>
-                                    <TableCell>{getSiteName(incident.siteId)}</TableCell>
-                                    <TableCell>{getAgencyName(incident.siteId)}</TableCell>
-                                    <TableCell>{getStatusIndicator(incident.status)}</TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                ) : (
-                    <p className="text-sm text-muted-foreground text-center">No incidents recorded for this month.</p>
-                )}
+                <p className="text-sm text-muted-foreground text-center">Detailed incident view is not available in this summary.</p>
             </CardContent>
         </CollapsibleContent>
       </Collapsible>

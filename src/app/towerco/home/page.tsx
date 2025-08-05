@@ -3,14 +3,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import type {
-  Guard,
-  PatrollingOfficer,
-  SecurityAgency,
-  Site,
-  Incident,
-  Organization,
-} from '@/types';
+import type { Organization } from '@/types';
 import {
   Card,
   CardContent,
@@ -40,72 +33,93 @@ import { SiteStatusBreakdown } from './_components/site-status-breakdown';
 import { IncidentChart } from './_components/incident-chart';
 import { AgencyPerformance } from './_components/agency-performance';
 import { Skeleton } from '@/components/ui/skeleton';
-import { securityAgencies as mockAgencies } from '@/lib/data/security-agencies';
-import { incidents as mockIncidents } from '@/lib/data/incidents';
-import { guards as mockGuards } from '@/lib/data/guards';
-import { patrollingOfficers as mockPatrollingOfficers } from '@/lib/data/patrolling-officers';
-import { sites as mockSites } from '@/lib/data/sites';
-import { organizations as mockOrganizations } from '@/lib/data/organizations';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useDataFetching } from '@/hooks/useDataFetching';
 
 const ACTIVE_INCIDENTS_PER_PAGE = 4;
 
+// New type definitions based on the API response
+type BasicCounts = {
+    active_incidents_count: number;
+    total_guards_count: number;
+    total_sites_count: number;
+    total_agencies_count: number;
+};
+
+type ActiveIncident = {
+    id: number;
+    incident_id: string;
+    site_details: { id: number; tb_site_id: string; site_name: string };
+    agency_details: { id: number; tb_agency_id: string; agency_name: string };
+    patrol_officer_name: string;
+    guard_name: string;
+    incident_time: string;
+    contact_details: { agency_phone: string | null; officer_phone: string | null; guard_phone: string | null };
+};
+
+type AgencyPerformanceData = {
+    agency_name: string;
+    performance: {
+        incident_resolution: number;
+        site_visit_accuracy: number;
+        guard_checkin_accuracy: number;
+        selfie_accuracy: number;
+    };
+};
+
+type SiteStatusData = {
+    assigned_sites_count: number;
+    unassigned_sites_count: number;
+    assigned_sites: { results: { id: number; tb_site_id: string; site_name: string; region: string; agency_name: string }[] };
+    unassigned_sites: any; // Assuming it can be null or an object
+};
+
+type IncidentTrendData = {
+    month: string;
+    total: number;
+    resolved: number;
+    active: number;
+    under_review: number;
+    resolution_duration: string;
+};
+
 interface DashboardData {
-  sites: Site[];
-  agencies: SecurityAgency[];
-  incidents: Incident[];
-  guards: Guard[];
-  patrollingOfficers: PatrollingOfficer[];
-  currentUserOrg: Organization | undefined;
+    basic_counts: BasicCounts;
+    active_incidents: {
+        count: number;
+        next: string | null;
+        previous: string | null;
+        results: ActiveIncident[];
+    };
+    agency_performance: AgencyPerformanceData[];
+    site_status: SiteStatusData;
+    incident_trend: IncidentTrendData[];
 }
 
-async function getDashboardData(org: Organization | null): Promise<DashboardData> {
-  // TODO: Replace with your actual API endpoint.
-  // This endpoint should return all the necessary data for the dashboard,
-  // filtered for the logged-in TOWERCO/MNO user.
-  const API_URL = '/api/v1/towerco/dashboard/';
+
+async function getDashboardData(org: Organization | null): Promise<DashboardData | null> {
+  if (!org) return null;
+  
+  const API_URL = `http://are.towerbuddy.tel:8000/security/api/orgs/${org.code}/security-dashboard/`;
+  const token = localStorage.getItem('token');
+  
+  if (!token) {
+    console.error("No auth token found");
+    return null;
+  }
+
   try {
-    // const res = await fetch(API_URL);
-    // if (!res.ok) {
-    //   throw new Error('Failed to fetch dashboard data');
-    // }
-    // return res.json();
-    
-    // Simulating network delay and returning mock data for now.
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    if (!org) {
-        throw new Error("Logged in organization not found");
+    const response = await fetch(API_URL, {
+      headers: { 'Authorization': `Token ${token}` }
+    });
+    if (!response.ok) {
+      throw new Error(`Failed to fetch dashboard data: ${response.statusText}`);
     }
-
-    const towercoSites = mockSites.filter(
-      (site) => site.towerco === org.name
-    );
-    const towercoSiteIds = new Set(towercoSites.map((site) => site.id));
-    const towercoIncidents = mockIncidents.filter((incident) =>
-      towercoSiteIds.has(incident.siteId)
-    );
-    
-    const towercoGuardIds = new Set(towercoSites.flatMap(s => s.guards));
-    const towercoGuards = mockGuards.filter(guard => towercoGuardIds.has(guard.id));
-
-    const towercoPatrollingOfficerIds = new Set(towercoSites.map(s => s.patrollingOfficerId).filter(Boolean));
-    const towercoPatrollingOfficers = mockPatrollingOfficers.filter(po => towercoPatrollingOfficerIds.has(po.id));
-
-    return {
-      sites: towercoSites,
-      agencies: mockAgencies, // Return all agencies
-      incidents: towercoIncidents,
-      guards: towercoGuards,
-      patrollingOfficers: towercoPatrollingOfficers,
-      currentUserOrg: org
-    };
-
+    return await response.json();
   } catch (error) {
     console.error('Could not fetch dashboard data:', error);
-    return { sites: [], agencies: [], incidents: [], guards: [], patrollingOfficers: [], currentUserOrg: undefined };
+    return null;
   }
 }
 
@@ -122,14 +136,11 @@ export default function TowercoHomePage() {
       }
   }, []);
 
-  const { data, isLoading } = useDataFetching<DashboardData>(() => getDashboardData(org), [org]);
-
+  const { data, isLoading } = useDataFetching<DashboardData | null>(() => getDashboardData(org), [org]);
 
   const activeEmergencies = useMemo(() => {
     if (!data) return [];
-    return data.incidents.filter(
-      (incident) => incident.status === 'Active'
-    );
+    return data.active_incidents.results;
   }, [data]);
 
   const paginatedActiveEmergencies = useMemo(() => {
@@ -137,27 +148,8 @@ export default function TowercoHomePage() {
     return activeEmergencies.slice(startIndex, startIndex + ACTIVE_INCIDENTS_PER_PAGE);
   }, [activeEmergencies, activeIncidentsCurrentPage]);
 
-  const totalActiveIncidentPages = Math.ceil(activeEmergencies.length / ACTIVE_INCIDENTS_PER_PAGE);
+  const totalActiveIncidentPages = Math.ceil((data?.active_incidents.count || 0) / ACTIVE_INCIDENTS_PER_PAGE);
 
-
-  const getGuardById = (id: string): Guard | undefined => {
-    return data?.guards.find((g) => g.id === id);
-  };
-
-  const getPatrollingOfficerById = (id?: string): PatrollingOfficer | undefined => {
-      if (!id || !data) return undefined;
-      return data.patrollingOfficers.find((p) => p.id === id);
-  };
-
-  const getAgencyForSite = (siteId: string): SecurityAgency | undefined => {
-    if (!data) return undefined;
-    return data.agencies.find(a => a.siteIds.includes(siteId));
-  }
-
-  const getSiteById = (id: string): Site | undefined => {
-      if (!data) return undefined;
-      return data.sites.find(s => s.id === id);
-  }
 
   if (isLoading) {
     return (
@@ -187,7 +179,7 @@ export default function TowercoHomePage() {
     );
   }
 
-  if (!data || !data.currentUserOrg) {
+  if (!data || !org) {
     return (
         <div className="p-4 sm:p-6 lg:p-8">
             <p className="font-medium">Could not load dashboard data for your organization.</p>
@@ -195,7 +187,7 @@ export default function TowercoHomePage() {
     )
   }
   
-  const portalName = data.currentUserOrg.role === 'T' ? 'TOWERCO' : 'MNO';
+  const portalName = org.role === 'T' ? 'TOWERCO' : 'MNO';
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6">
@@ -203,7 +195,7 @@ export default function TowercoHomePage() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight">{portalName} Dashboard</h1>
           <p className="text-muted-foreground font-medium">
-            Welcome, {data.currentUserOrg.name}! Here's a high-level overview of your assets.
+            Welcome, {org.name}! Here's a high-level overview of your assets.
           </p>
         </div>
       </div>
@@ -211,7 +203,7 @@ export default function TowercoHomePage() {
       <Card className="border-destructive bg-destructive/10">
           <CardHeader className="flex flex-row items-center gap-2">
           <AlertTriangle className="w-6 h-6 text-destructive" />
-          <CardTitle>Active Emergency Incidents ({activeEmergencies.length})</CardTitle>
+          <CardTitle>Active Emergency Incidents ({data.active_incidents.count})</CardTitle>
           </CardHeader>
           <CardContent>
           {activeEmergencies.length > 0 ? (
@@ -230,71 +222,64 @@ export default function TowercoHomePage() {
                       </TableHeader>
                       <TableBody>
                           {paginatedActiveEmergencies.map((incident) => {
-                          const siteDetails = getSiteById(incident.siteId);
-                          const guardDetails = getGuardById(incident.raisedByGuardId);
-                          const patrollingOfficerDetails = getPatrollingOfficerById(
-                              incident.attendedByPatrollingOfficerId
-                          );
-                          const agencyDetails = siteDetails ? getAgencyForSite(siteDetails.id) : undefined;
-                          const incidentDate = new Date(incident.incidentTime);
-
-                          return (
-                              <TableRow 
-                                key={incident.id}
-                                onClick={() => router.push(`/towerco/incidents/${incident.id}`)}
-                                className="cursor-pointer border-destructive/20 hover:bg-destructive/20"
-                              >
-                              <TableCell>
-                                <Button asChild variant="link" className="p-0 h-auto" onClick={(e) => e.stopPropagation()}>
-                                  <Link href={`/towerco/incidents/${incident.id}`}>{incident.id}</Link>
-                                </Button>
-                              </TableCell>
-                              <TableCell>
-                                  {siteDetails?.name || 'N/A'}
-                              </TableCell>
-                              <TableCell>{agencyDetails?.name || 'N/A'}</TableCell>
-                              <TableCell>
-                                  {patrollingOfficerDetails?.name || 'N/A'}
-                              </TableCell>
-                              <TableCell>{guardDetails?.name || 'N/A'}</TableCell>
-                              <TableCell>{incidentDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</TableCell>
-                              <TableCell>
-                                  <DropdownMenu>
-                                  <DropdownMenuTrigger asChild>
-                                      <Button variant="destructive" size="sm" onClick={(e) => e.stopPropagation()}>
-                                      Contact <ChevronDown className="ml-2 h-4 w-4" />
-                                      </Button>
-                                  </DropdownMenuTrigger>
-                                  <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
-                                      {guardDetails && (
-                                      <DropdownMenuItem asChild>
-                                          <a href={`tel:${guardDetails.phone}`} className="flex items-center gap-2 w-full">
-                                              <Phone className="mr-2 h-4 w-4" />
-                                              <span>Guard: {guardDetails.phone}</span>
-                                          </a>
-                                      </DropdownMenuItem>
-                                      )}
-                                      {patrollingOfficerDetails && (
-                                      <DropdownMenuItem asChild>
-                                          <a href={`tel:${patrollingOfficerDetails.phone}`} className="flex items-center gap-2 w-full">
-                                              <Phone className="mr-2 h-4 w-4" />
-                                              <span>P. Officer: {patrollingOfficerDetails.phone}</span>
-                                          </a>
-                                      </DropdownMenuItem>
-                                      )}
-                                      {agencyDetails && (
-                                      <DropdownMenuItem asChild>
-                                          <a href={`tel:${agencyDetails.phone}`} className="flex items-center gap-2 w-full">
-                                              <Phone className="mr-2 h-4 w-4" />
-                                              <span>Agency: {agencyDetails.phone}</span>
-                                          </a>
-                                      </DropdownMenuItem>
-                                      )}
-                                  </DropdownMenuContent>
-                                  </DropdownMenu>
-                              </TableCell>
-                              </TableRow>
-                          );
+                            const incidentDate = new Date(incident.incident_time);
+                            return (
+                                <TableRow 
+                                  key={incident.id}
+                                  onClick={() => router.push(`/towerco/incidents/${incident.id}`)}
+                                  className="cursor-pointer border-destructive/20 hover:bg-destructive/20"
+                                >
+                                <TableCell>
+                                  <Button asChild variant="link" className="p-0 h-auto" onClick={(e) => e.stopPropagation()}>
+                                    <Link href={`/towerco/incidents/${incident.id}`}>{incident.incident_id}</Link>
+                                  </Button>
+                                </TableCell>
+                                <TableCell>
+                                    {incident.site_details.site_name || 'N/A'}
+                                </TableCell>
+                                <TableCell>{incident.agency_details?.agency_name || 'N/A'}</TableCell>
+                                <TableCell>
+                                    {incident.patrol_officer_name}
+                                </TableCell>
+                                <TableCell>{incident.guard_name}</TableCell>
+                                <TableCell>{incidentDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</TableCell>
+                                <TableCell>
+                                    <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button variant="destructive" size="sm" onClick={(e) => e.stopPropagation()}>
+                                        Contact <ChevronDown className="ml-2 h-4 w-4" />
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
+                                        {incident.contact_details.guard_phone && (
+                                        <DropdownMenuItem asChild>
+                                            <a href={`tel:${incident.contact_details.guard_phone}`} className="flex items-center gap-2 w-full">
+                                                <Phone className="mr-2 h-4 w-4" />
+                                                <span>Guard: {incident.contact_details.guard_phone}</span>
+                                            </a>
+                                        </DropdownMenuItem>
+                                        )}
+                                        {incident.contact_details.officer_phone && (
+                                        <DropdownMenuItem asChild>
+                                            <a href={`tel:${incident.contact_details.officer_phone}`} className="flex items-center gap-2 w-full">
+                                                <Phone className="mr-2 h-4 w-4" />
+                                                <span>P. Officer: {incident.contact_details.officer_phone}</span>
+                                            </a>
+                                        </DropdownMenuItem>
+                                        )}
+                                        {incident.contact_details.agency_phone && (
+                                        <DropdownMenuItem asChild>
+                                            <a href={`tel:${incident.contact_details.agency_phone}`} className="flex items-center gap-2 w-full">
+                                                <Phone className="mr-2 h-4 w-4" />
+                                                <span>Agency: {incident.contact_details.agency_phone}</span>
+                                            </a>
+                                        </DropdownMenuItem>
+                                        )}
+                                    </DropdownMenuContent>
+                                    </DropdownMenu>
+                                </TableCell>
+                                </TableRow>
+                            );
                           })}
                       </TableBody>
                   </Table>
@@ -336,23 +321,16 @@ export default function TowercoHomePage() {
       </Card>
       
       <TowercoAnalyticsDashboard
-        sites={data.sites}
-        agencies={data.agencies}
-        incidents={data.incidents}
-        guards={data.guards}
+        counts={data.basic_counts}
       />
       
       <AgencyPerformance
-        agencies={data.agencies}
-        sites={data.sites}
-        incidents={data.incidents}
+        performanceData={data.agency_performance}
       />
-      <SiteStatusBreakdown sites={data.sites} agencies={data.agencies} />
+      <SiteStatusBreakdown siteStatusData={data.site_status} />
 
       <IncidentChart
-        incidents={data.incidents}
-        sites={data.sites}
-        securityAgencies={data.agencies}
+        incidentTrend={data.incident_trend}
       />
     </div>
   );

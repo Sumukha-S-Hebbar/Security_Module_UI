@@ -1,8 +1,7 @@
-// src/app/towerco/home/_components/agency-performance.tsx
+
 'use client';
 
 import { useMemo, useState } from 'react';
-import type { SecurityAgency, Site, Incident } from '@/types';
 import { useRouter } from 'next/navigation';
 import {
   Card,
@@ -35,8 +34,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { guards } from '@/lib/data/guards';
-import { patrollingOfficers } from '@/lib/data/patrolling-officers';
 
 const chartConfig = {
   incidentResolution: {
@@ -57,111 +54,40 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
+type AgencyPerformanceData = {
+    agency_name: string;
+    performance: {
+        incident_resolution: number;
+        site_visit_accuracy: number;
+        guard_checkin_accuracy: number;
+        selfie_accuracy: number;
+    };
+};
 
 export function AgencyPerformance({
-  agencies,
-  sites,
-  incidents,
+  performanceData,
 }: {
-  agencies: SecurityAgency[];
-  sites: Site[];
-  incidents: Incident[];
+  performanceData: AgencyPerformanceData[];
 }) {
   const router = useRouter();
   const [selectedYear, setSelectedYear] = useState<string>(new Date().getFullYear().toString());
   const [selectedMonth, setSelectedMonth] = useState<string>('all');
-
-  const availableYears = useMemo(() => {
-    const years = new Set(
-      incidents.map((incident) => new Date(incident.incidentTime).getFullYear().toString())
-    );
-    years.add(new Date().getFullYear().toString());
-    return Array.from(years).sort((a, b) => parseInt(b) - parseInt(a));
-  }, [incidents]);
-
-  const performanceData = useMemo(() => {
-    return agencies.map((agency) => {
-      const agencySiteIds = new Set(agency.siteIds);
-      
-      const dateFilteredIncidents = incidents.filter(incident => {
-        const incidentDate = new Date(incident.incidentTime);
-        const yearMatch = selectedYear === 'all' || incidentDate.getFullYear().toString() === selectedYear;
-        const monthMatch = selectedMonth === 'all' || (incidentDate.getMonth()).toString() === selectedMonth;
-        return yearMatch && monthMatch;
-      });
-      
-      const agencySites = sites.filter((s) => agencySiteIds.has(s.id));
-
-      // 1. Incident Resolution
-      const agencyIncidents = dateFilteredIncidents.filter((incident) =>
-        agencySiteIds.has(incident.siteId)
-      );
-      const totalIncidents = agencyIncidents.length;
-      const resolvedIncidents = agencyIncidents.filter(
-        (i) => i.status === 'Resolved'
-      ).length;
-      const incidentResolution =
-        totalIncidents > 0
-          ? (resolvedIncidents / totalIncidents) * 100
-          : 100;
-
-      // 2. Guard Check-in Accuracy
-      const agencyGuardIds = new Set(agencySites.flatMap((s) => s.guards));
-      const agencyGuards = guards.filter((g) => agencyGuardIds.has(g.id));
-      const totalPerimeterAccuracy = agencyGuards.reduce((acc, guard) => acc + (guard.performance?.perimeterAccuracy || 0), 0);
-      const perimeterAccuracy = agencyGuards.length > 0 ? totalPerimeterAccuracy / agencyGuards.length : 100;
-
-      // 3. Selfie Check-in Accuracy
-      const { totalSelfiesTaken, totalSelfieRequests } = agencyGuards.reduce(
-        (acc, guard) => {
-          acc.totalSelfiesTaken += guard.totalSelfieRequests - guard.missedSelfieCount;
-          acc.totalSelfieRequests += guard.totalSelfieRequests;
-          return acc;
-        },
-        { totalSelfiesTaken: 0, totalSelfieRequests: 0 }
-      );
-      const selfieAccuracy =
-        totalSelfieRequests > 0
-          ? (totalSelfiesTaken / totalSelfieRequests) * 100
-          : 100;
-
-      // 4. Site Visit Accuracy
-      const agencyPatrollingOfficerIds = new Set(
-        agencySites.map((s) => s.patrollingOfficerId).filter(Boolean)
-      );
-      const agencyPatrollingOfficers = patrollingOfficers.filter((po) =>
-        agencyPatrollingOfficerIds.has(po.id)
-      );
-      const { totalSiteVisits, totalSitesForOfficers } = agencyPatrollingOfficers.reduce(
-          (acc, po) => {
-            const poSites = agencySites.filter(s => s.patrollingOfficerId === po.id);
-            acc.totalSitesForOfficers += poSites.length;
-            acc.totalSiteVisits += poSites.filter(s => s.visited).length;
-            return acc;
-          }, { totalSiteVisits: 0, totalSitesForOfficers: 0 }
-      );
-      const siteVisits =
-        totalSitesForOfficers > 0
-          ? (totalSiteVisits / totalSitesForOfficers) * 100
-          : 100;
-
-      return {
-        id: agency.id,
-        name: agency.name,
-        incidentResolution: Math.round(incidentResolution),
-        perimeterAccuracy: Math.round(perimeterAccuracy),
-        selfieAccuracy: Math.round(selfieAccuracy),
-        siteVisits: Math.round(siteVisits),
-      };
-    }).sort((a, b) => a.name.localeCompare(b.name));
-  }, [agencies, sites, incidents, selectedYear, selectedMonth]);
+  
+  const chartData = useMemo(() => {
+    return performanceData.map(agency => ({
+        name: agency.agency_name,
+        incidentResolution: agency.performance.incident_resolution,
+        siteVisits: agency.performance.site_visit_accuracy,
+        perimeterAccuracy: agency.performance.guard_checkin_accuracy,
+        selfieAccuracy: agency.performance.selfie_accuracy
+    }));
+  }, [performanceData]);
 
   const handleBarClick = (data: any) => {
+    // Note: To navigate, we'd need agency IDs in the performance data.
+    // This is currently just for show.
     if (data && data.activePayload && data.activePayload.length > 0) {
-      const agencyId = data.activePayload[0].payload.id;
-      if (agencyId) {
-        router.push(`/towerco/agencies/${agencyId}`);
-      }
+      console.log("Clicked on:", data.activePayload[0].payload.name);
     }
   };
 
@@ -183,11 +109,11 @@ export function AgencyPerformance({
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all" className="font-medium">All Years</SelectItem>
-                    {availableYears.map((year) => (
-                      <SelectItem key={year} value={year} className="font-medium">
-                        {year}
-                      </SelectItem>
-                    ))}
+                     {[...new Array(5)].map((_, i) => (
+                        <SelectItem key={i} value={(new Date().getFullYear() - i).toString()} className="font-medium">
+                          {new Date().getFullYear() - i}
+                        </SelectItem>
+                      ))}
                   </SelectContent>
                 </Select>
                 <Select value={selectedMonth} onValueChange={setSelectedMonth}>
@@ -197,7 +123,7 @@ export function AgencyPerformance({
                   <SelectContent>
                     <SelectItem value="all" className="font-medium">All Months</SelectItem>
                     {Array.from({ length: 12 }, (_, i) => (
-                      <SelectItem key={i} value={i.toString()} className="font-medium">
+                      <SelectItem key={i} value={(i+1).toString()} className="font-medium">
                         {new Date(0, i).toLocaleString('default', { month: 'long' })}
                       </SelectItem>
                     ))}
@@ -209,7 +135,7 @@ export function AgencyPerformance({
       <CardContent>
         <ChartContainer config={chartConfig} className="h-[300px] w-full">
           <ResponsiveContainer>
-            <BarChart data={performanceData} margin={{ top: 20 }} onClick={handleBarClick}>
+            <BarChart data={chartData} margin={{ top: 20 }} onClick={handleBarClick}>
               <CartesianGrid vertical={false} />
               <XAxis
                 dataKey="name"
