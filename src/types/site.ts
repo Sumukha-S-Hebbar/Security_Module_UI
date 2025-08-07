@@ -2,7 +2,7 @@ import type { Incident } from './incident';
 import type { SecurityAgency } from './security-agency';
 
 export type Site = {
-  id: number; // The database primary key
+  id: string; // The database primary key
   tb_site_id: string; // The unique Tower Buddy site ID
   org_site_id: string; // The organization-specific site ID
   org_name: string;
