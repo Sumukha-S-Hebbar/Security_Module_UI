@@ -35,7 +35,7 @@ export default function AgencyAccountPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
 
-  const agency = useMemo(() => securityAgencies.find(a => a.id === LOGGED_IN_AGENCY_ID), []);
+  const agency = useMemo(() => securityAgencies.find(a => a.agency_id === LOGGED_IN_AGENCY_ID), []);
   
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
