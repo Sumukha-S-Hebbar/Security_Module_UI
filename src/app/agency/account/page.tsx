@@ -160,8 +160,8 @@ export default function AgencyAccountPage() {
                 
                 <div className="flex items-center gap-6">
                     <Avatar className="h-24 w-24">
-                        <AvatarImage src={avatarPreview || undefined} alt={agency.name} />
-                        <AvatarFallback>{agency.name.charAt(0)}</AvatarFallback>
+                        <AvatarImage src={avatarPreview || undefined} alt={agency.name || 'Agency Logo'} />
+                        <AvatarFallback>{agency.name ? agency.name.charAt(0) : 'A'}</AvatarFallback>
                     </Avatar>
                     <FormField
                       control={form.control}
