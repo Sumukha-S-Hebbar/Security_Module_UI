@@ -60,7 +60,7 @@ export default function AgencyIncidentReportPage() {
   const [resolutionNotes, setResolutionNotes] = useState(incident?.resolutionNotes || '');
   const [incidentFiles, setIncidentFiles] = useState<FileList | null>(null);
   const [resolutionFiles, setResolutionFiles] = useState<FileList | null>(null);
-  const [incidentType, setIncidentType] = useState<Incident['incidentType']>(incident?.incidentType);
+  const [incidentType, setIncidentType] = useState(incident?.incidentType);
 
 
   useEffect(() => {
@@ -392,7 +392,7 @@ export default function AgencyIncidentReportPage() {
                       <h3 className="text-xl font-semibold">Initial Incident Report</h3>
                        <div>
                         <Label htmlFor="incident-type" className="text-base">Incident Type</Label>
-                        <Select value={incidentType} onValueChange={(value) => setIncidentType(value as Incident['incidentType'])}>
+                        <Select value={incidentType} onValueChange={(value) => setIncidentType(value as typeof incidentType)}>
                           <SelectTrigger id="incident-type" className="mt-2">
                             <SelectValue placeholder="Select an incident type" />
                           </SelectTrigger>

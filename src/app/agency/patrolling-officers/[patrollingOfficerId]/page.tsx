@@ -214,7 +214,7 @@ export default function AgencyPatrollingOfficerReportPage() {
           </Button>
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Patrolling Officer Report</h1>
-            <p className="text-muted-foreground font-medium">Detailed overview for ${patrollingOfficer.name}.</p>
+            <p className="text-muted-foreground font-medium">Detailed overview for {patrollingOfficer.name}.</p>
           </div>
         </div>
         <Button onClick={handleDownloadReport} className="bg-[#00B4D8] hover:bg-[#00B4D8]/90">
