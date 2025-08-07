@@ -88,7 +88,7 @@ export default function AgencyIncidentsPage() {
   }
   
   const getGuardById = (id: string): Guard | undefined => {
-    return guards.find(g => g.id === id);
+    return guards.find(g => g.guard_id === id);
   }
   
   const getPatrollingOfficerById = (id?: string): PatrollingOfficer | undefined => {
@@ -108,8 +108,8 @@ export default function AgencyIncidentsPage() {
 
       const searchLower = searchQuery.toLowerCase();
       const matchesSearch =
-        incident.id.toLowerCase().includes(searchLower) ||
-        site.name.toLowerCase().includes(searchLower) ||
+        incident.incident_id.toLowerCase().includes(searchLower) ||
+        site.site_name.toLowerCase().includes(searchLower) ||
         guard.name.toLowerCase().includes(searchLower);
 
       let statusMatch = true;
@@ -309,7 +309,7 @@ export default function AgencyIncidentsPage() {
                         </Button>
                       </TableCell>
                       <TableCell className="font-medium">{new Date(incident.incidentTime).toLocaleString()}</TableCell>
-                      <TableCell className="font-medium">{site?.name || 'N/A'}</TableCell>
+                      <TableCell className="font-medium">{site?.site_name || 'N/A'}</TableCell>
                       <TableCell className="font-medium">{guard?.name || 'N/A'}</TableCell>
                       <TableCell className="font-medium">
                         {patrollingOfficer?.name || 'N/A'}
