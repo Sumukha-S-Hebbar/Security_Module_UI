@@ -81,7 +81,7 @@ export default function AgencyGuardsPage() {
   const agencySites = useMemo(() => sites.filter(site => site.agencyId === LOGGED_IN_AGENCY_ID), []);
   
   const agencyGuards = useMemo(() => {
-    const agencySiteNames = new Set(agencySites.map(s => s.name));
+    const agencySiteNames = new Set(agencySites.map(s => s.site_name));
     return guards.filter(guard => agencySiteNames.has(guard.site));
   }, [agencySites]);
 
@@ -89,7 +89,7 @@ export default function AgencyGuardsPage() {
   const agencyPatrollingOfficers = patrollingOfficers;
 
   const getPatrollingOfficerForGuard = (guard: Guard): PatrollingOfficer | undefined => {
-    const site = agencySites.find(s => s.name === guard.site);
+    const site = agencySites.find(s => s.site_name === guard.site);
     if (!site || !site.patrollingOfficerId) return undefined;
     return agencyPatrollingOfficers.find(po => po.id === site.patrollingOfficerId);
   };
@@ -300,8 +300,8 @@ export default function AgencyGuardsPage() {
                                                 </FormControl>
                                                 <SelectContent>
                                                     {agencySites.map((site) => (
-                                                        <SelectItem key={site.id} value={site.name}>
-                                                            {site.name}
+                                                        <SelectItem key={site.id} value={site.site_name}>
+                                                            {site.site_name}
                                                         </SelectItem>
                                                     ))}
                                                 </SelectContent>
@@ -390,7 +390,7 @@ export default function AgencyGuardsPage() {
                   filteredGuards.map((guard) => {
                     const patrollingOfficer = getPatrollingOfficerForGuard(guard);
                     const incidentCount = guardIncidentCounts[guard.id] || 0;
-                    const site = agencySites.find(s => s.name === guard.site);
+                    const site = agencySites.find(s => s.site_name === guard.site);
                     
                     return (
                       <TableRow 

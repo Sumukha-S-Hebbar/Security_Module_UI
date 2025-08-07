@@ -65,24 +65,12 @@ export default function AgencyPatrollingOfficerReportPage() {
 
   const patrollingOfficer = patrollingOfficers.find((p) => p.id === patrollingOfficerId);
 
-  if (!patrollingOfficer) {
-    return (
-      <div className="p-4 sm:p-6 lg:p-8">
-        <Card>
-          <CardContent className="pt-6">
-            <p className="font-medium">Patrolling Officer not found.</p>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
   const assignedSites = useMemo(() => sites.filter(site => site.agencyId === LOGGED_IN_AGENCY_ID && site.patrollingOfficerId === patrollingOfficerId), [patrollingOfficerId]);
   
   const assignedSiteIds = useMemo(() => new Set(assignedSites.map(s => s.id)), [assignedSites]);
   
   const assignedGuards = useMemo(() => {
-    const siteNames = new Set(assignedSites.map(s => s.name));
+    const siteNames = new Set(assignedSites.map(s => s.site_name));
     return guards.filter(guard => siteNames.has(guard.site));
   }, [assignedSites]);
 
@@ -114,7 +102,7 @@ export default function AgencyPatrollingOfficerReportPage() {
 
   const visitedSites = assignedSites.filter(s => s.visited).length;
   const siteVisitAccuracy = assignedSites.length > 0 ? (visitedSites / assignedSites.length) * 100 : 100;
-  const averageResponseTime = patrollingOfficer.averageResponseTime || 0;
+  const averageResponseTime = patrollingOfficer?.averageResponseTime || 0;
   
   const roundedSiteVisitAccuracy = Math.round(siteVisitAccuracy);
   const siteVisitColor = getPerformanceColor(roundedSiteVisitAccuracy);
@@ -125,6 +113,17 @@ export default function AgencyPatrollingOfficerReportPage() {
   ];
   const COLORS_SITE_VISIT = [siteVisitColor, 'hsl(var(--muted))'];
 
+  if (!patrollingOfficer) {
+    return (
+      <div className="p-4 sm:p-6 lg:p-8">
+        <Card>
+          <CardContent className="pt-6">
+            <p className="font-medium">Patrolling Officer not found.</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   const handleDownloadReport = () => {
     toast({
@@ -383,7 +382,7 @@ export default function AgencyPatrollingOfficerReportPage() {
                   </TableHeader>
                   <TableBody>
                       {assignedSites.map(site => {
-                          const siteGuards = guards.filter(g => g.site === site.name);
+                          const siteGuards = guards.filter(g => g.site === site.site_name);
                           const isExpanded = expandedSiteId === site.id;
                           const siteIncidents = incidents.filter(i => i.siteId === site.id);
                           const resolvedCount = siteIncidents.filter(i => i.status === 'Resolved').length;
@@ -396,7 +395,7 @@ export default function AgencyPatrollingOfficerReportPage() {
                                           <Link href={`/agency/sites/${site.id}`}>{site.id}</Link>
                                       </Button>
                                   </TableCell>
-                                  <TableCell className="font-medium">{site.name}</TableCell>
+                                  <TableCell className="font-medium">{site.site_name}</TableCell>
                                   <TableCell className="font-medium">{site.address}</TableCell>
                                   <TableCell>
                                      <Button
@@ -557,7 +556,7 @@ export default function AgencyPatrollingOfficerReportPage() {
                             </TableCell>
                             <TableCell className="font-medium">{new Date(incident.incidentTime).toLocaleDateString()}</TableCell>
                             <TableCell className="font-medium">{new Date(incident.incidentTime).toLocaleTimeString()}</TableCell>
-                            <TableCell className="font-medium">{site?.name || 'N/A'}</TableCell>
+                            <TableCell className="font-medium">{site?.site_name || 'N/A'}</TableCell>
                             <TableCell className="font-medium">{guard?.name || 'N/A'}</TableCell>
                             <TableCell>{getStatusIndicator(incident.status)}</TableCell>
                         </TableRow>

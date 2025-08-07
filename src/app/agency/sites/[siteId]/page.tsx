@@ -72,7 +72,7 @@ export default function AgencySiteReportPage() {
     (incident) => incident.siteId === site.id
   );
   
-  const siteGuards = guards.filter(g => site.guards.includes(g.id));
+  const siteGuards = guards.filter(g => site.guards?.includes(g.id));
   const patrollingOfficer = patrollingOfficers.find(p => p.id === site.patrollingOfficerId);
 
   const availableYears = useMemo(() => {
@@ -120,7 +120,7 @@ export default function AgencySiteReportPage() {
   const handleDownloadReport = () => {
     toast({
       title: 'Report Generation Started',
-      description: `Generating a detailed report for site ${site.name}.`,
+      description: `Generating a detailed report for site ${site.site_name}.`,
     });
     // In a real app, this would trigger a download.
   };
@@ -192,7 +192,7 @@ export default function AgencySiteReportPage() {
           </Button>
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Site Report</h1>
-            <p className="text-muted-foreground font-medium">Detailed overview for {site.name}.</p>
+            <p className="text-muted-foreground font-medium">Detailed overview for {site.site_name}.</p>
           </div>
         </div>
         <Button onClick={handleDownloadReport} className="bg-[#00B4D8] hover:bg-[#00B4D8]/90">
@@ -206,7 +206,7 @@ export default function AgencySiteReportPage() {
           <CardHeader>
               <div className="flex flex-wrap justify-between items-start gap-4">
                 <div>
-                  <CardTitle className="text-2xl">{site.name}</CardTitle>
+                  <CardTitle className="text-2xl">{site.site_name}</CardTitle>
                   <p className="font-medium">ID: {site.id}</p>
                 </div>
               </div>
@@ -268,7 +268,7 @@ export default function AgencySiteReportPage() {
         <Card>
             <CardHeader>
                 <CardTitle className="flex items-center gap-2"><Users className="h-5 w-5"/>Assigned Guards</CardTitle>
-                <CardDescription>Guards currently assigned to {site.name}.</CardDescription>
+                <CardDescription>Guards currently assigned to {site.site_name}.</CardDescription>
             </CardHeader>
             <CardContent>
                 {siteGuards.length > 0 ? (
@@ -299,7 +299,7 @@ export default function AgencySiteReportPage() {
         <CardHeader className="flex flex-row items-center justify-between gap-4">
             <div>
                 <CardTitle>Incidents Reported Monthly</CardTitle>
-                <CardDescription>A monthly breakdown of incidents reported at {site.name}.</CardDescription>
+                <CardDescription>A monthly breakdown of incidents reported at {site.site_name}.</CardDescription>
             </div>
             <Select value={selectedChartYear} onValueChange={setSelectedChartYear}>
                 <SelectTrigger className="w-[120px] font-medium hover:bg-accent hover:text-accent-foreground">
