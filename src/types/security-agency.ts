@@ -1,6 +1,19 @@
 
 import type { Site } from './site';
 
+type AssignedSiteDetail = {
+    site_details: {
+        id: number;
+        tb_site_id: string;
+        org_site_id: string;
+        site_name: string;
+        site_address_line1: string;
+        city: string;
+        region: string;
+    };
+    assigned_on: string;
+};
+
 export type SecurityAgency = {
   id: number;
   tb_agency_id: string;
@@ -18,10 +31,7 @@ export type SecurityAgency = {
   associated_org?: string;
   total_sites_assigned: number;
   total_number_of_incidents: number;
-  assigned_sites_details: {
-    site_details: Site;
-    assigned_on: string;
-  }[];
+  assigned_sites_details: AssignedSiteDetail[];
 
   // Fields from original mock data that might not be in the final API
   name?: string; // a bit redundant with agency_name

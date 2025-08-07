@@ -243,7 +243,7 @@ export default function AgencySiteReportPage() {
           </CardContent>
         </Card>
 
-        {patrollingOfficer && (
+        {patrollingOfficer ? (
           <Card>
             <CardHeader>
                 <CardTitle className="flex items-center gap-2"><UserCheck className="h-5 w-5"/>Patrolling Officer</CardTitle>
@@ -261,6 +261,16 @@ export default function AgencySiteReportPage() {
                  <Button asChild variant="link" className="p-0 h-auto font-medium">
                     <Link href={`/agency/patrolling-officers/${patrollingOfficer.id}`}>View Full Officer Report</Link>
                 </Button>
+            </CardContent>
+          </Card>
+        ) : (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2"><UserCheck className="h-5 w-5"/>Patrolling Officer</CardTitle>
+              <CardDescription>Officer overseeing this site.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground font-medium text-center py-8">No patrolling officer assigned.</p>
             </CardContent>
           </Card>
         )}
