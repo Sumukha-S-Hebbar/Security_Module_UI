@@ -4,7 +4,6 @@ import type { Guard } from '@/types';
 export const guards: Guard[] = [
   {
     id: 'GL001',
-    guard_id: 'GL001',
     name: 'John Doe',
     first_name: 'John',
     last_name: 'Doe',
@@ -19,7 +18,6 @@ export const guards: Guard[] = [
   },
   {
     id: 'GL002',
-    guard_id: 'GL002',
     name: 'Jane Smith',
     first_name: 'Jane',
     last_name: 'Smith',
@@ -34,7 +32,6 @@ export const guards: Guard[] = [
   },
   {
     id: 'GL003',
-    guard_id: 'GL003',
     name: 'Mike Johnson',
     first_name: 'Mike',
     last_name: 'Johnson',
@@ -49,7 +46,6 @@ export const guards: Guard[] = [
   },
   {
     id: 'GL004',
-    guard_id: 'GL004',
     name: 'Emily Williams',
     first_name: 'Emily',
     last_name: 'Williams',
@@ -64,7 +60,6 @@ export const guards: Guard[] = [
   },
   {
     id: 'GL005',
-    guard_id: 'GL005',
     name: 'Sarah Connor',
     first_name: 'Sarah',
     last_name: 'Connor',
@@ -79,7 +74,6 @@ export const guards: Guard[] = [
   },
   {
     id: 'GL006',
-    guard_id: 'GL006',
     name: 'Kyle Reese',
     first_name: 'Kyle',
     last_name: 'Reese',
@@ -94,7 +88,6 @@ export const guards: Guard[] = [
   },
   {
     id: 'GL007',
-    guard_id: 'GL007',
     name: 'David Brown',
     first_name: 'David',
     last_name: 'Brown',
@@ -109,7 +102,6 @@ export const guards: Guard[] = [
   },
   {
     id: 'GL008',
-    guard_id: 'GL008',
     name: 'Chris Green',
     first_name: 'Chris',
     last_name: 'Green',
@@ -123,7 +115,6 @@ export const guards: Guard[] = [
   },
   {
     id: 'GL009',
-    guard_id: 'GL009',
     name: 'Alex Ray',
     first_name: 'Alex',
     last_name: 'Ray',
@@ -137,7 +128,6 @@ export const guards: Guard[] = [
   },
   {
     id: 'GL010',
-    guard_id: 'GL010',
     name: 'Maria Garcia',
     first_name: 'Maria',
     last_name: 'Garcia',
@@ -151,7 +141,6 @@ export const guards: Guard[] = [
   },
   {
     id: 'GL011',
-    guard_id: 'GL011',
     name: 'James Wilson',
     first_name: 'James',
     last_name: 'Wilson',
@@ -166,7 +155,6 @@ export const guards: Guard[] = [
   },
   {
     id: 'GL012',
-    guard_id: 'GL012',
     name: 'Patricia Martinez',
     first_name: 'Patricia',
     last_name: 'Martinez',
@@ -181,7 +169,6 @@ export const guards: Guard[] = [
   },
   {
     id: 'GL013',
-    guard_id: 'GL013',
     name: 'Robert Jones',
     first_name: 'Robert',
     last_name: 'Jones',
@@ -196,7 +183,6 @@ export const guards: Guard[] = [
   },
   {
     id: 'GL014',
-    guard_id: 'GL014',
     name: 'Linda Taylor',
     first_name: 'Linda',
     last_name: 'Taylor',
@@ -211,7 +197,6 @@ export const guards: Guard[] = [
   },
   {
     id: 'GL015',
-    guard_id: 'GL015',
     name: 'William Anderson',
     first_name: 'William',
     last_name: 'Anderson',
@@ -226,7 +211,6 @@ export const guards: Guard[] = [
   },
   {
     id: 'GL016',
-    guard_id: 'GL016',
     name: 'Barbara Thomas',
     first_name: 'Barbara',
     last_name: 'Thomas',
@@ -240,7 +224,6 @@ export const guards: Guard[] = [
   },
   {
     id: 'GL017',
-    guard_id: 'GL017',
     name: 'Richard Jackson',
     first_name: 'Richard',
     last_name: 'Jackson',
@@ -254,7 +237,6 @@ export const guards: Guard[] = [
   },
   {
     id: 'GL018',
-    guard_id: 'GL018',
     name: 'Peter Parker',
     first_name: 'Peter',
     last_name: 'Parker',
@@ -269,7 +251,6 @@ export const guards: Guard[] = [
   },
   {
     id: 'GL019',
-    guard_id: 'GL019',
     name: 'Mary Jane Watson',
     first_name: 'Mary Jane',
     last_name: 'Watson',
@@ -283,5 +264,3 @@ export const guards: Guard[] = [
     patrollingOfficerId: 'PO04',
   }
 ];
-
-    

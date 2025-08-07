@@ -88,7 +88,7 @@ export default function AgencyIncidentsPage() {
   }
   
   const getGuardById = (id: string): Guard | undefined => {
-    return guards.find(g => g.guard_id === id);
+    return guards.find(g => g.id === id);
   }
   
   const getPatrollingOfficerById = (id?: string): PatrollingOfficer | undefined => {
@@ -108,7 +108,7 @@ export default function AgencyIncidentsPage() {
 
       const searchLower = searchQuery.toLowerCase();
       const matchesSearch =
-        incident.incident_id.toLowerCase().includes(searchLower) ||
+        incident.id.toLowerCase().includes(searchLower) ||
         site.site_name.toLowerCase().includes(searchLower) ||
         guard.name.toLowerCase().includes(searchLower);
 

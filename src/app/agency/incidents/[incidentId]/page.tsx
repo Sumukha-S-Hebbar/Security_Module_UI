@@ -20,7 +20,7 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, MapPin, Briefcase, UserCheck, User, Calendar, FileDown, Phone, Mail, Upload, Info, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, MapPin, Briefcase, UserCheck, User, Calendar, FileDown, Phone, Mail, Upload, Info, AlertTriangle, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -60,6 +60,7 @@ export default function AgencyIncidentReportPage() {
   const [incidentFiles, setIncidentFiles] = useState<FileList | null>(null);
   const [resolutionFiles, setResolutionFiles] = useState<FileList | null>(null);
   const [incidentType, setIncidentType] = useState(incident?.incidentType);
+  const [lightboxImage, setLightboxImage] = useState<string | null>(null);
 
 
   useEffect(() => {
@@ -96,7 +97,7 @@ export default function AgencyIncidentReportPage() {
   }
 
   const site = sites.find((s) => s.id === incident.siteId);
-  const agency = site ? securityAgencies.find((a) => a.siteIds && a.siteIds.includes(site.id)) : undefined;
+  const agency = site ? securityAgencies.find((a) => a.siteIds?.includes(site.id)) : undefined;
   const guard = guards.find((g) => g.id === incident.raisedByGuardId);
   const patrollingOfficer = patrollingOfficers.find((p) => p.id === incident.attendedByPatrollingOfficerId);
 
@@ -217,12 +218,12 @@ export default function AgencyIncidentReportPage() {
           </h4>
           <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
               {incident.initialIncidentMediaUrl.map((src, index) => (
-                  <div key={index} className="relative aspect-video">
+                  <div key={index} className="relative aspect-video" onClick={() => setLightboxImage(src)}>
                   <Image
                       src={src}
                       alt={`Incident evidence ${index + 1}`}
                       fill
-                      className="rounded-md object-cover"
+                      className="rounded-md object-cover cursor-pointer"
                       data-ai-hint={getHintForIncident(incident)}
                   />
                   </div>
@@ -233,6 +234,7 @@ export default function AgencyIncidentReportPage() {
   };
 
   return (
+    <>
     <div className="p-4 sm:p-6 lg:p-8 space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-4">
@@ -471,12 +473,12 @@ export default function AgencyIncidentReportPage() {
                               </h4>
                               <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
                                   {incident.resolvedIncidentMediaUrl.map((src, index) => (
-                                      <div key={index} className="relative aspect-video">
+                                      <div key={index} className="relative aspect-video" onClick={() => setLightboxImage(src)}>
                                       <Image
                                           src={src}
                                           alt={`Resolution evidence ${index + 1}`}
                                           fill
-                                          className="rounded-md object-cover"
+                                          className="rounded-md object-cover cursor-pointer"
                                           data-ai-hint={'report document'}
                                       />
                                       </div>
@@ -491,5 +493,28 @@ export default function AgencyIncidentReportPage() {
       </Card>
 
     </div>
+    {lightboxImage && (
+      <div 
+        className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4 animate-in fade-in-0"
+        onClick={() => setLightboxImage(null)}
+      >
+        <button 
+            className="absolute top-4 right-4 text-white hover:text-white/80 transition-opacity"
+            onClick={() => setLightboxImage(null)}
+        >
+            <X className="h-8 w-8" />
+        </button>
+        <div className="relative max-w-4xl max-h-full" onClick={(e) => e.stopPropagation()}>
+            <Image 
+                src={lightboxImage} 
+                alt="Enlarged incident evidence" 
+                width={1200}
+                height={800}
+                className="rounded-lg object-contain max-w-full max-h-[90vh]"
+            />
+        </div>
+      </div>
+    )}
+    </>
   );
 }

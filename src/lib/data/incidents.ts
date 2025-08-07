@@ -5,7 +5,6 @@ import type { Incident } from '@/types';
 export const incidents: Incident[] = [
     { 
       id: 'INC001', 
-      incident_id: 'INC001',
       incidentTime: '2024-07-20T14:30:00Z', 
       description: '', 
       status: 'Active', 
@@ -17,7 +16,6 @@ export const incidents: Incident[] = [
     },
     { 
       id: 'INC002', 
-      incident_id: 'INC002',
       incidentTime: '2024-07-21T09:00:00Z', 
       resolvedTime: '2024-07-21T17:30:00Z',
       description: 'False fire alarm triggered by dust near sensor in Lobby.', 
@@ -33,7 +31,6 @@ export const incidents: Incident[] = [
     },
     { 
       id: 'INC003', 
-      incident_id: 'INC003',
       incidentTime: '2024-06-15T22:05:00Z', 
       description: 'Graffiti on the north wall of Pier 3.', 
       status: 'Under Review', 
@@ -45,7 +42,6 @@ export const incidents: Incident[] = [
     },
     { 
       id: 'INC004', 
-      incident_id: 'INC004',
       incidentTime: '2024-05-10T11:00:00Z', 
       resolvedTime: '2024-05-11T11:00:00Z',
       description: 'Guard reported feeling unwell, requested relief.', 
@@ -60,7 +56,6 @@ export const incidents: Incident[] = [
     },
     { 
       id: 'INC005', 
-      incident_id: 'INC005',
       incidentTime: '2024-04-01T02:15:00Z', 
       resolvedTime: '2024-04-03T18:00:00Z',
       description: 'Successful break-in at R&D department, items stolen.', 
@@ -76,7 +71,6 @@ export const incidents: Incident[] = [
     },
     { 
       id: 'INC006', 
-      incident_id: 'INC006',
       incidentTime: '2024-07-22T10:00:00Z', 
       description: '', 
       status: 'Active', 
@@ -88,7 +82,6 @@ export const incidents: Incident[] = [
     },
     { 
       id: 'INC007', 
-      incident_id: 'INC007',
       incidentTime: '2024-07-23T11:00:00Z', 
       description: '', 
       status: 'Active', 
@@ -100,7 +93,6 @@ export const incidents: Incident[] = [
     },
     { 
       id: 'INC008', 
-      incident_id: 'INC008',
       incidentTime: '2024-07-23T15:00:00Z', 
       description: '', 
       status: 'Active', 
@@ -112,7 +104,6 @@ export const incidents: Incident[] = [
     },
     { 
       id: 'INC009', 
-      incident_id: 'INC009',
       incidentTime: '2024-07-18T18:45:00Z', 
       description: 'Suspicious individual reported near the perimeter fence of Industrial Zone 7.', 
       status: 'Under Review', 
@@ -124,7 +115,6 @@ export const incidents: Incident[] = [
     },
      { 
       id: 'INC010', 
-      incident_id: 'INC010',
       incidentTime: '2024-07-19T12:00:00Z', 
       description: 'Main gate access panel is malfunctioning.', 
       status: 'Under Review', 
@@ -136,7 +126,6 @@ export const incidents: Incident[] = [
     },
     { 
       id: 'INC011', 
-      incident_id: 'INC011',
       incidentTime: '2024-07-24T08:00:00Z', 
       description: '', 
       status: 'Active', 
@@ -148,7 +137,6 @@ export const incidents: Incident[] = [
     },
     { 
       id: 'INC012', 
-      incident_id: 'INC012',
       incidentTime: '2024-07-24T09:30:00Z', 
       description: '', 
       status: 'Active', 
@@ -160,7 +148,6 @@ export const incidents: Incident[] = [
     },
     { 
       id: 'INC013', 
-      incident_id: 'INC013',
       incidentTime: '2024-07-22T14:00:00Z', 
       description: 'A water pipe has burst in the server room.', 
       status: 'Under Review', 
@@ -172,7 +159,6 @@ export const incidents: Incident[] = [
     },
     {
       id: 'INC014',
-      incident_id: 'INC014',
       incidentTime: '2024-07-25T01:00:00Z',
       description: 'Power outage reported at City Core Tower.',
       status: 'Active',
@@ -184,7 +170,6 @@ export const incidents: Incident[] = [
     },
     {
       id: 'INC015',
-      incident_id: 'INC015',
       incidentTime: '2024-07-24T16:00:00Z',
       description: 'Unauthorized vehicle parked in the loading bay.',
       status: 'Under Review',
@@ -196,7 +181,6 @@ export const incidents: Incident[] = [
     },
     {
       id: 'INC016',
-      incident_id: 'INC016',
       incidentTime: '2025-01-15T10:00:00Z',
       description: 'Power failure at main entrance gate.',
       status: 'Active',
@@ -208,7 +192,6 @@ export const incidents: Incident[] = [
     },
     {
       id: 'INC017',
-      incident_id: 'INC017',
       incidentTime: '2025-02-10T20:30:00Z',
       resolvedTime: '2025-02-11T12:00:00Z',
       description: 'Attempted theft of copper wiring from substation B.',
@@ -225,7 +208,6 @@ export const incidents: Incident[] = [
     },
     {
       id: 'INC018',
-      incident_id: 'INC018',
       incidentTime: '2025-03-05T18:00:00Z',
       description: 'Vandalism reported at the base of the South Ridge Tower.',
       status: 'Under Review',
@@ -237,7 +219,6 @@ export const incidents: Incident[] = [
     },
     {
       id: 'INC019',
-      incident_id: 'INC019',
       incidentTime: '2025-04-20T14:15:00Z',
       resolvedTime: '2025-04-20T16:00:00Z',
       description:
@@ -254,7 +235,6 @@ export const incidents: Incident[] = [
     },
     {
       id: 'INC020',
-      incident_id: 'INC020',
       incidentTime: '2025-05-01T23:00:00Z',
       description:
         'Drone spotted flying over the Metro Data Center restricted airspace.',
@@ -266,5 +246,3 @@ export const incidents: Incident[] = [
       incidentType: 'Suspicious Activity',
     },
 ];
-
-    

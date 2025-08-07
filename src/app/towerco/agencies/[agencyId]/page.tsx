@@ -274,7 +274,7 @@ export default function AgencyReportPage() {
 
   const COLORS = [getPerformanceColor(), 'hsl(var(--muted))'];
 
-  const getStatusIndicator = (status: Incident['status']) => {
+  const getStatusIndicator = (status: "Active" | "Under Review" | "Resolved") => {
     switch (status) {
       case 'Active':
         return (

@@ -1,8 +1,6 @@
 
-
 export type Incident = {
   id: string; // incident_id
-  incident_id: string;
   status: 'Active' | 'Under Review' | 'Resolved';
   description: string;
   resolutionNotes?: string;
@@ -16,5 +14,3 @@ export type Incident = {
   resolvedIncidentMediaUrl?: string[];
   incidentType?: 'SOS' | 'Suspicious Activity' | 'Theft' | 'Vandalism' | 'Trespassing' | 'Safety Hazard' | 'Other';
 };
-
-    

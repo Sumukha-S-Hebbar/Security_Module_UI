@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useMemo } from 'react';
@@ -158,7 +157,7 @@ export default function AgencyGuardsPage() {
 
       return matchesSearch && matchesSite && matchesPatrollingOfficer;
     });
-  }, [searchQuery, selectedSiteFilter, selectedPatrollingOfficerFilter, agencyGuards, getPatrollingOfficerForGuard]);
+  }, [searchQuery, selectedSiteFilter, selectedPatrollingOfficerFilter, agencyGuards]);
   
   const guardIncidentCounts = useMemo(() => {
     return incidents.reduce((acc, incident) => {
@@ -169,9 +168,9 @@ export default function AgencyGuardsPage() {
 
   const uniqueSites = useMemo(() => [...new Set(agencyGuards.map(g => g.site))], [agencyGuards]);
   const uniquePatrollingOfficers = useMemo(() => {
-    const poIds = new Set(agencyGuards.map(g => getPatrollingOfficerForGuard(g)?.id).filter(Boolean));
-    return agencyPatrollingOfficers.filter(po => poIds.has(po.id as string));
-  }, [agencyGuards, agencyPatrollingOfficers, getPatrollingOfficerForGuard]);
+    const poIds = new Set(agencyGuards.map(g => getPatrollingOfficerForGuard(g)?.id).filter(Boolean) as string[]);
+    return agencyPatrollingOfficers.filter(po => poIds.has(po.id));
+  }, [agencyGuards]);
 
   return (
     <>
@@ -390,7 +389,7 @@ export default function AgencyGuardsPage() {
                 {filteredGuards.length > 0 ? (
                   filteredGuards.map((guard) => {
                     const patrollingOfficer = getPatrollingOfficerForGuard(guard);
-                    const incidentCount = guardIncidentCounts[guard.guard_id] || 0;
+                    const incidentCount = guardIncidentCounts[guard.id] || 0;
                     const site = agencySites.find(s => s.site_name === guard.site);
                     
                     return (
@@ -463,5 +462,3 @@ export default function AgencyGuardsPage() {
     </>
   );
 }
-
-    

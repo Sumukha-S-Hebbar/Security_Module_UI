@@ -1,7 +1,6 @@
 
 export type Guard = {
   id: string; // The guard_id, e.g. 'GL001'
-  guard_id: string;
   name: string;
   first_name: string;
   last_name: string | null;
@@ -17,5 +16,3 @@ export type Guard = {
   };
   patrollingOfficerId?: string;
 };
-
-    

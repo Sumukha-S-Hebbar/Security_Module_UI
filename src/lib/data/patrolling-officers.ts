@@ -1,3 +1,4 @@
+
 import type { PatrollingOfficer } from '@/types';
 
 export const patrollingOfficers: PatrollingOfficer[] = [
