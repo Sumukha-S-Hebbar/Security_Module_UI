@@ -169,7 +169,7 @@ export default function AgencyGuardsPage() {
   const uniqueSites = useMemo(() => [...new Set(agencyGuards.map(g => g.site))], [agencyGuards]);
   const uniquePatrollingOfficers = useMemo(() => {
     const poIds = new Set(agencyGuards.map(g => getPatrollingOfficerForGuard(g)?.id).filter(Boolean));
-    return agencyPatrollingOfficers.filter(po => poIds.has(po.id));
+    return agencyPatrollingOfficers.filter(po => poIds.has(po.id as string));
   }, [agencyGuards, agencyPatrollingOfficers, getPatrollingOfficerForGuard]);
 
   return (

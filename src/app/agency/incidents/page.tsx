@@ -112,8 +112,14 @@ export default function AgencyIncidentsPage() {
         site.name.toLowerCase().includes(searchLower) ||
         guard.name.toLowerCase().includes(searchLower);
 
-      const matchesStatus =
-        selectedStatus === 'all' || incident.status.toLowerCase().replace(' ', '-') === selectedStatus;
+      let statusMatch = true;
+      if (selectedStatus !== 'all') {
+        if (selectedStatus === 'under-review') {
+            statusMatch = incident.status === 'Under Review';
+        } else {
+            statusMatch = incident.status.toLowerCase() === selectedStatus;
+        }
+      }
       
       const incidentDate = new Date(incident.incidentTime);
       const matchesDate =
@@ -124,7 +130,7 @@ export default function AgencyIncidentsPage() {
         selectedMonth === 'all' ||
         (incidentDate.getMonth() + 1).toString() === selectedMonth;
 
-      return matchesSearch && matchesStatus && matchesDate && matchesMonth;
+      return matchesSearch && statusMatch && matchesDate && matchesMonth;
     });
     setCurrentPage(1);
     return filtered;

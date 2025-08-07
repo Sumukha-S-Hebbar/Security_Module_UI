@@ -235,7 +235,15 @@ export default function AgencyReportPage() {
     return reportData.incidents.filter(incident => {
         const incidentDate = new Date(incident.incident_time);
         
-        const statusMatch = incidentsStatusFilter === 'all' || incident.incident_status.toLowerCase().replace(' ', '_') === incidentsStatusFilter;
+        let statusMatch = true;
+        if (incidentsStatusFilter !== 'all') {
+          if (incidentsStatusFilter === 'under_review') {
+              statusMatch = incident.incident_status === 'Under Review';
+          } else {
+              statusMatch = incident.incident_status.toLowerCase() === incidentsStatusFilter;
+          }
+        }
+        
         const yearMatch = incidentsYearFilter === 'all' || incidentDate.getFullYear().toString() === incidentsYearFilter;
         const monthMatch = incidentsMonthFilter === 'all' || incidentDate.getMonth().toString() === incidentsMonthFilter;
 
