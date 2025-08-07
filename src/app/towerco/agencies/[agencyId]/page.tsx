@@ -157,7 +157,7 @@ export default function AgencyReportPage() {
   
   const [incidentsStatusFilter, setIncidentsStatusFilter] = useState('all');
   const [incidentsYearFilter, setIncidentsYearFilter] = useState('all');
-  const [incidentsMonthFilter, setIncidentsMonthFilter] = useState('all');
+  const [incidentsMonthFilter, setIncidentsMonthFilter] = useState<string>('all');
 
   const assignedSitesRef = useRef<HTMLDivElement>(null);
   const incidentsHistoryRef = useRef<HTMLDivElement>(null);
@@ -393,8 +393,8 @@ export default function AgencyReportPage() {
           <CardHeader>
           <div className="flex items-center gap-4">
               <Avatar className="h-16 w-16">
-                  <AvatarImage src={reportData.logo || undefined} alt={agency_name} />
-                  <AvatarFallback>{agency_name.charAt(0)}</AvatarFallback>
+                  <AvatarImage src={reportData.logo || undefined} alt={agency_name || ''} />
+                  <AvatarFallback>{agency_name ? agency_name.charAt(0) : 'A'}</AvatarFallback>
               </Avatar>
               <div>
                   <CardTitle className="text-2xl">{agency_name}</CardTitle>

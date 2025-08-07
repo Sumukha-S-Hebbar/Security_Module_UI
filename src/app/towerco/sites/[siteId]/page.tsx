@@ -90,7 +90,6 @@ export default function SiteReportPage() {
   const [reportData, setReportData] = useState<SiteReportData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [loggedInOrg, setLoggedInOrg] = useState<Organization | null>(null);
-  const [incidentsCurrentPage, setIncidentsCurrentPage] = useState(1);
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [selectedYear, setSelectedYear] = useState('all');
   const [selectedMonth, setSelectedMonth] = useState('all');
@@ -109,7 +108,7 @@ export default function SiteReportPage() {
   useEffect(() => {
     if (!loggedInOrg || !siteId) return;
 
-    const fetchReportData = async (page = 1) => {
+    const fetchReportData = async () => {
         setIsLoading(true);
         const token = localStorage.getItem('token');
         // Fetch all incidents by not including page param for client-side filtering
@@ -183,7 +182,7 @@ export default function SiteReportPage() {
       const incidentDate = new Date(incident.incident_time);
       const yearMatch = selectedYear === 'all' || incidentDate.getFullYear().toString() === selectedYear;
       const monthMatch = selectedMonth === 'all' || incidentDate.getMonth().toString() === selectedMonth;
-      const statusMatch = selectedStatus === 'all' || incident.incident_status.toLowerCase().replace(' ', '_') === selectedStatus;
+      const statusMatch = selectedStatus === 'all' || incident.incident_status.toLowerCase().replace(' ', '_') === selectedStatus.replace('-', '_');
       return yearMatch && monthMatch && statusMatch;
     });
   }, [reportData, selectedYear, selectedMonth, selectedStatus]);
