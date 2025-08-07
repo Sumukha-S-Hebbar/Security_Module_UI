@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useMemo } from 'react';
@@ -389,7 +390,7 @@ export default function AgencyGuardsPage() {
                 {filteredGuards.length > 0 ? (
                   filteredGuards.map((guard) => {
                     const patrollingOfficer = getPatrollingOfficerForGuard(guard);
-                    const incidentCount = guardIncidentCounts[guard.id] || 0;
+                    const incidentCount = guardIncidentCounts[guard.guard_id] || 0;
                     const site = agencySites.find(s => s.site_name === guard.site);
                     
                     return (
@@ -462,3 +463,5 @@ export default function AgencyGuardsPage() {
     </>
   );
 }
+
+    

@@ -1,9 +1,13 @@
+
 import type { Site } from '@/types';
 import { incidents } from './incidents';
 
 export const sites: Site[] = [
   {
     id: 'SITE01',
+    tb_site_id: 'TB-SITE-01',
+    org_site_id: 'TCOA-S1',
+    site_name: 'Tech Park One',
     name: 'Tech Park One',
     address: '123 Innovation Drive, Silicon Valley, CA',
     city: 'Silicon Valley',
@@ -21,10 +25,14 @@ export const sites: Site[] = [
     geofencePerimeter: 500,
     incidents: incidents.filter(i => i.siteId === 'SITE01'),
     agencyId: 'AGY01',
-    guardsRequired: 3
+    guardsRequired: 3,
+    site_status: 'Assigned'
   },
   {
     id: 'SITE02',
+    tb_site_id: 'TB-SITE-02',
+    org_site_id: 'TCOB-S1',
+    site_name: 'Downtown Mall',
     name: 'Downtown Mall',
     address: '456 Market Street, Metro City, NY',
     city: 'Metro City',
@@ -43,9 +51,13 @@ export const sites: Site[] = [
     incidents: incidents.filter(i => i.siteId === 'SITE02'),
     agencyId: 'AGY01',
     guardsRequired: 2,
+    site_status: 'Assigned'
   },
   {
     id: 'SITE03',
+    tb_site_id: 'TB-SITE-03',
+    org_site_id: 'TCOC-S1',
+    site_name: 'City Waterfront',
     name: 'City Waterfront',
     address: '789 Ocean Avenue, Bay City, FL',
     city: 'Bay City',
@@ -64,9 +76,13 @@ export const sites: Site[] = [
     incidents: incidents.filter(i => i.siteId === 'SITE03'),
     agencyId: 'AGY01',
     guardsRequired: 2,
+    site_status: 'Assigned'
   },
   {
     id: 'SITE04',
+    tb_site_id: 'TB-SITE-04',
+    org_site_id: 'TCOA-S2',
+    site_name: 'Cyberdyne Systems',
     name: 'Cyberdyne Systems',
     address: '2144 Kramer Street, Sunnyvale, CA',
     city: 'Sunnyvale',
@@ -84,10 +100,14 @@ export const sites: Site[] = [
     assignedOn: '2024-03-15',
     incidents: incidents.filter(i => i.siteId === 'SITE04'),
     agencyId: 'AGY02',
-    guardsRequired: 2
+    guardsRequired: 2,
+    site_status: 'Assigned'
   },
   {
     id: 'SITE05',
+    tb_site_id: 'TB-SITE-05',
+    org_site_id: 'TCOD-S1',
+    site_name: 'Industrial Zone 5',
     name: 'Industrial Zone 5',
     address: '555 Factory Rd, Industry City, TX',
     city: 'Industry City',
@@ -106,9 +126,13 @@ export const sites: Site[] = [
     incidents: incidents.filter(i => i.siteId === 'SITE05'),
     agencyId: 'AGY03',
     guardsRequired: 1,
+    site_status: 'Assigned'
   },
   {
     id: 'SITE06',
+    tb_site_id: 'TB-SITE-06',
+    org_site_id: 'TCOD-S2',
+    site_name: 'Industrial Zone 7',
     name: 'Industrial Zone 7',
     address: '777 Assembly Lane, Industry City, TX',
     city: 'Industry City',
@@ -127,9 +151,13 @@ export const sites: Site[] = [
     incidents: incidents.filter(i => i.siteId === 'SITE06'),
     agencyId: 'AGY03',
     guardsRequired: 1,
+    site_status: 'Unassigned'
   },
   {
     id: 'SITE07',
+    tb_site_id: 'TB-SITE-07',
+    org_site_id: 'TCOB-S2',
+    site_name: 'Metro Transit Hub',
     name: 'Metro Transit Hub',
     address: '101 Central Station, Metro City, NY',
     city: 'Metro City',
@@ -146,9 +174,13 @@ export const sites: Site[] = [
     assignedOn: '2024-05-20',
     agencyId: 'AGY01',
     guardsRequired: 1,
+    site_status: 'Assigned'
   },
   {
     id: 'SITE08',
+    tb_site_id: 'TB-SITE-08',
+    org_site_id: 'TCOA-S3',
+    site_name: 'North Point Relay',
     name: 'North Point Relay',
     address: '555 Summit Rd, Alpine, CA',
     city: 'Alpine',
@@ -165,9 +197,13 @@ export const sites: Site[] = [
     assignedOn: '2024-06-10',
     agencyId: 'AGY01',
     guardsRequired: 1,
+    site_status: 'Unassigned'
   },
   {
     id: 'SITE09',
+    tb_site_id: 'TB-SITE-09',
+    org_site_id: 'TCOA-S4',
+    site_name: 'East Valley Repeater',
     name: 'East Valley Repeater',
     address: '800 Valley View, Sunrise, CA',
     city: 'Sunrise',
@@ -183,9 +219,13 @@ export const sites: Site[] = [
     assignedOn: '2024-06-11',
     agencyId: 'AGY01',
     guardsRequired: 1,
+    site_status: 'Unassigned'
   },
   {
     id: 'SITE10',
+    tb_site_id: 'TB-SITE-10',
+    org_site_id: 'TCOA-S5',
+    site_name: 'South Ridge Tower',
     name: 'South Ridge Tower',
     address: '900 Ridge Line, Crestwood, CA',
     city: 'Crestwood',
@@ -202,9 +242,13 @@ export const sites: Site[] = [
     patrollingOfficerId: 'PO01',
     agencyId: 'AGY01',
     guardsRequired: 1,
+    site_status: 'Assigned'
   },
   {
     id: 'SITE11',
+    tb_site_id: 'TB-SITE-11',
+    org_site_id: 'TCOA-S6',
+    site_name: 'West Ridge Antenna',
     name: 'West Ridge Antenna',
     address: '110 Ridge Line, Crestwood, CA',
     city: 'Crestwood',
@@ -219,9 +263,13 @@ export const sites: Site[] = [
     towerco: 'TowerCo Alpha',
     agencyId: 'AGY01',
     guardsRequired: 1,
+    site_status: 'Unassigned'
   },
   {
     id: 'SITE12',
+    tb_site_id: 'TB-SITE-12',
+    org_site_id: 'TCOA-S7',
+    site_name: 'Central Valley Hub',
     name: 'Central Valley Hub',
     address: '220 Valley Center, Sunrise, CA',
     city: 'Sunrise',
@@ -236,9 +284,13 @@ export const sites: Site[] = [
     towerco: 'TowerCo Alpha',
     agencyId: 'AGY01',
     guardsRequired: 1,
+    site_status: 'Unassigned'
   },
   {
     id: 'SITE13',
+    tb_site_id: 'TB-SITE-13',
+    org_site_id: 'TCOA-S8',
+    site_name: 'City Core Tower',
     name: 'City Core Tower',
     address: '1 Central Plaza, Central City, CA',
     city: 'Central City',
@@ -257,9 +309,13 @@ export const sites: Site[] = [
     geofencePerimeter: 300,
     incidents: incidents.filter(i => i.siteId === 'SITE13'),
     guardsRequired: 1,
+    site_status: 'Assigned'
   },
   {
     id: 'SITE14',
+    tb_site_id: 'TB-SITE-14',
+    org_site_id: 'TCOA-S9',
+    site_name: 'Metro Data Center',
     name: 'Metro Data Center',
     address: '2 Data Drive, Central City, CA',
     city: 'Central City',
@@ -278,5 +334,8 @@ export const sites: Site[] = [
     geofencePerimeter: 400,
     incidents: incidents.filter(i => i.siteId === 'SITE14'),
     guardsRequired: 1,
+    site_status: 'Assigned'
   },
 ];
+
+    

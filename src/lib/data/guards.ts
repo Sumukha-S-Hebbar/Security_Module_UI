@@ -1,9 +1,13 @@
+
 import type { Guard } from '@/types';
 
 export const guards: Guard[] = [
   {
     id: 'GL001',
+    guard_id: 'GL001',
     name: 'John Doe',
+    first_name: 'John',
+    last_name: 'Doe',
     site: 'Downtown Mall',
     phone: '555-123-4567',
     location: 'Gate 4, Sector B',
@@ -15,7 +19,10 @@ export const guards: Guard[] = [
   },
   {
     id: 'GL002',
+    guard_id: 'GL002',
     name: 'Jane Smith',
+    first_name: 'Jane',
+    last_name: 'Smith',
     site: 'Tech Park One',
     phone: '555-987-6543',
     location: 'Building A, Lobby',
@@ -27,7 +34,10 @@ export const guards: Guard[] = [
   },
   {
     id: 'GL003',
+    guard_id: 'GL003',
     name: 'Mike Johnson',
+    first_name: 'Mike',
+    last_name: 'Johnson',
     site: 'City Waterfront',
     phone: '555-555-1212',
     location: 'Pier 3, North End',
@@ -39,7 +49,10 @@ export const guards: Guard[] = [
   },
   {
     id: 'GL004',
+    guard_id: 'GL004',
     name: 'Emily Williams',
+    first_name: 'Emily',
+    last_name: 'Williams',
     site: 'Tech Park One',
     phone: '555-333-4444',
     location: 'Building C, Entrance',
@@ -51,7 +64,10 @@ export const guards: Guard[] = [
   },
   {
     id: 'GL005',
+    guard_id: 'GL005',
     name: 'Sarah Connor',
+    first_name: 'Sarah',
+    last_name: 'Connor',
     site: 'Cyberdyne Systems',
     phone: '555-867-5309',
     location: 'R&D Dept',
@@ -63,7 +79,10 @@ export const guards: Guard[] = [
   },
   {
     id: 'GL006',
+    guard_id: 'GL006',
     name: 'Kyle Reese',
+    first_name: 'Kyle',
+    last_name: 'Reese',
     site: 'Cyberdyne Systems',
     phone: '555-867-5310',
     location: 'Mainframe Access',
@@ -75,7 +94,10 @@ export const guards: Guard[] = [
   },
   {
     id: 'GL007',
+    guard_id: 'GL007',
     name: 'David Brown',
+    first_name: 'David',
+    last_name: 'Brown',
     site: 'Industrial Zone 5',
     phone: '555-111-2222',
     location: 'Warehouse 3',
@@ -87,7 +109,10 @@ export const guards: Guard[] = [
   },
   {
     id: 'GL008',
+    guard_id: 'GL008',
     name: 'Chris Green',
+    first_name: 'Chris',
+    last_name: 'Green',
     site: 'Industrial Zone 7',
     phone: '555-444-5555',
     location: 'Perimeter Fence West',
@@ -98,7 +123,10 @@ export const guards: Guard[] = [
   },
   {
     id: 'GL009',
+    guard_id: 'GL009',
     name: 'Alex Ray',
+    first_name: 'Alex',
+    last_name: 'Ray',
     site: 'North Point Relay',
     phone: '555-222-3333',
     location: 'Main Tower',
@@ -109,7 +137,10 @@ export const guards: Guard[] = [
   },
   {
     id: 'GL010',
+    guard_id: 'GL010',
     name: 'Maria Garcia',
+    first_name: 'Maria',
+    last_name: 'Garcia',
     site: 'East Valley Repeater',
     phone: '555-666-7777',
     location: 'Substation A',
@@ -120,7 +151,10 @@ export const guards: Guard[] = [
   },
   {
     id: 'GL011',
+    guard_id: 'GL011',
     name: 'James Wilson',
+    first_name: 'James',
+    last_name: 'Wilson',
     site: 'South Ridge Tower',
     phone: '555-888-9999',
     location: 'Rooftop Antenna Array',
@@ -132,7 +166,10 @@ export const guards: Guard[] = [
   },
   {
     id: 'GL012',
+    guard_id: 'GL012',
     name: 'Patricia Martinez',
+    first_name: 'Patricia',
+    last_name: 'Martinez',
     site: 'Metro Transit Hub',
     phone: '555-777-8888',
     location: 'Platform 3',
@@ -144,7 +181,10 @@ export const guards: Guard[] = [
   },
   {
     id: 'GL013',
+    guard_id: 'GL013',
     name: 'Robert Jones',
+    first_name: 'Robert',
+    last_name: 'Jones',
     site: 'Downtown Mall',
     phone: '555-234-5678',
     location: 'Parking Garage Level 2',
@@ -156,7 +196,10 @@ export const guards: Guard[] = [
   },
   {
     id: 'GL014',
+    guard_id: 'GL014',
     name: 'Linda Taylor',
+    first_name: 'Linda',
+    last_name: 'Taylor',
     site: 'Tech Park One',
     phone: '555-345-6789',
     location: 'Server Room B',
@@ -168,7 +211,10 @@ export const guards: Guard[] = [
   },
   {
     id: 'GL015',
+    guard_id: 'GL015',
     name: 'William Anderson',
+    first_name: 'William',
+    last_name: 'Anderson',
     site: 'City Waterfront',
     phone: '555-456-7890',
     location: 'Boardwalk East',
@@ -180,7 +226,10 @@ export const guards: Guard[] = [
   },
   {
     id: 'GL016',
+    guard_id: 'GL016',
     name: 'Barbara Thomas',
+    first_name: 'Barbara',
+    last_name: 'Thomas',
     site: 'Central Valley Hub',
     phone: '555-567-8901',
     location: 'Control Room',
@@ -191,7 +240,10 @@ export const guards: Guard[] = [
   },
   {
     id: 'GL017',
+    guard_id: 'GL017',
     name: 'Richard Jackson',
+    first_name: 'Richard',
+    last_name: 'Jackson',
     site: 'West Ridge Antenna',
     phone: '555-678-9012',
     location: 'Base Station',
@@ -202,7 +254,10 @@ export const guards: Guard[] = [
   },
   {
     id: 'GL018',
+    guard_id: 'GL018',
     name: 'Peter Parker',
+    first_name: 'Peter',
+    last_name: 'Parker',
     site: 'City Core Tower',
     phone: '555-234-1962',
     location: 'Rooftop',
@@ -214,7 +269,10 @@ export const guards: Guard[] = [
   },
   {
     id: 'GL019',
+    guard_id: 'GL019',
     name: 'Mary Jane Watson',
+    first_name: 'Mary Jane',
+    last_name: 'Watson',
     site: 'Metro Data Center',
     phone: '555-234-1965',
     location: 'Lobby',
@@ -225,3 +283,5 @@ export const guards: Guard[] = [
     patrollingOfficerId: 'PO04',
   }
 ];
+
+    
