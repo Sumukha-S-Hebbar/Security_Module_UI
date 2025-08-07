@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
@@ -97,7 +96,7 @@ export default function AgencyIncidentReportPage() {
   }
 
   const site = sites.find((s) => s.id === incident.siteId);
-  const agency = site ? securityAgencies.find((a) => a.siteIds.includes(site.id)) : undefined;
+  const agency = site ? securityAgencies.find((a) => a.siteIds && a.siteIds.includes(site.id)) : undefined;
   const guard = guards.find((g) => g.id === incident.raisedByGuardId);
   const patrollingOfficer = patrollingOfficers.find((p) => p.id === incident.attendedByPatrollingOfficerId);
 
@@ -265,7 +264,7 @@ export default function AgencyIncidentReportPage() {
             </CardHeader>
             <CardContent className="text-sm space-y-3">
                <div>
-                  <div className="text-xl font-bold">{site.name}</div>
+                  <div className="text-xl font-bold">{site.site_name}</div>
                   <p className="font-medium">ID: {site.id}</p>
               </div>
               <div className='font-medium pt-2 border-t'>
@@ -296,7 +295,7 @@ export default function AgencyIncidentReportPage() {
             <CardContent className="text-sm space-y-2">
                <div>
                   <div className="text-xl font-bold">{agency.name}</div>
-                  <p className="font-medium">ID: {agency.id}</p>
+                  <p className="font-medium">ID: {agency.agency_id}</p>
               </div>
               <div className="flex items-center gap-2 font-medium pt-2 border-t"><Phone className="h-4 w-4" /> <a href={`tel:${agency.phone}`} className="hover:underline">{agency.phone}</a></div>
               <div className="flex items-center gap-2 font-medium"><Mail className="h-4 w-4" /> <a href={`mailto:${agency.email}`} className="hover:underline">{agency.email}</a></div>
@@ -392,7 +391,7 @@ export default function AgencyIncidentReportPage() {
                       <h3 className="text-xl font-semibold">Initial Incident Report</h3>
                        <div>
                         <Label htmlFor="incident-type" className="text-base">Incident Type</Label>
-                        <Select value={incidentType} onValueChange={(value) => setIncidentType(value as typeof incidentType)}>
+                        <Select value={incidentType} onValueChange={(value) => setIncidentType(value as Incident['incidentType'])}>
                           <SelectTrigger id="incident-type" className="mt-2">
                             <SelectValue placeholder="Select an incident type" />
                           </SelectTrigger>
