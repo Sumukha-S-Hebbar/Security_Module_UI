@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useMemo, useState, useRef } from 'react';
@@ -51,7 +50,7 @@ export default function AgencyHomePage() {
   const [activeIncidentsCurrentPage, setActiveIncidentsCurrentPage] = useState(1);
 
   const agencySiteIds = useMemo(() => {
-    const agency = securityAgencies.find(a => a.id === LOGGED_IN_AGENCY_ID);
+    const agency = securityAgencies.find(a => a.agency_id === LOGGED_IN_AGENCY_ID);
     return new Set(agency ? agency.siteIds : []);
   }, []);
 
@@ -60,7 +59,7 @@ export default function AgencyHomePage() {
   const agencyIncidents = useMemo(() => incidents.filter(incident => agencySiteIds.has(incident.siteId)), [agencySiteIds]);
   
   const agencyGuards = useMemo(() => {
-    const siteNames = new Set(agencySites.map(s => s.name));
+    const siteNames = new Set(agencySites.map(s => s.site_name));
     return guards.filter(guard => siteNames.has(guard.site));
   }, [agencySites]);
   
@@ -153,7 +152,7 @@ export default function AgencyHomePage() {
                         </Button>
                       </TableCell>
                       <TableCell>
-                        {siteDetails?.name || 'N/A'}
+                        {siteDetails?.site_name || 'N/A'}
                       </TableCell>
                       <TableCell>{guardDetails?.name || 'N/A'}</TableCell>
                       <TableCell>
