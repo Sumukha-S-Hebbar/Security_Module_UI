@@ -79,7 +79,7 @@ export default function AgencyIncidentsPage() {
   }, []);
 
   const agencySiteIds = useMemo(() => {
-    const agency = securityAgencies.find(a => a.id === LOGGED_IN_AGENCY_ID);
+    const agency = securityAgencies.find(a => a.agency_id === LOGGED_IN_AGENCY_ID);
     return new Set(agency ? agency.siteIds : []);
   }, []);
 
