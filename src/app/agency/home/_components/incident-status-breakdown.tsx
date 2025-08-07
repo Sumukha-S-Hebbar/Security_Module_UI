@@ -86,7 +86,7 @@ export function IncidentStatusBreakdown({
   }, [filteredByDateIncidents, selectedStatus]);
 
   const getSiteName = (siteId: string) =>
-    sites.find((s) => s.id === siteId)?.name || 'N/A';
+    sites.find((s) => s.id === siteId)?.site_name || 'N/A';
   const getGuardName = (guardId: string) =>
     guards.find((g) => g.id === guardId)?.name || 'N/A';
 
