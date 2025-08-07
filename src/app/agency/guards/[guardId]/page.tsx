@@ -77,7 +77,7 @@ export default function AgencyGuardReportPage() {
     );
   }
 
-  const site = sites.find((s) => s.name === guard.site);
+  const site = sites.find((s) => s.site_name === guard.site);
   const patrollingOfficer = site ? patrollingOfficers.find(p => p.id === site.patrollingOfficerId) : undefined;
   const guardIncidents = incidents.filter(i => i.raisedByGuardId === guard.id);
   const resolvedIncidents = guardIncidents.filter(i => i.status === 'Resolved').length;
@@ -255,7 +255,7 @@ export default function AgencyGuardReportPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <p className="font-semibold text-base">{site.name}</p>
+                <p className="font-semibold text-base">{site.site_name}</p>
                 <p className="font-medium">ID: {site.id}</p>
               </div>
               <div className="text-sm space-y-1 pt-2 border-t">
