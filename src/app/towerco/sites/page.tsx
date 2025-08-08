@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useMemo, useEffect, useRef } from 'react';
@@ -371,7 +372,7 @@ export default function TowercoSitesPage() {
         return;
     }
 
-    const agency = securityAgencies.find((a) => a.agency_id === agencyId);
+    const agency = securityAgencies.find((a) => a.id.toString() === agencyId);
     if (!agency) {
         toast({ variant: 'destructive', title: 'Error', description: 'Could not find the selected agency.' });
         return;
@@ -1038,11 +1039,7 @@ export default function TowercoSitesPage() {
                         <TableRow 
                           key={site.id} 
                           ref={(el) => {
-                            if (el) {
-                                unassignedSitesRef.current.set(site.id.toString(), el);
-                            } else {
-                                unassignedSitesRef.current.delete(site.id.toString());
-                            }
+                            unassignedSitesRef.current.set(site.id.toString(), el);
                           }}
                         >
                           <TableCell className="font-medium">{site.org_site_id}</TableCell>
@@ -1076,7 +1073,7 @@ export default function TowercoSitesPage() {
                               <SelectContent>
                                 {securityAgencies.length > 0 ? (
                                   securityAgencies.map((agency) => (
-                                    <SelectItem key={agency.id} value={agency.agency_id} className="font-medium">
+                                    <SelectItem key={agency.id} value={agency.id.toString()} className="font-medium">
                                       {agency.agency_name}
                                     </SelectItem>
                                   ))

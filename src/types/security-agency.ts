@@ -1,4 +1,5 @@
 
+
 import type { Site } from './site';
 
 type AssignedSiteDetail = {
@@ -34,9 +35,9 @@ export type SecurityAgency = {
   assigned_sites_details: AssignedSiteDetail[];
 
   // Fields from original mock data that might not be in the final API
-  name?: string; // a bit redundant with agency_name
-  email?: string; // a bit redundant with communication_email
-  address?: string;
+  name: string; // a bit redundant with agency_name
+  email: string; // a bit redundant with communication_email
+  address: string;
   country?: string;
   avatar?: string;
   siteIds?: string[];

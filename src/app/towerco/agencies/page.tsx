@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useMemo, useEffect, useRef, Fragment } from 'react';
@@ -77,6 +78,9 @@ type ApiCity = {
     name: string;
 }
 
+type AssignedSiteDetail = SecurityAgency['assigned_sites_details'][0];
+
+
 async function getRegions(agencies: SecurityAgency[]): Promise<string[]> {
     const uniqueRegions = [...new Set(agencies.map(agency => agency.region))];
     return uniqueRegions.sort();
@@ -93,6 +97,9 @@ export default function TowercoAgenciesPage() {
     const [isUploading, setIsUploading] = useState(false);
     const [isAddingAgency, setIsAddingAgency] = useState(false);
     const [expandedAgencyId, setExpandedAgencyId] = useState<string | null>(null);
+    const [expandedAgencySites, setExpandedAgencySites] = useState<AssignedSiteDetail[]>([]);
+    const [isExpandedSitesLoading, setIsExpandedSitesLoading] = useState(false);
+
     const { toast } = useToast();
     const router = useRouter();
     const [searchQuery, setSearchQuery] = useState('');
@@ -341,12 +348,40 @@ export default function TowercoAgenciesPage() {
         }
     };
 
-    const handleExpandClick = (e: React.MouseEvent, agencyId: string, siteCount: number) => {
-        e.stopPropagation();
-        if (siteCount > 0) {
-            setExpandedAgencyId(prevId => prevId === agencyId ? null : agencyId);
+    const fetchAssignedSites = async (agencyId: number) => {
+        if (!loggedInOrg) return [];
+        setIsExpandedSitesLoading(true);
+        const token = localStorage.getItem('token');
+        const url = `/security/api/orgs/${loggedInOrg.code}/security-agencies/${agencyId}/`;
+        try {
+            const data = await fetchData<{ assigned_sites: AssignedSiteDetail[] }>(url, {
+                headers: { 'Authorization': `Token ${token}` }
+            });
+            return data?.assigned_sites || [];
+        } catch (error) {
+            console.error("Failed to fetch assigned sites:", error);
+            toast({ variant: 'destructive', title: 'Error', description: 'Could not load assigned sites for this agency.' });
+            return [];
+        } finally {
+            setIsExpandedSitesLoading(false);
         }
-    }
+    };
+
+    const handleExpandClick = async (e: React.MouseEvent, agency: SecurityAgency) => {
+        e.stopPropagation();
+        const agencyId = agency.agency_id;
+        
+        if (expandedAgencyId === agencyId) {
+            setExpandedAgencyId(null);
+            setExpandedAgencySites([]);
+        } else {
+            if (agency.total_sites_assigned > 0) {
+                setExpandedAgencyId(agencyId);
+                const sites = await fetchAssignedSites(agency.id);
+                setExpandedAgencySites(sites);
+            }
+        }
+    };
 
     return (
         <div className="p-4 sm:p-6 lg:p-8 space-y-6">
@@ -719,23 +754,20 @@ export default function TowercoAgenciesPage() {
                                                     </div>
                                                 </TableCell>
                                                 <TableCell>
-                                                    {agency.total_sites_assigned > 0 ? (
+                                                    
                                                         <Button
                                                             data-expand-button="true"
                                                             variant="link"
                                                             className="p-0 h-auto flex items-center gap-2 text-accent group-hover:text-accent-foreground"
-                                                            onClick={(e) => handleExpandClick(e, agency.agency_id, agency.total_sites_assigned)}
+                                                            onClick={(e) => handleExpandClick(e, agency)}
+                                                            disabled={agency.total_sites_assigned === 0}
                                                         >
                                                             <Building2 className="h-4 w-4" />
                                                             {agency.total_sites_assigned}
-                                                            <ChevronDown className={cn("h-4 w-4 transition-transform", isExpanded && "rotate-180")} />
+                                                            {agency.total_sites_assigned > 0 && (
+                                                                <ChevronDown className={cn("h-4 w-4 transition-transform", isExpanded && "rotate-180")} />
+                                                            )}
                                                         </Button>
-                                                    ) : (
-                                                        <div className="flex items-center gap-2 font-medium">
-                                                            <Building2 className="h-4 w-4 text-muted-foreground group-hover:text-accent-foreground" />
-                                                            {agency.total_sites_assigned}
-                                                        </div>
-                                                    )}
                                                 </TableCell>
                                                 <TableCell>
                                                   <div className="flex items-center gap-2 font-medium">
@@ -744,11 +776,16 @@ export default function TowercoAgenciesPage() {
                                                   </div>
                                                 </TableCell>
                                             </TableRow>
-                                            {isExpanded && agency.total_sites_assigned > 0 && (
+                                            {isExpanded && (
                                                 <TableRow className="bg-muted/50 hover:bg-muted/50">
                                                     <TableCell colSpan={6} className="p-0">
                                                         <div className="p-4">
                                                             <h4 className="font-semibold mb-2">Sites Assigned to {agency.agency_name}</h4>
+                                                            {isExpandedSitesLoading ? (
+                                                                <div className="flex items-center justify-center p-4">
+                                                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Loading sites...
+                                                                </div>
+                                                            ) : expandedAgencySites.length > 0 ? (
                                                                 <Table>
                                                                     <TableHeader>
                                                                         <TableRow>
@@ -760,7 +797,7 @@ export default function TowercoAgenciesPage() {
                                                                         </TableRow>
                                                                     </TableHeader>
                                                                     <TableBody>
-                                                                        {agency.assigned_sites_details.map((siteDetail) => (
+                                                                        {expandedAgencySites.map((siteDetail) => (
                                                                             <TableRow 
                                                                               key={siteDetail.site_details.id} 
                                                                               onClick={() => router.push(`/towerco/sites/${siteDetail.site_details.id}`)}
@@ -779,6 +816,11 @@ export default function TowercoAgenciesPage() {
                                                                         ))}
                                                                     </TableBody>
                                                                 </Table>
+                                                            ) : (
+                                                                <p className="text-sm text-muted-foreground text-center py-4">
+                                                                    No sites are assigned to this agency.
+                                                                </p>
+                                                            )}
                                                         </div>
                                                     </TableCell>
                                                 </TableRow>

@@ -3,7 +3,7 @@
 'use client';
 
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { sites } from '@/lib/data/sites';
 import { guards } from '@/lib/data/guards';
@@ -94,12 +94,12 @@ export default function AgencySitesPage() {
     }, {} as {[key: string]: Site});
   }, []);
 
-  const unassignedGuards = useMemo(
-    () => guards.filter(guard => {
-      const site = agencySites.find(s => s.guards?.includes(guard.id));
-      return !site?.patrollingOfficerId;
-    }), [agencySites]
-  );
+  const unassignedGuards = useMemo(() => {
+    return guards.filter(guard => {
+      const siteForGuard = sites.find(s => s.guards?.includes(guard.id));
+      return !siteForGuard;
+    });
+  }, []);
   
   const allAgencyPatrollingOfficers = useMemo(() => {
     // In a real app, this might be a separate API call for all patrolling officers in the agency

@@ -183,7 +183,7 @@ export default function AgencyReportPage() {
           
           const queryParams = new URLSearchParams();
           if (performanceSelectedYear !== 'all') queryParams.append('year', performanceSelectedYear);
-          if (performanceSelectedMonth !== 'all') queryParams.append('month', performanceSelectedMonth);
+          if (performanceSelectedMonth !== 'all') queryParams.append('month', (parseInt(performanceSelectedMonth) + 1).toString());
 
           if (queryParams.toString()) {
             url += `?${queryParams.toString()}`;
@@ -235,15 +235,7 @@ export default function AgencyReportPage() {
     return reportData.incidents.filter(incident => {
         const incidentDate = new Date(incident.incident_time);
         
-        let statusMatch = true;
-        if (incidentsStatusFilter !== 'all') {
-          if (incidentsStatusFilter === 'under_review') {
-              statusMatch = incident.incident_status === 'Under Review';
-          } else {
-              statusMatch = incident.incident_status.toLowerCase() === incidentsStatusFilter;
-          }
-        }
-        
+        const statusMatch = incidentsStatusFilter === 'all' || incident.incident_status.toLowerCase().replace(' ', '_') === incidentsStatusFilter.replace('-', '_');
         const yearMatch = incidentsYearFilter === 'all' || incidentDate.getFullYear().toString() === incidentsYearFilter;
         const monthMatch = incidentsMonthFilter === 'all' || incidentDate.getMonth().toString() === incidentsMonthFilter;
 
@@ -473,7 +465,7 @@ export default function AgencyReportPage() {
                     <SelectContent>
                       <SelectItem value="all" className="font-medium">All Months</SelectItem>
                       {Array.from({ length: 12 }, (_, i) => (
-                          <SelectItem key={i} value={(i + 1).toString()} className="font-medium">
+                          <SelectItem key={i} value={i.toString()} className="font-medium">
                           {new Date(0, i).toLocaleString('default', { month: 'long' })}
                           </SelectItem>
                       ))}

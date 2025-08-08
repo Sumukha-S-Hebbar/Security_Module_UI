@@ -1,4 +1,5 @@
 
+
 import type { Incident } from './incident';
 import type { SecurityAgency } from './security-agency';
 
@@ -24,7 +25,6 @@ export type Site = {
   
   // These fields were in the mock data and may or may not be in the final API.
   // Kept for potential compatibility or future use.
-  address?: string; // Replaced by site_address_line1 etc.
   guards?: string[];
   country?: string;
   reportUrl?: string;
