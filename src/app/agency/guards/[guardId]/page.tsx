@@ -261,7 +261,7 @@ export default function AgencyGuardReportPage() {
               <div className="text-sm space-y-1 pt-2 border-t">
                 <p className="font-semibold">Address</p>
                 <p className="font-medium text-muted-foreground">
-                  {site.address}
+                  {site.site_address_line1}
                 </p>
               </div>
               <Button asChild variant="link" className="p-0 h-auto font-medium">
@@ -491,3 +491,5 @@ export default function AgencyGuardReportPage() {
     </div>
   );
 }
+
+    
