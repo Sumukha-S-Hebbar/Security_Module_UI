@@ -2,6 +2,7 @@
 import { Suspense } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { IncidentsPageClient } from './_components/incidents-page-client';
+import { Card, CardHeader, CardContent } from "@/components/ui/card";
 
 function IncidentsPageSkeleton() {
     return (
