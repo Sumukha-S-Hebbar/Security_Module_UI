@@ -89,14 +89,14 @@ export default function AgencySitesPage() {
   
   const siteDetailsMap = useMemo(() => {
     return sites.reduce((acc, site) => {
-        acc[site.name] = site;
+        acc[site.site_name] = site;
         return acc;
     }, {} as {[key: string]: Site});
   }, []);
 
   const unassignedGuards = useMemo(
     () => guards.filter(guard => {
-      const site = agencySites.find(s => s.guards.includes(guard.id));
+      const site = agencySites.find(s => s.guards?.includes(guard.id));
       return !site?.patrollingOfficerId;
     }), [agencySites]
   );
@@ -230,7 +230,7 @@ export default function AgencySitesPage() {
       });
       return;
     }
-    const siteName = unassignedSites.find((s) => s.id === siteId)?.name;
+    const siteName = unassignedSites.find((s) => s.id === siteId)?.site_name;
     const patrollingOfficerName = allAgencyPatrollingOfficers.find(
       (s) => s.id === patrollingOfficerId
     )?.name;
@@ -245,7 +245,7 @@ export default function AgencySitesPage() {
     return assignedSites.filter((site) => {
       const searchLower = assignedSearchQuery.toLowerCase();
       const matchesSearch =
-        site.name.toLowerCase().includes(searchLower) ||
+        site.site_name.toLowerCase().includes(searchLower) ||
         site.address.toLowerCase().includes(searchLower);
 
       const patrollingOfficer = getPatrollingOfficerForSite(site.id);
@@ -272,7 +272,7 @@ export default function AgencySitesPage() {
     return unassignedSites.filter((site) => {
       const searchLower = unassignedSearchQuery.toLowerCase();
       const matchesSearch =
-        site.name.toLowerCase().includes(searchLower) ||
+        site.site_name.toLowerCase().includes(searchLower) ||
         site.address.toLowerCase().includes(searchLower);
 
       const matchesRegion = unassignedSelectedRegion === 'all' || site.region === unassignedSelectedRegion;
@@ -500,14 +500,14 @@ export default function AgencySitesPage() {
                       </Button>
                     </TableCell>
                     <TableCell>
-                      <p className="font-medium">{site.name}</p>
+                      <p className="font-medium">{site.site_name}</p>
                       <p className="text-sm text-muted-foreground font-medium group-hover:text-accent-foreground">{site.address}</p>
                     </TableCell>
                     <TableCell className="font-medium">{patrollingOfficer?.name || 'N/A'}</TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2 font-medium">
                         <Users className="h-4 w-4 text-muted-foreground group-hover:text-accent-foreground" />
-                        <span>{site.guards.length}</span>
+                        <span>{site.guards?.length || 0}</span>
                       </div>
                     </TableCell>
                     <TableCell>
@@ -597,7 +597,7 @@ export default function AgencySitesPage() {
                   filteredUnassignedSites.map((site) => (
                   <TableRow key={site.id}>
                     <TableCell className="align-top py-4">
-                      <div className="font-medium">{site.name}</div>
+                      <div className="font-medium">{site.site_name}</div>
                       <div className="text-sm text-muted-foreground flex items-center gap-1 font-medium">
                         <MapPin className="w-3 h-3" />
                         {site.address}
@@ -672,4 +672,3 @@ export default function AgencySitesPage() {
     </div>
   );
 }
-
