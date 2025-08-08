@@ -93,6 +93,7 @@ export default function SiteReportPage() {
   const [selectedYear, setSelectedYear] = useState('all');
   const [selectedMonth, setSelectedMonth] = useState('all');
   const incidentsTableRef = useRef<HTMLDivElement>(null);
+  const [selectedChartYear, setSelectedChartYear] = useState<string>(new Date().getFullYear().toString());
 
 
   useEffect(() => {
@@ -141,17 +142,17 @@ export default function SiteReportPage() {
     return Array.from(years).sort((a, b) => parseInt(b) - parseInt(a));
   }, [reportData]);
 
-  const [selectedChartYear, setSelectedChartYear] = useState<string>(() => {
-    const currentYear = new Date().getFullYear().toString();
-    const years = reportData ? new Set(reportData.incidents.results.map((incident: any) => new Date(incident.incident_time).getFullYear().toString())) : new Set();
-    return years.has(currentYear) ? currentYear : (Array.from(years).sort((a,b) => parseInt(b) - parseInt(a))[0] || currentYear);
-  });
-
   useEffect(() => {
-    if (reportData && availableYears.length > 0 && !availableYears.includes(selectedChartYear)) {
-      setSelectedChartYear(availableYears[0]);
+    if (reportData && availableYears.length > 0) {
+      const currentYear = new Date().getFullYear().toString();
+      if (availableYears.includes(currentYear)) {
+        setSelectedChartYear(currentYear);
+      } else {
+        setSelectedChartYear(availableYears[0]);
+      }
     }
-  }, [reportData, availableYears, selectedChartYear]);
+  }, [reportData, availableYears]);
+
 
   const monthlyIncidentData = useMemo(() => {
     if (!reportData) return [];
