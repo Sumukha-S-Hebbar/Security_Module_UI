@@ -1,6 +1,5 @@
 
 import type { Site } from '@/types';
-import { incidents } from './incidents';
 
 export const sites: Site[] = [
   {
@@ -22,7 +21,6 @@ export const sites: Site[] = [
     assignedOn: '2024-05-10',
     patrollingOfficerId: 'PO02',
     geofencePerimeter: 500,
-    incidents: incidents.filter(i => i.siteId === 'SITE01'),
     agencyId: 'AGY01',
     guardsRequired: 3,
     site_status: 'Assigned'
@@ -46,7 +44,6 @@ export const sites: Site[] = [
     assignedOn: '2024-04-20',
     patrollingOfficerId: 'PO01',
     geofencePerimeter: 1000,
-    incidents: incidents.filter(i => i.siteId === 'SITE02'),
     agencyId: 'AGY01',
     guardsRequired: 2,
     site_status: 'Assigned'
@@ -70,7 +67,6 @@ export const sites: Site[] = [
     assignedOn: '2024-06-01',
     patrollingOfficerId: 'PO01',
     geofencePerimeter: 800,
-    incidents: incidents.filter(i => i.siteId === 'SITE03'),
     agencyId: 'AGY01',
     guardsRequired: 2,
     site_status: 'Assigned'
@@ -94,7 +90,6 @@ export const sites: Site[] = [
     patrollingOfficerId: 'PO02',
     geofencePerimeter: 1200,
     assignedOn: '2024-03-15',
-    incidents: incidents.filter(i => i.siteId === 'SITE04'),
     agencyId: 'AGY02',
     guardsRequired: 2,
     site_status: 'Assigned'
@@ -118,7 +113,6 @@ export const sites: Site[] = [
     patrollingOfficerId: 'PO03',
     assignedOn: '2024-07-01',
     geofencePerimeter: 1500,
-    incidents: incidents.filter(i => i.siteId === 'SITE05'),
     agencyId: 'AGY03',
     guardsRequired: 1,
     site_status: 'Assigned'
@@ -142,7 +136,6 @@ export const sites: Site[] = [
     patrollingOfficerId: 'PO03',
     assignedOn: '2024-07-05',
     geofencePerimeter: 2000,
-    incidents: incidents.filter(i => i.siteId === 'SITE06'),
     agencyId: 'AGY03',
     guardsRequired: 1,
     site_status: 'Unassigned'
@@ -294,7 +287,6 @@ export const sites: Site[] = [
     assignedOn: '2024-07-20',
     patrollingOfficerId: 'PO04',
     geofencePerimeter: 300,
-    incidents: incidents.filter(i => i.siteId === 'SITE13'),
     guardsRequired: 1,
     site_status: 'Assigned'
   },
@@ -318,7 +310,6 @@ export const sites: Site[] = [
     assignedOn: '2024-07-21',
     patrollingOfficerId: 'PO04',
     geofencePerimeter: 400,
-    incidents: incidents.filter(i => i.siteId === 'SITE14'),
     guardsRequired: 1,
     site_status: 'Assigned'
   },

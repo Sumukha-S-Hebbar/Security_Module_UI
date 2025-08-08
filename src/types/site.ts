@@ -35,7 +35,6 @@ export type Site = {
   assignedOn?: string;
   patrollingOfficerId?: string;
   geofencePerimeter?: number;
-  incidents?: Incident[];
   guardsRequired?: number;
 };
 
