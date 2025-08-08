@@ -25,12 +25,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Checkbox } from '@/components/ui/checkbox';
 import { CheckIcon, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import type { Organization, User } from '@/types';
+import type { Organization, User, Subcontractor } from '@/types';
 
 interface LoginResponse {
   token: string;
   user: User;
-  organization: Organization | null;
+  organization?: Organization;
+  subcontractor?: Subcontractor;
   country: any;
 }
 
@@ -68,10 +69,29 @@ export default function RootPage() {
       
       const data: LoginResponse = await response.json();
       
+      let orgToStore: Partial<Organization> | null = null;
+      if (data.organization) {
+        orgToStore = data.organization;
+      } else if (data.subcontractor) {
+        // Map subcontractor to organization structure for consistent use in the app
+        orgToStore = {
+            id: data.subcontractor.id,
+            name: data.subcontractor.name,
+            code: data.subcontractor.subcon_id,
+            role: data.subcontractor.role,
+            type: data.subcontractor.type,
+            logo: data.subcontractor.logo,
+            member: data.subcontractor.subcon_member
+        };
+      }
+
+
       // Store user and organization data in localStorage
       if (typeof window !== 'undefined') {
         localStorage.setItem('user', JSON.stringify(data.user));
-        localStorage.setItem('organization', JSON.stringify(data.organization));
+        if (orgToStore) {
+            localStorage.setItem('organization', JSON.stringify(orgToStore));
+        }
         localStorage.setItem('token', data.token);
       }
 
@@ -85,7 +105,7 @@ export default function RootPage() {
       const userRole = data.user.role;
       if (userRole === 'T' || userRole === 'O') {
         router.push('/towerco/home');
-      } else if (userRole === 'SA') {
+      } else if (userRole === 'SA' || userRole === 'SG') {
         router.push('/agency/home');
       } else {
         throw new Error('Unknown user role. Cannot redirect.');

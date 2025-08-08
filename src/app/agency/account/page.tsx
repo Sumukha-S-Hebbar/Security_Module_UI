@@ -6,7 +6,6 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useToast } from '@/hooks/use-toast';
-import { securityAgencies } from '@/lib/data/security-agencies';
 import { sites } from '@/lib/data/sites';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,8 +14,8 @@ import { Input } from '@/components/ui/input';
 import { Loader2, KeyRound } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import type { Organization, User } from '@/types';
 
-const LOGGED_IN_AGENCY_ID = 'AGY01';
 
 const profileFormSchema = z.object({
   name: z.string().min(1, 'Agency name is required.'),
@@ -34,18 +33,28 @@ export default function AgencyAccountPage() {
   const { toast } = useToast();
   const [isSaving, setIsSaving] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [agency, setAgency] = useState<Organization | null>(null);
+  const [user, setUser] = useState<User | null>(null);
 
-  const agency = useMemo(() => securityAgencies.find(a => a.agency_id === LOGGED_IN_AGENCY_ID), []);
+
+  useEffect(() => {
+    if(typeof window !== 'undefined') {
+        const orgData = localStorage.getItem('organization');
+        const userData = localStorage.getItem('user');
+        if (orgData) setAgency(JSON.parse(orgData));
+        if (userData) setUser(JSON.parse(userData));
+    }
+  }, []);
   
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
-    defaultValues: {
+    values: {
       name: agency?.name || '',
-      phone: agency?.phone || '',
-      email: agency?.email || '',
-      address: agency?.address || '',
-      region: agency?.region || '',
-      city: agency?.city || '',
+      phone: agency?.member?.phone || '',
+      email: user?.email || '',
+      address: '', // Mock data doesn't have this, so we leave it empty
+      region: '', // Mock data doesn't have this
+      city: '',   // Mock data doesn't have this
       avatar: undefined,
     },
   });
@@ -62,8 +71,11 @@ export default function AgencyAccountPage() {
   }, [selectedRegion]);
   
   useEffect(() => {
-    if (agency?.avatar) {
-      setAvatarPreview(agency.avatar);
+    if (agency?.logo) {
+      setAvatarPreview(agency.logo);
+    }
+     if (agency?.member?.profile_picture) {
+      setAvatarPreview(agency.member.profile_picture);
     }
   }, [agency]);
   
@@ -102,15 +114,15 @@ export default function AgencyAccountPage() {
     setIsSaving(false);
   }
 
-  if (!agency) {
+  if (!agency || !user) {
     return (
       <div className="p-4 sm:p-6 lg:p-8">
         <Card>
           <CardHeader>
-            <CardTitle>Error</CardTitle>
+            <CardTitle>Loading...</CardTitle>
           </CardHeader>
           <CardContent>
-            <p>Could not load agency profile. Please try again later.</p>
+            <p>Loading your profile information...</p>
           </CardContent>
         </Card>
       </div>
