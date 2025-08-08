@@ -82,7 +82,10 @@ export default function AgencyGuardsPage() {
   
   const agencyGuards = useMemo(() => {
     const agencySiteNames = new Set(agencySites.map(s => s.site_name));
-    return guards.filter(guard => agencySiteNames.has(guard.site));
+    return guards.filter(guard => {
+      // Defensive check: ensure guard.site exists on an agency site before including.
+      return guard.site && agencySiteNames.has(guard.site);
+    });
   }, [agencySites]);
 
   // Use all patrolling officers for lookup, not just ones already assigned to a site.

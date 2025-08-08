@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useMemo, useEffect, useRef } from 'react';
@@ -1038,9 +1037,7 @@ export default function TowercoSitesPage() {
                       return (
                         <TableRow 
                           key={site.id} 
-                          ref={(el) => {
-                            unassignedSitesRef.current.set(site.id.toString(), el);
-                          }}
+                          ref={(el) => unassignedSitesRef.current.set(site.id, el)}
                         >
                           <TableCell className="font-medium">{site.org_site_id}</TableCell>
                           <TableCell>
@@ -1061,29 +1058,30 @@ export default function TowercoSitesPage() {
                             />
                           </TableCell>
                           <TableCell>
-                            <Select
-                              onValueChange={(value) =>
-                                handleAssignmentChange(site.id.toString(), value)
-                              }
-                               onClick={(e) => e.stopPropagation()}
-                            >
-                              <SelectTrigger className="w-[200px] font-medium">
-                                <SelectValue placeholder="Select an agency" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {securityAgencies.length > 0 ? (
-                                  securityAgencies.map((agency) => (
-                                    <SelectItem key={agency.id} value={agency.id.toString()} className="font-medium">
-                                      {agency.agency_name}
-                                    </SelectItem>
-                                  ))
-                                ) : (
-                                  <div className="px-2 py-1.5 text-sm text-muted-foreground font-medium">
-                                    No agencies available
-                                  </div>
-                                )}
-                              </SelectContent>
-                            </Select>
+                            <div onClick={(e) => e.stopPropagation()}>
+                              <Select
+                                onValueChange={(value) =>
+                                  handleAssignmentChange(site.id.toString(), value)
+                                }
+                              >
+                                <SelectTrigger className="w-[200px] font-medium">
+                                  <SelectValue placeholder="Select an agency" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {securityAgencies.length > 0 ? (
+                                    securityAgencies.map((agency) => (
+                                      <SelectItem key={agency.id} value={agency.id.toString()} className="font-medium">
+                                        {agency.agency_name}
+                                      </SelectItem>
+                                    ))
+                                  ) : (
+                                    <div className="px-2 py-1.5 text-sm text-muted-foreground font-medium">
+                                      No agencies available
+                                    </div>
+                                  )}
+                                </SelectContent>
+                              </Select>
+                            </div>
                           </TableCell>
                           <TableCell className="text-right">
                             <Button
