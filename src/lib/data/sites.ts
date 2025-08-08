@@ -138,7 +138,7 @@ export const sites: Site[] = [
     geofencePerimeter: 2000,
     agencyId: 'AGY03',
     guardsRequired: 1,
-    site_status: 'Unassigned'
+    site_status: 'Assigned'
   },
   {
     id: 'SITE07',
@@ -178,9 +178,9 @@ export const sites: Site[] = [
     coords: { x: 30, y: 15 },
     visited: false,
     towerco: 'TowerCo Alpha',
-    patrollingOfficerId: 'PO01',
+    patrollingOfficerId: undefined,
     assignedOn: '2024-06-10',
-    agencyId: 'AGY01',
+    agencyId: undefined,
     guardsRequired: 1,
     site_status: 'Unassigned'
   },
@@ -200,8 +200,9 @@ export const sites: Site[] = [
     coords: { x: 45, y: 25 },
     visited: false,
     towerco: 'TowerCo Alpha',
+    patrollingOfficerId: undefined,
     assignedOn: '2024-06-11',
-    agencyId: 'AGY01',
+    agencyId: undefined,
     guardsRequired: 1,
     site_status: 'Unassigned'
   },
@@ -243,7 +244,8 @@ export const sites: Site[] = [
     coords: { x: 25, y: 40 },
     visited: false,
     towerco: 'TowerCo Alpha',
-    agencyId: 'AGY01',
+    patrollingOfficerId: undefined,
+    agencyId: undefined,
     guardsRequired: 1,
     site_status: 'Unassigned'
   },
@@ -263,7 +265,8 @@ export const sites: Site[] = [
     coords: { x: 50, y: 30 },
     visited: false,
     towerco: 'TowerCo Alpha',
-    agencyId: 'AGY01',
+    patrollingOfficerId: undefined,
+    agencyId: undefined,
     guardsRequired: 1,
     site_status: 'Unassigned'
   },
