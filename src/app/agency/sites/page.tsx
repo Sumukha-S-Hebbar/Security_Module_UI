@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
@@ -245,7 +246,7 @@ export default function AgencySitesPage() {
       const searchLower = assignedSearchQuery.toLowerCase();
       const matchesSearch =
         site.site_name.toLowerCase().includes(searchLower) ||
-        site.address.toLowerCase().includes(searchLower);
+        site.site_address_line1.toLowerCase().includes(searchLower);
 
       const patrollingOfficer = getPatrollingOfficerForSite(site.id);
       const matchesPatrollingOfficer =
@@ -272,7 +273,7 @@ export default function AgencySitesPage() {
       const searchLower = unassignedSearchQuery.toLowerCase();
       const matchesSearch =
         site.site_name.toLowerCase().includes(searchLower) ||
-        site.address.toLowerCase().includes(searchLower);
+        site.site_address_line1.toLowerCase().includes(searchLower);
 
       const matchesRegion = unassignedSelectedRegion === 'all' || site.region === unassignedSelectedRegion;
       const matchesCity = unassignedSelectedCity === 'all' || site.city === unassignedSelectedCity;
@@ -500,7 +501,7 @@ export default function AgencySitesPage() {
                     </TableCell>
                     <TableCell>
                       <p className="font-medium">{site.site_name}</p>
-                      <p className="text-sm text-muted-foreground font-medium group-hover:text-accent-foreground">{site.address}</p>
+                      <p className="text-sm text-muted-foreground font-medium group-hover:text-accent-foreground">{site.site_address_line1}</p>
                     </TableCell>
                     <TableCell className="font-medium">{patrollingOfficer?.name || 'N/A'}</TableCell>
                     <TableCell>
@@ -599,7 +600,7 @@ export default function AgencySitesPage() {
                       <div className="font-medium">{site.site_name}</div>
                       <div className="text-sm text-muted-foreground flex items-center gap-1 font-medium">
                         <MapPin className="w-3 h-3" />
-                        {site.address}
+                        {site.site_address_line1}
                       </div>
                     </TableCell>
                     <TableCell className="align-top py-4">
