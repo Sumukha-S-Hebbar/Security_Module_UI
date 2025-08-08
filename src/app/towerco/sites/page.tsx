@@ -1037,7 +1037,13 @@ export default function TowercoSitesPage() {
                       return (
                         <TableRow 
                           key={site.id} 
-                          ref={(el) => unassignedSitesRef.current.set(site.id.toString(), el)}
+                          ref={(el) => {
+                            if (el) {
+                                unassignedSitesRef.current.set(site.id.toString(), el);
+                            } else {
+                                unassignedSitesRef.current.delete(site.id.toString());
+                            }
+                          }}
                         >
                           <TableCell className="font-medium">{site.org_site_id}</TableCell>
                           <TableCell>
@@ -1053,14 +1059,14 @@ export default function TowercoSitesPage() {
                                 placeholder="e.g. 2"
                                 className="w-[120px]"
                                 value={guardsRequired[site.id] || ''}
-                                onChange={(e) => handleGuardsRequiredChange(site.id, e.target.value)}
+                                onChange={(e) => handleGuardsRequiredChange(site.id.toString(), e.target.value)}
                                 onClick={(e) => e.stopPropagation()}
                             />
                           </TableCell>
                           <TableCell>
                             <Select
                               onValueChange={(value) =>
-                                handleAssignmentChange(site.id, value)
+                                handleAssignmentChange(site.id.toString(), value)
                               }
                                onClick={(e) => e.stopPropagation()}
                             >
@@ -1088,7 +1094,7 @@ export default function TowercoSitesPage() {
                               className="bg-[#00B4D8] hover:bg-[#00B4D8]/90"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handleAssignAgency(site.id);
+                                handleAssignAgency(site.id.toString());
                               }}
                               disabled={!assignments[site.id] || !guardsRequired[site.id]}
                             >
