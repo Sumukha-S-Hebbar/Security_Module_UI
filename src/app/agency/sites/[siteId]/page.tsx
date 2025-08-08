@@ -217,7 +217,7 @@ export default function AgencySiteReportPage() {
                   <MapPin className="h-5 w-5 mt-0.5 text-primary" />
                   <div>
                     <p className="font-semibold">Address</p>
-                    <p className="font-medium">{site.address}</p>
+                    <p className="font-medium">{site.site_address_line1}</p>
                   </div>
                 </div>
                  <div className="flex items-start gap-3">

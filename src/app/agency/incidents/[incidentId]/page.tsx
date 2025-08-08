@@ -270,7 +270,7 @@ export default function AgencyIncidentReportPage() {
                   <p className="font-medium">ID: {site.id}</p>
               </div>
               <div className='font-medium pt-2 border-t'>
-                <p className='flex items-start gap-2'><MapPin className="h-4 w-4 mt-0.5" /><span>{site.address}</span></p>
+                <p className='flex items-start gap-2'><MapPin className="h-4 w-4 mt-0.5" /><span>{site.site_address_line1}</span></p>
               </div>
               {site.latitude && site.longitude && (
                 <div className='font-medium'>

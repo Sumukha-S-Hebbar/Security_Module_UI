@@ -45,5 +45,3 @@ export type PaginatedSitesResponse = {
   previous: string | null;
   results: Site[];
 };
-
-    

@@ -396,7 +396,7 @@ export default function AgencyPatrollingOfficerReportPage() {
                                       </Button>
                                   </TableCell>
                                   <TableCell className="font-medium">{site.site_name}</TableCell>
-                                  <TableCell className="font-medium">{site.address}</TableCell>
+                                  <TableCell className="font-medium">{site.site_address_line1}</TableCell>
                                   <TableCell>
                                      <Button
                                       variant="link"
