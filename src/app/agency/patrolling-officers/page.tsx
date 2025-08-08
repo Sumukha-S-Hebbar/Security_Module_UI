@@ -84,7 +84,7 @@ export default function AgencyPatrollingOfficersPage() {
     
     const getIncidentCountForPO = (patrollingOfficerId: string) => {
       const officerSiteIds = new Set(getAssignedSitesForPO(patrollingOfficerId).map(s => s.id));
-      return incidents.filter(i => officerSiteIds.has(i.siteId)).length;
+      return incidents.filter(i => officerSiteIds.has(i.id)).length;
     };
 
     const uploadForm = useForm<z.infer<typeof uploadFormSchema>>({
@@ -409,7 +409,7 @@ export default function AgencyPatrollingOfficersPage() {
                                                                             <Link href={`/agency/sites/${site.id}`}>{site.id}</Link>
                                                                             </Button>
                                                                         </TableCell>
-                                                                        <TableCell>{site.name}</TableCell>
+                                                                        <TableCell>{site.site_name}</TableCell>
                                                                         <TableCell>{site.address}</TableCell>
                                                                     </TableRow>
                                                                 ))}
