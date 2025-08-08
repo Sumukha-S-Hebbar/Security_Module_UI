@@ -70,9 +70,8 @@ export default function AgencyPatrollingOfficerReportPage() {
   const assignedSiteIds = useMemo(() => new Set(assignedSites.map(s => s.id)), [assignedSites]);
   
   const assignedGuards = useMemo(() => {
-    const siteNames = new Set(assignedSites.map(s => s.site_name));
-    return guards.filter(guard => siteNames.has(guard.site));
-  }, [assignedSites]);
+    return guards.filter(guard => guard.site && assignedSiteIds.has(guard.site));
+  }, [assignedSiteIds]);
 
   const assignedIncidents = useMemo(() => incidents.filter(incident => assignedSiteIds.has(incident.siteId)), [assignedSiteIds]);
   
@@ -382,7 +381,7 @@ export default function AgencyPatrollingOfficerReportPage() {
                   </TableHeader>
                   <TableBody>
                       {assignedSites.map(site => {
-                          const siteGuards = guards.filter(g => g.site === site.site_name);
+                          const siteGuards = guards.filter(g => g.site === site.id);
                           const isExpanded = expandedSiteId === site.id;
                           const siteIncidents = incidents.filter(i => i.siteId === site.id);
                           const resolvedCount = siteIncidents.filter(i => i.status === 'Resolved').length;

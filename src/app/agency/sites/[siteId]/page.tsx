@@ -72,7 +72,7 @@ export default function AgencySiteReportPage() {
     (incident) => incident.siteId === site.id
   );
   
-  const siteGuards = guards.filter(g => site.guards?.includes(g.id));
+  const siteGuards = guards.filter(g => g.site === site.id);
   const patrollingOfficer = patrollingOfficers.find(p => p.id === site.patrollingOfficerId);
 
   const availableYears = useMemo(() => {

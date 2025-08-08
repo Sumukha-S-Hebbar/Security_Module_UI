@@ -81,10 +81,9 @@ export default function AgencyGuardsPage() {
   const agencySites = useMemo(() => sites.filter(site => site.agencyId === LOGGED_IN_AGENCY_ID), []);
   
   const agencyGuards = useMemo(() => {
-    const agencySiteNames = new Set(agencySites.map(s => s.site_name));
+    const agencySiteIds = new Set(agencySites.map(s => s.id));
     return guards.filter(guard => {
-      // Defensive check: ensure guard.site exists on an agency site before including.
-      return guard.site && agencySiteNames.has(guard.site);
+      return guard.site && agencySiteIds.has(guard.site);
     });
   }, [agencySites]);
 
@@ -92,7 +91,7 @@ export default function AgencyGuardsPage() {
   const agencyPatrollingOfficers = patrollingOfficers;
 
   const getPatrollingOfficerForGuard = (guard: Guard): PatrollingOfficer | undefined => {
-    const site = agencySites.find(s => s.site_name === guard.site);
+    const site = agencySites.find(s => s.id === guard.site);
     if (!site || !site.patrollingOfficerId) return undefined;
     return agencyPatrollingOfficers.find(po => po.id === site.patrollingOfficerId);
   };
@@ -145,11 +144,12 @@ export default function AgencyGuardsPage() {
     return agencyGuards.filter((guard) => {
       const searchLower = searchQuery.toLowerCase();
       const patrollingOfficer = getPatrollingOfficerForGuard(guard);
+      const site = agencySites.find(s => s.id === guard.site);
       
       const matchesSearch =
         guard.name.toLowerCase().includes(searchLower) ||
         guard.id.toLowerCase().includes(searchLower) ||
-        guard.site.toLowerCase().includes(searchLower);
+        (site && site.site_name.toLowerCase().includes(searchLower)) || false;
 
       const matchesSite = selectedSiteFilter === 'all' || guard.site === selectedSiteFilter;
       
@@ -160,7 +160,7 @@ export default function AgencyGuardsPage() {
 
       return matchesSearch && matchesSite && matchesPatrollingOfficer;
     });
-  }, [searchQuery, selectedSiteFilter, selectedPatrollingOfficerFilter, agencyGuards]);
+  }, [searchQuery, selectedSiteFilter, selectedPatrollingOfficerFilter, agencyGuards, agencySites]);
   
   const guardIncidentCounts = useMemo(() => {
     return incidents.reduce((acc, incident) => {
@@ -169,7 +169,11 @@ export default function AgencyGuardsPage() {
     }, {} as {[key: string]: number});
   }, [incidents]);
 
-  const uniqueSites = useMemo(() => [...new Set(agencyGuards.map(g => g.site))], [agencyGuards]);
+  const uniqueSites = useMemo(() => {
+      const siteIdsInUse = new Set(agencyGuards.map(g => g.site));
+      return agencySites.filter(s => siteIdsInUse.has(s.id));
+  }, [agencyGuards, agencySites]);
+  
   const uniquePatrollingOfficers = useMemo(() => {
     const poIds = new Set(agencyGuards.map(g => getPatrollingOfficerForGuard(g)?.id).filter(Boolean) as string[]);
     return agencyPatrollingOfficers.filter(po => poIds.has(po.id));
@@ -303,7 +307,7 @@ export default function AgencyGuardsPage() {
                                                 </FormControl>
                                                 <SelectContent>
                                                     {agencySites.map((site) => (
-                                                        <SelectItem key={site.id} value={site.site_name}>
+                                                        <SelectItem key={site.id} value={site.id}>
                                                             {site.site_name}
                                                         </SelectItem>
                                                     ))}
@@ -354,8 +358,8 @@ export default function AgencyGuardsPage() {
                   <SelectContent>
                       <SelectItem value="all" className="font-medium">All Sites</SelectItem>
                       {uniqueSites.map((site) => (
-                          <SelectItem key={site} value={site} className="font-medium">
-                              {site}
+                          <SelectItem key={site.id} value={site.id} className="font-medium">
+                              {site.site_name}
                           </SelectItem>
                       ))}
                   </SelectContent>
@@ -393,7 +397,7 @@ export default function AgencyGuardsPage() {
                   filteredGuards.map((guard) => {
                     const patrollingOfficer = getPatrollingOfficerForGuard(guard);
                     const incidentCount = guardIncidentCounts[guard.id] || 0;
-                    const site = agencySites.find(s => s.site_name === guard.site);
+                    const site = agencySites.find(s => s.id === guard.site);
                     
                     return (
                       <TableRow 
@@ -426,7 +430,7 @@ export default function AgencyGuardsPage() {
                         <TableCell>
                           {site ? (
                             <Button asChild variant="link" className="p-0 h-auto font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
-                                <Link href={`/agency/sites/${site.id}`}>{guard.site}</Link>
+                                <Link href={`/agency/sites/${site.id}`}>{site.site_name}</Link>
                             </Button>
                            ) : (
                             <span className="font-medium">{guard.site}</span>
