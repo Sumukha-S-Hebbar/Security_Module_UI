@@ -1037,7 +1037,7 @@ export default function TowercoSitesPage() {
                       return (
                         <TableRow 
                           key={site.id} 
-                          ref={(el) => unassignedSitesRef.current.set(site.id, el)}
+                          ref={(el) => { unassignedSitesRef.current.set(site.id, el); }}
                         >
                           <TableCell className="font-medium">{site.org_site_id}</TableCell>
                           <TableCell>

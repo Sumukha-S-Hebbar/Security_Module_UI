@@ -89,16 +89,19 @@ export default function AgencySitesPage() {
   
   const siteDetailsMap = useMemo(() => {
     return sites.reduce((acc, site) => {
-        acc[site.site_name] = site;
+        acc[site.id] = site;
         return acc;
     }, {} as {[key: string]: Site});
   }, []);
 
   const unassignedGuards = useMemo(() => {
-    return guards.filter(guard => {
-      const siteForGuard = sites.find(s => s.guards?.includes(guard.id));
-      return !siteForGuard;
+    const assignedGuardIds = new Set<string>();
+    sites.forEach(site => {
+      if (site.guards) {
+        site.guards.forEach(guardId => assignedGuardIds.add(guardId));
+      }
     });
+    return guards.filter(guard => !assignedGuardIds.has(guard.id));
   }, []);
   
   const allAgencyPatrollingOfficers = useMemo(() => {
