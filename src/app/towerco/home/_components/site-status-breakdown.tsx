@@ -21,11 +21,19 @@ const COLORS = {
 
 const ITEMS_PER_PAGE = 5;
 
+type SiteListItem = { 
+  id: number; 
+  tb_site_id: string; 
+  site_name: string; 
+  region: string; 
+  agency_name?: string 
+};
+
 type SiteStatusData = {
     assigned_sites_count: number;
     unassigned_sites_count: number;
-    assigned_sites: { results: { id: number; tb_site_id: string; site_name: string; region: string; agency_name: string }[] };
-    unassigned_sites: any; // Assuming it can be null or an object with results
+    assigned_sites: { results: SiteListItem[] };
+    unassigned_sites: { results: SiteListItem[] } | null;
 };
 
 export function SiteStatusBreakdown({ siteStatusData }: { siteStatusData: SiteStatusData }) {
@@ -188,7 +196,7 @@ export function SiteStatusBreakdown({ siteStatusData }: { siteStatusData: SiteSt
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {paginatedSites.map(site => (
+                          {paginatedSites.map((site) => (
                             <TableRow 
                               key={site.id} 
                               className="group hover:bg-[#00B4D8] hover:text-accent-foreground"
