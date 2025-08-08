@@ -13,10 +13,9 @@ export type Site = {
   city: string;
   latitude: number;
   longitude: number;
-  address: string;
   
   // From API
-  site_address_line1?: string;
+  site_address_line1: string;
   site_address_line2?: string | null;
   site_address_line3?: string | null;
   site_zip_code?: string;
@@ -25,6 +24,7 @@ export type Site = {
   
   // These fields were in the mock data and may or may not be in the final API.
   // Kept for potential compatibility or future use.
+  address?: string; // Replaced by site_address_line1 etc.
   guards?: string[];
   country?: string;
   reportUrl?: string;
@@ -45,3 +45,5 @@ export type PaginatedSitesResponse = {
   previous: string | null;
   results: Site[];
 };
+
+    

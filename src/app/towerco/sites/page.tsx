@@ -351,9 +351,9 @@ export default function TowercoSitesPage() {
     setGuardsRequired((prev) => ({ ...prev, [siteId]: count }));
   };
 
-  const handleAssignAgency = async (siteId: number) => {
-    const agencyId = assignments[siteId.toString()];
-    const numGuards = guardsRequired[siteId.toString()];
+  const handleAssignAgency = async (siteId: string) => {
+    const agencyId = assignments[siteId];
+    const numGuards = guardsRequired[siteId];
     const token = localStorage.getItem('token');
 
     if (!loggedInOrg || !token) {
@@ -1052,15 +1052,15 @@ export default function TowercoSitesPage() {
                                 type="number"
                                 placeholder="e.g. 2"
                                 className="w-[120px]"
-                                value={guardsRequired[site.id.toString()] || ''}
-                                onChange={(e) => handleGuardsRequiredChange(site.id.toString(), e.target.value)}
+                                value={guardsRequired[site.id] || ''}
+                                onChange={(e) => handleGuardsRequiredChange(site.id, e.target.value)}
                                 onClick={(e) => e.stopPropagation()}
                             />
                           </TableCell>
                           <TableCell>
                             <Select
                               onValueChange={(value) =>
-                                handleAssignmentChange(site.id.toString(), value)
+                                handleAssignmentChange(site.id, value)
                               }
                                onClick={(e) => e.stopPropagation()}
                             >
@@ -1090,7 +1090,7 @@ export default function TowercoSitesPage() {
                                 e.stopPropagation();
                                 handleAssignAgency(site.id);
                               }}
-                              disabled={!assignments[site.id.toString()] || !guardsRequired[site.id.toString()]}
+                              disabled={!assignments[site.id] || !guardsRequired[site.id]}
                             >
                               Assign Agency
                             </Button>
@@ -1140,3 +1140,5 @@ export default function TowercoSitesPage() {
     </div>
   );
 }
+
+    
