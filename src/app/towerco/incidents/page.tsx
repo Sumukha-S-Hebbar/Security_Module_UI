@@ -100,11 +100,11 @@ export default function TowercoIncidentsPage() {
         const token = localStorage.getItem('token');
         const authHeader = { 'Authorization': `Token ${token}` };
         
-        const summaryIncidentsUrl = `http://are.towerbuddy.tel:8000/security/api/orgs/${loggedInOrg.code}/incidents/list/`;
+        const summaryIncidentsUrl = `/security/api/orgs/${loggedInOrg.code}/incidents/list/`;
         const summaryData = await fetchData<PaginatedIncidentsResponse>(summaryIncidentsUrl, { headers: authHeader });
         setAllIncidentsForSummary(summaryData?.results || []);
 
-        const sitesUrl = `http://are.towerbuddy.tel:8000/security/api/orgs/${loggedInOrg.code}/sites/list/`;
+        const sitesUrl = `/security/api/orgs/${loggedInOrg.code}/sites/list/`;
         const sitesData = await fetchData<{results: Site[]}>(sitesUrl, { headers: authHeader });
         setSites(sitesData?.results || []);
     };
@@ -120,7 +120,7 @@ export default function TowercoIncidentsPage() {
       const token = localStorage.getItem('token');
       const authHeader = { 'Authorization': `Token ${token}` };
       
-      let url = `http://are.towerbuddy.tel:8000/security/api/orgs/${loggedInOrg.code}/incidents/list/?`;
+      let url = `/security/api/orgs/${loggedInOrg.code}/incidents/list/?`;
       const params = new URLSearchParams();
       
       if (selectedStatus !== 'all') {

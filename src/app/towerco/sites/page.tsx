@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useMemo, useEffect, useRef } from 'react';
@@ -166,8 +165,8 @@ export default function TowercoSitesPage() {
         const authHeader = { 'Authorization': `Token ${token}` };
 
         const [sitesResponse, agenciesResponse] = await Promise.all([
-            fetchData<PaginatedSitesResponse>(`http://are.towerbuddy.tel:8000/security/api/orgs/${orgCode}/sites/list/`, { headers: authHeader }),
-            fetchData<{results: SecurityAgency[]}>(`http://are.towerbuddy.tel:8000/security/api/orgs/${orgCode}/security-agencies/list/`, { headers: authHeader }),
+            fetchData<PaginatedSitesResponse>(`/security/api/orgs/${orgCode}/sites/list/`, { headers: authHeader }),
+            fetchData<{results: SecurityAgency[]}>(`/security/api/orgs/${orgCode}/security-agencies/list/`, { headers: authHeader }),
         ]);
         
         setSites(sitesResponse?.results || []);
@@ -183,7 +182,7 @@ export default function TowercoSitesPage() {
 
       const token = localStorage.getItem('token');
       const countryId = loggedInUser.country.id;
-      const url = `http://are.towerbuddy.tel:8000/security/api/regions/?country=${countryId}`;
+      const url = `/security/api/regions/?country=${countryId}`;
       
       try {
         const data = await fetchData<{ regions: ApiRegion[] }>(url, {
@@ -233,7 +232,7 @@ export default function TowercoSitesPage() {
         setIsCitiesLoading(true);
         const token = localStorage.getItem('token');
         const countryId = loggedInUser.country.id;
-        const url = `http://are.towerbuddy.tel:8000/security/api/cities/?country=${countryId}&region=${watchedRegion}`;
+        const url = `/security/api/cities/?country=${countryId}&region=${watchedRegion}`;
 
         try {
             const data = await fetchData<{ cities: ApiCity[] }>(url, {
@@ -297,7 +296,8 @@ export default function TowercoSitesPage() {
     const token = localStorage.getItem('token');
 
     try {
-        const response = await fetch(`http://are.towerbuddy.tel:8000/security/api/orgs/${loggedInOrg.code}/sites/add/`, {
+        const API_URL = `${process.env.NEXT_PUBLIC_DJANGO_API_URL || 'http://are.towerbuddy.tel:8000'}/security/api/orgs/${loggedInOrg.code}/sites/add/`;
+        const response = await fetch(API_URL, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -383,7 +383,8 @@ export default function TowercoSitesPage() {
     };
 
     try {
-        const response = await fetch(`http://are.towerbuddy.tel:8000/security/api/orgs/${loggedInOrg.code}/sites/${siteId}/assign-agency/`, {
+        const API_URL = `${process.env.NEXT_PUBLIC_DJANGO_API_URL || 'http://are.towerbuddy.tel:8000'}/security/api/orgs/${loggedInOrg.code}/sites/${siteId}/assign-agency/`;
+        const response = await fetch(API_URL, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

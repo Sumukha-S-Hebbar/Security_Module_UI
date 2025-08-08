@@ -2,8 +2,10 @@
 // A simple data fetching function
 export async function fetchData<T>(url: string, options?: RequestInit): Promise<T | null> {
     try {
-        // In a real app, you might get the base URL from an environment variable
-        const response = await fetch(url, options);
+        const baseUrl = process.env.NEXT_PUBLIC_DJANGO_API_URL || 'http://are.towerbuddy.tel:8000';
+        const fullUrl = url.startsWith('http') ? url : `${baseUrl}${url}`;
+        
+        const response = await fetch(fullUrl, options);
 
         if (!response.ok) {
             console.error(`API Error: ${response.status} ${response.statusText}`);

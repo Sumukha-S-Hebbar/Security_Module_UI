@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
@@ -101,7 +100,7 @@ interface DashboardData {
 async function getDashboardData(org: Organization | null): Promise<DashboardData | null> {
   if (!org) return null;
   
-  const API_URL = `http://are.towerbuddy.tel:8000/security/api/orgs/${org.code}/security-dashboard/`;
+  const API_URL = `${process.env.NEXT_PUBLIC_DJANGO_API_URL}/security/api/orgs/${org.code}/security-dashboard/`;
   const token = localStorage.getItem('token');
   
   if (!token) {

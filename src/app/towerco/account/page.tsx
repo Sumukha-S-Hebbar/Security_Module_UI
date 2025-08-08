@@ -115,7 +115,8 @@ export default function TowercoAccountPage() {
     const token = localStorage.getItem('token');
     
     try {
-        const response = await fetch('http://are.towerbuddy.tel:8000/security/api/users/account/password/change/', {
+        const API_URL = `${process.env.NEXT_PUBLIC_DJANGO_API_URL}/security/api/users/account/password/change/`;
+        const response = await fetch(API_URL, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useMemo, useEffect, useRef, Fragment } from 'react';
@@ -129,7 +128,7 @@ export default function TowercoAgenciesPage() {
             const token = localStorage.getItem('token');
             const authHeader = { 'Authorization': `Token ${token}` };
 
-            const agenciesResponse = await fetchData<{results: SecurityAgency[]}>(`http://are.towerbuddy.tel:8000/security/api/orgs/${orgCode}/security-agencies/list`, { headers: authHeader });
+            const agenciesResponse = await fetchData<{results: SecurityAgency[]}>(`/security/api/orgs/${orgCode}/security-agencies/list`, { headers: authHeader });
             
             const fetchedAgencies = agenciesResponse?.results || [];
             setSecurityAgencies(fetchedAgencies);
@@ -168,7 +167,7 @@ export default function TowercoAgenciesPage() {
 
             const token = localStorage.getItem('token');
             const countryId = loggedInUser.country.id;
-            const url = `http://are.towerbuddy.tel:8000/security/api/regions/?country=${countryId}`;
+            const url = `/security/api/regions/?country=${countryId}`;
             
             try {
                 const data = await fetchData<{ regions: ApiRegion[] }>(url, {
@@ -197,7 +196,7 @@ export default function TowercoAgenciesPage() {
             setIsCitiesLoading(true);
             const token = localStorage.getItem('token');
             const countryId = loggedInUser.country.id;
-            const url = `http://are.towerbuddy.tel:8000/security/api/cities/?country=${countryId}&region=${watchedRegion}`;
+            const url = `/security/api/cities/?country=${countryId}&region=${watchedRegion}`;
 
             try {
                 const data = await fetchData<{ cities: ApiCity[] }>(url, {
@@ -247,7 +246,8 @@ export default function TowercoAgenciesPage() {
         const token = localStorage.getItem('token');
 
         try {
-            const response = await fetch(`http://are.towerbuddy.tel:8000/security/api/orgs/${loggedInOrg.code}/security-agencies/add/`, {
+            const API_URL = `${process.env.NEXT_PUBLIC_DJANGO_API_URL}/security/api/orgs/${loggedInOrg.code}/security-agencies/add/`;
+            const response = await fetch(API_URL, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -573,7 +573,7 @@ export default function TowercoAgenciesPage() {
                                             render={({ field }) => (
                                                 <FormItem>
                                                     <FormLabel>City</FormLabel>
-                                                    <Select onValueChange={field.onChange} value={field.value} disabled={!watchedRegion || isCitiesLoading}>
+                                                     <Select onValueChange={field.onChange} value={field.value} disabled={!watchedRegion || isCitiesLoading}>
                                                         <FormControl>
                                                             <SelectTrigger>
                                                                 <SelectValue placeholder={isCitiesLoading ? "Loading cities..." : "Select a city"} />

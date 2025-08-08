@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
@@ -112,7 +111,7 @@ export default function SiteReportPage() {
         setIsLoading(true);
         const token = localStorage.getItem('token');
         // Fetch all incidents by not including page param for client-side filtering
-        const url = `http://are.towerbuddy.tel:8000/security/api/orgs/${loggedInOrg.code}/site/${siteId}/`;
+        const url = `/security/api/orgs/${loggedInOrg.code}/site/${siteId}/`;
 
         try {
             const data = await fetchData<SiteReportData>(url, {
@@ -389,7 +388,7 @@ export default function SiteReportPage() {
                           return (
                             <div key={guard.id} className="flex items-center gap-4">
                                 <Avatar className="h-12 w-12">
-                                     <AvatarImage src={guard.profile_picture ? `http://are.towerbuddy.tel:8000${guard.profile_picture}` : undefined} alt={guardName} />
+                                     <AvatarImage src={guard.profile_picture ? `${process.env.NEXT_PUBLIC_DJANGO_API_URL}${guard.profile_picture}` : undefined} alt={guardName} />
                                      <AvatarFallback>{guard.first_name ? guard.first_name.charAt(0) : 'G'}</AvatarFallback>
                                 </Avatar>
                                 <div>

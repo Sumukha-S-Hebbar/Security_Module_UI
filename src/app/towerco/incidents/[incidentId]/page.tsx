@@ -120,7 +120,7 @@ export default function IncidentReportPage() {
     const fetchIncidentReport = async () => {
         setIsLoading(true);
         const token = localStorage.getItem('token');
-        const url = `http://are.towerbuddy.tel:8000/security/api/orgs/${loggedInOrg.code}/incident/${id}/`;
+        const url = `/security/api/orgs/${loggedInOrg.code}/incident/${id}/`;
 
         try {
             const response = await fetchData<{data: IncidentReport}>(url, {
@@ -214,7 +214,8 @@ export default function IncidentReportPage() {
     }
 
     try {
-        const response = await fetch(`http://are.towerbuddy.tel:8000/security/api/orgs/${loggedInOrg.code}/incident/${incidentIdParam}/`, {
+        const API_URL = `${process.env.NEXT_PUBLIC_DJANGO_API_URL}/security/api/orgs/${loggedInOrg.code}/incident/${incidentIdParam}/`;
+        const response = await fetch(API_URL, {
             method: 'PATCH',
             headers: {
                 'Authorization': `Token ${token}`
