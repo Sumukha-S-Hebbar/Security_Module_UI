@@ -12,8 +12,9 @@ function SitesPageSkeleton() {
                 <Skeleton className="h-4 w-1/2" />
             </div>
             <div className="flex items-center gap-2">
-                <Skeleton className="h-10 w-32" />
                 <Skeleton className="h-10 w-48" />
+                <Skeleton className="h-10 w-32" />
+                <Skeleton className="h-10 w-32" />
             </div>
             <Card>
                 <CardHeader>

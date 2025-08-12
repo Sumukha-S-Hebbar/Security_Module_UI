@@ -109,7 +109,7 @@ export function SitesPageClient() {
   const [unassignedSelectedCity, setUnassignedSelectedCity] = useState('all');
 
   // State for assignment and dialogs
-  const [assignment, setAssignment] = useState<{ [siteId: string]: string }>({});
+  const [assignment, setAssignment] = useState<{ [siteId: string]: { agencyId?: string; guards?: string } }>({});
   const [isAddSiteDialogOpen, setIsAddSiteDialogOpen] = useState(false);
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -275,28 +275,73 @@ export function SitesPageClient() {
     setUnassignedSelectedCity('all');
   };
 
-  const handleAssignmentChange = (siteId: string, agencyId: string) => {
-      setAssignment(prev => ({...prev, [siteId]: agencyId}));
+  const handleAssignmentChange = (siteId: string, key: 'agencyId' | 'guards', value: string) => {
+      setAssignment(prev => ({
+          ...prev, 
+          [siteId]: {
+            ...prev[siteId],
+            [key]: value
+          }
+      }));
   }
 
-  const handleAssignAgency = (siteId: string) => {
-    const agencyId = assignment[siteId];
-    if (!agencyId) {
+  const handleAssignAgency = async (siteId: string) => {
+    if (!loggedInOrg) return;
+
+    const assignmentDetails = assignment[siteId];
+    const agencyId = assignmentDetails?.agencyId;
+    const numberOfGuards = assignmentDetails?.guards;
+
+    if (!agencyId || !numberOfGuards || parseInt(numberOfGuards) <= 0) {
       toast({
         variant: 'destructive',
         title: 'Error',
-        description: 'Please select an agency to assign.',
+        description: 'Please select an agency and enter a valid number of guards.',
       });
       return;
     }
 
-    const siteName = allSites.find(s => s.id.toString() === siteId)?.site_name;
-    const agencyName = allAgencies.find(a => a.id.toString() === agencyId)?.name;
+    const agency = allAgencies.find(a => a.id.toString() === agencyId);
+    if (!agency) {
+       toast({ variant: 'destructive', title: 'Error', description: 'Could not find selected agency.' });
+       return;
+    }
+    
+    const token = localStorage.getItem('token');
+    const API_URL = `${process.env.NEXT_PUBLIC_DJANGO_API_URL}/security/api/orgs/${loggedInOrg.code}/sites/${siteId}/assign-agency/`;
 
-    toast({
-      title: 'Site Assigned',
-      description: `Site "${siteName}" has been assigned to ${agencyName}. This will update on next refresh.`,
-    });
+    try {
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Token ${token}`,
+            },
+            body: JSON.stringify({
+                agency_name: agency.name,
+                number_of_guards: parseInt(numberOfGuards, 10),
+            })
+        });
+
+        const responseData = await response.json();
+        if (!response.ok) {
+            throw new Error(responseData.detail || 'Failed to assign agency.');
+        }
+
+        toast({
+          title: 'Site Assigned Successfully',
+          description: responseData.detail,
+        });
+
+        fetchSitesAndAgencies();
+
+    } catch (error: any) {
+        toast({
+            variant: 'destructive',
+            title: 'Assignment Failed',
+            description: error.message,
+        });
+    }
   };
 
   const onAddSiteSubmit = async (values: z.infer<typeof addSiteFormSchema>) => {
@@ -809,11 +854,10 @@ export function SitesPageClient() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="text-foreground">Towerbuddy ID</TableHead>
                   <TableHead className="text-foreground">Site ID</TableHead>
                   <TableHead className="text-foreground">Site Name</TableHead>
-                  <TableHead className="text-foreground">Location</TableHead>
                   <TableHead className="text-foreground">Assign Agency</TableHead>
+                  <TableHead className="text-foreground">Guards Required</TableHead>
                   <TableHead className="text-right text-foreground">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -829,20 +873,22 @@ export function SitesPageClient() {
                           }}
                         >
                           <TableCell>
-                            <Button asChild variant="link" className="p-0 h-auto font-medium" onClick={(e) => e.stopPropagation()}>
-                              <Link href={`/towerco/sites/${site.id}`}>{site.tb_site_id}</Link>
+                             <Button asChild variant="link" className="p-0 h-auto font-medium" onClick={(e) => e.stopPropagation()}>
+                              <Link href={`/towerco/sites/${site.id}`}>{site.org_site_id}</Link>
                             </Button>
                           </TableCell>
-                          <TableCell className="font-medium">{site.org_site_id}</TableCell>
                           <TableCell>
                              <div className="font-medium">{site.site_name}</div>
+                              <div className="text-sm text-muted-foreground flex items-center gap-1 font-medium">
+                                <MapPin className="w-3 h-3" />
+                                {site.city}, {site.region}
+                              </div>
                           </TableCell>
-                          <TableCell className="font-medium">{site.city}, {site.region}</TableCell>
                           <TableCell>
                              <div onClick={(e) => e.stopPropagation()}>
                               <Select
                                 onValueChange={(value) =>
-                                  handleAssignmentChange(site.id.toString(), value)
+                                  handleAssignmentChange(site.id.toString(), 'agencyId', value)
                                 }
                              >
                                <SelectTrigger className="w-[200px] font-medium">
@@ -856,11 +902,21 @@ export function SitesPageClient() {
                               </Select>
                              </div>
                           </TableCell>
+                          <TableCell>
+                             <Input
+                                type="number"
+                                placeholder="e.g., 2"
+                                className="w-[120px]"
+                                value={assignment[site.id.toString()]?.guards || ''}
+                                onChange={(e) => handleAssignmentChange(site.id.toString(), 'guards', e.target.value)}
+                                onClick={(e) => e.stopPropagation()}
+                              />
+                          </TableCell>
                           <TableCell className="text-right">
                              <Button
                                 size="sm"
                                 onClick={() => handleAssignAgency(site.id.toString())}
-                                disabled={!assignment[site.id.toString()]}
+                                disabled={!assignment[site.id.toString()]?.agencyId || !assignment[site.id.toString()]?.guards}
                                 className="bg-[#00B4D8] hover:bg-[#00B4D8]/90"
                               >
                                 Assign
