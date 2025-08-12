@@ -602,6 +602,7 @@ export function SitesPageClient() {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="text-foreground">Towerbuddy ID</TableHead>
                 <TableHead className="text-foreground">Site ID</TableHead>
                 <TableHead className="text-foreground">Site Name</TableHead>
                 <TableHead className="text-foreground">Assigned Agency</TableHead>
@@ -621,9 +622,10 @@ export function SitesPageClient() {
                   >
                     <TableCell>
                       <Button asChild variant="link" className="p-0 h-auto font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
-                        <Link href={`/towerco/sites/${site.id}`}>{site.org_site_id}</Link>
+                        <Link href={`/towerco/sites/${site.id}`}>{site.tb_site_id}</Link>
                       </Button>
                     </TableCell>
+                    <TableCell className="font-medium">{site.org_site_id}</TableCell>
                     <TableCell>
                       <p className="font-medium">{site.site_name}</p>
                     </TableCell>
@@ -650,7 +652,7 @@ export function SitesPageClient() {
               })
             ) : (
               <TableRow>
-                <TableCell colSpan={5} className="text-center text-muted-foreground py-10 font-medium">
+                <TableCell colSpan={6} className="text-center text-muted-foreground py-10 font-medium">
                   No assigned sites found for the current filter.
                 </TableCell>
               </TableRow>
@@ -715,6 +717,7 @@ export function SitesPageClient() {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="text-foreground">Towerbuddy ID</TableHead>
                   <TableHead className="text-foreground">Site ID</TableHead>
                   <TableHead className="text-foreground">Site Name</TableHead>
                   <TableHead className="text-foreground">Location</TableHead>
@@ -733,6 +736,11 @@ export function SitesPageClient() {
                             }
                           }}
                         >
+                          <TableCell>
+                            <Button asChild variant="link" className="p-0 h-auto font-medium" onClick={(e) => e.stopPropagation()}>
+                              <Link href={`/towerco/sites/${site.id}`}>{site.tb_site_id}</Link>
+                            </Button>
+                          </TableCell>
                           <TableCell className="font-medium">{site.org_site_id}</TableCell>
                           <TableCell>
                              <div className="font-medium">{site.site_name}</div>
@@ -770,7 +778,7 @@ export function SitesPageClient() {
                 ))
               ) : (
                 <TableRow>
-                    <TableCell colSpan={5} className="text-center text-muted-foreground font-medium py-10">
+                    <TableCell colSpan={6} className="text-center text-muted-foreground font-medium py-10">
                         No unassigned sites found for the current filter.
                     </TableCell>
                 </TableRow>
