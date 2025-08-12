@@ -345,16 +345,52 @@ export function SitesPageClient() {
   };
 
   const onAddSiteSubmit = async (values: z.infer<typeof addSiteFormSchema>) => {
+    if (!loggedInOrg) {
+        toast({ variant: 'destructive', title: 'Error', description: 'Organization info not loaded.' });
+        return;
+    }
     setIsAddingSite(true);
-    console.log("New site data:", values);
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    toast({
-        title: 'Site Added Successfully',
-        description: `Site "${values.site_name}" has been added to the unassigned sites list.`,
-    });
-    setIsAddingSite(false);
-    setIsAddSiteDialogOpen(false);
-    addSiteForm.reset();
+    const token = localStorage.getItem('token');
+    const API_URL = `${process.env.NEXT_PUBLIC_DJANGO_API_URL}/security/api/orgs/${loggedInOrg.code}/sites/add/`;
+
+    try {
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Token ${token}`
+            },
+            body: JSON.stringify({
+                ...values,
+                region: parseInt(values.region, 10),
+                city: parseInt(values.city, 10),
+            })
+        });
+
+        const responseData = await response.json();
+        if (!response.ok) {
+            const errorDetail = typeof responseData.detail === 'object' ? JSON.stringify(responseData.detail) : responseData.detail;
+            throw new Error(errorDetail || 'Failed to add site.');
+        }
+
+        toast({
+            title: 'Site Added Successfully',
+            description: responseData.message,
+        });
+        
+        fetchSitesAndAgencies(); // Refresh the list
+        setIsAddSiteDialogOpen(false);
+        addSiteForm.reset();
+
+    } catch(error: any) {
+         toast({
+            variant: 'destructive',
+            title: 'Add Site Failed',
+            description: error.message,
+        });
+    } finally {
+        setIsAddingSite(false);
+    }
   }
   
   const onUploadSubmit = async (values: z.infer<typeof uploadFormSchema>) => {
@@ -769,11 +805,7 @@ export function SitesPageClient() {
                       <p className="font-medium">{site.site_name}</p>
                     </TableCell>
                     <TableCell>
-                      {site.assigned_agency ? (
-                        <span className="font-medium">{site.assigned_agency.name}</span>
-                      ) : (
-                        <span className="text-muted-foreground font-medium">N/A</span>
-                      )}
+                       <span className="font-medium">{site.assigned_agency?.name || 'N/A'}</span>
                     </TableCell>
                      <TableCell>
                       <p className="font-medium">{site.city}, {site.region}</p>
@@ -937,5 +969,3 @@ export function SitesPageClient() {
     </div>
   );
 }
-
-    
