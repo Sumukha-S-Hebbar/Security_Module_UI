@@ -704,8 +704,8 @@ export default function TowercoAgenciesPage() {
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead>ID</TableHead>
-                                <TableHead>Agency</TableHead>
+                                <TableHead>Agency ID</TableHead>
+                                <TableHead>Agency Name</TableHead>
                                 <TableHead>Contact Info</TableHead>
                                 <TableHead>Location</TableHead>
                                 <TableHead>Sites Assigned</TableHead>
@@ -737,13 +737,7 @@ export default function TowercoAgenciesPage() {
                                                     <p className="text-accent font-semibold group-hover:text-accent-foreground hover:underline">{agency.subcon_id}</p>
                                                 </TableCell>
                                                 <TableCell>
-                                                    <div className="flex items-center gap-3">
-                                                        <Avatar className="h-10 w-10">
-                                                            <AvatarImage src={agency.logo || undefined} alt={agency.name} />
-                                                            <AvatarFallback>{agency.name.charAt(0)}</AvatarFallback>
-                                                        </Avatar>
-                                                        <span className="font-medium">{agency.name}</span>
-                                                    </div>
+                                                    <span className="font-medium">{agency.name}</span>
                                                 </TableCell>
                                                 <TableCell>
                                                     <div className="flex items-center gap-2 text-sm">
@@ -880,5 +874,3 @@ export default function TowercoAgenciesPage() {
         </div>
     );
 }
-
-    
