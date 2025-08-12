@@ -20,16 +20,18 @@ export type Site = {
   site_address_line2?: string | null;
   site_address_line3?: string | null;
   site_zip_code?: string;
-  assigned_agency?: {
+  assigned_agency: {
     id: number;
-    tb_agency_id: string;
-    agency_id: string;
-    agency_name: string;
+    subcon_id: string;
+    name: string;
+    role: string;
     contact_person: string;
-    communication_email: string;
+    email: string;
     phone: string;
   } | null;
   total_incidents: number;
+  total_guards_requested: number;
+  total_guards_assigned: number;
   
   // These fields were in the mock data and may or may not be in the final API.
   // Kept for potential compatibility or future use.

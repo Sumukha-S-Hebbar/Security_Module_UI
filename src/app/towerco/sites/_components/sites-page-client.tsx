@@ -151,7 +151,7 @@ export function SitesPageClient() {
     const authHeader = { 'Authorization': `Token ${token}` };
 
     try {
-        const sitesResponse = await fetchData<PaginatedSitesResponse>(`/security/api/orgs/${loggedInOrg.code}/sites/list/`, { headers: authHeader });
+        const sitesResponse = await fetchData<{results: Site[]}>(`/security/api/orgs/${loggedInOrg.code}/sites/list/`, { headers: authHeader });
         setAllSites(sitesResponse?.results || []);
         
         const agenciesResponse = await fetchData<{results: SecurityAgency[]}>(`/security/api/orgs/${loggedInOrg.code}/security-agencies/list`, { headers: authHeader });
@@ -291,7 +291,7 @@ export function SitesPageClient() {
     }
 
     const siteName = allSites.find(s => s.id.toString() === siteId)?.site_name;
-    const agencyName = allAgencies.find(a => a.id.toString() === agencyId)?.agency_name;
+    const agencyName = allAgencies.find(a => a.id.toString() === agencyId)?.name;
 
     toast({
       title: 'Site Assigned',
@@ -341,7 +341,7 @@ export function SitesPageClient() {
       const matchesSearch =
         site.site_name.toLowerCase().includes(searchLower) ||
         site.org_site_id.toLowerCase().includes(searchLower) ||
-        (site.assigned_agency && site.assigned_agency.agency_name.toLowerCase().includes(searchLower));
+        (site.assigned_agency && site.assigned_agency.name.toLowerCase().includes(searchLower));
 
       const matchesAgency = selectedAgencyFilter === 'all' || site.assigned_agency?.id.toString() === selectedAgencyFilter;
       const matchesRegion = assignedSelectedRegion === 'all' || site.region === assignedSelectedRegion;
@@ -652,7 +652,7 @@ export function SitesPageClient() {
                 <SelectItem value="all" className="font-medium">All Agencies</SelectItem>
                 {allAgencies.map((agency) => (
                   <SelectItem key={agency.id} value={agency.id.toString()} className="font-medium">
-                    {agency.agency_name}
+                    {agency.name}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -726,7 +726,7 @@ export function SitesPageClient() {
                     <TableCell>
                       {site.assigned_agency ? (
                         <Button asChild variant="link" className="p-0 h-auto font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
-                          <Link href={`/towerco/agencies/${site.assigned_agency.id}`}>{site.assigned_agency.agency_name}</Link>
+                          <Link href={`/towerco/agencies/${site.assigned_agency.id}`}>{site.assigned_agency.name}</Link>
                         </Button>
                       ) : (
                         <span className="text-muted-foreground font-medium">N/A</span>
@@ -852,7 +852,7 @@ export function SitesPageClient() {
                                </SelectTrigger>
                                <SelectContent>
                                 {allAgencies.map(agency => (
-                                    <SelectItem key={agency.id} value={agency.id.toString()}>{agency.agency_name}</SelectItem>
+                                    <SelectItem key={agency.id} value={agency.id.toString()}>{agency.name}</SelectItem>
                                 ))}
                                </SelectContent>
                               </Select>
