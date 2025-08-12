@@ -1,5 +1,4 @@
 
-
 import type { Site } from './site';
 
 type AssignedSiteDetail = {
@@ -45,3 +44,5 @@ export type SecurityAgency = {
   avatar?: string;
   siteIds?: string[];
 };
+
+    

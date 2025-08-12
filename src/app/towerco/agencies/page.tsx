@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useMemo, useEffect, useRef, Fragment } from 'react';
@@ -396,8 +395,8 @@ export default function TowercoAgenciesPage() {
         } else {
             if (agency.total_sites_assigned > 0) {
                 setExpandedAgencyId(agency.id);
-                const sites = await fetchAssignedSites(agency.id);
-                setExpandedAgencySites(sites);
+                // The assigned_sites_details is already in the agency object from the list endpoint
+                setExpandedAgencySites(agency.assigned_sites_details || []);
             }
         }
     };
@@ -881,3 +880,5 @@ export default function TowercoAgenciesPage() {
         </div>
     );
 }
+
+    
