@@ -781,6 +781,7 @@ export function SitesPageClient() {
                 <TableHead className="text-foreground">Site ID</TableHead>
                 <TableHead className="text-foreground">Site Name</TableHead>
                 <TableHead className="text-foreground">Assigned Agency</TableHead>
+                <TableHead className="text-foreground">Guards Requested</TableHead>
                 <TableHead className="text-foreground">Location</TableHead>
                 <TableHead className="text-foreground">Incidents</TableHead>
               </TableRow>
@@ -807,6 +808,12 @@ export function SitesPageClient() {
                     <TableCell>
                        <span className="font-medium">{site.assigned_agency?.name || 'N/A'}</span>
                     </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2 font-medium">
+                        <Users className="h-4 w-4 text-muted-foreground group-hover:text-accent-foreground" />
+                        <span>{site.total_guards_requested}</span>
+                      </div>
+                    </TableCell>
                      <TableCell>
                       <p className="font-medium">{site.city}, {site.region}</p>
                     </TableCell>
@@ -821,7 +828,7 @@ export function SitesPageClient() {
               })
             ) : (
               <TableRow>
-                <TableCell colSpan={6} className="text-center text-muted-foreground py-10 font-medium">
+                <TableCell colSpan={7} className="text-center text-muted-foreground py-10 font-medium">
                   No assigned sites found for the current filter.
                 </TableCell>
               </TableRow>
