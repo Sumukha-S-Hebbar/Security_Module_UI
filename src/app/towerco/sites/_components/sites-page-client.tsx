@@ -7,19 +7,13 @@ import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { sites } from '@/lib/data/sites';
-import { guards } from '@/lib/data/guards';
-import { patrollingOfficers } from '@/lib/data/patrolling-officers';
-import { incidents } from '@/lib/data/incidents';
-import { securityAgencies } from '@/lib/data/security-agencies';
-import type { Site, PatrollingOfficer, Guard, SecurityAgency } from '@/types';
+import type { Site, Organization, SecurityAgency, PaginatedSitesResponse } from '@/types';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-  CardFooter,
 } from '@/components/ui/card';
 import {
   Table,
@@ -30,24 +24,13 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import {
   FileDown,
-  MapPin,
-  Fence,
   Search,
-  UserCheck,
   ShieldAlert,
   Users,
-  Eye,
   PlusCircle,
   Loader2,
+  MapPin,
 } from 'lucide-react';
 import {
   Select,
@@ -65,63 +48,95 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
-
-const LOGGED_IN_AGENCY_ID = 'AGY01'; // This is likely incorrect for a TOWERCO page, but we'll adapt
+import { Skeleton } from '@/components/ui/skeleton';
+import { fetchData } from '@/lib/api';
 
 const addSiteFormSchema = z.object({
     org_site_id: z.string().min(1, 'Site ID is required.'),
     site_name: z.string().min(1, 'Site name is required.'),
-    address_line_1: z.string().min(1, 'Address is required.'),
-    address_line_2: z.string().optional(),
-    address_line_3: z.string().optional(),
+    site_address_line1: z.string().min(1, 'Address is required.'),
+    site_address_line2: z.string().optional(),
+    site_address_line3: z.string().optional(),
     region: z.string().min(1, 'Region is required.'),
     city: z.string().min(1, 'City is required.'),
-    zip_code: z.string().min(1, 'Zip code is required.'),
-    latitude: z.coerce.number(),
-    longitude: z.coerce.number(),
+    site_zip_code: z.string().min(1, 'Zip code is required.'),
+    lat: z.coerce.number(),
+    lng: z.coerce.number(),
 });
 
 export function SitesPageClient() {
-  const [selectedPatrollingOfficers, setSelectedPatrollingOfficers] = useState<{
-    [key: string]: string;
-  }>({});
-  const [geofencePerimeters, setGeofencePerimeters] = useState<{
-    [key: string]: string;
-  }>({});
-  const [selectedGuards, setSelectedGuards] = useState<{
-    [key: string]: string[];
-  }>({});
   const { toast } = useToast();
   const router = useRouter();
   const searchParams = useSearchParams();
   const focusSite = searchParams.get('focusSite');
 
-  // State for Assigned Sites filters
+  const [allSites, setAllSites] = useState<Site[]>([]);
+  const [allAgencies, setAllAgencies] = useState<SecurityAgency[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loggedInOrg, setLoggedInOrg] = useState<Organization | null>(null);
+
+  // State for filters
   const [assignedSearchQuery, setAssignedSearchQuery] = useState('');
-  const [selectedPatrollingOfficerFilter, setSelectedPatrollingOfficerFilter] = useState('all');
+  const [selectedAgencyFilter, setSelectedAgencyFilter] = useState('all');
   const [assignedSelectedRegion, setAssignedSelectedRegion] = useState('all');
   const [assignedSelectedCity, setAssignedSelectedCity] = useState('all');
-  const [selectedAgencyFilter, setSelectedAgencyFilter] = useState('all');
-
-  // State for Unassigned Sites filters
   const [unassignedSearchQuery, setUnassignedSearchQuery] = useState('');
   const [unassignedSelectedRegion, setUnassignedSelectedRegion] = useState('all');
   const [unassignedSelectedCity, setUnassignedSelectedCity] = useState('all');
 
+  // State for assignment and dialogs
   const [assignment, setAssignment] = useState<{ [siteId: string]: string }>({});
-  
   const [isAddSiteDialogOpen, setIsAddSiteDialogOpen] = useState(false);
   const [isAddingSite, setIsAddingSite] = useState(false);
   
   const unassignedSitesRef = useRef(new Map<string, HTMLTableRowElement | null>());
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+        const orgData = localStorage.getItem('organization');
+        if (orgData) {
+            setLoggedInOrg(JSON.parse(orgData));
+        }
+    }
+  }, []);
   
   const addSiteForm = useForm<z.infer<typeof addSiteFormSchema>>({
     resolver: zodResolver(addSiteFormSchema),
   });
+
+  useEffect(() => {
+    if (!loggedInOrg) return;
+
+    const fetchAllData = async () => {
+        setIsLoading(true);
+        const token = localStorage.getItem('token');
+        const authHeader = { 'Authorization': `Token ${token}` };
+
+        try {
+            const sitesResponse = await fetchData<PaginatedSitesResponse>(`/security/api/orgs/${loggedInOrg.code}/sites/list/`, { headers: authHeader });
+            setAllSites(sitesResponse?.results || []);
+            
+            // Assuming an endpoint for agencies exists. If not, this needs adjustment.
+            const agenciesResponse = await fetchData<{results: SecurityAgency[]}>(`/security/api/orgs/${loggedInOrg.code}/security-agencies/list`, { headers: authHeader });
+            setAllAgencies(agenciesResponse?.results || []);
+
+        } catch (error) {
+            toast({
+                variant: 'destructive',
+                title: 'Error',
+                description: 'Failed to load initial site and agency data.'
+            });
+        } finally {
+            setIsLoading(false);
+        }
+    }
+    fetchAllData();
+  }, [loggedInOrg, toast]);
+
 
   useEffect(() => {
     const el = focusSite ? unassignedSitesRef.current.get(focusSite) : null;
@@ -132,47 +147,23 @@ export function SitesPageClient() {
         el.classList.remove('highlight-row');
       }, 2000);
     }
-  }, [focusSite]);
-
-  // TowerCo sees all sites, so no agency filter needed at this level.
-  const allSites = sites;
-  const allAgencies = securityAgencies;
-  const allPatrollingOfficers = patrollingOfficers;
-
-  const siteDetailsMap = useMemo(() => {
-    return allSites.reduce((acc, site) => {
-        acc[site.id] = site;
-        return acc;
-    }, {} as {[key: string]: Site});
-  }, [allSites]);
+  }, [focusSite, allSites]); // Rerun when allSites is populated
 
   const assignedSites = useMemo(
-    () => allSites.filter((site) => site.agencyId),
+    () => allSites.filter((site) => site.site_status === 'Assigned'),
     [allSites]
   );
   const unassignedSites = useMemo(
-    () => allSites.filter((site) => !site.agencyId),
+    () => allSites.filter((site) => site.site_status === 'Unassigned'),
     [allSites]
   );
-  
-  // Set default geofence value for unassigned sites
-  useEffect(() => {
-    const defaultGeofences = unassignedSites.reduce((acc, site) => {
-      acc[site.id] = '20';
-      return acc;
-    }, {} as { [key: string]: string });
-    setGeofencePerimeters(defaultGeofences);
-  }, [unassignedSites]);
 
-
-  // Location filters data for ASSIGNED sites
   const assignedRegions = useMemo(() => [...new Set(assignedSites.map((site) => site.region))].sort(), [assignedSites]);
   const assignedCities = useMemo(() => {
     if (assignedSelectedRegion === 'all') return [];
     return [...new Set(assignedSites.filter((site) => site.region === assignedSelectedRegion).map((site) => site.city))].sort();
   }, [assignedSelectedRegion, assignedSites]);
 
-  // Location filters data for UNASSIGNED sites
   const unassignedRegions = useMemo(() => [...new Set(unassignedSites.map((site) => site.region))].sort(), [unassignedSites]);
   const unassignedCities = useMemo(() => {
     if (unassignedSelectedRegion === 'all') return [];
@@ -205,8 +196,8 @@ export function SitesPageClient() {
       return;
     }
 
-    const siteName = allSites.find(s => s.id === siteId)?.site_name;
-    const agencyName = allAgencies.find(a => a.id.toString() === agencyId)?.name;
+    const siteName = allSites.find(s => s.id.toString() === siteId)?.site_name;
+    const agencyName = allAgencies.find(a => a.id.toString() === agencyId)?.agency_name;
 
     toast({
       title: 'Site Assigned',
@@ -231,14 +222,13 @@ export function SitesPageClient() {
   const filteredAssignedSites = useMemo(() => {
     return assignedSites.filter((site) => {
       const searchLower = assignedSearchQuery.toLowerCase();
-      const agency = allAgencies.find(a => a.agency_id === site.agencyId);
-
+      
       const matchesSearch =
         site.site_name.toLowerCase().includes(searchLower) ||
         site.org_site_id.toLowerCase().includes(searchLower) ||
-        (agency && agency.name.toLowerCase().includes(searchLower));
+        (site.assigned_agency && site.assigned_agency.agency_name.toLowerCase().includes(searchLower));
 
-      const matchesAgency = selectedAgencyFilter === 'all' || site.agencyId === selectedAgencyFilter;
+      const matchesAgency = selectedAgencyFilter === 'all' || site.assigned_agency?.id.toString() === selectedAgencyFilter;
       const matchesRegion = assignedSelectedRegion === 'all' || site.region === assignedSelectedRegion;
       const matchesCity = assignedSelectedCity === 'all' || site.city === assignedSelectedCity;
 
@@ -247,7 +237,6 @@ export function SitesPageClient() {
   }, [
     assignedSearchQuery,
     assignedSites,
-    allAgencies,
     selectedAgencyFilter,
     assignedSelectedRegion,
     assignedSelectedCity,
@@ -266,17 +255,6 @@ export function SitesPageClient() {
       return matchesSearch && matchesRegion && matchesCity;
     });
   }, [unassignedSearchQuery, unassignedSites, unassignedSelectedRegion, unassignedSelectedCity]);
-
-  const siteIncidentsCount = useMemo(() => {
-    const counts: { [siteId: string]: number } = {};
-    incidents.forEach((incident) => {
-        if (!counts[incident.siteId]) {
-          counts[incident.siteId] = 0;
-        }
-        counts[incident.siteId]++;
-    });
-    return counts;
-  }, []);
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6">
@@ -332,7 +310,7 @@ export function SitesPageClient() {
                             />
                              <FormField
                                 control={addSiteForm.control}
-                                name="address_line_1"
+                                name="site_address_line1"
                                 render={({ field }) => (
                                     <FormItem>
                                         <FormLabel>Address Line 1</FormLabel>
@@ -358,10 +336,8 @@ export function SitesPageClient() {
                                               </FormControl>
                                               <SelectContent>
                                                   {/* In a real app, these would come from an API */}
-                                                  <SelectItem value="CA">CA</SelectItem>
-                                                  <SelectItem value="NY">NY</SelectItem>
-                                                  <SelectItem value="TX">TX</SelectItem>
-                                                  <SelectItem value="FL">FL</SelectItem>
+                                                  <SelectItem value="Kiambu">Kiambu</SelectItem>
+                                                  <SelectItem value="Meru">Meru</SelectItem>
                                               </SelectContent>
                                           </Select>
                                           <FormMessage />
@@ -375,7 +351,7 @@ export function SitesPageClient() {
                                       <FormItem>
                                           <FormLabel>City</FormLabel>
                                            <FormControl>
-                                              <Input placeholder="e.g., Crestwood" {...field} />
+                                              <Input placeholder="e.g., Kikuyu" {...field} />
                                           </FormControl>
                                           <FormMessage />
                                       </FormItem>
@@ -384,12 +360,12 @@ export function SitesPageClient() {
                             </div>
                              <FormField
                                 control={addSiteForm.control}
-                                name="zip_code"
+                                name="site_zip_code"
                                 render={({ field }) => (
                                     <FormItem>
                                         <FormLabel>Zip Code</FormLabel>
                                         <FormControl>
-                                            <Input placeholder="e.g., 90210" {...field} />
+                                            <Input placeholder="e.g., 560060" {...field} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -398,12 +374,12 @@ export function SitesPageClient() {
                              <div className="grid grid-cols-2 gap-4">
                                 <FormField
                                     control={addSiteForm.control}
-                                    name="latitude"
+                                    name="lat"
                                     render={({ field }) => (
                                         <FormItem>
                                             <FormLabel>Latitude</FormLabel>
                                             <FormControl>
-                                                <Input type="number" placeholder="e.g., 34.0522" {...field} />
+                                                <Input type="number" placeholder="e.g., 12.9352" {...field} />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -411,12 +387,12 @@ export function SitesPageClient() {
                                 />
                                  <FormField
                                     control={addSiteForm.control}
-                                    name="longitude"
+                                    name="lng"
                                     render={({ field }) => (
                                         <FormItem>
                                             <FormLabel>Longitude</FormLabel>
                                             <FormControl>
-                                                <Input type="number" placeholder="e.g., -118.2437" {...field} />
+                                                <Input type="number" placeholder="e.g., 77.6146" {...field} />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -446,6 +422,21 @@ export function SitesPageClient() {
         </div>
       </div>
       
+      {isLoading ? (
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-6 w-1/4" />
+            <Skeleton className="h-4 w-1/3" />
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              <Skeleton className="h-12 w-full" />
+              <Skeleton className="h-12 w-full" />
+              <Skeleton className="h-12 w-full" />
+            </div>
+          </CardContent>
+        </Card>
+      ) : (
       <Card>
         <CardHeader>
           <CardTitle>Assigned Sites ({filteredAssignedSites.length})</CardTitle>
@@ -473,8 +464,8 @@ export function SitesPageClient() {
               <SelectContent>
                 <SelectItem value="all" className="font-medium">All Agencies</SelectItem>
                 {allAgencies.map((agency) => (
-                  <SelectItem key={agency.agency_id} value={agency.agency_id} className="font-medium">
-                    {agency.name}
+                  <SelectItem key={agency.id} value={agency.id.toString()} className="font-medium">
+                    {agency.agency_name}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -528,8 +519,7 @@ export function SitesPageClient() {
             <TableBody>
             {filteredAssignedSites.length > 0 ? (
               filteredAssignedSites.map((site) => {
-                const agency = allAgencies.find(a => a.agency_id === site.agencyId);
-                const incidentsCount = siteIncidentsCount[site.id] || 0;
+                const incidentsCount = site.total_incidents || 0;
                 return (
                   <TableRow 
                     key={site.id} 
@@ -545,9 +535,9 @@ export function SitesPageClient() {
                       <p className="font-medium">{site.site_name}</p>
                     </TableCell>
                     <TableCell>
-                      {agency ? (
+                      {site.assigned_agency ? (
                         <Button asChild variant="link" className="p-0 h-auto font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
-                          <Link href={`/towerco/agencies/${agency.id}`}>{agency.name}</Link>
+                          <Link href={`/towerco/agencies/${site.assigned_agency.id}`}>{site.assigned_agency.agency_name}</Link>
                         </Button>
                       ) : (
                         <span className="text-muted-foreground font-medium">N/A</span>
@@ -576,8 +566,9 @@ export function SitesPageClient() {
           </Table>
         </CardContent>
       </Card>
+      )}
 
-      {unassignedSites.length > 0 && (
+      {!isLoading && unassignedSites.length > 0 && (
         <Card>
           <CardHeader>
             <CardTitle>Unassigned Sites ({filteredUnassignedSites.length})</CardTitle>
@@ -645,7 +636,7 @@ export function SitesPageClient() {
                           key={site.id} 
                           ref={el => {
                             if (unassignedSitesRef.current) {
-                                unassignedSitesRef.current.set(site.id, el);
+                                unassignedSitesRef.current.set(site.id.toString(), el);
                             }
                           }}
                         >
@@ -666,7 +657,7 @@ export function SitesPageClient() {
                                </SelectTrigger>
                                <SelectContent>
                                 {allAgencies.map(agency => (
-                                    <SelectItem key={agency.id} value={agency.id.toString()}>{agency.name}</SelectItem>
+                                    <SelectItem key={agency.id} value={agency.id.toString()}>{agency.agency_name}</SelectItem>
                                 ))}
                                </SelectContent>
                               </Select>
@@ -675,8 +666,8 @@ export function SitesPageClient() {
                           <TableCell className="text-right">
                              <Button
                                 size="sm"
-                                onClick={() => handleAssignAgency(site.id)}
-                                disabled={!assignment[site.id]}
+                                onClick={() => handleAssignAgency(site.id.toString())}
+                                disabled={!assignment[site.id.toString()]}
                                 className="bg-[#00B4D8] hover:bg-[#00B4D8]/90"
                               >
                                 Assign
