@@ -886,6 +886,7 @@ export function SitesPageClient() {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="text-foreground">Towerbuddy ID</TableHead>
                   <TableHead className="text-foreground">Site ID</TableHead>
                   <TableHead className="text-foreground">Site Name</TableHead>
                   <TableHead className="text-foreground">Assign Agency</TableHead>
@@ -904,6 +905,9 @@ export function SitesPageClient() {
                             }
                           }}
                         >
+                          <TableCell className="font-medium">
+                            {site.tb_site_id}
+                          </TableCell>
                           <TableCell className="font-medium">
                             {site.org_site_id}
                           </TableCell>
