@@ -76,7 +76,19 @@ type ApiCity = {
     name: string;
 }
 
-type AssignedSiteDetail = SecurityAgency['assigned_sites_details'][0];
+type AssignedSiteDetail = {
+    site_details: {
+        id: number;
+        tb_site_id: string;
+        org_site_id: string;
+        site_name: string;
+        site_address_line1: string;
+        city: string;
+        region: string;
+    };
+    assigned_on: string;
+    number_of_guards: number;
+};
 
 
 async function getRegions(agencies: SecurityAgency[]): Promise<string[]> {
@@ -94,7 +106,7 @@ export default function TowercoAgenciesPage() {
     const [isAddAgencyDialogOpen, setIsAddAgencyDialogOpen] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
     const [isAddingAgency, setIsAddingAgency] = useState(false);
-    const [expandedAgencyId, setExpandedAgencyId] = useState<string | null>(null);
+    const [expandedAgencyId, setExpandedAgencyId] = useState<number | null>(null);
     const [expandedAgencySites, setExpandedAgencySites] = useState<AssignedSiteDetail[]>([]);
     const [isExpandedSitesLoading, setIsExpandedSitesLoading] = useState(false);
 
@@ -133,16 +145,22 @@ export default function TowercoAgenciesPage() {
             const token = localStorage.getItem('token');
             const authHeader = { 'Authorization': `Token ${token}` };
 
-            const agenciesResponse = await fetchData<{results: SecurityAgency[]}>(`/security/api/orgs/${orgCode}/security-agencies/list`, { headers: authHeader });
-            
-            const fetchedAgencies = agenciesResponse?.results || [];
-            setSecurityAgencies(fetchedAgencies);
-            setRegions(await getRegions(fetchedAgencies));
-            setIsLoading(false);
+            try {
+                const agenciesResponse = await fetchData<{results: SecurityAgency[]}>(`/security/api/orgs/${orgCode}/security-agencies/list`, { headers: authHeader });
+                
+                const fetchedAgencies = agenciesResponse?.results || [];
+                setSecurityAgencies(fetchedAgencies);
+                setRegions(await getRegions(fetchedAgencies));
+            } catch (error) {
+                console.error("Failed to fetch agencies:", error);
+                toast({ variant: 'destructive', title: 'Error', description: 'Could not load security agencies.' });
+            } finally {
+                setIsLoading(false);
+            }
         };
 
         fetchDataForOrg();
-    }, [loggedInOrg]);
+    }, [loggedInOrg, toast]);
 
     const uploadForm = useForm<z.infer<typeof uploadFormSchema>>({
         resolver: zodResolver(uploadFormSchema),
@@ -351,10 +369,10 @@ export default function TowercoAgenciesPage() {
         const token = localStorage.getItem('token');
         const url = `/security/api/orgs/${loggedInOrg.code}/security-agencies/${agencyId}/`;
         try {
-            const data = await fetchData<{ assigned_sites: AssignedSiteDetail[] }>(url, {
+            const data = await fetchData<{ data: { assigned_sites: AssignedSiteDetail[] } }>(url, {
                 headers: { 'Authorization': `Token ${token}` }
             });
-            return data?.assigned_sites || [];
+            return data?.data?.assigned_sites || [];
         } catch (error) {
             console.error("Failed to fetch assigned sites:", error);
             toast({ variant: 'destructive', title: 'Error', description: 'Could not load assigned sites for this agency.' });
@@ -366,14 +384,13 @@ export default function TowercoAgenciesPage() {
 
     const handleExpandClick = async (e: React.MouseEvent, agency: SecurityAgency) => {
         e.stopPropagation();
-        const agencyId = agency.subcon_id;
         
-        if (expandedAgencyId === agencyId) {
+        if (expandedAgencyId === agency.id) {
             setExpandedAgencyId(null);
             setExpandedAgencySites([]);
         } else {
             if (agency.total_sites_assigned > 0) {
-                setExpandedAgencyId(agencyId);
+                setExpandedAgencyId(agency.id);
                 const sites = await fetchAssignedSites(agency.id);
                 setExpandedAgencySites(sites);
             }
@@ -700,7 +717,7 @@ export default function TowercoAgenciesPage() {
                                 ))
                             ) : paginatedAgencies.length > 0 ? (
                                 paginatedAgencies.map((agency) => {
-                                    const isExpanded = expandedAgencyId === agency.subcon_id;
+                                    const isExpanded = expandedAgencyId === agency.id;
 
                                     return (
                                         <Fragment key={agency.id}>

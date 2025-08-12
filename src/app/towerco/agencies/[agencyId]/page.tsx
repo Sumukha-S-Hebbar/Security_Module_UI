@@ -70,30 +70,26 @@ import { fetchData } from '@/lib/api';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
 
-
 type AgencyReportData = {
     id: number;
-    tb_agency_id: string;
-    agency_name: string;
+    subcon_id: string;
+    name: string;
+    logo?: string | null;
     contact_person: string;
-    communication_email: string;
+    email: string;
     phone: string;
-    registered_address_line1: string;
-    registered_address_line2: string | null;
-    registered_address_line3: string | null;
     region: string;
     city: string;
-    logo: string | null;
+    registered_address_line1: string;
     assigned_sites_count: number;
     total_incidents_count: number;
     resolved_incidents_count: number;
     performance: {
         filters_applied: string;
-        overall_performance: string;
         incident_resolution_rate: string;
         site_visit_accuracy: string;
         guard_checkin_accuracy: string;
-        selfie_checkin_accuracy: string;
+        selfie_checkin_accuracy?: string; // It was missing in the last example
     };
     assigned_sites: {
         id: number;
@@ -101,8 +97,6 @@ type AgencyReportData = {
         org_site_id: string;
         site_name: string;
         registered_address_line1: string;
-        registered_address_line2: string | null;
-        registered_address_line3: string | null;
         assigned_on: string;
         number_of_guards: number;
         total_incidents_count: number;
@@ -143,6 +137,15 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
+
+const parsePerformanceValue = (value: string | undefined): number => {
+    if (typeof value !== 'string' || value === 'N/A') {
+        return 0;
+    }
+    return parseFloat(value.replace('%', ''));
+};
+
+
 export default function AgencyReportPage() {
   const params = useParams();
   const router = useRouter();
@@ -179,7 +182,7 @@ export default function AgencyReportPage() {
           const token = localStorage.getItem('token');
           const orgCode = loggedInOrg.code;
           
-          let url = `http://are.towerbuddy.tel:8000/security/api/orgs/${orgCode}/security-agencies/${agencyId}/`;
+          let url = `/security/api/orgs/${orgCode}/security-agencies/${agencyId}/`;
           
           const queryParams = new URLSearchParams();
           if (performanceSelectedYear !== 'all') queryParams.append('year', performanceSelectedYear);
@@ -190,10 +193,10 @@ export default function AgencyReportPage() {
           }
 
           try {
-              const data = await fetchData<AgencyReportData>(url, {
+              const response = await fetchData<{ data: AgencyReportData }>(url, {
                   headers: { 'Authorization': `Token ${token}` }
               });
-              setReportData(data);
+              setReportData(response?.data || null);
           } catch (error) {
               console.error("Failed to fetch agency report:", error);
               toast({
@@ -214,11 +217,10 @@ export default function AgencyReportPage() {
     if (!reportData) return null;
     const { performance } = reportData;
     return {
-      overall: parseInt(performance.overall_performance.replace('%', '')),
-      incidentResolution: parseInt(performance.incident_resolution_rate.replace('%', '')),
-      siteVisit: parseInt(performance.site_visit_accuracy.replace('%', '')),
-      checkin: parseInt(performance.guard_checkin_accuracy.replace('%', '')),
-      selfie: parseInt(performance.selfie_checkin_accuracy.replace('%', '')),
+      incidentResolution: parsePerformanceValue(performance.incident_resolution_rate),
+      siteVisit: parsePerformanceValue(performance.site_visit_accuracy),
+      checkin: parsePerformanceValue(performance.guard_checkin_accuracy),
+      selfie: parsePerformanceValue(performance.selfie_checkin_accuracy),
     };
   }, [reportData]);
 
@@ -227,6 +229,9 @@ export default function AgencyReportPage() {
     const years = new Set(
       reportData.incidents.map((incident) => new Date(incident.incident_time).getFullYear().toString())
     );
+    if (years.size === 0) {
+        years.add(new Date().getFullYear().toString());
+    }
     return Array.from(years).sort((a, b) => parseInt(b) - parseInt(a));
   }, [reportData]);
   
@@ -244,11 +249,6 @@ export default function AgencyReportPage() {
   }, [reportData, incidentsStatusFilter, incidentsYearFilter, incidentsMonthFilter]);
 
 
-  const complianceData = useMemo(() => [
-    { name: 'performance', value: performanceMetrics?.overall || 0 },
-    { name: 'Remaining', value: 100 - (performanceMetrics?.overall || 0) },
-  ], [performanceMetrics]);
-
   const performanceBreakdownChartData = useMemo(() => [{
     name: 'Performance',
     incidentResolutionRate: performanceMetrics?.incidentResolution || 0,
@@ -257,14 +257,6 @@ export default function AgencyReportPage() {
     guardSelfieAccuracy: performanceMetrics?.selfie || 0,
   }], [performanceMetrics]);
 
-  const getPerformanceColor = () => {
-    if (!performanceMetrics) return 'hsl(var(--muted))';
-    if (performanceMetrics.overall >= 95) return 'hsl(var(--chart-2))';
-    if (performanceMetrics.overall >= 65) return 'hsl(var(--chart-3))';
-    return 'hsl(var(--destructive))';
-  };
-
-  const COLORS = [getPerformanceColor(), 'hsl(var(--muted))'];
 
   const getStatusIndicator = (status: "Active" | "Under Review" | "Resolved") => {
     switch (status) {
@@ -346,8 +338,8 @@ export default function AgencyReportPage() {
   }
 
   const {
-    agency_name,
-    communication_email,
+    name,
+    email,
     phone,
     registered_address_line1,
     city,
@@ -371,7 +363,7 @@ export default function AgencyReportPage() {
           </Button>
           <div>
               <h1 className="text-3xl font-bold tracking-tight">Agency Report</h1>
-              <p className="text-muted-foreground font-medium">Detailed overview for {agency_name} on {loggedInOrg.name}.</p>
+              <p className="text-muted-foreground font-medium">Detailed overview for {name} on {loggedInOrg.name}.</p>
           </div>
         </div>
         <Button onClick={() => {}} className="bg-[#00B4D8] hover:bg-[#00B4D8]/90">
@@ -385,12 +377,12 @@ export default function AgencyReportPage() {
           <CardHeader>
           <div className="flex items-center gap-4">
               <Avatar className="h-16 w-16">
-                  <AvatarImage src={reportData.logo || undefined} alt={agency_name || ''} />
-                  <AvatarFallback>{agency_name ? agency_name.charAt(0) : 'A'}</AvatarFallback>
+                  <AvatarImage src={reportData.logo || undefined} alt={name || ''} />
+                  <AvatarFallback>{name ? name.charAt(0) : 'A'}</AvatarFallback>
               </Avatar>
               <div>
-                  <CardTitle className="text-2xl">{agency_name}</CardTitle>
-                  <p className="font-medium text-foreground">ID: {reportData.tb_agency_id}</p>
+                  <CardTitle className="text-2xl">{name}</CardTitle>
+                  <p className="font-medium text-foreground">ID: {reportData.subcon_id}</p>
               </div>
           </div>
           </CardHeader>
@@ -398,7 +390,7 @@ export default function AgencyReportPage() {
               <div className="text-sm mt-2 space-y-2">
                   <div className="flex items-center gap-2">
                       <Mail className="h-4 w-4" />
-                      <a href={`mailto:${communication_email}`} className="font-medium hover:underline">{communication_email}</a>
+                      <a href={`mailto:${email}`} className="font-medium hover:underline">{email}</a>
                   </div>
                   <div className="flex items-center gap-2">
                       <Phone className="h-4 w-4" />
@@ -473,24 +465,7 @@ export default function AgencyReportPage() {
                 </Select>
             </div>
           </CardHeader>
-          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-            <div className="relative w-full max-w-[250px] aspect-square mx-auto">
-                <ChartContainer config={chartConfig} className="w-full h-full">
-                    <PieChart>
-                      <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
-                      <Pie data={complianceData} cx="50%" cy="50%" innerRadius="70%" outerRadius="85%" paddingAngle={0} dataKey="value" stroke="none">
-                          {complianceData.map((entry, index) => (<Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />))}
-                      </Pie>
-                    </PieChart>
-                </ChartContainer>
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                    <span className="text-4xl font-bold" style={{ color: getPerformanceColor() }}>
-                        {performanceMetrics?.overall}%
-                    </span>
-                </div>
-                <p className="text-lg font-medium text-center mt-2">Overall Performance</p>
-            </div>
-            <div className="h-full">
+           <CardContent className="pt-6">
               <ChartContainer config={chartConfig} className="w-full h-64">
                 <ResponsiveContainer>
                   <BarChart data={performanceBreakdownChartData} layout="vertical" margin={{ left: 50, right: 40 }}>
@@ -514,8 +489,7 @@ export default function AgencyReportPage() {
                   </BarChart>
                 </ResponsiveContainer>
               </ChartContainer>
-            </div>
-          </CardContent>
+            </CardContent>
         </Card>
       </div>
 
@@ -523,7 +497,7 @@ export default function AgencyReportPage() {
         <CardHeader>
           <CardTitle>Assigned Sites</CardTitle>
           <CardDescription className="font-medium flex-1">
-            A detailed list of all sites assigned to {agency_name}.
+            A detailed list of all sites assigned to {name}.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -592,7 +566,7 @@ export default function AgencyReportPage() {
             <div>
               <CardTitle>Incidents Log</CardTitle>
               <CardDescription className="font-medium flex-1">
-                A log of emergency incidents at sites managed by {agency_name}.
+                A log of emergency incidents at sites managed by {name}.
               </CardDescription>
             </div>
             <div className="flex items-center gap-2 flex-shrink-0">
@@ -603,7 +577,7 @@ export default function AgencyReportPage() {
                   <SelectContent>
                       <SelectItem value="all" className="font-medium">All Statuses</SelectItem>
                       <SelectItem value="active" className="font-medium">Active</SelectItem>
-                      <SelectItem value="under_review" className="font-medium">Under Review</SelectItem>
+                      <SelectItem value="under-review" className="font-medium">Under Review</SelectItem>
                       <SelectItem value="resolved" className="font-medium">Resolved</SelectItem>
                   </SelectContent>
               </Select>
