@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import type { Site, Organization, SecurityAgency, PaginatedSitesResponse } from '@/types';
+import type { Site, Organization, SecurityAgency, PaginatedSitesResponse, User } from '@/types';
 import {
   Card,
   CardContent,
@@ -56,6 +56,7 @@ import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { fetchData } from '@/lib/api';
 
+
 const addSiteFormSchema = z.object({
     org_site_id: z.string().min(1, 'Site ID is required.'),
     site_name: z.string().min(1, 'Site name is required.'),
@@ -76,6 +77,16 @@ const uploadFormSchema = z.object({
     .refine((files) => ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel'].includes(files?.[0]?.type), 'Only .xlsx or .xls files are accepted.'),
 });
 
+type ApiRegion = {
+  id: number;
+  name: string;
+};
+
+type ApiCity = {
+    id: number;
+    name: string;
+}
+
 export function SitesPageClient() {
   const { toast } = useToast();
   const router = useRouter();
@@ -86,6 +97,7 @@ export function SitesPageClient() {
   const [allAgencies, setAllAgencies] = useState<SecurityAgency[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loggedInOrg, setLoggedInOrg] = useState<Organization | null>(null);
+  const [loggedInUser, setLoggedInUser] = useState<User | null>(null);
 
   // State for filters
   const [assignedSearchQuery, setAssignedSearchQuery] = useState('');
@@ -102,14 +114,22 @@ export function SitesPageClient() {
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [isAddingSite, setIsAddingSite] = useState(false);
+
+  const [apiRegions, setApiRegions] = useState<ApiRegion[]>([]);
+  const [apiCities, setApiCities] = useState<ApiCity[]>([]);
+  const [isCitiesLoading, setIsCitiesLoading] = useState(false);
   
   const unassignedSitesRef = useRef(new Map<string, HTMLTableRowElement | null>());
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
         const orgData = localStorage.getItem('organization');
+        const userData = localStorage.getItem('user');
         if (orgData) {
             setLoggedInOrg(JSON.parse(orgData));
+        }
+        if (userData) {
+            setLoggedInUser(JSON.parse(userData));
         }
     }
   }, []);
@@ -121,34 +141,95 @@ export function SitesPageClient() {
   const uploadForm = useForm<z.infer<typeof uploadFormSchema>>({
     resolver: zodResolver(uploadFormSchema),
   });
+  
+  const watchedRegion = addSiteForm.watch('region');
+
+  const fetchSitesAndAgencies = useCallback(async () => {
+    if (!loggedInOrg) return;
+    setIsLoading(true);
+    const token = localStorage.getItem('token');
+    const authHeader = { 'Authorization': `Token ${token}` };
+
+    try {
+        const sitesResponse = await fetchData<PaginatedSitesResponse>(`/security/api/orgs/${loggedInOrg.code}/sites/list/`, { headers: authHeader });
+        setAllSites(sitesResponse?.results || []);
+        
+        const agenciesResponse = await fetchData<{results: SecurityAgency[]}>(`/security/api/orgs/${loggedInOrg.code}/security-agencies/list`, { headers: authHeader });
+        setAllAgencies(agenciesResponse?.results || []);
+
+    } catch (error) {
+        toast({
+            variant: 'destructive',
+            title: 'Error',
+            description: 'Failed to load initial site and agency data.'
+        });
+    } finally {
+        setIsLoading(false);
+    }
+  }, [loggedInOrg, toast]);
 
   useEffect(() => {
-    if (!loggedInOrg) return;
+    fetchSitesAndAgencies();
+  }, [fetchSitesAndAgencies]);
 
-    const fetchAllData = async () => {
-        setIsLoading(true);
-        const token = localStorage.getItem('token');
-        const authHeader = { 'Authorization': `Token ${token}` };
+  useEffect(() => {
+      async function fetchRegions() {
+          if (!loggedInUser || !loggedInUser.country || !isAddSiteDialogOpen) return;
 
-        try {
-            const sitesResponse = await fetchData<PaginatedSitesResponse>(`/security/api/orgs/${loggedInOrg.code}/sites/list/`, { headers: authHeader });
-            setAllSites(sitesResponse?.results || []);
-            
-            const agenciesResponse = await fetchData<{results: SecurityAgency[]}>(`/security/api/orgs/${loggedInOrg.code}/security-agencies/list`, { headers: authHeader });
-            setAllAgencies(agenciesResponse?.results || []);
+          const token = localStorage.getItem('token');
+          const countryId = loggedInUser.country.id;
+          const url = `/security/api/regions/?country=${countryId}`;
+          
+          try {
+              const data = await fetchData<{ regions: ApiRegion[] }>(url, {
+              headers: { 'Authorization': `Token ${token}` }
+              });
+              setApiRegions(data?.regions || []);
+          } catch (error) {
+              console.error("Failed to fetch regions:", error);
+              toast({
+              variant: "destructive",
+              title: "Error",
+              description: "Could not load regions for the selection.",
+              });
+          }
+      }
+      fetchRegions();
+  }, [loggedInUser, isAddSiteDialogOpen, toast]);
 
-        } catch (error) {
-            toast({
-                variant: 'destructive',
-                title: 'Error',
-                description: 'Failed to load initial site and agency data.'
-            });
-        } finally {
-            setIsLoading(false);
-        }
-    }
-    fetchAllData();
-  }, [loggedInOrg, toast]);
+  useEffect(() => {
+      async function fetchCities() {
+          if (!watchedRegion || !loggedInUser || !loggedInUser.country) {
+              setApiCities([]);
+              return;
+          }
+          
+          setIsCitiesLoading(true);
+          const token = localStorage.getItem('token');
+          const countryId = loggedInUser.country.id;
+          const url = `/security/api/cities/?country=${countryId}&region=${watchedRegion}`;
+
+          try {
+              const data = await fetchData<{ cities: ApiCity[] }>(url, {
+                  headers: { 'Authorization': `Token ${token}` }
+              });
+              setApiCities(data?.cities || []);
+          } catch (error) {
+              console.error("Failed to fetch cities:", error);
+              toast({
+                  variant: "destructive",
+                  title: "Error",
+                  description: "Could not load cities for the selected region.",
+              });
+              setApiCities([]);
+          } finally {
+              setIsCitiesLoading(false);
+          }
+      }
+
+      addSiteForm.resetField('city');
+      fetchCities();
+  }, [watchedRegion, loggedInUser, toast, addSiteForm]);
 
 
   useEffect(() => {
@@ -432,9 +513,11 @@ export function SitesPageClient() {
                                                   </SelectTrigger>
                                               </FormControl>
                                               <SelectContent>
-                                                  {/* In a real app, these would come from an API */}
-                                                  <SelectItem value="Kiambu">Kiambu</SelectItem>
-                                                  <SelectItem value="Meru">Meru</SelectItem>
+                                                  {apiRegions.map(region => (
+                                                      <SelectItem key={region.id} value={region.id.toString()}>
+                                                          {region.name}
+                                                      </SelectItem>
+                                                  ))}
                                               </SelectContent>
                                           </Select>
                                           <FormMessage />
@@ -447,9 +530,20 @@ export function SitesPageClient() {
                                   render={({ field }) => (
                                       <FormItem>
                                           <FormLabel>City</FormLabel>
-                                           <FormControl>
-                                              <Input placeholder="e.g., Kikuyu" {...field} />
-                                          </FormControl>
+                                           <Select onValueChange={field.onChange} value={field.value} disabled={!watchedRegion || isCitiesLoading}>
+                                              <FormControl>
+                                                  <SelectTrigger>
+                                                      <SelectValue placeholder={isCitiesLoading ? "Loading cities..." : "Select a city"} />
+                                                  </SelectTrigger>
+                                              </FormControl>
+                                              <SelectContent>
+                                                  {apiCities.map(city => (
+                                                      <SelectItem key={city.id} value={city.id.toString()}>
+                                                          {city.name}
+                                                      </SelectItem>
+                                                  ))}
+                                              </SelectContent>
+                                          </Select>
                                           <FormMessage />
                                       </FormItem>
                                   )}
