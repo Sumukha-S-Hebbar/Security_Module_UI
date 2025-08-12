@@ -1,5 +1,3 @@
-
-
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
@@ -402,10 +400,10 @@ export default function AgencyReportPage() {
         <Card className="lg:col-span-1">
           <CardHeader>
           <div className="flex items-center gap-4">
-              <Avatar className="h-16 w-16">
+              {/* <Avatar className="h-16 w-16">
                   <AvatarImage src={reportData.logo || undefined} alt={name || ''} />
                   <AvatarFallback>{name ? name.charAt(0) : 'A'}</AvatarFallback>
-              </Avatar>
+              </Avatar> */}
               <div>
                   <CardTitle className="text-2xl">{name}</CardTitle>
                   <p className="font-medium text-foreground">ID: {reportData.subcon_id}</p>
