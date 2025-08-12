@@ -109,6 +109,7 @@ export default function TowercoAgenciesPage() {
     const [expandedAgencyId, setExpandedAgencyId] = useState<number | null>(null);
     const [expandedAgencySites, setExpandedAgencySites] = useState<AssignedSiteDetail[]>([]);
     const [isExpandedSitesLoading, setIsExpandedSitesLoading] = useState(false);
+    const [newlyAddedAgencyId, setNewlyAddedAgencyId] = useState<number | null>(null);
 
     const { toast } = useToast();
     const router = useRouter();
@@ -136,30 +137,32 @@ export default function TowercoAgenciesPage() {
      }
     }, []);
 
-    useEffect(() => {
+    const fetchAllAgencies = async () => {
         if (!loggedInOrg) return;
+        setIsLoading(true);
+        const orgCode = loggedInOrg.code;
+        const token = localStorage.getItem('token');
+        const authHeader = { 'Authorization': `Token ${token}` };
 
-        const fetchDataForOrg = async () => {
-            setIsLoading(true);
-            const orgCode = loggedInOrg.code;
-            const token = localStorage.getItem('token');
-            const authHeader = { 'Authorization': `Token ${token}` };
+        try {
+            const agenciesResponse = await fetchData<{results: SecurityAgency[]}>(`/security/api/orgs/${orgCode}/security-agencies/list`, { headers: authHeader });
+            
+            const fetchedAgencies = agenciesResponse?.results || [];
+            setSecurityAgencies(fetchedAgencies);
+            setRegions(await getRegions(fetchedAgencies));
+        } catch (error) {
+            console.error("Failed to fetch agencies:", error);
+            toast({ variant: 'destructive', title: 'Error', description: 'Could not load security agencies.' });
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
-            try {
-                const agenciesResponse = await fetchData<{results: SecurityAgency[]}>(`/security/api/orgs/${orgCode}/security-agencies/list`, { headers: authHeader });
-                
-                const fetchedAgencies = agenciesResponse?.results || [];
-                setSecurityAgencies(fetchedAgencies);
-                setRegions(await getRegions(fetchedAgencies));
-            } catch (error) {
-                console.error("Failed to fetch agencies:", error);
-                toast({ variant: 'destructive', title: 'Error', description: 'Could not load security agencies.' });
-            } finally {
-                setIsLoading(false);
-            }
-        };
 
-        fetchDataForOrg();
+    useEffect(() => {
+        if (loggedInOrg) {
+            fetchAllAgencies();
+        }
     }, [loggedInOrg, toast]);
 
     const uploadForm = useForm<z.infer<typeof uploadFormSchema>>({
@@ -287,8 +290,10 @@ export default function TowercoAgenciesPage() {
             if (!response.ok) {
                 throw new Error(responseData.detail || 'Failed to add agency.');
             }
-
-            setSecurityAgencies((prevAgencies) => [responseData.data, ...prevAgencies]);
+            
+            await fetchAllAgencies();
+            setNewlyAddedAgencyId(responseData.data.id);
+            setTimeout(() => setNewlyAddedAgencyId(null), 2000); 
 
             toast({
                 title: 'Agency Added',
@@ -718,10 +723,17 @@ export default function TowercoAgenciesPage() {
                             ) : paginatedAgencies.length > 0 ? (
                                 paginatedAgencies.map((agency) => {
                                     const isExpanded = expandedAgencyId === agency.id;
+                                    const isNewlyAdded = newlyAddedAgencyId === agency.id;
 
                                     return (
                                         <Fragment key={agency.id}>
-                                            <TableRow onClick={(e) => handleRowClick(e, agency.id)} className="cursor-pointer hover:bg-accent hover:text-accent-foreground group">
+                                            <TableRow 
+                                                onClick={(e) => handleRowClick(e, agency.id)} 
+                                                className={cn(
+                                                    "cursor-pointer hover:bg-accent hover:text-accent-foreground group",
+                                                    isNewlyAdded && 'highlight-row'
+                                                )}
+                                            >
                                                 <TableCell>
                                                     <p className="text-accent font-semibold group-hover:text-accent-foreground hover:underline">{agency.subcon_id}</p>
                                                 </TableCell>
