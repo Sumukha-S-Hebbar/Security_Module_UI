@@ -780,8 +780,8 @@ export function SitesPageClient() {
                 <TableHead className="text-foreground">Towerbuddy ID</TableHead>
                 <TableHead className="text-foreground">Site ID</TableHead>
                 <TableHead className="text-foreground">Site Name</TableHead>
-                <TableHead className="text-foreground">Assigned Agency</TableHead>
                 <TableHead className="text-foreground">Location</TableHead>
+                <TableHead className="text-foreground">Assigned Agency</TableHead>
                 <TableHead className="text-foreground">Guards Requested</TableHead>
                 <TableHead className="text-foreground">Incidents</TableHead>
               </TableRow>
@@ -806,10 +806,10 @@ export function SitesPageClient() {
                       <p className="font-medium">{site.site_name}</p>
                     </TableCell>
                     <TableCell>
-                       <span className="font-medium">{site.assigned_agency?.name || 'N/A'}</span>
+                      <p className="font-medium">{site.city}, {site.region}</p>
                     </TableCell>
                     <TableCell>
-                      <p className="font-medium">{site.city}, {site.region}</p>
+                       <span className="font-medium">{site.assigned_agency?.name || 'N/A'}</span>
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2 font-medium">
@@ -896,6 +896,7 @@ export function SitesPageClient() {
                   <TableHead className="text-foreground">Towerbuddy ID</TableHead>
                   <TableHead className="text-foreground">Site ID</TableHead>
                   <TableHead className="text-foreground">Site Name</TableHead>
+                  <TableHead className="text-foreground">Location</TableHead>
                   <TableHead className="text-foreground">Assign Agency</TableHead>
                   <TableHead className="text-foreground">Guards Required</TableHead>
                   <TableHead className="text-right text-foreground">Actions</TableHead>
@@ -920,10 +921,12 @@ export function SitesPageClient() {
                           </TableCell>
                           <TableCell>
                              <div className="font-medium">{site.site_name}</div>
-                              <div className="text-sm text-muted-foreground flex items-center gap-1 font-medium">
-                                <MapPin className="w-3 h-3" />
-                                {site.city}, {site.region}
-                              </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="text-sm text-muted-foreground flex items-center gap-1 font-medium">
+                              <MapPin className="w-3 h-3" />
+                              {site.city}, {site.region}
+                            </div>
                           </TableCell>
                           <TableCell>
                              <div onClick={(e) => e.stopPropagation()}>
@@ -967,7 +970,7 @@ export function SitesPageClient() {
                 ))
               ) : (
                 <TableRow>
-                    <TableCell colSpan={6} className="text-center text-muted-foreground font-medium py-10">
+                    <TableCell colSpan={7} className="text-center text-muted-foreground font-medium py-10">
                         No unassigned sites found for the current filter.
                     </TableCell>
                 </TableRow>
@@ -980,5 +983,3 @@ export function SitesPageClient() {
     </div>
   );
 }
-
-    
