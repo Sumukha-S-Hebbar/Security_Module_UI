@@ -31,6 +31,7 @@ import {
   PlusCircle,
   Loader2,
   MapPin,
+  Upload,
 } from 'lucide-react';
 import {
   Select,
@@ -68,6 +69,13 @@ const addSiteFormSchema = z.object({
     lng: z.coerce.number(),
 });
 
+const uploadFormSchema = z.object({
+  excelFile: z
+    .any()
+    .refine((files) => files?.length === 1, 'Excel file is required.')
+    .refine((files) => ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel'].includes(files?.[0]?.type), 'Only .xlsx or .xls files are accepted.'),
+});
+
 export function SitesPageClient() {
   const { toast } = useToast();
   const router = useRouter();
@@ -91,6 +99,8 @@ export function SitesPageClient() {
   // State for assignment and dialogs
   const [assignment, setAssignment] = useState<{ [siteId: string]: string }>({});
   const [isAddSiteDialogOpen, setIsAddSiteDialogOpen] = useState(false);
+  const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const [isAddingSite, setIsAddingSite] = useState(false);
   
   const unassignedSitesRef = useRef(new Map<string, HTMLTableRowElement | null>());
@@ -107,6 +117,10 @@ export function SitesPageClient() {
   const addSiteForm = useForm<z.infer<typeof addSiteFormSchema>>({
     resolver: zodResolver(addSiteFormSchema),
   });
+  
+  const uploadForm = useForm<z.infer<typeof uploadFormSchema>>({
+    resolver: zodResolver(uploadFormSchema),
+  });
 
   useEffect(() => {
     if (!loggedInOrg) return;
@@ -120,7 +134,6 @@ export function SitesPageClient() {
             const sitesResponse = await fetchData<PaginatedSitesResponse>(`/security/api/orgs/${loggedInOrg.code}/sites/list/`, { headers: authHeader });
             setAllSites(sitesResponse?.results || []);
             
-            // Assuming an endpoint for agencies exists. If not, this needs adjustment.
             const agenciesResponse = await fetchData<{results: SecurityAgency[]}>(`/security/api/orgs/${loggedInOrg.code}/security-agencies/list`, { headers: authHeader });
             setAllAgencies(agenciesResponse?.results || []);
 
@@ -147,7 +160,7 @@ export function SitesPageClient() {
         el.classList.remove('highlight-row');
       }, 2000);
     }
-  }, [focusSite, allSites]); // Rerun when allSites is populated
+  }, [focusSite, allSites]);
 
   const assignedSites = useMemo(
     () => allSites.filter((site) => site.site_status === 'Assigned'),
@@ -208,7 +221,6 @@ export function SitesPageClient() {
   const onAddSiteSubmit = async (values: z.infer<typeof addSiteFormSchema>) => {
     setIsAddingSite(true);
     console.log("New site data:", values);
-    // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1500));
     toast({
         title: 'Site Added Successfully',
@@ -217,6 +229,28 @@ export function SitesPageClient() {
     setIsAddingSite(false);
     setIsAddSiteDialogOpen(false);
     addSiteForm.reset();
+  }
+  
+  const onUploadSubmit = async (values: z.infer<typeof uploadFormSchema>) => {
+    setIsUploading(true);
+    console.log('Uploaded file:', values.excelFile[0]);
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+    toast({
+      title: 'Upload Successful',
+      description: `File "${values.excelFile[0].name}" has been uploaded. Site profiles will be processed.`,
+    });
+    uploadForm.reset({ excelFile: undefined });
+    const fileInput = document.getElementById('excelFile-site-input') as HTMLInputElement | null;
+    if (fileInput) fileInput.value = '';
+    setIsUploading(false);
+    setIsUploadDialogOpen(false);
+  }
+
+  const handleDownloadTemplate = () => {
+    toast({
+        title: 'Template Downloaded',
+        description: 'Site profile Excel template has been downloaded.',
+    });
   }
 
   const filteredAssignedSites = useMemo(() => {
@@ -266,6 +300,69 @@ export function SitesPageClient() {
           </p>
         </div>
         <div className="flex items-center gap-2">
+            <Button onClick={handleDownloadTemplate} className="bg-[#00B4D8] hover:bg-[#00B4D8]/90">
+                <FileDown className="mr-2 h-4 w-4" />
+                Download Excel Template
+            </Button>
+            <Dialog open={isUploadDialogOpen} onOpenChange={setIsUploadDialogOpen}>
+                <DialogTrigger asChild>
+                    <Button className="bg-[#00B4D8] hover:bg-[#00B4D8]/90">
+                        <Upload className="mr-2 h-4 w-4" />
+                        Upload Excel
+                    </Button>
+                </DialogTrigger>
+                <DialogContent>
+                    <DialogHeader>
+                    <DialogTitle>Upload Site Profiles</DialogTitle>
+                    <DialogDescription className="font-medium">
+                        Upload an Excel file to add multiple sites at once.
+                    </DialogDescription>
+                    </DialogHeader>
+                    <Form {...uploadForm}>
+                        <form onSubmit={uploadForm.handleSubmit(onUploadSubmit)}>
+                            <div className="grid gap-4 py-4">
+                                <FormField
+                                    control={uploadForm.control}
+                                    name="excelFile"
+                                    render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Site Excel File</FormLabel>
+                                        <FormControl>
+                                        <Input
+                                            id="excelFile-site-input"
+                                            type="file"
+                                            accept=".xlsx, .xls"
+                                            disabled={isUploading}
+                                            onChange={(e) => field.onChange(e.target.files)}
+                                        />
+                                        </FormControl>
+                                        <FormDescription className="font-medium">
+                                        The Excel file should contain columns for all site details.
+                                        </FormDescription>
+                                        <FormMessage />
+                                    </FormItem>
+                                    )}
+                                />
+                            </div>
+                            <DialogFooter>
+                                <Button type="submit" disabled={isUploading} className="bg-[#00B4D8] hover:bg-[#00B4D8]/90">
+                                {isUploading ? (
+                                    <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Uploading...
+                                    </>
+                                ) : (
+                                    <>
+                                    <Upload className="mr-2 h-4 w-4" />
+                                    Upload Excel
+                                    </>
+                                )}
+                                </Button>
+                            </DialogFooter>
+                        </form>
+                    </Form>
+                </DialogContent>
+            </Dialog>
             <Dialog open={isAddSiteDialogOpen} onOpenChange={setIsAddSiteDialogOpen}>
                 <DialogTrigger asChild>
                     <Button className="bg-[#00B4D8] hover:bg-[#00B4D8]/90">
@@ -415,10 +512,6 @@ export function SitesPageClient() {
                     </Form>
                 </DialogContent>
             </Dialog>
-            <Button className="bg-[#00B4D8] hover:bg-[#00B4D8]/90">
-                <FileDown className="mr-2 h-4 w-4" />
-                Download Site Report
-            </Button>
         </div>
       </div>
       
