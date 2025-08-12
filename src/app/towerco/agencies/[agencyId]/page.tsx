@@ -141,6 +141,25 @@ const parsePerformanceValue = (value: string | undefined): number => {
     return parseFloat(value.replace('%', ''));
 };
 
+const chartConfig = {
+  incidentResolution: {
+    label: 'Incident Resolution',
+    color: 'hsl(var(--chart-1))',
+  },
+  siteVisit: {
+    label: 'Site Visit Accuracy',
+    color: 'hsl(var(--chart-2))',
+  },
+  checkin: {
+    label: 'Guard Check-in Accuracy',
+    color: 'hsl(var(--chart-3))',
+  },
+  selfie: {
+    label: 'Selfie Check-in Accuracy',
+    color: 'hsl(var(--chart-5))',
+  },
+} satisfies ChartConfig;
+
 
 export default function AgencyReportPage() {
   const params = useParams();
@@ -233,10 +252,10 @@ export default function AgencyReportPage() {
   const performanceBreakdownChartData = useMemo(() => {
     if (!performanceMetrics) return [];
     return [
-      { name: "Incident Resolution", value: performanceMetrics.incidentResolution, fill: "hsl(var(--chart-1))" },
-      { name: "Site Visit Accuracy", value: performanceMetrics.siteVisit, fill: "hsl(var(--chart-2))" },
-      { name: "Guard Check-in Accuracy", value: performanceMetrics.checkin, fill: "hsl(var(--chart-3))" },
-      { name: "Selfie Check-in Accuracy", value: performanceMetrics.selfie, fill: "hsl(var(--chart-5))" },
+      { name: "incidentResolution", label: "Incident Resolution", value: performanceMetrics.incidentResolution },
+      { name: "siteVisit", label: "Site Visit Accuracy", value: performanceMetrics.siteVisit },
+      { name: "checkin", label: "Guard Check-in Accuracy", value: performanceMetrics.checkin },
+      { name: "selfie", label: "Selfie Check-in Accuracy", value: performanceMetrics.selfie },
     ];
   }, [performanceMetrics]);
   
@@ -506,31 +525,25 @@ export default function AgencyReportPage() {
                     <p className="font-semibold text-center mt-2">Overall Performance</p>
                   </div>
                   <div className="md:col-span-2">
-                    <ChartContainer config={{}} className="h-48 w-full">
+                    <ChartContainer config={chartConfig} className="h-[200px] w-full">
                        <ResponsiveContainer>
-                        <BarChart layout="vertical" data={performanceBreakdownChartData} margin={{ left: 30, right:30}}>
+                        <BarChart layout="vertical" data={performanceBreakdownChartData} margin={{ left: 120, right:30}}>
+                          <YAxis 
+                            dataKey="label" 
+                            type="category" 
+                            tickLine={false} 
+                            axisLine={false}
+                            width={120}
+                            tick={{ fontSize: 12 }}
+                          />
                           <XAxis type="number" domain={[0, 100]} hide />
-                          <YAxis type="category" dataKey="name" hide />
                           <Bar dataKey="value" radius={4}>
+                             {performanceBreakdownChartData.map((entry) => (
+                                <Cell key={entry.name} fill={`var(--color-${entry.name})`} />
+                            ))}
                             <LabelList dataKey="value" position="right" offset={8} formatter={(value: number) => `${value}%`} />
                           </Bar>
-                          <Tooltip cursor={{ fill: 'hsl(var(--muted))' }} content={<ChartTooltipContent hideLabel />} />
-                          <Legend
-                            layout="vertical"
-                            align="left"
-                            verticalAlign="middle"
-                            wrapperStyle={{ paddingLeft: '10px' }}
-                            content={({ payload }) => (
-                                <ul className="flex flex-col gap-2">
-                                {payload?.map((entry, index) => (
-                                    <li key={`item-${index}`} className="flex items-center gap-2">
-                                        <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: entry.color }} />
-                                        <span className="text-sm font-medium">{entry.value}</span>
-                                    </li>
-                                ))}
-                                </ul>
-                            )}
-                         />
+                          <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
                         </BarChart>
                       </ResponsiveContainer>
                     </ChartContainer>
