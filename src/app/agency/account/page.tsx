@@ -73,8 +73,7 @@ export default function AgencyAccountPage() {
   useEffect(() => {
     if (agency?.logo) {
       setAvatarPreview(agency.logo);
-    }
-     if (agency?.member?.profile_picture) {
+    } else if (agency?.member?.profile_picture) {
       setAvatarPreview(agency.member.profile_picture);
     }
   }, [agency]);
