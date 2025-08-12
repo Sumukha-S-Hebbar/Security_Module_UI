@@ -93,7 +93,7 @@ type AgencyReportData = {
         incident_resolution_rate: string;
         site_visit_accuracy: string;
         guard_checkin_accuracy: string;
-        selfie_checkin_accuracy?: string;
+        selfie_checkin_accuracy?: string | null;
     };
     assigned_sites: {
         id: number;
@@ -135,8 +135,8 @@ const getPerformanceColor = (value: number) => {
 };
 
 
-const parsePerformanceValue = (value: string | undefined): number => {
-    if (typeof value !== 'string' || value === 'N/A') {
+const parsePerformanceValue = (value: string | undefined | null): number => {
+    if (typeof value !== 'string' || value === 'N/A' || value === null) {
         return 0;
     }
     return parseFloat(value.replace('%', ''));
@@ -544,6 +544,7 @@ export default function AgencyReportPage() {
                             <LabelList dataKey="value" position="right" offset={8} formatter={(value: number) => `${value}%`} />
                           </Bar>
                           <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
+                          <ChartLegend content={<ChartLegendContent />} />
                         </BarChart>
                       </ResponsiveContainer>
                     </ChartContainer>
