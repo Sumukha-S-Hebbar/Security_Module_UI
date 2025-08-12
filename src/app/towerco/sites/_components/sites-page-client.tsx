@@ -4,6 +4,9 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
 import { sites } from '@/lib/data/sites';
 import { guards } from '@/lib/data/guards';
 import { patrollingOfficers } from '@/lib/data/patrolling-officers';
@@ -43,6 +46,8 @@ import {
   ShieldAlert,
   Users,
   Eye,
+  PlusCircle,
+  Loader2,
 } from 'lucide-react';
 import {
   Select,
@@ -51,11 +56,34 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 
 const LOGGED_IN_AGENCY_ID = 'AGY01'; // This is likely incorrect for a TOWERCO page, but we'll adapt
+
+const addSiteFormSchema = z.object({
+    org_site_id: z.string().min(1, 'Site ID is required.'),
+    site_name: z.string().min(1, 'Site name is required.'),
+    address_line_1: z.string().min(1, 'Address is required.'),
+    address_line_2: z.string().optional(),
+    address_line_3: z.string().optional(),
+    region: z.string().min(1, 'Region is required.'),
+    city: z.string().min(1, 'City is required.'),
+    zip_code: z.string().min(1, 'Zip code is required.'),
+    latitude: z.coerce.number(),
+    longitude: z.coerce.number(),
+});
 
 export function SitesPageClient() {
   const [selectedPatrollingOfficers, setSelectedPatrollingOfficers] = useState<{
@@ -86,7 +114,14 @@ export function SitesPageClient() {
 
   const [assignment, setAssignment] = useState<{ [siteId: string]: string }>({});
   
+  const [isAddSiteDialogOpen, setIsAddSiteDialogOpen] = useState(false);
+  const [isAddingSite, setIsAddingSite] = useState(false);
+  
   const unassignedSitesRef = useRef(new Map<string, HTMLTableRowElement | null>());
+  
+  const addSiteForm = useForm<z.infer<typeof addSiteFormSchema>>({
+    resolver: zodResolver(addSiteFormSchema),
+  });
 
   useEffect(() => {
     const el = focusSite ? unassignedSitesRef.current.get(focusSite) : null;
@@ -179,6 +214,20 @@ export function SitesPageClient() {
     });
   };
 
+  const onAddSiteSubmit = async (values: z.infer<typeof addSiteFormSchema>) => {
+    setIsAddingSite(true);
+    console.log("New site data:", values);
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    toast({
+        title: 'Site Added Successfully',
+        description: `Site "${values.site_name}" has been added to the unassigned sites list.`,
+    });
+    setIsAddingSite(false);
+    setIsAddSiteDialogOpen(false);
+    addSiteForm.reset();
+  }
+
   const filteredAssignedSites = useMemo(() => {
     return assignedSites.filter((site) => {
       const searchLower = assignedSearchQuery.toLowerCase();
@@ -239,13 +288,160 @@ export function SitesPageClient() {
           </p>
         </div>
         <div className="flex items-center gap-2">
+            <Dialog open={isAddSiteDialogOpen} onOpenChange={setIsAddSiteDialogOpen}>
+                <DialogTrigger asChild>
+                    <Button className="bg-[#00B4D8] hover:bg-[#00B4D8]/90">
+                        <PlusCircle className="mr-2 h-4 w-4" />
+                        Add Site
+                    </Button>
+                </DialogTrigger>
+                <DialogContent className="max-h-[90vh] overflow-y-auto">
+                    <DialogHeader>
+                        <DialogTitle>Add a New Site</DialogTitle>
+                        <DialogDescription className="font-medium">
+                            Fill in the details below to create a new site. It will be added to the unassigned list.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <Form {...addSiteForm}>
+                        <form onSubmit={addSiteForm.handleSubmit(onAddSiteSubmit)} className="space-y-4">
+                            <FormField
+                                control={addSiteForm.control}
+                                name="org_site_id"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Site ID</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="e.g., TCOA-S10" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={addSiteForm.control}
+                                name="site_name"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Site Name</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="e.g., Mountain Peak Tower" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                             <FormField
+                                control={addSiteForm.control}
+                                name="address_line_1"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Address Line 1</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="e.g., 123 Summit Way" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <div className="grid grid-cols-2 gap-4">
+                               <FormField
+                                  control={addSiteForm.control}
+                                  name="region"
+                                  render={({ field }) => (
+                                      <FormItem>
+                                          <FormLabel>Region</FormLabel>
+                                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                              <FormControl>
+                                                  <SelectTrigger>
+                                                      <SelectValue placeholder="Select a region" />
+                                                  </SelectTrigger>
+                                              </FormControl>
+                                              <SelectContent>
+                                                  {/* In a real app, these would come from an API */}
+                                                  <SelectItem value="CA">CA</SelectItem>
+                                                  <SelectItem value="NY">NY</SelectItem>
+                                                  <SelectItem value="TX">TX</SelectItem>
+                                                  <SelectItem value="FL">FL</SelectItem>
+                                              </SelectContent>
+                                          </Select>
+                                          <FormMessage />
+                                      </FormItem>
+                                  )}
+                              />
+                              <FormField
+                                  control={addSiteForm.control}
+                                  name="city"
+                                  render={({ field }) => (
+                                      <FormItem>
+                                          <FormLabel>City</FormLabel>
+                                           <FormControl>
+                                              <Input placeholder="e.g., Crestwood" {...field} />
+                                          </FormControl>
+                                          <FormMessage />
+                                      </FormItem>
+                                  )}
+                              />
+                            </div>
+                             <FormField
+                                control={addSiteForm.control}
+                                name="zip_code"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Zip Code</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="e.g., 90210" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                             <div className="grid grid-cols-2 gap-4">
+                                <FormField
+                                    control={addSiteForm.control}
+                                    name="latitude"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Latitude</FormLabel>
+                                            <FormControl>
+                                                <Input type="number" placeholder="e.g., 34.0522" {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                 <FormField
+                                    control={addSiteForm.control}
+                                    name="longitude"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Longitude</FormLabel>
+                                            <FormControl>
+                                                <Input type="number" placeholder="e.g., -118.2437" {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            </div>
+                            <DialogFooter>
+                                <Button type="submit" disabled={isAddingSite} className="bg-[#00B4D8] hover:bg-[#00B4D8]/90">
+                                {isAddingSite ? (
+                                    <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Adding Site...
+                                    </>
+                                ) : (
+                                    "Add Site"
+                                )}
+                                </Button>
+                            </DialogFooter>
+                        </form>
+                    </Form>
+                </DialogContent>
+            </Dialog>
             <Button className="bg-[#00B4D8] hover:bg-[#00B4D8]/90">
                 <FileDown className="mr-2 h-4 w-4" />
                 Download Site Report
-            </Button>
-            <Button className="bg-[#00B4D8] hover:bg-[#00B4D8]/90">
-                <FileDown className="mr-2 h-4 w-4" />
-                Download All Reports
             </Button>
         </div>
       </div>
