@@ -235,8 +235,8 @@ export default function TowercoAccountPage() {
                 <p className="font-semibold">{organization.member?.employee_id || 'N/A'}</p>
               </div>
               <div className="space-y-1">
-                <p className="text-muted-foreground font-medium">Role</p>
-                <p className="font-semibold">{user.role_details}</p>
+                <p className="text-muted-foreground font-medium">Designation</p>
+                <p className="font-semibold">{organization.member?.designation || 'N/A'}</p>
               </div>
               <div className="space-y-1">
                 <p className="text-muted-foreground font-medium">Organization</p>
