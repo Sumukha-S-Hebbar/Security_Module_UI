@@ -725,9 +725,7 @@ export function SitesPageClient() {
                     </TableCell>
                     <TableCell>
                       {site.assigned_agency ? (
-                        <Button asChild variant="link" className="p-0 h-auto font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
-                          <Link href={`/towerco/agencies/${site.assigned_agency.id}`}>{site.assigned_agency.name}</Link>
-                        </Button>
+                        <span className="font-medium">{site.assigned_agency.name}</span>
                       ) : (
                         <span className="text-muted-foreground font-medium">N/A</span>
                       )}
