@@ -68,8 +68,8 @@ type SiteReportData = {
     city: string;
     total_incidents_count: number;
     resolved_incidents_count: number;
-    agency_details: SecurityAgency | null;
-    guard_details: (Partial<Guard> & { id: number, guard_id: string, first_name: string, last_name: string | null, phone: string, profile_picture?: string })[];
+    agency_details: (Omit<SecurityAgency, 'agency_id' | 'agency_name' | 'address'> & {logo?: string | null}) | null;
+    guard_details: (Partial<Guard> & { id: number, user: string, email: string, first_name: string, last_name: string | null, phone: string, profile_picture?: string })[];
     incident_trend: { month: string; count: number }[];
     incidents: {
         count: number;
@@ -111,7 +111,6 @@ export default function SiteReportPage() {
     const fetchReportData = async () => {
         setIsLoading(true);
         const token = localStorage.getItem('token');
-        // Fetch all incidents by not including page param for client-side filtering
         const url = `/security/api/orgs/${loggedInOrg.code}/site/${siteId}/`;
 
         try {
@@ -156,23 +155,12 @@ export default function SiteReportPage() {
 
   const monthlyIncidentData = useMemo(() => {
     if (!reportData) return [];
-    const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-    ];
-    const monthlyData: { month: string; incidents: number }[] = months.map(
-      (month) => ({ month, incidents: 0 })
-    );
+    
+    return reportData.incident_trend.map(item => ({
+        month: item.month,
+        incidents: item.count
+    }));
 
-    reportData.incidents.results.forEach((incident) => {
-      const incidentDate = new Date(incident.incident_time);
-      if (incidentDate.getFullYear().toString() === selectedChartYear) {
-        const monthIndex = incidentDate.getMonth();
-        monthlyData[monthIndex].incidents += 1;
-      }
-    });
-
-    return monthlyData;
   }, [reportData, selectedChartYear]);
 
 
@@ -353,12 +341,12 @@ export default function SiteReportPage() {
             </CardHeader>
             <CardContent className="space-y-4">
                 <div>
-                    <p className="font-semibold text-base">{agency_details.agency_name}</p>
-                    <p className="font-medium">ID: {agency_details.agency_id}</p>
+                    <p className="font-semibold text-base">{agency_details.name}</p>
+                    <p className="font-medium">ID: {agency_details.subcon_id}</p>
                 </div>
                 <div className="text-sm space-y-2 pt-2 border-t">
                   <div className="flex items-center gap-2"><Phone className="h-4 w-4" /> <a href={`tel:${agency_details.phone}`} className="hover:underline">{agency_details.phone}</a></div>
-                  <div className="flex items-center gap-2"><Mail className="h-4 w-4" /> <a href={`mailto:${agency_details.communication_email}`} className="hover:underline">{agency_details.communication_email}</a></div>
+                  <div className="flex items-center gap-2"><Mail className="h-4 w-4" /> <a href={`mailto:${agency_details.email}`} className="hover:underline">{agency_details.email}</a></div>
                 </div>
                  <Button asChild variant="link" className="p-0 h-auto font-medium">
                     <Link href={`/towerco/agencies/${agency_details.id}`}>{`View Full Agency Report`}</Link>
@@ -389,7 +377,7 @@ export default function SiteReportPage() {
                           return (
                             <div key={guard.id} className="flex items-center gap-4">
                                 <Avatar className="h-12 w-12">
-                                     <AvatarImage src={guard.profile_picture ? `${process.env.NEXT_PUBLIC_DJANGO_API_URL}${guard.profile_picture}` : undefined} alt={guardName} />
+                                     <AvatarImage src={guard.profile_picture || undefined} alt={guardName} />
                                      <AvatarFallback>{guard.first_name ? guard.first_name.charAt(0) : 'G'}</AvatarFallback>
                                 </Avatar>
                                 <div>
