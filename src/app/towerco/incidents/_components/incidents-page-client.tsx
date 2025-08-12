@@ -29,16 +29,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Search, Calendar as CalendarIcon } from 'lucide-react';
+import { Search } from 'lucide-react';
 import Link from 'next/link';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
-import { Calendar } from '@/components/ui/calendar';
-import { format } from 'date-fns';
-import { cn } from '@/lib/utils';
 import { IncidentStatusSummary } from './incident-status-summary';
 import { fetchData } from '@/lib/api';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -78,9 +70,10 @@ export function IncidentsPageClient() {
   const siteIdFromQuery = searchParams.get('siteId');
 
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [selectedStatus, setSelectedStatus] = useState(statusFromQuery || 'all');
   const [selectedSite, setSelectedSite] = useState(siteIdFromQuery || 'all');
+  const [selectedYear, setSelectedYear] = useState('all');
+  const [selectedMonth, setSelectedMonth] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
 
@@ -92,6 +85,17 @@ export function IncidentsPageClient() {
       }
     }
   }, []);
+
+  const availableYears = useMemo(() => {
+    if (!allIncidentsForSummary || allIncidentsForSummary.length === 0) {
+        const currentYear = new Date().getFullYear();
+        return Array.from({ length: 5 }, (_, i) => (currentYear - i).toString());
+    }
+    const years = new Set(
+      allIncidentsForSummary.map((incident) => new Date(incident.incident_time).getFullYear().toString())
+    );
+    return Array.from(years).sort((a, b) => parseInt(b) - parseInt(a));
+  }, [allIncidentsForSummary]);
 
   useEffect(() => {
     if (!loggedInOrg) return;
@@ -135,7 +139,8 @@ export function IncidentsPageClient() {
       
       if (searchQuery) params.append('search', searchQuery);
       if (selectedSite !== 'all') params.append('site_name', selectedSite);
-      if (selectedDate) params.append('date', format(selectedDate, 'yyyy-MM-dd'));
+      if (selectedYear !== 'all') params.append('year', selectedYear);
+      if (selectedMonth !== 'all') params.append('month', selectedMonth);
       params.append('page', currentPage.toString());
       params.append('page_size', ITEMS_PER_PAGE.toString());
       
@@ -155,11 +160,11 @@ export function IncidentsPageClient() {
     };
 
     fetchFilteredIncidents();
-  }, [loggedInOrg, selectedStatus, searchQuery, selectedSite, selectedDate, currentPage]);
+  }, [loggedInOrg, selectedStatus, searchQuery, selectedSite, selectedYear, selectedMonth, currentPage]);
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, selectedStatus, selectedDate, selectedSite]);
+  }, [searchQuery, selectedStatus, selectedSite, selectedYear, selectedMonth]);
 
 
   const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
@@ -277,32 +282,30 @@ export function IncidentsPageClient() {
                 ))}
               </SelectContent>
             </Select>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant={'outline'}
-                  className={cn(
-                    'w-full sm:w-[240px] justify-start text-left font-medium hover:bg-accent hover:text-accent-foreground',
-                    !selectedDate && 'text-muted-foreground'
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {selectedDate ? (
-                    format(selectedDate, 'PPP')
-                  ) : (
-                    <span>Pick a date</span>
-                  )}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={selectedDate}
-                  onSelect={setSelectedDate}
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
+            <Select value={selectedYear} onValueChange={setSelectedYear}>
+                <SelectTrigger className="w-full sm:w-[120px] font-medium hover:bg-accent hover:text-accent-foreground">
+                    <SelectValue placeholder="Filter by Year" />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="all" className="font-medium">All Years</SelectItem>
+                    {availableYears.map(year => (
+                        <SelectItem key={year} value={year} className="font-medium">{year}</SelectItem>
+                    ))}
+                </SelectContent>
+            </Select>
+            <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+                <SelectTrigger className="w-full sm:w-[140px] font-medium hover:bg-accent hover:text-accent-foreground">
+                    <SelectValue placeholder="Filter by Month" />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="all" className="font-medium">All Months</SelectItem>
+                    {Array.from({ length: 12 }, (_, i) => (
+                        <SelectItem key={i} value={(i + 1).toString()} className="font-medium">
+                            {new Date(0, i).toLocaleString('default', { month: 'long' })}
+                        </SelectItem>
+                    ))}
+                </SelectContent>
+            </Select>
           </div>
         </CardHeader>
         <CardContent>
