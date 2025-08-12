@@ -145,19 +145,19 @@ const parsePerformanceValue = (value: string | undefined | null): number => {
 const chartConfig = {
   incidentResolution: {
     label: 'Incident Resolution',
-    color: 'hsl(var(--chart-1))',
+    color: '#1B2A41',
   },
   siteVisit: {
     label: 'Site Visit Accuracy',
-    color: 'hsl(var(--chart-2))',
+    color: '#3A506B',
   },
   checkin: {
     label: 'Guard Check-in Accuracy',
-    color: 'hsl(var(--chart-3))',
+    color: '#5C7595',
   },
   selfie: {
     label: 'Selfie Check-in Accuracy',
-    color: 'hsl(var(--chart-5))',
+    color: '#8E9BAF',
   },
 } satisfies ChartConfig;
 
