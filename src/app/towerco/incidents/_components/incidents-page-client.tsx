@@ -3,7 +3,7 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import type { Incident, Guard, PatrollingOfficer, SecurityAgency, Site, Organization } from '@/types';
+import type { Site, Organization } from '@/types';
 import {
   Card,
   CardContent,
@@ -273,7 +273,7 @@ export function IncidentsPageClient() {
               <SelectContent>
                 <SelectItem value="all" className="font-medium">All Sites</SelectItem>
                 {sites.map(site => (
-                  <SelectItem key={site.id} value={site.tb_site_id} className="font-medium">{site.site_name}</SelectItem>
+                  <SelectItem key={site.id} value={site.id.toString()} className="font-medium">{site.site_name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
