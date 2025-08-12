@@ -89,6 +89,7 @@ type AgencyReportData = {
     resolved_incidents_count: number;
     performance: {
         filters_applied: string;
+        overall_performance: string;
         incident_resolution_rate: string;
         site_visit_accuracy: string;
         guard_checkin_accuracy: string;
@@ -230,9 +231,8 @@ export default function AgencyReportPage() {
   const performanceMetrics = useMemo(() => {
     if (!reportData) return null;
     const { performance } = reportData;
-    const overallPerformanceString = performance.incident_resolution_rate; // Placeholder, assuming this is overall
     return {
-      overall: parsePerformanceValue(overallPerformanceString),
+      overall: parsePerformanceValue(performance.overall_performance),
       incidentResolution: parsePerformanceValue(performance.incident_resolution_rate),
       siteVisit: parsePerformanceValue(performance.site_visit_accuracy),
       checkin: parsePerformanceValue(performance.guard_checkin_accuracy),
