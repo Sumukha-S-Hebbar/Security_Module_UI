@@ -1,10 +1,11 @@
 
 
+
 import type { Incident } from './incident';
 import type { SecurityAgency } from './security-agency';
 
 export type Site = {
-  id: number; // The database primary key
+  id: string; // The database primary key
   tb_site_id: string; // The unique Tower Buddy site ID
   org_site_id: string; // The organization-specific site ID
   org_name?: string;
@@ -12,15 +13,15 @@ export type Site = {
   site_status: 'Assigned' | 'Unassigned';
   region: string;
   city: string;
-  lat: number;
-  lng: number;
+  lat?: number;
+  lng?: number;
   
   // From API
   site_address_line1: string;
   site_address_line2?: string | null;
   site_address_line3?: string | null;
   site_zip_code?: string;
-  assigned_agency: {
+  assigned_agency?: {
     id: number;
     subcon_id: string;
     name: string;
@@ -29,9 +30,9 @@ export type Site = {
     email: string;
     phone: string;
   } | null;
-  total_incidents: number;
-  total_guards_requested: number;
-  total_guards_assigned: number;
+  total_incidents?: number;
+  total_guards_requested?: number;
+  total_guards_assigned?: number;
   
   // These fields were in the mock data and may or may not be in the final API.
   // Kept for potential compatibility or future use.
@@ -46,6 +47,8 @@ export type Site = {
   patrollingOfficerId?: string;
   geofencePerimeter?: number;
   guardsRequired?: number;
+  latitude?: number;
+  longitude?: number;
 };
 
 export type PaginatedSitesResponse = {

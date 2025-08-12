@@ -81,7 +81,7 @@ export default function AgencyGuardsPage() {
   const agencySites = useMemo(() => sites.filter(site => site.agencyId === LOGGED_IN_AGENCY_ID), []);
   
   const agencyGuards = useMemo(() => {
-    const agencySiteIds = new Set(agencySites.map(s => s.id));
+    const agencySiteIds = new Set<string>(agencySites.map(s => s.id));
     return guards.filter(guard => {
       return guard.site && agencySiteIds.has(guard.site);
     });
