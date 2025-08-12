@@ -923,10 +923,7 @@ export function SitesPageClient() {
                              <div className="font-medium">{site.site_name}</div>
                           </TableCell>
                           <TableCell>
-                            <div className="text-sm text-muted-foreground flex items-center gap-1 font-medium">
-                              <MapPin className="w-3 h-3" />
-                              {site.city}, {site.region}
-                            </div>
+                             <p className="font-medium">{site.city}, {site.region}</p>
                           </TableCell>
                           <TableCell>
                              <div onClick={(e) => e.stopPropagation()}>
