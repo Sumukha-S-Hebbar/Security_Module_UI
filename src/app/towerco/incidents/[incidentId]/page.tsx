@@ -48,29 +48,32 @@ type IncidentReport = {
         site_address_line3: string | null;
         site_zip_code: string;
     };
-    agency_details: {
+    subcon_details: {
         id: number;
-        tb_agency_id: string;
-        agency_id: string;
-        agency_name: string;
+        subcon_id: string;
+        name: string;
+        role: string;
         contact_person: string;
-        communication_email: string;
+        email: string;
         phone: string;
     } | null;
     raised_by_guard_details: {
         id: number;
-        guard_id: string;
+        user: string;
+        email: string;
         first_name: string;
         last_name: string | null;
-        tb_agency_id: string;
         phone: string;
-        region: string;
-        city: string | null;
+        profile_picture: string | null;
     } | null;
     attended_by_officer_details: {
-      patrol_officer_id: string;
-      phone: string;
+      id: number;
+      user: string;
       email: string;
+      first_name: string;
+      last_name: string | null;
+      phone: string;
+      profile_picture: string | null;
     } | null; 
     incident_description: string | null;
     initial_incident_image_1: string | null;
@@ -387,7 +390,7 @@ export default function IncidentReportPage() {
             </CardContent>
           </Card>
         )}
-        {incident.agency_details && (
+        {incident.subcon_details && (
           <Card className="xl:col-span-1">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -397,13 +400,13 @@ export default function IncidentReportPage() {
             </CardHeader>
             <CardContent className="text-sm space-y-2">
               <div>
-                  <div className="text-xl font-bold">{incident.agency_details.agency_name}</div>
-                  <p className="font-medium">ID: {incident.agency_details.agency_id}</p>
+                  <div className="text-xl font-bold">{incident.subcon_details.name}</div>
+                  <p className="font-medium">ID: {incident.subcon_details.subcon_id}</p>
               </div>
-              <div className="flex items-center gap-2 font-medium pt-2 border-t"><Phone className="h-4 w-4" /> <a href={`tel:${incident.agency_details.phone}`} className="hover:underline">{incident.agency_details.phone}</a></div>
-              <div className="flex items-center gap-2 font-medium"><Mail className="h-4 w-4" /> <a href={`mailto:${incident.agency_details.communication_email}`} className="hover:underline">{incident.agency_details.communication_email}</a></div>
+              <div className="flex items-center gap-2 font-medium pt-2 border-t"><Phone className="h-4 w-4" /> <a href={`tel:${incident.subcon_details.phone}`} className="hover:underline">{incident.subcon_details.phone}</a></div>
+              <div className="flex items-center gap-2 font-medium"><Mail className="h-4 w-4" /> <a href={`mailto:${incident.subcon_details.email}`} className="hover:underline">{incident.subcon_details.email}</a></div>
                <Button asChild variant="link" className="p-0 h-auto font-medium mt-2">
-                  <Link href={`/towerco/agencies/${incident.agency_details.id}`}>View Full Agency Report</Link>
+                  <Link href={`/towerco/agencies/${incident.subcon_details.id}`}>View Full Agency Report</Link>
               </Button>
             </CardContent>
           </Card>
@@ -435,7 +438,7 @@ export default function IncidentReportPage() {
               {incident.attended_by_officer_details ? (
                 <>
                   <div>
-                    <div className="text-xl font-bold">{incident.attended_by_officer_details.patrol_officer_id}</div>
+                    <div className="text-xl font-bold">{incident.attended_by_officer_details.first_name} {incident.attended_by_officer_details.last_name || ''}</div>
                   </div>
                   <div className="flex items-center gap-2 font-medium pt-2 border-t"><Phone className="h-4 w-4" /> <a href={`tel:${incident.attended_by_officer_details.phone}`} className="hover:underline">{incident.attended_by_officer_details.phone}</a></div>
                   <div className="flex items-center gap-2 font-medium"><Mail className="h-4 w-4" /> <a href={`mailto:${incident.attended_by_officer_details.email}`} className="hover:underline">{incident.attended_by_officer_details.email}</a></div>
@@ -524,7 +527,7 @@ export default function IncidentReportPage() {
                                     />
                                 </div>
                                 <div>
-                                    <Label htmlFor="resolution-photos" className="text-base">Resolution Media Evidence (Optional)</Label>
+                                    <Label htmlFor="resolution-photos" className="text-base">Resolution Media Evidence (Optional, max 4)</Label>
                                     <Input 
                                         id="resolution-photos" 
                                         type="file" 
@@ -538,7 +541,7 @@ export default function IncidentReportPage() {
                         </div>
                         <CardFooter className="px-0 pt-6 justify-end">
                             <Button type="submit" disabled={!resolutionNotes || isResolving} className="bg-[#00B4D8] hover:bg-[#00B4D8]/90">
-                                Mark as Resolved
+                                {isResolving ? 'Resolving...' : 'Mark as Resolved'}
                             </Button>
                         </CardFooter>
                     </form>
