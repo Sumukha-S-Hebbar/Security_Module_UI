@@ -111,8 +111,13 @@ type AgencyReportData = {
         tb_site_id: string;
         incident_time: string;
         incident_status: "Active" | "Under Review" | "Resolved";
-        site_name: string;
-        guard_name: string;
+        site_details: {
+            site_name: string;
+        };
+        raised_by_guard_details: {
+            first_name: string;
+            last_name: string | null;
+        } | null;
         incident_type: string;
         incident_description: string;
     }[];
@@ -668,7 +673,11 @@ export default function AgencyReportPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredIncidents.map((incident) => (
+                {filteredIncidents.map((incident) => {
+                  const guardName = incident.raised_by_guard_details
+                    ? `${incident.raised_by_guard_details.first_name} ${incident.raised_by_guard_details.last_name || ''}`.trim()
+                    : 'N/A';
+                  return (
                     <TableRow key={incident.id} onClick={() => router.push(`/towerco/incidents/${incident.id}`)} className="cursor-pointer hover:bg-accent hover:text-accent-foreground group">
                       <TableCell>
                         <Button asChild variant="link" className="p-0 h-auto font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
@@ -681,11 +690,12 @@ export default function AgencyReportPage() {
                       <TableCell className="font-medium">
                         <ClientDate date={incident.incident_time} format="time" />
                       </TableCell>
-                      <TableCell className="font-medium">{incident.site_name}</TableCell>
-                      <TableCell className="font-medium">{incident.guard_name}</TableCell>
+                      <TableCell className="font-medium">{incident.site_details.site_name}</TableCell>
+                      <TableCell className="font-medium">{guardName}</TableCell>
                       <TableCell>{getStatusIndicator(incident.incident_status)}</TableCell>
                     </TableRow>
-                  ))}
+                  )
+                })}
               </TableBody>
             </Table>
           ) : (
