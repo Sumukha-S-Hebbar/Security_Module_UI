@@ -57,7 +57,7 @@ type ActiveIncident = {
     contact_details: { agency_phone: string | null; officer_phone: string | null; guard_phone: string | null };
 };
 
-type AgencyPerformanceData = {
+export type AgencyPerformanceData = {
     agency_name: string;
     performance: {
         incident_resolution: number;
@@ -67,14 +67,14 @@ type AgencyPerformanceData = {
     };
 };
 
-type SiteStatusData = {
+export type SiteStatusData = {
     assigned_sites_count: number;
     unassigned_sites_count: number;
-    assigned_sites: { results: { id: number; tb_site_id: string; site_name: string; region: string; agency_name: string }[] };
-    unassigned_sites: any; // Assuming it can be null or an object
+    assigned_sites: { results: { id: number; tb_site_id: string; site_name: string; region: string; agency_name?: string }[] };
+    unassigned_sites: { results: { id: number; tb_site_id: string; site_name: string; region: string; agency_name?: string }[] } | null;
 };
 
-type IncidentTrendData = {
+export type IncidentTrendData = {
     month: string;
     total: number;
     resolved: number;

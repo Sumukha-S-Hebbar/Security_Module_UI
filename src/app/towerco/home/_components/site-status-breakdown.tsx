@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useMemo, useState } from 'react';
@@ -13,6 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Building2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import type { SiteStatusData } from '../page';
 
 const COLORS = {
   assigned: 'hsl(var(--chart-2))',
@@ -20,21 +20,6 @@ const COLORS = {
 };
 
 const ITEMS_PER_PAGE = 5;
-
-type SiteListItem = { 
-  id: number; 
-  tb_site_id: string; 
-  site_name: string; 
-  region: string; 
-  agency_name?: string 
-};
-
-type SiteStatusData = {
-    assigned_sites_count: number;
-    unassigned_sites_count: number;
-    assigned_sites: { results: SiteListItem[] };
-    unassigned_sites: { results: SiteListItem[] } | null;
-};
 
 export function SiteStatusBreakdown({ siteStatusData }: { siteStatusData: SiteStatusData }) {
   const [selectedSection, setSelectedSection] = useState<'assigned' | 'unassigned'>('assigned');

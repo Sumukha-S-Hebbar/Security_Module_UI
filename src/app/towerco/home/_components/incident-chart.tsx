@@ -40,6 +40,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, LabelList, LineChart, Line, ResponsiveContainer } from 'recharts';
 import { useRouter } from 'next/navigation';
+import type { IncidentTrendData } from '../page';
 
 const chartConfig = {
   total: {
@@ -60,14 +61,6 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-type IncidentTrendData = {
-    month: string;
-    total: number;
-    resolved: number;
-    active: number;
-    under_review: number;
-    resolution_duration: string;
-};
 
 export function IncidentChart({
   incidentTrend
@@ -85,6 +78,7 @@ export function IncidentChart({
   const collapsibleRef = useRef<HTMLDivElement>(null);
 
   const monthlyIncidentData = useMemo(() => {
+    if (!incidentTrend) return [];
     return incidentTrend.map(monthData => ({
         month: monthData.month,
         total: monthData.total,
@@ -226,13 +220,13 @@ export function IncidentChart({
                   }}
               />
               <ChartLegend content={<ChartLegendContent />} />
-              <Bar yAxisId="left" dataKey="total" fill="var(--color-total)" radius={4} cursor="pointer" opacity={hoveredBar && hoveredBar !== monthlyIncidentData[monthlyIncidentData.findIndex(d => d.month === hoveredBar)].month ? 0.5 : 1}>
+              <Bar yAxisId="left" dataKey="total" fill="var(--color-total)" radius={4} cursor="pointer" opacity={hoveredBar && hoveredBar !== monthlyIncidentData.find(d => d.month === hoveredBar)?.month ? 0.5 : 1}>
                   <LabelList dataKey="total" position="top" offset={5} fontSize={12} />
               </Bar>
-              <Bar yAxisId="left" dataKey="resolved" fill="var(--color-resolved)" radius={4} cursor="pointer" opacity={hoveredBar && hoveredBar !== monthlyIncidentData[monthlyIncidentData.findIndex(d => d.month === hoveredBar)].month ? 0.5 : 1}>
+              <Bar yAxisId="left" dataKey="resolved" fill="var(--color-resolved)" radius={4} cursor="pointer" opacity={hoveredBar && hoveredBar !== monthlyIncidentData.find(d => d.month === hoveredBar)?.month ? 0.5 : 1}>
                   <LabelList dataKey="resolved" position="top" offset={5} fontSize={12} />
               </Bar>
-              <Bar yAxisId="left" dataKey="underReview" fill="var(--color-underReview)" radius={4} cursor="pointer" opacity={hoveredBar && hoveredBar !== monthlyIncidentData[monthlyIncidentData.findIndex(d => d.month === hoveredBar)].month ? 0.5 : 1}>
+              <Bar yAxisId="left" dataKey="underReview" fill="var(--color-underReview)" radius={4} cursor="pointer" opacity={hoveredBar && hoveredBar !== monthlyIncidentData.find(d => d.month === hoveredBar)?.month ? 0.5 : 1}>
                   <LabelList dataKey="underReview" position="top" offset={5} fontSize={12} />
               </Bar>
               <Line yAxisId="right" type="monotone" dataKey="avgClosure" stroke="var(--color-avgClosure)" strokeWidth={2} dot={{ r: 4 }}>

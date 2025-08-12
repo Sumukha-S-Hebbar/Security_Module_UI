@@ -34,6 +34,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import type { AgencyPerformanceData } from '../page';
 
 const chartConfig = {
   incidentResolution: {
@@ -54,15 +55,6 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-type AgencyPerformanceData = {
-    agency_name: string;
-    performance: {
-        incident_resolution: number;
-        site_visit_accuracy: number;
-        guard_checkin_accuracy: number;
-        selfie_accuracy: number;
-    };
-};
 
 export function AgencyPerformance({
   performanceData,
@@ -74,6 +66,7 @@ export function AgencyPerformance({
   const [selectedMonth, setSelectedMonth] = useState<string>('all');
   
   const chartData = useMemo(() => {
+    if (!performanceData) return [];
     return performanceData.map(agency => ({
         name: agency.agency_name,
         incidentResolution: agency.performance.incident_resolution,
