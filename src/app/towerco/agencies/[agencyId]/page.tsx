@@ -51,6 +51,7 @@ import {
   Tooltip,
   CartesianGrid,
   LabelList,
+  Legend,
 } from 'recharts';
 import {
   ChartContainer,
@@ -88,6 +89,7 @@ type AgencyReportData = {
     resolved_incidents_count: number;
     performance: {
         filters_applied: string;
+        overall_performance: string;
         incident_resolution_rate: string;
         site_visit_accuracy: string;
         guard_checkin_accuracy: string;
@@ -202,11 +204,11 @@ export default function AgencyReportPage() {
       fetchReportData();
   }, [loggedInOrg, agencyId, toast, performanceSelectedYear, performanceSelectedMonth]);
 
-
   const performanceMetrics = useMemo(() => {
     if (!reportData) return null;
     const { performance } = reportData;
     return {
+      overall: parsePerformanceValue(performance.overall_performance),
       incidentResolution: parsePerformanceValue(performance.incident_resolution_rate),
       siteVisit: parsePerformanceValue(performance.site_visit_accuracy),
       checkin: parsePerformanceValue(performance.guard_checkin_accuracy),
@@ -214,25 +216,25 @@ export default function AgencyReportPage() {
     };
   }, [reportData]);
   
-  const pieChartData = useMemo(() => {
+  const overallPerformanceChartData = useMemo(() => {
     if (!performanceMetrics) return null;
-    
-    const { incidentResolution, siteVisit, checkin, selfie } = performanceMetrics;
-
-    const incidentResolutionData = [{ name: 'Resolved', value: incidentResolution }, { name: 'Remaining', value: 100 - incidentResolution }];
-    const siteVisitData = [{ name: 'Visited', value: siteVisit }, { name: 'Remaining', value: 100 - siteVisit }];
-    const checkinData = [{ name: 'Accurate', value: checkin }, { name: 'Remaining', value: 100 - checkin }];
-    const selfieData = [{ name: 'Accurate', value: selfie }, { name: 'Remaining', value: 100 - selfie }];
-
+    const overall = performanceMetrics.overall;
     return {
-        incidentResolution: { data: incidentResolutionData, color: getPerformanceColor(incidentResolution) },
-        siteVisit: { data: siteVisitData, color: getPerformanceColor(siteVisit) },
-        checkin: { data: checkinData, color: getPerformanceColor(checkin) },
-        selfie: { data: selfieData, color: getPerformanceColor(selfie) },
-    }
+        data: [{ name: 'Overall', value: overall }, { name: 'Remaining', value: 100 - overall }],
+        color: getPerformanceColor(overall)
+    };
   }, [performanceMetrics]);
 
-
+  const performanceBreakdownChartData = useMemo(() => {
+    if (!performanceMetrics) return [];
+    return [
+      { name: "Incident Resolution", value: performanceMetrics.incidentResolution, fill: "hsl(var(--chart-1))" },
+      { name: "Site Visit Accuracy", value: performanceMetrics.siteVisit, fill: "hsl(var(--chart-2))" },
+      { name: "Guard Check-in Accuracy", value: performanceMetrics.checkin, fill: "hsl(var(--chart-3))" },
+      { name: "Selfie Check-in Accuracy", value: performanceMetrics.selfie, fill: "hsl(var(--chart-5))" },
+    ];
+  }, [performanceMetrics]);
+  
   const incidentAvailableYears = useMemo(() => {
     if (!reportData) return [];
     const years = new Set(
@@ -466,77 +468,69 @@ export default function AgencyReportPage() {
             </div>
           </CardHeader>
            <CardContent className="pt-6">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 items-center justify-items-center">
-                {performanceMetrics && pieChartData && (
-                  <>
-                    <div className="flex flex-col items-center gap-2">
-                        <div className="w-24 h-24 relative">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <PieChart>
-                                    <Pie data={pieChartData.incidentResolution.data} cx="50%" cy="50%" innerRadius="70%" outerRadius="85%" dataKey="value" stroke="none">
-                                        <Cell fill={pieChartData.incidentResolution.color} />
-                                        <Cell fill="hsl(var(--muted))" />
-                                    </Pie>
-                                </PieChart>
-                            </ResponsiveContainer>
-                            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                <span className="text-2xl font-bold" style={{ color: pieChartData.incidentResolution.color }}>{performanceMetrics.incidentResolution}%</span>
-                            </div>
-                        </div>
-                        <p className="flex items-center gap-2 text-center font-medium text-sm"><ShieldAlert className="w-4 h-4 text-primary" /> Incident Resolution</p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+              {performanceMetrics && overallPerformanceChartData && (
+                <>
+                  <div className="flex flex-col items-center gap-2 md:col-span-1">
+                    <div className="w-40 h-40 relative">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie
+                            data={overallPerformanceChartData.data}
+                            cx="50%"
+                            cy="50%"
+                            innerRadius="70%"
+                            outerRadius="85%"
+                            dataKey="value"
+                            stroke="none"
+                          >
+                            <Cell fill={overallPerformanceChartData.color} />
+                            <Cell fill="hsl(var(--muted))" />
+                          </Pie>
+                        </PieChart>
+                      </ResponsiveContainer>
+                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                        <span className="text-3xl font-bold" style={{ color: overallPerformanceChartData.color }}>
+                          {performanceMetrics.overall}%
+                        </span>
+                      </div>
                     </div>
-                     <div className="flex flex-col items-center gap-2">
-                        <div className="w-24 h-24 relative">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <PieChart>
-                                    <Pie data={pieChartData.siteVisit.data} cx="50%" cy="50%" innerRadius="70%" outerRadius="85%" dataKey="value" stroke="none">
-                                        <Cell fill={pieChartData.siteVisit.color} />
-                                        <Cell fill="hsl(var(--muted))" />
-                                    </Pie>
-                                </PieChart>
-                            </ResponsiveContainer>
-                            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                <span className="text-2xl font-bold" style={{ color: pieChartData.siteVisit.color }}>{performanceMetrics.siteVisit}%</span>
-                            </div>
-                        </div>
-                        <p className="flex items-center gap-2 text-center font-medium text-sm"><MapPin className="w-4 h-4 text-primary" /> Site Visit Accuracy</p>
-                    </div>
-                     <div className="flex flex-col items-center gap-2">
-                        <div className="w-24 h-24 relative">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <PieChart>
-                                    <Pie data={pieChartData.checkin.data} cx="50%" cy="50%" innerRadius="70%" outerRadius="85%" dataKey="value" stroke="none">
-                                        <Cell fill={pieChartData.checkin.color} />
-                                        <Cell fill="hsl(var(--muted))" />
-                                    </Pie>
-                                </PieChart>
-                            </ResponsiveContainer>
-                            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                <span className="text-2xl font-bold" style={{ color: pieChartData.checkin.color }}>{performanceMetrics.checkin}%</span>
-                            </div>
-                        </div>
-                        <p className="flex items-center gap-2 text-center font-medium text-sm"><ShieldCheck className="w-4 h-4 text-primary" /> Guard Check-in</p>
-                    </div>
-                     <div className="flex flex-col items-center gap-2">
-                        <div className="w-24 h-24 relative">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <PieChart>
-                                    <Pie data={pieChartData.selfie.data} cx="50%" cy="50%" innerRadius="70%" outerRadius="85%" dataKey="value" stroke="none">
-                                        <Cell fill={pieChartData.selfie.color} />
-                                        <Cell fill="hsl(var(--muted))" />
-                                    </Pie>
-                                </PieChart>
-                            </ResponsiveContainer>
-                            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                <span className="text-2xl font-bold" style={{ color: pieChartData.selfie.color }}>{performanceMetrics.selfie}%</span>
-                            </div>
-                        </div>
-                        <p className="flex items-center gap-2 text-center font-medium text-sm"><UserCheck className="w-4 h-4 text-primary" /> Selfie Check-in</p>
-                    </div>
-                  </>
-                )}
-              </div>
-            </CardContent>
+                    <p className="font-semibold text-center mt-2">Overall Performance</p>
+                  </div>
+                  <div className="md:col-span-2">
+                    <ChartContainer config={{}} className="h-48 w-full">
+                       <ResponsiveContainer>
+                        <BarChart layout="vertical" data={performanceBreakdownChartData} margin={{ left: 30, right:30}}>
+                          <XAxis type="number" domain={[0, 100]} hide />
+                          <YAxis type="category" dataKey="name" hide />
+                          <Bar dataKey="value" radius={4}>
+                            <LabelList dataKey="value" position="right" offset={8} formatter={(value: number) => `${value}%`} />
+                          </Bar>
+                          <Tooltip cursor={{ fill: 'hsl(var(--muted))' }} content={<ChartTooltipContent hideLabel />} />
+                          <Legend
+                            layout="vertical"
+                            align="left"
+                            verticalAlign="middle"
+                            wrapperStyle={{ paddingLeft: '10px' }}
+                            content={({ payload }) => (
+                                <ul className="flex flex-col gap-2">
+                                {payload?.map((entry, index) => (
+                                    <li key={`item-${index}`} className="flex items-center gap-2">
+                                        <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: entry.color }} />
+                                        <span className="text-sm font-medium">{entry.value}</span>
+                                    </li>
+                                ))}
+                                </ul>
+                            )}
+                         />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </ChartContainer>
+                  </div>
+                </>
+              )}
+            </div>
+          </CardContent>
         </Card>
       </div>
 
@@ -701,5 +695,6 @@ export default function AgencyReportPage() {
     </div>
   );
 }
+
 
 
