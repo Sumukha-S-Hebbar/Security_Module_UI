@@ -20,7 +20,7 @@ const allModules: Module[] = [
 ];
 
 // In a real app, this would come from a user context or API call
-const MOCK_ENABLED_MODULES_FOR_USER = ['Security', 'Real Estate'];
+const MOCK_ENABLED_MODULES_FOR_USER = ['Security'];
 
 export function ModuleSwitcher({ portalHome }: { portalHome: '/agency/home' | '/towerco/home' }) {
   const pathname = usePathname();
