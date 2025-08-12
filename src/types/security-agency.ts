@@ -37,6 +37,7 @@ export type SecurityAgency = {
 
   // Fields from original mock data that might not be in the final API
   // Kept for potential compatibility or future use.
+  tb_agency_id?: string;
   agency_id?: string;
   agency_name?: string;
   communication_email?: string;
