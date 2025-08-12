@@ -872,10 +872,8 @@ export function SitesPageClient() {
                             }
                           }}
                         >
-                          <TableCell>
-                             <Button asChild variant="link" className="p-0 h-auto font-medium" onClick={(e) => e.stopPropagation()}>
-                              <Link href={`/towerco/sites/${site.id}`}>{site.org_site_id}</Link>
-                            </Button>
+                          <TableCell className="font-medium">
+                            {site.org_site_id}
                           </TableCell>
                           <TableCell>
                              <div className="font-medium">{site.site_name}</div>
@@ -939,3 +937,5 @@ export function SitesPageClient() {
     </div>
   );
 }
+
+    
