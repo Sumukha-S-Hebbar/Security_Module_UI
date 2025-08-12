@@ -45,7 +45,6 @@ import { cn } from '@/lib/utils';
 import { fetchData } from '@/lib/api';
 
 
-const LOGGED_IN_ORG_ID = 'TCO01'; // Simulate logged-in user
 const ITEMS_PER_PAGE = 5;
 
 const uploadFormSchema = z.object({
@@ -314,9 +313,9 @@ export default function TowercoAgenciesPage() {
         const filtered = securityAgencies.filter((agency) => {
             const searchLower = searchQuery.toLowerCase();
             const matchesSearch = (
-                agency.agency_name.toLowerCase().includes(searchLower) ||
-                agency.agency_id.toLowerCase().includes(searchLower) ||
-                agency.communication_email.toLowerCase().includes(searchLower)
+                agency.name.toLowerCase().includes(searchLower) ||
+                agency.subcon_id.toLowerCase().includes(searchLower) ||
+                agency.email.toLowerCase().includes(searchLower)
             );
             
             const matchesRegion = selectedRegion === 'all' || agency.region === selectedRegion;
@@ -336,13 +335,13 @@ export default function TowercoAgenciesPage() {
     
     const totalPages = Math.ceil(filteredAgencies.length / ITEMS_PER_PAGE);
     
-    const handleRowClick = (e: React.MouseEvent, agencyId: string) => {
+    const handleRowClick = (e: React.MouseEvent, agencyId: number) => {
         const target = e.target as HTMLElement;
         if (target.closest('[data-expand-button]')) {
             return;
         }
         
-        const agency = securityAgencies.find(a => a.agency_id === agencyId);
+        const agency = securityAgencies.find(a => a.id === agencyId);
         if (agency) {
             router.push(`/towerco/agencies/${agency.id}`);
         }
@@ -369,7 +368,7 @@ export default function TowercoAgenciesPage() {
 
     const handleExpandClick = async (e: React.MouseEvent, agency: SecurityAgency) => {
         e.stopPropagation();
-        const agencyId = agency.agency_id;
+        const agencyId = agency.subcon_id;
         
         if (expandedAgencyId === agencyId) {
             setExpandedAgencyId(null);
@@ -716,28 +715,28 @@ export default function TowercoAgenciesPage() {
                                 ))
                             ) : paginatedAgencies.length > 0 ? (
                                 paginatedAgencies.map((agency) => {
-                                    const isExpanded = expandedAgencyId === agency.agency_id;
+                                    const isExpanded = expandedAgencyId === agency.subcon_id;
 
                                     return (
                                         <Fragment key={agency.id}>
-                                            <TableRow onClick={(e) => handleRowClick(e, agency.agency_id)} className="cursor-pointer hover:bg-accent hover:text-accent-foreground group">
+                                            <TableRow onClick={(e) => handleRowClick(e, agency.id)} className="cursor-pointer hover:bg-accent hover:text-accent-foreground group">
                                                 <TableCell>
-                                                    <p className="text-accent font-semibold group-hover:text-accent-foreground hover:underline">{agency.agency_id}</p>
+                                                    <p className="text-accent font-semibold group-hover:text-accent-foreground hover:underline">{agency.subcon_id}</p>
                                                 </TableCell>
                                                 <TableCell>
                                                     <div className="flex items-center gap-3">
                                                         <Avatar className="h-10 w-10">
-                                                            <AvatarImage src={agency.logo || undefined} alt={agency.agency_name} />
-                                                            <AvatarFallback>{agency.agency_name.charAt(0)}</AvatarFallback>
+                                                            <AvatarImage src={agency.logo || undefined} alt={agency.name} />
+                                                            <AvatarFallback>{agency.name.charAt(0)}</AvatarFallback>
                                                         </Avatar>
-                                                        <span className="font-medium">{agency.agency_name}</span>
+                                                        <span className="font-medium">{agency.name}</span>
                                                     </div>
                                                 </TableCell>
                                                 <TableCell>
                                                     <div className="flex items-center gap-2 text-sm">
                                                         <Mail className="h-4 w-4 flex-shrink-0" />
-                                                        <a href={`mailto:${agency.communication_email}`} onClick={(e) => e.stopPropagation()} className="truncate hover:underline text-accent group-hover:text-accent-foreground">
-                                                            {agency.communication_email}
+                                                        <a href={`mailto:${agency.email}`} onClick={(e) => e.stopPropagation()} className="truncate hover:underline text-accent group-hover:text-accent-foreground">
+                                                            {agency.email}
                                                         </a>
                                                     </div>
                                                     <div className="flex items-center gap-2 text-sm">
@@ -780,7 +779,7 @@ export default function TowercoAgenciesPage() {
                                                 <TableRow className="bg-muted/50 hover:bg-muted/50">
                                                     <TableCell colSpan={6} className="p-0">
                                                         <div className="p-4">
-                                                            <h4 className="font-semibold mb-2">Sites Assigned to {agency.agency_name}</h4>
+                                                            <h4 className="font-semibold mb-2">Sites Assigned to {agency.name}</h4>
                                                             {isExpandedSitesLoading ? (
                                                                 <div className="flex items-center justify-center p-4">
                                                                     <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Loading sites...
