@@ -134,7 +134,7 @@ export function IncidentsPageClient() {
       }
       
       if (searchQuery) params.append('search', searchQuery);
-      if (selectedSite !== 'all') params.append('site_id', selectedSite);
+      if (selectedSite !== 'all') params.append('site', selectedSite);
       if (selectedDate) params.append('date', format(selectedDate, 'yyyy-MM-dd'));
       params.append('page', currentPage.toString());
       params.append('page_size', ITEMS_PER_PAGE.toString());
