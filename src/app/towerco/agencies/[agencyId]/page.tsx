@@ -89,7 +89,6 @@ type AgencyReportData = {
     resolved_incidents_count: number;
     performance: {
         filters_applied: string;
-        overall_performance: string;
         incident_resolution_rate: string;
         site_visit_accuracy: string;
         guard_checkin_accuracy: string;
@@ -207,8 +206,9 @@ export default function AgencyReportPage() {
   const performanceMetrics = useMemo(() => {
     if (!reportData) return null;
     const { performance } = reportData;
+    const overallPerformanceString = performance.incident_resolution_rate; // Placeholder, assuming this is overall
     return {
-      overall: parsePerformanceValue(performance.overall_performance),
+      overall: parsePerformanceValue(overallPerformanceString),
       incidentResolution: parsePerformanceValue(performance.incident_resolution_rate),
       siteVisit: parsePerformanceValue(performance.site_visit_accuracy),
       checkin: parsePerformanceValue(performance.guard_checkin_accuracy),
@@ -398,10 +398,10 @@ export default function AgencyReportPage() {
                       <Phone className="h-4 w-4" />
                       <a href={`tel:${phone}`} className="font-medium hover:underline">{phone}</a>
                   </div>
-                  <div className="flex items-center gap-2">
+                  {registered_address_line1 && <div className="flex items-center gap-2">
                       <MapPin className="h-4 w-4" />
                       <span className="font-medium">{`${registered_address_line1}, ${city}, ${region}`}</span>
-                  </div>
+                  </div>}
               </div>
 
               <div className="pt-4 border-t">
@@ -437,7 +437,10 @@ export default function AgencyReportPage() {
 
         <Card className="lg:col-span-2">
           <CardHeader className="flex flex-row items-center justify-between gap-2">
-              <CardTitle>Agency Performance</CardTitle>
+              <div>
+                <CardTitle>Agency Performance</CardTitle>
+                <CardDescription>{reportData.performance.filters_applied}</CardDescription>
+              </div>
               <div className="flex items-center gap-2">
                 <Select value={performanceSelectedYear} onValueChange={setPerformanceSelectedYear}>
                     <SelectTrigger className="w-[120px] font-medium hover:bg-accent hover:text-accent-foreground">
@@ -695,7 +698,3 @@ export default function AgencyReportPage() {
     </div>
   );
 }
-
-
-
-

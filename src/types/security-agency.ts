@@ -1,4 +1,5 @@
 
+
 import type { Site } from './site';
 
 type AssignedSiteDetail = {
@@ -25,7 +26,7 @@ export type SecurityAgency = {
   phone: string;
   region: string;
   city: string;
-  registered_address_line1: string;
+  registered_address_line1: string | null;
   registered_address_line2: string | null;
   registered_address_line3: string | null;
   created_at: string;
