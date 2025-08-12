@@ -55,8 +55,7 @@ const uploadFormSchema = z.object({
 });
 
 const addAgencyFormSchema = z.object({
-    agency_id: z.string().min(1, { message: 'Agency ID is required.' }),
-    agency_name: z.string().min(1, { message: 'Agency name is required.' }),
+    name: z.string().min(1, { message: 'Agency name is required.' }),
     contact_person: z.string().min(1, { message: 'Contact person is required.' }),
     email: z.string().email({ message: 'Valid email is required.' }),
     phone: z.string().min(1, { message: 'Phone is required.' }),
@@ -152,8 +151,7 @@ export default function TowercoAgenciesPage() {
     const addAgencyForm = useForm<z.infer<typeof addAgencyFormSchema>>({
         resolver: zodResolver(addAgencyFormSchema),
         defaultValues: {
-            agency_id: '',
-            agency_name: '',
+            name: '',
             contact_person: '',
             phone: '',
             email: '',
@@ -276,7 +274,7 @@ export default function TowercoAgenciesPage() {
 
             toast({
                 title: 'Agency Added',
-                description: `Agency "${values.agency_name}" has been created successfully.`,
+                description: `Agency "${values.name}" has been created successfully.`,
             });
             
             addAgencyForm.reset();
@@ -474,20 +472,7 @@ export default function TowercoAgenciesPage() {
                                 <form onSubmit={addAgencyForm.handleSubmit(onAddAgencySubmit)} className="space-y-4">
                                     <FormField
                                         control={addAgencyForm.control}
-                                        name="agency_id"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Agency ID</FormLabel>
-                                                <FormControl>
-                                                    <Input placeholder="e.g., AGY04" {...field} />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <FormField
-                                        control={addAgencyForm.control}
-                                        name="agency_name"
+                                        name="name"
                                         render={({ field }) => (
                                             <FormItem>
                                                 <FormLabel>Agency Name</FormLabel>
