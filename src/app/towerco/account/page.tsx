@@ -30,45 +30,6 @@ const passwordFormSchema = z.object({
 
 type PasswordFormValues = z.infer<typeof passwordFormSchema>;
 
-
-// Mock user and org data that would come from a login response/context
-const MOCK_USER_RESPONSE = {
-    "user": {
-        "id": 2,
-        "email": "towerco@i4sight.net",
-        "first_name": "TowerCo",
-        "last_name": "User",
-        "middle_name": null,
-        "role": "T",
-        "role_details": "Tower Company",
-        "date_joined": "2025-07-30T07:47:32.371932Z",
-        "last_login": "2025-07-30T07:47:32.371972Z",
-        "has_user_profile": false,
-        "country": {
-            "id": 290557,
-            "name": "United Arab Emirates",
-            "code3": "ARE",
-            "currency": "AED",
-            "currency_name": "Dirham",
-            "currency_symbol": "د.إ",
-            "phone": "971"
-        }
-    },
-    "organization": {
-        "id": 1,
-        "name": "Company of Towers",
-        "code": "COT",
-        "role": "T",
-        "type": "Tower Company",
-        "logo": "https://placehold.co/100x100.png",
-        "member": {
-            "id": 1,
-            "employee_id": "COT001",
-            "designation": "Vice President"
-        }
-    }
-};
-
 export default function TowercoAccountPage() {
   const { toast } = useToast();
   const [user, setUser] = useState<User | null>(null);
@@ -88,17 +49,17 @@ export default function TowercoAccountPage() {
   });
 
   useEffect(() => {
-    async function fetchUserAndOrg() {
-        setIsLoading(true);
-        // In a real app, this data would likely come from a user context
-        // after login, not be fetched on this page directly.
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        const data = MOCK_USER_RESPONSE;
-        setUser(data.user);
-        setOrganization(data.organization);
-        setIsLoading(false);
+    if (typeof window !== 'undefined') {
+      const userData = localStorage.getItem('user');
+      const orgData = localStorage.getItem('organization');
+      if (userData) {
+        setUser(JSON.parse(userData));
+      }
+      if (orgData) {
+        setOrganization(JSON.parse(orgData));
+      }
     }
-    fetchUserAndOrg();
+    setIsLoading(false);
   }, []);
   
   useEffect(() => {
@@ -188,7 +149,7 @@ export default function TowercoAccountPage() {
             <CardTitle>Error</CardTitle>
           </CardHeader>
           <CardContent>
-            <p>Could not load organization or user profile. Please try again later.</p>
+            <p>Could not load organization or user profile. Please log in again.</p>
           </CardContent>
         </Card>
       </div>
