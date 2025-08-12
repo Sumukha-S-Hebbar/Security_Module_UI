@@ -134,7 +134,7 @@ export function IncidentsPageClient() {
       }
       
       if (searchQuery) params.append('search', searchQuery);
-      if (selectedSite !== 'all') params.append('site', selectedSite);
+      if (selectedSite !== 'all') params.append('site_name', selectedSite);
       if (selectedDate) params.append('date', format(selectedDate, 'yyyy-MM-dd'));
       params.append('page', currentPage.toString());
       params.append('page_size', ITEMS_PER_PAGE.toString());
@@ -273,7 +273,7 @@ export function IncidentsPageClient() {
               <SelectContent>
                 <SelectItem value="all" className="font-medium">All Sites</SelectItem>
                 {sites.map(site => (
-                  <SelectItem key={site.id} value={site.id.toString()} className="font-medium">{site.site_name}</SelectItem>
+                  <SelectItem key={site.id} value={site.site_name} className="font-medium">{site.site_name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
