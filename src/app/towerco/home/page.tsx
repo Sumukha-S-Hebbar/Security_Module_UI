@@ -121,26 +121,12 @@ interface DashboardData {
 }
 
 
-async function getDashboardData(org: Organization | null, agencyName?: string, year?: string): Promise<DashboardData | null> {
+async function getDashboardData(org: Organization | null): Promise<DashboardData | null> {
   if (!org) return null;
   
   let url = `${process.env.NEXT_PUBLIC_DJANGO_API_URL}/security/api/orgs/${org.code}/security-dashboard/`;
   const token = localStorage.getItem('token');
   
-  const queryParams = new URLSearchParams();
-  if (agencyName && agencyName !== 'all') {
-    queryParams.append('agency_name', agencyName);
-  }
-  if (year && year !== 'all') {
-    queryParams.append('year', year);
-  }
-  
-  const queryString = queryParams.toString();
-  if (queryString) {
-    url += `?${queryString}`;
-  }
-
-
   if (!token) {
     console.error("No auth token found");
     return null;
@@ -162,8 +148,6 @@ async function getDashboardData(org: Organization | null, agencyName?: string, y
 
 export default function TowercoHomePage() {
   const [activeIncidentsCurrentPage, setActiveIncidentsCurrentPage] = useState(1);
-  const [selectedAgency, setSelectedAgency] = useState<string>('all');
-  const [selectedYear, setSelectedYear] = useState<string>(new Date().getFullYear().toString());
   const router = useRouter();
   
   const [org, setOrg] = useState<Organization | null>(null);
@@ -176,8 +160,8 @@ export default function TowercoHomePage() {
   }, []);
 
   const { data, isLoading } = useDataFetching<DashboardData | null>(
-    () => getDashboardData(org, selectedAgency, selectedYear), 
-    [org, selectedAgency, selectedYear]
+    () => getDashboardData(org), 
+    [org]
   );
 
   const activeEmergencies = useMemo(() => {
@@ -372,12 +356,7 @@ export default function TowercoHomePage() {
       <SiteStatusBreakdown siteStatusData={data.site_status} />
 
       <IncidentChart
-        incidentTrend={data.incident_trend}
         agencies={data.agency_performance}
-        selectedAgency={selectedAgency}
-        setSelectedAgency={setSelectedAgency}
-        selectedYear={selectedYear}
-        setSelectedYear={setSelectedYear}
       />
     </div>
   );
