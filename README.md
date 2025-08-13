@@ -1,6 +1,6 @@
 # Firebase Studio
 
-This is a NextJS starter project for GuardLink, a security management application. It includes three user portals: Patrolling Officer, Agency, and TOWERCO/MNO.
+This is a NextJS starter project for GuardLink, a security management application. It includes two user portals: Agency and TOWERCO/MNO.
 
 ## Tech Stack
 
@@ -8,7 +8,6 @@ This is a NextJS starter project for GuardLink, a security management applicatio
 *   **Language**: [TypeScript](https://www.typescriptlang.org/)
 *   **UI Components**: [ShadCN UI](https://ui.shadcn.com/)
 *   **Styling**: [Tailwind CSS](https://tailwindcss.com/)
-*   **Generative AI**: [Genkit](https://firebase.google.com/docs/genkit)
 
 ## Getting Started
 
@@ -50,13 +49,3 @@ npm run dev
 ```
 
 This will start the application, typically on `http://localhost:9002`. Open this URL in your web browser to see the application. The server will automatically reload when you make changes to the code.
-
-### 4. Running Genkit for AI Features
-
-The application uses Genkit for its AI capabilities. To run the Genkit development server, which enables the AI flows, open a *new terminal window* and run:
-
-```bash
-npm run genkit:dev
-```
-
-This will start the Genkit development environment, allowing the Next.js app to communicate with the AI models. You can leave this running in the background while you work on the application.
