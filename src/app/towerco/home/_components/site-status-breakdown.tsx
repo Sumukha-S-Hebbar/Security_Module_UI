@@ -158,12 +158,14 @@ export function SiteStatusBreakdown({ siteStatusData }: { siteStatusData: SiteSt
                               onClick={() => router.push(`/towerco/sites/${site.id}`)}
                               className="group cursor-pointer hover:bg-[#00B4D8] hover:text-accent-foreground"
                             >
-                              <TableCell className="group-hover:text-accent-foreground px-2 font-medium">{site.tb_site_id}</TableCell>
-                              <TableCell className="group-hover:text-accent-foreground px-2 font-medium">{site.org_site_id}</TableCell>
-                              <TableCell className="group-hover:text-accent-foreground px-2">
+                              <TableCell className="group-hover:text-accent-foreground px-2 font-medium">
                                 <Button asChild variant="link" className="p-0 h-auto font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
-                                      <Link href={`/towerco/sites/${site.id}`}>{site.site_name}</Link>
+                                      <Link href={`/towerco/sites/${site.id}`}>{site.tb_site_id}</Link>
                                 </Button>
+                              </TableCell>
+                              <TableCell className="group-hover:text-accent-foreground px-2 font-medium">{site.org_site_id}</TableCell>
+                              <TableCell className="group-hover:text-accent-foreground px-2 font-medium">
+                                {site.site_name}
                               </TableCell>
                               <TableCell className="group-hover:text-accent-foreground px-2">
                                 <Badge variant="outline" className="font-medium group-hover:border-accent-foreground/50 group-hover:text-accent-foreground">{site.region}</Badge>
@@ -192,12 +194,14 @@ export function SiteStatusBreakdown({ siteStatusData }: { siteStatusData: SiteSt
                               key={site.id} 
                               className="group hover:bg-[#00B4D8] hover:text-accent-foreground"
                             >
-                              <TableCell className="group-hover:text-accent-foreground px-2 font-medium">{site.tb_site_id}</TableCell>
-                               <TableCell className="group-hover:text-accent-foreground px-2 font-medium">{site.org_site_id}</TableCell>
-                              <TableCell className="group-hover:text-accent-foreground px-2">
+                              <TableCell className="group-hover:text-accent-foreground px-2 font-medium">
                                 <Button asChild variant="link" className="p-0 h-auto font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
-                                      <Link href={`/towerco/sites/${site.id}`}>{site.site_name}</Link>
+                                      <Link href={`/towerco/sites/${site.id}`}>{site.tb_site_id}</Link>
                                 </Button>
+                              </TableCell>
+                               <TableCell className="group-hover:text-accent-foreground px-2 font-medium">{site.org_site_id}</TableCell>
+                              <TableCell className="group-hover:text-accent-foreground px-2 font-medium">
+                                {site.site_name}
                               </TableCell>
                               <TableCell className="group-hover:text-accent-foreground px-2">
                                 <Badge variant="outline" className="font-medium group-hover:border-accent-foreground/50 group-hover:text-accent-foreground">{site.region}</Badge>
