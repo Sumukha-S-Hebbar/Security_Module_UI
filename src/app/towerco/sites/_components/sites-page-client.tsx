@@ -548,7 +548,7 @@ export function SitesPageClient() {
                                     <FormItem>
                                         <FormLabel>Site ID</FormLabel>
                                         <FormControl>
-                                            <Input placeholder="e.g., TCOA-S10" {...field} />
+                                            <Input placeholder="Enter site ID" {...field} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -561,7 +561,7 @@ export function SitesPageClient() {
                                     <FormItem>
                                         <FormLabel>Site Name</FormLabel>
                                         <FormControl>
-                                            <Input placeholder="e.g., Mountain Peak Tower" {...field} />
+                                            <Input placeholder="Enter site name" {...field} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -574,7 +574,7 @@ export function SitesPageClient() {
                                     <FormItem>
                                         <FormLabel>Address Line 1</FormLabel>
                                         <FormControl>
-                                            <Input placeholder="e.g., 123 Summit Way" {...field} />
+                                            <Input placeholder="Enter address" {...field} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -637,7 +637,7 @@ export function SitesPageClient() {
                                     <FormItem>
                                         <FormLabel>Zip Code</FormLabel>
                                         <FormControl>
-                                            <Input placeholder="e.g., 560060" {...field} />
+                                            <Input placeholder="Enter zip code" {...field} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -651,7 +651,7 @@ export function SitesPageClient() {
                                         <FormItem>
                                             <FormLabel>Latitude</FormLabel>
                                             <FormControl>
-                                                <Input type="number" placeholder="e.g., 12.9352" {...field} />
+                                                <Input type="number" placeholder="Enter latitude" {...field} />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -664,7 +664,7 @@ export function SitesPageClient() {
                                         <FormItem>
                                             <FormLabel>Longitude</FormLabel>
                                             <FormControl>
-                                                <Input type="number" placeholder="e.g., 77.6146" {...field} />
+                                                <Input type="number" placeholder="Enter longitude" {...field} />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -946,7 +946,7 @@ export function SitesPageClient() {
                           <TableCell>
                              <Input
                                 type="number"
-                                placeholder="e.g., 2"
+                                placeholder="Number of guards"
                                 className="w-[120px]"
                                 value={assignment[site.id.toString()]?.guards || ''}
                                 onChange={(e) => handleAssignmentChange(site.id.toString(), 'guards', e.target.value)}

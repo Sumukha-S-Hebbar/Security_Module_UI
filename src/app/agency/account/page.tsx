@@ -201,7 +201,7 @@ export default function AgencyAccountPage() {
                     <FormItem>
                       <FormLabel>Agency Name</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g., GuardLink Security" {...field} />
+                        <Input placeholder="Enter agency name" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -215,7 +215,7 @@ export default function AgencyAccountPage() {
                       <FormItem>
                         <FormLabel>Phone Number</FormLabel>
                         <FormControl>
-                          <Input placeholder="e.g., 555-001-0001" {...field} />
+                          <Input placeholder="Enter phone number" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -228,7 +228,7 @@ export default function AgencyAccountPage() {
                       <FormItem>
                         <FormLabel>Email Address</FormLabel>
                         <FormControl>
-                          <Input placeholder="e.g., contact@guardlink.com" {...field} />
+                          <Input placeholder="Enter email address" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -242,7 +242,7 @@ export default function AgencyAccountPage() {
                     <FormItem>
                       <FormLabel>Address</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g., 123 Security Blvd" {...field} />
+                        <Input placeholder="Enter address" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

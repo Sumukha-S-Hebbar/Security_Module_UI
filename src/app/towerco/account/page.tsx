@@ -234,7 +234,7 @@ export default function TowercoAccountPage() {
                                     <FormItem>
                                         <FormLabel>Old Password</FormLabel>
                                         <FormControl>
-                                            <Input type="password" placeholder="Enter your current password" {...field} />
+                                            <Input type="password" placeholder="Enter current password" {...field} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>

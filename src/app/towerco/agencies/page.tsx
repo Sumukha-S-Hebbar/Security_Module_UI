@@ -498,7 +498,7 @@ export default function TowercoAgenciesPage() {
                                             <FormItem>
                                                 <FormLabel>Agency Name</FormLabel>
                                                 <FormControl>
-                                                    <Input placeholder="e.g., SecureGuard Inc." {...field} />
+                                                    <Input placeholder="Enter agency name" {...field} />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>
@@ -511,7 +511,7 @@ export default function TowercoAgenciesPage() {
                                             <FormItem>
                                                 <FormLabel>Contact Person</FormLabel>
                                                 <FormControl>
-                                                    <Input placeholder="e.g., John Doe" {...field} />
+                                                    <Input placeholder="Enter contact person name" {...field} />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>
@@ -524,7 +524,7 @@ export default function TowercoAgenciesPage() {
                                             <FormItem>
                                                 <FormLabel>Phone</FormLabel>
                                                 <FormControl>
-                                                    <Input placeholder="e.g., 555-123-4567" {...field} />
+                                                    <Input placeholder="Enter phone number" {...field} />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>
@@ -537,7 +537,7 @@ export default function TowercoAgenciesPage() {
                                             <FormItem>
                                                 <FormLabel>Email</FormLabel>
                                                 <FormControl>
-                                                    <Input placeholder="e.g., contact@secureguard.com" {...field} />
+                                                    <Input placeholder="Enter email address" {...field} />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>
@@ -550,7 +550,7 @@ export default function TowercoAgenciesPage() {
                                             <FormItem>
                                                 <FormLabel>Address Line 1</FormLabel>
                                                 <FormControl>
-                                                    <Input placeholder="e.g., 123 Security Blvd" {...field} />
+                                                    <Input placeholder="Enter address" {...field} />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>

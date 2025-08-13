@@ -227,25 +227,25 @@ export default function RootPage() {
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="email-up">EMAIL ADDRESS <span className="text-destructive">*</span></Label>
-                    <Input id="email-up" type="email" placeholder="Enter Email" required />
+                    <Input id="email-up" type="email" placeholder="Enter your email" required />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="firstname-up">FIRST NAME <span className="text-destructive">*</span></Label>
-                    <Input id="firstname-up" type="text" placeholder="As Per Government Records" required />
+                    <Input id="firstname-up" type="text" placeholder="Enter your first name" required />
                   </div>
                    <div className="space-y-2">
                     <Label htmlFor="middlename-up">MIDDLE NAME</Label>
-                    <Input id="middlename-up" type="text" placeholder="As Per Government Records" />
+                    <Input id="middlename-up" type="text" placeholder="Enter your middle name" />
                   </div>
                    <div className="space-y-2">
                     <Label htmlFor="lastname-up">LAST NAME <span className="text-destructive">*</span></Label>
-                    <Input id="lastname-up" type="text" placeholder="As Per Government Records" required />
+                    <Input id="lastname-up" type="text" placeholder="Enter your last name" required />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="role-up">PLATFORM ROLE <span className="text-destructive">*</span></Label>
                     <Select>
                         <SelectTrigger id="role-up">
-                            <SelectValue placeholder="Choose An Option" />
+                            <SelectValue placeholder="Choose an option" />
                         </SelectTrigger>
                         <SelectContent>
                             <SelectItem value="officer">Patrolling Officer</SelectItem>
@@ -255,11 +255,11 @@ export default function RootPage() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="password-up">PASSWORD <span className="text-destructive">*</span></Label>
-                    <Input id="password-up" type="password" placeholder="Enter Password" required />
+                    <Input id="password-up" type="password" placeholder="Enter password" required />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="confirm-password-up">CONFIRM PASSWORD <span className="text-destructive">*</span></Label>
-                    <Input id="confirm-password-up" type="password" placeholder="Enter Password Again" required />
+                    <Input id="confirm-password-up" type="password" placeholder="Re-enter password" required />
                   </div>
                    <div className="flex items-center space-x-2">
                         <Checkbox id="terms" />

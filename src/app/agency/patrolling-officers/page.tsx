@@ -242,7 +242,7 @@ export default function AgencyPatrollingOfficersPage() {
                                             <FormItem>
                                                 <FormLabel>Full Name</FormLabel>
                                                 <FormControl>
-                                                    <Input placeholder="e.g., Michael Scott" {...field} />
+                                                    <Input placeholder="Enter full name" {...field} />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>
@@ -255,7 +255,7 @@ export default function AgencyPatrollingOfficersPage() {
                                             <FormItem>
                                                 <FormLabel>Phone</FormLabel>
                                                 <FormControl>
-                                                    <Input placeholder="e.g., 555-100-2000" {...field} />
+                                                    <Input placeholder="Enter phone number" {...field} />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>
@@ -268,7 +268,7 @@ export default function AgencyPatrollingOfficersPage() {
                                             <FormItem>
                                                 <FormLabel>Email</FormLabel>
                                                 <FormControl>
-                                                    <Input placeholder="e.g., michael.s@guardlink.com" {...field} />
+                                                    <Input placeholder="Enter email address" {...field} />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>

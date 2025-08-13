@@ -274,7 +274,7 @@ export default function AgencyGuardsPage() {
                                         <FormItem>
                                             <FormLabel>Full Name</FormLabel>
                                             <FormControl>
-                                                <Input placeholder="e.g., John Doe" {...field} />
+                                                <Input placeholder="Enter full name" {...field} />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -287,7 +287,7 @@ export default function AgencyGuardsPage() {
                                         <FormItem>
                                             <FormLabel>Phone</FormLabel>
                                             <FormControl>
-                                                <Input placeholder="e.g., 555-123-4567" {...field} />
+                                                <Input placeholder="Enter phone number" {...field} />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
