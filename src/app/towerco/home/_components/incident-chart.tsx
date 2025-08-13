@@ -81,7 +81,7 @@ export function IncidentChart({
   selectedYear,
   setSelectedYear,
 }: {
-  incidentTrend: IncidentTrendData[];
+  incidentTrend: IncidentTrendData[] | undefined;
   agencies: AgencyPerformanceData[];
   selectedAgency: string;
   setSelectedAgency: (agency: string) => void;
@@ -237,7 +237,6 @@ export function IncidentChart({
                 <SelectValue placeholder="Select Year" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all" className="font-medium">All Years</SelectItem>
                   {availableYears.map(year => (
                     <SelectItem key={year} value={year} className="font-medium">{year}</SelectItem>
                   ))}
