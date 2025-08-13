@@ -371,8 +371,8 @@ export default function IncidentReportPage() {
             <CardContent className="text-sm space-y-3">
               <div>
                 <div className="text-xl font-bold">{incident.site_details.site_name}</div>
-                <p className="font-medium">Site ID: {incident.site_details.org_site_id}</p>
                 <p className="font-medium">Towerbuddy ID: {incident.site_details.tb_site_id}</p>
+                <p className="font-medium">Site ID: {incident.site_details.org_site_id}</p>
               </div>
               <div className='font-medium pt-2 border-t'>
                 <p className='flex items-start gap-2'><MapPin className="h-4 w-4 mt-0.5" /><span>{incident.site_details.site_address_line1}, {incident.site_details.city}</span></p>
