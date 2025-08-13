@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useMemo, useRef, useEffect } from 'react';
+import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import {
   Card,
@@ -76,9 +76,13 @@ type PaginatedIncidentsResponse = {
 export function IncidentChart({
   incidentTrend,
   agencies,
+  selectedAgency,
+  setSelectedAgency,
 }: {
   incidentTrend: IncidentTrendData[];
   agencies: AgencyPerformanceData[];
+  selectedAgency: string;
+  setSelectedAgency: (agency: string) => void;
 }) {
   const router = useRouter();
   const [org, setOrg] = useState<Organization | null>(null);
@@ -86,7 +90,7 @@ export function IncidentChart({
   const [selectedYear, setSelectedYear] = useState<string>(
     new Date().getFullYear().toString()
   );
-  const [selectedAgency, setSelectedAgency] = useState<string>('all');
+  
   const [selectedMonthIndex, setSelectedMonthIndex] = useState<number | null>(null);
   const [hoveredBar, setHoveredBar] = useState<string | null>(null);
   const collapsibleRef = useRef<HTMLDivElement>(null);
@@ -120,7 +124,11 @@ export function IncidentChart({
 
     const token = localStorage.getItem('token');
     const month = monthIndex + 1;
-    const url = `/security/api/orgs/${org.code}/incidents/list/?year=${selectedYear}&month=${month}`;
+    let url = `/security/api/orgs/${org.code}/incidents/list/?year=${selectedYear}&month=${month}`;
+
+    if (selectedAgency !== 'all') {
+      url += `&agency_name=${encodeURIComponent(selectedAgency)}`;
+    }
 
     try {
         const data = await fetchData<PaginatedIncidentsResponse>(url, {
@@ -133,7 +141,7 @@ export function IncidentChart({
     } finally {
         setIsDetailsLoading(false);
     }
-  }, [org, selectedYear]);
+  }, [org, selectedYear, selectedAgency]);
 
   const handleBarClick = useCallback((data: any, index: number) => {
     if (selectedMonthIndex === index) {

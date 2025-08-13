@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import type { Organization } from '@/types';
 import {
   Card,
@@ -121,12 +121,16 @@ interface DashboardData {
 }
 
 
-async function getDashboardData(org: Organization | null): Promise<DashboardData | null> {
+async function getDashboardData(org: Organization | null, agencyName?: string): Promise<DashboardData | null> {
   if (!org) return null;
   
-  const API_URL = `${process.env.NEXT_PUBLIC_DJANGO_API_URL}/security/api/orgs/${org.code}/security-dashboard/`;
+  let API_URL = `${process.env.NEXT_PUBLIC_DJANGO_API_URL}/security/api/orgs/${org.code}/security-dashboard/`;
   const token = localStorage.getItem('token');
   
+  if (agencyName && agencyName !== 'all') {
+    API_URL += `?agency_name=${encodeURIComponent(agencyName)}`;
+  }
+
   if (!token) {
     console.error("No auth token found");
     return null;
@@ -148,6 +152,7 @@ async function getDashboardData(org: Organization | null): Promise<DashboardData
 
 export default function TowercoHomePage() {
   const [activeIncidentsCurrentPage, setActiveIncidentsCurrentPage] = useState(1);
+  const [selectedAgency, setSelectedAgency] = useState<string>('all');
   const router = useRouter();
   
   const [org, setOrg] = useState<Organization | null>(null);
@@ -159,7 +164,10 @@ export default function TowercoHomePage() {
       }
   }, []);
 
-  const { data, isLoading } = useDataFetching<DashboardData | null>(() => getDashboardData(org), [org]);
+  const { data, isLoading } = useDataFetching<DashboardData | null>(
+    () => getDashboardData(org, selectedAgency), 
+    [org, selectedAgency]
+  );
 
   const activeEmergencies = useMemo(() => {
     if (!data) return [];
@@ -355,6 +363,8 @@ export default function TowercoHomePage() {
       <IncidentChart
         incidentTrend={data.incident_trend}
         agencies={data.agency_performance}
+        selectedAgency={selectedAgency}
+        setSelectedAgency={setSelectedAgency}
       />
     </div>
   );
