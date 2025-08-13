@@ -191,7 +191,7 @@ export function IncidentChart({
     }
   }, [org, selectedYear, selectedAgency]);
 
-  const handleBarClick = useCallback((_data: any, index: number) => {
+  const handleBarClick = useCallback((index: number) => {
     if (selectedMonthIndex === index) {
       setSelectedMonthIndex(null);
       setIncidentsInSelectedMonth([]);
@@ -300,7 +300,6 @@ export function IncidentChart({
             <BarChart 
               data={monthlyIncidentData} 
               margin={{ top: 20, right: 20, left: -10, bottom: 5 }}
-              onClick={(data, index) => handleBarClick(data, index)}
               onMouseEnter={(data) => {
                 if (data.activePayload?.[0]?.payload.month) {
                     setHoveredBar(data.activePayload[0].payload.month);
@@ -373,13 +372,13 @@ export function IncidentChart({
                   }}
               />
               <ChartLegend content={<ChartLegendContent />} />
-              <Bar yAxisId="left" dataKey="total" fill="var(--color-total)" radius={4} cursor="pointer" opacity={hoveredBar && hoveredBar !== monthlyIncidentData.find(d => d.month === hoveredBar)?.month ? 0.5 : 1}>
+              <Bar yAxisId="left" dataKey="total" fill="var(--color-total)" radius={4} cursor="pointer" onClick={(_, index) => handleBarClick(index)} opacity={hoveredBar && hoveredBar !== monthlyIncidentData.find(d => d.month === hoveredBar)?.month ? 0.5 : 1}>
                   <LabelList dataKey="total" position="top" offset={5} fontSize={12} />
               </Bar>
-              <Bar yAxisId="left" dataKey="resolved" fill="var(--color-resolved)" radius={4} cursor="pointer" opacity={hoveredBar && hoveredBar !== monthlyIncidentData.find(d => d.month === hoveredBar)?.month ? 0.5 : 1}>
+              <Bar yAxisId="left" dataKey="resolved" fill="var(--color-resolved)" radius={4} cursor="pointer" onClick={(_, index) => handleBarClick(index)} opacity={hoveredBar && hoveredBar !== monthlyIncidentData.find(d => d.month === hoveredBar)?.month ? 0.5 : 1}>
                   <LabelList dataKey="resolved" position="top" offset={5} fontSize={12} />
               </Bar>
-              <Bar yAxisId="left" dataKey="underReview" fill="var(--color-underReview)" radius={4} cursor="pointer" opacity={hoveredBar && hoveredBar !== monthlyIncidentData.find(d => d.month === hoveredBar)?.month ? 0.5 : 1}>
+              <Bar yAxisId="left" dataKey="underReview" fill="var(--color-underReview)" radius={4} cursor="pointer" onClick={(_, index) => handleBarClick(index)} opacity={hoveredBar && hoveredBar !== monthlyIncidentData.find(d => d.month === hoveredBar)?.month ? 0.5 : 1}>
                   <LabelList dataKey="underReview" position="top" offset={5} fontSize={12} />
               </Bar>
               <Line yAxisId="right" type="monotone" dataKey="avgClosure" stroke="var(--color-avgClosure)" strokeWidth={2} dot={{ r: 4 }}>
