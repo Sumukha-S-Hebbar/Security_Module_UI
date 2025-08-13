@@ -195,9 +195,7 @@ export function SiteStatusBreakdown({ siteStatusData }: { siteStatusData: SiteSt
                               className="group hover:bg-[#00B4D8] hover:text-accent-foreground"
                             >
                               <TableCell className="group-hover:text-accent-foreground px-2 font-medium">
-                                <Button asChild variant="link" className="p-0 h-auto font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
-                                      <Link href={`/towerco/sites/${site.id}`}>{site.tb_site_id}</Link>
-                                </Button>
+                                {site.tb_site_id}
                               </TableCell>
                                <TableCell className="group-hover:text-accent-foreground px-2 font-medium">{site.org_site_id}</TableCell>
                               <TableCell className="group-hover:text-accent-foreground px-2 font-medium">
