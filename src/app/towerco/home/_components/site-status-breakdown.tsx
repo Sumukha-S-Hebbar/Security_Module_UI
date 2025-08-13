@@ -144,6 +144,8 @@ export function SiteStatusBreakdown({ siteStatusData }: { siteStatusData: SiteSt
                       <Table>
                         <TableHeader>
                           <TableRow>
+                            <TableHead className="text-foreground px-2">Towerbuddy ID</TableHead>
+                            <TableHead className="text-foreground px-2">Site ID</TableHead>
                             <TableHead className="text-foreground px-2">Site Name</TableHead>
                             <TableHead className="text-foreground px-2">Region</TableHead>
                             <TableHead className="text-foreground px-2">Agency</TableHead>
@@ -156,6 +158,8 @@ export function SiteStatusBreakdown({ siteStatusData }: { siteStatusData: SiteSt
                               onClick={() => router.push(`/towerco/sites/${site.id}`)}
                               className="group cursor-pointer hover:bg-[#00B4D8] hover:text-accent-foreground"
                             >
+                              <TableCell className="group-hover:text-accent-foreground px-2 font-medium">{site.tb_site_id}</TableCell>
+                              <TableCell className="group-hover:text-accent-foreground px-2 font-medium">{site.org_site_id}</TableCell>
                               <TableCell className="group-hover:text-accent-foreground px-2">
                                 <Button asChild variant="link" className="p-0 h-auto font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
                                       <Link href={`/towerco/sites/${site.id}`}>{site.site_name}</Link>
@@ -175,6 +179,8 @@ export function SiteStatusBreakdown({ siteStatusData }: { siteStatusData: SiteSt
                        <Table>
                         <TableHeader>
                           <TableRow>
+                            <TableHead className="text-foreground px-2">Towerbuddy ID</TableHead>
+                            <TableHead className="text-foreground px-2">Site ID</TableHead>
                             <TableHead className="text-foreground px-2">Site Name</TableHead>
                             <TableHead className="text-foreground px-2">Region</TableHead>
                             <TableHead className="text-right text-foreground px-2">Action</TableHead>
@@ -186,6 +192,8 @@ export function SiteStatusBreakdown({ siteStatusData }: { siteStatusData: SiteSt
                               key={site.id} 
                               className="group hover:bg-[#00B4D8] hover:text-accent-foreground"
                             >
+                              <TableCell className="group-hover:text-accent-foreground px-2 font-medium">{site.tb_site_id}</TableCell>
+                               <TableCell className="group-hover:text-accent-foreground px-2 font-medium">{site.org_site_id}</TableCell>
                               <TableCell className="group-hover:text-accent-foreground px-2">
                                 <Button asChild variant="link" className="p-0 h-auto font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
                                       <Link href={`/towerco/sites/${site.id}`}>{site.site_name}</Link>

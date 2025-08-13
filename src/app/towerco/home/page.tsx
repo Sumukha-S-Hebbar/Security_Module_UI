@@ -67,11 +67,20 @@ export type AgencyPerformanceData = {
     };
 };
 
+type SiteListItem = {
+    id: number;
+    tb_site_id: string;
+    org_site_id: string;
+    site_name: string;
+    region: string;
+    agency_name?: string;
+};
+
 export type SiteStatusData = {
     assigned_sites_count: number;
     unassigned_sites_count: number;
-    assigned_sites: { results: { id: number; tb_site_id: string; site_name: string; region: string; agency_name?: string }[] };
-    unassigned_sites: { results: { id: number; tb_site_id: string; site_name: string; region: string; agency_name?: string }[] } | null;
+    assigned_sites: { results: SiteListItem[] };
+    unassigned_sites: { results: SiteListItem[] } | null;
 };
 
 export type IncidentTrendData = {
