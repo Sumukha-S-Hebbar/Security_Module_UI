@@ -233,15 +233,17 @@ export function SitesPageClient() {
 
 
   useEffect(() => {
-    const el = focusSite ? unassignedSitesRef.current.get(focusSite) : null;
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      el.classList.add('highlight-row');
-      setTimeout(() => {
-        el.classList.remove('highlight-row');
-      }, 2000);
+    if (!isLoading && focusSite) {
+        const el = unassignedSitesRef.current.get(focusSite);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          el.classList.add('highlight-row');
+          setTimeout(() => {
+            el.classList.remove('highlight-row');
+          }, 2000);
+        }
     }
-  }, [focusSite, allSites]);
+  }, [focusSite, isLoading]);
 
   const assignedSites = useMemo(
     () => allSites.filter((site) => site.site_status === 'Assigned'),
