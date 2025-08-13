@@ -191,7 +191,7 @@ export function IncidentChart({
     }
   }, [org, selectedYear, selectedAgency]);
 
-  const handleBarClick = useCallback((data: any, index: number) => {
+  const handleBarClick = useCallback((_data: any, index: number) => {
     if (selectedMonthIndex === index) {
       setSelectedMonthIndex(null);
       setIncidentsInSelectedMonth([]);
