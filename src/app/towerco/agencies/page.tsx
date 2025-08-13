@@ -482,7 +482,7 @@ export default function TowercoAgenciesPage() {
                                 Add Agency
                             </Button>
                         </DialogTrigger>
-                        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
+                        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-3xl">
                             <DialogHeader>
                                 <DialogTitle>Add a New Agency</DialogTitle>
                                 <DialogDescription className="font-medium">
@@ -498,7 +498,7 @@ export default function TowercoAgenciesPage() {
                                             <FormItem>
                                                 <FormLabel>Agency Name</FormLabel>
                                                 <FormControl>
-                                                    <Input placeholder="Enter agency name" {...field} />
+                                                    <Input placeholder="Enter text" {...field} />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>
@@ -511,7 +511,7 @@ export default function TowercoAgenciesPage() {
                                             <FormItem>
                                                 <FormLabel>Contact Person</FormLabel>
                                                 <FormControl>
-                                                    <Input placeholder="Enter contact person name" {...field} />
+                                                    <Input placeholder="Enter text" {...field} />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>
@@ -524,7 +524,7 @@ export default function TowercoAgenciesPage() {
                                             <FormItem>
                                                 <FormLabel>Phone</FormLabel>
                                                 <FormControl>
-                                                    <Input placeholder="Enter phone number" {...field} />
+                                                    <Input placeholder="Enter number" {...field} />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>
@@ -537,7 +537,7 @@ export default function TowercoAgenciesPage() {
                                             <FormItem>
                                                 <FormLabel>Email</FormLabel>
                                                 <FormControl>
-                                                    <Input placeholder="Enter email address" {...field} />
+                                                    <Input placeholder="Enter email" {...field} />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>
@@ -795,6 +795,7 @@ export default function TowercoAgenciesPage() {
                                                                 <Table>
                                                                     <TableHeader>
                                                                         <TableRow>
+                                                                            <TableHead>Towerbuddy ID</TableHead>
                                                                             <TableHead>Site ID</TableHead>
                                                                             <TableHead>Site Name</TableHead>
                                                                             <TableHead>Address</TableHead>
@@ -811,9 +812,10 @@ export default function TowercoAgenciesPage() {
                                                                             >
                                                                                 <TableCell>
                                                                                     <Button asChild variant="link" className="p-0 h-auto font-medium text-accent group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
-                                                                                      <Link href={`/towerco/sites/${siteDetail.site_details.id}`}>{siteDetail.site_details.org_site_id}</Link>
+                                                                                      <Link href={`/towerco/sites/${siteDetail.site_details.id}`}>{siteDetail.site_details.tb_site_id}</Link>
                                                                                     </Button>
                                                                                 </TableCell>
+                                                                                <TableCell className="font-medium">{siteDetail.site_details.org_site_id}</TableCell>
                                                                                 <TableCell>{siteDetail.site_details.site_name}</TableCell>
                                                                                 <TableCell>{siteDetail.site_details.site_address_line1}</TableCell>
                                                                                 <TableCell>{siteDetail.site_details.city}</TableCell>
@@ -874,3 +876,5 @@ export default function TowercoAgenciesPage() {
         </div>
     );
 }
+
+    
