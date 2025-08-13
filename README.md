@@ -1,4 +1,4 @@
-# Firebase Studio
+# Security Module UI
 
 This is a NextJS starter project for GuardLink, a security management application. It includes two user portals: Agency and TOWERCO/MNO.
 
