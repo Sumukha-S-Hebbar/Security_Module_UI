@@ -43,7 +43,7 @@ export default function RootPage() {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSignIn = async (event: React.MouseEvent<HTMLButtonElement>) => {
+  const handleSignIn = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsLoading(true);
 
@@ -173,7 +173,7 @@ export default function RootPage() {
             
             <TabsContent value="signin" className="mt-8">
               <Card className="border-0 shadow-none">
-                <form onSubmit={(e) => e.preventDefault()}>
+                <form onSubmit={handleSignIn}>
                   <CardHeader>
                     <CardTitle className="text-2xl font-bold">Sign In</CardTitle>
                     <CardDescription>
@@ -207,7 +207,7 @@ export default function RootPage() {
                     </div>
                   </CardContent>
                   <CardFooter>
-                    <Button type="button" onClick={handleSignIn} className="w-full bg-[#1e90ff] hover:bg-[#1c86ee]" disabled={isLoading}>
+                    <Button type="submit" className="w-full bg-[#1e90ff] hover:bg-[#1c86ee]" disabled={isLoading}>
                       {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                       Sign In
                     </Button>
