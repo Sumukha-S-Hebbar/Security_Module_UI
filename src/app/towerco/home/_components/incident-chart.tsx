@@ -166,11 +166,17 @@ export function IncidentChart({
 
     const token = localStorage.getItem('token');
     const month = monthIndex + 1;
-    let url = `/security/api/orgs/${org.code}/incidents/list/?year=${selectedYear}&month=${month}`;
+    
+    const params = new URLSearchParams({
+        year: selectedYear,
+        month: month.toString(),
+    });
 
     if (selectedAgency !== 'all') {
-      url += `&agency_name=${encodeURIComponent(selectedAgency)}`;
+      params.append('agency_name', selectedAgency);
     }
+    
+    const url = `/security/api/orgs/${org.code}/incidents/list/?${params.toString()}`;
 
     try {
         const data = await fetchData<PaginatedIncidentsResponse>(url, {
