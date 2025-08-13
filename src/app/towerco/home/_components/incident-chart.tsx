@@ -150,7 +150,7 @@ export function IncidentChart({
         total: monthData.total,
         resolved: monthData.resolved,
         underReview: monthData.under_review,
-        avgClosure: null, // This part is tricky without raw incident data.
+        avgClosure: null,
         closureTimeFormatted: monthData.resolution_duration,
     }));
   }, [incidentTrend]);
