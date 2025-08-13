@@ -1,4 +1,3 @@
-export * from './alert';
 export * from './guard';
 export * from './incident';
 export * from './patrolling-officer';
