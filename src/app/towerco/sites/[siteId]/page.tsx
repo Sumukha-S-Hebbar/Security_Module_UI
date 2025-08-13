@@ -300,7 +300,8 @@ export default function SiteReportPage() {
             <div className="flex flex-wrap justify-between items-start gap-4">
               <div>
                 <CardTitle className="text-2xl">{site_name}</CardTitle>
-                <p className="font-medium">ID: {org_site_id}</p>
+                <p className="font-medium">Towerbuddy ID: {reportData.tb_site_id}</p>
+                <p className="font-medium">Site ID: {org_site_id}</p>
               </div>
             </div>
           </CardHeader>
