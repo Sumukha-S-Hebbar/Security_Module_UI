@@ -447,9 +447,6 @@ export default function TowercoAgenciesPage() {
                                                     onChange={(e) => field.onChange(e.target.files)}
                                                 />
                                                 </FormControl>
-                                                <FormDescription className="font-medium">
-                                                The Excel file should contain columns: id, name, phone, email, address, city, region.
-                                                </FormDescription>
                                                 <FormMessage />
                                             </FormItem>
                                             )}
@@ -491,58 +488,62 @@ export default function TowercoAgenciesPage() {
                             </DialogHeader>
                             <Form {...addAgencyForm}>
                                 <form onSubmit={addAgencyForm.handleSubmit(onAddAgencySubmit)} className="space-y-4">
-                                    <FormField
-                                        control={addAgencyForm.control}
-                                        name="name"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Agency Name</FormLabel>
-                                                <FormControl>
-                                                    <Input placeholder="Enter text" {...field} />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                     <FormField
-                                        control={addAgencyForm.control}
-                                        name="contact_person"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Contact Person</FormLabel>
-                                                <FormControl>
-                                                    <Input placeholder="Enter text" {...field} />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <FormField
-                                        control={addAgencyForm.control}
-                                        name="phone"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Phone</FormLabel>
-                                                <FormControl>
-                                                    <Input placeholder="Enter number" {...field} />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <FormField
-                                        control={addAgencyForm.control}
-                                        name="email"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Email</FormLabel>
-                                                <FormControl>
-                                                    <Input placeholder="Enter email" {...field} />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <FormField
+                                            control={addAgencyForm.control}
+                                            name="name"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Agency Name</FormLabel>
+                                                    <FormControl>
+                                                        <Input placeholder="Enter text" {...field} />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <FormField
+                                            control={addAgencyForm.control}
+                                            name="contact_person"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Contact Person</FormLabel>
+                                                    <FormControl>
+                                                        <Input placeholder="Enter text" {...field} />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <FormField
+                                            control={addAgencyForm.control}
+                                            name="phone"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Phone</FormLabel>
+                                                    <FormControl>
+                                                        <Input placeholder="Enter number" {...field} />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <FormField
+                                            control={addAgencyForm.control}
+                                            name="email"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Email</FormLabel>
+                                                    <FormControl>
+                                                        <Input placeholder="Enter email" {...field} />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                    </div>
                                     <FormField
                                         control={addAgencyForm.control}
                                         name="registered_address_line1"
@@ -876,5 +877,3 @@ export default function TowercoAgenciesPage() {
         </div>
     );
 }
-
-    

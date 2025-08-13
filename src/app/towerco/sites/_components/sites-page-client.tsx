@@ -498,9 +498,6 @@ export function SitesPageClient() {
                                             onChange={(e) => field.onChange(e.target.files)}
                                         />
                                         </FormControl>
-                                        <FormDescription className="font-medium">
-                                        The Excel file should contain columns for all site details.
-                                        </FormDescription>
                                         <FormMessage />
                                     </FormItem>
                                     )}
@@ -532,7 +529,7 @@ export function SitesPageClient() {
                         Add Site
                     </Button>
                 </DialogTrigger>
-                <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
+                <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-3xl">
                     <DialogHeader>
                         <DialogTitle>Add a New Site</DialogTitle>
                         <DialogDescription className="font-medium">
@@ -541,32 +538,34 @@ export function SitesPageClient() {
                     </DialogHeader>
                     <Form {...addSiteForm}>
                         <form onSubmit={addSiteForm.handleSubmit(onAddSiteSubmit)} className="space-y-4">
-                            <FormField
-                                control={addSiteForm.control}
-                                name="org_site_id"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Site ID</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder="Enter site ID" {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={addSiteForm.control}
-                                name="site_name"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Site Name</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder="Enter site name" {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <FormField
+                                    control={addSiteForm.control}
+                                    name="org_site_id"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Site ID</FormLabel>
+                                            <FormControl>
+                                                <Input placeholder="Enter text" {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={addSiteForm.control}
+                                    name="site_name"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Site Name</FormLabel>
+                                            <FormControl>
+                                                <Input placeholder="Enter text" {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            </div>
                              <FormField
                                 control={addSiteForm.control}
                                 name="site_address_line1"
@@ -574,7 +573,7 @@ export function SitesPageClient() {
                                     <FormItem>
                                         <FormLabel>Address Line 1</FormLabel>
                                         <FormControl>
-                                            <Input placeholder="Enter address" {...field} />
+                                            <Input placeholder="Enter text" {...field} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -590,7 +589,7 @@ export function SitesPageClient() {
                                           <Select onValueChange={field.onChange} defaultValue={field.value}>
                                               <FormControl>
                                                   <SelectTrigger>
-                                                      <SelectValue placeholder="Select a region" />
+                                                      <SelectValue placeholder="Select region" />
                                                   </SelectTrigger>
                                               </FormControl>
                                               <SelectContent>
@@ -614,7 +613,7 @@ export function SitesPageClient() {
                                            <Select onValueChange={field.onChange} value={field.value} disabled={!watchedRegion || isCitiesLoading}>
                                               <FormControl>
                                                   <SelectTrigger>
-                                                      <SelectValue placeholder={isCitiesLoading ? "Loading cities..." : "Select a city"} />
+                                                      <SelectValue placeholder={isCitiesLoading ? "Loading..." : "Select city"} />
                                                   </SelectTrigger>
                                               </FormControl>
                                               <SelectContent>
@@ -637,7 +636,7 @@ export function SitesPageClient() {
                                     <FormItem>
                                         <FormLabel>Zip Code</FormLabel>
                                         <FormControl>
-                                            <Input placeholder="Enter zip code" {...field} />
+                                            <Input placeholder="Enter number" {...field} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -651,7 +650,7 @@ export function SitesPageClient() {
                                         <FormItem>
                                             <FormLabel>Latitude</FormLabel>
                                             <FormControl>
-                                                <Input type="number" placeholder="Enter latitude" {...field} />
+                                                <Input type="number" placeholder="Enter number" {...field} />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -664,7 +663,7 @@ export function SitesPageClient() {
                                         <FormItem>
                                             <FormLabel>Longitude</FormLabel>
                                             <FormControl>
-                                                <Input type="number" placeholder="Enter longitude" {...field} />
+                                                <Input type="number" placeholder="Enter number" {...field} />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
