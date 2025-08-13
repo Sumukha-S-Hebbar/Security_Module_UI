@@ -392,6 +392,7 @@ export default function AgencyPatrollingOfficersPage() {
                                                         <Table>
                                                             <TableHeader>
                                                                 <TableRow>
+                                                                    <TableHead>Towerbuddy ID</TableHead>
                                                                     <TableHead>Site ID</TableHead>
                                                                     <TableHead>Site Name</TableHead>
                                                                     <TableHead>Address</TableHead>
@@ -406,9 +407,10 @@ export default function AgencyPatrollingOfficersPage() {
                                                                     >
                                                                         <TableCell>
                                                                             <Button asChild variant="link" className="p-0 h-auto font-medium text-accent group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
-                                                                            <Link href={`/agency/sites/${site.id}`}>{site.id}</Link>
+                                                                            <Link href={`/agency/sites/${site.id}`}>{site.tb_site_id}</Link>
                                                                             </Button>
                                                                         </TableCell>
+                                                                        <TableCell className="font-medium">{site.org_site_id}</TableCell>
                                                                         <TableCell>{site.site_name}</TableCell>
                                                                         <TableCell>{site.site_address_line1}</TableCell>
                                                                     </TableRow>
