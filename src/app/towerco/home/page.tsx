@@ -46,6 +46,18 @@ type BasicCounts = {
     total_agencies_count: number;
 };
 
+export type IncidentListItem = {
+    id: number;
+    incident_id: string;
+    tb_site_id: string;
+    incident_time: string;
+    incident_status: "Active" | "Under Review" | "Resolved";
+    site_name: string;
+    guard_name: string;
+    incident_type: string;
+    incident_description: string;
+};
+
 type ActiveIncident = {
     id: number;
     incident_id: string;
@@ -103,6 +115,9 @@ interface DashboardData {
     agency_performance: AgencyPerformanceData[];
     site_status: SiteStatusData;
     incident_trend: IncidentTrendData[];
+    all_incidents: {
+        results: IncidentListItem[];
+    }
 }
 
 
@@ -339,6 +354,7 @@ export default function TowercoHomePage() {
 
       <IncidentChart
         incidentTrend={data.incident_trend}
+        incidents={data.all_incidents.results}
       />
     </div>
   );

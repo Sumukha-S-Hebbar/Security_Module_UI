@@ -40,7 +40,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, LabelList, LineChart, Line, ResponsiveContainer } from 'recharts';
 import { useRouter } from 'next/navigation';
-import type { IncidentTrendData } from '../page';
+import type { IncidentTrendData, IncidentListItem } from '../page';
 
 const chartConfig = {
   total: {
@@ -63,9 +63,11 @@ const chartConfig = {
 
 
 export function IncidentChart({
-  incidentTrend
+  incidentTrend,
+  incidents,
 }: {
   incidentTrend: IncidentTrendData[];
+  incidents: IncidentListItem[];
 }) {
   const router = useRouter();
 
@@ -89,18 +91,23 @@ export function IncidentChart({
     }));
   }, [incidentTrend]);
   
-  // Note: incidentsInSelectedMonth cannot be calculated without raw incident data.
-  // The collapsible section will be disabled for now.
-  const incidentsInSelectedMonth: any[] = []; 
+  const incidentsInSelectedMonth = useMemo(() => {
+    if (selectedMonthIndex === null || !incidents) return [];
+    
+    return incidents.filter(incident => {
+        const incidentDate = new Date(incident.incident_time);
+        const yearMatch = incidentDate.getFullYear().toString() === selectedYear;
+        const monthMatch = incidentDate.getMonth() === selectedMonthIndex;
+        return yearMatch && monthMatch;
+    });
+  }, [selectedMonthIndex, selectedYear, incidents]);
 
-  const handleBarClick = (data: any) => {
-    // Disabled since we don't have the raw incidents to show details.
-    // const index = data.activeTooltipIndex;
-    // if (selectedMonthIndex === index) {
-    //   setSelectedMonthIndex(null); // Collapse if clicking the same month
-    // } else {
-    //   setSelectedMonthIndex(index);
-    // }
+  const handleBarClick = (data: any, index: number) => {
+    if (selectedMonthIndex === index) {
+      setSelectedMonthIndex(null); // Collapse if clicking the same month
+    } else {
+      setSelectedMonthIndex(index);
+    }
   };
 
   useEffect(() => {
@@ -111,6 +118,49 @@ export function IncidentChart({
     }
   }, [selectedMonthIndex]);
 
+  const getStatusIndicator = (status: "Active" | "Under Review" | "Resolved") => {
+    switch (status) {
+      case 'Active':
+        return (
+          <div className="flex items-center gap-2 font-medium">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-destructive"></span>
+            </span>
+            <span>Active</span>
+          </div>
+        );
+      case 'Under Review':
+        return (
+          <div className="flex items-center gap-2 font-medium">
+            <span className="relative flex h-2 w-2">
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-[#FFC107]"></span>
+            </span>
+            <span>Under Review</span>
+          </div>
+        );
+      case 'Resolved':
+        return (
+          <div className="flex items-center gap-2 font-medium">
+            <span className="relative flex h-2 w-2">
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-chart-2"></span>
+            </span>
+            <span>Resolved</span>
+          </div>
+        );
+      default:
+        return (
+          <div className="flex items-center gap-2 font-medium">
+            <span className="relative flex h-2 w-2">
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-muted-foreground"></span>
+            </span>
+            <span>{status}</span>
+          </div>
+        );
+    }
+  };
+
+
   return (
     <Card ref={collapsibleRef}>
       <CardHeader>
@@ -118,7 +168,7 @@ export function IncidentChart({
             <div>
                 <CardTitle>Incident Trend</CardTitle>
                 <CardDescription>
-                    Monthly total vs. resolved incidents.
+                    Monthly total vs. resolved incidents. Click a bar to see details.
                 </CardDescription>
             </div>
             <div className="flex items-center gap-2">
@@ -147,7 +197,7 @@ export function IncidentChart({
             <BarChart 
               data={monthlyIncidentData} 
               margin={{ top: 20, right: 20, left: -10, bottom: 5 }}
-              onClick={handleBarClick}
+              onClick={(data, index) => handleBarClick(data, index)}
               onMouseEnter={(data) => {
                 if (data.activePayload?.[0]?.payload.month) {
                     setHoveredBar(data.activePayload[0].payload.month);
@@ -245,7 +295,40 @@ export function IncidentChart({
                 </CardTitle>
             </CardHeader>
             <CardContent>
-                <p className="text-sm text-muted-foreground text-center">Detailed incident view is not available in this summary.</p>
+                {incidentsInSelectedMonth.length > 0 ? (
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Incident ID</TableHead>
+                                <TableHead>Date</TableHead>
+                                <TableHead>Site Name</TableHead>
+                                <TableHead>Guard</TableHead>
+                                <TableHead>Status</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {incidentsInSelectedMonth.map(incident => (
+                                <TableRow 
+                                  key={incident.id}
+                                  onClick={() => router.push(`/towerco/incidents/${incident.id}`)}
+                                  className="cursor-pointer"
+                                >
+                                    <TableCell>
+                                        <Button asChild variant="link" className="p-0 h-auto" onClick={(e) => e.stopPropagation()}>
+                                          <Link href={`/towerco/incidents/${incident.id}`}>{incident.incident_id}</Link>
+                                        </Button>
+                                    </TableCell>
+                                    <TableCell>{new Date(incident.incident_time).toLocaleDateString()}</TableCell>
+                                    <TableCell>{incident.site_name}</TableCell>
+                                    <TableCell>{incident.guard_name}</TableCell>
+                                    <TableCell>{getStatusIndicator(incident.incident_status)}</TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                ) : (
+                    <p className="text-sm text-muted-foreground text-center">No incidents recorded for this month.</p>
+                )}
             </CardContent>
         </CollapsibleContent>
       </Collapsible>
