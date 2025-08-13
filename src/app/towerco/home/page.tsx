@@ -354,7 +354,7 @@ export default function TowercoHomePage() {
 
       <IncidentChart
         incidentTrend={data.incident_trend}
-        initialIncidents={data.all_incidents?.results || []}
+        agencies={data.agency_performance}
       />
     </div>
   );

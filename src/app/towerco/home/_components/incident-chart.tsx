@@ -40,7 +40,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, LabelList, LineChart, Line, ResponsiveContainer } from 'recharts';
 import { useRouter } from 'next/navigation';
-import type { IncidentTrendData, IncidentListItem } from '../page';
+import type { IncidentTrendData, IncidentListItem, AgencyPerformanceData } from '../page';
 import { useDataFetching } from '@/hooks/useDataFetching';
 import { Loader2 } from 'lucide-react';
 import { Organization } from '@/types';
@@ -75,8 +75,10 @@ type PaginatedIncidentsResponse = {
 
 export function IncidentChart({
   incidentTrend,
+  agencies,
 }: {
   incidentTrend: IncidentTrendData[];
+  agencies: AgencyPerformanceData[];
 }) {
   const router = useRouter();
   const [org, setOrg] = useState<Organization | null>(null);
@@ -84,7 +86,7 @@ export function IncidentChart({
   const [selectedYear, setSelectedYear] = useState<string>(
     new Date().getFullYear().toString()
   );
-  const [selectedCompany, setSelectedCompany] = useState<string>('all');
+  const [selectedAgency, setSelectedAgency] = useState<string>('all');
   const [selectedMonthIndex, setSelectedMonthIndex] = useState<number | null>(null);
   const [hoveredBar, setHoveredBar] = useState<string | null>(null);
   const collapsibleRef = useRef<HTMLDivElement>(null);
@@ -112,7 +114,7 @@ export function IncidentChart({
   }, [incidentTrend]);
   
 
-  const fetchMonthIncidents = async (monthIndex: number) => {
+  const fetchMonthIncidents = useCallback(async (monthIndex: number) => {
     if (org === null) return;
     setIsDetailsLoading(true);
 
@@ -131,9 +133,9 @@ export function IncidentChart({
     } finally {
         setIsDetailsLoading(false);
     }
-  }
+  }, [org, selectedYear]);
 
-  const handleBarClick = (data: any, index: number) => {
+  const handleBarClick = useCallback((data: any, index: number) => {
     if (selectedMonthIndex === index) {
       setSelectedMonthIndex(null);
       setIncidentsInSelectedMonth([]);
@@ -141,7 +143,7 @@ export function IncidentChart({
       setSelectedMonthIndex(index);
       fetchMonthIncidents(index);
     }
-  };
+  }, [selectedMonthIndex, fetchMonthIncidents]);
 
   useEffect(() => {
     if (selectedMonthIndex !== null && collapsibleRef.current) {
@@ -205,12 +207,17 @@ export function IncidentChart({
                 </CardDescription>
             </div>
             <div className="flex items-center gap-2">
-            <Select value={selectedCompany} onValueChange={setSelectedCompany} disabled>
+            <Select value={selectedAgency} onValueChange={setSelectedAgency}>
                 <SelectTrigger className="w-full sm:w-[180px] font-medium hover:bg-accent hover:text-accent-foreground">
-                <SelectValue placeholder="Select Company" />
+                <SelectValue placeholder="Select Agency" />
                 </SelectTrigger>
                 <SelectContent>
-                <SelectItem value="all" className="font-medium">All Companies</SelectItem>
+                <SelectItem value="all" className="font-medium">All Agencies</SelectItem>
+                 {agencies.map(agency => (
+                    <SelectItem key={agency.agency_name} value={agency.agency_name} className="font-medium">
+                        {agency.agency_name}
+                    </SelectItem>
+                ))}
                 </SelectContent>
             </Select>
             <Select value={selectedYear} onValueChange={setSelectedYear} disabled>
@@ -324,7 +331,7 @@ export function IncidentChart({
         <CollapsibleContent>
             <CardHeader>
                 <CardTitle>
-                    Incidents in {selectedMonthIndex !== null && monthlyIncidentData && monthlyIncidentData.length > selectedMonthIndex ? monthlyIncidentData[selectedMonthIndex].month : ''} {selectedYear}
+                    Incidents in {monthlyIncidentData && selectedMonthIndex !== null && monthlyIncidentData.length > selectedMonthIndex ? monthlyIncidentData[selectedMonthIndex].month : ''} {selectedYear}
                 </CardTitle>
             </CardHeader>
             <CardContent>
