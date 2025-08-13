@@ -482,7 +482,7 @@ export default function TowercoAgenciesPage() {
                                 Add Agency
                             </Button>
                         </DialogTrigger>
-                        <DialogContent className="max-h-[90vh] overflow-y-auto">
+                        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
                             <DialogHeader>
                                 <DialogTitle>Add a New Agency</DialogTitle>
                                 <DialogDescription className="font-medium">
