@@ -324,7 +324,7 @@ export function IncidentChart({
         <CollapsibleContent>
             <CardHeader>
                 <CardTitle>
-                    Incidents in {selectedMonthIndex !== null && monthlyIncidentData.length > selectedMonthIndex ? monthlyIncidentData[selectedMonthIndex].month : ''} {selectedYear}
+                    Incidents in {selectedMonthIndex !== null && monthlyIncidentData && monthlyIncidentData.length > selectedMonthIndex ? monthlyIncidentData[selectedMonthIndex].month : ''} {selectedYear}
                 </CardTitle>
             </CardHeader>
             <CardContent>
