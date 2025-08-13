@@ -121,15 +121,25 @@ interface DashboardData {
 }
 
 
-async function getDashboardData(org: Organization | null, agencyName?: string): Promise<DashboardData | null> {
+async function getDashboardData(org: Organization | null, agencyName?: string, year?: string): Promise<DashboardData | null> {
   if (!org) return null;
   
-  let API_URL = `${process.env.NEXT_PUBLIC_DJANGO_API_URL}/security/api/orgs/${org.code}/security-dashboard/`;
+  let url = `${process.env.NEXT_PUBLIC_DJANGO_API_URL}/security/api/orgs/${org.code}/security-dashboard/`;
   const token = localStorage.getItem('token');
   
+  const queryParams = new URLSearchParams();
   if (agencyName && agencyName !== 'all') {
-    API_URL += `?agency_name=${encodeURIComponent(agencyName)}`;
+    queryParams.append('agency_name', agencyName);
   }
+  if (year && year !== 'all') {
+    queryParams.append('year', year);
+  }
+  
+  const queryString = queryParams.toString();
+  if (queryString) {
+    url += `?${queryString}`;
+  }
+
 
   if (!token) {
     console.error("No auth token found");
@@ -137,7 +147,7 @@ async function getDashboardData(org: Organization | null, agencyName?: string): 
   }
 
   try {
-    const response = await fetch(API_URL, {
+    const response = await fetch(url, {
       headers: { 'Authorization': `Token ${token}` }
     });
     if (!response.ok) {
@@ -153,6 +163,7 @@ async function getDashboardData(org: Organization | null, agencyName?: string): 
 export default function TowercoHomePage() {
   const [activeIncidentsCurrentPage, setActiveIncidentsCurrentPage] = useState(1);
   const [selectedAgency, setSelectedAgency] = useState<string>('all');
+  const [selectedYear, setSelectedYear] = useState<string>(new Date().getFullYear().toString());
   const router = useRouter();
   
   const [org, setOrg] = useState<Organization | null>(null);
@@ -165,8 +176,8 @@ export default function TowercoHomePage() {
   }, []);
 
   const { data, isLoading } = useDataFetching<DashboardData | null>(
-    () => getDashboardData(org, selectedAgency), 
-    [org, selectedAgency]
+    () => getDashboardData(org, selectedAgency, selectedYear), 
+    [org, selectedAgency, selectedYear]
   );
 
   const activeEmergencies = useMemo(() => {
@@ -365,6 +376,8 @@ export default function TowercoHomePage() {
         agencies={data.agency_performance}
         selectedAgency={selectedAgency}
         setSelectedAgency={setSelectedAgency}
+        selectedYear={selectedYear}
+        setSelectedYear={setSelectedYear}
       />
     </div>
   );

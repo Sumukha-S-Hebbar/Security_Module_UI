@@ -78,18 +78,18 @@ export function IncidentChart({
   agencies,
   selectedAgency,
   setSelectedAgency,
+  selectedYear,
+  setSelectedYear,
 }: {
   incidentTrend: IncidentTrendData[];
   agencies: AgencyPerformanceData[];
   selectedAgency: string;
   setSelectedAgency: (agency: string) => void;
+  selectedYear: string;
+  setSelectedYear: (year: string) => void;
 }) {
   const router = useRouter();
   const [org, setOrg] = useState<Organization | null>(null);
-
-  const [selectedYear, setSelectedYear] = useState<string>(
-    new Date().getFullYear().toString()
-  );
   
   const [selectedMonthIndex, setSelectedMonthIndex] = useState<number | null>(null);
   const [hoveredBar, setHoveredBar] = useState<string | null>(null);
@@ -117,6 +117,10 @@ export function IncidentChart({
     }));
   }, [incidentTrend]);
   
+  const availableYears = useMemo(() => {
+    const currentYear = new Date().getFullYear();
+    return Array.from({ length: 5 }, (_, i) => (currentYear - i).toString());
+  }, []);
 
   const fetchMonthIncidents = useCallback(async (monthIndex: number) => {
     if (org === null) return;
@@ -228,12 +232,15 @@ export function IncidentChart({
                 ))}
                 </SelectContent>
             </Select>
-            <Select value={selectedYear} onValueChange={setSelectedYear} disabled>
+            <Select value={selectedYear} onValueChange={setSelectedYear}>
                 <SelectTrigger className="w-full sm:w-[120px] font-medium hover:bg-accent hover:text-accent-foreground">
                 <SelectValue placeholder="Select Year" />
                 </SelectTrigger>
                 <SelectContent>
-                 <SelectItem value={new Date().getFullYear().toString()} className="font-medium">{new Date().getFullYear()}</SelectItem>
+                  <SelectItem value="all" className="font-medium">All Years</SelectItem>
+                  {availableYears.map(year => (
+                    <SelectItem key={year} value={year} className="font-medium">{year}</SelectItem>
+                  ))}
                 </SelectContent>
             </Select>
             </div>
