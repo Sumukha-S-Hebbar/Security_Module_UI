@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Card,
@@ -35,6 +35,9 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import type { AgencyPerformanceData } from '../page';
+import { useDataFetching } from '@/hooks/useDataFetching';
+import type { Organization } from '@/types';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const chartConfig = {
   incidentResolution: {
@@ -55,20 +58,69 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
+async function getAgencyPerformance(org: Organization | null, year?: string, month?: string): Promise<AgencyPerformanceData[] | null> {
+  if (!org) return null;
+  
+  let url = `${process.env.NEXT_PUBLIC_DJANGO_API_URL}/security/api/orgs/${org.code}/security-dashboard/`;
+  const token = localStorage.getItem('token');
+  
+  const queryParams = new URLSearchParams();
+  if (year && year !== 'all') {
+    queryParams.append('year', year);
+  }
+  if (month && month !== 'all') {
+    queryParams.append('month', month);
+  }
+  
+  const queryString = queryParams.toString();
+  if (queryString) {
+    url += `?${queryString}`;
+  }
 
-export function AgencyPerformance({
-  performanceData,
-}: {
-  performanceData: AgencyPerformanceData[];
-}) {
+  if (!token) {
+    console.error("No auth token found");
+    return null;
+  }
+
+  try {
+    const response = await fetch(url, {
+      headers: { 'Authorization': `Token ${token}` }
+    });
+    if (!response.ok) {
+      throw new Error(`Failed to fetch dashboard data: ${response.statusText}`);
+    }
+    const data = await response.json();
+    return data.agency_performance || [];
+  } catch (error) {
+    console.error('Could not fetch agency performance data:', error);
+    return null;
+  }
+}
+
+export function AgencyPerformance() {
   const router = useRouter();
+  const [org, setOrg] = useState<Organization | null>(null);
+  
   const [selectedYear, setSelectedYear] = useState<string>(new Date().getFullYear().toString());
   const [selectedMonth, setSelectedMonth] = useState<string>('all');
+
+  useEffect(() => {
+    const orgData = localStorage.getItem('organization');
+    if (orgData) {
+      setOrg(JSON.parse(orgData));
+    }
+  }, []);
+  
+  const { data: performanceData, isLoading } = useDataFetching<AgencyPerformanceData[] | null>(
+    () => getAgencyPerformance(org, selectedYear, selectedMonth),
+    [org, selectedYear, selectedMonth]
+  );
   
   const chartData = useMemo(() => {
     if (!performanceData) return [];
     return performanceData.map(agency => ({
         name: agency.agency_name,
+        agencyId: agency.agency_id,
         incidentResolution: agency.performance.incident_resolution,
         siteVisits: agency.performance.site_visit_accuracy,
         perimeterAccuracy: agency.performance.guard_checkin_accuracy,
@@ -77,10 +129,11 @@ export function AgencyPerformance({
   }, [performanceData]);
 
   const handleBarClick = (data: any) => {
-    // Note: To navigate, we'd need agency IDs in the performance data.
-    // This is currently just for show.
     if (data && data.activePayload && data.activePayload.length > 0) {
-      console.log("Clicked on:", data.activePayload[0].payload.name);
+      const agencyId = data.activePayload[0].payload.agencyId;
+      if (agencyId) {
+        router.push(`/towerco/agencies/${agencyId}`);
+      }
     }
   };
 
@@ -126,6 +179,11 @@ export function AgencyPerformance({
         </div>
       </CardHeader>
       <CardContent>
+        {isLoading ? (
+          <div className="flex justify-center items-center h-[300px]">
+            <Skeleton className="h-full w-full" />
+          </div>
+        ) : (
         <ChartContainer config={chartConfig} className="h-[300px] w-full">
           <ResponsiveContainer>
             <BarChart data={chartData} margin={{ top: 20 }} onClick={handleBarClick}>
@@ -170,6 +228,7 @@ export function AgencyPerformance({
             </BarChart>
           </ResponsiveContainer>
         </ChartContainer>
+        )}
       </CardContent>
     </Card>
   );

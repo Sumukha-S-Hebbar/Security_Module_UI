@@ -39,7 +39,7 @@ import { useDataFetching } from '@/hooks/useDataFetching';
 const ACTIVE_INCIDENTS_PER_PAGE = 4;
 
 // New type definitions based on the API response
-type BasicCounts = {
+export type BasicCounts = {
     active_incidents_count: number;
     total_guards_count: number;
     total_sites_count: number;
@@ -71,6 +71,7 @@ type ActiveIncident = {
 
 export type AgencyPerformanceData = {
     agency_name: string;
+    agency_id: number;
     performance: {
         incident_resolution: number;
         site_visit_accuracy: number;
@@ -114,10 +115,6 @@ interface DashboardData {
     };
     agency_performance: AgencyPerformanceData[];
     site_status: SiteStatusData;
-    incident_trend: IncidentTrendData[];
-    all_incidents?: { // Make this optional to prevent crashes
-        results: IncidentListItem[];
-    }
 }
 
 
@@ -177,7 +174,7 @@ export default function TowercoHomePage() {
   const totalActiveIncidentPages = Math.ceil((data?.active_incidents.count || 0) / ACTIVE_INCIDENTS_PER_PAGE);
 
 
-  if (isLoading) {
+  if (isLoading || !data || !org) {
     return (
       <div className="p-4 sm:p-6 lg:p-8 space-y-6">
         <div className="space-y-2">
@@ -203,14 +200,6 @@ export default function TowercoHomePage() {
         <Skeleton className="h-64 w-full" />
       </div>
     );
-  }
-
-  if (!data || !org) {
-    return (
-        <div className="p-4 sm:p-6 lg:p-8">
-            <p className="font-medium">Could not load dashboard data for your organization.</p>
-        </div>
-    )
   }
   
   const portalName = org.role === 'T' ? 'TOWERCO' : 'MNO';
@@ -350,14 +339,9 @@ export default function TowercoHomePage() {
         counts={data.basic_counts}
       />
       
-      <AgencyPerformance
-        performanceData={data.agency_performance}
-      />
-      <SiteStatusBreakdown siteStatusData={data.site_status} />
-
-      <IncidentChart
-        agencies={data.agency_performance}
-      />
+      <AgencyPerformance />
+      <SiteStatusBreakdown />
+      <IncidentChart />
     </div>
   );
 }

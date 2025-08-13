@@ -45,6 +45,7 @@ import { useDataFetching } from '@/hooks/useDataFetching';
 import { Loader2 } from 'lucide-react';
 import { Organization } from '@/types';
 import { fetchData } from '@/lib/api';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const chartConfig = {
   total: {
@@ -72,7 +73,13 @@ type PaginatedIncidentsResponse = {
     results: IncidentListItem[];
 };
 
-async function getIncidentTrend(org: Organization | null, agencyName?: string, year?: string): Promise<IncidentTrendData[] | null> {
+type DashboardData = {
+    incident_trend: IncidentTrendData[];
+    agency_performance: AgencyPerformanceData[];
+}
+
+
+async function getIncidentData(org: Organization | null, agencyName?: string, year?: string): Promise<DashboardData | null> {
   if (!org) return null;
   
   let url = `${process.env.NEXT_PUBLIC_DJANGO_API_URL}/security/api/orgs/${org.code}/security-dashboard/`;
@@ -105,7 +112,7 @@ async function getIncidentTrend(org: Organization | null, agencyName?: string, y
       throw new Error(`Failed to fetch dashboard data: ${response.statusText}`);
     }
     const data = await response.json();
-    return data.incident_trend || [];
+    return data;
   } catch (error) {
     console.error('Could not fetch incident trend data:', error);
     return null;
@@ -113,11 +120,7 @@ async function getIncidentTrend(org: Organization | null, agencyName?: string, y
 }
 
 
-export function IncidentChart({
-  agencies,
-}: {
-  agencies: AgencyPerformanceData[];
-}) {
+export function IncidentChart() {
   const router = useRouter();
   const [org, setOrg] = useState<Organization | null>(null);
   
@@ -138,10 +141,13 @@ export function IncidentChart({
     }
   }, []);
 
-  const { data: incidentTrend, isLoading } = useDataFetching<IncidentTrendData[] | null>(
-    () => getIncidentTrend(org, selectedAgency, selectedYear),
+  const { data: dashboardData, isLoading } = useDataFetching<DashboardData | null>(
+    () => getIncidentData(org, selectedAgency, selectedYear),
     [org, selectedAgency, selectedYear]
   );
+  
+  const incidentTrend = dashboardData?.incident_trend;
+  const agencies = dashboardData?.agency_performance || [];
 
   const monthlyIncidentData = useMemo(() => {
     if (!incidentTrend) return [];
@@ -293,7 +299,7 @@ export function IncidentChart({
       <CardContent className="pt-4">
         {isLoading ? (
           <div className="flex justify-center items-center h-[300px]">
-            <Loader2 className="h-8 w-8 animate-spin" />
+            <Skeleton className="h-full w-full" />
           </div>
         ) : (
         <ChartContainer config={chartConfig} className="h-[300px] w-full">
@@ -373,13 +379,13 @@ export function IncidentChart({
                   }}
               />
               <ChartLegend content={<ChartLegendContent />} />
-              <Bar yAxisId="left" dataKey="total" fill="var(--color-total)" radius={4} cursor="pointer" onClick={handleBarClick} opacity={hoveredBar && hoveredBar !== monthlyIncidentData.find(d => d.month === hoveredBar)?.month ? 0.5 : 1}>
+              <Bar yAxisId="left" dataKey="total" fill="var(--color-total)" radius={4} cursor="pointer" onClick={(data, index) => handleBarClick(data, index)} opacity={hoveredBar && hoveredBar !== monthlyIncidentData.find(d => d.month === hoveredBar)?.month ? 0.5 : 1}>
                   <LabelList dataKey="total" position="top" offset={5} fontSize={12} />
               </Bar>
-              <Bar yAxisId="left" dataKey="resolved" fill="var(--color-resolved)" radius={4} cursor="pointer" onClick={handleBarClick} opacity={hoveredBar && hoveredBar !== monthlyIncidentData.find(d => d.month === hoveredBar)?.month ? 0.5 : 1}>
+              <Bar yAxisId="left" dataKey="resolved" fill="var(--color-resolved)" radius={4} cursor="pointer" onClick={(data, index) => handleBarClick(data, index)} opacity={hoveredBar && hoveredBar !== monthlyIncidentData.find(d => d.month === hoveredBar)?.month ? 0.5 : 1}>
                   <LabelList dataKey="resolved" position="top" offset={5} fontSize={12} />
               </Bar>
-              <Bar yAxisId="left" dataKey="underReview" fill="var(--color-underReview)" radius={4} cursor="pointer" onClick={handleBarClick} opacity={hoveredBar && hoveredBar !== monthlyIncidentData.find(d => d.month === hoveredBar)?.month ? 0.5 : 1}>
+              <Bar yAxisId="left" dataKey="underReview" fill="var(--color-underReview)" radius={4} cursor="pointer" onClick={(data, index) => handleBarClick(data, index)} opacity={hoveredBar && hoveredBar !== monthlyIncidentData.find(d => d.month === hoveredBar)?.month ? 0.5 : 1}>
                   <LabelList dataKey="underReview" position="top" offset={5} fontSize={12} />
               </Bar>
               <Line yAxisId="right" type="monotone" dataKey="avgClosure" stroke="var(--color-avgClosure)" strokeWidth={2} dot={{ r: 4 }}>
