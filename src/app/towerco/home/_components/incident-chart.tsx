@@ -393,5 +393,3 @@ export function IncidentChart({
     </Card>
   );
 }
-
-    
