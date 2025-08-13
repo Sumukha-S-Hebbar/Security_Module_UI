@@ -191,13 +191,14 @@ export function IncidentChart({
     }
   }, [org, selectedYear, selectedAgency]);
 
-  const handleBarClick = useCallback((index: number) => {
-    if (selectedMonthIndex === index) {
+  const handleBarClick = useCallback((data: any, index: number) => {
+    const monthIndex = index;
+    if (selectedMonthIndex === monthIndex) {
       setSelectedMonthIndex(null);
       setIncidentsInSelectedMonth([]);
     } else {
-      setSelectedMonthIndex(index);
-      fetchMonthIncidents(index);
+      setSelectedMonthIndex(monthIndex);
+      fetchMonthIncidents(monthIndex);
     }
   }, [selectedMonthIndex, fetchMonthIncidents]);
 
@@ -372,13 +373,13 @@ export function IncidentChart({
                   }}
               />
               <ChartLegend content={<ChartLegendContent />} />
-              <Bar yAxisId="left" dataKey="total" fill="var(--color-total)" radius={4} cursor="pointer" onClick={(_, index) => handleBarClick(index)} opacity={hoveredBar && hoveredBar !== monthlyIncidentData.find(d => d.month === hoveredBar)?.month ? 0.5 : 1}>
+              <Bar yAxisId="left" dataKey="total" fill="var(--color-total)" radius={4} cursor="pointer" onClick={handleBarClick} opacity={hoveredBar && hoveredBar !== monthlyIncidentData.find(d => d.month === hoveredBar)?.month ? 0.5 : 1}>
                   <LabelList dataKey="total" position="top" offset={5} fontSize={12} />
               </Bar>
-              <Bar yAxisId="left" dataKey="resolved" fill="var(--color-resolved)" radius={4} cursor="pointer" onClick={(_, index) => handleBarClick(index)} opacity={hoveredBar && hoveredBar !== monthlyIncidentData.find(d => d.month === hoveredBar)?.month ? 0.5 : 1}>
+              <Bar yAxisId="left" dataKey="resolved" fill="var(--color-resolved)" radius={4} cursor="pointer" onClick={handleBarClick} opacity={hoveredBar && hoveredBar !== monthlyIncidentData.find(d => d.month === hoveredBar)?.month ? 0.5 : 1}>
                   <LabelList dataKey="resolved" position="top" offset={5} fontSize={12} />
               </Bar>
-              <Bar yAxisId="left" dataKey="underReview" fill="var(--color-underReview)" radius={4} cursor="pointer" onClick={(_, index) => handleBarClick(index)} opacity={hoveredBar && hoveredBar !== monthlyIncidentData.find(d => d.month === hoveredBar)?.month ? 0.5 : 1}>
+              <Bar yAxisId="left" dataKey="underReview" fill="var(--color-underReview)" radius={4} cursor="pointer" onClick={handleBarClick} opacity={hoveredBar && hoveredBar !== monthlyIncidentData.find(d => d.month === hoveredBar)?.month ? 0.5 : 1}>
                   <LabelList dataKey="underReview" position="top" offset={5} fontSize={12} />
               </Bar>
               <Line yAxisId="right" type="monotone" dataKey="avgClosure" stroke="var(--color-avgClosure)" strokeWidth={2} dot={{ r: 4 }}>
@@ -418,10 +419,10 @@ export function IncidentChart({
                                 <TableRow 
                                   key={incident.id}
                                   onClick={() => router.push(`/towerco/incidents/${incident.id}`)}
-                                  className="cursor-pointer"
+                                  className="cursor-pointer hover:bg-accent hover:text-accent-foreground group"
                                 >
                                     <TableCell>
-                                        <Button asChild variant="link" className="p-0 h-auto" onClick={(e) => e.stopPropagation()}>
+                                        <Button asChild variant="link" className="p-0 h-auto font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
                                           <Link href={`/towerco/incidents/${incident.id}`}>{incident.incident_id}</Link>
                                         </Button>
                                     </TableCell>
