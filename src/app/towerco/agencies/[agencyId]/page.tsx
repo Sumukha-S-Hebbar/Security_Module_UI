@@ -566,10 +566,11 @@ export default function AgencyReportPage() {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="text-foreground">Towerbuddy ID</TableHead>
                   <TableHead className="text-foreground">Site ID</TableHead>
                   <TableHead className="text-foreground">Site</TableHead>
                   <TableHead className="text-foreground">Assigned On</TableHead>
-                  <TableHead className="text-center text-foreground">Guards</TableHead>
+                  <TableHead className="text-center text-foreground">Guards Requested</TableHead>
                   <TableHead className="text-center text-foreground">Incidents</TableHead>
                   <TableHead className="text-center text-foreground">Resolved</TableHead>
                 </TableRow>
@@ -577,10 +578,13 @@ export default function AgencyReportPage() {
               <TableBody>
                 {assigned_sites.map((site) => (
                     <TableRow key={site.id} onClick={() => router.push(`/towerco/sites/${site.id}`)} className="cursor-pointer hover:bg-accent hover:text-accent-foreground group">
-                       <TableCell>
+                        <TableCell>
                           <Button asChild variant="link" className="p-0 h-auto font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
-                            <Link href={`/towerco/sites/${site.id}`}>{site.org_site_id}</Link>
+                            <Link href={`/towerco/sites/${site.id}`}>{site.tb_site_id}</Link>
                           </Button>
+                        </TableCell>
+                       <TableCell className="font-medium">
+                          {site.org_site_id}
                         </TableCell>
                       <TableCell>
                         <div className="font-medium">{site.site_name}</div>
