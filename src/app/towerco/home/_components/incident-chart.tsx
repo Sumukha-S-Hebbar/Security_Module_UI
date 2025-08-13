@@ -41,6 +41,10 @@ import { Button } from '@/components/ui/button';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, LabelList, LineChart, Line, ResponsiveContainer } from 'recharts';
 import { useRouter } from 'next/navigation';
 import type { IncidentTrendData, IncidentListItem } from '../page';
+import { useDataFetching } from '@/hooks/useDataFetching';
+import { Loader2 } from 'lucide-react';
+import { Organization } from '@/types';
+import { fetchData } from '@/lib/api';
 
 const chartConfig = {
   total: {
@@ -61,15 +65,23 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
+type PaginatedIncidentsResponse = {
+    count: number;
+    next: string | null;
+    previous: string | null;
+    results: IncidentListItem[];
+};
+
 
 export function IncidentChart({
   incidentTrend,
-  incidents,
+  initialIncidents,
 }: {
   incidentTrend: IncidentTrendData[];
-  incidents: IncidentListItem[];
+  initialIncidents: IncidentListItem[];
 }) {
   const router = useRouter();
+  const [org, setOrg] = useState<Organization | null>(null);
 
   const [selectedYear, setSelectedYear] = useState<string>(
     new Date().getFullYear().toString()
@@ -78,6 +90,16 @@ export function IncidentChart({
   const [selectedMonthIndex, setSelectedMonthIndex] = useState<number | null>(null);
   const [hoveredBar, setHoveredBar] = useState<string | null>(null);
   const collapsibleRef = useRef<HTMLDivElement>(null);
+  
+  const [incidentsInSelectedMonth, setIncidentsInSelectedMonth] = useState<IncidentListItem[]>([]);
+  const [isDetailsLoading, setIsDetailsLoading] = useState(false);
+
+  useEffect(() => {
+    const orgData = localStorage.getItem('organization');
+    if (orgData) {
+      setOrg(JSON.parse(orgData));
+    }
+  }, []);
 
   const monthlyIncidentData = useMemo(() => {
     if (!incidentTrend) return [];
@@ -91,22 +113,35 @@ export function IncidentChart({
     }));
   }, [incidentTrend]);
   
-  const incidentsInSelectedMonth = useMemo(() => {
-    if (selectedMonthIndex === null || !incidents) return [];
-    
-    return incidents.filter(incident => {
-        const incidentDate = new Date(incident.incident_time);
-        const yearMatch = incidentDate.getFullYear().toString() === selectedYear;
-        const monthMatch = incidentDate.getMonth() === selectedMonthIndex;
-        return yearMatch && monthMatch;
-    });
-  }, [selectedMonthIndex, selectedYear, incidents]);
+
+  const fetchMonthIncidents = async (monthIndex: number) => {
+    if (org === null) return;
+    setIsDetailsLoading(true);
+
+    const token = localStorage.getItem('token');
+    const month = monthIndex + 1;
+    const url = `/security/api/orgs/${org.code}/incidents/list/?year=${selectedYear}&month=${month}`;
+
+    try {
+        const data = await fetchData<PaginatedIncidentsResponse>(url, {
+            headers: { 'Authorization': `Token ${token}` }
+        });
+        setIncidentsInSelectedMonth(data?.results || []);
+    } catch(e) {
+        console.error("Failed to fetch incidents for month", e);
+        setIncidentsInSelectedMonth([]);
+    } finally {
+        setIsDetailsLoading(false);
+    }
+  }
 
   const handleBarClick = (data: any, index: number) => {
     if (selectedMonthIndex === index) {
-      setSelectedMonthIndex(null); // Collapse if clicking the same month
+      setSelectedMonthIndex(null);
+      setIncidentsInSelectedMonth([]);
     } else {
       setSelectedMonthIndex(index);
+      fetchMonthIncidents(index);
     }
   };
 
@@ -295,7 +330,11 @@ export function IncidentChart({
                 </CardTitle>
             </CardHeader>
             <CardContent>
-                {incidentsInSelectedMonth.length > 0 ? (
+                {isDetailsLoading ? (
+                    <div className="flex justify-center items-center h-24">
+                        <Loader2 className="h-6 w-6 animate-spin" />
+                    </div>
+                ) : incidentsInSelectedMonth.length > 0 ? (
                     <Table>
                         <TableHeader>
                             <TableRow>

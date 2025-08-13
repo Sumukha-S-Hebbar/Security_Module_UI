@@ -115,7 +115,7 @@ interface DashboardData {
     agency_performance: AgencyPerformanceData[];
     site_status: SiteStatusData;
     incident_trend: IncidentTrendData[];
-    all_incidents: {
+    all_incidents?: { // Make this optional to prevent crashes
         results: IncidentListItem[];
     }
 }
@@ -354,7 +354,7 @@ export default function TowercoHomePage() {
 
       <IncidentChart
         incidentTrend={data.incident_trend}
-        incidents={data.all_incidents.results}
+        initialIncidents={data.all_incidents?.results || []}
       />
     </div>
   );
