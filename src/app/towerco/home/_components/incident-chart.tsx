@@ -75,10 +75,8 @@ type PaginatedIncidentsResponse = {
 
 export function IncidentChart({
   incidentTrend,
-  initialIncidents,
 }: {
   incidentTrend: IncidentTrendData[];
-  initialIncidents: IncidentListItem[];
 }) {
   const router = useRouter();
   const [org, setOrg] = useState<Organization | null>(null);
@@ -326,7 +324,7 @@ export function IncidentChart({
         <CollapsibleContent>
             <CardHeader>
                 <CardTitle>
-                    Incidents in {selectedMonthIndex !== null ? monthlyIncidentData[selectedMonthIndex].month : ''} {selectedYear}
+                    Incidents in {selectedMonthIndex !== null && monthlyIncidentData.length > selectedMonthIndex ? monthlyIncidentData[selectedMonthIndex].month : ''} {selectedYear}
                 </CardTitle>
             </CardHeader>
             <CardContent>
