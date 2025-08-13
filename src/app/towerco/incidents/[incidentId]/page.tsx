@@ -412,22 +412,28 @@ export default function IncidentReportPage() {
             </CardContent>
           </Card>
         )}
-        {incident.raised_by_guard_details && (
-          <Card className="xl:col-span-1">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <User className="h-5 w-5 text-primary" />
-                Guard Details
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="text-sm space-y-2">
-              <div>
-                <div className="text-xl font-bold">{`${incident.raised_by_guard_details.first_name} ${incident.raised_by_guard_details.last_name || ''}`}</div>
-              </div>
-              <div className="flex items-center gap-2 font-medium pt-2 border-t"><Phone className="h-4 w-4" /> <a href={`tel:${incident.raised_by_guard_details.phone}`} className="hover:underline">{incident.raised_by_guard_details.phone}</a></div>
-            </CardContent>
-          </Card>
-        )}
+        
+        <Card className="xl:col-span-1">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <User className="h-5 w-5 text-primary" />
+              Guard Details
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="text-sm space-y-2">
+            {incident.raised_by_guard_details ? (
+              <>
+                <div>
+                  <div className="text-xl font-bold">{`${incident.raised_by_guard_details.first_name} ${incident.raised_by_guard_details.last_name || ''}`}</div>
+                </div>
+                <div className="flex items-center gap-2 font-medium pt-2 border-t"><Phone className="h-4 w-4" /> <a href={`tel:${incident.raised_by_guard_details.phone}`} className="hover:underline">{incident.raised_by_guard_details.phone}</a></div>
+              </>
+            ) : (
+              <p className="text-muted-foreground font-medium text-center py-8">Not available.</p>
+            )}
+          </CardContent>
+        </Card>
+
         <Card className="xl:col-span-1">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
