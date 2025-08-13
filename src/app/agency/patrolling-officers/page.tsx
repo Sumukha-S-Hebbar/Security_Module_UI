@@ -226,7 +226,7 @@ export default function AgencyPatrollingOfficersPage() {
                                 Add Patrolling Officer
                             </Button>
                         </DialogTrigger>
-                        <DialogContent>
+                        <DialogContent className="sm:max-w-2xl">
                             <DialogHeader>
                                 <DialogTitle>Add a New Patrolling Officer</DialogTitle>
                                 <DialogDescription className="font-medium">
