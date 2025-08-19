@@ -1,11 +1,9 @@
 
 
-
-import type { Incident } from './incident';
-import type { SecurityAgency } from './security-agency';
+import type { Guard, PatrollingOfficer } from '@/types';
 
 export type Site = {
-  id: string; // The database primary key
+  id: number; // The database primary key
   tb_site_id: string; // The unique Tower Buddy site ID
   org_site_id: string; // The organization-specific site ID
   org_name?: string;
@@ -34,6 +32,10 @@ export type Site = {
   total_guards_requested?: number;
   total_guards_assigned?: number;
   
+  guard_details: (Partial<Guard> & { profile_picture?: string })[];
+  patrol_officer_details: (Partial<PatrollingOfficer> & {id: number, first_name: string, last_name: string | null, email: string, phone: string, profile_picture?: string})[];
+
+
   // These fields were in the mock data and may or may not be in the final API.
   // Kept for potential compatibility or future use.
   guards?: string[];

@@ -1,4 +1,5 @@
 
+
 // A simple data fetching function
 export async function fetchData<T>(url: string, options?: RequestInit): Promise<T | null> {
     try {
@@ -8,7 +9,8 @@ export async function fetchData<T>(url: string, options?: RequestInit): Promise<
         const response = await fetch(fullUrl, options);
 
         if (!response.ok) {
-            console.error(`API Error: ${response.status} ${response.statusText}`);
+            const errorText = await response.text();
+            console.error(`API Error: ${response.status} ${response.statusText}`, errorText);
             // You could throw an error here to be caught by the caller
             return null;
         }
