@@ -292,6 +292,7 @@ export default function AgencySitesPage() {
     const guardsNotInCity = unassignedGuards.filter(guard => guard.city !== site.city);
 
     const renderItems = (guardList: Guard[]) => guardList.map((guard) => {
+        const guardName = `${guard.first_name} ${guard.last_name || ''}`.trim();
         const isChecked = assignment[site.id.toString()]?.guardIds?.includes(guard.id.toString());
         return (
           <DropdownMenuCheckboxItem
@@ -300,7 +301,7 @@ export default function AgencySitesPage() {
             onSelect={(e) => e.preventDefault()}
             onCheckedChange={() => handleGuardSelect(site.id.toString(), guard.id.toString())}
           >
-            {guard.name}
+            {guardName}
           </DropdownMenuCheckboxItem>
         )
       });
@@ -333,15 +334,17 @@ export default function AgencySitesPage() {
      const officersInCity = patrollingOfficers.filter(po => po.city === site.city);
      const officersNotInCity = patrollingOfficers.filter(po => po.city !== site.city);
      
-     const renderItems = (officerList: PatrollingOfficer[]) => officerList.map((po) => (
+     const renderItems = (officerList: PatrollingOfficer[]) => officerList.map((po) => {
+       const officerName = `${po.first_name} ${po.last_name || ''}`.trim();
+       return (
         <SelectItem
           key={po.id}
           value={po.id.toString()}
           className="font-medium"
         >
-          {po.name}
+          {officerName}
         </SelectItem>
-     ));
+     )});
 
      return (
         <SelectContent>
@@ -563,6 +566,7 @@ export default function AgencySitesPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead className="text-foreground">Towerbuddy ID</TableHead>
+                  <TableHead className="text-foreground">Site ID</TableHead>
                   <TableHead className="text-foreground">Site</TableHead>
                   <TableHead className="text-foreground">Assign Guards</TableHead>
                   <TableHead className="text-foreground">Assign Patrolling Officer</TableHead>
@@ -575,6 +579,9 @@ export default function AgencySitesPage() {
                   <TableRow key={site.id}>
                      <TableCell className="font-medium">
                       {site.tb_site_id}
+                    </TableCell>
+                     <TableCell className="font-medium">
+                      {site.org_site_id}
                     </TableCell>
                     <TableCell className="align-top py-4">
                       <div className="font-medium">{site.site_name}</div>
@@ -639,6 +646,7 @@ export default function AgencySitesPage() {
     </div>
   );
 }
+
 
 
 
