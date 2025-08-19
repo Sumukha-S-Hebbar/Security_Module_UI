@@ -32,7 +32,7 @@ import {
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { FileDown, Upload, Loader2, Search, PlusCircle, ShieldAlert, Phone } from 'lucide-react';
+import { FileDown, Upload, Loader2, Search, PlusCircle, ShieldAlert, Phone, Mail } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -458,9 +458,19 @@ export default function AgencyGuardsPage() {
                             <p className="font-medium">{guardName}</p>
                         </TableCell>
                         <TableCell>
-                           <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                <Phone className="h-4 w-4 flex-shrink-0" />
-                                <a href={`tel:${guard.phone}`} className="hover:underline font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>{guard.phone}</a>
+                           <div className="space-y-1">
+                                {guard.email && (
+                                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                        <Mail className="h-4 w-4 flex-shrink-0" />
+                                        <a href={`mailto:${guard.email}`} className="hover:underline font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>{guard.email}</a>
+                                    </div>
+                                )}
+                                {guard.phone && (
+                                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                        <Phone className="h-4 w-4 flex-shrink-0" />
+                                        <a href={`tel:${guard.phone}`} className="hover:underline font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>{guard.phone}</a>
+                                    </div>
+                                )}
                             </div>
                         </TableCell>
                         <TableCell>

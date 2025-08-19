@@ -8,6 +8,7 @@ export type Guard = {
   first_name: string;
   last_name: string | null;
   phone: string;
+  email: string;
   profile_picture?: string | null;
   site: (Omit<Site, 'guards' | 'patrollingOfficerId'> & { id: number, site_name: string }) | null;
   patrolling_officer: {
