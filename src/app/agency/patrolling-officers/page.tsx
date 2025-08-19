@@ -1,15 +1,11 @@
 
 'use client';
 
-import { useState, useMemo, Fragment } from 'react';
+import { useState, useMemo, Fragment, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { patrollingOfficers } from '@/lib/data/patrolling-officers';
-import { guards } from '@/lib/data/guards';
-import { sites } from '@/lib/data/sites';
-import { incidents } from '@/lib/data/incidents';
-import type { PatrollingOfficer, Site } from '@/types';
+import type { PatrollingOfficer as PatrollingOfficerType, Site, Organization } from '@/types';
 import {
   Card,
   CardContent,
@@ -42,11 +38,27 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Progress } from '@/components/ui/progress';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
+import { fetchData } from '@/lib/api';
+import { Skeleton } from '@/components/ui/skeleton';
 
-const LOGGED_IN_AGENCY_ID = 'AGY01'; // Simulate logged-in agency
+type ApiPatrollingOfficer = {
+    id: number;
+    employee_id: string;
+    first_name: string;
+    last_name: string | null;
+    email: string;
+    sites_assigned_count: number;
+    site_details: {
+        id: number;
+        tb_site_id: string;
+        org_site_id: string;
+        site_name: string;
+    } | null;
+    incidents_count: number;
+    assigned_sites_details?: any[]; // Keep this for expand logic
+};
 
 const uploadFormSchema = z.object({
   excelFile: z
@@ -64,28 +76,46 @@ const addPatrollingOfficerFormSchema = z.object({
 export default function AgencyPatrollingOfficersPage() {
     const { toast } = useToast();
     const router = useRouter();
+    const [patrollingOfficers, setPatrollingOfficers] = useState<ApiPatrollingOfficer[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [loggedInOrg, setLoggedInOrg] = useState<Organization | null>(null);
+
     const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
     const [isAdding, setIsAdding] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
-    const [expandedOfficerId, setExpandedOfficerId] = useState<string | null>(null);
+    const [expandedOfficerId, setExpandedOfficerId] = useState<number | null>(null);
 
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const orgData = localStorage.getItem('organization');
+            if (orgData) {
+                setLoggedInOrg(JSON.parse(orgData));
+            }
+        }
+    }, []);
 
-    // In a real app, you'd fetch officers belonging to the logged-in agency.
-    // For this prototype, we'll assume all officers are available to the agency.
-    const agencyPatrollingOfficers = patrollingOfficers;
+    const fetchPatrollingOfficers = useCallback(async () => {
+        if (!loggedInOrg) return;
+        setIsLoading(true);
+        const token = localStorage.getItem('token');
+        const url = `/security/api/agency/${loggedInOrg.code}/patrol_officers/list/`;
+        try {
+            const data = await fetchData<{ results: ApiPatrollingOfficer[] }>(url, {
+                headers: { 'Authorization': `Token ${token}` }
+            });
+            setPatrollingOfficers(data?.results || []);
+        } catch (error) {
+            toast({ variant: 'destructive', title: 'Error', description: 'Failed to load patrolling officers.' });
+        } finally {
+            setIsLoading(false);
+        }
+    }, [loggedInOrg, toast]);
 
-    const agencySites = useMemo(() => sites.filter(site => site.agencyId === LOGGED_IN_AGENCY_ID), []);
-
-    const getAssignedSitesForPO = (patrollingOfficerId: string) => {
-        return agencySites.filter(s => s.patrollingOfficerId === patrollingOfficerId);
-    }
-    
-    const getIncidentCountForPO = (patrollingOfficerId: string) => {
-      const officerSiteIds = new Set(getAssignedSitesForPO(patrollingOfficerId).map(s => s.id));
-      return incidents.filter(i => officerSiteIds.has(i.siteId)).length;
-    };
+    useEffect(() => {
+        fetchPatrollingOfficers();
+    }, [fetchPatrollingOfficers]);
 
     const uploadForm = useForm<z.infer<typeof uploadFormSchema>>({
         resolver: zodResolver(uploadFormSchema),
@@ -120,6 +150,7 @@ export default function AgencyPatrollingOfficersPage() {
         addForm.reset();
         setIsAdding(false);
         setIsAddDialogOpen(false);
+        // fetchPatrollingOfficers(); // Re-fetch after adding
     }
 
     const handleDownloadTemplate = () => {
@@ -130,21 +161,22 @@ export default function AgencyPatrollingOfficersPage() {
     }
 
     const filteredPatrollingOfficers = useMemo(() => {
-        return agencyPatrollingOfficers.filter((po) =>
-            po.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        return patrollingOfficers.filter((po) => {
+            const name = `${po.first_name} ${po.last_name || ''}`.trim();
+            return name.toLowerCase().includes(searchQuery.toLowerCase()) ||
             po.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            po.phone.includes(searchQuery)
-        );
-    }, [searchQuery, agencyPatrollingOfficers]);
+            po.employee_id.includes(searchQuery)
+        });
+    }, [searchQuery, patrollingOfficers]);
 
-    const handleRowClick = (officerId: string) => {
+    const handleRowClick = (officerId: number) => {
         router.push(`/agency/patrolling-officers/${officerId}`);
     };
 
-    const handleExpandClick = (e: React.MouseEvent, officerId: string) => {
+    const handleExpandClick = (e: React.MouseEvent, officer: ApiPatrollingOfficer) => {
         e.stopPropagation();
-        setExpandedOfficerId(prevId => prevId === officerId ? null : officerId);
-    }
+        setExpandedOfficerId(prevId => (prevId === officer.id ? null : officer.id));
+    };
 
     return (
       <>
@@ -313,6 +345,13 @@ export default function AgencyPatrollingOfficersPage() {
                     </div>
                 </CardHeader>
                 <CardContent>
+                    {isLoading ? (
+                        <div className="space-y-2">
+                           <Skeleton className="h-12 w-full" />
+                           <Skeleton className="h-12 w-full" />
+                           <Skeleton className="h-12 w-full" />
+                        </div>
+                    ) : (
                   <Table>
                     <TableHeader>
                       <TableRow>
@@ -326,9 +365,8 @@ export default function AgencyPatrollingOfficersPage() {
                     <TableBody>
                         {filteredPatrollingOfficers.length > 0 ? (
                             filteredPatrollingOfficers.map((patrollingOfficer) => {
-                                const assignedSites = getAssignedSitesForPO(patrollingOfficer.id);
-                                const incidentCount = getIncidentCountForPO(patrollingOfficer.id);
                                 const isExpanded = expandedOfficerId === patrollingOfficer.id;
+                                const officerName = `${patrollingOfficer.first_name} ${patrollingOfficer.last_name || ''}`.trim();
                                 
                                 return (
                                 <Fragment key={patrollingOfficer.id}>
@@ -338,23 +376,18 @@ export default function AgencyPatrollingOfficersPage() {
                                     >
                                     <TableCell>
                                         <Button asChild variant="link" className="p-0 h-auto font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
-                                        <Link href={`/agency/patrolling-officers/${patrollingOfficer.id}`}>{patrollingOfficer.id}</Link>
+                                        <Link href={`/agency/patrolling-officers/${patrollingOfficer.id}`}>{patrollingOfficer.employee_id}</Link>
                                         </Button>
                                     </TableCell>
                                     <TableCell>
                                         <div className="flex items-center gap-3">
                                             <Avatar className="h-10 w-10">
-                                                <AvatarImage src={patrollingOfficer.avatar} alt={patrollingOfficer.name} />
-                                                <AvatarFallback>{patrollingOfficer.name.charAt(0)}</AvatarFallback>
+                                                <AvatarFallback>{officerName.charAt(0)}</AvatarFallback>
                                             </Avatar>
-                                            <p className="font-medium">{patrollingOfficer.name}</p>
+                                            <p className="font-medium">{officerName}</p>
                                         </div>
                                     </TableCell>
                                     <TableCell>
-                                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                            <Phone className="h-4 w-4 flex-shrink-0" />
-                                            <a href={`tel:${patrollingOfficer.phone}`} className="hover:underline font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>{patrollingOfficer.phone}</a>
-                                        </div>
                                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                             <Mail className="h-4 w-4 flex-shrink-0" />
                                             <a href={`mailto:${patrollingOfficer.email}`} className="truncate hover:underline font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
@@ -366,12 +399,12 @@ export default function AgencyPatrollingOfficersPage() {
                                       <Button
                                         variant="link"
                                         className="p-0 h-auto flex items-center gap-2 text-accent group-hover:text-accent-foreground"
-                                        onClick={(e) => handleExpandClick(e, patrollingOfficer.id)}
-                                        disabled={assignedSites.length === 0}
+                                        onClick={(e) => handleExpandClick(e, patrollingOfficer)}
+                                        disabled={patrollingOfficer.sites_assigned_count === 0}
                                         >
                                             <Building2 className="h-4 w-4" />
-                                            {assignedSites.length}
-                                            {assignedSites.length > 0 && (
+                                            {patrollingOfficer.sites_assigned_count}
+                                            {patrollingOfficer.sites_assigned_count > 0 && (
                                                 <ChevronDown className={cn("h-4 w-4 transition-transform", isExpanded && "rotate-180")} />
                                             )}
                                         </Button>
@@ -379,27 +412,26 @@ export default function AgencyPatrollingOfficersPage() {
                                     <TableCell>
                                         <div className="flex items-center gap-2 text-sm">
                                             <ShieldAlert className="h-4 w-4 flex-shrink-0 text-muted-foreground group-hover:text-accent-foreground" />
-                                            <span className="font-medium">{incidentCount}</span>
+                                            <span className="font-medium">{patrollingOfficer.incidents_count}</span>
                                         </div>
                                     </TableCell>
                                     </TableRow>
-                                    {isExpanded && (
+                                    {isExpanded && patrollingOfficer.assigned_sites_details && (
                                         <TableRow className="bg-muted/50 hover:bg-muted/50">
                                             <TableCell colSpan={5} className="p-0">
                                                 <div className="p-4">
-                                                    <h4 className="font-semibold mb-2">Sites Assigned to {patrollingOfficer.name}</h4>
-                                                    {assignedSites.length > 0 ? (
+                                                    <h4 className="font-semibold mb-2">Sites Assigned to {officerName}</h4>
+                                                    {patrollingOfficer.assigned_sites_details.length > 0 ? (
                                                         <Table>
                                                             <TableHeader>
                                                                 <TableRow>
                                                                     <TableHead>Towerbuddy ID</TableHead>
                                                                     <TableHead>Site ID</TableHead>
                                                                     <TableHead>Site Name</TableHead>
-                                                                    <TableHead>Address</TableHead>
                                                                 </TableRow>
                                                             </TableHeader>
                                                             <TableBody>
-                                                                {assignedSites.map((site) => (
+                                                                {patrollingOfficer.assigned_sites_details.map((site: any) => (
                                                                     <TableRow 
                                                                     key={site.id} 
                                                                     onClick={() => router.push(`/agency/sites/${site.id}`)}
@@ -412,7 +444,6 @@ export default function AgencyPatrollingOfficersPage() {
                                                                         </TableCell>
                                                                         <TableCell className="font-medium">{site.org_site_id}</TableCell>
                                                                         <TableCell>{site.site_name}</TableCell>
-                                                                        <TableCell>{site.site_address_line1}</TableCell>
                                                                     </TableRow>
                                                                 ))}
                                                             </TableBody>
@@ -437,6 +468,7 @@ export default function AgencyPatrollingOfficersPage() {
                         )}
                     </TableBody>
                   </Table>
+                    )}
                 </CardContent>
             </Card>
         </div>
