@@ -14,7 +14,6 @@ import {
   CardDescription,
   CardFooter
 } from '@/components/ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Users, Phone, Building2, Upload, PlusCircle, Loader2, Search, Mail, Eye, FileDown, ShieldAlert, ChevronDown } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -411,12 +410,12 @@ export default function AgencyPatrollingOfficersPage() {
                                         </div>
                                     </TableCell>
                                     </TableRow>
-                                    {isExpanded && patrollingOfficer.assigned_sites_details && (
+                                    {isExpanded && patrollingOfficer.site_details && (
                                         <TableRow className="bg-muted/50 hover:bg-muted/50">
                                             <TableCell colSpan={5} className="p-0">
                                                 <div className="p-4">
                                                     <h4 className="font-semibold mb-2">Sites Assigned to {officerName}</h4>
-                                                    {patrollingOfficer.assigned_sites_details.length > 0 ? (
+                                                    {patrollingOfficer.assigned_sites_details && patrollingOfficer.assigned_sites_details.length > 0 ? (
                                                         <Table>
                                                             <TableHeader>
                                                                 <TableRow>
