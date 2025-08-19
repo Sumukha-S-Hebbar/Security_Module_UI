@@ -380,12 +380,7 @@ export default function AgencyPatrollingOfficersPage() {
                                         </Button>
                                     </TableCell>
                                     <TableCell>
-                                        <div className="flex items-center gap-3">
-                                            <Avatar className="h-10 w-10">
-                                                <AvatarFallback>{officerName.charAt(0)}</AvatarFallback>
-                                            </Avatar>
-                                            <p className="font-medium">{officerName}</p>
-                                        </div>
+                                        <p className="font-medium">{officerName}</p>
                                     </TableCell>
                                     <TableCell>
                                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
