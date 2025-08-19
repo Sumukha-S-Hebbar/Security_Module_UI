@@ -13,16 +13,16 @@ export function IncidentStatusSummary({
   onStatusSelect,
   selectedStatus,
 }: { 
-  incidents: Incident[];
+  incidents: any[]; // Using any to accept API response structure
   onStatusSelect: (status: string) => void;
   selectedStatus: string;
 }) {
   const summary = useMemo(() => {
     return incidents.reduce(
       (acc, incident) => {
-        if (incident.status === 'Active') acc.active++;
-        if (incident.status === 'Under Review') acc.underReview++;
-        if (incident.status === 'Resolved') acc.resolved++;
+        if (incident.incident_status === 'Active') acc.active++;
+        if (incident.incident_status === 'Under Review') acc.underReview++;
+        if (incident.incident_status === 'Resolved') acc.resolved++;
         return acc;
       },
       { active: 0, underReview: 0, resolved: 0 }
