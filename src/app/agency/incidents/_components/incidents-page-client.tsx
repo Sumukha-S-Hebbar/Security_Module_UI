@@ -320,7 +320,8 @@ export function IncidentsPageClient() {
               <TableHeader>
                 <TableRow>
                   <TableHead className="text-foreground">Incident ID</TableHead>
-                  <TableHead className="text-foreground">Date & Time</TableHead>
+                  <TableHead className="text-foreground">Incident Date</TableHead>
+                  <TableHead className="text-foreground">Incident Time</TableHead>
                   <TableHead className="text-foreground">Site</TableHead>
                   <TableHead className="text-foreground">Guard</TableHead>
                   <TableHead className="text-foreground">Patrolling Officer</TableHead>
@@ -340,7 +341,8 @@ export function IncidentsPageClient() {
                           <Link href={`/agency/incidents/${incident.id}`}>{incident.incident_id}</Link>
                         </Button>
                       </TableCell>
-                      <TableCell className="font-medium">{new Date(incident.incident_time).toLocaleString()}</TableCell>
+                      <TableCell className="font-medium">{new Date(incident.incident_time).toLocaleDateString()}</TableCell>
+                      <TableCell className="font-medium">{new Date(incident.incident_time).toLocaleTimeString()}</TableCell>
                       <TableCell className="font-medium">{incident.site_name || 'N/A'}</TableCell>
                       <TableCell className="font-medium">{incident.guard_name || 'N/A'}</TableCell>
                       <TableCell className="font-medium">
@@ -352,7 +354,7 @@ export function IncidentsPageClient() {
                 ) : (
                   <TableRow>
                     <TableCell
-                      colSpan={6}
+                      colSpan={7}
                       className="text-center text-muted-foreground font-medium py-10"
                     >
                       No incidents found for the current filter.
