@@ -48,6 +48,7 @@ type ApiPatrollingOfficer = {
     first_name: string;
     last_name: string | null;
     email: string;
+    phone: string;
     sites_assigned_count: number;
     site_details: {
         id: number;
@@ -382,11 +383,19 @@ export default function AgencyPatrollingOfficersPage() {
                                         <p className="font-medium">{officerName}</p>
                                     </TableCell>
                                     <TableCell>
-                                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                            <Mail className="h-4 w-4 flex-shrink-0" />
-                                            <a href={`mailto:${patrollingOfficer.email}`} className="truncate hover:underline font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
-                                                {patrollingOfficer.email}
-                                            </a>
+                                        <div className="space-y-1">
+                                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                                <Mail className="h-4 w-4 flex-shrink-0" />
+                                                <a href={`mailto:${patrollingOfficer.email}`} className="truncate hover:underline font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
+                                                    {patrollingOfficer.email}
+                                                </a>
+                                            </div>
+                                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                                <Phone className="h-4 w-4 flex-shrink-0" />
+                                                <a href={`tel:${patrollingOfficer.phone}`} className="truncate hover:underline font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
+                                                    {patrollingOfficer.phone}
+                                                </a>
+                                            </div>
                                         </div>
                                     </TableCell>
                                     <TableCell>
@@ -410,7 +419,7 @@ export default function AgencyPatrollingOfficersPage() {
                                         </div>
                                     </TableCell>
                                     </TableRow>
-                                    {isExpanded && patrollingOfficer.site_details && (
+                                    {isExpanded && patrollingOfficer.assigned_sites_details && (
                                         <TableRow className="bg-muted/50 hover:bg-muted/50">
                                             <TableCell colSpan={5} className="p-0">
                                                 <div className="p-4">

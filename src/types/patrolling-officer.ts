@@ -1,13 +1,14 @@
 
+
 export type PatrollingOfficer = {
   id: number;
   employee_id: string;
   first_name: string;
   last_name: string | null;
   email: string;
+  phone: string;
   sites_assigned_count: number;
   incidents_count: number;
-  phone?: string;
   avatar?: string;
   name?: string;
   site_details?: {
