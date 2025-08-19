@@ -465,18 +465,14 @@ export default function AgencyGuardsPage() {
                         </TableCell>
                         <TableCell>
                           {guard.site ? (
-                            <Button asChild variant="link" className="p-0 h-auto font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
-                                <Link href={`/agency/sites/${guard.site.id}`}>{guard.site.site_name}</Link>
-                            </Button>
+                            <span className="font-medium">{guard.site.site_name}</span>
                            ) : (
                             <span className="font-medium text-muted-foreground">Unassigned</span>
                            )}
                         </TableCell>
                         <TableCell>
                             {guard.patrolling_officer ? (
-                               <Button asChild variant="link" className="p-0 h-auto font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
-                                   <Link href={`/agency/patrolling-officers/${guard.patrolling_officer.id}`}>{poName}</Link>
-                               </Button>
+                               <span className="font-medium">{poName}</span>
                             ) : (
                                 <span className="text-muted-foreground group-hover:text-accent-foreground font-medium">Unassigned</span>
                             )}
