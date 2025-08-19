@@ -1,15 +1,11 @@
 
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import type { Site, Guard, PatrollingOfficer } from '@/types';
-import { guards } from '@/lib/data/guards';
-import { patrollingOfficers } from '@/lib/data/patrolling-officers';
-import { sites } from '@/lib/data/sites';
-import { incidents } from '@/lib/data/incidents';
+import type { Site, Guard, PatrollingOfficer, Organization } from '@/types';
 import {
   Table,
   TableBody,
@@ -50,7 +46,8 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from '@/components/ui/input';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-
+import { fetchData } from '@/lib/api';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const uploadFormSchema = z.object({
   excelFile: z
@@ -65,37 +62,70 @@ const addGuardFormSchema = z.object({
     site: z.string().min(1, { message: 'Please select a site.' }),
 });
 
-const LOGGED_IN_AGENCY_ID = 'AGY01'; // Simulate logged-in agency
-
 export default function AgencyGuardsPage() {
   const { toast } = useToast();
   const router = useRouter();
+  
+  const [guards, setGuards] = useState<Guard[]>([]);
+  const [sites, setSites] = useState<Site[]>([]);
+  const [patrollingOfficers, setPatrollingOfficers] = useState<PatrollingOfficer[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loggedInOrg, setLoggedInOrg] = useState<Organization | null>(null);
+
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
+  
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSiteFilter, setSelectedSiteFilter] = useState('all');
   const [selectedPatrollingOfficerFilter, setSelectedPatrollingOfficerFilter] = useState('all');
 
-  const agencySites = useMemo(() => sites.filter(site => site.agencyId === LOGGED_IN_AGENCY_ID), []);
-  
-  const agencyGuards = useMemo(() => {
-    const agencySiteIds = new Set<string>(agencySites.map(s => s.id));
-    return guards.filter(guard => {
-      return guard.site && agencySiteIds.has(guard.site);
-    });
-  }, [agencySites]);
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+        const orgData = localStorage.getItem('organization');
+        if (orgData) {
+            setLoggedInOrg(JSON.parse(orgData));
+        }
+    }
+  }, []);
 
-  // Use all patrolling officers for lookup, not just ones already assigned to a site.
-  const agencyPatrollingOfficers = patrollingOfficers;
+  useEffect(() => {
+    if (!loggedInOrg) return;
 
-  const getPatrollingOfficerForGuard = (guard: Guard): PatrollingOfficer | undefined => {
-    const site = agencySites.find(s => s.id === guard.site);
-    if (!site || !site.patrollingOfficerId) return undefined;
-    return agencyPatrollingOfficers.find(po => po.id === site.patrollingOfficerId);
-  };
-  
+    const fetchGuardsData = async () => {
+        setIsLoading(true);
+        const token = localStorage.getItem('token');
+        const authHeader = { Authorization: `Token ${token}` };
+        const orgCode = loggedInOrg.code;
+
+        try {
+            const guardsResponse = await fetchData<{ results: Guard[] }>(`/security/api/agency/${orgCode}/guards/list/`, { headers: authHeader });
+            setGuards(guardsResponse?.results || []);
+
+            const sitesResponse = await fetchData<{ results: Site[] }>(`/security/api/agency/${orgCode}/sites/list/`, { headers: authHeader });
+            setSites(sitesResponse?.results || []);
+            
+            const poResponse = await fetchData<{ results: any[] }>(`/security/api/agency/${orgCode}/patrolling-officers/list/`, { headers: authHeader });
+            const formattedPOs = poResponse?.results.map(po => ({
+                id: po.id.toString(),
+                name: `${po.first_name} ${po.last_name || ''}`.trim(),
+                email: po.email,
+                phone: po.phone,
+                avatar: po.profile_picture,
+            })) || [];
+            setPatrollingOfficers(formattedPOs);
+
+        } catch (error) {
+            toast({ variant: 'destructive', title: 'Error', description: 'Failed to load guards data.' });
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    fetchGuardsData();
+  }, [loggedInOrg, toast]);
+
   const uploadForm = useForm<z.infer<typeof uploadFormSchema>>({
     resolver: zodResolver(uploadFormSchema),
   });
@@ -141,43 +171,52 @@ export default function AgencyGuardsPage() {
   }
 
   const filteredGuards = useMemo(() => {
-    return agencyGuards.filter((guard) => {
+    return guards.filter((guard) => {
       const searchLower = searchQuery.toLowerCase();
-      const patrollingOfficer = getPatrollingOfficerForGuard(guard);
-      const site = agencySites.find(s => s.id === guard.site);
+      const guardName = `${guard.first_name} ${guard.last_name || ''}`.trim();
       
       const matchesSearch =
-        guard.name.toLowerCase().includes(searchLower) ||
-        guard.id.toLowerCase().includes(searchLower) ||
-        (site && site.site_name.toLowerCase().includes(searchLower)) || false;
+        guardName.toLowerCase().includes(searchLower) ||
+        guard.employee_id.toLowerCase().includes(searchLower) ||
+        (guard.site && guard.site.site_name.toLowerCase().includes(searchLower)) || false;
 
-      const matchesSite = selectedSiteFilter === 'all' || guard.site === selectedSiteFilter;
+      const matchesSite = selectedSiteFilter === 'all' || guard.site?.id.toString() === selectedSiteFilter;
       
       const matchesPatrollingOfficer = 
         selectedPatrollingOfficerFilter === 'all' || 
-        (selectedPatrollingOfficerFilter === 'unassigned' && !patrollingOfficer) ||
-        (patrollingOfficer && patrollingOfficer.id === selectedPatrollingOfficerFilter);
-
+        guard.patrolling_officer?.id.toString() === selectedPatrollingOfficerFilter;
+        
       return matchesSearch && matchesSite && matchesPatrollingOfficer;
     });
-  }, [searchQuery, selectedSiteFilter, selectedPatrollingOfficerFilter, agencyGuards, agencySites]);
-  
-  const guardIncidentCounts = useMemo(() => {
-    return incidents.reduce((acc, incident) => {
-      acc[incident.raisedByGuardId] = (acc[incident.raisedByGuardId] || 0) + 1;
-      return acc;
-    }, {} as {[key: string]: number});
-  }, [incidents]);
+  }, [searchQuery, selectedSiteFilter, selectedPatrollingOfficerFilter, guards]);
 
   const uniqueSites = useMemo(() => {
-      const siteIdsInUse = new Set(agencyGuards.map(g => g.site));
-      return agencySites.filter(s => siteIdsInUse.has(s.id));
-  }, [agencyGuards, agencySites]);
+    const siteMap = new Map<number, Site>();
+    guards.forEach(guard => {
+      if (guard.site && !siteMap.has(guard.site.id)) {
+        siteMap.set(guard.site.id, guard.site);
+      }
+    });
+    return Array.from(siteMap.values());
+  }, [guards]);
   
   const uniquePatrollingOfficers = useMemo(() => {
-    const poIds = new Set(agencyGuards.map(g => getPatrollingOfficerForGuard(g)?.id).filter(Boolean) as string[]);
-    return agencyPatrollingOfficers.filter(po => poIds.has(po.id));
-  }, [agencyGuards]);
+    const poMap = new Map<number, PatrollingOfficer>();
+     guards.forEach(guard => {
+      if (guard.patrolling_officer && !poMap.has(guard.patrolling_officer.id)) {
+        const poName = `${guard.patrolling_officer.first_name} ${guard.patrolling_officer.last_name || ''}`.trim();
+        poMap.set(guard.patrolling_officer.id, {
+            id: guard.patrolling_officer.id.toString(),
+            name: poName,
+            email: guard.patrolling_officer.email,
+            phone: guard.patrolling_officer.phone,
+            avatar: guard.patrolling_officer.profile_picture || '',
+        });
+      }
+    });
+    return Array.from(poMap.values());
+  }, [guards]);
+
 
   return (
     <>
@@ -306,8 +345,8 @@ export default function AgencyGuardsPage() {
                                                     </SelectTrigger>
                                                 </FormControl>
                                                 <SelectContent>
-                                                    {agencySites.map((site) => (
-                                                        <SelectItem key={site.id} value={site.id}>
+                                                    {sites.map((site) => (
+                                                        <SelectItem key={site.id} value={site.id.toString()}>
                                                             {site.site_name}
                                                         </SelectItem>
                                                     ))}
@@ -358,29 +397,35 @@ export default function AgencyGuardsPage() {
                   <SelectContent>
                       <SelectItem value="all" className="font-medium">All Sites</SelectItem>
                       {uniqueSites.map((site) => (
-                          <SelectItem key={site.id} value={site.id} className="font-medium">
+                          <SelectItem key={site.id} value={site.id.toString()} className="font-medium">
                               {site.site_name}
                           </SelectItem>
                       ))}
                   </SelectContent>
               </Select>
               <Select value={selectedPatrollingOfficerFilter} onValueChange={setSelectedPatrollingOfficerFilter}>
-                  <SelectTrigger className="w-full sm:w-[180px] font-medium hover:bg-accent hover:text-accent-foreground">
+                  <SelectTrigger className="w-full sm:w-[220px] font-medium hover:bg-accent hover:text-accent-foreground">
                       <SelectValue placeholder="Filter by Patrolling Officer" />
                   </SelectTrigger>
                   <SelectContent>
                       <SelectItem value="all" className="font-medium">All Patrolling Officers</SelectItem>
                       {uniquePatrollingOfficers.map((po) => (
-                          <SelectItem key={po.id} value={po.id} className="font-medium">
+                          <SelectItem key={po.id} value={po.id.toString()} className="font-medium">
                               {po.name}
                           </SelectItem>
                       ))}
-                      <SelectItem value="unassigned" className="font-medium">Unassigned</SelectItem>
                   </SelectContent>
               </Select>
             </div>
           </CardHeader>
           <CardContent>
+            {isLoading ? (
+                <div className="space-y-2">
+                    <Skeleton className="h-12 w-full" />
+                    <Skeleton className="h-12 w-full" />
+                    <Skeleton className="h-12 w-full" />
+                </div>
+            ) : (
             <Table>
               <TableHeader>
                 <TableRow>
@@ -395,9 +440,8 @@ export default function AgencyGuardsPage() {
               <TableBody>
                 {filteredGuards.length > 0 ? (
                   filteredGuards.map((guard) => {
-                    const patrollingOfficer = getPatrollingOfficerForGuard(guard);
-                    const incidentCount = guardIncidentCounts[guard.id] || 0;
-                    const site = agencySites.find(s => s.id === guard.site);
+                    const guardName = `${guard.first_name} ${guard.last_name || ''}`.trim();
+                    const poName = guard.patrolling_officer ? `${guard.patrolling_officer.first_name} ${guard.patrolling_officer.last_name || ''}`.trim() : 'Unassigned';
                     
                     return (
                       <TableRow 
@@ -407,17 +451,17 @@ export default function AgencyGuardsPage() {
                       >
                         <TableCell>
                           <Button asChild variant="link" className="p-0 h-auto font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
-                            <Link href={`/agency/guards/${guard.id}`}>{guard.id}</Link>
+                            <Link href={`/agency/guards/${guard.id}`}>{guard.employee_id}</Link>
                           </Button>
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-3">
                             <Avatar>
-                              <AvatarImage src={guard.avatar} alt={guard.name} />
-                              <AvatarFallback>{guard.name.charAt(0)}</AvatarFallback>
+                              <AvatarImage src={guard.profile_picture || undefined} alt={guardName} />
+                              <AvatarFallback>{guard.first_name.charAt(0)}</AvatarFallback>
                             </Avatar>
                             <div>
-                              <p className="font-medium">{guard.name}</p>
+                              <p className="font-medium">{guardName}</p>
                             </div>
                           </div>
                         </TableCell>
@@ -428,18 +472,18 @@ export default function AgencyGuardsPage() {
                             </div>
                         </TableCell>
                         <TableCell>
-                          {site ? (
+                          {guard.site ? (
                             <Button asChild variant="link" className="p-0 h-auto font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
-                                <Link href={`/agency/sites/${site.id}`}>{site.site_name}</Link>
+                                <Link href={`/agency/sites/${guard.site.id}`}>{guard.site.site_name}</Link>
                             </Button>
                            ) : (
-                            <span className="font-medium">{guard.site}</span>
+                            <span className="font-medium text-muted-foreground">Unassigned</span>
                            )}
                         </TableCell>
                         <TableCell>
-                            {patrollingOfficer ? (
+                            {guard.patrolling_officer ? (
                                <Button asChild variant="link" className="p-0 h-auto font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
-                                   <Link href={`/agency/patrolling-officers/${patrollingOfficer.id}`}>{patrollingOfficer.name}</Link>
+                                   <Link href={`/agency/patrolling-officers/${guard.patrolling_officer.id}`}>{poName}</Link>
                                </Button>
                             ) : (
                                 <span className="text-muted-foreground group-hover:text-accent-foreground font-medium">Unassigned</span>
@@ -448,7 +492,7 @@ export default function AgencyGuardsPage() {
                         <TableCell>
                           <div className="flex items-center gap-2">
                             <ShieldAlert className="h-4 w-4 text-muted-foreground group-hover:text-accent-foreground" />
-                            <span className="font-medium">{incidentCount}</span>
+                            <span className="font-medium">{guard.incident_count}</span>
                           </div>
                         </TableCell>
                       </TableRow>
@@ -463,6 +507,7 @@ export default function AgencyGuardsPage() {
                 )}
               </TableBody>
             </Table>
+            )}
           </CardContent>
         </Card>
       </div>
