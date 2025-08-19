@@ -77,7 +77,7 @@ export default function RootPage() {
         orgToStore = {
             id: data.subcontractor.id,
             name: data.subcontractor.name,
-            code: data.subcontractor.subcon_id,
+            code: data.subcontractor.code, // Use the numeric code for API calls
             role: data.subcontractor.role,
             type: data.subcontractor.type,
             logo: data.subcontractor.logo,
