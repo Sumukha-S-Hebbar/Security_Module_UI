@@ -455,15 +455,7 @@ export default function AgencyGuardsPage() {
                           </Button>
                         </TableCell>
                         <TableCell>
-                          <div className="flex items-center gap-3">
-                            <Avatar>
-                              <AvatarImage src={guard.profile_picture || undefined} alt={guardName} />
-                              <AvatarFallback>{guard.first_name.charAt(0)}</AvatarFallback>
-                            </Avatar>
-                            <div>
-                              <p className="font-medium">{guardName}</p>
-                            </div>
-                          </div>
+                            <p className="font-medium">{guardName}</p>
                         </TableCell>
                         <TableCell>
                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
