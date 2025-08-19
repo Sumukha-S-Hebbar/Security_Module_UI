@@ -467,10 +467,11 @@ export default function AgencySitesPage() {
                 return (
                   <TableRow 
                     key={site.id} 
-                    className="hover:bg-accent hover:text-accent-foreground group"
+                    onClick={() => router.push(`/agency/sites/${site.id}`)}
+                    className="cursor-pointer hover:bg-accent hover:text-accent-foreground group"
                   >
                     <TableCell>
-                       <Button asChild variant="link" className="p-0 h-auto font-medium group-hover:text-accent-foreground">
+                       <Button asChild variant="link" className="p-0 h-auto font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
                         <Link href={`/agency/sites/${site.id}`}>{site.tb_site_id}</Link>
                       </Button>
                     </TableCell>
@@ -638,5 +639,6 @@ export default function AgencySitesPage() {
     </div>
   );
 }
+
 
 
