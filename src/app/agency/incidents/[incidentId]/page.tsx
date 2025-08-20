@@ -198,8 +198,11 @@ export default function AgencyIncidentReportPage() {
     const formData = new FormData();
     formData.append('incident_type', incidentType);
     formData.append('incident_description', description);
-    if(incidentFiles) {
-        formData.append('initial_incident_image_1', incidentFiles[0]);
+    
+    if (incidentFiles) {
+        for (let i = 0; i < incidentFiles.length && i < 4; i++) {
+            formData.append(`initial_incident_image_${i + 1}`, incidentFiles[i]);
+        }
     }
     
     const API_URL = `${process.env.NEXT_PUBLIC_DJANGO_API_URL}/security/api/agency/${loggedInOrg.code}/incident/${incident.id}/`;
@@ -481,7 +484,8 @@ export default function AgencyIncidentReportPage() {
                             <Label htmlFor="active-incident-photos" className="text-base">Upload Media (Optional)</Label>
                             <Input 
                                 id="active-incident-photos" 
-                                type="file" 
+                                type="file"
+                                multiple
                                 className="mt-2"
                                 onChange={(e) => setIncidentFiles(e.target.files)}
                                 accept="image/*"
