@@ -1,14 +1,9 @@
 
-
 'use client';
 
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { sites } from '@/lib/data/sites';
-import { incidents } from '@/lib/data/incidents';
-import { guards } from '@/lib/data/guards';
-import { patrollingOfficers } from '@/lib/data/patrolling-officers';
-import type { Incident, Guard } from '@/types';
+import type { Incident, Guard, Organization, PatrollingOfficer } from '@/types';
 import {
   Card,
   CardContent,
@@ -25,15 +20,15 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, MapPin, UserCheck, ShieldAlert, FileDown, Fence, Users, Phone, Mail } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useRouter } from 'next/navigation';
-import { useMemo, useState, useRef } from 'react';
+import { useMemo, useState, useRef, useEffect } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from 'recharts';
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartConfig } from '@/components/ui/chart';
+import { fetchData } from '@/lib/api';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const chartConfig = {
   incidents: {
@@ -42,87 +37,151 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
+type SiteReportData = {
+    id: number;
+    tb_site_id: string;
+    org_site_id: string;
+    site_name: string;
+    site_status: string;
+    lat: number;
+    lng: number;
+    site_address_line1: string;
+    site_address_line2?: string | null;
+    site_address_line3?: string | null;
+    site_zip_code: string;
+    region: string;
+    city: string;
+    total_incidents_count: number;
+    resolved_incidents_count: number;
+    guard_details: {
+        id: number;
+        user: string;
+        email: string;
+        first_name: string;
+        last_name: string | null;
+        employee_id: string;
+        phone: string;
+        profile_picture: string | null;
+    }[];
+    patrol_officer_details: {
+        id: number;
+        user: string;
+        email: string;
+        first_name: string;
+        last_name: string | null;
+        employee_id: string;
+        phone: string;
+        profile_picture: string | null;
+    }[];
+    incident_trend: { month: string; count: number }[];
+    incidents: {
+        count: number;
+        next: string | null;
+        previous: string | null;
+        results: any[];
+    };
+};
+
 
 export default function AgencySiteReportPage() {
   const params = useParams();
   const router = useRouter();
   const { toast } = useToast();
   const siteId = params.siteId as string;
+
+  const [reportData, setReportData] = useState<SiteReportData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loggedInOrg, setLoggedInOrg] = useState<Organization | null>(null);
+  
   const [selectedMonth, setSelectedMonth] = useState('all');
   const [selectedYear, setSelectedYear] = useState('all');
   const [selectedStatus, setSelectedStatus] = useState('all');
   const incidentsTableRef = useRef<HTMLDivElement>(null);
+  const [selectedChartYear, setSelectedChartYear] = useState<string>(new Date().getFullYear().toString());
 
-
-  const site = sites.find((s) => s.id === siteId);
-
-  if (!site) {
-    return (
-      <div className="p-4 sm:p-6 lg:p-8">
-        <Card>
-          <CardContent className="pt-6">
-            <p className="font-medium">Site not found.</p>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  const siteIncidents = incidents.filter(
-    (incident) => incident.siteId === site.id
-  );
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+        const orgData = localStorage.getItem('organization');
+        if (orgData) {
+            setLoggedInOrg(JSON.parse(orgData));
+        }
+    }
+  }, []);
   
-  const siteGuards = guards.filter(g => g.site === site.id);
-  const patrollingOfficer = patrollingOfficers.find(p => p.id === site.patrollingOfficerId);
+  useEffect(() => {
+    if (!loggedInOrg || !siteId) return;
+
+    const fetchReportData = async () => {
+        setIsLoading(true);
+        const token = localStorage.getItem('token');
+        const url = `/security/api/agency/${loggedInOrg.code}/site/${siteId}/`;
+        
+        try {
+            const data = await fetchData<SiteReportData>(url, {
+                headers: { 'Authorization': `Token ${token}` }
+            });
+            setReportData(data);
+        } catch (error) {
+            console.error("Failed to fetch site report:", error);
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: "Could not load site report data.",
+            });
+        } finally {
+            setIsLoading(false);
+        }
+    };
+    fetchReportData();
+  }, [loggedInOrg, siteId, toast]);
 
   const availableYears = useMemo(() => {
+    if (!reportData) return [];
     const years = new Set(
-      siteIncidents.map((incident) => new Date(incident.incidentTime).getFullYear().toString())
+      reportData.incidents.results.map((incident: any) => new Date(incident.incident_time).getFullYear().toString())
     );
     if (years.size > 0) years.add(new Date().getFullYear().toString());
     return Array.from(years).sort((a, b) => parseInt(b) - parseInt(a));
-  }, [siteIncidents]);
-  
-  const [selectedChartYear, setSelectedChartYear] = useState<string>(availableYears[0] || new Date().getFullYear().toString());
+  }, [reportData]);
+
+  useEffect(() => {
+    if (reportData && availableYears.length > 0) {
+      const currentYear = new Date().getFullYear().toString();
+      if (availableYears.includes(currentYear)) {
+        setSelectedChartYear(currentYear);
+      } else {
+        setSelectedChartYear(availableYears[0]);
+      }
+    }
+  }, [reportData, availableYears]);
+
+
+  const monthlyIncidentData = useMemo(() => {
+    if (!reportData) return [];
+    return reportData.incident_trend.map(item => ({
+        month: item.month,
+        incidents: item.count
+    }));
+  }, [reportData, selectedChartYear]);
 
 
   const filteredIncidents = useMemo(() => {
-    return siteIncidents.filter(incident => {
-      const incidentDate = new Date(incident.incidentTime);
+    if (!reportData) return [];
+    return reportData.incidents.results.filter((incident: any) => {
+      const incidentDate = new Date(incident.incident_time);
       const yearMatch = selectedYear === 'all' || incidentDate.getFullYear().toString() === selectedYear;
       const monthMatch = selectedMonth === 'all' || incidentDate.getMonth().toString() === selectedMonth;
-      const statusMatch = selectedStatus === 'all' || incident.status.toLowerCase().replace(' ', '-') === selectedStatus;
+      const statusMatch = selectedStatus === 'all' || incident.incident_status.toLowerCase().replace(' ', '-') === selectedStatus;
       return yearMatch && monthMatch && statusMatch;
     });
-  }, [siteIncidents, selectedYear, selectedMonth, selectedStatus]);
-
-  const monthlyIncidentData = useMemo(() => {
-    const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-    ];
-    const monthlyData: { month: string; incidents: number }[] = months.map(
-      (month) => ({ month, incidents: 0 })
-    );
-
-    siteIncidents.forEach((incident) => {
-      const incidentDate = new Date(incident.incidentTime);
-      if (incidentDate.getFullYear().toString() === selectedChartYear) {
-        const monthIndex = incidentDate.getMonth();
-        monthlyData[monthIndex].incidents += 1;
-      }
-    });
-
-    return monthlyData;
-  }, [siteIncidents, selectedChartYear]);
+  }, [reportData, selectedYear, selectedMonth, selectedStatus]);
 
 
   const handleDownloadReport = () => {
     toast({
       title: 'Report Generation Started',
-      description: `Generating a detailed report for site ${site.site_name}.`,
+      description: `Generating a detailed report for site ${reportData?.site_name}.`,
     });
-    // In a real app, this would trigger a download.
   };
 
   const handleScrollToIncidents = () => {
@@ -177,8 +236,42 @@ export default function AgencySiteReportPage() {
         );
     }
   };
+  
+  if (isLoading) {
+    return (
+        <div className="p-4 sm:p-6 lg:p-8 space-y-6">
+            <div className="flex items-center gap-4">
+                <Skeleton className="h-10 w-10" />
+                <div className="space-y-2">
+                    <Skeleton className="h-8 w-48" />
+                    <Skeleton className="h-4 w-64" />
+                </div>
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <Skeleton className="h-48" />
+                <Skeleton className="h-48" />
+                <Skeleton className="h-48" />
+            </div>
+            <Skeleton className="h-64" />
+            <Skeleton className="h-96" />
+        </div>
+    )
+  }
 
-  const getGuardById = (id: string) => guards.find(g => g.id === id);
+  if (!reportData) {
+    return (
+      <div className="p-4 sm:p-6 lg:p-8">
+        <Card>
+          <CardContent className="pt-6">
+            <p className="font-medium">Site not found.</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  const { site_name, org_site_id, site_address_line1, lat, lng, guard_details, incident_trend, incidents } = reportData;
+  const patrollingOfficer = reportData.patrol_officer_details?.[0]; // Assuming one PO per site
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6">
@@ -192,7 +285,7 @@ export default function AgencySiteReportPage() {
           </Button>
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Site Report</h1>
-            <p className="text-muted-foreground font-medium">Detailed overview for {site.site_name}.</p>
+            <p className="text-muted-foreground font-medium">Detailed overview for {site_name}.</p>
           </div>
         </div>
         <Button onClick={handleDownloadReport} className="bg-[#00B4D8] hover:bg-[#00B4D8]/90">
@@ -206,8 +299,8 @@ export default function AgencySiteReportPage() {
           <CardHeader>
               <div className="flex flex-wrap justify-between items-start gap-4">
                 <div>
-                  <CardTitle className="text-2xl">{site.site_name}</CardTitle>
-                  <p className="font-medium">ID: {site.id}</p>
+                  <CardTitle className="text-2xl">{site_name}</CardTitle>
+                  <p className="font-medium">ID: {org_site_id}</p>
                 </div>
               </div>
           </CardHeader>
@@ -217,14 +310,14 @@ export default function AgencySiteReportPage() {
                   <MapPin className="h-5 w-5 mt-0.5 text-primary" />
                   <div>
                     <p className="font-semibold">Address</p>
-                    <p className="font-medium">{site.site_address_line1}</p>
+                    <p className="font-medium">{site_address_line1}</p>
                   </div>
                 </div>
                  <div className="flex items-start gap-3">
                   <Fence className="h-5 w-5 mt-0.5 text-primary" />
                   <div>
                     <p className="font-semibold">Geofence Perimeter</p>
-                    <p className="font-medium">{site.geofencePerimeter ? `${site.geofencePerimeter}m` : 'Not set'}</p>
+                    <p className="font-medium">Not set</p>
                   </div>
                 </div>
                  <div className="flex items-start gap-3">
@@ -235,7 +328,7 @@ export default function AgencySiteReportPage() {
                     <ShieldAlert className="h-5 w-5 mt-0.5 text-primary" />
                     <div>
                       <p className="font-semibold">Total Incidents</p>
-                      <p className="font-medium text-base">{siteIncidents.length}</p>
+                      <p className="font-medium text-base">{reportData.total_incidents_count}</p>
                     </div>
                   </button>
                 </div>
@@ -251,8 +344,8 @@ export default function AgencySiteReportPage() {
             </CardHeader>
             <CardContent className="space-y-4">
                 <div>
-                    <p className="font-semibold text-base">{patrollingOfficer.name}</p>
-                    <p className="font-medium">ID: {patrollingOfficer.id}</p>
+                    <p className="font-semibold text-base">{`${patrollingOfficer.first_name} ${patrollingOfficer.last_name || ''}`}</p>
+                    <p className="font-medium">ID: {patrollingOfficer.employee_id}</p>
                 </div>
                 <div className="text-sm space-y-2 pt-2 border-t">
                   <div className="flex items-center gap-2"><Phone className="h-4 w-4" /> <a href={`tel:${patrollingOfficer.phone}`} className="hover:underline">{patrollingOfficer.phone}</a></div>
@@ -278,25 +371,27 @@ export default function AgencySiteReportPage() {
         <Card>
             <CardHeader>
                 <CardTitle className="flex items-center gap-2"><Users className="h-5 w-5"/>Assigned Guards</CardTitle>
-                <CardDescription>Guards currently assigned to {site.site_name}.</CardDescription>
+                <CardDescription>Guards currently assigned to {site_name}.</CardDescription>
             </CardHeader>
             <CardContent>
-                {siteGuards.length > 0 ? (
+                {guard_details.length > 0 ? (
                     <div className="space-y-3">
-                        {siteGuards.map(guard => (
+                        {guard_details.map(guard => {
+                           const guardName = `${guard.first_name} ${guard.last_name || ''}`.trim();
+                           return (
                             <div key={guard.id} className="flex items-center gap-3">
                                 <Avatar className="h-10 w-10">
-                                    <AvatarImage src={guard.avatar} alt={guard.name} />
-                                    <AvatarFallback>{guard.name.charAt(0)}</AvatarFallback>
+                                    <AvatarImage src={guard.profile_picture || undefined} alt={guardName} />
+                                    <AvatarFallback>{guard.first_name.charAt(0)}</AvatarFallback>
                                 </Avatar>
                                 <div>
-                                    <p className="text-base font-semibold">{guard.name}</p>
+                                    <p className="text-base font-semibold">{guardName}</p>
                                     <Button asChild variant="link" className="p-0 h-auto text-sm font-medium">
-                                        <Link href={`/agency/guards/${guard.id}`}>ID: {guard.id}</Link>
+                                        <Link href={`/agency/guards/${guard.id}`}>ID: {guard.employee_id}</Link>
                                     </Button>
                                 </div>
                             </div>
-                        ))}
+                        )})}
                     </div>
                 ) : (
                     <p className="text-sm text-muted-foreground font-medium">No guards are assigned to this site.</p>
@@ -309,7 +404,7 @@ export default function AgencySiteReportPage() {
         <CardHeader className="flex flex-row items-center justify-between gap-4">
             <div>
                 <CardTitle>Incidents Reported Monthly</CardTitle>
-                <CardDescription>A monthly breakdown of incidents reported at {site.site_name}.</CardDescription>
+                <CardDescription>A monthly breakdown of incidents reported at {site_name}.</CardDescription>
             </div>
             <Select value={selectedChartYear} onValueChange={setSelectedChartYear}>
                 <SelectTrigger className="w-[120px] font-medium hover:bg-accent hover:text-accent-foreground">
@@ -400,7 +495,6 @@ export default function AgencySiteReportPage() {
               </TableHeader>
               <TableBody>
                 {filteredIncidents.map((incident) => {
-                  const guard = getGuardById(incident.raisedByGuardId);
                   return (
                     <TableRow 
                       key={incident.id}
@@ -409,12 +503,12 @@ export default function AgencySiteReportPage() {
                     >
                       <TableCell>
                         <Button asChild variant="link" className="p-0 h-auto font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
-                          <Link href={`/agency/incidents/${incident.id}`}>{incident.id}</Link>
+                          <Link href={`/agency/incidents/${incident.id}`}>{incident.incident_id}</Link>
                         </Button>
                       </TableCell>
-                      <TableCell className="font-medium">{new Date(incident.incidentTime).toLocaleString()}</TableCell>
-                      <TableCell className="font-medium">{guard?.name || 'N/A'}</TableCell>
-                      <TableCell>{getStatusIndicator(incident.status)}</TableCell>
+                      <TableCell className="font-medium">{new Date(incident.incident_time).toLocaleString()}</TableCell>
+                      <TableCell className="font-medium">{incident.guard_name || 'N/A'}</TableCell>
+                      <TableCell>{getStatusIndicator(incident.incident_status)}</TableCell>
                     </TableRow>
                   )
                 })}
@@ -428,3 +522,5 @@ export default function AgencySiteReportPage() {
     </div>
   );
 }
+
+    
