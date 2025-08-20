@@ -511,7 +511,7 @@ export default function AgencySitesPage() {
         </CardContent>
       </Card>
 
-      {unassignedSites.length > 0 && (
+      
         <Card>
           <CardHeader>
             <CardTitle>Unassigned Sites</CardTitle>
@@ -642,11 +642,7 @@ export default function AgencySitesPage() {
             </Table>
           </CardContent>
         </Card>
-      )}
+      
     </div>
   );
 }
-
-
-
-
