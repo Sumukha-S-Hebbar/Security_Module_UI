@@ -123,7 +123,7 @@ export default function AgencyIncidentReportPage() {
     const fetchIncident = async () => {
         setIsLoading(true);
         const token = localStorage.getItem('token');
-        const url = `/security/api/agency/${loggedInOrg.code}/incidents/${incidentId}/`;
+        const url = `/security/api/agency/${loggedInOrg.code}/incident/${incidentId}/`;
 
         try {
             const response = await fetchData<{data: IncidentDetails}>(url, { headers: { Authorization: `Token ${token}` } });
@@ -202,10 +202,10 @@ export default function AgencyIncidentReportPage() {
         formData.append('initial_incident_image_1', incidentFiles[0]);
     }
     
-    const url = `/security/api/agency/${loggedInOrg.code}/incidents/${incident.id}/`;
+    const API_URL = `${process.env.NEXT_PUBLIC_DJANGO_API_URL}/security/api/agency/${loggedInOrg.code}/incident/${incident.id}/`;
 
     try {
-        const response = await fetch(url, {
+        const response = await fetch(API_URL, {
             method: 'PATCH',
             headers: { 'Authorization': `Token ${token}` },
             body: formData,
