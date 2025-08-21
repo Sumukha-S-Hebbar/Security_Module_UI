@@ -269,8 +269,10 @@ export default function AgencyPatrollingOfficersPage() {
             setIsAdding(false);
             setIsAddDialogOpen(false);
             await fetchPatrollingOfficers(); // Re-fetch after adding
-            setNewlyAddedOfficerId(responseData.data.id);
-            setTimeout(() => setNewlyAddedOfficerId(null), 2000);
+            if (responseData.data?.id) {
+                setNewlyAddedOfficerId(responseData.data.id);
+                setTimeout(() => setNewlyAddedOfficerId(null), 2000);
+            }
 
         } catch(error: any) {
              toast({
