@@ -156,27 +156,30 @@ export default function AgencyPatrollingOfficersPage() {
 
     const watchedRegion = addForm.watch('region');
 
-    const fetchRegions = useCallback(async () => {
-        if (!loggedInUser || !loggedInUser.country) return;
+    useEffect(() => {
+        async function fetchRegions() {
+            if (!loggedInUser || !loggedInUser.country || !isAddDialogOpen) return;
 
-        const token = localStorage.getItem('token');
-        const countryId = loggedInUser.country.id;
-        const url = `/security/api/regions/?country=${countryId}`;
-        
-        try {
-            const data = await fetchData<{ regions: ApiRegion[] }>(url, {
-            headers: { 'Authorization': `Token ${token}` }
-            });
-            setApiRegions(data?.regions || []);
-        } catch (error) {
-            console.error("Failed to fetch regions:", error);
-            toast({
-            variant: "destructive",
-            title: "Error",
-            description: "Could not load regions for the selection.",
-            });
+            const token = localStorage.getItem('token');
+            const countryId = loggedInUser.country.id;
+            const url = `/security/api/regions/?country=${countryId}`;
+            
+            try {
+                const data = await fetchData<{ regions: ApiRegion[] }>(url, {
+                headers: { 'Authorization': `Token ${token}` }
+                });
+                setApiRegions(data?.regions || []);
+            } catch (error) {
+                console.error("Failed to fetch regions:", error);
+                toast({
+                variant: "destructive",
+                title: "Error",
+                description: "Could not load regions for the selection.",
+                });
+            }
         }
-    }, [loggedInUser, toast]);
+        fetchRegions();
+    }, [loggedInUser, isAddDialogOpen, toast]);
 
     useEffect(() => {
         async function fetchCities() {
@@ -386,7 +389,7 @@ export default function AgencyPatrollingOfficersPage() {
                     </Dialog>
                     <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
                         <DialogTrigger asChild>
-                            <Button variant="outline" className="bg-[#00B4D8] hover:bg-[#00B4D8]/90 text-white" onClick={fetchRegions}>
+                            <Button variant="outline" className="bg-[#00B4D8] hover:bg-[#00B4D8]/90 text-white">
                                 <PlusCircle className="mr-2 h-4 w-4" />
                                 Add Patrolling Officer
                             </Button>
