@@ -89,10 +89,10 @@ type AgencyReportData = {
     performance: {
         filters_applied: string;
         overall_performance: number;
-        incident_resolution_rate: number;
+        incident_resolution: number;
         site_visit_accuracy: number;
         guard_checkin_accuracy: number;
-        selfie_checkin_accuracy: number | null;
+        selfie_accuracy: number | null;
     };
     assigned_sites: {
         id: number;
@@ -232,10 +232,10 @@ export default function AgencyReportPage() {
     const { performance } = reportData;
     return {
       overall: parsePerformanceValue(performance.overall_performance),
-      incidentResolution: parsePerformanceValue(performance.incident_resolution_rate),
+      incidentResolution: parsePerformanceValue(performance.incident_resolution),
       siteVisit: parsePerformanceValue(performance.site_visit_accuracy),
       checkin: parsePerformanceValue(performance.guard_checkin_accuracy),
-      selfie: parsePerformanceValue(performance.selfie_checkin_accuracy),
+      selfie: parsePerformanceValue(performance.selfie_accuracy),
     };
   }, [reportData]);
   
