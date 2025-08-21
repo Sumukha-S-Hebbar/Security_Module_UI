@@ -163,7 +163,7 @@ export default function AgencyGuardsPage() {
   
   useEffect(() => {
     async function fetchRegions() {
-      if (!loggedInUser || !loggedInUser.country || !isAddDialogOpen) return;
+      if (!loggedInUser || !loggedInUser.country) return;
       const token = localStorage.getItem('token');
       const countryId = loggedInUser.country.id;
       const url = `/security/api/regions/?country=${countryId}`;
@@ -181,7 +181,10 @@ export default function AgencyGuardsPage() {
         });
       }
     }
-    fetchRegions();
+
+    if (isAddDialogOpen) {
+        fetchRegions();
+    }
   }, [loggedInUser, isAddDialogOpen, toast]);
 
 
@@ -709,3 +712,5 @@ export default function AgencyGuardsPage() {
     </>
   );
 }
+
+    
