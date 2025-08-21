@@ -216,8 +216,10 @@ export default function AgencyGuardsPage() {
           }
       }
 
-      addGuardForm.resetField('city');
-      fetchCities();
+      if (watchedRegion) {
+        addGuardForm.resetField('city');
+        fetchCities();
+      }
   }, [watchedRegion, loggedInUser, toast, addGuardForm]);
 
 
@@ -510,7 +512,7 @@ export default function AgencyGuardsPage() {
                                         render={({ field }) => (
                                             <FormItem>
                                                 <FormLabel>Region</FormLabel>
-                                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                <Select onValueChange={field.onChange} value={field.value}>
                                                     <FormControl>
                                                         <SelectTrigger>
                                                             <SelectValue placeholder="Select a region" />
@@ -709,5 +711,3 @@ export default function AgencyGuardsPage() {
     </>
   );
 }
-
-    

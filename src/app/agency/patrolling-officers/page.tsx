@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useMemo, Fragment, useEffect, useCallback } from 'react';
@@ -208,8 +209,10 @@ export default function AgencyPatrollingOfficersPage() {
             }
         }
 
-        addForm.resetField('city');
-        fetchCities();
+        if (watchedRegion) {
+          addForm.resetField('city');
+          fetchCities();
+        }
     }, [watchedRegion, loggedInUser, toast, addForm]);
 
     async function onUploadSubmit(values: z.infer<typeof uploadFormSchema>) {
@@ -262,7 +265,7 @@ export default function AgencyPatrollingOfficersPage() {
 
             toast({
                 title: 'Patrolling Officer Added',
-                description: `Patrolling Officer "${values.first_name}" has been created successfully.`,
+                description: responseData.message || `Patrolling Officer "${values.first_name}" has been created successfully.`,
             });
             
             addForm.reset();
@@ -474,7 +477,7 @@ export default function AgencyPatrollingOfficersPage() {
                                             render={({ field }) => (
                                                 <FormItem>
                                                     <FormLabel>Region</FormLabel>
-                                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                    <Select onValueChange={field.onChange} value={field.value}>
                                                         <FormControl>
                                                             <SelectTrigger>
                                                                 <SelectValue placeholder="Select a region" />
