@@ -56,14 +56,6 @@ type ApiPatrollingOfficer = {
         site_name: string;
     } | null;
     incidents_count: number;
-    assigned_sites_details?: {
-        site_details: {
-            id: number;
-            tb_site_id: string;
-            org_site_id: string;
-            site_name: string;
-        }
-    }[];
 };
 
 const uploadFormSchema = z.object({
@@ -531,3 +523,4 @@ export default function AgencyPatrollingOfficersPage() {
         </div>
       </>
     );
+}
