@@ -118,12 +118,12 @@ export default function AgencySitesPage() {
 
 
   const assignedSites = useMemo(
-    () => sites.filter((site) => site.site_status === 'Assigned'),
+    () => sites.filter((site) => site.personnel_assignment_status === 'Assigned'),
     [sites]
   );
   const unassignedSites = useMemo(
     () =>
-      sites.filter((site) => site.site_status === 'Unassigned'),
+      sites.filter((site) => site.personnel_assignment_status === 'Unassigned'),
     [sites]
   );
   

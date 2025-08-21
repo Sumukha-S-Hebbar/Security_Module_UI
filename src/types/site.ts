@@ -9,6 +9,7 @@ export type Site = {
   org_name?: string;
   site_name: string;
   site_status: 'Assigned' | 'Unassigned';
+  personnel_assignment_status: 'Assigned' | 'Unassigned';
   region: string;
   city: string;
   lat?: number;
