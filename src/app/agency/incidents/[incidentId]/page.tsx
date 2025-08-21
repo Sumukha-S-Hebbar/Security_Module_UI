@@ -35,7 +35,6 @@ import type { Organization, Incident } from '@/types';
 
 
 const incidentTypes = [
-  'SOS',
   'Suspicious Activity',
   'Theft',
   'Vandalism',
