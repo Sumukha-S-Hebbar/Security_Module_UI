@@ -154,32 +154,33 @@ export default function AgencyPatrollingOfficersPage() {
 
     const watchedRegion = addForm.watch('region');
 
-    useEffect(() => {
-        async function fetchRegions() {
-            if (!loggedInUser || !loggedInUser.country) return;
+    const fetchRegions = useCallback(async () => {
+        if (!loggedInUser || !loggedInUser.country) return;
 
-            const token = localStorage.getItem('token');
-            const countryId = loggedInUser.country.id;
-            const url = `/security/api/regions/?country=${countryId}`;
-            
-            try {
-                const data = await fetchData<{ regions: ApiRegion[] }>(url, {
-                headers: { 'Authorization': `Token ${token}` }
-                });
-                setApiRegions(data?.regions || []);
-            } catch (error) {
-                console.error("Failed to fetch regions:", error);
-                toast({
-                variant: "destructive",
-                title: "Error",
-                description: "Could not load regions for the selection.",
-                });
-            }
+        const token = localStorage.getItem('token');
+        const countryId = loggedInUser.country.id;
+        const url = `/security/api/regions/?country=${countryId}`;
+        
+        try {
+            const data = await fetchData<{ regions: ApiRegion[] }>(url, {
+            headers: { 'Authorization': `Token ${token}` }
+            });
+            setApiRegions(data?.regions || []);
+        } catch (error) {
+            console.error("Failed to fetch regions:", error);
+            toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Could not load regions for the selection.",
+            });
         }
-        if (isAddDialogOpen) {
+    }, [loggedInUser, toast]);
+
+    useEffect(() => {
+        if (loggedInUser?.country) {
             fetchRegions();
         }
-    }, [loggedInUser, isAddDialogOpen, toast]);
+    }, [loggedInUser, fetchRegions]);
 
     useEffect(() => {
         async function fetchCities() {
@@ -690,3 +691,5 @@ export default function AgencyPatrollingOfficersPage() {
       </>
     );
 }
+
+    

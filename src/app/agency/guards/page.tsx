@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -113,7 +113,7 @@ export default function AgencyGuardsPage() {
     }
   }, []);
   
-  const fetchGuardsData = async () => {
+  const fetchGuardsData = useCallback(async () => {
     if (!loggedInOrg) return;
       setIsLoading(true);
       const token = localStorage.getItem('token');
@@ -142,13 +142,13 @@ export default function AgencyGuardsPage() {
       } finally {
           setIsLoading(false);
       }
-  };
+  }, [loggedInOrg, toast]);
 
   useEffect(() => {
     if(loggedInOrg) {
       fetchGuardsData();
     }
-  }, [loggedInOrg]);
+  }, [loggedInOrg, fetchGuardsData]);
 
   const uploadForm = useForm<z.infer<typeof uploadFormSchema>>({
     resolver: zodResolver(uploadFormSchema),
@@ -161,32 +161,33 @@ export default function AgencyGuardsPage() {
 
   const watchedRegion = addGuardForm.watch('region');
 
-  useEffect(() => {
-      async function fetchRegions() {
-          if (!loggedInUser || !loggedInUser.country) return;
+  const fetchRegions = useCallback(async () => {
+      if (!loggedInUser || !loggedInUser.country) return;
 
-          const token = localStorage.getItem('token');
-          const countryId = loggedInUser.country.id;
-          const url = `/security/api/regions/?country=${countryId}`;
-          
-          try {
-              const data = await fetchData<{ regions: ApiRegion[] }>(url, {
-              headers: { 'Authorization': `Token ${token}` }
-              });
-              setApiRegions(data?.regions || []);
-          } catch (error) {
-              console.error("Failed to fetch regions:", error);
-              toast({
-              variant: "destructive",
-              title: "Error",
-              description: "Could not load regions for the selection.",
-              });
-          }
+      const token = localStorage.getItem('token');
+      const countryId = loggedInUser.country.id;
+      const url = `/security/api/regions/?country=${countryId}`;
+      
+      try {
+          const data = await fetchData<{ regions: ApiRegion[] }>(url, {
+          headers: { 'Authorization': `Token ${token}` }
+          });
+          setApiRegions(data?.regions || []);
+      } catch (error) {
+          console.error("Failed to fetch regions:", error);
+          toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Could not load regions for the selection.",
+          });
       }
-      if (isAddDialogOpen) {
-        fetchRegions();
-      }
-  }, [loggedInUser, isAddDialogOpen, toast]);
+  }, [loggedInUser, toast]);
+
+  useEffect(() => {
+    if (loggedInUser?.country) {
+      fetchRegions();
+    }
+  }, [loggedInUser, fetchRegions]);
 
   useEffect(() => {
       async function fetchCities() {
@@ -713,3 +714,5 @@ export default function AgencyGuardsPage() {
     </>
   );
 }
+
+    
