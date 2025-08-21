@@ -3,7 +3,7 @@
 
 import { useState, useMemo, Fragment, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@zod/resolvers/zod';
+import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import type { PatrollingOfficer as PatrollingOfficerType, Site, Organization } from '@/types';
 import {
