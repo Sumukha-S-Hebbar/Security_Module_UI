@@ -158,7 +158,7 @@ export default function AgencyPatrollingOfficersPage() {
     
     useEffect(() => {
         async function fetchRegions() {
-            if (!loggedInUser || !loggedInUser.country) return;
+            if (!isAddDialogOpen || !loggedInUser || !loggedInUser.country) return;
             const token = localStorage.getItem('token');
             const countryId = loggedInUser.country.id;
             const url = `/security/api/regions/?country=${countryId}`;
@@ -176,10 +176,8 @@ export default function AgencyPatrollingOfficersPage() {
                 });
             }
         }
-        if (isAddDialogOpen) {
-            fetchRegions();
-        }
-    }, [loggedInUser, isAddDialogOpen, toast]);
+        fetchRegions();
+    }, [isAddDialogOpen, loggedInUser, toast]);
 
     useEffect(() => {
         async function fetchCities() {
