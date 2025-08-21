@@ -92,7 +92,6 @@ export default function AgencySitesPage() {
         const sitesResponse = await fetchData<{results: Site[]}>(`/security/api/agency/${loggedInOrg.code}/sites/list/`, { headers: authHeader });
         setSites(sitesResponse?.results || []);
 
-        // Assuming other data needs to be fetched for assignment dropdowns
         const poResponse = await fetchData<{results: PatrollingOfficer[]}>(`/security/api/agency/${loggedInOrg.code}/patrolling-officers/list/`, { headers: authHeader });
         setPatrollingOfficers(poResponse?.results || []);
         
@@ -646,3 +645,4 @@ export default function AgencySitesPage() {
     </div>
   );
 }
+
