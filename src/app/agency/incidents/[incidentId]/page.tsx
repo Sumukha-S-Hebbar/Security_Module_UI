@@ -35,10 +35,8 @@ import type { Organization, Incident } from '@/types';
 
 
 const incidentTypes = [
-  'Suspicious Activity',
   'Theft',
   'Vandalism',
-  'Trespassing',
   'Safety Hazard',
   'Other',
 ] as const;
@@ -109,7 +107,7 @@ export default function AgencyIncidentReportPage() {
 
   const [description, setDescription] = useState('');
   const [incidentFiles, setIncidentFiles] = useState<FileList | null>(null);
-  const [incidentType, setIncidentType] = useState<Incident['incidentType']>();
+  const [incidentType, setIncidentType] = useState<typeof incidentTypes[number]>();
   const [lightboxImage, setLightboxImage] = useState<string | null>(null);
 
   useEffect(() => {
@@ -136,7 +134,9 @@ export default function AgencyIncidentReportPage() {
                 const data = response.data;
                 setIncident(data);
                 setDescription(data.incident_description || '');
-                setIncidentType(data.incident_type);
+                if (data.incident_type !== 'SOS' && incidentTypes.includes(data.incident_type as any)) {
+                    setIncidentType(data.incident_type as typeof incidentTypes[number]);
+                }
             } else {
                  toast({ variant: 'destructive', title: 'Error', description: 'Incident not found.' });
             }
@@ -463,7 +463,7 @@ export default function AgencyIncidentReportPage() {
                       <h3 className="text-xl font-semibold">Initial Incident Report</h3>
                        <div>
                         <Label htmlFor="incident-type" className="text-base">Incident Type</Label>
-                        <Select value={incidentType} onValueChange={(value) => setIncidentType(value as Incident['incidentType'])}>
+                        <Select value={incidentType} onValueChange={(value) => setIncidentType(value as typeof incidentTypes[number])}>
                           <SelectTrigger id="incident-type" className="mt-2">
                             <SelectValue placeholder="Select an incident type" />
                           </SelectTrigger>
