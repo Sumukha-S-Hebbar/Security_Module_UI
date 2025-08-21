@@ -488,7 +488,9 @@ export default function AgencySiteReportPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Incident ID</TableHead>
-                  <TableHead>Date & Time</TableHead>
+                  <TableHead>Incident Date</TableHead>
+                  <TableHead>Incident Time</TableHead>
+                  <TableHead>Patrolling Officer</TableHead>
                   <TableHead>Guard</TableHead>
                   <TableHead>Status</TableHead>
                 </TableRow>
@@ -506,7 +508,9 @@ export default function AgencySiteReportPage() {
                           <Link href={`/agency/incidents/${incident.id}`}>{incident.incident_id}</Link>
                         </Button>
                       </TableCell>
-                      <TableCell className="font-medium">{new Date(incident.incident_time).toLocaleString()}</TableCell>
+                      <TableCell className="font-medium">{new Date(incident.incident_time).toLocaleDateString()}</TableCell>
+                      <TableCell className="font-medium">{new Date(incident.incident_time).toLocaleTimeString()}</TableCell>
+                      <TableCell className="font-medium">{incident.patrol_officer_name || 'N/A'}</TableCell>
                       <TableCell className="font-medium">{incident.guard_name || 'N/A'}</TableCell>
                       <TableCell>{getStatusIndicator(incident.incident_status)}</TableCell>
                     </TableRow>
@@ -522,5 +526,3 @@ export default function AgencySiteReportPage() {
     </div>
   );
 }
-
-    
