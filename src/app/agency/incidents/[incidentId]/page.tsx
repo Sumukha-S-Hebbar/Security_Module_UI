@@ -86,8 +86,14 @@ type IncidentDetails = {
     } | null;
     incident_description: string | null;
     initial_incident_image_1: string | null;
+    initial_incident_image_2: string | null;
+    initial_incident_image_3: string | null;
+    initial_incident_image_4: string | null;
     resolution_notes: string | null;
     resolved_incident_image_1: string | null;
+    resolved_incident_image_2: string | null;
+    resolved_incident_image_3: string | null;
+    resolved_incident_image_4: string | null;
     resolved_at: string | null;
 };
 
@@ -509,7 +515,7 @@ export default function AgencyIncidentReportPage() {
                       </h4>
                       <p className="text-muted-foreground">{incident.incident_description}</p>
                   </div>
-                  {renderMediaGallery([incident.initial_incident_image_1], "Incident Media Evidence", getHintForIncident(incident))}
+                  {renderMediaGallery([incident.initial_incident_image_1, incident.initial_incident_image_2, incident.initial_incident_image_3, incident.initial_incident_image_4], "Incident Media Evidence", getHintForIncident(incident))}
                   
                   {incident.incident_status === 'Under Review' && (
                     <div>
@@ -533,7 +539,7 @@ export default function AgencyIncidentReportPage() {
                                 <p className="text-muted-foreground">{incident.resolution_notes}</p>
                             </div>
                           )}
-                           {renderMediaGallery([incident.resolved_incident_image_1], "Resolution Media Evidence", 'report document')}
+                           {renderMediaGallery([incident.resolved_incident_image_1, incident.resolved_incident_image_2, incident.resolved_incident_image_3, incident.resolved_incident_image_4], "Resolution Media Evidence", 'report document')}
                       </div>
                   )}
                 </div>
