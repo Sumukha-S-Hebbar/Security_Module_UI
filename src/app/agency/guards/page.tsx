@@ -304,14 +304,13 @@ export default function AgencyGuardsPage() {
       
       const matchesSearch =
         guardName.toLowerCase().includes(searchLower) ||
-        guard.employee_id.toLowerCase().includes(searchLower) ||
+        (guard.employee_id && guard.employee_id.toLowerCase().includes(searchLower)) ||
         (guard.site && guard.site.site_name.toLowerCase().includes(searchLower)) || false;
 
       const matchesSite = selectedSiteFilter === 'all' || guard.site?.id.toString() === selectedSiteFilter;
       
-      const matchesPatrollingOfficer = 
-        selectedPatrollingOfficerFilter === 'all' || 
-        guard.patrolling_officer?.id.toString() === selectedPatrollingOfficerFilter;
+      const poId = guard.patrolling_officer ? guard.patrolling_officer.id.toString() : null;
+      const matchesPatrollingOfficer = selectedPatrollingOfficerFilter === 'all' || poId === selectedPatrollingOfficerFilter;
         
       return matchesSearch && matchesSite && matchesPatrollingOfficer;
     });

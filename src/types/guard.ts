@@ -21,6 +21,8 @@ export type Guard = {
       profile_picture: string | null;
   } | null;
   incident_count: number;
+  region?: string;
+  city?: string;
 
   // Mock data fields that may not be in final API response
   name?: string;
@@ -33,5 +35,4 @@ export type Guard = {
     leaveDays: number;
   };
   patrollingOfficerId?: string;
-  city?: string;
 };

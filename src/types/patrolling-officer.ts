@@ -18,9 +18,10 @@ export type PatrollingOfficer = {
       site_name: string;
   } | null;
   assigned_sites_details?: any[];
+  region?: string;
+  city?: string;
 
   // Mock data fields that might not be in final API response
   routes?: string[];
   averageResponseTime?: number;
-  city?: string;
 };
