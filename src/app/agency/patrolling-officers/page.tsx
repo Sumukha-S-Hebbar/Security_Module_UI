@@ -93,6 +93,7 @@ export default function AgencyPatrollingOfficersPage() {
     const [isAdding, setIsAdding] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [expandedOfficerId, setExpandedOfficerId] = useState<number | null>(null);
+    const [newlyAddedOfficerId, setNewlyAddedOfficerId] = useState<number | null>(null);
 
     useEffect(() => {
         if (typeof window !== 'undefined') {
@@ -148,16 +149,61 @@ export default function AgencyPatrollingOfficersPage() {
 
     async function onAddSubmit(values: z.infer<typeof addPatrollingOfficerFormSchema>) {
         setIsAdding(true);
-        console.log('New patrolling officer data:', values);
-        await new Promise((resolve) => setTimeout(resolve, 1500));
-        toast({
-            title: 'Patrolling Officer Added',
-            description: `Patrolling Officer "${values.name}" has been created successfully.`,
-        });
-        addForm.reset();
-        setIsAdding(false);
-        setIsAddDialogOpen(false);
-        // fetchPatrollingOfficers(); // Re-fetch after adding
+        
+        if (!loggedInOrg) {
+            toast({ variant: 'destructive', title: 'Error', description: 'Organization information not found.'});
+            setIsAdding(false);
+            return;
+        }
+
+        const token = localStorage.getItem('token');
+        const API_URL = `${process.env.NEXT_PUBLIC_DJANGO_API_URL}/security/api/agency/${loggedInOrg.code}/patrolling-officers/add/`;
+
+        const [firstName, ...lastNameParts] = values.name.split(' ');
+        const lastName = lastNameParts.join(' ');
+        
+        try {
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Token ${token}`
+                },
+                body: JSON.stringify({
+                    first_name: firstName,
+                    last_name: lastName,
+                    email: values.email,
+                    phone: values.phone
+                })
+            });
+
+            const responseData = await response.json();
+            
+            if (!response.ok) {
+                const errorDetail = typeof responseData.detail === 'object' ? JSON.stringify(responseData.detail) : responseData.detail;
+                throw new Error(errorDetail || 'Failed to add patrolling officer.');
+            }
+
+            toast({
+                title: 'Patrolling Officer Added',
+                description: `Patrolling Officer "${values.name}" has been created successfully.`,
+            });
+            
+            addForm.reset();
+            setIsAdding(false);
+            setIsAddDialogOpen(false);
+            await fetchPatrollingOfficers(); // Re-fetch after adding
+            setNewlyAddedOfficerId(responseData.data.id);
+            setTimeout(() => setNewlyAddedOfficerId(null), 2000);
+
+        } catch(error: any) {
+             toast({
+                variant: 'destructive',
+                title: 'Add Failed',
+                description: error.message,
+            });
+             setIsAdding(false);
+        }
     }
 
     const handleDownloadTemplate = () => {
@@ -374,12 +420,16 @@ export default function AgencyPatrollingOfficersPage() {
                             filteredPatrollingOfficers.map((patrollingOfficer) => {
                                 const isExpanded = expandedOfficerId === patrollingOfficer.id;
                                 const officerName = `${patrollingOfficer.first_name} ${patrollingOfficer.last_name || ''}`.trim();
+                                const isNewlyAdded = newlyAddedOfficerId === patrollingOfficer.id;
                                 
                                 return (
                                 <Fragment key={patrollingOfficer.id}>
                                     <TableRow 
                                     onClick={() => handleRowClick(patrollingOfficer.id)}
-                                    className="cursor-pointer hover:bg-accent hover:text-accent-foreground group"
+                                    className={cn(
+                                        "cursor-pointer hover:bg-accent hover:text-accent-foreground group",
+                                        isNewlyAdded && "highlight-row"
+                                    )}
                                     >
                                     <TableCell>
                                         <Button asChild variant="link" className="p-0 h-auto font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
@@ -430,8 +480,8 @@ export default function AgencyPatrollingOfficersPage() {
                                         <TableRow className="bg-muted/50 hover:bg-muted/50">
                                             <TableCell colSpan={5} className="p-0">
                                                 <div className="p-4">
-                                                    <h4 className="font-semibold mb-2">Sites Assigned to {officerName}</h4>
-                                                    {(patrollingOfficer.assigned_sites_details && patrollingOfficer.assigned_sites_details.length > 0) ? (
+                                                    <h4 className="font-semibold mb-2">Site Assigned to {officerName}</h4>
+                                                    {patrollingOfficer.site_details ? (
                                                         <Table>
                                                             <TableHeader>
                                                                 <TableRow>
@@ -441,21 +491,19 @@ export default function AgencyPatrollingOfficersPage() {
                                                                 </TableRow>
                                                             </TableHeader>
                                                             <TableBody>
-                                                                {patrollingOfficer.assigned_sites_details.map((siteDetail) => (
-                                                                    <TableRow 
-                                                                    key={siteDetail.site_details.id} 
-                                                                    onClick={() => router.push(`/agency/sites/${siteDetail.site_details.id}`)}
+                                                                <TableRow 
+                                                                    key={patrollingOfficer.site_details.id} 
+                                                                    onClick={() => router.push(`/agency/sites/${patrollingOfficer.site_details!.id}`)}
                                                                     className="cursor-pointer hover:bg-accent hover:text-accent-foreground group"
-                                                                    >
-                                                                        <TableCell>
-                                                                            <Button asChild variant="link" className="p-0 h-auto font-medium text-accent group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
-                                                                            <Link href={`/agency/sites/${siteDetail.site_details.id}`}>{siteDetail.site_details.tb_site_id}</Link>
-                                                                            </Button>
-                                                                        </TableCell>
-                                                                        <TableCell className="font-medium">{siteDetail.site_details.org_site_id}</TableCell>
-                                                                        <TableCell>{siteDetail.site_details.site_name}</TableCell>
-                                                                    </TableRow>
-                                                                ))}
+                                                                >
+                                                                    <TableCell>
+                                                                        <Button asChild variant="link" className="p-0 h-auto font-medium text-accent group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
+                                                                        <Link href={`/agency/sites/${patrollingOfficer.site_details!.id}`}>{patrollingOfficer.site_details.tb_site_id}</Link>
+                                                                        </Button>
+                                                                    </TableCell>
+                                                                    <TableCell className="font-medium">{patrollingOfficer.site_details.org_site_id}</TableCell>
+                                                                    <TableCell>{patrollingOfficer.site_details.site_name}</TableCell>
+                                                                </TableRow>
                                                             </TableBody>
                                                         </Table>
                                                     ) : (
