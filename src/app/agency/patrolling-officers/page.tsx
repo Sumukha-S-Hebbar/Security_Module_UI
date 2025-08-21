@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useMemo, Fragment, useEffect, useCallback } from 'react';
@@ -108,7 +107,7 @@ export default function AgencyPatrollingOfficersPage() {
         if (!loggedInOrg) return;
         setIsLoading(true);
         const token = localStorage.getItem('token');
-        const url = `/security/api/agency/${loggedInOrg.code}/patrol_officers/list/`;
+        const url = `/security/api/agency/${loggedInOrg.code}/patrolling-officers/list/`;
         try {
             const data = await fetchData<{ results: ApiPatrollingOfficer[] }>(url, {
                 headers: { 'Authorization': `Token ${token}` }
@@ -532,4 +531,3 @@ export default function AgencyPatrollingOfficersPage() {
         </div>
       </>
     );
-}
