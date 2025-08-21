@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useMemo, useEffect, useCallback } from 'react';
@@ -193,6 +194,7 @@ export default function AgencyGuardsPage() {
           }
           
           setIsCitiesLoading(true);
+          addGuardForm.resetField('city');
           const token = localStorage.getItem('token');
           const countryId = loggedInUser.country.id;
           const url = `/security/api/cities/?country=${countryId}&region=${watchedRegion}`;
@@ -216,7 +218,6 @@ export default function AgencyGuardsPage() {
       }
 
       if (watchedRegion) {
-        addGuardForm.resetField('city');
         fetchCities();
       }
   }, [watchedRegion, loggedInUser, toast, addGuardForm]);
