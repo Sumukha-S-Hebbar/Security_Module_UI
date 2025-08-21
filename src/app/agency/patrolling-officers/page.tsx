@@ -57,7 +57,14 @@ type ApiPatrollingOfficer = {
         site_name: string;
     } | null;
     incidents_count: number;
-    assigned_sites_details?: any[]; // Keep this for expand logic
+    assigned_sites_details?: {
+        site_details: {
+            id: number;
+            tb_site_id: string;
+            org_site_id: string;
+            site_name: string;
+        }
+    }[];
 };
 
 const uploadFormSchema = z.object({
@@ -419,12 +426,12 @@ export default function AgencyPatrollingOfficersPage() {
                                         </div>
                                     </TableCell>
                                     </TableRow>
-                                    {isExpanded && patrollingOfficer.assigned_sites_details && (
+                                    {isExpanded && (
                                         <TableRow className="bg-muted/50 hover:bg-muted/50">
                                             <TableCell colSpan={5} className="p-0">
                                                 <div className="p-4">
                                                     <h4 className="font-semibold mb-2">Sites Assigned to {officerName}</h4>
-                                                    {patrollingOfficer.assigned_sites_details && patrollingOfficer.assigned_sites_details.length > 0 ? (
+                                                    {(patrollingOfficer.assigned_sites_details && patrollingOfficer.assigned_sites_details.length > 0) ? (
                                                         <Table>
                                                             <TableHeader>
                                                                 <TableRow>
@@ -434,19 +441,19 @@ export default function AgencyPatrollingOfficersPage() {
                                                                 </TableRow>
                                                             </TableHeader>
                                                             <TableBody>
-                                                                {patrollingOfficer.assigned_sites_details.map((site: any) => (
+                                                                {patrollingOfficer.assigned_sites_details.map((siteDetail) => (
                                                                     <TableRow 
-                                                                    key={site.id} 
-                                                                    onClick={() => router.push(`/agency/sites/${site.id}`)}
+                                                                    key={siteDetail.site_details.id} 
+                                                                    onClick={() => router.push(`/agency/sites/${siteDetail.site_details.id}`)}
                                                                     className="cursor-pointer hover:bg-accent hover:text-accent-foreground group"
                                                                     >
                                                                         <TableCell>
                                                                             <Button asChild variant="link" className="p-0 h-auto font-medium text-accent group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
-                                                                            <Link href={`/agency/sites/${site.id}`}>{site.tb_site_id}</Link>
+                                                                            <Link href={`/agency/sites/${siteDetail.site_details.id}`}>{siteDetail.site_details.tb_site_id}</Link>
                                                                             </Button>
                                                                         </TableCell>
-                                                                        <TableCell className="font-medium">{site.org_site_id}</TableCell>
-                                                                        <TableCell>{site.site_name}</TableCell>
+                                                                        <TableCell className="font-medium">{siteDetail.site_details.org_site_id}</TableCell>
+                                                                        <TableCell>{siteDetail.site_details.site_name}</TableCell>
                                                                     </TableRow>
                                                                 ))}
                                                             </TableBody>
