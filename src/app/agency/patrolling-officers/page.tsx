@@ -99,7 +99,7 @@ export default function AgencyPatrollingOfficersPage() {
         if (!loggedInOrg) return;
         setIsLoading(true);
         const token = localStorage.getItem('token');
-        const url = `/security/api/agency/${loggedInOrg.code}/patrolling-officers/list/`;
+        const url = `/security/api/agency/${loggedInOrg.code}/patrol_officers/list/`;
         try {
             const data = await fetchData<{ results: ApiPatrollingOfficer[] }>(url, {
                 headers: { 'Authorization': `Token ${token}` }
