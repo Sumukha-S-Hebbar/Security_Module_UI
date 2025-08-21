@@ -57,6 +57,7 @@ type ApiPatrollingOfficer = {
         site_name: string;
     } | null;
     incidents_count: number;
+    assigned_sites_details?: any[];
 };
 
 const uploadFormSchema = z.object({
@@ -236,6 +237,12 @@ export default function AgencyPatrollingOfficersPage() {
         const token = localStorage.getItem('token');
         const API_URL = `${process.env.NEXT_PUBLIC_DJANGO_API_URL}/security/api/agency/${loggedInOrg.code}/patrolling-officers/add/`;
         
+        const payload = {
+            ...values,
+            region: parseInt(values.region, 10),
+            city: parseInt(values.city, 10),
+        };
+
         try {
             const response = await fetch(API_URL, {
                 method: 'POST',
@@ -243,7 +250,7 @@ export default function AgencyPatrollingOfficersPage() {
                     'Content-Type': 'application/json',
                     'Authorization': `Token ${token}`
                 },
-                body: JSON.stringify(values)
+                body: JSON.stringify(payload)
             });
 
             const responseData = await response.json();
