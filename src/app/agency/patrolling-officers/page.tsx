@@ -3,7 +3,7 @@
 
 import { useState, useMemo, Fragment, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { zodResolver } from '@zod/resolvers/zod';
 import * as z from 'zod';
 import type { PatrollingOfficer as PatrollingOfficerType, Site, Organization } from '@/types';
 import {
@@ -173,9 +173,9 @@ export default function AgencyPatrollingOfficersPage() {
         router.push(`/agency/patrolling-officers/${officerId}`);
     };
 
-    const handleExpandClick = (e: React.MouseEvent, officer: ApiPatrollingOfficer) => {
+    const handleExpandClick = (e: React.MouseEvent, officerId: number) => {
         e.stopPropagation();
-        setExpandedOfficerId(prevId => (prevId === officer.id ? null : officer.id));
+        setExpandedOfficerId(prevId => (prevId === officerId ? null : officerId));
     };
 
     return (
@@ -402,7 +402,7 @@ export default function AgencyPatrollingOfficersPage() {
                                       <Button
                                         variant="link"
                                         className="p-0 h-auto flex items-center gap-2 text-accent group-hover:text-accent-foreground"
-                                        onClick={(e) => handleExpandClick(e, patrollingOfficer)}
+                                        onClick={(e) => handleExpandClick(e, patrollingOfficer.id)}
                                         disabled={patrollingOfficer.sites_assigned_count === 0}
                                         >
                                             <Building2 className="h-4 w-4" />
