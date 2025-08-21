@@ -177,48 +177,46 @@ export default function RootPage() {
             
             <TabsContent value="signin" className="mt-8">
               <Card className="border-0 shadow-none">
-                <Form {...form}>
-                  <form onSubmit={handleSignIn}>
-                    <CardHeader>
-                      <CardTitle className="text-2xl font-bold">Sign In</CardTitle>
-                      <CardDescription>
-                        Enter your credentials to access your portal.
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="username-in">Username</Label>
-                        <Input 
-                          id="username-in" 
-                          type="text" 
-                          placeholder="Enter your username" 
-                          required 
-                          value={username}
-                          onChange={(e) => setUsername(e.target.value)}
-                          disabled={isLoading}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="password-in">Password</Label>
-                        <Input 
-                          id="password-in" 
-                          type="password" 
-                          placeholder="Enter your password"
-                          required 
-                          value={password}
-                          onChange={(e) => setPassword(e.target.value)}
-                          disabled={isLoading}
-                        />
-                      </div>
-                    </CardContent>
-                    <CardFooter>
-                      <Button type="submit" className="w-full bg-[#1e90ff] hover:bg-[#1c86ee]" disabled={isLoading}>
-                        {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        Sign In
-                      </Button>
-                    </CardFooter>
-                  </form>
-                </Form>
+                <form onSubmit={handleSignIn}>
+                  <CardHeader>
+                    <CardTitle className="text-2xl font-bold">Sign In</CardTitle>
+                    <CardDescription>
+                      Enter your credentials to access your portal.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="username-in">Username</Label>
+                      <Input 
+                        id="username-in" 
+                        type="text" 
+                        placeholder="Enter your username" 
+                        required 
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                        disabled={isLoading}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="password-in">Password</Label>
+                      <Input 
+                        id="password-in" 
+                        type="password" 
+                        placeholder="Enter your password"
+                        required 
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        disabled={isLoading}
+                      />
+                    </div>
+                  </CardContent>
+                  <CardFooter>
+                    <Button type="submit" className="w-full bg-[#1e90ff] hover:bg-[#1c86ee]" disabled={isLoading}>
+                      {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      Sign In
+                    </Button>
+                  </CardFooter>
+                </form>
               </Card>
             </TabsContent>
             
