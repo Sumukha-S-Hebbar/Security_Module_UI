@@ -160,31 +160,32 @@ export default function AgencyGuardsPage() {
   });
 
   const watchedRegion = addGuardForm.watch('region');
-
-  useEffect(() => {
-      async function fetchRegions() {
-          if (!loggedInUser || !loggedInUser.country || !isAddDialogOpen) return;
-
-          const token = localStorage.getItem('token');
-          const countryId = loggedInUser.country.id;
-          const url = `/security/api/regions/?country=${countryId}`;
-          
-          try {
-              const data = await fetchData<{ regions: ApiRegion[] }>(url, {
+  
+  const fetchRegions = useCallback(async () => {
+      if (!loggedInUser || !loggedInUser.country) return;
+      const token = localStorage.getItem('token');
+      const countryId = loggedInUser.country.id;
+      const url = `/security/api/regions/?country=${countryId}`;
+      try {
+          const data = await fetchData<{ regions: ApiRegion[] }>(url, {
               headers: { 'Authorization': `Token ${token}` }
-              });
-              setApiRegions(data?.regions || []);
-          } catch (error) {
-              console.error("Failed to fetch regions:", error);
-              toast({
+          });
+          setApiRegions(data?.regions || []);
+      } catch (error) {
+          console.error("Failed to fetch regions:", error);
+          toast({
               variant: "destructive",
               title: "Error",
               description: "Could not load regions for the selection.",
-              });
-          }
+          });
       }
+  }, [loggedInUser, toast]);
+
+  useEffect(() => {
+    if (isAddDialogOpen) {
       fetchRegions();
-  }, [loggedInUser, isAddDialogOpen, toast]);
+    }
+  }, [isAddDialogOpen, fetchRegions]);
 
   useEffect(() => {
       async function fetchCities() {
