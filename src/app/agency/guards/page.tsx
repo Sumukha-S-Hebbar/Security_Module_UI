@@ -112,41 +112,42 @@ export default function AgencyGuardsPage() {
         }
     }
   }, []);
+  
+  const fetchGuardsData = async () => {
+    if (!loggedInOrg) return;
+      setIsLoading(true);
+      const token = localStorage.getItem('token');
+      const authHeader = { Authorization: `Token ${token}` };
+      const orgCode = loggedInOrg.code;
+
+      try {
+          const guardsResponse = await fetchData<{ results: Guard[] }>(`/security/api/agency/${orgCode}/guards/list/`, { headers: authHeader });
+          setGuards(guardsResponse?.results || []);
+
+          const sitesResponse = await fetchData<{ results: Site[] }>(`/security/api/agency/${orgCode}/sites/list/`, { headers: authHeader });
+          setSites(sitesResponse?.results || []);
+          
+          const poResponse = await fetchData<{ results: any[] }>(`/security/api/agency/${orgCode}/patrolling-officers/list/`, { headers: authHeader });
+          const formattedPOs = poResponse?.results.map(po => ({
+              id: po.id.toString(),
+              name: `${po.first_name} ${po.last_name || ''}`.trim(),
+              email: po.email,
+              phone: po.phone,
+              avatar: po.profile_picture,
+          })) || [];
+          setPatrollingOfficers(formattedPOs);
+
+      } catch (error) {
+          toast({ variant: 'destructive', title: 'Error', description: 'Failed to load guards data.' });
+      } finally {
+          setIsLoading(false);
+      }
+  };
 
   useEffect(() => {
-    if (!loggedInOrg) return;
-
-    const fetchGuardsData = async () => {
-        setIsLoading(true);
-        const token = localStorage.getItem('token');
-        const authHeader = { Authorization: `Token ${token}` };
-        const orgCode = loggedInOrg.code;
-
-        try {
-            const guardsResponse = await fetchData<{ results: Guard[] }>(`/security/api/agency/${orgCode}/guards/list/`, { headers: authHeader });
-            setGuards(guardsResponse?.results || []);
-
-            const sitesResponse = await fetchData<{ results: Site[] }>(`/security/api/agency/${orgCode}/sites/list/`, { headers: authHeader });
-            setSites(sitesResponse?.results || []);
-            
-            const poResponse = await fetchData<{ results: any[] }>(`/security/api/agency/${orgCode}/patrolling-officers/list/`, { headers: authHeader });
-            const formattedPOs = poResponse?.results.map(po => ({
-                id: po.id.toString(),
-                name: `${po.first_name} ${po.last_name || ''}`.trim(),
-                email: po.email,
-                phone: po.phone,
-                avatar: po.profile_picture,
-            })) || [];
-            setPatrollingOfficers(formattedPOs);
-
-        } catch (error) {
-            toast({ variant: 'destructive', title: 'Error', description: 'Failed to load guards data.' });
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    fetchGuardsData();
+    if(loggedInOrg) {
+      fetchGuardsData();
+    }
   }, [loggedInOrg, toast]);
 
   const uploadForm = useForm<z.infer<typeof uploadFormSchema>>({
@@ -237,15 +238,57 @@ export default function AgencyGuardsPage() {
 
   async function onAddGuardSubmit(values: z.infer<typeof addGuardFormSchema>) {
     setIsAdding(true);
-    console.log('New guard data:', values);
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    toast({
-      title: 'Guard Added',
-      description: `Guard "${values.first_name}" has been added successfully.`,
-    });
-    addGuardForm.reset();
-    setIsAdding(false);
-    setIsAddDialogOpen(false);
+    
+    if (!loggedInOrg) {
+        toast({ variant: 'destructive', title: 'Error', description: 'Organization information not found.'});
+        setIsAdding(false);
+        return;
+    }
+
+    const token = localStorage.getItem('token');
+    const API_URL = `${process.env.NEXT_PUBLIC_DJANGO_API_URL}/security/api/agency/${loggedInOrg.code}/guards/add/`;
+
+    const payload = {
+        ...values,
+        region: parseInt(values.region, 10),
+        city: parseInt(values.city, 10),
+    };
+
+    try {
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Token ${token}`
+            },
+            body: JSON.stringify(payload)
+        });
+
+        const responseData = await response.json();
+        
+        if (!response.ok) {
+            const errorDetail = typeof responseData.detail === 'object' ? JSON.stringify(responseData.detail) : responseData.detail;
+            throw new Error(errorDetail || 'Failed to add guard.');
+        }
+
+        toast({
+            title: 'Guard Added',
+            description: responseData.message,
+        });
+        
+        addGuardForm.reset();
+        setIsAdding(false);
+        setIsAddDialogOpen(false);
+        await fetchGuardsData(); // Re-fetch after adding
+
+    } catch(error: any) {
+         toast({
+            variant: 'destructive',
+            title: 'Add Failed',
+            description: error.message,
+        });
+         setIsAdding(false);
+    }
   }
 
   const handleDownloadTemplate = () => {
@@ -666,3 +709,5 @@ export default function AgencyGuardsPage() {
     </>
   );
 }
+
+    
