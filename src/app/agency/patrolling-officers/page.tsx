@@ -210,7 +210,7 @@ export default function AgencyPatrollingOfficersPage() {
         }
 
         if (watchedRegion) {
-          addForm.resetField('city');
+          addForm.setValue('city', '');
           fetchCities();
         }
     }, [watchedRegion, loggedInUser, toast, addForm]);
@@ -688,5 +688,3 @@ export default function AgencyPatrollingOfficersPage() {
       </>
     );
 }
-
-    

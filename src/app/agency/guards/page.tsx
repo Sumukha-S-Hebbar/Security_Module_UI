@@ -216,7 +216,7 @@ export default function AgencyGuardsPage() {
       }
 
       if (watchedRegion) {
-        addGuardForm.resetField('city');
+        addGuardForm.setValue('city', '');
         fetchCities();
       }
   }, [watchedRegion, loggedInUser, toast, addGuardForm]);
@@ -709,5 +709,3 @@ export default function AgencyGuardsPage() {
     </>
   );
 }
-
-    
