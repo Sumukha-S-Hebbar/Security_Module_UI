@@ -156,7 +156,7 @@ export default function AgencyPatrollingOfficersPage() {
 
     useEffect(() => {
         async function fetchRegions() {
-            if (!loggedInUser || !loggedInUser.country || !isAddDialogOpen) return;
+            if (!loggedInUser || !loggedInUser.country) return;
 
             const token = localStorage.getItem('token');
             const countryId = loggedInUser.country.id;
@@ -176,7 +176,9 @@ export default function AgencyPatrollingOfficersPage() {
                 });
             }
         }
-        fetchRegions();
+        if (isAddDialogOpen) {
+            fetchRegions();
+        }
     }, [loggedInUser, isAddDialogOpen, toast]);
 
     useEffect(() => {
@@ -210,7 +212,7 @@ export default function AgencyPatrollingOfficersPage() {
         }
 
         if (watchedRegion) {
-          addForm.resetField('city');
+          addForm.setValue('city', '');
           fetchCities();
         }
     }, [watchedRegion, loggedInUser, toast, addForm]);
@@ -238,7 +240,7 @@ export default function AgencyPatrollingOfficersPage() {
         }
 
         const token = localStorage.getItem('token');
-        const API_URL = `${process.env.NEXT_PUBLIC_DJANGO_API_URL}/security/api/agency/${loggedInOrg.code}/patrolling-officers/add/`;
+        const API_URL = `${process.env.NEXT_PUBLIC_DJANGO_API_URL}/security/api/agency/${loggedInOrg.code}/patrol_officers/add/`;
         
         const payload = {
             ...values,

@@ -148,7 +148,7 @@ export default function AgencyGuardsPage() {
     if(loggedInOrg) {
       fetchGuardsData();
     }
-  }, [loggedInOrg, toast]);
+  }, [loggedInOrg]);
 
   const uploadForm = useForm<z.infer<typeof uploadFormSchema>>({
     resolver: zodResolver(uploadFormSchema),
@@ -163,7 +163,7 @@ export default function AgencyGuardsPage() {
 
   useEffect(() => {
       async function fetchRegions() {
-          if (!loggedInUser || !loggedInUser.country || !isAddDialogOpen) return;
+          if (!loggedInUser || !loggedInUser.country) return;
 
           const token = localStorage.getItem('token');
           const countryId = loggedInUser.country.id;
@@ -183,7 +183,9 @@ export default function AgencyGuardsPage() {
               });
           }
       }
-      fetchRegions();
+      if (isAddDialogOpen) {
+        fetchRegions();
+      }
   }, [loggedInUser, isAddDialogOpen, toast]);
 
   useEffect(() => {
@@ -217,7 +219,7 @@ export default function AgencyGuardsPage() {
       }
 
       if (watchedRegion) {
-        addGuardForm.resetField('city');
+        addGuardForm.setValue('city', '');
         fetchCities();
       }
   }, [watchedRegion, loggedInUser, toast, addGuardForm]);
