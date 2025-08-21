@@ -127,7 +127,7 @@ export default function AgencyGuardsPage() {
           const sitesResponse = await fetchData<{ results: Site[] }>(`/security/api/agency/${orgCode}/sites/list/`, { headers: authHeader });
           setSites(sitesResponse?.results || []);
           
-          const poResponse = await fetchData<{ results: any[] }>(`/security/api/agency/${orgCode}/patrolling-officers/list/`, { headers: authHeader });
+          const poResponse = await fetchData<{ results: any[] }>(`/security/api/agency/${orgCode}/patrol_officers/list/`, { headers: authHeader });
           const formattedPOs = poResponse?.results.map(po => ({
               id: po.id.toString(),
               name: `${po.first_name} ${po.last_name || ''}`.trim(),

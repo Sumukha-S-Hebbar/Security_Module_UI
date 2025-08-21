@@ -644,10 +644,10 @@ export default function AgencyPatrollingOfficersPage() {
                                                     <h4 className="font-semibold mb-2">Site Assigned to {officerName}</h4>
                                                     <Table>
                                                         <TableHeader>
-                                                            <TableRow>
-                                                                <TableHead>Towerbuddy ID</TableHead>
-                                                                <TableHead>Site ID</TableHead>
-                                                                <TableHead>Site Name</TableHead>
+                                                            <TableRow className="border-b-primary/20 hover:bg-transparent">
+                                                                <TableHead className="text-foreground">Towerbuddy ID</TableHead>
+                                                                <TableHead className="text-foreground">Site ID</TableHead>
+                                                                <TableHead className="text-foreground">Site Name</TableHead>
                                                             </TableRow>
                                                         </TableHeader>
                                                         <TableBody>
