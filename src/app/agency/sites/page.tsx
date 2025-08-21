@@ -55,7 +55,6 @@ export default function AgencySitesPage() {
 
   const [sites, setSites] = useState<Site[]>([]);
   const [patrollingOfficers, setPatrollingOfficers] = useState<PatrollingOfficer[]>([]);
-  const [unassignedGuards, setUnassignedGuards] = useState<Guard[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loggedInOrg, setLoggedInOrg] = useState<Organization | null>(null);
   
@@ -92,12 +91,9 @@ export default function AgencySitesPage() {
         const sitesResponse = await fetchData<{results: Site[]}>(`/security/api/agency/${loggedInOrg.code}/sites/list/`, { headers: authHeader });
         setSites(sitesResponse?.results || []);
 
-        const poResponse = await fetchData<{results: PatrollingOfficer[]}>(`/security/api/agency/${loggedInOrg.code}/patrolling-officers/list/`, { headers: authHeader });
+        const poResponse = await fetchData<{results: PatrollingOfficer[]}>(`/security/api/agency/${loggedInOrg.code}/patrol_officers/list/`, { headers: authHeader });
         setPatrollingOfficers(poResponse?.results || []);
         
-        const guardsResponse = await fetchData<{results: Guard[]}>(`/security/api/agency/${loggedInOrg.code}/guards/list/?is_assigned=false`, { headers: authHeader });
-        setUnassignedGuards(guardsResponse?.results || []);
-
 
     } catch (error) {
         toast({
@@ -286,48 +282,6 @@ export default function AgencySitesPage() {
     });
   }, [unassignedSearchQuery, unassignedSites, unassignedSelectedRegion, unassignedSelectedCity]);
 
-  const renderGuardSelection = (site: Site) => {
-    const guardsInCity = unassignedGuards.filter(guard => guard.city === site.city);
-    const guardsNotInCity = unassignedGuards.filter(guard => guard.city !== site.city);
-
-    const renderItems = (guardList: Guard[]) => guardList.map((guard) => {
-        const guardName = `${guard.first_name} ${guard.last_name || ''}`.trim();
-        const isChecked = assignment[site.id.toString()]?.guardIds?.includes(guard.id.toString());
-        return (
-          <DropdownMenuCheckboxItem
-            key={guard.id}
-            checked={isChecked}
-            onSelect={(e) => e.preventDefault()}
-            onCheckedChange={() => handleGuardSelect(site.id.toString(), guard.id.toString())}
-          >
-            {guardName}
-          </DropdownMenuCheckboxItem>
-        )
-      });
-      
-    return (
-        <DropdownMenuContent className="w-64 font-medium">
-            <DropdownMenuLabel>Available Guards</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            {guardsInCity.length > 0 && (
-                <>
-                    <DropdownMenuLabel className="text-xs font-normal text-muted-foreground px-2">In {site.city}</DropdownMenuLabel>
-                    {renderItems(guardsInCity)}
-                </>
-            )}
-            {guardsNotInCity.length > 0 && (
-                <>
-                     {guardsInCity.length > 0 && <DropdownMenuSeparator />}
-                    <DropdownMenuLabel className="text-xs font-normal text-muted-foreground px-2">Other Cities</DropdownMenuLabel>
-                    {renderItems(guardsNotInCity)}
-                </>
-            )}
-            {unassignedGuards.length === 0 && (
-                <div className="px-2 py-1.5 text-sm text-muted-foreground font-medium">No unassigned guards</div>
-            )}
-      </DropdownMenuContent>
-    )
-  }
   
   const renderPatrollingOfficerSelection = (site: Site) => {
      const officersInCity = patrollingOfficers.filter(po => po.city === site.city);
@@ -598,7 +552,9 @@ export default function AgencySitesPage() {
                               Select Guards ({assignment[site.id.toString()]?.guardIds?.length || 0})
                             </Button>
                           </DropdownMenuTrigger>
-                          {renderGuardSelection(site)}
+                          <DropdownMenuContent>
+                             <DropdownMenuLabel>No guards available</DropdownMenuLabel>
+                          </DropdownMenuContent>
                         </DropdownMenu>
                       </div>
                     </TableCell>
@@ -645,4 +601,3 @@ export default function AgencySitesPage() {
     </div>
   );
 }
-
