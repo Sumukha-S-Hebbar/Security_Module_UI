@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
@@ -87,11 +88,11 @@ type AgencyReportData = {
     resolved_incidents_count: number;
     performance: {
         filters_applied: string;
-        overall_performance: string;
-        incident_resolution_rate: string;
-        site_visit_accuracy: string;
-        guard_checkin_accuracy: string;
-        selfie_checkin_accuracy?: string | null;
+        overall_performance: number;
+        incident_resolution_rate: number;
+        site_visit_accuracy: number;
+        guard_checkin_accuracy: number;
+        selfie_checkin_accuracy: number | null;
     };
     assigned_sites: {
         id: number;
@@ -133,11 +134,11 @@ const getPerformanceColor = (value: number) => {
 };
 
 
-const parsePerformanceValue = (value: string | undefined | null): number => {
-    if (typeof value !== 'string' || value === 'N/A' || value === null) {
+const parsePerformanceValue = (value: number | undefined | null): number => {
+    if (typeof value !== 'number' || value === null) {
         return 0;
     }
-    return parseFloat(value.replace('%', ''));
+    return value;
 };
 
 const chartConfig = {
