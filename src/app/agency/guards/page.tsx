@@ -184,12 +184,6 @@ export default function AgencyGuardsPage() {
   }, [loggedInUser, toast]);
 
   useEffect(() => {
-    if (loggedInUser?.country) {
-      fetchRegions();
-    }
-  }, [loggedInUser, fetchRegions]);
-
-  useEffect(() => {
       async function fetchCities() {
           if (!watchedRegion || !loggedInUser || !loggedInUser.country) {
               setApiCities([]);
@@ -425,7 +419,7 @@ export default function AgencyGuardsPage() {
                 </Dialog>
                 <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
                     <DialogTrigger asChild>
-                        <Button variant="outline" className="bg-[#00B4D8] hover:bg-[#00B4D8]/90 text-white">
+                        <Button variant="outline" className="bg-[#00B4D8] hover:bg-[#00B4D8]/90 text-white" onClick={fetchRegions}>
                             <PlusCircle className="mr-2 h-4 w-4" />
                             Add Guard
                         </Button>
@@ -714,5 +708,3 @@ export default function AgencyGuardsPage() {
     </>
   );
 }
-
-    

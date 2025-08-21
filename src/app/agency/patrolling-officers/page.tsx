@@ -140,8 +140,10 @@ export default function AgencyPatrollingOfficersPage() {
     }, [loggedInOrg, toast]);
 
     useEffect(() => {
-        fetchPatrollingOfficers();
-    }, [fetchPatrollingOfficers]);
+        if(loggedInOrg) {
+            fetchPatrollingOfficers();
+        }
+    }, [loggedInOrg, fetchPatrollingOfficers]);
 
     const uploadForm = useForm<z.infer<typeof uploadFormSchema>>({
         resolver: zodResolver(uploadFormSchema),
@@ -175,12 +177,6 @@ export default function AgencyPatrollingOfficersPage() {
             });
         }
     }, [loggedInUser, toast]);
-
-    useEffect(() => {
-        if (loggedInUser?.country) {
-            fetchRegions();
-        }
-    }, [loggedInUser, fetchRegions]);
 
     useEffect(() => {
         async function fetchCities() {
@@ -390,7 +386,7 @@ export default function AgencyPatrollingOfficersPage() {
                     </Dialog>
                     <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
                         <DialogTrigger asChild>
-                            <Button variant="outline" className="bg-[#00B4D8] hover:bg-[#00B4D8]/90 text-white">
+                            <Button variant="outline" className="bg-[#00B4D8] hover:bg-[#00B4D8]/90 text-white" onClick={fetchRegions}>
                                 <PlusCircle className="mr-2 h-4 w-4" />
                                 Add Patrolling Officer
                             </Button>
@@ -691,5 +687,3 @@ export default function AgencyPatrollingOfficersPage() {
       </>
     );
 }
-
-    
