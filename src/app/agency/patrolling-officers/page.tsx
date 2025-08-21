@@ -4,7 +4,7 @@ import { useState, useMemo, Fragment, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import type { PatrollingOfficer as PatrollingOfficerType, Site, Organization } from '@/types';
+import type { PatrollingOfficer as PatrollingOfficerType, Site, Organization, User } from '@/types';
 import {
   Card,
   CardContent,
@@ -40,6 +40,7 @@ import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { fetchData } from '@/lib/api';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 type ApiPatrollingOfficer = {
     id: number;
@@ -66,10 +67,24 @@ const uploadFormSchema = z.object({
 });
 
 const addPatrollingOfficerFormSchema = z.object({
-    name: z.string().min(1, { message: 'Patrolling officer name is required.' }),
-    phone: z.string().min(1, { message: 'Phone is required.' }),
+    first_name: z.string().min(1, { message: 'First name is required.' }),
+    last_name: z.string().optional(),
     email: z.string().email({ message: 'Valid email is required.' }),
+    employee_id: z.string().min(1, { message: 'Employee ID is required.' }),
+    phone: z.string().min(1, { message: 'Phone is required.' }),
+    region: z.string().min(1, { message: 'Region is required.' }),
+    city: z.string().min(1, { message: 'City is required.' }),
 });
+
+type ApiRegion = {
+  id: number;
+  name: string;
+};
+
+type ApiCity = {
+    id: number;
+    name: string;
+}
 
 export default function AgencyPatrollingOfficersPage() {
     const { toast } = useToast();
@@ -77,6 +92,7 @@ export default function AgencyPatrollingOfficersPage() {
     const [patrollingOfficers, setPatrollingOfficers] = useState<ApiPatrollingOfficer[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [loggedInOrg, setLoggedInOrg] = useState<Organization | null>(null);
+    const [loggedInUser, setLoggedInUser] = useState<User | null>(null);
 
     const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -85,12 +101,21 @@ export default function AgencyPatrollingOfficersPage() {
     const [searchQuery, setSearchQuery] = useState('');
     const [expandedOfficerId, setExpandedOfficerId] = useState<number | null>(null);
     const [newlyAddedOfficerId, setNewlyAddedOfficerId] = useState<number | null>(null);
+    
+    const [apiRegions, setApiRegions] = useState<ApiRegion[]>([]);
+    const [apiCities, setApiCities] = useState<ApiCity[]>([]);
+    const [isCitiesLoading, setIsCitiesLoading] = useState(false);
+
 
     useEffect(() => {
         if (typeof window !== 'undefined') {
             const orgData = localStorage.getItem('organization');
+            const userData = localStorage.getItem('user');
             if (orgData) {
                 setLoggedInOrg(JSON.parse(orgData));
+            }
+            if (userData) {
+                setLoggedInUser(JSON.parse(userData));
             }
         }
     }, []);
@@ -122,8 +147,69 @@ export default function AgencyPatrollingOfficersPage() {
 
     const addForm = useForm<z.infer<typeof addPatrollingOfficerFormSchema>>({
         resolver: zodResolver(addPatrollingOfficerFormSchema),
-        defaultValues: { name: '', phone: '', email: '' }
+        defaultValues: { first_name: '', last_name: '', email: '', employee_id: '', phone: '', region: '', city: '' }
     });
+
+    const watchedRegion = addForm.watch('region');
+
+    useEffect(() => {
+        async function fetchRegions() {
+            if (!loggedInUser || !loggedInUser.country || !isAddDialogOpen) return;
+
+            const token = localStorage.getItem('token');
+            const countryId = loggedInUser.country.id;
+            const url = `/security/api/regions/?country=${countryId}`;
+            
+            try {
+                const data = await fetchData<{ regions: ApiRegion[] }>(url, {
+                headers: { 'Authorization': `Token ${token}` }
+                });
+                setApiRegions(data?.regions || []);
+            } catch (error) {
+                console.error("Failed to fetch regions:", error);
+                toast({
+                variant: "destructive",
+                title: "Error",
+                description: "Could not load regions for the selection.",
+                });
+            }
+        }
+        fetchRegions();
+    }, [loggedInUser, isAddDialogOpen, toast]);
+
+    useEffect(() => {
+        async function fetchCities() {
+            if (!watchedRegion || !loggedInUser || !loggedInUser.country) {
+                setApiCities([]);
+                return;
+            }
+            
+            setIsCitiesLoading(true);
+            const token = localStorage.getItem('token');
+            const countryId = loggedInUser.country.id;
+            const url = `/security/api/cities/?country=${countryId}&region=${watchedRegion}`;
+
+            try {
+                const data = await fetchData<{ cities: ApiCity[] }>(url, {
+                    headers: { 'Authorization': `Token ${token}` }
+                });
+                setApiCities(data?.cities || []);
+            } catch (error) {
+                console.error("Failed to fetch cities:", error);
+                toast({
+                    variant: "destructive",
+                    title: "Error",
+                    description: "Could not load cities for the selected region.",
+                });
+                setApiCities([]);
+            } finally {
+                setIsCitiesLoading(false);
+            }
+        }
+
+        addForm.resetField('city');
+        fetchCities();
+    }, [watchedRegion, loggedInUser, toast, addForm]);
 
     async function onUploadSubmit(values: z.infer<typeof uploadFormSchema>) {
         setIsUploading(true);
@@ -149,9 +235,6 @@ export default function AgencyPatrollingOfficersPage() {
 
         const token = localStorage.getItem('token');
         const API_URL = `${process.env.NEXT_PUBLIC_DJANGO_API_URL}/security/api/agency/${loggedInOrg.code}/patrolling-officers/add/`;
-
-        const [firstName, ...lastNameParts] = values.name.split(' ');
-        const lastName = lastNameParts.join(' ');
         
         try {
             const response = await fetch(API_URL, {
@@ -160,12 +243,7 @@ export default function AgencyPatrollingOfficersPage() {
                     'Content-Type': 'application/json',
                     'Authorization': `Token ${token}`
                 },
-                body: JSON.stringify({
-                    first_name: firstName,
-                    last_name: lastName,
-                    email: values.email,
-                    phone: values.phone
-                })
+                body: JSON.stringify(values)
             });
 
             const responseData = await response.json();
@@ -177,7 +255,7 @@ export default function AgencyPatrollingOfficersPage() {
 
             toast({
                 title: 'Patrolling Officer Added',
-                description: `Patrolling Officer "${values.name}" has been created successfully.`,
+                description: `Patrolling Officer "${values.first_name}" has been created successfully.`,
             });
             
             addForm.reset();
@@ -302,7 +380,7 @@ export default function AgencyPatrollingOfficersPage() {
                                 Add Patrolling Officer
                             </Button>
                         </DialogTrigger>
-                        <DialogContent className="sm:max-w-2xl">
+                        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-3xl">
                             <DialogHeader>
                                 <DialogTitle>Add a New Patrolling Officer</DialogTitle>
                                 <DialogDescription className="font-medium">
@@ -311,45 +389,125 @@ export default function AgencyPatrollingOfficersPage() {
                             </DialogHeader>
                             <Form {...addForm}>
                                 <form onSubmit={addForm.handleSubmit(onAddSubmit)} className="space-y-4">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <FormField
+                                            control={addForm.control}
+                                            name="first_name"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>First Name</FormLabel>
+                                                    <FormControl>
+                                                        <Input placeholder="Enter first name" {...field} />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <FormField
+                                            control={addForm.control}
+                                            name="last_name"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Last Name (Optional)</FormLabel>
+                                                    <FormControl>
+                                                        <Input placeholder="Enter last name" {...field} />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                    </div>
                                     <FormField
                                         control={addForm.control}
-                                        name="name"
+                                        name="employee_id"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel>Full Name</FormLabel>
+                                                <FormLabel>Employee ID</FormLabel>
                                                 <FormControl>
-                                                    <Input placeholder="Enter full name" {...field} />
+                                                    <Input placeholder="Enter employee ID" {...field} />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>
                                         )}
                                     />
-                                    <FormField
-                                        control={addForm.control}
-                                        name="phone"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Phone</FormLabel>
-                                                <FormControl>
-                                                    <Input placeholder="Enter phone number" {...field} />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <FormField
-                                        control={addForm.control}
-                                        name="email"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Email</FormLabel>
-                                                <FormControl>
-                                                    <Input placeholder="Enter email address" {...field} />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <FormField
+                                            control={addForm.control}
+                                            name="email"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Email</FormLabel>
+                                                    <FormControl>
+                                                        <Input type="email" placeholder="Enter email address" {...field} />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <FormField
+                                            control={addForm.control}
+                                            name="phone"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Phone</FormLabel>
+                                                    <FormControl>
+                                                        <Input placeholder="Enter phone number" {...field} />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <FormField
+                                            control={addForm.control}
+                                            name="region"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Region</FormLabel>
+                                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                        <FormControl>
+                                                            <SelectTrigger>
+                                                                <SelectValue placeholder="Select a region" />
+                                                            </SelectTrigger>
+                                                        </FormControl>
+                                                        <SelectContent>
+                                                            {apiRegions.map(region => (
+                                                                <SelectItem key={region.id} value={region.id.toString()}>
+                                                                    {region.name}
+                                                                </SelectItem>
+                                                            ))}
+                                                        </SelectContent>
+                                                    </Select>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <FormField
+                                            control={addForm.control}
+                                            name="city"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>City</FormLabel>
+                                                     <Select onValueChange={field.onChange} value={field.value} disabled={!watchedRegion || isCitiesLoading}>
+                                                        <FormControl>
+                                                            <SelectTrigger>
+                                                                <SelectValue placeholder={isCitiesLoading ? "Loading cities..." : "Select a city"} />
+                                                            </SelectTrigger>
+                                                        </FormControl>
+                                                        <SelectContent>
+                                                            {apiCities.map(city => (
+                                                                <SelectItem key={city.id} value={city.id.toString()}>
+                                                                    {city.name}
+                                                                </SelectItem>
+                                                            ))}
+                                                        </SelectContent>
+                                                    </Select>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                    </div>
                                     <DialogFooter>
                                         <Button type="submit" disabled={isAdding} className="bg-[#00B4D8] hover:bg-[#00B4D8]/90">
                                         {isAdding ? (
@@ -467,41 +625,35 @@ export default function AgencyPatrollingOfficersPage() {
                                         </div>
                                     </TableCell>
                                     </TableRow>
-                                    {isExpanded && (
+                                    {isExpanded && patrollingOfficer.site_details && (
                                         <TableRow className="bg-muted/50 hover:bg-muted/50">
                                             <TableCell colSpan={5} className="p-0">
                                                 <div className="p-4">
                                                     <h4 className="font-semibold mb-2">Site Assigned to {officerName}</h4>
-                                                    {patrollingOfficer.site_details ? (
-                                                        <Table>
-                                                            <TableHeader>
-                                                                <TableRow>
-                                                                    <TableHead>Towerbuddy ID</TableHead>
-                                                                    <TableHead>Site ID</TableHead>
-                                                                    <TableHead>Site Name</TableHead>
-                                                                </TableRow>
-                                                            </TableHeader>
-                                                            <TableBody>
-                                                                <TableRow 
-                                                                    key={patrollingOfficer.site_details.id} 
-                                                                    onClick={() => router.push(`/agency/sites/${patrollingOfficer.site_details!.id}`)}
-                                                                    className="cursor-pointer hover:bg-accent hover:text-accent-foreground group"
-                                                                >
-                                                                    <TableCell>
-                                                                        <Button asChild variant="link" className="p-0 h-auto font-medium text-accent group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
-                                                                        <Link href={`/agency/sites/${patrollingOfficer.site_details!.id}`}>{patrollingOfficer.site_details.tb_site_id}</Link>
-                                                                        </Button>
-                                                                    </TableCell>
-                                                                    <TableCell className="font-medium">{patrollingOfficer.site_details.org_site_id}</TableCell>
-                                                                    <TableCell>{patrollingOfficer.site_details.site_name}</TableCell>
-                                                                </TableRow>
-                                                            </TableBody>
-                                                        </Table>
-                                                    ) : (
-                                                        <p className="text-sm text-muted-foreground text-center py-4">
-                                                            No sites are assigned to this officer.
-                                                        </p>
-                                                    )}
+                                                    <Table>
+                                                        <TableHeader>
+                                                            <TableRow>
+                                                                <TableHead>Towerbuddy ID</TableHead>
+                                                                <TableHead>Site ID</TableHead>
+                                                                <TableHead>Site Name</TableHead>
+                                                            </TableRow>
+                                                        </TableHeader>
+                                                        <TableBody>
+                                                            <TableRow 
+                                                                key={patrollingOfficer.site_details.id} 
+                                                                onClick={() => router.push(`/agency/sites/${patrollingOfficer.site_details!.id}`)}
+                                                                className="cursor-pointer hover:bg-accent hover:text-accent-foreground group"
+                                                            >
+                                                                <TableCell>
+                                                                    <Button asChild variant="link" className="p-0 h-auto font-medium text-accent group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
+                                                                    <Link href={`/agency/sites/${patrollingOfficer.site_details!.id}`}>{patrollingOfficer.site_details.tb_site_id}</Link>
+                                                                    </Button>
+                                                                </TableCell>
+                                                                <TableCell className="font-medium">{patrollingOfficer.site_details.org_site_id}</TableCell>
+                                                                <TableCell>{patrollingOfficer.site_details.site_name}</TableCell>
+                                                            </TableRow>
+                                                        </TableBody>
+                                                    </Table>
                                                 </div>
                                             </TableCell>
                                         </TableRow>
