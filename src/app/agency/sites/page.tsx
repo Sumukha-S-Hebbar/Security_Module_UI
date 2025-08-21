@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
@@ -91,8 +90,15 @@ export default function AgencySitesPage() {
         const sitesResponse = await fetchData<{results: Site[]}>(`/security/api/agency/${loggedInOrg.code}/sites/list/`, { headers: authHeader });
         setSites(sitesResponse?.results || []);
 
-        const poResponse = await fetchData<{results: PatrollingOfficer[]}>(`/security/api/agency/${loggedInOrg.code}/patrol_officers/list/`, { headers: authHeader });
-        setPatrollingOfficers(poResponse?.results || []);
+        const poResponse = await fetchData<{results: any[]}>(`/security/api/agency/${loggedInOrg.code}/patrol_officers/list/`, { headers: authHeader });
+        const formattedPOs = poResponse?.results.map(po => ({
+            id: po.id.toString(),
+            name: `${po.first_name} ${po.last_name || ''}`.trim(),
+            email: po.email,
+            phone: po.phone,
+            avatar: po.profile_picture,
+        })) || [];
+        setPatrollingOfficers(formattedPOs);
         
 
     } catch (error) {
@@ -412,6 +418,7 @@ export default function AgencySitesPage() {
                 <TableHead className="text-foreground">Towerbuddy ID</TableHead>
                 <TableHead className="text-foreground">Site ID</TableHead>
                 <TableHead className="text-foreground">Site Name</TableHead>
+                <TableHead className="text-foreground">Location</TableHead>
                 <TableHead className="text-foreground">Patrolling Officer</TableHead>
                 <TableHead className="text-foreground">Guards</TableHead>
                 <TableHead className="text-foreground">Incidents</TableHead>
@@ -434,7 +441,9 @@ export default function AgencySitesPage() {
                     <TableCell className="font-medium">{site.org_site_id}</TableCell>
                     <TableCell>
                       <p className="font-medium">{site.site_name}</p>
-                      <p className="text-sm text-muted-foreground font-medium group-hover:text-accent-foreground">{site.site_address_line1}</p>
+                    </TableCell>
+                    <TableCell>
+                      <p className="font-medium">{site.city}, {site.region}</p>
                     </TableCell>
                     <TableCell className="font-medium">{site.patrol_officer_details?.map(po => `${po.first_name} ${po.last_name || ''}`.trim()).join(', ') || 'N/A'}</TableCell>
                     <TableCell>
@@ -454,7 +463,7 @@ export default function AgencySitesPage() {
               })
             ) : (
               <TableRow>
-                <TableCell colSpan={6} className="text-center text-muted-foreground py-10 font-medium">
+                <TableCell colSpan={7} className="text-center text-muted-foreground py-10 font-medium">
                   No assigned sites found for the current filter.
                 </TableCell>
               </TableRow>
@@ -520,7 +529,8 @@ export default function AgencySitesPage() {
                 <TableRow>
                   <TableHead className="text-foreground">Towerbuddy ID</TableHead>
                   <TableHead className="text-foreground">Site ID</TableHead>
-                  <TableHead className="text-foreground">Site</TableHead>
+                  <TableHead className="text-foreground">Site Name</TableHead>
+                  <TableHead className="text-foreground">Location</TableHead>
                   <TableHead className="text-foreground">Assign Guards</TableHead>
                   <TableHead className="text-foreground">Assign Patrolling Officer</TableHead>
                   <TableHead className="text-right text-foreground">Actions</TableHead>
@@ -538,10 +548,9 @@ export default function AgencySitesPage() {
                     </TableCell>
                     <TableCell className="align-top py-4">
                       <div className="font-medium">{site.site_name}</div>
-                      <div className="text-sm text-muted-foreground flex items-center gap-1 font-medium">
-                        <MapPin className="w-3 h-3" />
-                        {site.site_address_line1}
-                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="font-medium">{site.city}, {site.region}</div>
                     </TableCell>
                     <TableCell className="align-top py-4">
                       <div className='flex flex-col items-start gap-2'>
@@ -588,7 +597,7 @@ export default function AgencySitesPage() {
                 ))
               ) : (
                 <TableRow>
-                    <TableCell colSpan={5} className="text-center text-muted-foreground font-medium py-10">
+                    <TableCell colSpan={7} className="text-center text-muted-foreground font-medium py-10">
                         No unassigned sites found for the current filter.
                     </TableCell>
                 </TableRow>
@@ -601,3 +610,5 @@ export default function AgencySitesPage() {
     </div>
   );
 }
+
+    
