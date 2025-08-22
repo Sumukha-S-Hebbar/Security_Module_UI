@@ -499,7 +499,7 @@ export default function AgencyIncidentReportPage() {
                    </div>
 
                     <CardFooter className="px-0 pt-6 justify-end">
-                        <Button type="submit">
+                        <Button type="submit" className="bg-[#00B4D8] hover:bg-[#00B4D8]/90">
                             Save and Start Review
                         </Button>
                     </CardFooter>
