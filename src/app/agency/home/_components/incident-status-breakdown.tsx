@@ -12,47 +12,34 @@ import {
 } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { CheckCircle2, ShieldAlert, ShieldQuestion } from 'lucide-react';
-import type { IncidentTrendData } from '../page';
+import type { BasicCounts } from '../page';
 
 
 export function IncidentStatusBreakdown({
-  incidentTrend,
+  counts,
 }: {
-  incidentTrend: IncidentTrendData[];
+  counts: BasicCounts;
 }) {
   const router = useRouter();
-  
-  const summary = useMemo(() => {
-    return incidentTrend.reduce(
-      (acc, month) => {
-        acc.active += month.active;
-        acc.underReview += month.under_review;
-        acc.resolved += month.resolved;
-        return acc;
-      },
-      { active: 0, underReview: 0, resolved: 0 }
-    );
-  }, [incidentTrend]);
-
 
   const statusCards = [
     {
       status: 'active',
-      count: summary.active,
+      count: counts.active_incidents_count,
       icon: ShieldAlert,
       className: 'bg-destructive/10 text-destructive',
       ring: 'ring-destructive',
     },
     {
       status: 'under-review',
-      count: summary.underReview,
+      count: counts.under_review_incidents_count,
       icon: ShieldQuestion,
       className: 'bg-[#FFC107]/10 text-[#FFC107]',
       ring: 'ring-[#FFC107]',
     },
     {
       status: 'resolved',
-      count: summary.resolved,
+      count: counts.resolved_incidents_count,
       icon: CheckCircle2,
       className: 'bg-chart-2/10 text-chart-2',
       ring: 'ring-chart-2',

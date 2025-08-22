@@ -44,6 +44,9 @@ export type BasicCounts = {
     total_sites_count: number;
     total_guards_count: number;
     total_patrol_officers_count: number;
+    under_review_incidents_count: number;
+    resolved_incidents_count: number;
+    total_incidents_count?: number;
 };
 
 export type ActiveIncident = {
@@ -296,7 +299,7 @@ export default function AgencyHomePage() {
 
       <AgencyAnalyticsDashboard counts={data.basic_counts} />
       
-      <IncidentStatusBreakdown incidentTrend={data.incident_trend} />
+      <IncidentStatusBreakdown counts={data.basic_counts} />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <GuardPerformanceBreakdown performance={data.guard_performance} />
