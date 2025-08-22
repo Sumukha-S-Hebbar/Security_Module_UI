@@ -33,82 +33,28 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import type { IncidentTrendData } from '../page';
+
 
 export function IncidentStatusBreakdown({
-  allIncidents,
+  incidentTrend,
 }: {
-  allIncidents: any[];
+  incidentTrend: IncidentTrendData[];
 }) {
   const router = useRouter();
-  const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
   
   const summary = useMemo(() => {
-    return allIncidents.reduce(
-      (acc, incident) => {
-        if (incident.incident_status === 'Active') acc.active++;
-        if (incident.incident_status === 'Under Review') acc.underReview++;
-        if (incident.incident_status === 'Resolved') acc.resolved++;
+    return incidentTrend.reduce(
+      (acc, month) => {
+        acc.active += month.active;
+        acc.underReview += month.under_review;
+        acc.resolved += month.resolved;
         return acc;
       },
       { active: 0, underReview: 0, resolved: 0 }
     );
-  }, [allIncidents]);
+  }, [incidentTrend]);
 
-  const filteredIncidents = useMemo(() => {
-    if (!selectedStatus) return [];
-    const statusMap: {[key: string]: string} = {
-        'active': 'Active',
-        'under-review': 'Under Review',
-        'resolved': 'Resolved'
-    };
-    return allIncidents.filter((incident) => incident.incident_status === statusMap[selectedStatus]);
-  }, [allIncidents, selectedStatus]);
-
-  const getStatusIndicator = (status: string) => {
-    switch (status) {
-      case 'Active':
-        return (
-          <div className="flex items-center gap-2 font-medium">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-destructive"></span>
-            </span>
-            <span>Active</span>
-          </div>
-        );
-      case 'Under Review':
-        return (
-          <div className="flex items-center gap-2 font-medium">
-            <span className="relative flex h-2 w-2">
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-[#FFC107]"></span>
-            </span>
-            <span>Under Review</span>
-          </div>
-        );
-      case 'Resolved':
-        return (
-          <div className="flex items-center gap-2 font-medium">
-            <span className="relative flex h-2 w-2">
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-chart-2"></span>
-            </span>
-            <span>Resolved</span>
-          </div>
-        );
-      default:
-        return (
-          <div className="flex items-center gap-2 font-medium">
-            <span className="relative flex h-2 w-2">
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-muted-foreground"></span>
-            </span>
-            <span>{status}</span>
-          </div>
-        );
-    }
-  };
-
-  const handleStatusClick = (status: string) => {
-    setSelectedStatus((prevStatus) => (prevStatus === status ? null : status));
-  };
 
   const statusCards = [
     {
@@ -134,6 +80,10 @@ export function IncidentStatusBreakdown({
     },
   ] as const;
 
+  const handleStatusClick = (status: string) => {
+    router.push(`/agency/incidents?status=${status}`);
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -151,77 +101,19 @@ export function IncidentStatusBreakdown({
               role="button"
               tabIndex={0}
               className={cn(
-                'flex cursor-pointer items-center gap-4 rounded-lg p-4 transition-all',
-                item.className,
-                selectedStatus === item.status && `ring-2 ${item.ring}`
+                'flex cursor-pointer items-center gap-4 rounded-lg p-4 transition-all hover:shadow-md',
+                item.className
               )}
             >
               <item.icon className="h-8 w-8" />
               <div>
-                <p className="font-medium">{item.status.replace('-', ' ')}</p>
+                <p className="font-medium capitalize">{item.status.replace('-', ' ')}</p>
                 <p className="text-2xl font-bold">{item.count}</p>
               </div>
             </div>
           ))}
         </div>
       </CardContent>
-
-      <Collapsible open={!!selectedStatus}>
-        <CollapsibleContent>
-          <CardHeader>
-            <CardTitle>Incidents: {selectedStatus?.replace('-', ' ')}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {filteredIncidents.length > 0 ? (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Incident ID</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Site</TableHead>
-                    <TableHead>Guard</TableHead>
-                    <TableHead>Status</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredIncidents.map((incident) => (
-                    <TableRow
-                      key={incident.id}
-                      onClick={() =>
-                        router.push(`/agency/incidents/${incident.id}`)
-                      }
-                      className="cursor-pointer"
-                    >
-                      <TableCell>
-                        <Button
-                          asChild
-                          variant="link"
-                          className="h-auto p-0 font-medium"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <Link href={`/agency/incidents/${incident.id}`}>
-                            {incident.incident_id}
-                          </Link>
-                        </Button>
-                      </TableCell>
-                      <TableCell className="font-medium">
-                        {new Date(incident.incident_time).toLocaleDateString()}
-                      </TableCell>
-                      <TableCell className="font-medium">{incident.site_name}</TableCell>
-                      <TableCell className="font-medium">{incident.guard_name}</TableCell>
-                      <TableCell>{getStatusIndicator(incident.incident_status)}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            ) : (
-              <p className="text-center text-sm text-muted-foreground font-medium">
-                No incidents with status "{selectedStatus}" found.
-              </p>
-            )}
-          </CardContent>
-        </CollapsibleContent>
-      </Collapsible>
     </Card>
   );
 }

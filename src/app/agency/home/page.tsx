@@ -87,10 +87,6 @@ interface AgencyDashboardData {
     guard_performance: GuardPerformanceData;
     patrol_officer_performance: PatrollingOfficerPerformanceData;
     incident_trend: IncidentTrendData[];
-    all_incidents: {
-        count: number;
-        results: any[];
-    }
 }
 
 
@@ -299,7 +295,7 @@ export default function AgencyHomePage() {
 
       <AgencyAnalyticsDashboard counts={data.basic_counts} />
       
-      <IncidentStatusBreakdown allIncidents={data.all_incidents.results} />
+      <IncidentStatusBreakdown incidentTrend={data.incident_trend} />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <GuardPerformanceBreakdown performance={data.guard_performance} />
