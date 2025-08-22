@@ -60,7 +60,7 @@ export default function AgencyAccountPage() {
                     </Avatar>
                      <div>
                         <h3 className="text-xl font-bold">{agency.name}</h3>
-                        <p className="text-muted-foreground">Agency Profile</p>
+                        <p className="text-muted-foreground">{agency.type}</p>
                     </div>
                 </div>
 
