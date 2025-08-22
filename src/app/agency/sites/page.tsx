@@ -54,7 +54,7 @@ export default function AgencySitesPage() {
 
   const [sites, setSites] = useState<Site[]>([]);
   const [patrollingOfficers, setPatrollingOfficers] = useState<PatrollingOfficer[]>([]);
-  const [guards, setGuards] = useState<Guard[]>([]);
+  const [unassignedGuards, setUnassignedGuards] = useState<Guard[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loggedInOrg, setLoggedInOrg] = useState<Organization | null>(null);
   
@@ -102,8 +102,8 @@ export default function AgencySitesPage() {
         })) || [];
         setPatrollingOfficers(formattedPOs);
 
-        const guardsResponse = await fetchData<{ results: Guard[] }>(`/security/api/agency/${loggedInOrg.code}/guards/list/`, { headers: authHeader });
-        setGuards(guardsResponse?.results || []);
+        const unassignedGuardsResponse = await fetchData<{ results: Guard[] }>(`/security/api/agency/${loggedInOrg.code}/unassigned_guards/list/`, { headers: authHeader });
+        setUnassignedGuards(unassignedGuardsResponse?.results || []);
         
 
     } catch (error) {
@@ -386,8 +386,8 @@ export default function AgencySitesPage() {
   }
 
   const renderGuardSelection = (site: Site) => {
-    const guardsInCity = guards.filter(g => g.city === site.city);
-    const guardsNotInCity = guards.filter(g => g.city !== site.city);
+    const guardsInCity = unassignedGuards.filter(g => g.city === site.city);
+    const guardsNotInCity = unassignedGuards.filter(g => g.city !== site.city);
 
     const renderItems = (guardList: Guard[]) => guardList.map(guard => {
       const guardName = `${guard.first_name} ${guard.last_name || ''}`.trim();
@@ -406,8 +406,8 @@ export default function AgencySitesPage() {
       );
     });
     
-    if (guards.length === 0) {
-        return <DropdownMenuLabel>No guards available</DropdownMenuLabel>;
+    if (unassignedGuards.length === 0) {
+        return <DropdownMenuLabel>No unassigned guards available</DropdownMenuLabel>;
     }
 
     return (
