@@ -231,7 +231,7 @@ export default function AgencySitesPage() {
     }
 
     const token = localStorage.getItem('token');
-    const API_URL = `${process.env.NEXT_PUBLIC_DJANGO_API_URL}/security/api/agency/${loggedInOrg.code}/sites/${siteId}/assign/`;
+    const API_URL = `${process.env.NEXT_PUBLIC_DJANGO_API_URL}/security/api/agency/${loggedInOrg.code}/sites/${siteId}/assign_personnel/`;
 
     try {
         const response = await fetch(API_URL, {
@@ -241,8 +241,8 @@ export default function AgencySitesPage() {
                 'Authorization': `Token ${token}`,
             },
             body: JSON.stringify({
-                patrolling_officer: parseInt(patrollingOfficerId, 10),
-                guards: guardIds.map(id => parseInt(id, 10)),
+                patrol_officer_id: parseInt(patrollingOfficerId, 10),
+                guard_ids: guardIds.map(id => parseInt(id, 10)),
                 geofence_perimeter: geofence ? parseInt(geofence, 10) : undefined,
             })
         });
