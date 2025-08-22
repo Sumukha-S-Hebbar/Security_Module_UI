@@ -545,8 +545,8 @@ export default function AgencySitesPage() {
                   <TableHead className="text-foreground">Site Name</TableHead>
                   <TableHead className="text-foreground">Location</TableHead>
                   <TableHead className="text-foreground">Geofence Perimeter</TableHead>
-                  <TableHead className="text-foreground">Assign Guards</TableHead>
                   <TableHead className="text-foreground">Assign Patrolling Officer</TableHead>
+                  <TableHead className="text-foreground">Assign Guards</TableHead>
                   <TableHead className="text-right text-foreground">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -576,6 +576,19 @@ export default function AgencySitesPage() {
                       />
                     </TableCell>
                     <TableCell className="align-top py-4">
+                      <Select
+                        value={assignment[site.id.toString()]?.patrollingOfficerId || ''}
+                        onValueChange={(value) =>
+                          handlePatrollingOfficerSelect(site.id.toString(), value)
+                        }
+                      >
+                        <SelectTrigger className="w-[180px] font-medium">
+                          <SelectValue placeholder="Select Patrolling Officer" />
+                        </SelectTrigger>
+                        {renderPatrollingOfficerSelection(site)}
+                      </Select>
+                    </TableCell>
+                    <TableCell className="align-top py-4">
                       <div className='flex flex-col items-start gap-2'>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
@@ -589,19 +602,6 @@ export default function AgencySitesPage() {
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </div>
-                    </TableCell>
-                    <TableCell className="align-top py-4">
-                      <Select
-                        value={assignment[site.id.toString()]?.patrollingOfficerId || ''}
-                        onValueChange={(value) =>
-                          handlePatrollingOfficerSelect(site.id.toString(), value)
-                        }
-                      >
-                        <SelectTrigger className="w-[180px] font-medium">
-                          <SelectValue placeholder="Select Patrolling Officer" />
-                        </SelectTrigger>
-                        {renderPatrollingOfficerSelection(site)}
-                      </Select>
                     </TableCell>
                     <TableCell className="align-top py-4 text-right">
                       <Button
