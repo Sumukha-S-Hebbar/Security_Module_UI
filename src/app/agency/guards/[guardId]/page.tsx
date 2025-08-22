@@ -1,13 +1,9 @@
 
 'use client';
 
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { guards } from '@/lib/data/guards';
-import { sites } from '@/lib/data/sites';
-import { patrollingOfficers } from '@/lib/data/patrolling-officers';
-import { incidents } from '@/lib/data/incidents';
-import type { Incident, Guard, Site, PatrollingOfficer } from '@/types';
+import type { Incident, Guard, Site, Organization, PatrollingOfficer } from '@/types';
 import {
   Card,
   CardContent,
@@ -17,7 +13,6 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import {
   Table,
@@ -30,8 +25,7 @@ import {
 import { ArrowLeft, FileDown, Phone, MapPin, UserCheck, ShieldCheck, Mail, ShieldAlert } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { useToast } from '@/hooks/use-toast';
-import { useRouter } from 'next/navigation';
-import { useMemo, useState, useRef } from 'react';
+import { useMemo, useState, useRef, useEffect } from 'react';
 import {
   Select,
   SelectContent,
@@ -39,6 +33,49 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { fetchData } from '@/lib/api';
+import { Skeleton } from '@/components/ui/skeleton';
+
+type GuardReportData = {
+    id: number;
+    employee_id: string;
+    profile_picture: string | null;
+    first_name: string;
+    last_name: string | null;
+    phone: string;
+    email: string;
+    total_incidents_count: number;
+    resolved_incidents_count: number;
+    guard_checkin_accuracy: string;
+    selfie_accuracy: string;
+    total_selfie_requests: number;
+    missed_selfies: number;
+    site_details: {
+        id: number;
+        site_name: string;
+        site_address_line1: string;
+    } | null;
+    patrol_officer: {
+        id: number;
+        first_name: string;
+        last_name: string | null;
+        email: string;
+        phone: string;
+    } | null;
+    incidents: {
+        count: number;
+        next: string | null;
+        previous: string | null;
+        results: {
+            id: number;
+            incident_id: string;
+            incident_time: string;
+            site_name: string;
+            incident_status: "Active" | "Under Review" | "Resolved";
+        }[];
+    };
+};
+
 
 const getPerformanceColor = (value: number) => {
   if (value >= 95) {
@@ -56,6 +93,11 @@ export default function AgencyGuardReportPage() {
   const router = useRouter();
   const { toast } = useToast();
   const guardId = params.guardId as string;
+  
+  const [reportData, setReportData] = useState<GuardReportData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loggedInOrg, setLoggedInOrg] = useState<Organization | null>(null);
+
   const [selectedMonth, setSelectedMonth] = useState('all');
   const [selectedYear, setSelectedYear] = useState('all');
   const [selectedStatus, setSelectedStatus] = useState('all');
@@ -63,32 +105,45 @@ export default function AgencyGuardReportPage() {
   const [performanceSelectedMonth, setPerformanceSelectedMonth] = useState<string>('all');
   const incidentsTableRef = useRef<HTMLDivElement>(null);
 
-  const guard = guards.find((g) => g.id === guardId);
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+        const orgData = localStorage.getItem('organization');
+        if (orgData) {
+            setLoggedInOrg(JSON.parse(orgData));
+        }
+    }
+  }, []);
 
-  if (!guard) {
-    return (
-      <div className="p-4 sm:p-6 lg:p-8">
-        <Card>
-          <CardContent className="pt-6">
-            <p className="font-medium">Guard not found.</p>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
+  useEffect(() => {
+    if (!loggedInOrg || !guardId) return;
 
-  const site = sites.find((s) => s.site_name === guard.site);
-  const patrollingOfficer = site ? patrollingOfficers.find(p => p.id === site.patrollingOfficerId) : undefined;
-  const guardIncidents = incidents.filter(i => i.raisedByGuardId === guard.id);
-  const resolvedIncidents = guardIncidents.filter(i => i.status === 'Resolved').length;
+    const fetchReportData = async () => {
+        setIsLoading(true);
+        const token = localStorage.getItem('token');
+        const url = `/security/api/agency/${loggedInOrg.code}/guard/${guardId}/`;
+        try {
+            const data = await fetchData<GuardReportData>(url, {
+                headers: { 'Authorization': `Token ${token}` }
+            });
+            setReportData(data);
+        } catch (error) {
+            console.error("Failed to fetch guard report:", error);
+            toast({ variant: "destructive", title: "Error", description: "Could not load guard report data."});
+        } finally {
+            setIsLoading(false);
+        }
+    };
+    fetchReportData();
+  }, [loggedInOrg, guardId, toast]);
   
   const availableYears = useMemo(() => {
+    if (!reportData) return [];
     const years = new Set(
-      guardIncidents.map((incident) => new Date(incident.incidentTime).getFullYear().toString())
+      reportData.incidents.results.map((incident) => new Date(incident.incident_time).getFullYear().toString())
     );
     if (years.size > 0) years.add(new Date().getFullYear().toString());
     return Array.from(years).sort((a, b) => parseInt(b) - parseInt(a));
-  }, [guardIncidents]);
+  }, [reportData]);
   
   const performanceAvailableYears = useMemo(() => {
     const currentYear = new Date().getFullYear();
@@ -96,20 +151,22 @@ export default function AgencyGuardReportPage() {
   }, []);
 
   const filteredIncidents = useMemo(() => {
-    return guardIncidents.filter(incident => {
-      const incidentDate = new Date(incident.incidentTime);
+    if (!reportData) return [];
+    return reportData.incidents.results.filter(incident => {
+      const incidentDate = new Date(incident.incident_time);
       const yearMatch = selectedYear === 'all' || incidentDate.getFullYear().toString() === selectedYear;
       const monthMatch = selectedMonth === 'all' || incidentDate.getMonth().toString() === selectedMonth;
-      const statusMatch = selectedStatus === 'all' || incident.status.toLowerCase().replace(' ', '-') === selectedStatus;
+      const statusMatch = selectedStatus === 'all' || incident.incident_status.toLowerCase().replace(' ', '-') === selectedStatus;
       return yearMatch && monthMatch && statusMatch;
     });
-  }, [guardIncidents, selectedYear, selectedMonth, selectedStatus]);
+  }, [reportData, selectedYear, selectedMonth, selectedStatus]);
 
 
   const handleDownloadReport = () => {
+    if (!reportData) return;
     toast({
       title: 'Report Generation Started',
-      description: `Generating a detailed report for ${guard.name}.`,
+      description: `Generating a detailed report for ${reportData.first_name} ${reportData.last_name || ''}.`,
     });
   };
 
@@ -124,7 +181,7 @@ export default function AgencyGuardReportPage() {
     }
   };
 
-  const getStatusIndicator = (status: Incident['status']) => {
+  const getStatusIndicator = (status: "Active" | "Under Review" | "Resolved") => {
     switch (status) {
       case 'Active':
         return (
@@ -166,12 +223,40 @@ export default function AgencyGuardReportPage() {
     }
   };
   
-  const selfieAccuracy = guard.totalSelfieRequests > 0 ? Math.round(((guard.totalSelfieRequests - guard.missedSelfieCount) / guard.totalSelfieRequests) * 100) : 100;
-  const perimeterAccuracy = guard.performance?.perimeterAccuracy || 0;
+  if (isLoading) {
+    return (
+        <div className="p-4 sm:p-6 lg:p-8 space-y-6">
+            <Skeleton className="h-12 w-1/2" />
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <Skeleton className="h-64 lg:col-span-1" />
+                <Skeleton className="h-64 lg:col-span-1" />
+                <Skeleton className="h-64 lg:col-span-1" />
+            </div>
+            <Skeleton className="h-64 w-full" />
+            <Skeleton className="h-80 w-full" />
+        </div>
+    );
+  }
+
+  if (!reportData) {
+    return (
+      <div className="p-4 sm:p-6 lg:p-8">
+        <Card>
+          <CardContent className="pt-6">
+            <p className="font-medium">Guard not found.</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  const guardName = `${reportData.first_name} ${reportData.last_name || ''}`.trim();
+  const checkinAccuracy = parseFloat(reportData.guard_checkin_accuracy);
+  const selfieAccuracy = parseFloat(reportData.selfie_accuracy);
   
   const perimeterAccuracyData = [
-    { name: 'Accuracy', value: perimeterAccuracy },
-    { name: 'Remaining', value: 100 - perimeterAccuracy },
+    { name: 'Accuracy', value: checkinAccuracy },
+    { name: 'Remaining', value: 100 - checkinAccuracy },
   ];
   
   const selfieAccuracyData = [
@@ -179,7 +264,7 @@ export default function AgencyGuardReportPage() {
     { name: 'Remaining', value: 100 - selfieAccuracy },
   ];
 
-  const perimeterColor = getPerformanceColor(perimeterAccuracy);
+  const perimeterColor = getPerformanceColor(checkinAccuracy);
   const selfieColor = getPerformanceColor(selfieAccuracy);
   
   const COLORS_CHECKIN = [perimeterColor, 'hsl(var(--muted))'];
@@ -197,7 +282,7 @@ export default function AgencyGuardReportPage() {
           </Button>
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Security Guard Report</h1>
-            <p className="text-muted-foreground font-medium">Detailed overview for {guard.name}.</p>
+            <p className="text-muted-foreground font-medium">Detailed overview for {guardName}.</p>
           </div>
         </div>
         <Button onClick={handleDownloadReport} className="bg-[#00B4D8] hover:bg-[#00B4D8]/90">
@@ -211,12 +296,12 @@ export default function AgencyGuardReportPage() {
           <CardHeader>
             <div className="flex items-center gap-4">
               <Avatar className="h-16 w-16">
-                <AvatarImage src={guard.avatar} alt={guard.name} />
-                <AvatarFallback>{guard.name.charAt(0)}</AvatarFallback>
+                <AvatarImage src={reportData.profile_picture || undefined} alt={guardName} />
+                <AvatarFallback>{guardName.charAt(0)}</AvatarFallback>
               </Avatar>
               <div>
-                <CardTitle className="text-2xl">{guard.name}</CardTitle>
-                <CardDescription>ID: {guard.id}</CardDescription>
+                <CardTitle className="text-2xl">{guardName}</CardTitle>
+                <CardDescription>ID: {reportData.employee_id}</CardDescription>
               </div>
             </div>
           </CardHeader>
@@ -224,7 +309,7 @@ export default function AgencyGuardReportPage() {
             <div className="text-sm mt-2 space-y-2">
               <div className="flex items-start gap-3">
                 <Phone className="h-4 w-4 mt-1 text-primary" />
-                <a href={`tel:${guard.phone}`} className="hover:underline font-medium">{guard.phone}</a>
+                <a href={`tel:${reportData.phone}`} className="hover:underline font-medium">{reportData.phone}</a>
               </div>
             </div>
              <div className="pt-4 mt-4 border-t">
@@ -233,19 +318,19 @@ export default function AgencyGuardReportPage() {
                   <button onClick={handleScrollToIncidents} className="flex flex-col items-center gap-1 group">
                       <ShieldAlert className="h-8 w-8 text-primary" />
                       <p className="font-medium text-[#00B4D8] group-hover:underline">Total Incidents</p>
-                      <p className="font-bold text-lg text-[#00B4D8] group-hover:underline">{guardIncidents.length}</p>
+                      <p className="font-bold text-lg text-[#00B4D8] group-hover:underline">{reportData.total_incidents_count}</p>
                   </button>
                    <button onClick={handleScrollToIncidents} className="flex flex-col items-center gap-1 group">
                       <ShieldCheck className="h-8 w-8 text-primary" />
                       <p className="font-medium text-[#00B4D8] group-hover:underline">Incidents Resolved</p>
-                      <p className="font-bold text-lg text-[#00B4D8] group-hover:underline">{resolvedIncidents}</p>
+                      <p className="font-bold text-lg text-[#00B4D8] group-hover:underline">{reportData.resolved_incidents_count}</p>
                   </button>
                 </div>
             </div>
           </CardContent>
         </Card>
 
-        {site && (
+        {reportData.site_details && (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -255,17 +340,16 @@ export default function AgencyGuardReportPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <p className="font-semibold text-base">{site.site_name}</p>
-                <p className="font-medium">ID: {site.id}</p>
+                <p className="font-semibold text-base">{reportData.site_details.site_name}</p>
               </div>
               <div className="text-sm space-y-1 pt-2 border-t">
                 <p className="font-semibold">Address</p>
                 <p className="font-medium text-muted-foreground">
-                  {site.site_address_line1}
+                  {reportData.site_details.site_address_line1}
                 </p>
               </div>
               <Button asChild variant="link" className="p-0 h-auto font-medium">
-                <Link href={`/agency/sites/${site.id}`}>
+                <Link href={`/agency/sites/${reportData.site_details.id}`}>
                   View Full Site Report
                 </Link>
               </Button>
@@ -273,7 +357,7 @@ export default function AgencyGuardReportPage() {
           </Card>
         )}
 
-        {patrollingOfficer && (
+        {reportData.patrol_officer && (
            <Card>
             <CardHeader>
                 <CardTitle className="flex items-center gap-2"><UserCheck className="h-5 w-5"/>Patrolling Officer</CardTitle>
@@ -281,15 +365,14 @@ export default function AgencyGuardReportPage() {
             </CardHeader>
             <CardContent className="space-y-4">
                 <div>
-                    <p className="font-semibold text-base">{patrollingOfficer.name}</p>
-                    <p className="font-medium">ID: {patrollingOfficer.id}</p>
+                    <p className="font-semibold text-base">{`${reportData.patrol_officer.first_name} ${reportData.patrol_officer.last_name || ''}`}</p>
                 </div>
                 <div className="text-sm space-y-2 pt-2 border-t">
-                  <div className="flex items-center gap-2"><Phone className="h-4 w-4" /> <a href={`tel:${patrollingOfficer.phone}`} className="hover:underline">{patrollingOfficer.phone}</a></div>
-                  <div className="flex items-center gap-2"><Mail className="h-4 w-4" /> <a href={`mailto:${patrollingOfficer.email}`} className="hover:underline">{patrollingOfficer.email}</a></div>
+                  <div className="flex items-center gap-2"><Phone className="h-4 w-4" /> <a href={`tel:${reportData.patrol_officer.phone}`} className="hover:underline">{reportData.patrol_officer.phone}</a></div>
+                  <div className="flex items-center gap-2"><Mail className="h-4 w-4" /> <a href={`mailto:${reportData.patrol_officer.email}`} className="hover:underline">{reportData.patrol_officer.email}</a></div>
                 </div>
                  <Button asChild variant="link" className="p-0 h-auto font-medium">
-                    <Link href={`/agency/patrolling-officers/${patrollingOfficer.id}`}>View Full Officer Report</Link>
+                    <Link href={`/agency/patrolling-officers/${reportData.patrol_officer.id}`}>View Full Officer Report</Link>
                 </Button>
             </CardContent>
           </Card>
@@ -354,7 +437,7 @@ export default function AgencyGuardReportPage() {
                           </ResponsiveContainer>
                           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                               <span className="text-3xl font-bold" style={{ color: perimeterColor }}>
-                                  {perimeterAccuracy}%
+                                  {checkinAccuracy}%
                               </span>
                           </div>
                       </div>
@@ -395,7 +478,7 @@ export default function AgencyGuardReportPage() {
                         Selfie Check-in Accuracy
                       </p>
                       <div className="text-sm text-muted-foreground font-medium text-center mt-1">
-                          <p>Total Requests: {guard.totalSelfieRequests} | Missed: {guard.missedSelfieCount}</p>
+                          <p>Total Requests: {reportData.total_selfie_requests} | Missed: {reportData.missed_selfies}</p>
                       </div>
                   </div>
               </div>
@@ -406,7 +489,7 @@ export default function AgencyGuardReportPage() {
         <CardHeader className="flex flex-row items-start justify-between gap-4">
           <div className="flex-grow">
             <CardTitle>Incidents Log</CardTitle>
-            <CardDescription className="font-medium">A log of emergency incidents involving {guard.name}.</CardDescription>
+            <CardDescription className="font-medium">A log of emergency incidents involving {guardName}.</CardDescription>
           </div>
            <div className="flex items-center gap-2 flex-shrink-0">
               <Select value={selectedStatus} onValueChange={setSelectedStatus}>
@@ -471,13 +554,13 @@ export default function AgencyGuardReportPage() {
                   >
                     <TableCell>
                       <Button asChild variant="link" className="p-0 h-auto font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
-                        <Link href={`/agency/incidents/${incident.id}`}>{incident.id}</Link>
+                        <Link href={`/agency/incidents/${incident.id}`}>{incident.incident_id}</Link>
                       </Button>
                     </TableCell>
-                    <TableCell className="font-medium">{new Date(incident.incidentTime).toLocaleDateString()}</TableCell>
-                    <TableCell className="font-medium">{new Date(incident.incidentTime).toLocaleTimeString()}</TableCell>
-                    <TableCell className="font-medium">{incident.siteId}</TableCell>
-                    <TableCell>{getStatusIndicator(incident.status)}</TableCell>
+                    <TableCell className="font-medium">{new Date(incident.incident_time).toLocaleDateString()}</TableCell>
+                    <TableCell className="font-medium">{new Date(incident.incident_time).toLocaleTimeString()}</TableCell>
+                    <TableCell className="font-medium">{incident.site_name}</TableCell>
+                    <TableCell>{getStatusIndicator(incident.incident_status)}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -491,5 +574,3 @@ export default function AgencyGuardReportPage() {
     </div>
   );
 }
-
-    
