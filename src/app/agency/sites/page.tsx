@@ -593,6 +593,7 @@ export default function AgencySitesPage() {
                   <TableHead className="text-foreground">Site ID</TableHead>
                   <TableHead className="text-foreground">Site Name</TableHead>
                   <TableHead className="text-foreground">Location</TableHead>
+                  <TableHead className="text-foreground">Guards Required</TableHead>
                   <TableHead className="text-foreground">Geofence Perimeter</TableHead>
                   <TableHead className="text-foreground">Assign Patrolling Officer</TableHead>
                   <TableHead className="text-foreground">Assign Guards</TableHead>
@@ -614,6 +615,12 @@ export default function AgencySitesPage() {
                     </TableCell>
                     <TableCell>
                       <div className="font-medium">{site.city}, {site.region}</div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="font-medium flex items-center gap-2">
+                        <Users className="h-4 w-4" />
+                        {site.total_guards_requested || 0}
+                      </div>
                     </TableCell>
                     <TableCell>
                       <Input
@@ -669,7 +676,7 @@ export default function AgencySitesPage() {
                 ))
               ) : (
                 <TableRow>
-                    <TableCell colSpan={8} className="text-center text-muted-foreground font-medium py-10">
+                    <TableCell colSpan={9} className="text-center text-muted-foreground font-medium py-10">
                         No unassigned sites found for the current filter.
                     </TableCell>
                 </TableRow>
