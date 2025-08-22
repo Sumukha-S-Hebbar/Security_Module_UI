@@ -92,7 +92,8 @@ export default function RootPage() {
 
       // Store user and organization data in localStorage
       if (typeof window !== 'undefined') {
-        localStorage.setItem('user', JSON.stringify(data.user));
+        const userToStore = { ...data.user, country: data.country };
+        localStorage.setItem('user', JSON.stringify(userToStore));
         if (orgToStore) {
             localStorage.setItem('organization', JSON.stringify(orgToStore));
         }

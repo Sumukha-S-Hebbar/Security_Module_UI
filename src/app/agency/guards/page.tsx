@@ -162,7 +162,7 @@ export default function AgencyGuardsPage() {
   const watchedRegion = addGuardForm.watch('region');
 
   const handleAddGuardClick = async () => {
-      if (!loggedInUser || !loggedInUser.country) {
+      if (!loggedInUser || !loggedInUser.country?.id) {
           toast({ variant: "destructive", title: "Error", description: "User country not found. Cannot fetch regions." });
           return;
       }
@@ -187,7 +187,7 @@ export default function AgencyGuardsPage() {
 
   useEffect(() => {
       async function fetchCities() {
-          if (!watchedRegion || !loggedInUser || !loggedInUser.country) {
+          if (!watchedRegion || !loggedInUser || !loggedInUser.country?.id) {
               setApiCities([]);
               return;
           }
@@ -709,5 +709,3 @@ export default function AgencyGuardsPage() {
     </>
   );
 }
-
-    

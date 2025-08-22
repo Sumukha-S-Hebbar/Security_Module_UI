@@ -157,7 +157,7 @@ export default function AgencyPatrollingOfficersPage() {
     const watchedRegion = addForm.watch('region');
 
     const handleAddPatrollingOfficerClick = async () => {
-        if (!loggedInUser || !loggedInUser.country) {
+        if (!loggedInUser || !loggedInUser.country?.id) {
             toast({ variant: "destructive", title: "Error", description: "User country not found. Cannot fetch regions." });
             return;
         }
@@ -182,7 +182,7 @@ export default function AgencyPatrollingOfficersPage() {
     
     useEffect(() => {
         async function fetchCities() {
-            if (!watchedRegion || !loggedInUser || !loggedInUser.country) {
+            if (!watchedRegion || !loggedInUser || !loggedInUser.country?.id) {
                 setApiCities([]);
                 return;
             }
@@ -689,5 +689,3 @@ export default function AgencyPatrollingOfficersPage() {
       </>
     );
 }
-
-    
