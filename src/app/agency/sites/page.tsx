@@ -54,6 +54,7 @@ export default function AgencySitesPage() {
 
   const [sites, setSites] = useState<Site[]>([]);
   const [patrollingOfficers, setPatrollingOfficers] = useState<PatrollingOfficer[]>([]);
+  const [guards, setGuards] = useState<Guard[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loggedInOrg, setLoggedInOrg] = useState<Organization | null>(null);
   
@@ -97,8 +98,12 @@ export default function AgencySitesPage() {
             email: po.email,
             phone: po.phone,
             avatar: po.profile_picture,
+            city: po.city,
         })) || [];
         setPatrollingOfficers(formattedPOs);
+
+        const guardsResponse = await fetchData<{ results: Guard[] }>(`/security/api/agency/${loggedInOrg.code}/guards/list/`, { headers: authHeader });
+        setGuards(guardsResponse?.results || []);
         
 
     } catch (error) {
@@ -307,7 +312,7 @@ export default function AgencySitesPage() {
      const officersNotInCity = patrollingOfficers.filter(po => po.city !== site.city);
      
      const renderItems = (officerList: PatrollingOfficer[]) => officerList.map((po) => {
-       const officerName = `${po.first_name} ${po.last_name || ''}`.trim();
+       const officerName = `${po.name || ''}`.trim();
        return (
         <SelectItem
           key={po.id}
@@ -335,6 +340,50 @@ export default function AgencySitesPage() {
             )}
         </SelectContent>
      )
+  }
+
+  const renderGuardSelection = (site: Site) => {
+    const guardsInCity = guards.filter(g => g.city === site.city);
+    const guardsNotInCity = guards.filter(g => g.city !== site.city);
+
+    const renderItems = (guardList: Guard[]) => guardList.map(guard => {
+      const guardName = `${guard.first_name} ${guard.last_name || ''}`.trim();
+      const isSelected = (assignment[site.id.toString()]?.guardIds || []).includes(guard.id.toString());
+      return (
+        <DropdownMenuCheckboxItem
+          key={guard.id}
+          checked={isSelected}
+          onSelect={(e) => {
+              e.preventDefault();
+              handleGuardSelect(site.id.toString(), guard.id.toString());
+          }}
+        >
+          {guardName}
+        </DropdownMenuCheckboxItem>
+      );
+    });
+    
+    if (guards.length === 0) {
+        return <DropdownMenuLabel>No guards available</DropdownMenuLabel>;
+    }
+
+    return (
+        <>
+            {guardsInCity.length > 0 && (
+                <>
+                    <DropdownMenuLabel>In {site.city}</DropdownMenuLabel>
+                    {renderItems(guardsInCity)}
+                </>
+            )}
+             {guardsNotInCity.length > 0 && (
+                <>
+                    {guardsInCity.length > 0 && <DropdownMenuSeparator />}
+                    <DropdownMenuLabel>Other Cities</DropdownMenuLabel>
+                    {renderItems(guardsNotInCity)}
+                </>
+            )}
+        </>
+    );
   }
 
   if (isLoading) {
@@ -583,7 +632,7 @@ export default function AgencySitesPage() {
                         }
                       >
                         <SelectTrigger className="w-[180px] font-medium">
-                          <SelectValue placeholder="Select Patrolling Officer" />
+                          <SelectValue placeholder="Select Officer" />
                         </SelectTrigger>
                         {renderPatrollingOfficerSelection(site)}
                       </Select>
@@ -597,8 +646,8 @@ export default function AgencySitesPage() {
                               Select Guards ({assignment[site.id.toString()]?.guardIds?.length || 0})
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent>
-                             <DropdownMenuLabel>No guards available</DropdownMenuLabel>
+                          <DropdownMenuContent className="max-h-64 overflow-y-auto">
+                             {renderGuardSelection(site)}
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </div>
