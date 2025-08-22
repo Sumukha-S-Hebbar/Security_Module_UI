@@ -160,10 +160,12 @@ export default function AgencyGuardsPage() {
   });
 
   const watchedRegion = addGuardForm.watch('region');
-  
-  useEffect(() => {
-    async function fetchRegions() {
-      if (!isAddDialogOpen || !loggedInUser || !loggedInUser.country) return;
+
+  const handleAddGuardClick = async () => {
+      if (!loggedInUser || !loggedInUser.country) {
+          toast({ variant: "destructive", title: "Error", description: "User country not found. Cannot fetch regions." });
+          return;
+      }
       const token = localStorage.getItem('token');
       const countryId = loggedInUser.country.id;
       const url = `/security/api/regions/?country=${countryId}`;
@@ -172,6 +174,7 @@ export default function AgencyGuardsPage() {
           headers: { 'Authorization': `Token ${token}` }
         });
         setApiRegions(data?.regions || []);
+        setIsAddDialogOpen(true);
       } catch (error) {
         console.error("Failed to fetch regions:", error);
         toast({
@@ -180,10 +183,7 @@ export default function AgencyGuardsPage() {
           description: "Could not load regions for the selection.",
         });
       }
-    }
-    fetchRegions();
-  }, [isAddDialogOpen, loggedInUser, toast]);
-
+  };
 
   useEffect(() => {
       async function fetchCities() {
@@ -420,7 +420,7 @@ export default function AgencyGuardsPage() {
                 </Dialog>
                 <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
                     <DialogTrigger asChild>
-                        <Button variant="outline" className="bg-[#00B4D8] hover:bg-[#00B4D8]/90 text-white">
+                        <Button variant="outline" className="bg-[#00B4D8] hover:bg-[#00B4D8]/90 text-white" onClick={handleAddGuardClick}>
                             <PlusCircle className="mr-2 h-4 w-4" />
                             Add Guard
                         </Button>
@@ -709,3 +709,5 @@ export default function AgencyGuardsPage() {
     </>
   );
 }
+
+    

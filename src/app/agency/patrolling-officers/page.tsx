@@ -155,30 +155,31 @@ export default function AgencyPatrollingOfficersPage() {
     });
 
     const watchedRegion = addForm.watch('region');
-    
-    useEffect(() => {
-        async function fetchRegions() {
-            if (!isAddDialogOpen || !loggedInUser || !loggedInUser.country) return;
-            const token = localStorage.getItem('token');
-            const countryId = loggedInUser.country.id;
-            const url = `/security/api/regions/?country=${countryId}`;
-            try {
-                const data = await fetchData<{ regions: ApiRegion[] }>(url, {
-                    headers: { 'Authorization': `Token ${token}` }
-                });
-                setApiRegions(data?.regions || []);
-            } catch (error) {
-                console.error("Failed to fetch regions:", error);
-                toast({
-                    variant: "destructive",
-                    title: "Error",
-                    description: "Could not load regions for the selection.",
-                });
-            }
-        }
-        fetchRegions();
-    }, [isAddDialogOpen, loggedInUser, toast]);
 
+    const handleAddPatrollingOfficerClick = async () => {
+        if (!loggedInUser || !loggedInUser.country) {
+            toast({ variant: "destructive", title: "Error", description: "User country not found. Cannot fetch regions." });
+            return;
+        }
+        const token = localStorage.getItem('token');
+        const countryId = loggedInUser.country.id;
+        const url = `/security/api/regions/?country=${countryId}`;
+        try {
+            const data = await fetchData<{ regions: ApiRegion[] }>(url, {
+                headers: { 'Authorization': `Token ${token}` }
+            });
+            setApiRegions(data?.regions || []);
+            setIsAddDialogOpen(true);
+        } catch (error) {
+            console.error("Failed to fetch regions:", error);
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: "Could not load regions for the selection.",
+            });
+        }
+    };
+    
     useEffect(() => {
         async function fetchCities() {
             if (!watchedRegion || !loggedInUser || !loggedInUser.country) {
@@ -387,7 +388,7 @@ export default function AgencyPatrollingOfficersPage() {
                     </Dialog>
                     <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
                         <DialogTrigger asChild>
-                            <Button variant="outline" className="bg-[#00B4D8] hover:bg-[#00B4D8]/90 text-white">
+                            <Button variant="outline" className="bg-[#00B4D8] hover:bg-[#00B4D8]/90 text-white" onClick={handleAddPatrollingOfficerClick}>
                                 <PlusCircle className="mr-2 h-4 w-4" />
                                 Add Patrolling Officer
                             </Button>
@@ -688,3 +689,5 @@ export default function AgencyPatrollingOfficersPage() {
       </>
     );
 }
+
+    
