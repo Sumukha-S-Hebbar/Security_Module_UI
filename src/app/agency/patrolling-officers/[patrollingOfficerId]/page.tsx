@@ -1,13 +1,9 @@
 
 'use client';
 
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { patrollingOfficers } from '@/lib/data/patrolling-officers';
-import { sites } from '@/lib/data/sites';
-import { guards } from '@/lib/data/guards';
-import { incidents } from '@/lib/data/incidents';
-import type { Incident, Guard, Site, PatrollingOfficer } from '@/types';
+import type { Incident, Guard, Site, Organization } from '@/types';
 import {
   Card,
   CardContent,
@@ -24,19 +20,61 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ArrowLeft, FileDown, Phone, Mail, MapPin, Users, ShieldAlert, Map, Clock, ChevronDown, Building2, CheckCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { Progress } from '@/components/ui/progress';
-import { useMemo, useState, useRef, Fragment } from 'react';
+import { useMemo, useState, useRef, Fragment, useEffect } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
+import { fetchData } from '@/lib/api';
+import { Skeleton } from '@/components/ui/skeleton';
 
+type OfficerReportData = {
+    id: number;
+    employee_id: string;
+    profile_picture: string | null;
+    first_name: string;
+    last_name: string | null;
+    phone: string;
+    email: string;
+    total_guards: number;
+    total_sites: number;
+    total_incidents: number;
+    average_response_time: string;
+    site_visit_accuracy: string;
+    assigned_sites: {
+        site_id: string;
+        site_name: string;
+        address: string;
+        total_incidents: number;
+        resolved_incidents: number;
+        guards_count: number;
+        guards: {
+            id: number;
+            employee_id: string;
+            first_name: string;
+            last_name: string | null;
+            phone: string;
+        }[];
+    }[];
+    incidents: {
+        count: number;
+        next: string | null;
+        previous: string | null;
+        results: {
+            id: number;
+            incident_id: string;
+            tb_site_id: string;
+            incident_time: string;
+            incident_status: "Active" | "Under Review" | "Resolved";
+            site_name: string;
+            guard_name: string;
+            patrol_officer_name: string;
+        }[];
+    };
+};
 
-const LOGGED_IN_AGENCY_ID = 'AGY01'; // Simulate logged-in agency
 
 const getPerformanceColor = (value: number) => {
   if (value >= 95) {
@@ -53,6 +91,11 @@ export default function AgencyPatrollingOfficerReportPage() {
   const router = useRouter();
   const { toast } = useToast();
   const patrollingOfficerId = params.patrollingOfficerId as string;
+  
+  const [reportData, setReportData] = useState<OfficerReportData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loggedInOrg, setLoggedInOrg] = useState<Organization | null>(null);
+
   const [selectedMonth, setSelectedMonth] = useState('all');
   const [selectedYear, setSelectedYear] = useState('all');
   const [selectedStatus, setSelectedStatus] = useState('all');
@@ -62,46 +105,65 @@ export default function AgencyPatrollingOfficerReportPage() {
 
   const incidentsTableRef = useRef<HTMLDivElement>(null);
   const assignedSitesTableRef = useRef<HTMLDivElement>(null);
-
-  const patrollingOfficer = patrollingOfficers.find((p) => p.id === patrollingOfficerId);
-
-  const assignedSites = useMemo(() => sites.filter(site => site.agencyId === LOGGED_IN_AGENCY_ID && site.patrollingOfficerId === patrollingOfficerId), [patrollingOfficerId]);
   
-  const assignedSiteIds = useMemo(() => new Set(assignedSites.map(s => s.id)), [assignedSites]);
-  
-  const assignedGuards = useMemo(() => {
-    return guards.filter(guard => guard.site && assignedSiteIds.has(guard.site));
-  }, [assignedSiteIds]);
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+        const orgData = localStorage.getItem('organization');
+        if (orgData) {
+            setLoggedInOrg(JSON.parse(orgData));
+        }
+    }
+  }, []);
 
-  const assignedIncidents = useMemo(() => incidents.filter(incident => assignedSiteIds.has(incident.siteId)), [assignedSiteIds]);
-  
+  useEffect(() => {
+    if (!loggedInOrg || !patrollingOfficerId) return;
+
+    const fetchReportData = async () => {
+        setIsLoading(true);
+        const token = localStorage.getItem('token');
+        const url = `/security/api/agency/${loggedInOrg.code}/patrol_officer/${patrollingOfficerId}/`;
+        try {
+            const data = await fetchData<OfficerReportData>(url, {
+                headers: { 'Authorization': `Token ${token}` }
+            });
+            setReportData(data);
+        } catch (error) {
+            console.error("Failed to fetch officer report:", error);
+            toast({ variant: "destructive", title: "Error", description: "Could not load patrolling officer report."});
+        } finally {
+            setIsLoading(false);
+        }
+    };
+    fetchReportData();
+  }, [loggedInOrg, patrollingOfficerId, toast]);
+
   const availableYears = useMemo(() => {
+    if (!reportData) return [];
     const years = new Set(
-      assignedIncidents.map((incident) => new Date(incident.incidentTime).getFullYear().toString())
+      reportData.incidents.results.map((incident) => new Date(incident.incident_time).getFullYear().toString())
     );
     if (years.size > 0) years.add(new Date().getFullYear().toString());
     return Array.from(years).sort((a, b) => parseInt(b) - parseInt(a));
-  }, [assignedIncidents]);
+  }, [reportData]);
   
   const performanceAvailableYears = useMemo(() => {
-    // In a real app, this would be derived from available data time ranges
     const currentYear = new Date().getFullYear();
     return Array.from({ length: 5 }, (_, i) => (currentYear - i).toString());
   }, []);
 
   const filteredIncidents = useMemo(() => {
-    return assignedIncidents.filter(incident => {
-      const incidentDate = new Date(incident.incidentTime);
+    if (!reportData) return [];
+    return reportData.incidents.results.filter(incident => {
+      const incidentDate = new Date(incident.incident_time);
       const yearMatch = selectedYear === 'all' || incidentDate.getFullYear().toString() === selectedYear;
       const monthMatch = selectedMonth === 'all' || incidentDate.getMonth().toString() === selectedMonth;
-      const statusMatch = selectedStatus === 'all' || incident.status.toLowerCase().replace(' ', '-') === selectedStatus;
+      const statusMatch = selectedStatus === 'all' || incident.incident_status.toLowerCase().replace(' ', '-') === selectedStatus;
       return yearMatch && monthMatch && statusMatch;
     });
-  }, [assignedIncidents, selectedYear, selectedMonth, selectedStatus]);
+  }, [reportData, selectedYear, selectedMonth, selectedStatus]);
 
-  const visitedSites = assignedSites.filter(s => s.visited).length;
-  const siteVisitAccuracy = assignedSites.length > 0 ? (visitedSites / assignedSites.length) * 100 : 100;
-  const averageResponseTime = patrollingOfficer?.averageResponseTime || 0;
+  const siteVisitAccuracy = parseFloat(reportData?.site_visit_accuracy || '0');
+  const averageResponseTime = parseInt(reportData?.average_response_time || '0', 10);
   
   const roundedSiteVisitAccuracy = Math.round(siteVisitAccuracy);
   const siteVisitColor = getPerformanceColor(roundedSiteVisitAccuracy);
@@ -112,7 +174,21 @@ export default function AgencyPatrollingOfficerReportPage() {
   ];
   const COLORS_SITE_VISIT = [siteVisitColor, 'hsl(var(--muted))'];
 
-  if (!patrollingOfficer) {
+  if (isLoading) {
+    return (
+        <div className="p-4 sm:p-6 lg:p-8 space-y-6">
+            <Skeleton className="h-12 w-1/2" />
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <Skeleton className="h-64 lg:col-span-1" />
+                <Skeleton className="h-64 lg:col-span-2" />
+            </div>
+            <Skeleton className="h-80 w-full" />
+            <Skeleton className="h-80 w-full" />
+        </div>
+    );
+  }
+
+  if (!reportData) {
     return (
       <div className="p-4 sm:p-6 lg:p-8">
         <Card>
@@ -123,11 +199,13 @@ export default function AgencyPatrollingOfficerReportPage() {
       </div>
     );
   }
+  
+  const officerName = `${reportData.first_name} ${reportData.last_name || ''}`.trim();
 
   const handleDownloadReport = () => {
     toast({
       title: 'Report Generation Started',
-      description: `Generating a detailed report for ${patrollingOfficer.name}.`,
+      description: `Generating a detailed report for ${officerName}.`,
     });
   };
 
@@ -158,7 +236,7 @@ export default function AgencyPatrollingOfficerReportPage() {
     setExpandedSiteId(prevId => prevId === siteId ? null : siteId);
   }
 
-  const getStatusIndicator = (status: Incident['status']) => {
+  const getStatusIndicator = (status: "Active" | "Under Review" | "Resolved") => {
     switch (status) {
       case 'Active':
         return (
@@ -212,7 +290,7 @@ export default function AgencyPatrollingOfficerReportPage() {
           </Button>
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Patrolling Officer Report</h1>
-            <p className="text-muted-foreground font-medium">Detailed overview for {patrollingOfficer.name}.</p>
+            <p className="text-muted-foreground font-medium">Detailed overview for {officerName}.</p>
           </div>
         </div>
         <Button onClick={handleDownloadReport} className="bg-[#00B4D8] hover:bg-[#00B4D8]/90">
@@ -227,12 +305,12 @@ export default function AgencyPatrollingOfficerReportPage() {
                   <CardHeader>
                     <div className="flex items-center gap-4">
                       <Avatar className="h-16 w-16">
-                        <AvatarImage src={patrollingOfficer.avatar} alt={patrollingOfficer.name} />
-                        <AvatarFallback>{patrollingOfficer.name.charAt(0)}</AvatarFallback>
+                        <AvatarImage src={reportData.profile_picture || undefined} alt={officerName} />
+                        <AvatarFallback>{officerName.charAt(0)}</AvatarFallback>
                       </Avatar>
                       <div>
-                        <CardTitle className="text-2xl">{patrollingOfficer.name}</CardTitle>
-                        <p className="font-medium text-foreground">ID: {patrollingOfficer.id}</p>
+                        <CardTitle className="text-2xl">{officerName}</CardTitle>
+                        <p className="font-medium text-foreground">ID: {reportData.employee_id}</p>
                       </div>
                     </div>
                   </CardHeader>
@@ -240,11 +318,11 @@ export default function AgencyPatrollingOfficerReportPage() {
                     <div className="text-sm mt-2 space-y-2">
                       <div className="flex items-start gap-3">
                         <Phone className="h-4 w-4 mt-1 text-primary" />
-                        <a href={`tel:${patrollingOfficer.phone}`} className="hover:underline font-medium">{patrollingOfficer.phone}</a>
+                        <a href={`tel:${reportData.phone}`} className="hover:underline font-medium">{reportData.phone}</a>
                       </div>
                       <div className="flex items-start gap-3">
                         <Mail className="h-4 w-4 mt-1 text-primary" />
-                        <a href={`mailto:${patrollingOfficer.email}`} className="hover:underline font-medium">{patrollingOfficer.email}</a>
+                        <a href={`mailto:${reportData.email}`} className="hover:underline font-medium">{reportData.email}</a>
                       </div>
                     </div>
                      <div className="pt-4 mt-4 border-t">
@@ -253,7 +331,7 @@ export default function AgencyPatrollingOfficerReportPage() {
                            <div className="flex flex-col items-center gap-1">
                               <Users className="h-8 w-8 text-primary" />
                               <p className="font-medium text-muted-foreground">Total Guards</p>
-                              <p className="font-bold text-lg">{assignedGuards.length}</p>
+                              <p className="font-bold text-lg">{reportData.total_guards}</p>
                           </div>
                           <button
                             onClick={handleScrollToAssignedSites}
@@ -261,7 +339,7 @@ export default function AgencyPatrollingOfficerReportPage() {
                           >
                               <Building2 className="h-8 w-8 text-primary" />
                               <p className="font-medium text-[#00B4D8] group-hover:underline">Total Sites</p>
-                              <p className="font-bold text-lg text-[#00B4D8] group-hover:underline">{assignedSites.length}</p>
+                              <p className="font-bold text-lg text-[#00B4D8] group-hover:underline">{reportData.total_sites}</p>
                           </button>
                           <button
                             onClick={handleScrollToIncidents}
@@ -269,7 +347,7 @@ export default function AgencyPatrollingOfficerReportPage() {
                           >
                             <ShieldAlert className="h-8 w-8 text-primary" />
                             <p className="font-medium text-[#00B4D8] group-hover:underline">Total Incidents</p>
-                            <p className="font-bold text-lg text-[#00B4D8] group-hover:underline">{assignedIncidents.length}</p>
+                            <p className="font-bold text-lg text-[#00B4D8] group-hover:underline">{reportData.total_incidents}</p>
                           </button>
                         </div>
                     </div>
@@ -364,10 +442,10 @@ export default function AgencyPatrollingOfficerReportPage() {
       <Card ref={assignedSitesTableRef}>
         <CardHeader>
           <CardTitle className="flex items-center gap-2"><MapPin className="h-5 w-5"/>Assigned Sites</CardTitle>
-          <CardDescription className="font-medium">A detailed list of all sites assigned to {patrollingOfficer.name}.</CardDescription>
+          <CardDescription className="font-medium">A detailed list of all sites assigned to {officerName}.</CardDescription>
         </CardHeader>
         <CardContent>
-          {assignedSites.length > 0 ? (
+          {reportData.assigned_sites.length > 0 ? (
               <Table>
                   <TableHeader>
                       <TableRow>
@@ -380,44 +458,39 @@ export default function AgencyPatrollingOfficerReportPage() {
                       </TableRow>
                   </TableHeader>
                   <TableBody>
-                      {assignedSites.map(site => {
-                          const siteGuards = guards.filter(g => g.site === site.id);
-                          const isExpanded = expandedSiteId === site.id;
-                          const siteIncidents = incidents.filter(i => i.siteId === site.id);
-                          const resolvedCount = siteIncidents.filter(i => i.status === 'Resolved').length;
+                      {reportData.assigned_sites.map(site => {
+                          const isExpanded = expandedSiteId === site.site_id;
 
                           return (
-                            <Fragment key={site.id}>
+                            <Fragment key={site.site_id}>
                               <TableRow className="hover:bg-accent hover:text-accent-foreground group">
                                   <TableCell>
-                                      <Button asChild variant="link" className="p-0 h-auto font-medium group-hover:text-accent-foreground">
-                                          <Link href={`/agency/sites/${site.id}`}>{site.id}</Link>
-                                      </Button>
+                                      <span className="font-medium">{site.site_id}</span>
                                   </TableCell>
                                   <TableCell className="font-medium">{site.site_name}</TableCell>
-                                  <TableCell className="font-medium">{site.site_address_line1}</TableCell>
+                                  <TableCell className="font-medium">{site.address}</TableCell>
                                   <TableCell>
                                      <Button
                                       variant="link"
                                       className="p-0 h-auto flex items-center gap-2 text-accent group-hover:text-accent-foreground"
-                                      onClick={(e) => handleExpandClick(e, site.id)}
-                                      disabled={siteGuards.length === 0}
+                                      onClick={(e) => handleExpandClick(e, site.site_id)}
+                                      disabled={site.guards_count === 0}
                                     >
                                       <Users className="h-4 w-4" />
-                                      {siteGuards.length}
+                                      {site.guards_count}
                                       <ChevronDown className={cn("h-4 w-4 transition-transform", isExpanded && "rotate-180")} />
                                     </Button>
                                   </TableCell>
                                   <TableCell>
                                     <div className="flex items-center gap-2 font-medium">
                                       <ShieldAlert className="h-4 w-4 text-muted-foreground group-hover:text-accent-foreground" />
-                                      <span>{siteIncidents.length}</span>
+                                      <span>{site.total_incidents}</span>
                                     </div>
                                   </TableCell>
                                   <TableCell>
                                     <div className="flex items-center gap-2 font-medium">
                                       <CheckCircle className="h-4 w-4 text-chart-2" />
-                                      <span>{resolvedCount}</span>
+                                      <span>{site.resolved_incidents}</span>
                                     </div>
                                   </TableCell>
                               </TableRow>
@@ -434,20 +507,16 @@ export default function AgencyPatrollingOfficerReportPage() {
                                                     </TableRow>
                                                 </TableHeader>
                                                 <TableBody>
-                                                    {siteGuards.map(guard => (
+                                                    {site.guards.map(guard => (
                                                         <TableRow key={guard.id} className="hover:bg-accent hover:text-accent-foreground group cursor-pointer" onClick={() => router.push(`/agency/guards/${guard.id}`)}>
                                                             <TableCell>
                                                                 <Button asChild variant="link" className="p-0 h-auto text-sm font-medium text-accent group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
-                                                                  <Link href={`/agency/guards/${guard.id}`}>{guard.id}</Link>
+                                                                  <Link href={`/agency/guards/${guard.id}`}>{guard.employee_id}</Link>
                                                                 </Button>
                                                             </TableCell>
                                                             <TableCell>
                                                                 <div className="flex items-center gap-3">
-                                                                    <Avatar className="h-10 w-10">
-                                                                        <AvatarImage src={guard.avatar} alt={guard.name} />
-                                                                        <AvatarFallback>{guard.name.charAt(0)}</AvatarFallback>
-                                                                    </Avatar>
-                                                                    <p className="font-semibold">{guard.name}</p>
+                                                                    <p className="font-semibold">{`${guard.first_name} ${guard.last_name || ''}`}</p>
                                                                 </div>
                                                             </TableCell>
                                                             <TableCell>
@@ -470,7 +539,7 @@ export default function AgencyPatrollingOfficerReportPage() {
                   </TableBody>
               </Table>
           ) : (
-              <p className="text-sm text-muted-foreground font-medium">No sites are assigned to this patrolling officer.</p>
+              <p className="text-sm text-muted-foreground text-center py-4 font-medium">No sites are assigned to this patrolling officer.</p>
           )}
         </CardContent>
       </Card>
@@ -479,7 +548,7 @@ export default function AgencyPatrollingOfficerReportPage() {
         <CardHeader className="flex flex-row items-start justify-between gap-4">
           <div className="flex-grow">
             <CardTitle>Incidents Log</CardTitle>
-            <CardDescription className="font-medium">A log of emergency incidents at sites managed by {patrollingOfficer.name}.</CardDescription>
+            <CardDescription className="font-medium">A log of emergency incidents at sites managed by {officerName}.</CardDescription>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
              <Select value={selectedStatus} onValueChange={setSelectedStatus}>
@@ -540,8 +609,6 @@ export default function AgencyPatrollingOfficerReportPage() {
               </TableHeader>
               <TableBody>
                 {filteredIncidents.map((incident) => {
-                    const site = sites.find(s => s.id === incident.siteId);
-                    const guard = guards.find(g => g.id === incident.raisedByGuardId);
                     return (
                         <TableRow 
                           key={incident.id}
@@ -550,14 +617,14 @@ export default function AgencyPatrollingOfficerReportPage() {
                         >
                             <TableCell>
                               <Button asChild variant="link" className="p-0 h-auto font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
-                                <Link href={`/agency/incidents/${incident.id}`}>{incident.id}</Link>
+                                <Link href={`/agency/incidents/${incident.id}`}>{incident.incident_id}</Link>
                               </Button>
                             </TableCell>
-                            <TableCell className="font-medium">{new Date(incident.incidentTime).toLocaleDateString()}</TableCell>
-                            <TableCell className="font-medium">{new Date(incident.incidentTime).toLocaleTimeString()}</TableCell>
-                            <TableCell className="font-medium">{site?.site_name || 'N/A'}</TableCell>
-                            <TableCell className="font-medium">{guard?.name || 'N/A'}</TableCell>
-                            <TableCell>{getStatusIndicator(incident.status)}</TableCell>
+                            <TableCell className="font-medium">{new Date(incident.incident_time).toLocaleDateString()}</TableCell>
+                            <TableCell className="font-medium">{new Date(incident.incident_time).toLocaleTimeString()}</TableCell>
+                            <TableCell className="font-medium">{incident.site_name || 'N/A'}</TableCell>
+                            <TableCell className="font-medium">{incident.guard_name || 'N/A'}</TableCell>
+                            <TableCell>{getStatusIndicator(incident.incident_status)}</TableCell>
                         </TableRow>
                     )
                 })}
@@ -568,7 +635,6 @@ export default function AgencyPatrollingOfficerReportPage() {
           )}
         </CardContent>
       </Card>
-
     </div>
   );
 }
