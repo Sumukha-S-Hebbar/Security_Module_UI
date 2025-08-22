@@ -210,6 +210,7 @@ export default function AgencySitesPage() {
 
     setAssignment((prev) => {
       const currentSelection = prev[siteId]?.guardIds || [];
+      const guardsRequired = site.total_guards_requested || 0;
       
       // If guard is already selected, deselect it
       if (currentSelection.includes(guardId)) {
@@ -218,19 +219,43 @@ export default function AgencySitesPage() {
       }
 
       // If adding a guard, check against the limit
-      if (currentSelection.length >= (site.total_guards_requested || 0)) {
-        toast({
-          variant: 'destructive',
-          title: 'Guard Limit Reached',
-          description: `You cannot assign more than ${site.total_guards_requested} guard(s) to this site.`,
-        });
-        return prev; // Return previous state without changes
+      if (currentSelection.length >= guardsRequired) {
+        // We can't call toast here directly.
+        // Instead, we can just return the previous state.
+        // A useEffect can be used to show the toast.
+        return prev; 
       }
 
       const newSelection = [...currentSelection, guardId];
       return { ...prev, [siteId]: { ...prev[siteId], guardIds: newSelection } };
     });
   };
+
+  // This effect will run when the assignment changes, and it's safe to call toast here.
+  useEffect(() => {
+    for (const siteId in assignment) {
+      const site = unassignedSites.find(s => s.id.toString() === siteId);
+      if (site) {
+        const selectedGuards = assignment[siteId]?.guardIds || [];
+        const requiredGuards = site.total_guards_requested || 0;
+        if (selectedGuards.length > requiredGuards) {
+          toast({
+            variant: 'destructive',
+            title: 'Guard Limit Reached',
+            description: `You cannot assign more than ${requiredGuards} guard(s) to this site.`,
+          });
+          // Optional: automatically trim the selection
+          setAssignment(prev => ({
+            ...prev,
+            [siteId]: {
+              ...prev[siteId],
+              guardIds: selectedGuards.slice(0, requiredGuards)
+            }
+          }));
+        }
+      }
+    }
+  }, [assignment, unassignedSites, toast]);
 
   const handleAssign = async (siteId: string) => {
     if (!loggedInOrg) return;
