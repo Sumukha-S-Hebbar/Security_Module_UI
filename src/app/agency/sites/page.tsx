@@ -205,11 +205,29 @@ export default function AgencySitesPage() {
   }
 
   const handleGuardSelect = (siteId: string, guardId: string) => {
+    const site = unassignedSites.find(s => s.id.toString() === siteId);
+    if (!site) return;
+
     setAssignment((prev) => {
       const currentSelection = prev[siteId]?.guardIds || [];
-      const newSelection = currentSelection.includes(guardId)
-        ? currentSelection.filter((id) => id !== guardId)
-        : [...currentSelection, guardId];
+      
+      // If guard is already selected, deselect it
+      if (currentSelection.includes(guardId)) {
+        const newSelection = currentSelection.filter((id) => id !== guardId);
+        return { ...prev, [siteId]: { ...prev[siteId], guardIds: newSelection } };
+      }
+
+      // If adding a guard, check against the limit
+      if (currentSelection.length >= (site.total_guards_requested || 0)) {
+        toast({
+          variant: 'destructive',
+          title: 'Guard Limit Reached',
+          description: `You cannot assign more than ${site.total_guards_requested} guard(s) to this site.`,
+        });
+        return prev; // Return previous state without changes
+      }
+
+      const newSelection = [...currentSelection, guardId];
       return { ...prev, [siteId]: { ...prev[siteId], guardIds: newSelection } };
     });
   };
