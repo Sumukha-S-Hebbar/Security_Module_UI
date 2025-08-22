@@ -1,20 +1,14 @@
 
 'use client';
 
-import { useMemo, useState, useRef } from 'react';
-import { incidents } from '@/lib/data/incidents';
-import { guards } from '@/lib/data/guards';
-import { sites } from '@/lib/data/sites';
-import { patrollingOfficers } from '@/lib/data/patrolling-officers';
-import { securityAgencies } from '@/lib/data/security-agencies';
-import type { Guard, PatrollingOfficer, Site } from '@/types';
-import { AgencyAnalyticsDashboard } from './_components/agency-analytics-dashboard';
+import { useState, useEffect, useMemo } from 'react';
+import type { Organization } from '@/types';
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-  CardFooter
+  CardFooter,
 } from '@/components/ui/card';
 import {
   Table,
@@ -24,84 +18,162 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
+import { AlertTriangle, ChevronDown, Phone } from 'lucide-react';
+import { AgencyAnalyticsDashboard } from './_components/agency-analytics-dashboard';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Button } from '@/components/ui/button';
-import { AlertTriangle, ChevronDown, Phone } from 'lucide-react';
 import { IncidentStatusBreakdown } from './_components/incident-status-breakdown';
 import { AgencyIncidentChart } from './_components/agency-incident-chart';
 import { GuardPerformanceBreakdown } from './_components/guard-performance-breakdown';
 import { PatrollingOfficerPerformance } from './_components/patrolling-officer-performance';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useDataFetching } from '@/hooks/useDataFetching';
 
-const LOGGED_IN_AGENCY_ID = 'AGY01'; // Simulate logged-in agency
 const ACTIVE_INCIDENTS_PER_PAGE = 4;
+
+// Type definitions based on the new API response
+export type BasicCounts = {
+    active_incidents_count: number;
+    total_sites_count: number;
+    total_guards_count: number;
+    total_patrol_officers_count: number;
+};
+
+export type ActiveIncident = {
+    id: number;
+    incident_id: string;
+    site_details: { id: number; tb_site_id: string; site_name: string };
+    patrol_officer_name: string;
+    guard_name: string;
+    incident_time: string;
+    contact_details: { officer_phone: string | null; guard_phone: string | null };
+};
+
+export type GuardPerformanceData = {
+    guard_checkin_accuracy: number;
+    selfie_checkin_accuracy: number;
+};
+
+export type PatrollingOfficerPerformanceData = {
+    site_visit_accuracy: number;
+    average_response_time: string;
+};
+
+export type IncidentTrendData = {
+    month: string;
+    year: number;
+    total: number;
+    resolved: number;
+    active: number;
+    under_review: number;
+    resolution_duration: string;
+};
+
+interface AgencyDashboardData {
+    basic_counts: BasicCounts;
+    active_incidents: {
+        count: number;
+        next: string | null;
+        previous: string | null;
+        results: ActiveIncident[];
+    };
+    guard_performance: GuardPerformanceData;
+    patrol_officer_performance: PatrollingOfficerPerformanceData;
+    incident_trend: IncidentTrendData[];
+    all_incidents: {
+        count: number;
+        results: any[];
+    }
+}
+
+
+async function getDashboardData(org: Organization | null): Promise<AgencyDashboardData | null> {
+  if (!org) return null;
+  
+  let url = `${process.env.NEXT_PUBLIC_DJANGO_API_URL}/security/api/agency/${org.code}/agency-dashboard/`;
+  const token = localStorage.getItem('token');
+  
+  if (!token) {
+    console.error("No auth token found");
+    return null;
+  }
+
+  try {
+    const response = await fetch(url, {
+      headers: { 'Authorization': `Token ${token}` }
+    });
+    if (!response.ok) {
+      throw new Error(`Failed to fetch dashboard data: ${response.statusText}`);
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Could not fetch dashboard data:', error);
+    return null;
+  }
+}
 
 export default function AgencyHomePage() {
   const router = useRouter();
-  const guardsRef = useRef<HTMLDivElement>(null);
-  const officersRef = useRef<HTMLDivElement>(null);
-  const sitesRef = useRef<HTMLDivElement>(null);
   const [activeIncidentsCurrentPage, setActiveIncidentsCurrentPage] = useState(1);
+  const [org, setOrg] = useState<Organization | null>(null);
 
-  const agencySiteIds = useMemo(() => {
-    const agency = securityAgencies.find(a => a.agency_id === LOGGED_IN_AGENCY_ID);
-    return new Set(agency ? agency.siteIds : []);
+  useEffect(() => {
+      const orgData = localStorage.getItem('organization');
+      if (orgData) {
+        setOrg(JSON.parse(orgData));
+      }
   }, []);
 
-  const agencySites = useMemo(() => sites.filter(site => agencySiteIds.has(site.id)), [agencySiteIds]);
+  const { data, isLoading } = useDataFetching<AgencyDashboardData | null>(
+    () => getDashboardData(org), 
+    [org]
+  );
+  
+  const activeEmergencies = useMemo(() => {
+    if (!data) return [];
+    return data.active_incidents.results;
+  }, [data]);
 
-  const agencyIncidents = useMemo(() => incidents.filter(incident => agencySiteIds.has(incident.siteId)), [agencySiteIds]);
-  
-  const agencyGuards = useMemo(() => {
-    const siteNames = new Set(agencySites.map(s => s.site_name));
-    return guards.filter(guard => siteNames.has(guard.site));
-  }, [agencySites]);
-  
-  const agencyPatrollingOfficers = useMemo(() => {
-    const poIds = new Set(agencySites.map(s => s.patrollingOfficerId).filter(Boolean));
-    return patrollingOfficers.filter(po => poIds.has(po.id));
-  }, [agencySites]);
-
-  const activeEmergencies = useMemo(() => agencyIncidents.filter(
-    (incident) => incident.status === 'Active'
-  ), [agencyIncidents]);
-  
   const paginatedActiveEmergencies = useMemo(() => {
     const startIndex = (activeIncidentsCurrentPage - 1) * ACTIVE_INCIDENTS_PER_PAGE;
     return activeEmergencies.slice(startIndex, startIndex + ACTIVE_INCIDENTS_PER_PAGE);
   }, [activeEmergencies, activeIncidentsCurrentPage]);
   
-  const totalActiveIncidentPages = Math.ceil(activeEmergencies.length / ACTIVE_INCIDENTS_PER_PAGE);
+  const totalActiveIncidentPages = Math.ceil((data?.active_incidents.count || 0) / ACTIVE_INCIDENTS_PER_PAGE);
 
-  const getGuardById = (id: string): Guard | undefined => {
-    return agencyGuards.find((g) => g.id === id);
-  };
-  
-  const getSiteById = (id: string): Site | undefined => {
-    return agencySites.find((s) => s.id === id);
-  };
-
-  const getPatrollingOfficerById = (id?: string): PatrollingOfficer | undefined => {
-    if (!id) return undefined;
-    return agencyPatrollingOfficers.find((p) => p.id === id);
-  };
-
-  const handleDashboardCardClick = (refId: 'guards' | 'officers' | 'sites') => {
-    if (refId === 'guards') {
-      router.push('/agency/guards');
-    } else if (refId === 'officers') {
-      router.push('/agency/patrolling-officers');
-    } else if (refId === 'sites') {
-      router.push('/agency/sites');
-    }
-  };
-
+  if (isLoading || !data || !org) {
+    return (
+      <div className="p-4 sm:p-6 lg:p-8 space-y-6">
+        <div className="space-y-2">
+            <Skeleton className="h-8 w-1/3" />
+            <Skeleton className="h-4 w-1/2" />
+        </div>
+        <Card>
+            <CardHeader>
+                <Skeleton className="h-6 w-1/4" />
+            </CardHeader>
+            <CardContent>
+                <Skeleton className="h-24 w-full" />
+            </CardContent>
+        </Card>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <Skeleton className="h-28 w-full" />
+            <Skeleton className="h-28 w-full" />
+            <Skeleton className="h-28 w-full" />
+        </div>
+        <Skeleton className="h-[400px] w-full" />
+        <Skeleton className="h-48 w-full" />
+        <Skeleton className="h-64 w-full" />
+      </div>
+    );
+  }
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6">
@@ -117,7 +189,7 @@ export default function AgencyHomePage() {
       <Card className="border-destructive bg-destructive/10">
         <CardHeader className="flex flex-row items-center gap-2">
           <AlertTriangle className="w-6 h-6 text-destructive" />
-          <CardTitle>Active Emergency Incidents ({activeEmergencies.length})</CardTitle>
+          <CardTitle>Active Emergency Incidents ({data.active_incidents.count})</CardTitle>
         </CardHeader>
         <CardContent>
           {activeEmergencies.length > 0 ? (
@@ -135,10 +207,7 @@ export default function AgencyHomePage() {
               </TableHeader>
               <TableBody>
                 {paginatedActiveEmergencies.map((incident) => {
-                  const siteDetails = getSiteById(incident.siteId);
-                  const guardDetails = getGuardById(incident.raisedByGuardId);
-                  const patrollingOfficerDetails = getPatrollingOfficerById(incident.attendedByPatrollingOfficerId);
-                  const incidentDate = new Date(incident.incidentTime);
+                  const incidentDate = new Date(incident.incident_time);
                   
                   return (
                     <TableRow 
@@ -148,15 +217,15 @@ export default function AgencyHomePage() {
                     >
                       <TableCell>
                         <Button asChild variant="link" className="p-0 h-auto" onClick={(e) => e.stopPropagation()}>
-                          <Link href={`/agency/incidents/${incident.id}`}>{incident.id}</Link>
+                          <Link href={`/agency/incidents/${incident.id}`}>{incident.incident_id}</Link>
                         </Button>
                       </TableCell>
                       <TableCell>
-                        {siteDetails?.site_name || 'N/A'}
+                        {incident.site_details?.site_name || 'N/A'}
                       </TableCell>
-                      <TableCell>{guardDetails?.name || 'N/A'}</TableCell>
+                      <TableCell>{incident.guard_name || 'N/A'}</TableCell>
                       <TableCell>
-                        {patrollingOfficerDetails?.name || 'N/A'}
+                        {incident.patrol_officer_name || 'N/A'}
                       </TableCell>
                       <TableCell>{incidentDate.toLocaleDateString()}</TableCell>
                       <TableCell>{incidentDate.toLocaleTimeString()}</TableCell>
@@ -168,17 +237,17 @@ export default function AgencyHomePage() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
-                            {guardDetails && (
+                            {incident.contact_details.guard_phone && (
                               <DropdownMenuItem asChild>
-                                <a href={`tel:${guardDetails.phone}`}>
+                                <a href={`tel:${incident.contact_details.guard_phone}`}>
                                   <Phone className="mr-2 h-4 w-4" />
                                   Contact Guard
                                 </a>
                               </DropdownMenuItem>
                             )}
-                            {patrollingOfficerDetails && (
+                            {incident.contact_details.officer_phone && (
                               <DropdownMenuItem asChild>
-                                <a href={`tel:${patrollingOfficerDetails.phone}`}>
+                                <a href={`tel:${incident.contact_details.officer_phone}`}>
                                   <Phone className="mr-2 h-4 w-4" />
                                   Contact Patrolling Officer
                                 </a>
@@ -228,21 +297,16 @@ export default function AgencyHomePage() {
           )}
       </Card>
 
-      <AgencyAnalyticsDashboard
-        guards={agencyGuards}
-        sites={agencySites}
-        patrollingOfficers={agencyPatrollingOfficers}
-        onCardClick={handleDashboardCardClick}
-      />
-
-      <IncidentStatusBreakdown incidents={agencyIncidents} />
+      <AgencyAnalyticsDashboard counts={data.basic_counts} />
+      
+      <IncidentStatusBreakdown allIncidents={data.all_incidents.results} />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <GuardPerformanceBreakdown guards={agencyGuards} />
-        <PatrollingOfficerPerformance patrollingOfficers={agencyPatrollingOfficers} sites={agencySites} />
+        <GuardPerformanceBreakdown performance={data.guard_performance} />
+        <PatrollingOfficerPerformance performance={data.patrol_officer_performance} />
       </div>
 
-      <AgencyIncidentChart incidents={agencyIncidents} />
+      <AgencyIncidentChart incidentTrend={data.incident_trend} />
     </div>
   );
 }

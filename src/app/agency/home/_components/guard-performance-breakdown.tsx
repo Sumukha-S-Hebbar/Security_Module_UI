@@ -1,18 +1,10 @@
 
 'use client';
 
-import { useState, useMemo } from 'react';
-import type { Guard } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { ShieldCheck, UserCheck } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import type { GuardPerformanceData } from '../page';
 
 const getPerformanceColor = (value: number) => {
   if (value >= 95) {
@@ -24,47 +16,9 @@ const getPerformanceColor = (value: number) => {
   }
 };
 
-export function GuardPerformanceBreakdown({ guards }: { guards: Guard[] }) {
-  const [selectedYear, setSelectedYear] = useState<string>(new Date().getFullYear().toString());
-  const [selectedMonth, setSelectedMonth] = useState<string>('all');
-  
-  const availableYears = useMemo(() => {
-    // In a real app, this would be derived from available data time ranges
-    const currentYear = new Date().getFullYear();
-    return Array.from({ length: 5 }, (_, i) => (currentYear - i).toString());
-  }, []);
-
-  const totalGuards = guards.length;
-
-  const performanceData = useMemo(() => {
-    // NOTE: In a real application, you would filter the source data
-    // based on selectedYear and selectedMonth here before calculating performance.
-    // The current mock data is cumulative, so filtering is for demonstration purposes.
-
-    return guards.reduce(
-      (acc, guard) => {
-        acc.totalPerimeterAccuracy += guard.performance?.perimeterAccuracy || 0;
-        acc.totalSelfieRequests += guard.totalSelfieRequests;
-        acc.totalSelfiesTaken += guard.totalSelfieRequests - guard.missedSelfieCount;
-        return acc;
-      },
-      {
-        totalPerimeterAccuracy: 0,
-        totalSelfieRequests: 0,
-        totalSelfiesTaken: 0,
-      }
-    );
-  }, [guards, selectedYear, selectedMonth]);
-
-
-  const avgPerimeterAccuracy = totalGuards > 0 ? performanceData.totalPerimeterAccuracy / totalGuards : 0;
-  const avgSelfieAccuracy =
-    performanceData.totalSelfieRequests > 0
-      ? (performanceData.totalSelfiesTaken / performanceData.totalSelfieRequests) * 100
-      : 0;
-      
-  const roundedPerimeterAccuracy = Math.round(avgPerimeterAccuracy);
-  const roundedSelfieAccuracy = Math.round(avgSelfieAccuracy);
+export function GuardPerformanceBreakdown({ performance }: { performance: GuardPerformanceData }) {
+  const roundedPerimeterAccuracy = Math.round(performance.guard_checkin_accuracy);
+  const roundedSelfieAccuracy = Math.round(performance.selfie_checkin_accuracy);
 
   const perimeterAccuracyData = [
     { name: 'Accuracy', value: roundedPerimeterAccuracy },
@@ -85,40 +39,11 @@ export function GuardPerformanceBreakdown({ guards }: { guards: Guard[] }) {
 
   return (
     <Card>
-      <CardHeader className="flex-row items-start justify-between">
-        <div>
-            <CardTitle>Guard Performance Overview</CardTitle>
-            <CardDescription>
-            Average performance metrics across all assigned guards.
-            </CardDescription>
-        </div>
-        <div className="flex items-center gap-2">
-            <Select value={selectedYear} onValueChange={setSelectedYear}>
-                <SelectTrigger className="w-[120px] font-medium hover:bg-accent hover:text-accent-foreground">
-                    <SelectValue placeholder="Select Year" />
-                </SelectTrigger>
-                <SelectContent>
-                {availableYears.map((year) => (
-                    <SelectItem key={year} value={year} className="font-medium">
-                    {year}
-                    </SelectItem>
-                ))}
-                </SelectContent>
-            </Select>
-            <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-                <SelectTrigger className="w-[140px] font-medium hover:bg-accent hover:text-accent-foreground">
-                    <SelectValue placeholder="Select Month" />
-                </SelectTrigger>
-                <SelectContent>
-                <SelectItem value="all" className="font-medium">All Months</SelectItem>
-                {Array.from({ length: 12 }, (_, i) => (
-                    <SelectItem key={i} value={i.toString()} className="font-medium">
-                    {new Date(0, i).toLocaleString('default', { month: 'long' })}
-                    </SelectItem>
-                ))}
-                </SelectContent>
-            </Select>
-        </div>
+      <CardHeader>
+        <CardTitle>Guard Performance Overview</CardTitle>
+        <CardDescription>
+        Average performance metrics across all assigned guards.
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center justify-items-center">

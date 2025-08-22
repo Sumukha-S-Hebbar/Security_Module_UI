@@ -1,18 +1,10 @@
 
 'use client';
 
-import type { PatrollingOfficer, Site } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Map, Clock } from 'lucide-react';
-import { useState, useMemo } from 'react';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
+import type { PatrollingOfficerPerformanceData } from '../page';
 
 const getPerformanceColor = (value: number) => {
   if (value >= 95) {
@@ -25,59 +17,11 @@ const getPerformanceColor = (value: number) => {
 };
 
 export function PatrollingOfficerPerformance({ 
-    patrollingOfficers, 
-    sites 
+    performance
 }: { 
-    patrollingOfficers: PatrollingOfficer[],
-    sites: Site[]
+    performance: PatrollingOfficerPerformanceData
 }) {
-  const [selectedYear, setSelectedYear] = useState<string>(new Date().getFullYear().toString());
-  const [selectedMonth, setSelectedMonth] = useState<string>('all');
-  
-  const availableYears = useMemo(() => {
-    const currentYear = new Date().getFullYear();
-    return Array.from({ length: 5 }, (_, i) => (currentYear - i).toString());
-  }, []);
-
-  const performanceData = useMemo(() => {
-    // NOTE: In a real application, you would filter based on selectedYear and selectedMonth here.
-    const totalOfficers = patrollingOfficers.length;
-    if (totalOfficers === 0) {
-      return {
-        avgSiteVisitAccuracy: 0,
-        avgResponseTime: 0,
-      };
-    }
-
-    const perf = patrollingOfficers.reduce(
-      (acc, officer) => {
-        const assignedSites = sites.filter(s => s.patrollingOfficerId === officer.id);
-        const visitedSites = assignedSites.filter(s => s.visited).length;
-        
-        if (assignedSites.length > 0) {
-          acc.totalSiteVisitAccuracy += (visitedSites / assignedSites.length) * 100;
-        } else {
-          // If officer has no sites, their accuracy is 100% for the average calculation
-          acc.totalSiteVisitAccuracy += 100;
-        }
-        
-        acc.totalResponseTime += officer.averageResponseTime || 0;
-        
-        return acc;
-      },
-      {
-        totalSiteVisitAccuracy: 0,
-        totalResponseTime: 0,
-      }
-    );
-
-    return {
-      avgSiteVisitAccuracy: perf.totalSiteVisitAccuracy / totalOfficers,
-      avgResponseTime: perf.totalResponseTime / totalOfficers,
-    }
-  }, [patrollingOfficers, sites, selectedYear, selectedMonth]);
-
-  const roundedSiteVisitAccuracy = Math.round(performanceData.avgSiteVisitAccuracy);
+  const roundedSiteVisitAccuracy = Math.round(performance.site_visit_accuracy);
   const siteVisitColor = getPerformanceColor(roundedSiteVisitAccuracy);
 
   const siteVisitAccuracyData = [
@@ -88,40 +32,11 @@ export function PatrollingOfficerPerformance({
 
   return (
     <Card>
-      <CardHeader className="flex-row items-start justify-between">
-        <div>
+      <CardHeader>
           <CardTitle>Patrolling Officer Performance</CardTitle>
           <CardDescription>
             Average performance metrics across all patrolling officers.
           </CardDescription>
-        </div>
-        <div className="flex items-center gap-2">
-            <Select value={selectedYear} onValueChange={setSelectedYear}>
-                <SelectTrigger className="w-[120px] font-medium hover:bg-accent hover:text-accent-foreground">
-                    <SelectValue placeholder="Select Year" />
-                </SelectTrigger>
-                <SelectContent>
-                {availableYears.map((year) => (
-                    <SelectItem key={year} value={year} className="font-medium">
-                    {year}
-                    </SelectItem>
-                ))}
-                </SelectContent>
-            </Select>
-            <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-                <SelectTrigger className="w-[140px] font-medium hover:bg-accent hover:text-accent-foreground">
-                    <SelectValue placeholder="Select Month" />
-                </SelectTrigger>
-                <SelectContent>
-                <SelectItem value="all" className="font-medium">All Months</SelectItem>
-                {Array.from({ length: 12 }, (_, i) => (
-                    <SelectItem key={i} value={i.toString()} className="font-medium">
-                    {new Date(0, i).toLocaleString('default', { month: 'long' })}
-                    </SelectItem>
-                ))}
-                </SelectContent>
-            </Select>
-        </div>
       </CardHeader>
       <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center justify-items-center">
         <div className="flex flex-col items-center gap-2">
@@ -160,8 +75,8 @@ export function PatrollingOfficerPerformance({
             <div className="flex items-center gap-4 text-foreground">
                 <Clock className="w-12 h-12 text-primary" />
                 <div>
-                    <span className="text-4xl font-bold">{performanceData.avgResponseTime.toFixed(0)}</span>
-                    <span className="text-lg text-muted-foreground ml-1">mins</span>
+                    <span className="text-4xl font-bold">{performance.average_response_time.split(' ')[0]}</span>
+                    <span className="text-lg text-muted-foreground ml-1">{performance.average_response_time.split(' ')[1]}</span>
                 </div>
             </div>
             <p className="text-center font-medium mt-2">

@@ -1,10 +1,8 @@
 
-
 'use client';
 
 import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import type { Incident, Guard, Site } from '@/types';
 import {
   Card,
   CardContent,
@@ -23,14 +21,11 @@ import {
 import {
   Collapsible,
   CollapsibleContent,
-  CollapsibleTrigger,
 } from '@/components/ui/collapsible';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { CheckCircle2, ShieldAlert, ShieldQuestion } from 'lucide-react';
-import { guards } from '@/lib/data/guards';
-import { sites } from '@/lib/data/sites';
 import {
   Select,
   SelectContent,
@@ -40,57 +35,36 @@ import {
 } from '@/components/ui/select';
 
 export function IncidentStatusBreakdown({
-  incidents,
+  allIncidents,
 }: {
-  incidents: Incident[];
+  allIncidents: any[];
 }) {
   const router = useRouter();
-  const [selectedStatus, setSelectedStatus] = useState<
-    Incident['status'] | null
-  >(null);
-  const [selectedYear, setSelectedYear] = useState<string>('all');
-  const [selectedMonth, setSelectedMonth] = useState<string>('all');
+  const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
   
-  const availableYears = useMemo(() => {
-    const years = new Set(
-      incidents.map((incident) => new Date(incident.incidentTime).getFullYear().toString())
-    );
-    if (years.size > 0) years.add(new Date().getFullYear().toString());
-    return Array.from(years).sort((a, b) => parseInt(b) - parseInt(a));
-  }, [incidents]);
-
-  const filteredByDateIncidents = useMemo(() => {
-    return incidents.filter(incident => {
-      const incidentDate = new Date(incident.incidentTime);
-      const yearMatch = selectedYear === 'all' || incidentDate.getFullYear().toString() === selectedYear;
-      const monthMatch = selectedMonth === 'all' || incidentDate.getMonth().toString() === selectedMonth;
-      return yearMatch && monthMatch;
-    });
-  }, [incidents, selectedYear, selectedMonth]);
-
   const summary = useMemo(() => {
-    return filteredByDateIncidents.reduce(
+    return allIncidents.reduce(
       (acc, incident) => {
-        if (incident.status === 'Active') acc.active++;
-        if (incident.status === 'Under Review') acc.underReview++;
-        if (incident.status === 'Resolved') acc.resolved++;
+        if (incident.incident_status === 'Active') acc.active++;
+        if (incident.incident_status === 'Under Review') acc.underReview++;
+        if (incident.incident_status === 'Resolved') acc.resolved++;
         return acc;
       },
       { active: 0, underReview: 0, resolved: 0 }
     );
-  }, [filteredByDateIncidents]);
+  }, [allIncidents]);
 
   const filteredIncidents = useMemo(() => {
     if (!selectedStatus) return [];
-    return filteredByDateIncidents.filter((incident) => incident.status === selectedStatus);
-  }, [filteredByDateIncidents, selectedStatus]);
+    const statusMap: {[key: string]: string} = {
+        'active': 'Active',
+        'under-review': 'Under Review',
+        'resolved': 'Resolved'
+    };
+    return allIncidents.filter((incident) => incident.incident_status === statusMap[selectedStatus]);
+  }, [allIncidents, selectedStatus]);
 
-  const getSiteName = (siteId: string) =>
-    sites.find((s) => s.id === siteId)?.site_name || 'N/A';
-  const getGuardName = (guardId: string) =>
-    guards.find((g) => g.id === guardId)?.name || 'N/A';
-
-  const getStatusIndicator = (status: Incident['status']) => {
+  const getStatusIndicator = (status: string) => {
     switch (status) {
       case 'Active':
         return (
@@ -132,27 +106,27 @@ export function IncidentStatusBreakdown({
     }
   };
 
-  const handleStatusClick = (status: Incident['status']) => {
+  const handleStatusClick = (status: string) => {
     setSelectedStatus((prevStatus) => (prevStatus === status ? null : status));
   };
 
   const statusCards = [
     {
-      status: 'Active',
+      status: 'active',
       count: summary.active,
       icon: ShieldAlert,
       className: 'bg-destructive/10 text-destructive',
       ring: 'ring-destructive',
     },
     {
-      status: 'Under Review',
+      status: 'under-review',
       count: summary.underReview,
       icon: ShieldQuestion,
       className: 'bg-[#FFC107]/10 text-[#FFC107]',
       ring: 'ring-[#FFC107]',
     },
     {
-      status: 'Resolved',
+      status: 'resolved',
       count: summary.resolved,
       icon: CheckCircle2,
       className: 'bg-chart-2/10 text-chart-2',
@@ -162,43 +136,11 @@ export function IncidentStatusBreakdown({
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
-        <div>
+      <CardHeader>
             <CardTitle>Incident Status Breakdown</CardTitle>
             <CardDescription className="font-medium">
             Click a status to see the list of incidents.
             </CardDescription>
-        </div>
-        <div className="flex items-center gap-2">
-            {availableYears.length > 0 && (
-                <Select value={selectedYear} onValueChange={setSelectedYear}>
-                  <SelectTrigger className="w-[120px] font-medium hover:bg-accent hover:text-accent-foreground">
-                    <SelectValue placeholder="Select Year" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all" className="font-medium">All Years</SelectItem>
-                    {availableYears.map((year) => (
-                      <SelectItem key={year} value={year} className="font-medium">
-                        {year}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-              <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-                <SelectTrigger className="w-[140px] font-medium hover:bg-accent hover:text-accent-foreground">
-                  <SelectValue placeholder="Select Month" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all" className="font-medium">All Months</SelectItem>
-                  {Array.from({ length: 12 }, (_, i) => (
-                    <SelectItem key={i} value={i.toString()} className="font-medium">
-                      {new Date(0, i).toLocaleString('default', { month: 'long' })}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-        </div>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -216,7 +158,7 @@ export function IncidentStatusBreakdown({
             >
               <item.icon className="h-8 w-8" />
               <div>
-                <p className="font-medium">{item.status}</p>
+                <p className="font-medium">{item.status.replace('-', ' ')}</p>
                 <p className="text-2xl font-bold">{item.count}</p>
               </div>
             </div>
@@ -227,7 +169,7 @@ export function IncidentStatusBreakdown({
       <Collapsible open={!!selectedStatus}>
         <CollapsibleContent>
           <CardHeader>
-            <CardTitle>Incidents: {selectedStatus}</CardTitle>
+            <CardTitle>Incidents: {selectedStatus?.replace('-', ' ')}</CardTitle>
           </CardHeader>
           <CardContent>
             {filteredIncidents.length > 0 ? (
@@ -258,23 +200,23 @@ export function IncidentStatusBreakdown({
                           onClick={(e) => e.stopPropagation()}
                         >
                           <Link href={`/agency/incidents/${incident.id}`}>
-                            {incident.id}
+                            {incident.incident_id}
                           </Link>
                         </Button>
                       </TableCell>
                       <TableCell className="font-medium">
-                        {new Date(incident.incidentTime).toLocaleDateString()}
+                        {new Date(incident.incident_time).toLocaleDateString()}
                       </TableCell>
-                      <TableCell className="font-medium">{getSiteName(incident.siteId)}</TableCell>
-                      <TableCell className="font-medium">{getGuardName(incident.raisedByGuardId)}</TableCell>
-                      <TableCell>{getStatusIndicator(incident.status)}</TableCell>
+                      <TableCell className="font-medium">{incident.site_name}</TableCell>
+                      <TableCell className="font-medium">{incident.guard_name}</TableCell>
+                      <TableCell>{getStatusIndicator(incident.incident_status)}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
               </Table>
             ) : (
               <p className="text-center text-sm text-muted-foreground font-medium">
-                No incidents with status "{selectedStatus}" {selectedYear !== 'all' || selectedMonth !== 'all' ? 'in the selected period' : ''}.
+                No incidents with status "{selectedStatus}" found.
               </p>
             )}
           </CardContent>

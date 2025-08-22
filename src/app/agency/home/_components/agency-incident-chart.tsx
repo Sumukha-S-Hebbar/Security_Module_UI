@@ -1,8 +1,8 @@
 
 'use client';
 
-import { useState, useMemo, useRef, useEffect } from 'react';
-import type { Incident } from '@/types';
+import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
+import type { IncidentTrendData } from '../page';
 import {
   Card,
   CardContent,
@@ -25,7 +25,7 @@ import {
   ChartLegend,
   ChartLegendContent,
 } from '@/components/ui/chart';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, LabelList, LineChart, Line } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, LabelList, LineChart, Line, ResponsiveContainer } from 'recharts';
 import { useRouter } from 'next/navigation';
 import {
   Table,
@@ -41,6 +41,32 @@ import {
 } from '@/components/ui/collapsible';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import { fetchData } from '@/lib/api';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Loader2 } from 'lucide-react';
+import type { Organization } from '@/types';
+
+
+type IncidentListItem = {
+    id: number;
+    incident_id: string;
+    tb_site_id: string;
+    subcon_id: string;
+    site_name: string;
+    incident_time: string;
+    incident_status: "Active" | "Under Review" | "Resolved";
+    incident_type: string;
+    incident_description: string;
+    guard_name: string;
+    patrol_officer_name: string;
+};
+
+type PaginatedIncidentsResponse = {
+    count: number;
+    next: string | null;
+    previous: string | null;
+    results: IncidentListItem[];
+};
 
 const chartConfig = {
   total: {
@@ -61,31 +87,15 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-const formatClosureTime = (hours: number | null): string => {
-    if (hours === null || hours === 0) return 'N/A';
-    const days = Math.floor(hours / 24);
-    const remainingHours = Math.round(hours % 24);
-    if (days > 0) {
-        return `${days}d ${remainingHours}h`;
-    }
-    return `${remainingHours}h`;
-};
-
 
 export function AgencyIncidentChart({
-  incidents,
+  incidentTrend
 }: {
-  incidents: Incident[];
+  incidentTrend: IncidentTrendData[];
 }) {
   const router = useRouter();
-  const availableYears = useMemo(() => {
-    const years = new Set(
-      incidents.map((incident) => new Date(incident.incidentTime).getFullYear().toString())
-    );
-    years.add(new Date().getFullYear().toString());
-    return Array.from(years).sort((a, b) => parseInt(b) - parseInt(a));
-  }, [incidents]);
-
+  const [loggedInOrg, setLoggedInOrg] = useState<Organization | null>(null);
+  
   const [selectedYear, setSelectedYear] = useState<string>(
     new Date().getFullYear().toString()
   );
@@ -93,80 +103,67 @@ export function AgencyIncidentChart({
   const [hoveredBar, setHoveredBar] = useState<string | null>(null);
   const collapsibleRef = useRef<HTMLDivElement>(null);
 
+  const [incidentsInSelectedMonth, setIncidentsInSelectedMonth] = useState<IncidentListItem[]>([]);
+  const [isDetailsLoading, setIsDetailsLoading] = useState(false);
+
+  useEffect(() => {
+    const orgData = localStorage.getItem('organization');
+    if(orgData) setLoggedInOrg(JSON.parse(orgData));
+  }, []);
+
   const monthlyIncidentData = useMemo(() => {
-    const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-    ];
-    const monthlyData: { 
-        month: string; 
-        total: number; 
-        resolved: number; 
-        underReview: number; 
-        avgClosure: number | null,
-        closureTimeFormatted: string;
-    }[] = months.map(
-      (month) => ({ month, total: 0, resolved: 0, underReview: 0, avgClosure: null, closureTimeFormatted: 'N/A' })
-    );
+    return incidentTrend.map(d => ({
+        ...d,
+        underReview: d.under_review,
+        avgClosure: null, // API does not provide this per month in this view
+        closureTimeFormatted: d.resolution_duration,
+    }));
+  }, [incidentTrend]);
+  
+  const availableYears = useMemo(() => {
+    // In a real app, this would be derived from available data time ranges
+    const currentYear = new Date().getFullYear();
+    return Array.from({ length: 5 }, (_, i) => (currentYear - i).toString());
+  }, []);
 
-    incidents.forEach((incident) => {
-      const incidentDate = new Date(incident.incidentTime);
 
-      const yearMatch = incidentDate.getFullYear().toString() === selectedYear;
+  const fetchMonthIncidents = useCallback(async (monthIndex: number) => {
+    if (!loggedInOrg) return;
+    setIsDetailsLoading(true);
 
-      if (yearMatch) {
-        const monthIndex = incidentDate.getMonth();
-        monthlyData[monthIndex].total += 1;
-        if (incident.status === 'Resolved') {
-          monthlyData[monthIndex].resolved += 1;
-        }
-        if (incident.status === 'Under Review') {
-            monthlyData[monthIndex].underReview += 1;
-        }
-      }
+    const token = localStorage.getItem('token');
+    const month = monthIndex + 1;
+    
+    const params = new URLSearchParams({
+        year: selectedYear,
+        month: month.toString(),
     });
     
-    // Calculate average closure time for each month
-    for (let i = 0; i < 12; i++) {
-        const monthIncidents = incidents.filter(incident => {
-            const incidentDate = new Date(incident.incidentTime);
-            return incidentDate.getFullYear().toString() === selectedYear && incidentDate.getMonth() === i && incident.status === 'Resolved' && incident.resolvedTime;
+    const url = `/security/api/agency/${loggedInOrg.code}/incidents/list/?${params.toString()}`;
+
+    try {
+        const data = await fetchData<PaginatedIncidentsResponse>(url, {
+            headers: { 'Authorization': `Token ${token}` }
         });
-
-        if (monthIncidents.length > 0) {
-            const totalClosureMillis = monthIncidents.reduce((acc, inc) => {
-                const startTime = new Date(inc.incidentTime).getTime();
-                const endTime = new Date(inc.resolvedTime!).getTime();
-                return acc + (endTime - startTime);
-            }, 0);
-            const avgClosureHours = (totalClosureMillis / monthIncidents.length) / (1000 * 60 * 60);
-            monthlyData[i].avgClosure = avgClosureHours;
-            monthlyData[i].closureTimeFormatted = formatClosureTime(avgClosureHours);
-        }
+        setIncidentsInSelectedMonth(data?.results || []);
+    } catch(e) {
+        console.error("Failed to fetch incidents for month", e);
+        setIncidentsInSelectedMonth([]);
+    } finally {
+        setIsDetailsLoading(false);
     }
+  }, [loggedInOrg, selectedYear]);
 
-    return monthlyData;
-  }, [incidents, selectedYear]);
-
-  const incidentsInSelectedMonth = useMemo(() => {
-    if (selectedMonthIndex === null) return [];
-    
-    return incidents.filter(incident => {
-        const incidentDate = new Date(incident.incidentTime);
-        const yearMatch = incidentDate.getFullYear().toString() === selectedYear;
-        const monthMatch = incidentDate.getMonth() === selectedMonthIndex;
-        return yearMatch && monthMatch;
-    });
-  }, [selectedMonthIndex, selectedYear, incidents]);
-
-
-  const handleBarClick = (data: any, index: number) => {
-    if (selectedMonthIndex === index) {
+  const handleBarClick = useCallback((data: any, index: number) => {
+    const monthIndex = index;
+    if (selectedMonthIndex === monthIndex) {
       setSelectedMonthIndex(null); // Collapse if clicking the same month
+      setIncidentsInSelectedMonth([]);
     } else {
-      setSelectedMonthIndex(index);
+      setSelectedMonthIndex(monthIndex);
+      fetchMonthIncidents(monthIndex);
     }
-  };
+  }, [selectedMonthIndex, fetchMonthIncidents]);
 
   useEffect(() => {
     if (selectedMonthIndex !== null && collapsibleRef.current) {
@@ -176,7 +173,7 @@ export function AgencyIncidentChart({
     }
   }, [selectedMonthIndex]);
 
-  const getStatusIndicator = (status: Incident['status']) => {
+  const getStatusIndicator = (status: "Active" | "Under Review" | "Resolved") => {
     switch (status) {
       case 'Active':
         return (
@@ -245,6 +242,7 @@ export function AgencyIncidentChart({
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig} className="h-[250px] w-full">
+            <ResponsiveContainer>
             <BarChart 
                 data={monthlyIncidentData} 
                 margin={{ top: 20, right: 20, left: -10, bottom: 5 }} 
@@ -329,10 +327,8 @@ export function AgencyIncidentChart({
               <Bar yAxisId="left" dataKey="underReview" fill="var(--color-underReview)" radius={4} onClick={(data, index) => handleBarClick(data, index)} cursor="pointer" opacity={hoveredBar && hoveredBar !== monthlyIncidentData.find(d => d.month === hoveredBar)?.month ? 0.5 : 1}>
                   <LabelList dataKey="underReview" position="top" offset={5} fontSize={12} />
               </Bar>
-              <Line yAxisId="right" type="monotone" dataKey="avgClosure" stroke="var(--color-avgClosure)" strokeWidth={2} dot={{ r: 4 }}>
-                  <LabelList dataKey="closureTimeFormatted" position="top" offset={8} fontSize={10} />
-              </Line>
             </BarChart>
+          </ResponsiveContainer>
           </ChartContainer>
       </CardContent>
       <Collapsible open={selectedMonthIndex !== null}>
@@ -343,13 +339,17 @@ export function AgencyIncidentChart({
                 </CardTitle>
             </CardHeader>
             <CardContent>
-                {incidentsInSelectedMonth.length > 0 ? (
+                 {isDetailsLoading ? (
+                    <div className="flex justify-center items-center h-24">
+                        <Loader2 className="h-6 w-6 animate-spin" />
+                    </div>
+                ) : incidentsInSelectedMonth.length > 0 ? (
                     <Table>
                         <TableHeader>
                             <TableRow>
                                 <TableHead>Incident ID</TableHead>
                                 <TableHead>Date</TableHead>
-                                <TableHead>Site ID</TableHead>
+                                <TableHead>Site Name</TableHead>
                                 <TableHead>Status</TableHead>
                             </TableRow>
                         </TableHeader>
@@ -362,12 +362,12 @@ export function AgencyIncidentChart({
                                 >
                                     <TableCell>
                                         <Button asChild variant="link" className="p-0 h-auto" onClick={(e) => e.stopPropagation()}>
-                                          <Link href={`/agency/incidents/${incident.id}`}>{incident.id}</Link>
+                                          <Link href={`/agency/incidents/${incident.id}`}>{incident.incident_id}</Link>
                                         </Button>
                                     </TableCell>
-                                    <TableCell>{new Date(incident.incidentTime).toLocaleDateString()}</TableCell>
-                                    <TableCell>{incident.siteId}</TableCell>
-                                    <TableCell>{getStatusIndicator(incident.status)}</TableCell>
+                                    <TableCell>{new Date(incident.incident_time).toLocaleDateString()}</TableCell>
+                                    <TableCell>{incident.site_name}</TableCell>
+                                    <TableCell>{getStatusIndicator(incident.incident_status)}</TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
