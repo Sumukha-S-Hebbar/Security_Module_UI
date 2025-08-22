@@ -5,7 +5,7 @@ import { useState, useEffect, useRef } from 'react';
 import type { Organization, User } from '@/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Mail, Phone, MapPin, KeyRound, Loader2 } from 'lucide-react';
+import { Mail, Phone, MapPin, KeyRound, Loader2, Building, Calendar } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -14,6 +14,8 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
+import { Separator } from '@/components/ui/separator';
+import { Skeleton } from '@/components/ui/skeleton';
 
 
 const passwordFormSchema = z.object({
@@ -32,6 +34,7 @@ export default function AgencyAccountPage() {
   const { toast } = useToast();
   const [agency, setAgency] = useState<Organization | null>(null);
   const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [isPasswordFormVisible, setIsPasswordFormVisible] = useState(false);
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
   const passwordFormRef = useRef<HTMLDivElement>(null);
@@ -53,6 +56,7 @@ export default function AgencyAccountPage() {
         if (orgData) setAgency(JSON.parse(orgData));
         if (userData) setUser(JSON.parse(userData));
     }
+    setIsLoading(false);
   }, []);
   
   useEffect(() => {
@@ -65,7 +69,8 @@ export default function AgencyAccountPage() {
   }, [isPasswordFormVisible]);
 
   const avatarSrc = agency?.logo || agency?.member?.profile_picture;
-  const avatarFallback = agency?.name ? agency.name.charAt(0) : 'A';
+  const userFullName = user ? `${user.first_name} ${user.last_name || ''}`.trim() : 'User';
+  const avatarFallback = agency?.name ? agency.name.charAt(0) : userFullName.charAt(0);
   
   async function onPasswordSubmit(values: PasswordFormValues) {
     setIsUpdatingPassword(true);
@@ -107,6 +112,36 @@ export default function AgencyAccountPage() {
   }
 
 
+  if (isLoading) {
+    return (
+        <div className="p-4 sm:p-6 lg:p-8">
+            <div className="max-w-5xl mx-auto space-y-6">
+              <Card>
+                <CardHeader><Skeleton className="h-8 w-48" /></CardHeader>
+                <CardContent className="space-y-8">
+                    <div className="flex flex-col sm:flex-row items-center gap-6">
+                        <Skeleton className="h-24 w-24 rounded-full" />
+                        <div className="space-y-2">
+                            <Skeleton className="h-8 w-40" />
+                            <Skeleton className="h-4 w-64" />
+                            <Skeleton className="h-4 w-56" />
+                            <Skeleton className="h-4 w-60" />
+                        </div>
+                    </div>
+                    <Separator />
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-sm">
+                        <div className="space-y-1"><Skeleton className="h-4 w-20" /><Skeleton className="h-5 w-24" /></div>
+                        <div className="space-y-1"><Skeleton className="h-4 w-20" /><Skeleton className="h-5 w-24" /></div>
+                        <div className="space-y-1"><Skeleton className="h-4 w-20" /><Skeleton className="h-5 w-24" /></div>
+                        <div className="space-y-1"><Skeleton className="h-4 w-20" /><Skeleton className="h-5 w-24" /></div>
+                    </div>
+                </CardContent>
+              </Card>
+            </div>
+        </div>
+    );
+  }
+
   if (!agency || !user) {
     return (
       <div className="p-4 sm:p-6 lg:p-8">
@@ -125,59 +160,54 @@ export default function AgencyAccountPage() {
   return (
     <div className="p-4 sm:p-6 lg:p-8">
       <div className="max-w-5xl mx-auto space-y-6">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold tracking-tight">Account Settings</h1>
-          <p className="text-muted-foreground">View your agency's profile information.</p>
-        </div>
         <Card>
           <CardHeader>
-            <CardTitle>Agency Profile</CardTitle>
-            <CardDescription>Your agency's contact and location details.</CardDescription>
+            <CardTitle>PROFILE DETAILS</CardTitle>
           </CardHeader>
-          <CardContent>
-             <div className="space-y-6">
-                <div className="flex items-center gap-6">
-                    <Avatar className="h-24 w-24">
-                        <AvatarImage src={avatarSrc || undefined} alt={agency.name || 'Agency Logo'} />
-                        <AvatarFallback>{avatarFallback}</AvatarFallback>
-                    </Avatar>
-                     <div>
-                        <h3 className="text-xl font-bold">{agency.name}</h3>
-                        <p className="text-muted-foreground">{agency.type}</p>
-                    </div>
+          <CardContent className="space-y-8">
+            <div className="flex flex-col sm:flex-row items-center gap-6">
+               <Avatar className="h-24 w-24">
+                <AvatarImage src={avatarSrc || undefined} alt={agency.name || 'Agency Logo'} />
+                <AvatarFallback>{avatarFallback}</AvatarFallback>
+              </Avatar>
+              <div className="text-center sm:text-left">
+                <h2 className="text-2xl font-bold">{userFullName}</h2>
+                <div className="text-muted-foreground mt-2 space-y-1">
+                  <div className="flex items-center gap-2">
+                    <Building className="h-4 w-4" />
+                    <span>{agency.name} ({agency.type})</span>
+                  </div>
+                   <div className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4" />
+                    <span>Joined on {new Date(user.date_joined).toLocaleDateString()}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Mail className="h-4 w-4" />
+                    <a href={`mailto:${user.email}`} className="hover:underline">{user.email}</a>
+                  </div>
                 </div>
-
-                <div className="space-y-4 pt-4 border-t">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <p className="text-sm font-medium text-muted-foreground">Agency Name</p>
-                            <p className="font-semibold">{agency.name || 'Not available'}</p>
-                        </div>
-                        <div>
-                            <p className="text-sm font-medium text-muted-foreground">Email Address</p>
-                             <div className="flex items-center gap-2">
-                                <Mail className="h-4 w-4 text-muted-foreground" />
-                                <p className="font-semibold">{user.email || 'Not available'}</p>
-                            </div>
-                        </div>
-                    </div>
-                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <p className="text-sm font-medium text-muted-foreground">Phone Number</p>
-                             <div className="flex items-center gap-2">
-                                <Phone className="h-4 w-4 text-muted-foreground" />
-                                <p className="font-semibold">{agency.member?.phone || 'Not available'}</p>
-                            </div>
-                        </div>
-                        <div>
-                            <p className="text-sm font-medium text-muted-foreground">Address</p>
-                             <div className="flex items-center gap-2">
-                                <MapPin className="h-4 w-4 text-muted-foreground" />
-                                <p className="font-semibold">{agency.member?.designation || 'Address not available'}</p>
-                            </div>
-                        </div>
-                     </div>
+              </div>
+            </div>
+            <Separator />
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-sm">
+                <div className="space-y-1">
+                    <p className="text-muted-foreground font-medium">EMP ID</p>
+                    <p className="font-semibold">{agency.member?.employee_id || 'N/A'}</p>
                 </div>
+                <div className="space-y-1">
+                    <p className="text-muted-foreground font-medium">Designation</p>
+                    <p className="font-semibold">{agency.member?.designation || 'N/A'}</p>
+                </div>
+                <div className="space-y-1">
+                    <p className="text-muted-foreground font-medium">Phone</p>
+                    <p className="font-semibold">{agency.member?.phone || 'Not available'}</p>
+                </div>
+                {user.country && (
+                    <div className="space-y-1">
+                        <p className="text-muted-foreground font-medium">Country</p>
+                        <p className="font-semibold">{user.country.name} ({user.country.code3})</p>
+                    </div>
+                )}
             </div>
           </CardContent>
         </Card>
