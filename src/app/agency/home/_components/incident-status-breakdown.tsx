@@ -10,29 +10,8 @@ import {
   CardTitle,
   CardDescription,
 } from '@/components/ui/card';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import {
-  Collapsible,
-  CollapsibleContent,
-} from '@/components/ui/collapsible';
-import { Button } from '@/components/ui/button';
-import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { CheckCircle2, ShieldAlert, ShieldQuestion } from 'lucide-react';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import type { IncidentTrendData } from '../page';
 
 

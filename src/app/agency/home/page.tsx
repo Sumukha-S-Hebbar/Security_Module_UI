@@ -163,6 +163,7 @@ export default function AgencyHomePage() {
             <Skeleton className="h-28 w-full" />
             <Skeleton className="h-28 w-full" />
             <Skeleton className="h-28 w-full" />
+            <Skeleton className="h-28 w-full" />
         </div>
         <Skeleton className="h-[400px] w-full" />
         <Skeleton className="h-48 w-full" />

@@ -75,8 +75,8 @@ export function PatrollingOfficerPerformance({
             <div className="flex items-center gap-4 text-foreground">
                 <Clock className="w-12 h-12 text-primary" />
                 <div>
-                    <span className="text-4xl font-bold">{performance.average_response_time.split(' ')[0]}</span>
-                    <span className="text-lg text-muted-foreground ml-1">{performance.average_response_time.split(' ')[1]}</span>
+                    <span className="text-4xl font-bold">{performance.average_response_time !== 'N/A' ? performance.average_response_time.split(' ')[0] : 'N/A'}</span>
+                    <span className="text-lg text-muted-foreground ml-1">{performance.average_response_time !== 'N/A' ? performance.average_response_time.split(' ')[1] : ''}</span>
                 </div>
             </div>
             <p className="text-center font-medium mt-2">
