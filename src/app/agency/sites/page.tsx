@@ -68,7 +68,7 @@ export default function AgencySitesPage() {
   const [unassignedSelectedRegion, setUnassignedSelectedRegion] = useState('all');
   const [unassignedSelectedCity, setUnassignedSelectedCity] = useState('all');
 
-  const [assignment, setAssignment] = useState<{ [siteId: string]: { patrollingOfficerId?: string; guardIds?: string[] } }>({});
+  const [assignment, setAssignment] = useState<{ [siteId: string]: { patrollingOfficerId?: string; guardIds?: string[]; geofencePerimeter?: string; } }>({});
 
 
   useEffect(() => {
@@ -132,10 +132,11 @@ export default function AgencySitesPage() {
     const defaultGuards = unassignedSites.reduce((acc, site) => {
       acc[site.id.toString()] = { 
         patrollingOfficerId: '', 
-        guardIds: []
+        guardIds: [],
+        geofencePerimeter: site.geofencePerimeter?.toString() || ''
       };
       return acc;
-    }, {} as { [key: string]: { patrollingOfficerId?: string; guardIds?: string[] } });
+    }, {} as { [key: string]: { patrollingOfficerId?: string; guardIds?: string[]; geofencePerimeter?: string; } });
     setAssignment(defaultGuards);
   }, [unassignedSites]);
 
@@ -187,6 +188,16 @@ export default function AgencySitesPage() {
       [siteId]: { ...prev[siteId], patrollingOfficerId },
     }));
   };
+  
+  const handleAssignmentChange = (siteId: string, key: 'geofencePerimeter', value: string) => {
+    setAssignment(prev => ({
+        ...prev, 
+        [siteId]: {
+          ...prev[siteId],
+          [key]: value
+        }
+    }));
+  }
 
   const handleGuardSelect = (siteId: string, guardId: string) => {
     setAssignment((prev) => {
@@ -203,6 +214,7 @@ export default function AgencySitesPage() {
     const assignmentDetails = assignment[siteId];
     const patrollingOfficerId = assignmentDetails?.patrollingOfficerId;
     const guardIds = assignmentDetails?.guardIds || [];
+    const geofence = assignmentDetails?.geofencePerimeter;
 
     if (!patrollingOfficerId) {
       toast({ variant: 'destructive', title: 'Error', description: 'Please select a patrolling officer.' });
@@ -226,6 +238,7 @@ export default function AgencySitesPage() {
             body: JSON.stringify({
                 patrolling_officer: parseInt(patrollingOfficerId, 10),
                 guards: guardIds.map(id => parseInt(id, 10)),
+                geofence_perimeter: geofence ? parseInt(geofence, 10) : undefined,
             })
         });
 
@@ -531,6 +544,7 @@ export default function AgencySitesPage() {
                   <TableHead className="text-foreground">Site ID</TableHead>
                   <TableHead className="text-foreground">Site Name</TableHead>
                   <TableHead className="text-foreground">Location</TableHead>
+                  <TableHead className="text-foreground">Geofence Perimeter</TableHead>
                   <TableHead className="text-foreground">Assign Guards</TableHead>
                   <TableHead className="text-foreground">Assign Patrolling Officer</TableHead>
                   <TableHead className="text-right text-foreground">Actions</TableHead>
@@ -551,6 +565,15 @@ export default function AgencySitesPage() {
                     </TableCell>
                     <TableCell>
                       <div className="font-medium">{site.city}, {site.region}</div>
+                    </TableCell>
+                    <TableCell>
+                      <Input
+                        type="number"
+                        placeholder="in meters"
+                        className="w-[140px]"
+                        value={assignment[site.id.toString()]?.geofencePerimeter || ''}
+                        onChange={(e) => handleAssignmentChange(site.id.toString(), 'geofencePerimeter', e.target.value)}
+                      />
                     </TableCell>
                     <TableCell className="align-top py-4">
                       <div className='flex flex-col items-start gap-2'>
@@ -597,7 +620,7 @@ export default function AgencySitesPage() {
                 ))
               ) : (
                 <TableRow>
-                    <TableCell colSpan={7} className="text-center text-muted-foreground font-medium py-10">
+                    <TableCell colSpan={8} className="text-center text-muted-foreground font-medium py-10">
                         No unassigned sites found for the current filter.
                     </TableCell>
                 </TableRow>
@@ -610,5 +633,3 @@ export default function AgencySitesPage() {
     </div>
   );
 }
-
-    
