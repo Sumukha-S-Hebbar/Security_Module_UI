@@ -290,5 +290,3 @@ export default function TowercoAccountPage() {
     </div>
   );
 }
-
-    
