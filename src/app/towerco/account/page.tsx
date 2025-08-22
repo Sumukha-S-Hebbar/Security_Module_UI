@@ -203,12 +203,12 @@ export default function TowercoAccountPage() {
                 <p className="text-muted-foreground font-medium">Organization</p>
                 <p className="font-semibold">{organization.name}</p>
               </div>
-               {user.country && (
-                  <div className="space-y-1">
-                      <p className="text-muted-foreground font-medium">Country</p>
-                      <p className="font-semibold">{user.country.name} ({user.country.code3})</p>
-                  </div>
-                )}
+              {user.country && (
+                <div className="space-y-1">
+                    <p className="text-muted-foreground font-medium">Country</p>
+                    <p className="font-semibold">{user.country.name} ({user.country.code3})</p>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
