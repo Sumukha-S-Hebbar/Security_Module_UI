@@ -128,9 +128,7 @@ export default function AgencyPatrollingOfficersPage() {
         const token = localStorage.getItem('token');
         const url = `/security/api/agency/${loggedInOrg.code}/patrol_officers/list/`;
         try {
-            const data = await fetchData<{ results: ApiPatrollingOfficer[] }>(url, {
-                headers: { 'Authorization': `Token ${token}` }
-            });
+            const data = await fetchData<{ results: ApiPatrollingOfficer[] }>(url, token || undefined);
             setPatrollingOfficers(data?.results || []);
         } catch (error) {
             toast({ variant: 'destructive', title: 'Error', description: 'Failed to load patrolling officers.' });
@@ -165,9 +163,7 @@ export default function AgencyPatrollingOfficersPage() {
         const countryId = loggedInUser.country.id;
         const url = `/security/api/regions/?country=${countryId}`;
         try {
-            const data = await fetchData<{ regions: ApiRegion[] }>(url, {
-                headers: { 'Authorization': `Token ${token}` }
-            });
+            const data = await fetchData<{ regions: ApiRegion[] }>(url, token || undefined);
             setApiRegions(data?.regions || []);
             setIsAddDialogOpen(true);
         } catch (error) {
@@ -193,9 +189,7 @@ export default function AgencyPatrollingOfficersPage() {
             const url = `/security/api/cities/?country=${countryId}&region=${watchedRegion}`;
 
             try {
-                const data = await fetchData<{ cities: ApiCity[] }>(url, {
-                    headers: { 'Authorization': `Token ${token}` }
-                });
+                const data = await fetchData<{ cities: ApiCity[] }>(url, token || undefined);
                 setApiCities(data?.cities || []);
             } catch (error) {
                 console.error("Failed to fetch cities:", error);
