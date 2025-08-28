@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import type { Organization } from '@/types';
 import {
   Card,
@@ -34,18 +34,20 @@ import { PatrollingOfficerPerformance } from './_components/patrolling-officer-p
 import { Skeleton } from '@/components/ui/skeleton';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useDataFetching } from '@/hooks/useDataFetching';
+import { fetchData } from '@/lib/api';
+import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
 
 const ACTIVE_INCIDENTS_PER_PAGE = 4;
 
 // Type definitions based on the new API response
 export type BasicCounts = {
     active_incidents_count: number;
+    under_review_incidents_count: number;
+    resolved_incidents_count: number;
     total_sites_count: number;
     total_guards_count: number;
     total_patrol_officers_count: number;
-    under_review_incidents_count: number;
-    resolved_incidents_count: number;
     total_incidents_count?: number;
 };
 
@@ -92,62 +94,24 @@ interface AgencyDashboardData {
     incident_trend: IncidentTrendData[];
 }
 
-
-async function getDashboardData(org: Organization | null): Promise<AgencyDashboardData | null> {
-  if (!org) return null;
-  
-  let url = `${process.env.NEXT_PUBLIC_DJANGO_API_URL}/security/api/agency/${org.code}/agency-dashboard/`;
-  const token = localStorage.getItem('token');
-  
-  if (!token) {
-    console.error("No auth token found");
-    return null;
-  }
-
-  try {
-    const response = await fetch(url, {
-      headers: { 'Authorization': `Token ${token}` }
-    });
-    if (!response.ok) {
-      throw new Error(`Failed to fetch dashboard data: ${response.statusText}`);
-    }
-    return await response.json();
-  } catch (error) {
-    console.error('Could not fetch dashboard data:', error);
-    return null;
-  }
+async function getDashboardData(org: Organization): Promise<AgencyDashboardData | null> {
+  let url = `/security/api/agency/${org.code}/agency-dashboard/`;
+  return fetchData<AgencyDashboardData>(url);
 }
 
-export default function AgencyHomePage() {
+export default async function AgencyHomePage() {
   const router = useRouter();
   const [activeIncidentsCurrentPage, setActiveIncidentsCurrentPage] = useState(1);
-  const [org, setOrg] = useState<Organization | null>(null);
-
-  useEffect(() => {
-      const orgData = localStorage.getItem('organization');
-      if (orgData) {
-        setOrg(JSON.parse(orgData));
-      }
-  }, []);
-
-  const { data, isLoading } = useDataFetching<AgencyDashboardData | null>(
-    () => getDashboardData(org), 
-    [org]
-  );
   
-  const activeEmergencies = useMemo(() => {
-    if (!data) return [];
-    return data.active_incidents.results;
-  }, [data]);
+  const savedOrg = cookies().get('organization')?.value;
+  if (!savedOrg) {
+    redirect('/');
+  }
+  const org: Organization = JSON.parse(savedOrg);
 
-  const paginatedActiveEmergencies = useMemo(() => {
-    const startIndex = (activeIncidentsCurrentPage - 1) * ACTIVE_INCIDENTS_PER_PAGE;
-    return activeEmergencies.slice(startIndex, startIndex + ACTIVE_INCIDENTS_PER_PAGE);
-  }, [activeEmergencies, activeIncidentsCurrentPage]);
+  const data = await getDashboardData(org);
   
-  const totalActiveIncidentPages = Math.ceil((data?.active_incidents.count || 0) / ACTIVE_INCIDENTS_PER_PAGE);
-
-  if (isLoading || !data || !org) {
+  if (!data) {
     return (
       <div className="p-4 sm:p-6 lg:p-8 space-y-6">
         <div className="space-y-2">
@@ -174,6 +138,13 @@ export default function AgencyHomePage() {
       </div>
     );
   }
+  
+  const activeEmergencies = data.active_incidents.results;
+  const totalActiveIncidentPages = Math.ceil((data?.active_incidents.count || 0) / ACTIVE_INCIDENTS_PER_PAGE);
+  const paginatedActiveEmergencies = activeEmergencies.slice(
+      (activeIncidentsCurrentPage - 1) * ACTIVE_INCIDENTS_PER_PAGE,
+      activeIncidentsCurrentPage * ACTIVE_INCIDENTS_PER_PAGE
+  );
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6">
@@ -306,7 +277,7 @@ export default function AgencyHomePage() {
         <PatrollingOfficerPerformance performance={data.patrol_officer_performance} />
       </div>
 
-      <AgencyIncidentChart incidentTrend={data.incident_trend} />
+      <AgencyIncidentChart incidentTrend={data.incident_trend} orgCode={org.code.toString()} />
     </div>
   );
 }

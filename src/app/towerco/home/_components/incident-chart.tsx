@@ -41,7 +41,6 @@ import { Button } from '@/components/ui/button';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, LabelList, LineChart, Line, ResponsiveContainer } from 'recharts';
 import { useRouter } from 'next/navigation';
 import type { IncidentListItem, AgencyPerformanceData, IncidentTrendData } from '../page';
-import { useDataFetching } from '@/hooks/useDataFetching';
 import { Loader2 } from 'lucide-react';
 import { Organization } from '@/types';
 import { fetchData } from '@/lib/api';
@@ -78,51 +77,16 @@ type DashboardData = {
     agency_performance: AgencyPerformanceData[];
 }
 
-
-async function getIncidentData(org: Organization | null, agencyName?: string, year?: string): Promise<DashboardData | null> {
-  if (!org) return null;
-  
-  let url = `${process.env.NEXT_PUBLIC_DJANGO_API_URL}/security/api/orgs/${org.code}/security-dashboard/`;
-  const token = localStorage.getItem('token');
-  
-  const queryParams = new URLSearchParams();
-  if (agencyName && agencyName !== 'all') {
-    queryParams.append('agency_name', agencyName);
-  }
-  if (year && year !== 'all') {
-    queryParams.append('year', year);
-  }
-  
-  const queryString = queryParams.toString();
-  if (queryString) {
-    url += `?${queryString}`;
-  }
-
-
-  if (!token) {
-    console.error("No auth token found");
-    return null;
-  }
-
-  try {
-    const response = await fetch(url, {
-      headers: { 'Authorization': `Token ${token}` }
-    });
-    if (!response.ok) {
-      throw new Error(`Failed to fetch dashboard data: ${response.statusText}`);
-    }
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error('Could not fetch incident trend data:', error);
-    return null;
-  }
-}
-
-
-export function IncidentChart() {
+export function IncidentChart({
+    incidentTrend,
+    agencies,
+    orgCode
+}: {
+    incidentTrend: IncidentTrendData[];
+    agencies: AgencyPerformanceData[];
+    orgCode: string;
+}) {
   const router = useRouter();
-  const [org, setOrg] = useState<Organization | null>(null);
   
   const [selectedAgency, setSelectedAgency] = useState<string>('all');
   const [selectedYear, setSelectedYear] = useState<string>(new Date().getFullYear().toString());
@@ -134,24 +98,11 @@ export function IncidentChart() {
   const [incidentsInSelectedMonth, setIncidentsInSelectedMonth] = useState<IncidentListItem[]>([]);
   const [isDetailsLoading, setIsDetailsLoading] = useState(false);
 
-  useEffect(() => {
-    const orgData = localStorage.getItem('organization');
-    if (orgData) {
-      setOrg(JSON.parse(orgData));
-    }
-  }, []);
-
-  const { data: dashboardData, isLoading } = useDataFetching<DashboardData | null>(
-    () => getIncidentData(org, selectedAgency, selectedYear),
-    [org, selectedAgency, selectedYear]
-  );
-  
-  const incidentTrend = dashboardData?.incident_trend;
-  const agencies = dashboardData?.agency_performance || [];
+  // This should now be a derived state from props
+  const [currentIncidentTrend, setCurrentIncidentTrend] = useState(incidentTrend);
 
   const monthlyIncidentData = useMemo(() => {
-    if (!incidentTrend) return [];
-    return incidentTrend.map(monthData => ({
+    return currentIncidentTrend.map(monthData => ({
         month: monthData.month,
         total: monthData.total,
         resolved: monthData.resolved,
@@ -159,7 +110,7 @@ export function IncidentChart() {
         avgClosure: null,
         closureTimeFormatted: monthData.resolution_duration,
     }));
-  }, [incidentTrend]);
+  }, [currentIncidentTrend]);
   
   const availableYears = useMemo(() => {
     const currentYear = new Date().getFullYear();
@@ -167,7 +118,7 @@ export function IncidentChart() {
   }, []);
 
   const fetchMonthIncidents = useCallback(async (monthIndex: number) => {
-    if (org === null) return;
+    if (!orgCode) return;
     setIsDetailsLoading(true);
 
     const token = localStorage.getItem('token');
@@ -182,12 +133,10 @@ export function IncidentChart() {
       params.append('agency_name', selectedAgency);
     }
     
-    const url = `/security/api/orgs/${org.code}/incidents/list/?${params.toString()}`;
+    const url = `/security/api/orgs/${orgCode}/incidents/list/?${params.toString()}`;
 
     try {
-        const data = await fetchData<PaginatedIncidentsResponse>(url, {
-            headers: { 'Authorization': `Token ${token}` }
-        });
+        const data = await fetchData<PaginatedIncidentsResponse>(url);
         setIncidentsInSelectedMonth(data?.results || []);
     } catch(e) {
         console.error("Failed to fetch incidents for month", e);
@@ -195,7 +144,7 @@ export function IncidentChart() {
     } finally {
         setIsDetailsLoading(false);
     }
-  }, [org, selectedYear, selectedAgency]);
+  }, [orgCode, selectedYear, selectedAgency]);
 
   const handleBarClick = useCallback((data: any, index: number) => {
     const monthIndex = index;
@@ -297,11 +246,6 @@ export function IncidentChart() {
         </div>
       </CardHeader>
       <CardContent className="pt-4">
-        {isLoading ? (
-          <div className="flex justify-center items-center h-[300px]">
-            <Skeleton className="h-full w-full" />
-          </div>
-        ) : (
         <ChartContainer config={chartConfig} className="h-[300px] w-full">
           <ResponsiveContainer>
             <BarChart 
@@ -394,7 +338,6 @@ export function IncidentChart() {
             </BarChart>
           </ResponsiveContainer>
         </ChartContainer>
-        )}
       </CardContent>
 
       <Collapsible open={selectedMonthIndex !== null}>

@@ -27,14 +27,13 @@ export function useDataFetching<T>(
 
 
   useEffect(() => {
-    // Only fetch if dependencies are met (e.g., org is loaded) and the hook is enabled
     const canFetch = deps.every(dep => dep !== null && dep !== undefined);
     if (canFetch && enabled) {
         fetchDataCallback();
     } else if (!enabled) {
         setIsLoading(false);
     }
-  }, [...deps, enabled]);
+  }, [JSON.stringify(deps), enabled]);
 
   return { data, isLoading, error, refetch: fetchDataCallback };
 }

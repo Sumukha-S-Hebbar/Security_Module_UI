@@ -89,12 +89,13 @@ const chartConfig = {
 
 
 export function AgencyIncidentChart({
-  incidentTrend
+  incidentTrend,
+  orgCode
 }: {
   incidentTrend: IncidentTrendData[];
+  orgCode: string;
 }) {
   const router = useRouter();
-  const [loggedInOrg, setLoggedInOrg] = useState<Organization | null>(null);
   
   const [selectedYear, setSelectedYear] = useState<string>(
     new Date().getFullYear().toString()
@@ -106,10 +107,6 @@ export function AgencyIncidentChart({
   const [incidentsInSelectedMonth, setIncidentsInSelectedMonth] = useState<IncidentListItem[]>([]);
   const [isDetailsLoading, setIsDetailsLoading] = useState(false);
 
-  useEffect(() => {
-    const orgData = localStorage.getItem('organization');
-    if(orgData) setLoggedInOrg(JSON.parse(orgData));
-  }, []);
 
   const monthlyIncidentData = useMemo(() => {
     return incidentTrend.map(d => ({
@@ -128,10 +125,9 @@ export function AgencyIncidentChart({
 
 
   const fetchMonthIncidents = useCallback(async (monthIndex: number) => {
-    if (!loggedInOrg) return;
+    if (!orgCode) return;
     setIsDetailsLoading(true);
 
-    const token = localStorage.getItem('token');
     const month = monthIndex + 1;
     
     const params = new URLSearchParams({
@@ -139,12 +135,10 @@ export function AgencyIncidentChart({
         month: month.toString(),
     });
     
-    const url = `/security/api/agency/${loggedInOrg.code}/incidents/list/?${params.toString()}`;
+    const url = `/security/api/agency/${orgCode}/incidents/list/?${params.toString()}`;
 
     try {
-        const data = await fetchData<PaginatedIncidentsResponse>(url, {
-            headers: { 'Authorization': `Token ${token}` }
-        });
+        const data = await fetchData<PaginatedIncidentsResponse>(url);
         setIncidentsInSelectedMonth(data?.results || []);
     } catch(e) {
         console.error("Failed to fetch incidents for month", e);
@@ -152,7 +146,7 @@ export function AgencyIncidentChart({
     } finally {
         setIsDetailsLoading(false);
     }
-  }, [loggedInOrg, selectedYear]);
+  }, [orgCode, selectedYear]);
 
   const handleBarClick = useCallback((data: any, index: number) => {
     const monthIndex = index;

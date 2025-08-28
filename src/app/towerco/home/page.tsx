@@ -1,7 +1,6 @@
 
-'use client';
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useMemo, Suspense } from 'react';
 import type { Organization } from '@/types';
 import {
   Card,
@@ -34,16 +33,18 @@ import { AgencyPerformance } from './_components/agency-performance';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useDataFetching } from '@/hooks/useDataFetching';
+import { fetchData } from '@/lib/api';
+import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
 
 const ACTIVE_INCIDENTS_PER_PAGE = 4;
 
 // New type definitions based on the API response
 export type BasicCounts = {
-    active_incidents_count: number;
-    total_guards_count: number;
-    total_sites_count: number;
-    total_agencies_count: number;
+  active_incidents_count: number;
+  total_guards_count: number;
+  total_sites_count: number;
+  total_agencies_count: number;
 };
 
 export type IncidentListItem = {
@@ -115,66 +116,16 @@ interface DashboardData {
     };
     agency_performance: AgencyPerformanceData[];
     site_status: SiteStatusData;
+    incident_trend: IncidentTrendData[];
 }
 
 
-async function getDashboardData(org: Organization | null): Promise<DashboardData | null> {
-  if (!org) return null;
-  
-  let url = `${process.env.NEXT_PUBLIC_DJANGO_API_URL}/security/api/orgs/${org.code}/security-dashboard/`;
-  const token = localStorage.getItem('token');
-  
-  if (!token) {
-    console.error("No auth token found");
-    return null;
-  }
-
-  try {
-    const response = await fetch(url, {
-      headers: { 'Authorization': `Token ${token}` }
-    });
-    if (!response.ok) {
-      throw new Error(`Failed to fetch dashboard data: ${response.statusText}`);
-    }
-    return await response.json();
-  } catch (error) {
-    console.error('Could not fetch dashboard data:', error);
-    return null;
-  }
+async function getDashboardData(org: Organization): Promise<DashboardData | null> {
+  let url = `/security/api/orgs/${org.code}/security-dashboard/`;
+  return fetchData<DashboardData>(url);
 }
 
-export default function TowercoHomePage() {
-  const [activeIncidentsCurrentPage, setActiveIncidentsCurrentPage] = useState(1);
-  const router = useRouter();
-  
-  const [org, setOrg] = useState<Organization | null>(null);
-
-  useEffect(() => {
-      const orgData = localStorage.getItem('organization');
-      if (orgData) {
-        setOrg(JSON.parse(orgData));
-      }
-  }, []);
-
-  const { data, isLoading } = useDataFetching<DashboardData | null>(
-    () => getDashboardData(org), 
-    [org]
-  );
-
-  const activeEmergencies = useMemo(() => {
-    if (!data) return [];
-    return data.active_incidents.results;
-  }, [data]);
-
-  const paginatedActiveEmergencies = useMemo(() => {
-    const startIndex = (activeIncidentsCurrentPage - 1) * ACTIVE_INCIDENTS_PER_PAGE;
-    return activeEmergencies.slice(startIndex, startIndex + ACTIVE_INCIDENTS_PER_PAGE);
-  }, [activeEmergencies, activeIncidentsCurrentPage]);
-
-  const totalActiveIncidentPages = Math.ceil((data?.active_incidents.count || 0) / ACTIVE_INCIDENTS_PER_PAGE);
-
-
-  if (isLoading || !data || !org) {
+function PageSkeleton() {
     return (
       <div className="p-4 sm:p-6 lg:p-8 space-y-6">
         <div className="space-y-2">
@@ -200,10 +151,39 @@ export default function TowercoHomePage() {
         <Skeleton className="h-64 w-full" />
       </div>
     );
+}
+
+async function TowercoHomePageContent() {
+  const savedOrg = cookies().get('organization')?.value;
+  if (!savedOrg) {
+    redirect('/');
+  }
+  const org: Organization = JSON.parse(savedOrg);
+
+  const data = await getDashboardData(org);
+  
+  if (!data) {
+    return (
+        <div className="p-4 sm:p-6 lg:p-8">
+            <Card>
+                <CardHeader><CardTitle>Error</CardTitle></CardHeader>
+                <CardContent><p>Could not load dashboard data. Please try again later.</p></CardContent>
+            </Card>
+        </div>
+    )
   }
   
   const portalName = org.role === 'T' ? 'TOWERCO' : 'MNO';
+  const activeEmergencies = data.active_incidents.results;
+  const totalActiveIncidentPages = Math.ceil((data.active_incidents.count || 0) / ACTIVE_INCIDENTS_PER_PAGE);
 
+  // This part can be made a client component if pagination needs to be interactive without full page reloads
+  const activeIncidentsCurrentPage = 1; // Default to page 1 for server component
+  const paginatedActiveEmergencies = activeEmergencies.slice(
+      (activeIncidentsCurrentPage - 1) * ACTIVE_INCIDENTS_PER_PAGE,
+      activeIncidentsCurrentPage * ACTIVE_INCIDENTS_PER_PAGE
+  );
+  
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
@@ -241,11 +221,10 @@ export default function TowercoHomePage() {
                             return (
                                 <TableRow 
                                   key={incident.id}
-                                  onClick={() => router.push(`/towerco/incidents/${incident.id}`)}
                                   className="cursor-pointer border-destructive/20 hover:bg-destructive/20"
                                 >
                                 <TableCell>
-                                  <Button asChild variant="link" className="p-0 h-auto" onClick={(e) => e.stopPropagation()}>
+                                  <Button asChild variant="link" className="p-0 h-auto">
                                     <Link href={`/towerco/incidents/${incident.id}`}>{incident.incident_id}</Link>
                                   </Button>
                                 </TableCell>
@@ -261,11 +240,11 @@ export default function TowercoHomePage() {
                                 <TableCell>
                                     <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
-                                        <Button variant="destructive" size="sm" onClick={(e) => e.stopPropagation()}>
+                                        <Button variant="destructive" size="sm">
                                         Contact <ChevronDown className="ml-2 h-4 w-4" />
                                         </Button>
                                     </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
+                                    <DropdownMenuContent align="end">
                                         {incident.contact_details.guard_phone && (
                                         <DropdownMenuItem asChild>
                                             <a href={`tel:${incident.contact_details.guard_phone}`} className="flex items-center gap-2 w-full">
@@ -315,7 +294,6 @@ export default function TowercoHomePage() {
                         <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => setActiveIncidentsCurrentPage(prev => Math.max(prev - 1, 1))}
                             disabled={activeIncidentsCurrentPage === 1}
                         >
                             Previous
@@ -324,7 +302,6 @@ export default function TowercoHomePage() {
                         <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => setActiveIncidentsCurrentPage(prev => Math.min(prev + 1, totalActiveIncidentPages))}
                             disabled={activeIncidentsCurrentPage === totalActiveIncidentPages || totalActiveIncidentPages === 0}
                         >
                             Next
@@ -340,8 +317,16 @@ export default function TowercoHomePage() {
       />
       
       <AgencyPerformance />
-      <SiteStatusBreakdown />
-      <IncidentChart />
+      <SiteStatusBreakdown siteStatusData={data.site_status} />
+      <IncidentChart incidentTrend={data.incident_trend} agencies={data.agency_performance} orgCode={org.code.toString()} />
     </div>
   );
+}
+
+export default function TowercoHomePage() {
+    return (
+        <Suspense fallback={<PageSkeleton />}>
+            <TowercoHomePageContent />
+        </Suspense>
+    )
 }

@@ -13,8 +13,6 @@ import { Button } from '@/components/ui/button';
 import { Building2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { SiteStatusData } from '../page';
-import { useDataFetching } from '@/hooks/useDataFetching';
-import type { Organization } from '@/types';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const COLORS = {
@@ -24,51 +22,10 @@ const COLORS = {
 
 const ITEMS_PER_PAGE = 5;
 
-
-async function getSiteStatus(org: Organization | null): Promise<SiteStatusData | null> {
-  if (!org) return null;
-  
-  let url = `${process.env.NEXT_PUBLIC_DJANGO_API_URL}/security/api/orgs/${org.code}/security-dashboard/`;
-  const token = localStorage.getItem('token');
-  
-  if (!token) {
-    console.error("No auth token found");
-    return null;
-  }
-
-  try {
-    const response = await fetch(url, {
-      headers: { 'Authorization': `Token ${token}` }
-    });
-    if (!response.ok) {
-      throw new Error(`Failed to fetch dashboard data: ${response.statusText}`);
-    }
-    const data = await response.json();
-    return data.site_status || null;
-  } catch (error) {
-    console.error('Could not fetch site status data:', error);
-    return null;
-  }
-}
-
-
-export function SiteStatusBreakdown() {
+export function SiteStatusBreakdown({ siteStatusData }: { siteStatusData: SiteStatusData | null }) {
   const [selectedSection, setSelectedSection] = useState<'assigned' | 'unassigned'>('assigned');
   const [currentPage, setCurrentPage] = useState(1);
   const router = useRouter();
-  const [org, setOrg] = useState<Organization | null>(null);
-
-  useEffect(() => {
-    const orgData = localStorage.getItem('organization');
-    if (orgData) {
-      setOrg(JSON.parse(orgData));
-    }
-  }, []);
-
-  const { data: siteStatusData, isLoading } = useDataFetching<SiteStatusData | null>(
-    () => getSiteStatus(org),
-    [org]
-  );
 
   const { chartData, totalSites, assignedSites, unassignedSites } = useMemo(() => {
     if (!siteStatusData) {
@@ -150,7 +107,7 @@ export function SiteStatusBreakdown() {
         <CardDescription className="font-medium">A real-time overview of site assignments. Click a slice to see details.</CardDescription>
       </CardHeader>
       <CardContent>
-         {isLoading ? (
+         {!siteStatusData ? (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <Skeleton className="h-80 md:col-span-1" />
                 <Skeleton className="h-80 md:col-span-2" />
