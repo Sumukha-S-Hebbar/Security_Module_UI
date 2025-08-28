@@ -194,7 +194,7 @@ export default function AgencyReportPage() {
 
       const fetchReportData = async () => {
           setIsLoading(true);
-          const token = localStorage.getItem('token');
+          const token = localStorage.getItem('token') || undefined;
           const orgCode = loggedInOrg.code;
           
           let url = `/security/api/orgs/${orgCode}/security-agencies/${agencyId}/`;
@@ -208,9 +208,7 @@ export default function AgencyReportPage() {
           }
 
           try {
-              const response = await fetchData<{ data: AgencyReportData }>(url, {
-                  headers: { 'Authorization': `Token ${token}` }
-              });
+              const response = await fetchData<{ data: AgencyReportData }>(url, token);
               setReportData(response?.data || null);
           } catch (error) {
               console.error("Failed to fetch agency report:", error);
