@@ -34,6 +34,7 @@ import { PatrollingOfficerPerformance } from './_components/patrolling-officer-p
 import { Skeleton } from '@/components/ui/skeleton';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { fetchData } from '@/lib/api';
 
 const ACTIVE_INCIDENTS_PER_PAGE = 4;
 
@@ -154,7 +155,7 @@ export default function AgencyHomePage() {
   }, [org]);
 
 
-  if (isLoading || !data) {
+  if (isLoading || !data || !org) {
     return (
       <div className="p-4 sm:p-6 lg:p-8 space-y-6">
         <div className="space-y-2">
