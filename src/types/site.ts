@@ -39,15 +39,15 @@ export type Site = {
 
   // These fields were in the mock data and may or may not be in the final API.
   // Kept for potential compatibility or future use.
-  guards?: string[];
+  guards?: number[];
   country?: string;
   reportUrl?: string;
   coords?: { x: number; y: number };
   visited?: boolean;
   towerco?: string;
-  agencyId?: string;
+  agencyId?: number;
   assignedOn?: string;
-  patrollingOfficerId?: string;
+  patrollingOfficerId?: number;
   geofencePerimeter?: number;
   guardsRequired?: number;
   latitude?: number;

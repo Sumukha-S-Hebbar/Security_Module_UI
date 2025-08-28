@@ -1,15 +1,16 @@
 
 
 export type Incident = {
-  id: string; // incident_id
+  id: number; 
+  incident_id?: string;
   status: 'Active' | 'Under Review' | 'Resolved';
   description: string;
   resolutionNotes?: string;
-  raisedByGuardId: string;
-  siteId: string;
+  raisedByGuardId: number;
+  siteId: number;
   incidentTime: string;
   resolvedTime?: string;
-  attendedByPatrollingOfficerId?: string;
+  attendedByPatrollingOfficerId?: number;
   resolvedByUserId?: string;
   initialIncidentMediaUrl: (string | null)[];
   resolvedIncidentMediaUrl?: (string | null)[];

@@ -1,3 +1,4 @@
+
 // src/lib/data/incident-store.ts
 import type { Incident } from '@/types';
 import { incidents as initialIncidents } from './incidents';
@@ -31,11 +32,11 @@ export const incidentStore = {
     return incidentsState;
   },
   
-  getIncidentById: (id: string): Incident | undefined => {
+  getIncidentById: (id: number): Incident | undefined => {
     return incidentsState.find(i => i.id === id);
   },
 
-  updateIncident: (id: string, updates: Partial<Incident>): void => {
+  updateIncident: (id: number, updates: Partial<Incident>): void => {
     let incidentUpdated = false;
     incidentsState = incidentsState.map(incident => {
       if (incident.id === id) {

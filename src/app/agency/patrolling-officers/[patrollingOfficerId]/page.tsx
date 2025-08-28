@@ -3,7 +3,7 @@
 
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import type { Incident, Guard, Site, Organization } from '@/types';
+import type { Incident, Guard, Site, Organization, PatrollingOfficer } from '@/types';
 import {
   Card,
   CardContent,
@@ -44,7 +44,7 @@ type OfficerReportData = {
     average_response_time: string;
     site_visit_accuracy: string;
     assigned_sites: {
-        site_id: string;
+        site_id: number;
         site_name: string;
         address: string;
         total_incidents: number;
@@ -101,7 +101,7 @@ export default function AgencyPatrollingOfficerReportPage() {
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [performanceSelectedYear, setPerformanceSelectedYear] = useState<string>(new Date().getFullYear().toString());
   const [performanceSelectedMonth, setPerformanceSelectedMonth] = useState<string>('all');
-  const [expandedSiteId, setExpandedSiteId] = useState<string | null>(null);
+  const [expandedSiteId, setExpandedSiteId] = useState<number | null>(null);
 
   const incidentsTableRef = useRef<HTMLDivElement>(null);
   const assignedSitesTableRef = useRef<HTMLDivElement>(null);
@@ -163,7 +163,7 @@ export default function AgencyPatrollingOfficerReportPage() {
   }, [reportData, selectedYear, selectedMonth, selectedStatus]);
 
   const siteVisitAccuracy = parseFloat(reportData?.site_visit_accuracy || '0');
-  const averageResponseTime = parseInt(reportData?.average_response_time || '0', 10);
+  const averageResponseTime = reportData?.average_response_time || '0 mins';
   
   const roundedSiteVisitAccuracy = Math.round(siteVisitAccuracy);
   const siteVisitColor = getPerformanceColor(roundedSiteVisitAccuracy);
@@ -231,7 +231,7 @@ export default function AgencyPatrollingOfficerReportPage() {
     }
   };
   
-  const handleExpandClick = (e: React.MouseEvent, siteId: string) => {
+  const handleExpandClick = (e: React.MouseEvent, siteId: number) => {
     e.stopPropagation();
     setExpandedSiteId(prevId => prevId === siteId ? null : siteId);
   }
@@ -427,8 +427,8 @@ export default function AgencyPatrollingOfficerReportPage() {
                     <div className="flex items-center gap-4 text-foreground">
                         <Clock className="w-12 h-12 text-primary" />
                         <div>
-                            <span className="text-4xl font-bold">{averageResponseTime.toFixed(0)}</span>
-                            <span className="text-lg text-muted-foreground ml-1">mins</span>
+                            <span className="text-4xl font-bold">{averageResponseTime.split(' ')[0]}</span>
+                            <span className="text-lg text-muted-foreground ml-1">{averageResponseTime.split(' ')[1]}</span>
                         </div>
                     </div>
                     <p className="text-center font-medium mt-2">
