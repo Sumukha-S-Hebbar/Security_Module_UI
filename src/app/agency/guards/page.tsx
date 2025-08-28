@@ -22,7 +22,6 @@ import {
   CardTitle,
   CardFooter
 } from '@/components/ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   Select,
   SelectContent,
@@ -46,7 +45,6 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from '@/components/ui/input';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { fetchData } from '@/lib/api';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const uploadFormSchema = z.object({
@@ -75,6 +73,36 @@ type ApiCity = {
     id: number;
     name: string;
 }
+
+async function fetchData<T>(url: string, token: string | undefined): Promise<T | null> {
+    try {
+        const baseUrl = process.env.NEXT_PUBLIC_DJANGO_API_URL || 'http://are.towerbuddy.tel:8000';
+        const fullUrl = url.startsWith('http') ? url : `${baseUrl}${url}`;
+        
+        const response = await fetch(fullUrl, {
+            headers: {
+                'Authorization': `Token ${token}`,
+                'Content-Type': 'application/json',
+            }
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error(`API Error: ${response.status} ${response.statusText}`, errorText);
+            throw new Error(errorText || `Request failed with status ${response.status}`);
+        }
+
+        if (response.status === 204) {
+            return null;
+        }
+
+        return await response.json() as T;
+    } catch (error) {
+        console.error("Network or parsing error:", error);
+        throw error;
+    }
+}
+
 
 export default function AgencyGuardsPage() {
   const { toast } = useToast();
@@ -116,18 +144,17 @@ export default function AgencyGuardsPage() {
   const fetchGuardsData = useCallback(async () => {
     if (!loggedInOrg) return;
       setIsLoading(true);
-      const token = localStorage.getItem('token');
-      const authHeader = { Authorization: `Token ${token}` };
+      const token = localStorage.getItem('token') || undefined;
       const orgCode = loggedInOrg.code;
 
       try {
-          const guardsResponse = await fetchData<{ results: Guard[] }>(`/security/api/agency/${orgCode}/guards/list/`, { headers: authHeader });
+          const guardsResponse = await fetchData<{ results: Guard[] }>(`/security/api/agency/${orgCode}/guards/list/`, token);
           setGuards(guardsResponse?.results || []);
 
-          const sitesResponse = await fetchData<{ results: Site[] }>(`/security/api/agency/${orgCode}/sites/list/`, { headers: authHeader });
+          const sitesResponse = await fetchData<{ results: Site[] }>(`/security/api/agency/${orgCode}/sites/list/`, token);
           setSites(sitesResponse?.results || []);
           
-          const poResponse = await fetchData<{ results: PatrollingOfficer[] }>(`/security/api/agency/${orgCode}/patrol_officers/list/`, { headers: authHeader });
+          const poResponse = await fetchData<{ results: PatrollingOfficer[] }>(`/security/api/agency/${orgCode}/patrol_officers/list/`, token);
           const formattedPOs = poResponse?.results.map(po => ({
               ...po,
               id: po.id,
@@ -164,13 +191,11 @@ export default function AgencyGuardsPage() {
           toast({ variant: "destructive", title: "Error", description: "User country not found. Cannot fetch regions." });
           return;
       }
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('token') || undefined;
       const countryId = loggedInUser.country.id;
       const url = `/security/api/regions/?country=${countryId}`;
       try {
-        const data = await fetchData<{ regions: ApiRegion[] }>(url, {
-          headers: { 'Authorization': `Token ${token}` }
-        });
+        const data = await fetchData<{ regions: ApiRegion[] }>(url, token);
         setApiRegions(data?.regions || []);
         setIsAddDialogOpen(true);
       } catch (error) {
@@ -191,14 +216,12 @@ export default function AgencyGuardsPage() {
           }
           
           setIsCitiesLoading(true);
-          const token = localStorage.getItem('token');
+          const token = localStorage.getItem('token') || undefined;
           const countryId = loggedInUser.country.id;
           const url = `/security/api/cities/?country=${countryId}&region=${watchedRegion}`;
 
           try {
-              const data = await fetchData<{ cities: ApiCity[] }>(url, {
-                  headers: { 'Authorization': `Token ${token}` }
-              });
+              const data = await fetchData<{ cities: ApiCity[] }>(url, token);
               setApiCities(data?.cities || []);
           } catch (error) {
               console.error("Failed to fetch cities:", error);
@@ -334,13 +357,13 @@ export default function AgencyGuardsPage() {
         const poName = `${po.first_name} ${po.last_name || ''}`.trim();
         poMap.set(po.id, {
           id: po.id,
-          employee_id: (po as any).employee_id || '', // Safely access potentially missing property
+          employee_id: (po as any).employee_id || '',
           first_name: po.first_name,
           last_name: po.last_name,
           email: po.email,
           phone: po.phone,
-          sites_assigned_count: (po as any).sites_assigned_count || 0, // Provide default
-          incidents_count: (po as any).incidents_count || 0, // Provide default
+          sites_assigned_count: (po as any).sites_assigned_count || 0,
+          incidents_count: (po as any).incidents_count || 0,
           name: poName,
           profile_picture: po.profile_picture
         });

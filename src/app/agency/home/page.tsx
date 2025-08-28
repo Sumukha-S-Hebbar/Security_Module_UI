@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import type { Organization } from '@/types';
 import {
   Card,
@@ -34,9 +34,6 @@ import { PatrollingOfficerPerformance } from './_components/patrolling-officer-p
 import { Skeleton } from '@/components/ui/skeleton';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { fetchData } from '@/lib/api';
-import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
 
 const ACTIVE_INCIDENTS_PER_PAGE = 4;
 
@@ -94,24 +91,70 @@ interface AgencyDashboardData {
     incident_trend: IncidentTrendData[];
 }
 
-async function getDashboardData(org: Organization): Promise<AgencyDashboardData | null> {
+async function getDashboardData(org: Organization, token?: string): Promise<AgencyDashboardData | null> {
   let url = `/security/api/agency/${org.code}/agency-dashboard/`;
-  return fetchData<AgencyDashboardData>(url);
+  
+  try {
+      const baseUrl = process.env.NEXT_PUBLIC_DJANGO_API_URL || 'http://are.towerbuddy.tel:8000';
+      const fullUrl = url.startsWith('http') ? url : `${baseUrl}${url}`;
+      
+      const response = await fetch(fullUrl, {
+          headers: {
+              'Authorization': `Token ${token}`,
+              'Content-Type': 'application/json',
+          }
+      });
+
+      if (!response.ok) {
+          const errorText = await response.text();
+          console.error(`API Error: ${response.status} ${response.statusText}`, errorText);
+          throw new Error(errorText || `Request failed with status ${response.status}`);
+      }
+
+      if (response.status === 204) {
+          return null;
+      }
+
+      return await response.json() as AgencyDashboardData;
+  } catch (error) {
+      console.error("Network or parsing error:", error);
+      throw error;
+  }
 }
 
-export default async function AgencyHomePage() {
+export default function AgencyHomePage() {
   const router = useRouter();
   const [activeIncidentsCurrentPage, setActiveIncidentsCurrentPage] = useState(1);
-  
-  const savedOrg = cookies().get('organization')?.value;
-  if (!savedOrg) {
-    redirect('/');
-  }
-  const org: Organization = JSON.parse(savedOrg);
+  const [data, setData] = useState<AgencyDashboardData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [org, setOrg] = useState<Organization | null>(null);
 
-  const data = await getDashboardData(org);
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const savedOrg = localStorage.getItem('organization');
+      if (savedOrg) {
+        setOrg(JSON.parse(savedOrg));
+      } else {
+        router.replace('/');
+      }
+    }
+  }, [router]);
   
-  if (!data) {
+  useEffect(() => {
+    if (org) {
+      const token = localStorage.getItem('token') || undefined;
+      getDashboardData(org, token)
+        .then(setData)
+        .catch(err => {
+            console.error(err);
+            setData(null);
+        })
+        .finally(() => setIsLoading(false));
+    }
+  }, [org]);
+
+
+  if (isLoading || !data) {
     return (
       <div className="p-4 sm:p-6 lg:p-8 space-y-6">
         <div className="space-y-2">

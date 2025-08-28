@@ -22,7 +22,8 @@ function IncidentsPageSkeleton() {
                         <Skeleton className="h-10 w-full md:w-[200px] lg:w-[320px]" />
                         <Skeleton className="h-10 w-full sm:w-[180px]" />
                         <Skeleton className="h-10 w-full sm:w-[180px]" />
-                        <Skeleton className="h-10 w-full sm:w-[240px]" />
+                        <Skeleton className="h-10 w-full sm:w-[120px]" />
+                        <Skeleton className="h-10 w-full sm:w-[140px]" />
                     </div>
                 </CardHeader>
                 <CardContent>
