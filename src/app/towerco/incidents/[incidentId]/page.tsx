@@ -122,13 +122,11 @@ export default function IncidentReportPage() {
 
     const fetchIncidentReport = async () => {
         setIsLoading(true);
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('token') || undefined;
         const url = `/security/api/orgs/${loggedInOrg.code}/incident/${id}/`;
 
         try {
-            const response = await fetchData<{data: IncidentReport}>(url, {
-                headers: { 'Authorization': `Token ${token}` }
-            });
+            const response = await fetchData<{data: IncidentReport}>(url, token);
             if (response?.data) {
                 setIncident(response.data);
                 setResolutionNotes(response.data.resolution_notes || '');
