@@ -71,7 +71,8 @@ export default function AgencyAccountPage() {
   const avatarSrc = agency?.logo || agency?.member?.profile_picture;
   const userFullName = user ? `${user.first_name} ${user.last_name || ''}`.trim() : 'User';
   const avatarFallback = agency?.name ? agency.name.charAt(0) : userFullName.charAt(0);
-  
+  const country = user?.country;
+
   async function onPasswordSubmit(values: PasswordFormValues) {
     setIsUpdatingPassword(true);
     const token = localStorage.getItem('token');
@@ -202,10 +203,10 @@ export default function AgencyAccountPage() {
                     <p className="text-muted-foreground font-medium">Phone</p>
                     <p className="font-semibold">{agency.member?.phone || 'Not available'}</p>
                 </div>
-                {user.country && (
+                {country && (
                     <div className="space-y-1">
                         <p className="text-muted-foreground font-medium">Country</p>
-                        <p className="font-semibold">{user.country.name} ({user.country.code3})</p>
+                        <p className="font-semibold">{country.name} ({country.code3})</p>
                     </div>
                 )}
             </div>
