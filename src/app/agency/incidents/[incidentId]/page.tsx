@@ -125,11 +125,11 @@ export default function AgencyIncidentReportPage() {
 
     const fetchIncident = async () => {
         setIsLoading(true);
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('token') || undefined;
         const url = `/security/api/agency/${loggedInOrg.code}/incident/${incidentId}/`;
 
         try {
-            const response = await fetchData<{data: IncidentDetails}>(url, { headers: { Authorization: `Token ${token}` } });
+            const response = await fetchData<{data: IncidentDetails}>(url, token);
             if (response?.data) {
                 const data = response.data;
                 setIncident(data);

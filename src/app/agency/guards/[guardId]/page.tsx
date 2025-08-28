@@ -119,12 +119,10 @@ export default function AgencyGuardReportPage() {
 
     const fetchReportData = async () => {
         setIsLoading(true);
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('token') || undefined;
         const url = `/security/api/agency/${loggedInOrg.code}/guard/${guardId}/`;
         try {
-            const data = await fetchData<GuardReportData>(url, {
-                headers: { 'Authorization': `Token ${token}` }
-            });
+            const data = await fetchData<GuardReportData>(url, token);
             setReportData(data);
         } catch (error) {
             console.error("Failed to fetch guard report:", error);
