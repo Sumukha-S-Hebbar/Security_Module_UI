@@ -110,13 +110,11 @@ export default function SiteReportPage() {
 
     const fetchReportData = async () => {
         setIsLoading(true);
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('token') || undefined;
         const url = `/security/api/orgs/${loggedInOrg.code}/site/${siteId}/`;
 
         try {
-            const data = await fetchData<SiteReportData>(url, {
-                headers: { 'Authorization': `Token ${token}` }
-            });
+            const data = await fetchData<SiteReportData>(url, token);
             setReportData(data);
         } catch (error) {
             console.error("Failed to fetch site report:", error);
