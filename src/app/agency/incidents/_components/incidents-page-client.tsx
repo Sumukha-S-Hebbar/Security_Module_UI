@@ -102,17 +102,16 @@ export function IncidentsPageClient() {
     if (!loggedInOrg) return;
 
     const fetchSupportingData = async () => {
-        const token = localStorage.getItem('token');
-        const authHeader = { 'Authorization': `Token ${token}` };
+        const token = localStorage.getItem('token') || undefined;
         
         // Fetch all incidents for the summary cards without pagination
         const summaryIncidentsUrl = `/security/api/agency/${loggedInOrg.code}/incidents/list/`;
-        const summaryData = await fetchData<PaginatedIncidentsResponse>(summaryIncidentsUrl, { headers: authHeader });
+        const summaryData = await fetchData<PaginatedIncidentsResponse>(summaryIncidentsUrl, token);
         setAllIncidentsForSummary(summaryData?.results || []);
 
         // Fetch sites for the filter dropdown
         const sitesUrl = `/security/api/agency/${loggedInOrg.code}/sites/list/`;
-        const sitesData = await fetchData<{results: Site[]}>(sitesUrl, { headers: authHeader });
+        const sitesData = await fetchData<{results: Site[]}>(sitesUrl, token);
         setSites(sitesData?.results || []);
     };
 
@@ -124,8 +123,7 @@ export function IncidentsPageClient() {
 
     const fetchFilteredIncidents = async () => {
       setIsLoading(true);
-      const token = localStorage.getItem('token');
-      const authHeader = { 'Authorization': `Token ${token}` };
+      const token = localStorage.getItem('token') || undefined;
       
       let url = `/security/api/agency/${loggedInOrg.code}/incidents/list/?`;
       const params = new URLSearchParams();
@@ -150,7 +148,7 @@ export function IncidentsPageClient() {
       url += params.toString().replace(/\+/g, '%20');
 
       try {
-        const data = await fetchData<PaginatedIncidentsResponse>(url, { headers: authHeader });
+        const data = await fetchData<PaginatedIncidentsResponse>(url, token);
         setIncidents(data?.results || []);
         setTotalCount(data?.count || 0);
       } catch (error) {
