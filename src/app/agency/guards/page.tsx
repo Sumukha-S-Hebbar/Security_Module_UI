@@ -127,13 +127,11 @@ export default function AgencyGuardsPage() {
           const sitesResponse = await fetchData<{ results: Site[] }>(`/security/api/agency/${orgCode}/sites/list/`, { headers: authHeader });
           setSites(sitesResponse?.results || []);
           
-          const poResponse = await fetchData<{ results: any[] }>(`/security/api/agency/${orgCode}/patrol_officers/list/`, { headers: authHeader });
+          const poResponse = await fetchData<{ results: PatrollingOfficer[] }>(`/security/api/agency/${orgCode}/patrol_officers/list/`, { headers: authHeader });
           const formattedPOs = poResponse?.results.map(po => ({
-              id: po.id.toString(),
+              ...po,
+              id: po.id,
               name: `${po.first_name} ${po.last_name || ''}`.trim(),
-              email: po.email,
-              phone: po.phone,
-              avatar: po.profile_picture,
           })) || [];
           setPatrollingOfficers(formattedPOs);
 
@@ -334,11 +332,8 @@ export default function AgencyGuardsPage() {
       if (guard.patrolling_officer && !poMap.has(guard.patrolling_officer.id)) {
         const poName = `${guard.patrolling_officer.first_name} ${guard.patrolling_officer.last_name || ''}`.trim();
         poMap.set(guard.patrolling_officer.id, {
-            id: guard.patrolling_officer.id.toString(),
+            ...guard.patrolling_officer,
             name: poName,
-            email: guard.patrolling_officer.email,
-            phone: guard.patrolling_officer.phone,
-            avatar: guard.patrolling_officer.profile_picture || '',
         });
       }
     });

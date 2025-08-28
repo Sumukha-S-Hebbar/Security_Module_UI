@@ -20,6 +20,7 @@ export type PatrollingOfficer = {
   assigned_sites_details?: any[];
   region?: string;
   city?: string;
+  profile_picture?: string | null;
 
   // Mock data fields that might not be in final API response
   routes?: string[];
