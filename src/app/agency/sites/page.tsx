@@ -84,14 +84,13 @@ export default function AgencySitesPage() {
   const fetchPageData = useCallback(async () => {
     if (!loggedInOrg) return;
     setIsLoading(true);
-    const token = localStorage.getItem('token');
-    const authHeader = { 'Authorization': `Token ${token}` };
+    const token = localStorage.getItem('token') || undefined;
 
     try {
-        const sitesResponse = await fetchData<{results: Site[]}>(`/security/api/agency/${loggedInOrg.code}/sites/list/`, { headers: authHeader });
+        const sitesResponse = await fetchData<{results: Site[]}>(`/security/api/agency/${loggedInOrg.code}/sites/list/`, token);
         setSites(sitesResponse?.results || []);
 
-        const poResponse = await fetchData<{results: any[]}>(`/security/api/agency/${loggedInOrg.code}/patrol_officers/list/`, { headers: authHeader });
+        const poResponse = await fetchData<{results: any[]}>(`/security/api/agency/${loggedInOrg.code}/patrol_officers/list/`, token);
         const formattedPOs = poResponse?.results.map((po): PatrollingOfficer => ({
             id: po.id,
             employee_id: po.employee_id,
@@ -107,7 +106,7 @@ export default function AgencySitesPage() {
         })) || [];
         setPatrollingOfficers(formattedPOs);
 
-        const unassignedGuardsResponse = await fetchData<{ results: Guard[] }>(`/security/api/agency/${loggedInOrg.code}/unassigned_guards/list/`, { headers: authHeader });
+        const unassignedGuardsResponse = await fetchData<{ results: Guard[] }>(`/security/api/agency/${loggedInOrg.code}/unassigned_guards/list/`, token);
         setUnassignedGuards(unassignedGuardsResponse?.results || []);
         
 
@@ -123,8 +122,10 @@ export default function AgencySitesPage() {
   }, [loggedInOrg, toast]);
 
   useEffect(() => {
-    fetchPageData();
-  }, [fetchPageData]);
+    if (loggedInOrg) {
+        fetchPageData();
+    }
+  }, [fetchPageData, loggedInOrg]);
 
 
   const assignedSites = useMemo(
