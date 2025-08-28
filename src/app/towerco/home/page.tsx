@@ -1,13 +1,13 @@
 
+'use client';
 
-import { useState, useMemo, Suspense } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import type { Organization } from '@/types';
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-  CardDescription,
   CardFooter,
 } from '@/components/ui/card';
 import {
@@ -34,12 +34,9 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { fetchData } from '@/lib/api';
-import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
 
 const ACTIVE_INCIDENTS_PER_PAGE = 4;
 
-// New type definitions based on the API response
 export type BasicCounts = {
   active_incidents_count: number;
   total_guards_count: number;
@@ -119,12 +116,6 @@ interface DashboardData {
     incident_trend: IncidentTrendData[];
 }
 
-
-async function getDashboardData(org: Organization): Promise<DashboardData | null> {
-  let url = `/security/api/orgs/${org.code}/security-dashboard/`;
-  return fetchData<DashboardData>(url);
-}
-
 function PageSkeleton() {
     return (
       <div className="p-4 sm:p-6 lg:p-8 space-y-6">
@@ -153,32 +144,51 @@ function PageSkeleton() {
     );
 }
 
-async function TowercoHomePageContent() {
-  const savedOrg = cookies().get('organization')?.value;
-  if (!savedOrg) {
-    redirect('/');
-  }
-  const org: Organization = JSON.parse(savedOrg);
-
-  const data = await getDashboardData(org);
+function TowercoHomePageContent() {
+  const router = useRouter();
+  const [data, setData] = useState<DashboardData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [org, setOrg] = useState<Organization | null>(null);
+  const [activeIncidentsCurrentPage, setActiveIncidentsCurrentPage] = useState(1);
   
-  if (!data) {
-    return (
-        <div className="p-4 sm:p-6 lg:p-8">
-            <Card>
-                <CardHeader><CardTitle>Error</CardTitle></CardHeader>
-                <CardContent><p>Could not load dashboard data. Please try again later.</p></CardContent>
-            </Card>
-        </div>
-    )
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const savedOrg = localStorage.getItem('organization');
+      if (savedOrg) {
+        setOrg(JSON.parse(savedOrg));
+      } else {
+        router.replace('/');
+      }
+    }
+  }, [router]);
+
+  useEffect(() => {
+    if (org) {
+      const token = localStorage.getItem('token') || undefined;
+      const getDashboardData = async () => {
+        let url = `/security/api/orgs/${org.code}/security-dashboard/`;
+        try {
+          const dashboardData = await fetchData<DashboardData>(url, token);
+          setData(dashboardData);
+        } catch (error) {
+          console.error(error);
+          setData(null);
+        } finally {
+          setIsLoading(false);
+        }
+      }
+      getDashboardData();
+    }
+  }, [org]);
+  
+  if (isLoading || !data || !org) {
+    return <PageSkeleton />;
   }
   
   const portalName = org.role === 'T' ? 'TOWERCO' : 'MNO';
   const activeEmergencies = data.active_incidents.results;
   const totalActiveIncidentPages = Math.ceil((data.active_incidents.count || 0) / ACTIVE_INCIDENTS_PER_PAGE);
 
-  // This part can be made a client component if pagination needs to be interactive without full page reloads
-  const activeIncidentsCurrentPage = 1; // Default to page 1 for server component
   const paginatedActiveEmergencies = activeEmergencies.slice(
       (activeIncidentsCurrentPage - 1) * ACTIVE_INCIDENTS_PER_PAGE,
       activeIncidentsCurrentPage * ACTIVE_INCIDENTS_PER_PAGE
@@ -221,10 +231,11 @@ async function TowercoHomePageContent() {
                             return (
                                 <TableRow 
                                   key={incident.id}
+                                  onClick={() => router.push(`/towerco/incidents/${incident.id}`)}
                                   className="cursor-pointer border-destructive/20 hover:bg-destructive/20"
                                 >
                                 <TableCell>
-                                  <Button asChild variant="link" className="p-0 h-auto">
+                                  <Button asChild variant="link" className="p-0 h-auto" onClick={(e) => e.stopPropagation()}>
                                     <Link href={`/towerco/incidents/${incident.id}`}>{incident.incident_id}</Link>
                                   </Button>
                                 </TableCell>
@@ -240,11 +251,11 @@ async function TowercoHomePageContent() {
                                 <TableCell>
                                     <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
-                                        <Button variant="destructive" size="sm">
+                                        <Button variant="destructive" size="sm" onClick={(e) => e.stopPropagation()}>
                                         Contact <ChevronDown className="ml-2 h-4 w-4" />
                                         </Button>
                                     </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="end">
+                                    <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
                                         {incident.contact_details.guard_phone && (
                                         <DropdownMenuItem asChild>
                                             <a href={`tel:${incident.contact_details.guard_phone}`} className="flex items-center gap-2 w-full">
@@ -294,6 +305,7 @@ async function TowercoHomePageContent() {
                         <Button
                             variant="outline"
                             size="sm"
+                            onClick={() => setActiveIncidentsCurrentPage(prev => Math.max(prev - 1, 1))}
                             disabled={activeIncidentsCurrentPage === 1}
                         >
                             Previous
@@ -302,6 +314,7 @@ async function TowercoHomePageContent() {
                         <Button
                             variant="outline"
                             size="sm"
+                            onClick={() => setActiveIncidentsCurrentPage(prev => Math.min(prev + 1, totalActiveIncidentPages))}
                             disabled={activeIncidentsCurrentPage === totalActiveIncidentPages || totalActiveIncidentPages === 0}
                         >
                             Next
