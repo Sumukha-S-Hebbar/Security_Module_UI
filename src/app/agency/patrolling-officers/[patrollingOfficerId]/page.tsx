@@ -120,12 +120,10 @@ export default function AgencyPatrollingOfficerReportPage() {
 
     const fetchReportData = async () => {
         setIsLoading(true);
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('token') || undefined;
         const url = `/security/api/agency/${loggedInOrg.code}/patrol_officer/${patrollingOfficerId}/`;
         try {
-            const data = await fetchData<OfficerReportData>(url, {
-                headers: { 'Authorization': `Token ${token}` }
-            });
+            const data = await fetchData<OfficerReportData>(url, token);
             setReportData(data);
         } catch (error) {
             console.error("Failed to fetch officer report:", error);
