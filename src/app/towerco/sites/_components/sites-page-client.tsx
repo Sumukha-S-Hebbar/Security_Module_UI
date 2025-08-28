@@ -147,14 +147,13 @@ export function SitesPageClient() {
   const fetchSitesAndAgencies = useCallback(async () => {
     if (!loggedInOrg) return;
     setIsLoading(true);
-    const token = localStorage.getItem('token');
-    const authHeader = { 'Authorization': `Token ${token}` };
+    const token = localStorage.getItem('token') || undefined;
 
     try {
-        const sitesResponse = await fetchData<{results: Site[]}>(`/security/api/orgs/${loggedInOrg.code}/sites/list/`, { headers: authHeader });
+        const sitesResponse = await fetchData<{results: Site[]}>(`/security/api/orgs/${loggedInOrg.code}/sites/list/`, token);
         setAllSites(sitesResponse?.results || []);
         
-        const agenciesResponse = await fetchData<{results: SecurityAgency[]}>(`/security/api/orgs/${loggedInOrg.code}/security-agencies/list`, { headers: authHeader });
+        const agenciesResponse = await fetchData<{results: SecurityAgency[]}>(`/security/api/orgs/${loggedInOrg.code}/security-agencies/list`, token);
         setAllAgencies(agenciesResponse?.results || []);
 
     } catch (error) {
@@ -169,21 +168,21 @@ export function SitesPageClient() {
   }, [loggedInOrg, toast]);
 
   useEffect(() => {
-    fetchSitesAndAgencies();
-  }, [fetchSitesAndAgencies]);
+    if(loggedInOrg) {
+        fetchSitesAndAgencies();
+    }
+  }, [loggedInOrg, fetchSitesAndAgencies]);
 
   useEffect(() => {
       async function fetchRegions() {
           if (!loggedInUser || !loggedInUser.country || !isAddSiteDialogOpen) return;
 
-          const token = localStorage.getItem('token');
+          const token = localStorage.getItem('token') || undefined;
           const countryId = loggedInUser.country.id;
           const url = `/security/api/regions/?country=${countryId}`;
           
           try {
-              const data = await fetchData<{ regions: ApiRegion[] }>(url, {
-              headers: { 'Authorization': `Token ${token}` }
-              });
+              const data = await fetchData<{ regions: ApiRegion[] }>(url, token);
               setApiRegions(data?.regions || []);
           } catch (error) {
               console.error("Failed to fetch regions:", error);
@@ -205,14 +204,12 @@ export function SitesPageClient() {
           }
           
           setIsCitiesLoading(true);
-          const token = localStorage.getItem('token');
+          const token = localStorage.getItem('token') || undefined;
           const countryId = loggedInUser.country.id;
           const url = `/security/api/cities/?country=${countryId}&region=${watchedRegion}`;
 
           try {
-              const data = await fetchData<{ cities: ApiCity[] }>(url, {
-                  headers: { 'Authorization': `Token ${token}` }
-              });
+              const data = await fetchData<{ cities: ApiCity[] }>(url, token);
               setApiCities(data?.cities || []);
           } catch (error) {
               console.error("Failed to fetch cities:", error);
@@ -228,7 +225,9 @@ export function SitesPageClient() {
       }
 
       addSiteForm.resetField('city');
-      fetchCities();
+      if (watchedRegion) {
+        fetchCities();
+      }
   }, [watchedRegion, loggedInUser, toast, addSiteForm]);
 
 
