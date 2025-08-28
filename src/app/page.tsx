@@ -34,6 +34,7 @@ interface LoginResponse {
   user: User;
   organization?: Organization;
   subcontractor?: Subcontractor;
+  country?: User['country'];
 }
 
 
@@ -88,10 +89,15 @@ export default function RootPage() {
         };
       }
 
+      const userToStore = { ...data.user };
+      if (data.country) {
+          userToStore.country = data.country;
+      }
+
 
       // Store user and organization data in localStorage
       if (typeof window !== 'undefined') {
-        localStorage.setItem('user', JSON.stringify(data.user));
+        localStorage.setItem('user', JSON.stringify(userToStore));
         if (orgToStore) {
             localStorage.setItem('organization', JSON.stringify(orgToStore));
         }
