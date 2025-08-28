@@ -92,13 +92,18 @@ export default function AgencySitesPage() {
         setSites(sitesResponse?.results || []);
 
         const poResponse = await fetchData<{results: any[]}>(`/security/api/agency/${loggedInOrg.code}/patrol_officers/list/`, { headers: authHeader });
-        const formattedPOs = poResponse?.results.map(po => ({
-            id: po.id.toString(),
+        const formattedPOs = poResponse?.results.map((po): PatrollingOfficer => ({
+            id: po.id,
+            employee_id: po.employee_id,
+            first_name: po.first_name,
+            last_name: po.last_name,
             name: `${po.first_name} ${po.last_name || ''}`.trim(),
             email: po.email,
             phone: po.phone,
             avatar: po.profile_picture,
             city: po.city,
+            sites_assigned_count: po.sites_assigned_count,
+            incidents_count: po.incidents_count,
         })) || [];
         setPatrollingOfficers(formattedPOs);
 
@@ -152,7 +157,12 @@ export default function AgencySitesPage() {
       site.patrol_officer_details?.forEach(po => {
         if (!officers.has(po.id.toString())) {
             officers.set(po.id.toString(), {
-                id: po.id.toString(),
+                id: po.id,
+                employee_id: po.employee_id || '',
+                first_name: po.first_name,
+                last_name: po.last_name,
+                sites_assigned_count: 0, // Not available in this context
+                incidents_count: 0, // Not available in this context
                 name: `${po.first_name} ${po.last_name || ''}`.trim(),
                 email: po.email,
                 phone: po.phone,
