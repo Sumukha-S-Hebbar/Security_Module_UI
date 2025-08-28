@@ -328,12 +328,21 @@ export default function AgencyGuardsPage() {
   
   const uniquePatrollingOfficers = useMemo(() => {
     const poMap = new Map<number, PatrollingOfficer>();
-     guards.forEach(guard => {
+    guards.forEach((guard) => {
       if (guard.patrolling_officer && !poMap.has(guard.patrolling_officer.id)) {
-        const poName = `${guard.patrolling_officer.first_name} ${guard.patrolling_officer.last_name || ''}`.trim();
-        poMap.set(guard.patrolling_officer.id, {
-            ...guard.patrolling_officer,
-            name: poName,
+        const po = guard.patrolling_officer;
+        const poName = `${po.first_name} ${po.last_name || ''}`.trim();
+        poMap.set(po.id, {
+          id: po.id,
+          employee_id: (po as any).employee_id || '', // Safely access potentially missing property
+          first_name: po.first_name,
+          last_name: po.last_name,
+          email: po.email,
+          phone: po.phone,
+          sites_assigned_count: (po as any).sites_assigned_count || 0, // Provide default
+          incidents_count: (po as any).incidents_count || 0, // Provide default
+          name: poName,
+          profile_picture: po.profile_picture
         });
       }
     });
@@ -704,3 +713,5 @@ export default function AgencyGuardsPage() {
     </>
   );
 }
+
+    
