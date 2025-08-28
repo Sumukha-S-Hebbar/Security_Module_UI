@@ -141,10 +141,9 @@ export default function TowercoAgenciesPage() {
         setIsLoading(true);
         const orgCode = loggedInOrg.code;
         const token = localStorage.getItem('token');
-        const authHeader = { 'Authorization': `Token ${token}` };
 
         try {
-            const agenciesResponse = await fetchData<{results: SecurityAgency[]}>(`/security/api/orgs/${orgCode}/security-agencies/list`, { headers: authHeader });
+            const agenciesResponse = await fetchData<{results: SecurityAgency[]}>(`/security/api/orgs/${orgCode}/security-agencies/list`, token || undefined);
             
             const fetchedAgencies = agenciesResponse?.results || [];
             setSecurityAgencies(fetchedAgencies);
@@ -194,9 +193,7 @@ export default function TowercoAgenciesPage() {
             const url = `/security/api/regions/?country=${countryId}`;
             
             try {
-                const data = await fetchData<{ regions: ApiRegion[] }>(url, {
-                headers: { 'Authorization': `Token ${token}` }
-                });
+                const data = await fetchData<{ regions: ApiRegion[] }>(url, token || undefined);
                 setApiRegions(data?.regions || []);
             } catch (error) {
                 console.error("Failed to fetch regions:", error);
@@ -223,9 +220,7 @@ export default function TowercoAgenciesPage() {
             const url = `/security/api/cities/?country=${countryId}&region=${watchedRegion}`;
 
             try {
-                const data = await fetchData<{ cities: ApiCity[] }>(url, {
-                    headers: { 'Authorization': `Token ${token}` }
-                });
+                const data = await fetchData<{ cities: ApiCity[] }>(url, token || undefined);
                 setApiCities(data?.cities || []);
             } catch (error) {
                 console.error("Failed to fetch cities:", error);
@@ -373,9 +368,7 @@ export default function TowercoAgenciesPage() {
         const token = localStorage.getItem('token');
         const url = `/security/api/orgs/${loggedInOrg.code}/security-agencies/${agencyId}/`;
         try {
-            const data = await fetchData<{ data: { assigned_sites: AssignedSiteDetail[] } }>(url, {
-                headers: { 'Authorization': `Token ${token}` }
-            });
+            const data = await fetchData<{ data: { assigned_sites: AssignedSiteDetail[] } }>(url, token || undefined);
             return data?.data?.assigned_sites || [];
         } catch (error) {
             console.error("Failed to fetch assigned sites:", error);
