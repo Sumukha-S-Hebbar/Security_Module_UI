@@ -319,9 +319,10 @@ export default function IncidentReportPage() {
               {urls.map((src, index) => (
                   <div key={index} className="relative aspect-video cursor-pointer group" onClick={() => setLightboxImage(src)}>
                     <Image
-                        src={encodeURI(src)}
+                        src={src}
                         alt={`${title} evidence ${index + 1}`}
                         fill
+                        unoptimized
                         className="rounded-md object-cover transition-transform group-hover:scale-105"
                         data-ai-hint={hint}
                     />
@@ -568,10 +569,11 @@ export default function IncidentReportPage() {
         </button>
         <div className="relative max-w-4xl max-h-full" onClick={(e) => e.stopPropagation()}>
             <Image 
-                src={encodeURI(lightboxImage)} 
+                src={lightboxImage} 
                 alt="Enlarged incident evidence" 
                 width={1200}
                 height={800}
+                unoptimized
                 className="rounded-lg object-contain max-w-full max-h-[90vh]"
             />
         </div>
