@@ -121,7 +121,7 @@ export function IncidentChart({
     if (!orgCode) return;
     setIsDetailsLoading(true);
 
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('token') || undefined;
     const month = monthIndex + 1;
     
     const params = new URLSearchParams({
@@ -136,7 +136,7 @@ export function IncidentChart({
     const url = `/security/api/orgs/${orgCode}/incidents/list/?${params.toString()}`;
 
     try {
-        const data = await fetchData<PaginatedIncidentsResponse>(url);
+        const data = await fetchData<PaginatedIncidentsResponse>(url, token);
         setIncidentsInSelectedMonth(data?.results || []);
     } catch(e) {
         console.error("Failed to fetch incidents for month", e);
