@@ -308,7 +308,7 @@ export default function AgencyIncidentReportPage() {
               {validUrls.map((src, index) => (
                   <div key={index} className="relative aspect-video" onClick={() => setLightboxImage(src)}>
                   <Image
-                      src={src}
+                      src={encodeURI(src)}
                       alt={`${title} ${index + 1}`}
                       fill
                       className="rounded-md object-cover cursor-pointer"
@@ -561,7 +561,7 @@ export default function AgencyIncidentReportPage() {
         </button>
         <div className="relative max-w-4xl max-h-full" onClick={(e) => e.stopPropagation()}>
             <Image 
-                src={lightboxImage} 
+                src={encodeURI(lightboxImage)} 
                 alt="Enlarged incident evidence" 
                 width={1200}
                 height={800}
