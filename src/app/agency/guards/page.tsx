@@ -46,6 +46,8 @@ import { Input } from '@/components/ui/input';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
 
 const uploadFormSchema = z.object({
   excelFile: z
@@ -108,7 +110,8 @@ export default function AgencyGuardsPage() {
   const { toast } = useToast();
   const router = useRouter();
   
-  const [guards, setGuards] = useState<Guard[]>([]);
+  const [checkedInGuards, setCheckedInGuards] = useState<Guard[]>([]);
+  const [checkedOutGuards, setCheckedOutGuards] = useState<Guard[]>([]);
   const [sites, setSites] = useState<Site[]>([]);
   const [patrollingOfficers, setPatrollingOfficers] = useState<PatrollingOfficer[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -148,13 +151,17 @@ export default function AgencyGuardsPage() {
       const orgCode = loggedInOrg.code;
 
       try {
-          const guardsResponse = await fetchData<{ results: Guard[] }>(`/security/api/agency/${orgCode}/guards/list/`, token);
-          setGuards(guardsResponse?.results || []);
-
-          const sitesResponse = await fetchData<{ results: Site[] }>(`/security/api/agency/${orgCode}/sites/list/`, token);
+          const [checkedInResponse, checkedOutResponse, sitesResponse, poResponse] = await Promise.all([
+            fetchData<{ results: Guard[] }>(`/security/api/agency/${orgCode}/guards/list/?check_in_status=checked_in`, token),
+            fetchData<{ results: Guard[] }>(`/security/api/agency/${orgCode}/guards/list/?check_in_status=checked_out`, token),
+            fetchData<{ results: Site[] }>(`/security/api/agency/${orgCode}/sites/list/`, token),
+            fetchData<{ results: PatrollingOfficer[] }>(`/security/api/agency/${orgCode}/patrol_officers/list/`, token)
+          ]);
+          
+          setCheckedInGuards(checkedInResponse?.results || []);
+          setCheckedOutGuards(checkedOutResponse?.results || []);
           setSites(sitesResponse?.results || []);
           
-          const poResponse = await fetchData<{ results: PatrollingOfficer[] }>(`/security/api/agency/${orgCode}/patrol_officers/list/`, token);
           const formattedPOs = poResponse?.results.map(po => ({
               ...po,
               id: po.id,
@@ -319,39 +326,44 @@ export default function AgencyGuardsPage() {
         description: 'Guard profile Excel template has been downloaded.',
     });
   }
-
-  const filteredGuards = useMemo(() => {
-    return guards.filter((guard) => {
-      const searchLower = searchQuery.toLowerCase();
-      const guardName = `${guard.first_name} ${guard.last_name || ''}`.trim();
-      
-      const matchesSearch =
-        guardName.toLowerCase().includes(searchLower) ||
-        (guard.employee_id && guard.employee_id.toLowerCase().includes(searchLower)) ||
-        (guard.site && guard.site.site_name.toLowerCase().includes(searchLower)) || false;
-
-      const matchesSite = selectedSiteFilter === 'all' || guard.site?.id.toString() === selectedSiteFilter;
-      
-      const poId = guard.patrolling_officer ? guard.patrolling_officer.id.toString() : null;
-      const matchesPatrollingOfficer = selectedPatrollingOfficerFilter === 'all' || poId === selectedPatrollingOfficerFilter;
+  
+  const filterGuards = (guards: Guard[]) => {
+      return guards.filter((guard) => {
+        const searchLower = searchQuery.toLowerCase();
+        const guardName = `${guard.first_name} ${guard.last_name || ''}`.trim();
         
-      return matchesSearch && matchesSite && matchesPatrollingOfficer;
-    });
-  }, [searchQuery, selectedSiteFilter, selectedPatrollingOfficerFilter, guards]);
+        const matchesSearch =
+          guardName.toLowerCase().includes(searchLower) ||
+          (guard.employee_id && guard.employee_id.toLowerCase().includes(searchLower)) ||
+          (guard.site && guard.site.site_name.toLowerCase().includes(searchLower)) || false;
 
+        const matchesSite = selectedSiteFilter === 'all' || guard.site?.id.toString() === selectedSiteFilter;
+        
+        const poId = guard.patrolling_officer ? guard.patrolling_officer.id.toString() : null;
+        const matchesPatrollingOfficer = selectedPatrollingOfficerFilter === 'all' || poId === selectedPatrollingOfficerFilter;
+          
+        return matchesSearch && matchesSite && matchesPatrollingOfficer;
+      });
+  }
+
+  const filteredCheckedInGuards = useMemo(() => filterGuards(checkedInGuards), [searchQuery, selectedSiteFilter, selectedPatrollingOfficerFilter, checkedInGuards]);
+  const filteredCheckedOutGuards = useMemo(() => filterGuards(checkedOutGuards), [searchQuery, selectedSiteFilter, selectedPatrollingOfficerFilter, checkedOutGuards]);
+
+  const allGuards = useMemo(() => [...checkedInGuards, ...checkedOutGuards], [checkedInGuards, checkedOutGuards]);
+  
   const uniqueSites = useMemo(() => {
     const siteMap = new Map<number, Site>();
-    guards.forEach(guard => {
+    allGuards.forEach(guard => {
       if (guard.site && !siteMap.has(guard.site.id)) {
         siteMap.set(guard.site.id, guard.site);
       }
     });
     return Array.from(siteMap.values());
-  }, [guards]);
+  }, [allGuards]);
   
   const uniquePatrollingOfficers = useMemo(() => {
     const poMap = new Map<number, PatrollingOfficer>();
-    guards.forEach((guard) => {
+    allGuards.forEach((guard) => {
       if (guard.patrolling_officer && !poMap.has(guard.patrolling_officer.id)) {
         const po = guard.patrolling_officer;
         const poName = `${po.first_name} ${po.last_name || ''}`.trim();
@@ -370,8 +382,92 @@ export default function AgencyGuardsPage() {
       }
     });
     return Array.from(poMap.values());
-  }, [guards]);
+  }, [allGuards]);
 
+
+  const renderGuardsTable = (guards: Guard[]) => {
+      return (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Guard ID</TableHead>
+                  <TableHead>Guard</TableHead>
+                  <TableHead>Contact Info</TableHead>
+                  <TableHead>Site</TableHead>
+                  <TableHead>Patrolling Officer</TableHead>
+                  <TableHead>Incidents Occurred</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {guards.length > 0 ? (
+                  guards.map((guard) => {
+                    const guardName = `${guard.first_name} ${guard.last_name || ''}`.trim();
+                    const poName = guard.patrolling_officer ? `${guard.patrolling_officer.first_name} ${guard.patrolling_officer.last_name || ''}`.trim() : 'Unassigned';
+                    
+                    return (
+                      <TableRow 
+                        key={guard.id}
+                        onClick={() => router.push(`/agency/guards/${guard.id}`)}
+                        className="cursor-pointer hover:bg-accent hover:text-accent-foreground group"
+                      >
+                        <TableCell>
+                          <Button asChild variant="link" className="p-0 h-auto font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
+                            <Link href={`/agency/guards/${guard.id}`}>{guard.employee_id}</Link>
+                          </Button>
+                        </TableCell>
+                        <TableCell>
+                            <p className="font-medium">{guardName}</p>
+                        </TableCell>
+                        <TableCell>
+                           <div className="space-y-1">
+                                {guard.email && (
+                                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                        <Mail className="h-4 w-4 flex-shrink-0" />
+                                        <a href={`mailto:${guard.email}`} className="hover:underline font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>{guard.email}</a>
+                                    </div>
+                                )}
+                                {guard.phone && (
+                                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                        <Phone className="h-4 w-4 flex-shrink-0" />
+                                        <a href={`tel:${guard.phone}`} className="hover:underline font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>{guard.phone}</a>
+                                    </div>
+                                )}
+                            </div>
+                        </TableCell>
+                        <TableCell>
+                          {guard.site ? (
+                            <span className="font-medium">{guard.site.site_name}</span>
+                           ) : (
+                            <span className="font-medium text-muted-foreground">Unassigned</span>
+                           )}
+                        </TableCell>
+                        <TableCell>
+                            {guard.patrolling_officer ? (
+                               <span className="font-medium">{poName}</span>
+                            ) : (
+                                <span className="text-muted-foreground group-hover:text-accent-foreground font-medium">Unassigned</span>
+                            )}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <ShieldAlert className="h-4 w-4 text-muted-foreground group-hover:text-accent-foreground" />
+                            <span className="font-medium">{guard.incident_count}</span>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    )
+                  })
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center text-muted-foreground py-10 font-medium">
+                      No guards found for the current filter.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+      )
+  }
 
   return (
     <>
@@ -598,11 +694,11 @@ export default function AgencyGuardsPage() {
                 </Dialog>
             </div>
         </div>
-
+        
         <Card>
-          <CardHeader>
-            <CardTitle>All Guard Details</CardTitle>
-            <CardDescription className="font-medium">A list of all guards in your agency.</CardDescription>
+           <CardHeader>
+            <CardTitle>Guard Status</CardTitle>
+            <CardDescription className="font-medium">Filter and view guards based on their check-in status.</CardDescription>
             <div className="flex flex-wrap items-center gap-2 pt-4">
               <div className="relative flex-1 md:grow-0">
                   <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -650,85 +746,18 @@ export default function AgencyGuardsPage() {
                     <Skeleton className="h-12 w-full" />
                 </div>
             ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Guard ID</TableHead>
-                  <TableHead>Guard</TableHead>
-                  <TableHead>Contact Info</TableHead>
-                  <TableHead>Site</TableHead>
-                  <TableHead>Patrolling Officer</TableHead>
-                  <TableHead>Incidents Occurred</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredGuards.length > 0 ? (
-                  filteredGuards.map((guard) => {
-                    const guardName = `${guard.first_name} ${guard.last_name || ''}`.trim();
-                    const poName = guard.patrolling_officer ? `${guard.patrolling_officer.first_name} ${guard.patrolling_officer.last_name || ''}`.trim() : 'Unassigned';
-                    
-                    return (
-                      <TableRow 
-                        key={guard.id}
-                        onClick={() => router.push(`/agency/guards/${guard.id}`)}
-                        className="cursor-pointer hover:bg-accent hover:text-accent-foreground group"
-                      >
-                        <TableCell>
-                          <Button asChild variant="link" className="p-0 h-auto font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
-                            <Link href={`/agency/guards/${guard.id}`}>{guard.employee_id}</Link>
-                          </Button>
-                        </TableCell>
-                        <TableCell>
-                            <p className="font-medium">{guardName}</p>
-                        </TableCell>
-                        <TableCell>
-                           <div className="space-y-1">
-                                {guard.email && (
-                                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                        <Mail className="h-4 w-4 flex-shrink-0" />
-                                        <a href={`mailto:${guard.email}`} className="hover:underline font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>{guard.email}</a>
-                                    </div>
-                                )}
-                                {guard.phone && (
-                                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                        <Phone className="h-4 w-4 flex-shrink-0" />
-                                        <a href={`tel:${guard.phone}`} className="hover:underline font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>{guard.phone}</a>
-                                    </div>
-                                )}
-                            </div>
-                        </TableCell>
-                        <TableCell>
-                          {guard.site ? (
-                            <span className="font-medium">{guard.site.site_name}</span>
-                           ) : (
-                            <span className="font-medium text-muted-foreground">Unassigned</span>
-                           )}
-                        </TableCell>
-                        <TableCell>
-                            {guard.patrolling_officer ? (
-                               <span className="font-medium">{poName}</span>
-                            ) : (
-                                <span className="text-muted-foreground group-hover:text-accent-foreground font-medium">Unassigned</span>
-                            )}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <ShieldAlert className="h-4 w-4 text-muted-foreground group-hover:text-accent-foreground" />
-                            <span className="font-medium">{guard.incident_count}</span>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    )
-                  })
-                ) : (
-                  <TableRow>
-                    <TableCell colSpan={6} className="text-center text-muted-foreground py-10 font-medium">
-                      No guards found for the current filter.
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
+             <Tabs defaultValue="checked-in">
+                <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="checked-in">Checked In ({filteredCheckedInGuards.length})</TabsTrigger>
+                    <TabsTrigger value="checked-out">Checked Out ({filteredCheckedOutGuards.length})</TabsTrigger>
+                </TabsList>
+                <TabsContent value="checked-in" className="mt-4">
+                    {renderGuardsTable(filteredCheckedInGuards)}
+                </TabsContent>
+                 <TabsContent value="checked-out" className="mt-4">
+                    {renderGuardsTable(filteredCheckedOutGuards)}
+                </TabsContent>
+            </Tabs>
             )}
           </CardContent>
         </Card>
