@@ -31,7 +31,7 @@ import {
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { FileDown, Upload, Loader2, Search, PlusCircle, ShieldAlert, Phone, Mail } from 'lucide-react';
+import { FileDown, Upload, Loader2, Search, PlusCircle, ShieldAlert, Phone, Mail, Camera } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -126,6 +126,8 @@ export default function AgencyGuardsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSiteFilter, setSelectedSiteFilter] = useState('all');
   const [selectedPatrollingOfficerFilter, setSelectedPatrollingOfficerFilter] = useState('all');
+  const [activeTab, setActiveTab] = useState('checked-in');
+
 
   const [apiRegions, setApiRegions] = useState<ApiRegion[]>([]);
   const [apiCities, setApiCities] = useState<ApiCity[]>([]);
@@ -697,8 +699,18 @@ export default function AgencyGuardsPage() {
         
         <Card>
            <CardHeader>
-            <CardTitle>Guard Status</CardTitle>
-            <CardDescription className="font-medium">Filter and view guards based on their check-in status.</CardDescription>
+            <div className="flex justify-between items-start">
+              <div>
+                <CardTitle>Guard Status</CardTitle>
+                <CardDescription className="font-medium">Filter and view guards based on their check-in status.</CardDescription>
+              </div>
+               {activeTab === 'checked-in' && (
+                 <Button className="bg-destructive hover:bg-destructive/90">
+                    <Camera className="mr-2 h-4 w-4" />
+                    Request Random Selfie Check-in
+                 </Button>
+               )}
+            </div>
             <div className="flex flex-wrap items-center gap-2 pt-4">
               <div className="relative flex-1 md:grow-0">
                   <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -746,7 +758,7 @@ export default function AgencyGuardsPage() {
                     <Skeleton className="h-12 w-full" />
                 </div>
             ) : (
-             <Tabs defaultValue="checked-in">
+             <Tabs defaultValue="checked-in" onValueChange={setActiveTab}>
                 <TabsList className="grid w-full grid-cols-2">
                     <TabsTrigger value="checked-in">Checked In ({filteredCheckedInGuards.length})</TabsTrigger>
                     <TabsTrigger value="checked-out">Checked Out ({filteredCheckedOutGuards.length})</TabsTrigger>
