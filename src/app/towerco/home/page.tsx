@@ -225,7 +225,7 @@ function TowercoHomePageContent() {
           <CardContent>
           {isIncidentsLoading ? (
              <div className="flex items-center justify-center h-48"><Loader2 className="h-8 w-8 animate-spin" /></div>
-          ) : activeIncidents && activeIncidents.results.length > 0 ? (
+          ) : activeIncidents && activeIncidents.results && activeIncidents.results.length > 0 ? (
               <ScrollArea className="h-72">
                   <Table>
                       <TableHeader>
