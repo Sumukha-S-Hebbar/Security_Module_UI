@@ -19,7 +19,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { AlertTriangle, ChevronDown, Phone } from 'lucide-react';
+import { AlertTriangle, ChevronDown, Phone, Loader2 } from 'lucide-react';
 import { TowercoAnalyticsDashboard } from './_components/towerco-analytics-dashboard';
 import {
   DropdownMenu,
@@ -34,8 +34,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { fetchData } from '@/lib/api';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
-const ACTIVE_INCIDENTS_PER_PAGE = 4;
 
 export type BasicCounts = {
   active_incidents_count: number;
@@ -67,6 +67,13 @@ type ActiveIncident = {
     contact_details: { agency_phone: string | null; officer_phone: string | null; guard_phone: string | null };
 };
 
+type PaginatedActiveIncidents = {
+    count: number;
+    next: string | null;
+    previous: string | null;
+    results: ActiveIncident[];
+};
+
 export type AgencyPerformanceData = {
     agency_name: string;
     agency_id: number;
@@ -78,7 +85,7 @@ export type AgencyPerformanceData = {
     };
 };
 
-type SiteListItem = {
+export type SiteListItem = {
     id: number;
     tb_site_id: string;
     org_site_id: string;
@@ -90,8 +97,8 @@ type SiteListItem = {
 export type SiteStatusData = {
     assigned_sites_count: number;
     unassigned_sites_count: number;
-    assigned_sites: { results: SiteListItem[] };
-    unassigned_sites: { results: SiteListItem[] } | null;
+    assigned_sites: { count: number; next: string | null; previous: string | null; results: SiteListItem[] };
+    unassigned_sites: { count: number; next: string | null; previous: string | null; results: SiteListItem[] } | null;
 };
 
 export type IncidentTrendData = {
@@ -105,12 +112,7 @@ export type IncidentTrendData = {
 
 interface DashboardData {
     basic_counts: BasicCounts;
-    active_incidents: {
-        count: number;
-        next: string | null;
-        previous: string | null;
-        results: ActiveIncident[];
-    };
+    active_incidents: PaginatedActiveIncidents;
     agency_performance: AgencyPerformanceData[];
     site_status: SiteStatusData;
     incident_trend: IncidentTrendData[];
@@ -148,8 +150,8 @@ function TowercoHomePageContent() {
   const router = useRouter();
   const [data, setData] = useState<DashboardData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isIncidentsLoading, setIsIncidentsLoading] = useState(false);
   const [org, setOrg] = useState<Organization | null>(null);
-  const [activeIncidentsCurrentPage, setActiveIncidentsCurrentPage] = useState(1);
   
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -181,19 +183,29 @@ function TowercoHomePageContent() {
     }
   }, [org]);
   
+  const handleIncidentPagination = async (url: string | null) => {
+    if (!url || !data) return;
+    setIsIncidentsLoading(true);
+    try {
+        const token = localStorage.getItem('token') || undefined;
+        const incidentData = await fetchData<PaginatedActiveIncidents>(url, token);
+        if (incidentData) {
+            setData({ ...data, active_incidents: incidentData });
+        }
+    } catch(error) {
+        console.error("Failed to fetch active incidents", error);
+    } finally {
+        setIsIncidentsLoading(false);
+    }
+  }
+
   if (isLoading || !data || !org) {
     return <PageSkeleton />;
   }
   
   const portalName = org.role === 'T' ? 'TOWERCO' : 'MNO';
-  const activeEmergencies = data.active_incidents.results;
-  const totalActiveIncidentPages = Math.ceil((data.active_incidents.count || 0) / ACTIVE_INCIDENTS_PER_PAGE);
+  const activeIncidents = data.active_incidents;
 
-  const paginatedActiveEmergencies = activeEmergencies.slice(
-      (activeIncidentsCurrentPage - 1) * ACTIVE_INCIDENTS_PER_PAGE,
-      activeIncidentsCurrentPage * ACTIVE_INCIDENTS_PER_PAGE
-  );
-  
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
@@ -208,11 +220,13 @@ function TowercoHomePageContent() {
       <Card className="border-destructive bg-destructive/10">
           <CardHeader className="flex flex-row items-center gap-2">
           <AlertTriangle className="w-6 h-6 text-destructive" />
-          <CardTitle>Active Emergency Incidents ({data.active_incidents.count})</CardTitle>
+          <CardTitle>Active Emergency Incidents ({activeIncidents.count})</CardTitle>
           </CardHeader>
           <CardContent>
-          {activeEmergencies.length > 0 ? (
-              <div className="overflow-x-auto">
+          {isIncidentsLoading ? (
+             <div className="flex items-center justify-center h-48"><Loader2 className="h-8 w-8 animate-spin" /></div>
+          ) : activeIncidents.results.length > 0 ? (
+              <ScrollArea className="h-72">
                   <Table>
                       <TableHeader>
                           <TableRow className="border-destructive/20">
@@ -226,7 +240,7 @@ function TowercoHomePageContent() {
                           </TableRow>
                       </TableHeader>
                       <TableBody>
-                          {paginatedActiveEmergencies.map((incident) => {
+                          {activeIncidents.results.map((incident) => {
                             const incidentDate = new Date(incident.incident_time);
                             return (
                                 <TableRow 
@@ -288,34 +302,33 @@ function TowercoHomePageContent() {
                           })}
                       </TableBody>
                   </Table>
-              </div>
+              </ScrollArea>
           ) : (
               <p className="text-center py-4 font-medium">
               No active emergency incidents. All systems are normal.
               </p>
           )}
           </CardContent>
-          {activeEmergencies.length > 0 && (
+          {activeIncidents.count > 0 && (
             <CardFooter>
                  <div className="flex items-center justify-between w-full">
                     <div className="text-sm text-destructive font-medium">
-                        Showing {paginatedActiveEmergencies.length} of {activeEmergencies.length} active incidents.
+                        Showing {activeIncidents.results.length} of {activeIncidents.count} active incidents.
                     </div>
                     <div className="flex items-center gap-2">
                         <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => setActiveIncidentsCurrentPage(prev => Math.max(prev - 1, 1))}
-                            disabled={activeIncidentsCurrentPage === 1}
+                            onClick={() => handleIncidentPagination(activeIncidents.previous)}
+                            disabled={!activeIncidents.previous || isIncidentsLoading}
                         >
                             Previous
                         </Button>
-                        <span className="text-sm font-medium text-destructive">Page {activeIncidentsCurrentPage} of {totalActiveIncidentPages || 1}</span>
                         <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => setActiveIncidentsCurrentPage(prev => Math.min(prev + 1, totalActiveIncidentPages))}
-                            disabled={activeIncidentsCurrentPage === totalActiveIncidentPages || totalActiveIncidentPages === 0}
+                            onClick={() => handleIncidentPagination(activeIncidents.next)}
+                            disabled={!activeIncidents.next || isIncidentsLoading}
                         >
                             Next
                         </Button>

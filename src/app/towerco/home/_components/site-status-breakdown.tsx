@@ -10,30 +10,41 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Building2 } from 'lucide-react';
+import { Building2, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import type { SiteStatusData } from '../page';
+import type { SiteStatusData, SiteListItem } from '../page';
 import { Skeleton } from '@/components/ui/skeleton';
+import { fetchData } from '@/lib/api';
 
 const COLORS = {
   assigned: 'hsl(var(--chart-2))',
   unassigned: 'hsl(var(--destructive))',
 };
 
-const ITEMS_PER_PAGE = 5;
+type PaginatedSites = {
+    count: number;
+    next: string | null;
+    previous: string | null;
+    results: SiteListItem[];
+};
 
 export function SiteStatusBreakdown({ siteStatusData }: { siteStatusData: SiteStatusData | null }) {
   const [selectedSection, setSelectedSection] = useState<'assigned' | 'unassigned'>('assigned');
-  const [currentPage, setCurrentPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
-  const { chartData, totalSites, assignedSites, unassignedSites } = useMemo(() => {
+  const [assignedData, setAssignedData] = useState<PaginatedSites | null>(siteStatusData?.assigned_sites || null);
+  const [unassignedData, setUnassignedData] = useState<PaginatedSites | null>(siteStatusData?.unassigned_sites || null);
+
+  useEffect(() => {
+    setAssignedData(siteStatusData?.assigned_sites || null);
+    setUnassignedData(siteStatusData?.unassigned_sites || null);
+  }, [siteStatusData]);
+
+  const { chartData, totalSites } = useMemo(() => {
     if (!siteStatusData) {
-        return { chartData: [], totalSites: 0, assignedSites: [], unassignedSites: [] };
+        return { chartData: [], totalSites: 0 };
     }
-    const assigned = siteStatusData.assigned_sites?.results || [];
-    const unassigned = siteStatusData.unassigned_sites?.results || [];
-    
     const data = [
       { name: 'Assigned', value: siteStatusData.assigned_sites_count, color: COLORS.assigned, key: 'assigned' },
       { name: 'Unassigned', value: siteStatusData.unassigned_sites_count, color: COLORS.unassigned, key: 'unassigned' },
@@ -41,25 +52,34 @@ export function SiteStatusBreakdown({ siteStatusData }: { siteStatusData: SiteSt
     return {
       chartData: data,
       totalSites: siteStatusData.assigned_sites_count + siteStatusData.unassigned_sites_count,
-      assignedSites: assigned,
-      unassignedSites: unassigned,
     };
   }, [siteStatusData]);
 
   const handlePieClick = (data: any) => {
     const section = data.payload.key as 'assigned' | 'unassigned';
     setSelectedSection(section);
-    setCurrentPage(1); // Reset page when section changes
   };
-  
-  const selectedSites = selectedSection === 'assigned' ? assignedSites : unassignedSites;
-  
-  const paginatedSites = useMemo(() => {
-    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-    return selectedSites.slice(startIndex, startIndex + ITEMS_PER_PAGE);
-  }, [selectedSites, currentPage]);
 
-  const totalPages = Math.ceil(selectedSites.length / ITEMS_PER_PAGE);
+  const handlePagination = async (url: string | null) => {
+    if (!url) return;
+    setIsLoading(true);
+    try {
+        const token = localStorage.getItem('token') || undefined;
+        const data = await fetchData<PaginatedSites>(url, token);
+        if (selectedSection === 'assigned') {
+            setAssignedData(data);
+        } else {
+            setUnassignedData(data);
+        }
+    } catch (error) {
+        console.error("Failed to fetch paginated site data:", error);
+    } finally {
+        setIsLoading(false);
+    }
+  };
+
+  const selectedData = selectedSection === 'assigned' ? assignedData : unassignedData;
+  const selectedSites = selectedData?.results || [];
 
   const customTooltipContent = (props: any) => {
     if (!props.active || !props.payload || props.payload.length === 0) {
@@ -85,7 +105,7 @@ export function SiteStatusBreakdown({ siteStatusData }: { siteStatusData: SiteSt
     return (
       <div className="flex justify-center gap-6 mt-4 text-sm font-medium">
         {payload.map((entry: any, index: number) => (
-          <div key={`item-${index}`} className="flex items-center gap-2">
+          <div key={`item-${index}`} className="flex items-center gap-2 cursor-pointer" onClick={() => setSelectedSection(entry.payload.key)}>
             <span
               className="h-2.5 w-2.5 rounded-full"
               style={{ backgroundColor: entry.color }}
@@ -147,8 +167,11 @@ export function SiteStatusBreakdown({ siteStatusData }: { siteStatusData: SiteSt
                 <>
                   <div className="flex items-center gap-2 mb-4">
                      <Building2 className="h-5 w-5" />
-                     <h3 className="text-lg font-semibold">{selectedSection === 'assigned' ? 'Assigned Sites' : 'Unassigned Sites'} ({selectedSites.length})</h3>
+                     <h3 className="text-lg font-semibold">{selectedSection === 'assigned' ? 'Assigned Sites' : 'Unassigned Sites'} ({selectedData?.count || 0})</h3>
                   </div>
+                  {isLoading ? (
+                     <div className="flex justify-center items-center h-full"><Loader2 className="h-6 w-6 animate-spin"/></div>
+                  ) : (
                   <ScrollArea className="h-80 flex-grow">
                     {selectedSection === 'assigned' ? (
                       <Table>
@@ -162,7 +185,7 @@ export function SiteStatusBreakdown({ siteStatusData }: { siteStatusData: SiteSt
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {paginatedSites.map(site => (
+                          {selectedSites.map(site => (
                             <TableRow 
                               key={site.id} 
                               onClick={() => router.push(`/towerco/sites/${site.id}`)}
@@ -199,7 +222,7 @@ export function SiteStatusBreakdown({ siteStatusData }: { siteStatusData: SiteSt
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {paginatedSites.map((site) => (
+                          {selectedSites.map((site) => (
                             <TableRow 
                               key={site.id} 
                               className="group hover:bg-[#00B4D8] hover:text-accent-foreground"
@@ -232,25 +255,25 @@ export function SiteStatusBreakdown({ siteStatusData }: { siteStatusData: SiteSt
                       </Table>
                     )}
                   </ScrollArea>
+                  )}
                    <div className="flex items-center justify-between w-full pt-4">
                         <div className="text-sm text-muted-foreground font-medium">
-                            Showing {paginatedSites.length} of {selectedSites.length} sites.
+                            Showing {selectedSites.length} of {selectedData?.count || 0} sites.
                         </div>
                         <div className="flex items-center gap-2">
                             <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                                disabled={currentPage === 1}
+                                onClick={() => handlePagination(selectedData?.previous || null)}
+                                disabled={!selectedData?.previous || isLoading}
                             >
                                 Previous
                             </Button>
-                            <span className="text-sm font-medium">Page {currentPage} of {totalPages || 1}</span>
                             <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                                disabled={currentPage === totalPages || totalPages === 0}
+                                onClick={() => handlePagination(selectedData?.next || null)}
+                                disabled={!selectedData?.next || isLoading}
                             >
                                 Next
                             </Button>
