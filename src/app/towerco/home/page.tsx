@@ -220,12 +220,12 @@ function TowercoHomePageContent() {
       <Card className="border-destructive bg-destructive/10">
           <CardHeader className="flex flex-row items-center gap-2">
           <AlertTriangle className="w-6 h-6 text-destructive" />
-          <CardTitle>Active Emergency Incidents ({activeIncidents.count})</CardTitle>
+          <CardTitle>Active Emergency Incidents ({activeIncidents?.count || 0})</CardTitle>
           </CardHeader>
           <CardContent>
           {isIncidentsLoading ? (
              <div className="flex items-center justify-center h-48"><Loader2 className="h-8 w-8 animate-spin" /></div>
-          ) : activeIncidents.results.length > 0 ? (
+          ) : activeIncidents && activeIncidents.results.length > 0 ? (
               <ScrollArea className="h-72">
                   <Table>
                       <TableHeader>
@@ -309,7 +309,7 @@ function TowercoHomePageContent() {
               </p>
           )}
           </CardContent>
-          {activeIncidents.count > 0 && (
+          {activeIncidents && activeIncidents.count > 0 && (
             <CardFooter>
                  <div className="flex items-center justify-between w-full">
                     <div className="text-sm text-destructive font-medium">
