@@ -188,9 +188,11 @@ function TowercoHomePageContent() {
     setIsIncidentsLoading(true);
     try {
         const token = localStorage.getItem('token') || undefined;
-        const incidentData = await fetchData<PaginatedActiveIncidents>(url, token);
-        if (incidentData) {
-            setData({ ...data, active_incidents: incidentData });
+        // The paginated URL returns the full dashboard object, so we type it as DashboardData
+        const paginatedData = await fetchData<DashboardData>(url, token);
+        if (paginatedData) {
+            // We only need to update the active_incidents part of the state
+            setData({ ...data, active_incidents: paginatedData.active_incidents });
         }
     } catch(error) {
         console.error("Failed to fetch active incidents", error);
@@ -198,6 +200,7 @@ function TowercoHomePageContent() {
         setIsIncidentsLoading(false);
     }
   }
+
 
   if (isLoading || !data || !org) {
     return <PageSkeleton />;
