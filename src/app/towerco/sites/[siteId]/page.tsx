@@ -96,7 +96,6 @@ export default function SiteReportPage() {
   const [isIncidentsLoading, setIsIncidentsLoading] = useState(false);
   const [loggedInOrg, setLoggedInOrg] = useState<Organization | null>(null);
   
-  const [selectedStatus, setSelectedStatus] = useState('all');
   const [selectedYear, setSelectedYear] = useState('all');
   const [selectedMonth, setSelectedMonth] = useState('all');
   const incidentsTableRef = useRef<HTMLDivElement>(null);
@@ -147,7 +146,6 @@ export default function SiteReportPage() {
     const params = new URLSearchParams({
         page: page.toString()
     });
-    if (selectedStatus !== 'all') params.append('incident_status', selectedStatus === 'under-review' ? 'Under Review' : selectedStatus.charAt(0).toUpperCase() + selectedStatus.slice(1));
     if (selectedYear !== 'all') params.append('year', selectedYear);
     if (selectedMonth !== 'all') params.append('month', (parseInt(selectedMonth) + 1).toString());
 
@@ -165,11 +163,11 @@ export default function SiteReportPage() {
     } finally {
         setIsIncidentsLoading(false);
     }
-  }, [loggedInOrg, siteId, selectedStatus, selectedYear, selectedMonth, toast]);
+  }, [loggedInOrg, siteId, selectedYear, selectedMonth, toast]);
 
   useEffect(() => {
     fetchIncidents(1);
-  }, [selectedStatus, selectedYear, selectedMonth, fetchIncidents]);
+  }, [selectedYear, selectedMonth, fetchIncidents]);
 
   const handleIncidentPagination = useCallback(async (url: string | null) => {
       if (!url) return;
@@ -483,17 +481,6 @@ export default function SiteReportPage() {
               <CardDescription className="font-medium">A log of all emergency incidents reported at this site.</CardDescription>
             </div>
              <div className="flex items-center gap-2 flex-shrink-0">
-              <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-                  <SelectTrigger className="w-[180px] font-medium hover:bg-accent hover:text-accent-foreground">
-                      <SelectValue placeholder="Filter by status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                      <SelectItem value="all" className="font-medium">All Statuses</SelectItem>
-                      <SelectItem value="active" className="font-medium">Active</SelectItem>
-                      <SelectItem value="under-review" className="font-medium">Under Review</SelectItem>
-                      <SelectItem value="resolved" className="font-medium">Resolved</SelectItem>
-                  </SelectContent>
-              </Select>
               <Select value={selectedYear} onValueChange={setSelectedYear}>
                 <SelectTrigger className="w-[120px] font-medium hover:bg-accent hover:text-accent-foreground">
                   <SelectValue placeholder="Select Year" />
