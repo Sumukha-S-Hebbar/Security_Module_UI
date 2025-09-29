@@ -101,7 +101,7 @@ export function AgencyPerformance() {
   const router = useRouter();
   const [org, setOrg] = useState<Organization | null>(null);
   
-  const [selectedYear, setSelectedYear] = useState<string>(new Date().getFullYear().toString());
+  const [selectedYear, setSelectedYear] = useState<string>('all');
   const [selectedMonth, setSelectedMonth] = useState<string>('all');
 
   useEffect(() => {
