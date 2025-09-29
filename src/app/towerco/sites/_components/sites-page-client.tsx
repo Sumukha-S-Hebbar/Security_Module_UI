@@ -14,6 +14,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  CardFooter,
 } from '@/components/ui/card';
 import {
   Table,
@@ -55,6 +56,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { fetchData } from '@/lib/api';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 
 const addSiteFormSchema = z.object({
@@ -87,17 +89,22 @@ type ApiCity = {
     name: string;
 }
 
+const ITEMS_PER_PAGE = 10;
+
 export function SitesPageClient() {
   const { toast } = useToast();
   const router = useRouter();
   const searchParams = useSearchParams();
   const focusSite = searchParams.get('focusSite');
 
-  const [allSites, setAllSites] = useState<Site[]>([]);
+  const [assignedSites, setAssignedSites] = useState<Site[]>([]);
+  const [unassignedSites, setUnassignedSites] = useState<Site[]>([]);
   const [allAgencies, setAllAgencies] = useState<SecurityAgency[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loggedInOrg, setLoggedInOrg] = useState<Organization | null>(null);
   const [loggedInUser, setLoggedInUser] = useState<User | null>(null);
+  
+  const [activeTab, setActiveTab] = useState('assigned');
 
   // State for filters
   const [assignedSearchQuery, setAssignedSearchQuery] = useState('');
@@ -107,6 +114,11 @@ export function SitesPageClient() {
   const [unassignedSearchQuery, setUnassignedSearchQuery] = useState('');
   const [unassignedSelectedRegion, setUnassignedSelectedRegion] = useState('all');
   const [unassignedSelectedCity, setUnassignedSelectedCity] = useState('all');
+  
+  const [assignedSitesCount, setAssignedSitesCount] = useState(0);
+  const [unassignedSitesCount, setUnassignedSitesCount] = useState(0);
+  const [assignedCurrentPage, setAssignedCurrentPage] = useState(1);
+  const [unassignedCurrentPage, setUnassignedCurrentPage] = useState(1);
 
   // State for assignment and dialogs
   const [assignment, setAssignment] = useState<{ [siteId: string]: { agencyId?: string; guards?: string } }>({});
@@ -143,35 +155,86 @@ export function SitesPageClient() {
   });
   
   const watchedRegion = addSiteForm.watch('region');
-
-  const fetchSitesAndAgencies = useCallback(async () => {
+  
+  const fetchAgencies = useCallback(async () => {
     if (!loggedInOrg) return;
-    setIsLoading(true);
     const token = localStorage.getItem('token') || undefined;
-
     try {
-        const sitesResponse = await fetchData<{results: Site[]}>(`/security/api/orgs/${loggedInOrg.code}/sites/list/`, token);
-        setAllSites(sitesResponse?.results || []);
-        
         const agenciesResponse = await fetchData<{results: SecurityAgency[]}>(`/security/api/orgs/${loggedInOrg.code}/security-agencies/list`, token);
         setAllAgencies(agenciesResponse?.results || []);
-
     } catch (error) {
         toast({
             variant: 'destructive',
             title: 'Error',
-            description: 'Failed to load initial site and agency data.'
+            description: 'Failed to load agencies data.'
+        });
+    }
+  }, [loggedInOrg, toast]);
+
+
+  const fetchSites = useCallback(async (status: 'Assigned' | 'Unassigned', page: number) => {
+    if (!loggedInOrg) return;
+    setIsLoading(true);
+    const token = localStorage.getItem('token') || undefined;
+    
+    const params = new URLSearchParams({
+        site_status: status,
+        page: page.toString(),
+        page_size: ITEMS_PER_PAGE.toString(),
+    });
+
+    // Add filters based on status
+    if (status === 'Assigned') {
+        if (assignedSearchQuery) params.append('search', assignedSearchQuery);
+        if (selectedAgencyFilter !== 'all') params.append('agency_id', selectedAgencyFilter);
+        if (assignedSelectedRegion !== 'all') params.append('region', assignedSelectedRegion);
+        if (assignedSelectedCity !== 'all') params.append('city', assignedSelectedCity);
+    } else {
+        if (unassignedSearchQuery) params.append('search', unassignedSearchQuery);
+        if (unassignedSelectedRegion !== 'all') params.append('region', unassignedSelectedRegion);
+        if (unassignedSelectedCity !== 'all') params.append('city', unassignedSelectedCity);
+    }
+
+    try {
+        const response = await fetchData<PaginatedSitesResponse>(`/security/api/orgs/${loggedInOrg.code}/sites/list/?${params.toString()}`, token);
+        if (status === 'Assigned') {
+            setAssignedSites(response?.results || []);
+            setAssignedSitesCount(response?.count || 0);
+        } else {
+            setUnassignedSites(response?.results || []);
+            setUnassignedSitesCount(response?.count || 0);
+        }
+    } catch (error) {
+        toast({
+            variant: 'destructive',
+            title: 'Error',
+            description: `Failed to load ${status.toLowerCase()} sites.`
         });
     } finally {
         setIsLoading(false);
     }
-  }, [loggedInOrg, toast]);
+  }, [loggedInOrg, toast, assignedSearchQuery, selectedAgencyFilter, assignedSelectedRegion, assignedSelectedCity, unassignedSearchQuery, unassignedSelectedRegion, unassignedSelectedCity]);
 
   useEffect(() => {
-    if(loggedInOrg) {
-        fetchSitesAndAgencies();
+    if (loggedInOrg) {
+      fetchAgencies();
     }
-  }, [loggedInOrg, fetchSitesAndAgencies]);
+  }, [loggedInOrg, fetchAgencies]);
+  
+  useEffect(() => {
+    if (loggedInOrg) {
+        if (activeTab === 'assigned') {
+            fetchSites('Assigned', assignedCurrentPage);
+        } else {
+            fetchSites('Unassigned', unassignedCurrentPage);
+        }
+    }
+  }, [loggedInOrg, activeTab, fetchSites, assignedCurrentPage, unassignedCurrentPage]);
+
+  // Reset page number on filter change
+  useEffect(() => setAssignedCurrentPage(1), [assignedSearchQuery, selectedAgencyFilter, assignedSelectedRegion, assignedSelectedCity]);
+  useEffect(() => setUnassignedCurrentPage(1), [unassignedSearchQuery, unassignedSelectedRegion, unassignedSelectedCity]);
+
 
   useEffect(() => {
       async function fetchRegions() {
@@ -232,7 +295,7 @@ export function SitesPageClient() {
 
 
   useEffect(() => {
-    if (!isLoading && focusSite) {
+    if (!isLoading && focusSite && activeTab === 'unassigned') {
         const el = unassignedSitesRef.current.get(focusSite);
         if (el) {
           el.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -242,16 +305,7 @@ export function SitesPageClient() {
           }, 2000);
         }
     }
-  }, [focusSite, isLoading]);
-
-  const assignedSites = useMemo(
-    () => allSites.filter((site) => site.site_status === 'Assigned'),
-    [allSites]
-  );
-  const unassignedSites = useMemo(
-    () => allSites.filter((site) => site.site_status === 'Unassigned'),
-    [allSites]
-  );
+  }, [focusSite, isLoading, activeTab]);
 
   const assignedRegions = useMemo(() => [...new Set(assignedSites.map((site) => site.region))].sort(), [assignedSites]);
   const assignedCities = useMemo(() => {
@@ -333,8 +387,9 @@ export function SitesPageClient() {
           title: 'Site Assigned Successfully',
           description: responseData.detail,
         });
-
-        fetchSitesAndAgencies();
+        
+        fetchSites('Assigned', assignedCurrentPage);
+        fetchSites('Unassigned', unassignedCurrentPage);
 
     } catch (error: any) {
         toast({
@@ -379,7 +434,7 @@ export function SitesPageClient() {
             description: responseData.message,
         });
         
-        fetchSitesAndAgencies(); // Refresh the list
+        fetchSites('Unassigned', unassignedCurrentPage);
         setIsAddSiteDialogOpen(false);
         addSiteForm.reset();
 
@@ -407,6 +462,7 @@ export function SitesPageClient() {
     if (fileInput) fileInput.value = '';
     setIsUploading(false);
     setIsUploadDialogOpen(false);
+    fetchSites('Unassigned', 1);
   }
 
   const handleDownloadTemplate = () => {
@@ -415,44 +471,10 @@ export function SitesPageClient() {
         description: 'Site profile Excel template has been downloaded.',
     });
   }
-
-  const filteredAssignedSites = useMemo(() => {
-    return assignedSites.filter((site) => {
-      const searchLower = assignedSearchQuery.toLowerCase();
-      
-      const matchesSearch =
-        site.site_name.toLowerCase().includes(searchLower) ||
-        site.org_site_id.toLowerCase().includes(searchLower) ||
-        (site.assigned_agency && site.assigned_agency.name.toLowerCase().includes(searchLower));
-
-      const matchesAgency = selectedAgencyFilter === 'all' || site.assigned_agency?.id.toString() === selectedAgencyFilter;
-      const matchesRegion = assignedSelectedRegion === 'all' || site.region === assignedSelectedRegion;
-      const matchesCity = assignedSelectedCity === 'all' || site.city === assignedSelectedCity;
-
-      return matchesSearch && matchesAgency && matchesRegion && matchesCity;
-    });
-  }, [
-    assignedSearchQuery,
-    assignedSites,
-    selectedAgencyFilter,
-    assignedSelectedRegion,
-    assignedSelectedCity,
-  ]);
   
-  const filteredUnassignedSites = useMemo(() => {
-    return unassignedSites.filter((site) => {
-      const searchLower = unassignedSearchQuery.toLowerCase();
-      const matchesSearch =
-        site.site_name.toLowerCase().includes(searchLower) ||
-        site.org_site_id.toLowerCase().includes(searchLower);
-
-      const matchesRegion = unassignedSelectedRegion === 'all' || site.region === unassignedSelectedRegion;
-      const matchesCity = unassignedSelectedCity === 'all' || site.city === unassignedSelectedCity;
-
-      return matchesSearch && matchesRegion && matchesCity;
-    });
-  }, [unassignedSearchQuery, unassignedSites, unassignedSelectedRegion, unassignedSelectedCity]);
-
+  const assignedTotalPages = Math.ceil(assignedSitesCount / ITEMS_PER_PAGE);
+  const unassignedTotalPages = Math.ceil(unassignedSitesCount / ITEMS_PER_PAGE);
+  
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
@@ -690,293 +712,278 @@ export function SitesPageClient() {
         </div>
       </div>
       
-      {isLoading ? (
-        <Card>
-          <CardHeader>
-            <Skeleton className="h-6 w-1/4" />
-            <Skeleton className="h-4 w-1/3" />
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              <Skeleton className="h-12 w-full" />
-              <Skeleton className="h-12 w-full" />
-              <Skeleton className="h-12 w-full" />
-            </div>
-          </CardContent>
-        </Card>
-      ) : (
       <Card>
-        <CardHeader>
-          <CardTitle>Assigned Sites ({filteredAssignedSites.length})</CardTitle>
-          <CardDescription className="font-medium">
-            A list of all sites that have been assigned to a security agency.
-          </CardDescription>
-          <div className="flex flex-wrap items-center gap-2 pt-4">
-            <div className="relative flex-1 md:grow-0">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                type="search"
-                placeholder="Search assigned sites..."
-                value={assignedSearchQuery}
-                onChange={(e) => setAssignedSearchQuery(e.target.value)}
-                className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[320px]"
-              />
-            </div>
-             <Select
-              value={selectedAgencyFilter}
-              onValueChange={setSelectedAgencyFilter}
-            >
-              <SelectTrigger className="w-full sm:w-[220px] font-medium hover:bg-accent hover:text-accent-foreground">
-                <SelectValue placeholder="Filter by Agency" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all" className="font-medium">All Agencies</SelectItem>
-                {allAgencies.map((agency) => (
-                  <SelectItem key={agency.id} value={agency.id.toString()} className="font-medium">
-                    {agency.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select
-              value={assignedSelectedRegion}
-              onValueChange={handleAssignedRegionChange}
-            >
-              <SelectTrigger className="w-full sm:w-[180px] font-medium hover:bg-accent hover:text-accent-foreground">
-                <SelectValue placeholder="Filter by region" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all" className="font-medium">All Regions</SelectItem>
-                {assignedRegions.map((region) => (
-                  <SelectItem key={region} value={region} className="font-medium">
-                    {region}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select
-              value={assignedSelectedCity}
-              onValueChange={setAssignedSelectedCity}
-              disabled={assignedSelectedRegion === 'all'}
-            >
-              <SelectTrigger className="w-full sm:w-[180px] font-medium hover:bg-accent hover:text-accent-foreground">
-                <SelectValue placeholder="Filter by city" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all" className="font-medium">All Cities</SelectItem>
-                {assignedCities.map((city) => (
-                  <SelectItem key={city} value={city} className="font-medium">
-                    {city}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="text-foreground">Towerbuddy ID</TableHead>
-                <TableHead className="text-foreground">Site ID</TableHead>
-                <TableHead className="text-foreground">Site Name</TableHead>
-                <TableHead className="text-foreground">Location</TableHead>
-                <TableHead className="text-foreground">Assigned Agency</TableHead>
-                <TableHead className="text-foreground">Guards Requested</TableHead>
-                <TableHead className="text-foreground">Incidents</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-            {filteredAssignedSites.length > 0 ? (
-              filteredAssignedSites.map((site) => {
-                const incidentsCount = site.total_incidents || 0;
-                return (
-                  <TableRow 
-                    key={site.id} 
-                    onClick={() => router.push(`/towerco/sites/${site.id}`)}
-                    className="cursor-pointer hover:bg-accent hover:text-accent-foreground group"
-                  >
-                    <TableCell>
-                       <Button asChild variant="link" className="p-0 h-auto font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
-                        <Link href={`/towerco/sites/${site.id}`}>{site.tb_site_id}</Link>
-                      </Button>
-                    </TableCell>
-                    <TableCell className="font-medium">{site.org_site_id}</TableCell>
-                    <TableCell>
-                      <p className="font-medium">{site.site_name}</p>
-                    </TableCell>
-                    <TableCell>
-                      <p className="font-medium">{site.city}, {site.region}</p>
-                    </TableCell>
-                    <TableCell>
-                       <span className="font-medium">{site.assigned_agency?.name || 'N/A'}</span>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2 font-medium">
-                        <Users className="h-4 w-4 text-muted-foreground group-hover:text-accent-foreground" />
-                        <span>{site.total_guards_requested}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2 font-medium">
-                        <ShieldAlert className="h-4 w-4 text-muted-foreground group-hover:text-accent-foreground" />
-                        <span>{incidentsCount}</span>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                )
-              })
-            ) : (
-              <TableRow>
-                <TableCell colSpan={7} className="text-center text-muted-foreground py-10 font-medium">
-                  No assigned sites found for the current filter.
-                </TableCell>
-              </TableRow>
-            )}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
-      )}
-
-      {!isLoading && unassignedSites.length > 0 && (
-        <Card>
+        <Tabs defaultValue="assigned" onValueChange={setActiveTab}>
           <CardHeader>
-            <CardTitle>Unassigned Sites ({filteredUnassignedSites.length})</CardTitle>
-            <CardDescription className="font-medium">
-              A list of sites that do not have a security agency assigned.
-            </CardDescription>
-            <div className="flex flex-wrap items-center gap-2 pt-4">
-                <div className="relative flex-1 md:grow-0">
-                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    type="search"
-                    placeholder="Search unassigned sites..."
-                    value={unassignedSearchQuery}
-                    onChange={(e) => setUnassignedSearchQuery(e.target.value)}
-                    className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[320px]"
-                  />
+            <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="assigned">Assigned ({assignedSitesCount})</TabsTrigger>
+                <TabsTrigger value="unassigned">Unassigned ({unassignedSitesCount})</TabsTrigger>
+            </TabsList>
+            {activeTab === 'assigned' ? (
+                <div className="flex flex-wrap items-center gap-2 pt-4">
+                    <div className="relative flex-1 md:grow-0">
+                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input
+                        type="search"
+                        placeholder="Search assigned sites..."
+                        value={assignedSearchQuery}
+                        onChange={(e) => setAssignedSearchQuery(e.target.value)}
+                        className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[320px]"
+                    />
+                    </div>
+                    <Select value={selectedAgencyFilter} onValueChange={setSelectedAgencyFilter}>
+                        <SelectTrigger className="w-full sm:w-[220px] font-medium hover:bg-accent hover:text-accent-foreground">
+                            <SelectValue placeholder="Filter by Agency" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all" className="font-medium">All Agencies</SelectItem>
+                            {allAgencies.map((agency) => (
+                            <SelectItem key={agency.id} value={agency.id.toString()} className="font-medium">
+                                {agency.name}
+                            </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                    <Select value={assignedSelectedRegion} onValueChange={handleAssignedRegionChange}>
+                        <SelectTrigger className="w-full sm:w-[180px] font-medium hover:bg-accent hover:text-accent-foreground">
+                            <SelectValue placeholder="Filter by region" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all" className="font-medium">All Regions</SelectItem>
+                            {assignedRegions.map((region) => (
+                            <SelectItem key={region} value={region} className="font-medium">
+                                {region}
+                            </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                    <Select value={assignedSelectedCity} onValueChange={setAssignedSelectedCity} disabled={assignedSelectedRegion === 'all'}>
+                        <SelectTrigger className="w-full sm:w-[180px] font-medium hover:bg-accent hover:text-accent-foreground">
+                            <SelectValue placeholder="Filter by city" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all" className="font-medium">All Cities</SelectItem>
+                            {assignedCities.map((city) => (
+                            <SelectItem key={city} value={city} className="font-medium">
+                                {city}
+                            </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
                 </div>
-                <Select value={unassignedSelectedRegion} onValueChange={handleUnassignedRegionChange}>
-                  <SelectTrigger className="w-full sm:w-[180px] font-medium hover:bg-accent hover:text-accent-foreground">
-                    <SelectValue placeholder="Filter by region" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all" className="font-medium">All Regions</SelectItem>
-                    {unassignedRegions.map((region) => (
-                      <SelectItem key={region} value={region} className="font-medium">
-                        {region}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Select
-                  value={unassignedSelectedCity}
-                  onValueChange={setUnassignedSelectedCity}
-                  disabled={unassignedSelectedRegion === 'all'}
-                >
-                  <SelectTrigger className="w-full sm:w-[180px] font-medium hover:bg-accent hover:text-accent-foreground">
-                    <SelectValue placeholder="Filter by city" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all" className="font-medium">All Cities</SelectItem>
-                    {unassignedCities.map((city) => (
-                      <SelectItem key={city} value={city} className="font-medium">
-                        {city}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-            </div>
+            ) : (
+                 <div className="flex flex-wrap items-center gap-2 pt-4">
+                    <div className="relative flex-1 md:grow-0">
+                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input
+                        type="search"
+                        placeholder="Search unassigned sites..."
+                        value={unassignedSearchQuery}
+                        onChange={(e) => setUnassignedSearchQuery(e.target.value)}
+                        className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[320px]"
+                    />
+                    </div>
+                    <Select value={unassignedSelectedRegion} onValueChange={handleUnassignedRegionChange}>
+                    <SelectTrigger className="w-full sm:w-[180px] font-medium hover:bg-accent hover:text-accent-foreground">
+                        <SelectValue placeholder="Filter by region" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all" className="font-medium">All Regions</SelectItem>
+                        {unassignedRegions.map((region) => (
+                        <SelectItem key={region} value={region} className="font-medium">
+                            {region}
+                        </SelectItem>
+                        ))}
+                    </SelectContent>
+                    </Select>
+                    <Select value={unassignedSelectedCity} onValueChange={setUnassignedSelectedCity} disabled={unassignedSelectedRegion === 'all'}>
+                    <SelectTrigger className="w-full sm:w-[180px] font-medium hover:bg-accent hover:text-accent-foreground">
+                        <SelectValue placeholder="Filter by city" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all" className="font-medium">All Cities</SelectItem>
+                        {unassignedCities.map((city) => (
+                        <SelectItem key={city} value={city} className="font-medium">
+                            {city}
+                        </SelectItem>
+                        ))}
+                    </SelectContent>
+                    </Select>
+                </div>
+            )}
           </CardHeader>
           <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="text-foreground">Towerbuddy ID</TableHead>
-                  <TableHead className="text-foreground">Site ID</TableHead>
-                  <TableHead className="text-foreground">Site Name</TableHead>
-                  <TableHead className="text-foreground">Location</TableHead>
-                  <TableHead className="text-foreground">Assign Agency</TableHead>
-                  <TableHead className="text-foreground">Guards Required</TableHead>
-                  <TableHead className="text-right text-foreground">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredUnassignedSites.length > 0 ? (
-                  filteredUnassignedSites.map((site) => (
-                        <TableRow 
-                          key={site.id} 
-                          ref={el => {
-                            if (unassignedSitesRef.current) {
-                                unassignedSitesRef.current.set(site.id.toString(), el);
-                            }
-                          }}
-                        >
-                          <TableCell className="font-medium">
-                            {site.tb_site_id}
-                          </TableCell>
-                          <TableCell className="font-medium">
-                            {site.org_site_id}
-                          </TableCell>
-                          <TableCell>
-                             <div className="font-medium">{site.site_name}</div>
-                          </TableCell>
-                          <TableCell>
-                             <p className="font-medium">{site.city}, {site.region}</p>
-                          </TableCell>
-                          <TableCell>
-                             <div onClick={(e) => e.stopPropagation()}>
-                              <Select
-                                onValueChange={(value) =>
-                                  handleAssignmentChange(site.id.toString(), 'agencyId', value)
-                                }
-                             >
-                               <SelectTrigger className="w-[200px] font-medium">
-                                 <SelectValue placeholder="Select an agency" />
-                               </SelectTrigger>
-                               <SelectContent>
-                                {allAgencies.map(agency => (
-                                    <SelectItem key={agency.id} value={agency.id.toString()}>{agency.name}</SelectItem>
-                                ))}
-                               </SelectContent>
-                              </Select>
-                             </div>
-                          </TableCell>
-                          <TableCell>
-                             <Input
-                                type="number"
-                                placeholder="Number of guards"
-                                className="w-[120px]"
-                                value={assignment[site.id.toString()]?.guards || ''}
-                                onChange={(e) => handleAssignmentChange(site.id.toString(), 'guards', e.target.value)}
-                                onClick={(e) => e.stopPropagation()}
-                              />
-                          </TableCell>
-                          <TableCell className="text-right">
-                             <Button
-                                size="sm"
-                                onClick={() => handleAssignAgency(site.id.toString())}
-                                disabled={!assignment[site.id.toString()]?.agencyId || !assignment[site.id.toString()]?.guards}
-                                className="bg-[#00B4D8] hover:bg-[#00B4D8]/90"
-                              >
-                                Assign
+            {isLoading ? (
+                <div className="space-y-2">
+                    <Skeleton className="h-12 w-full" />
+                    <Skeleton className="h-12 w-full" />
+                    <Skeleton className="h-12 w-full" />
+                </div>
+            ) : (
+                <TabsContent value="assigned">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="text-foreground">Towerbuddy ID</TableHead>
+                        <TableHead className="text-foreground">Site ID</TableHead>
+                        <TableHead className="text-foreground">Site Name</TableHead>
+                        <TableHead className="text-foreground">Location</TableHead>
+                        <TableHead className="text-foreground">Assigned Agency</TableHead>
+                        <TableHead className="text-foreground">Guards Requested</TableHead>
+                        <TableHead className="text-foreground">Incidents</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                    {assignedSites.length > 0 ? (
+                      assignedSites.map((site) => (
+                          <TableRow 
+                            key={site.id} 
+                            onClick={() => router.push(`/towerco/sites/${site.id}`)}
+                            className="cursor-pointer hover:bg-accent hover:text-accent-foreground group"
+                          >
+                            <TableCell>
+                              <Button asChild variant="link" className="p-0 h-auto font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
+                                <Link href={`/towerco/sites/${site.id}`}>{site.tb_site_id}</Link>
                               </Button>
-                          </TableCell>
+                            </TableCell>
+                            <TableCell className="font-medium">{site.org_site_id}</TableCell>
+                            <TableCell><p className="font-medium">{site.site_name}</p></TableCell>
+                            <TableCell><p className="font-medium">{site.city}, {site.region}</p></TableCell>
+                            <TableCell><span className="font-medium">{site.assigned_agency?.name || 'N/A'}</span></TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-2 font-medium">
+                                <Users className="h-4 w-4 text-muted-foreground group-hover:text-accent-foreground" />
+                                <span>{site.total_guards_requested}</span>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-2 font-medium">
+                                <ShieldAlert className="h-4 w-4 text-muted-foreground group-hover:text-accent-foreground" />
+                                <span>{site.total_incidents || 0}</span>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={7} className="text-center text-muted-foreground py-10 font-medium">
+                          No assigned sites found for the current filter.
+                        </TableCell>
+                      </TableRow>
+                    )}
+                    </TableBody>
+                  </Table>
+                </TabsContent>
+            )}
+            {isLoading ? null : (
+                <TabsContent value="unassigned">
+                  <Table>
+                    <TableHeader>
+                        <TableRow>
+                        <TableHead className="text-foreground">Towerbuddy ID</TableHead>
+                        <TableHead className="text-foreground">Site ID</TableHead>
+                        <TableHead className="text-foreground">Site Name</TableHead>
+                        <TableHead className="text-foreground">Location</TableHead>
+                        <TableHead className="text-foreground">Assign Agency</TableHead>
+                        <TableHead className="text-foreground">Guards Required</TableHead>
+                        <TableHead className="text-right text-foreground">Actions</TableHead>
                         </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                    <TableCell colSpan={7} className="text-center text-muted-foreground font-medium py-10">
-                        No unassigned sites found for the current filter.
-                    </TableCell>
-                </TableRow>
-              )}
-              </TableBody>
-            </Table>
+                    </TableHeader>
+                    <TableBody>
+                        {unassignedSites.length > 0 ? (
+                        unassignedSites.map((site) => (
+                                <TableRow 
+                                key={site.id} 
+                                ref={el => {
+                                    if (unassignedSitesRef.current) {
+                                        unassignedSitesRef.current.set(site.id.toString(), el);
+                                    }
+                                }}
+                                >
+                                <TableCell className="font-medium">{site.tb_site_id}</TableCell>
+                                <TableCell className="font-medium">{site.org_site_id}</TableCell>
+                                <TableCell><div className="font-medium">{site.site_name}</div></TableCell>
+                                <TableCell><p className="font-medium">{site.city}, {site.region}</p></TableCell>
+                                <TableCell>
+                                    <div onClick={(e) => e.stopPropagation()}>
+                                    <Select onValueChange={(value) => handleAssignmentChange(site.id.toString(), 'agencyId', value)}>
+                                    <SelectTrigger className="w-[200px] font-medium">
+                                        <SelectValue placeholder="Select an agency" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {allAgencies.map(agency => (
+                                            <SelectItem key={agency.id} value={agency.id.toString()}>{agency.name}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                    </Select>
+                                    </div>
+                                </TableCell>
+                                <TableCell>
+                                    <Input
+                                        type="number"
+                                        placeholder="Number of guards"
+                                        className="w-[120px]"
+                                        value={assignment[site.id.toString()]?.guards || ''}
+                                        onChange={(e) => handleAssignmentChange(site.id.toString(), 'guards', e.target.value)}
+                                        onClick={(e) => e.stopPropagation()}
+                                    />
+                                </TableCell>
+                                <TableCell className="text-right">
+                                    <Button
+                                        size="sm"
+                                        onClick={() => handleAssignAgency(site.id.toString())}
+                                        disabled={!assignment[site.id.toString()]?.agencyId || !assignment[site.id.toString()]?.guards}
+                                        className="bg-[#00B4D8] hover:bg-[#00B4D8]/90"
+                                    >
+                                        Assign
+                                    </Button>
+                                </TableCell>
+                                </TableRow>
+                        ))
+                        ) : (
+                        <TableRow>
+                            <TableCell colSpan={7} className="text-center text-muted-foreground font-medium py-10">
+                                No unassigned sites found for the current filter.
+                            </TableCell>
+                        </TableRow>
+                        )}
+                    </TableBody>
+                  </Table>
+                </TabsContent>
+            )}
           </CardContent>
-        </Card>
-      )}
+          {(activeTab === 'assigned' && assignedSitesCount > 0) || (activeTab === 'unassigned' && unassignedSitesCount > 0) ? (
+            <CardFooter>
+                <div className="flex items-center justify-between w-full">
+                    <div className="text-sm text-muted-foreground font-medium">
+                        Showing {activeTab === 'assigned' ? assignedSites.length : unassignedSites.length} of {activeTab === 'assigned' ? assignedSitesCount : unassignedSitesCount} sites.
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => activeTab === 'assigned' ? setAssignedCurrentPage(p => Math.max(1, p - 1)) : setUnassignedCurrentPage(p => Math.max(1, p - 1))}
+                            disabled={(activeTab === 'assigned' ? assignedCurrentPage : unassignedCurrentPage) === 1}
+                        >
+                            Previous
+                        </Button>
+                        <span className="text-sm font-medium">
+                            Page {activeTab === 'assigned' ? assignedCurrentPage : unassignedCurrentPage} of {activeTab === 'assigned' ? assignedTotalPages : unassignedTotalPages}
+                        </span>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => activeTab === 'assigned' ? setAssignedCurrentPage(p => Math.min(assignedTotalPages, p + 1)) : setUnassignedCurrentPage(p => Math.min(unassignedTotalPages, p + 1))}
+                            disabled={(activeTab === 'assigned' ? assignedCurrentPage : unassignedCurrentPage) === (activeTab === 'assigned' ? assignedTotalPages : unassignedTotalPages)}
+                        >
+                            Next
+                        </Button>
+                    </div>
+                </div>
+            </CardFooter>
+          ) : null}
+        </Tabs>
+      </Card>
     </div>
   );
 }
