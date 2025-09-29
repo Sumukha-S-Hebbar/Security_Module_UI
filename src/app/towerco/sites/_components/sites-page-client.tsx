@@ -120,6 +120,13 @@ export function SitesPageClient() {
   const [assignedCurrentPage, setAssignedCurrentPage] = useState(1);
   const [unassignedCurrentPage, setUnassignedCurrentPage] = useState(1);
 
+  // Pagination URL state
+  const [assignedNextUrl, setAssignedNextUrl] = useState<string | null>(null);
+  const [assignedPrevUrl, setAssignedPrevUrl] = useState<string | null>(null);
+  const [unassignedNextUrl, setUnassignedNextUrl] = useState<string | null>(null);
+  const [unassignedPrevUrl, setUnassignedPrevUrl] = useState<string | null>(null);
+
+
   // State for assignment and dialogs
   const [assignment, setAssignment] = useState<{ [siteId: string]: { agencyId?: string; guards?: string } }>({});
   const [isAddSiteDialogOpen, setIsAddSiteDialogOpen] = useState(false);
@@ -200,9 +207,13 @@ export function SitesPageClient() {
         if (status === 'Assigned') {
             setAssignedSites(response?.results || []);
             setAssignedSitesCount(response?.count || 0);
+            setAssignedNextUrl(response?.next || null);
+            setAssignedPrevUrl(response?.previous || null);
         } else {
             setUnassignedSites(response?.results || []);
             setUnassignedSitesCount(response?.count || 0);
+            setUnassignedNextUrl(response?.next || null);
+            setUnassignedPrevUrl(response?.previous || null);
         }
     } catch (error) {
         toast({
@@ -214,6 +225,40 @@ export function SitesPageClient() {
         setIsLoading(false);
     }
   }, [loggedInOrg, toast, assignedSearchQuery, selectedAgencyFilter, assignedSelectedRegion, assignedSelectedCity, unassignedSearchQuery, unassignedSelectedRegion, unassignedSelectedCity]);
+
+  const handlePagination = useCallback(async (url: string, status: 'Assigned' | 'Unassigned') => {
+    if (!loggedInOrg) return;
+    setIsLoading(true);
+    const token = localStorage.getItem('token') || undefined;
+
+    try {
+      const response = await fetchData<PaginatedSitesResponse>(url, token);
+      if (status === 'Assigned') {
+        setAssignedSites(response?.results || []);
+        setAssignedSitesCount(response?.count || 0);
+        setAssignedNextUrl(response?.next || null);
+        setAssignedPrevUrl(response?.previous || null);
+        const page = new URL(url).searchParams.get('page');
+        setAssignedCurrentPage(page ? parseInt(page) : 1);
+      } else {
+        setUnassignedSites(response?.results || []);
+        setUnassignedSitesCount(response?.count || 0);
+        setUnassignedNextUrl(response?.next || null);
+        setUnassignedPrevUrl(response?.previous || null);
+        const page = new URL(url).searchParams.get('page');
+        setUnassignedCurrentPage(page ? parseInt(page) : 1);
+      }
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: `Failed to load page.`,
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }, [loggedInOrg, toast]);
+
 
   useEffect(() => {
     if (loggedInOrg) {
@@ -962,8 +1007,8 @@ export function SitesPageClient() {
                         <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => activeTab === 'assigned' ? setAssignedCurrentPage(p => Math.max(1, p - 1)) : setUnassignedCurrentPage(p => Math.max(1, p - 1))}
-                            disabled={(activeTab === 'assigned' ? assignedCurrentPage : unassignedCurrentPage) === 1}
+                            onClick={() => handlePagination(activeTab === 'assigned' ? assignedPrevUrl! : unassignedPrevUrl!, activeTab as 'Assigned' | 'Unassigned')}
+                            disabled={activeTab === 'assigned' ? !assignedPrevUrl : !unassignedPrevUrl}
                         >
                             Previous
                         </Button>
@@ -973,8 +1018,8 @@ export function SitesPageClient() {
                         <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => activeTab === 'assigned' ? setAssignedCurrentPage(p => Math.min(assignedTotalPages, p + 1)) : setUnassignedCurrentPage(p => Math.min(unassignedTotalPages, p + 1))}
-                            disabled={(activeTab === 'assigned' ? assignedCurrentPage : unassignedCurrentPage) === (activeTab === 'assigned' ? assignedTotalPages : unassignedTotalPages)}
+                            onClick={() => handlePagination(activeTab === 'assigned' ? assignedNextUrl! : unassignedNextUrl!, activeTab as 'Assigned' | 'Unassigned')}
+                            disabled={activeTab === 'assigned' ? !assignedNextUrl : !unassignedNextUrl}
                         >
                             Next
                         </Button>
