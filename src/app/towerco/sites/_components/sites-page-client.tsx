@@ -227,7 +227,7 @@ export function SitesPageClient() {
   }, [loggedInOrg, toast, assignedSearchQuery, selectedAgencyFilter, assignedSelectedRegion, assignedSelectedCity, unassignedSearchQuery, unassignedSelectedRegion, unassignedSelectedCity]);
 
   const handlePagination = useCallback(async (url: string, status: 'Assigned' | 'Unassigned') => {
-    if (!loggedInOrg) return;
+    if (!loggedInOrg || !url) return;
     setIsLoading(true);
     const token = localStorage.getItem('token') || undefined;
 
@@ -761,8 +761,8 @@ export function SitesPageClient() {
         <Tabs defaultValue="assigned" onValueChange={setActiveTab}>
           <CardHeader>
             <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="assigned">Assigned ({assignedSitesCount})</TabsTrigger>
-                <TabsTrigger value="unassigned">Unassigned ({unassignedSitesCount})</TabsTrigger>
+                <TabsTrigger value="assigned" className="data-[state=active]:bg-[#00B4D8] data-[state=active]:text-white">Assigned ({assignedSitesCount})</TabsTrigger>
+                <TabsTrigger value="unassigned" className="data-[state=active]:bg-[#00B4D8] data-[state=active]:text-white">Unassigned ({unassignedSitesCount})</TabsTrigger>
             </TabsList>
             {activeTab === 'assigned' ? (
                 <div className="flex flex-wrap items-center gap-2 pt-4">
@@ -1008,7 +1008,7 @@ export function SitesPageClient() {
                             variant="outline"
                             size="sm"
                             onClick={() => handlePagination(activeTab === 'assigned' ? assignedPrevUrl! : unassignedPrevUrl!, activeTab as 'Assigned' | 'Unassigned')}
-                            disabled={activeTab === 'assigned' ? !assignedPrevUrl : !unassignedPrevUrl}
+                            disabled={isLoading || (activeTab === 'assigned' ? !assignedPrevUrl : !unassignedPrevUrl)}
                         >
                             Previous
                         </Button>
@@ -1019,7 +1019,7 @@ export function SitesPageClient() {
                             variant="outline"
                             size="sm"
                             onClick={() => handlePagination(activeTab === 'assigned' ? assignedNextUrl! : unassignedNextUrl!, activeTab as 'Assigned' | 'Unassigned')}
-                            disabled={activeTab === 'assigned' ? !assignedNextUrl : !unassignedNextUrl}
+                            disabled={isLoading || (activeTab === 'assigned' ? !assignedNextUrl : !unassignedNextUrl)}
                         >
                             Next
                         </Button>
