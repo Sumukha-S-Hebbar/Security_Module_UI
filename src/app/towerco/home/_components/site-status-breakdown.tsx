@@ -29,7 +29,7 @@ type PaginatedSites = {
 };
 
 export function SiteStatusBreakdown({ siteStatusData }: { siteStatusData: SiteStatusData | null }) {
-  const [selectedSection, setSelectedSection] = useState<'assigned' | 'unassigned' | null>(null);
+  const [selectedSection, setSelectedSection] = useState<'assigned' | 'unassigned' | null>('assigned');
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
@@ -268,7 +268,7 @@ export function SiteStatusBreakdown({ siteStatusData }: { siteStatusData: SiteSt
                             <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => handlePagination(selectedData?.previous || null, selectedSection)}
+                                onClick={() => selectedSection && handlePagination(selectedData?.previous || null, selectedSection)}
                                 disabled={!selectedData?.previous || isLoading}
                             >
                                 Previous
@@ -276,7 +276,7 @@ export function SiteStatusBreakdown({ siteStatusData }: { siteStatusData: SiteSt
                             <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => handlePagination(selectedData?.next || null, selectedSection)}
+                                onClick={() => selectedSection && handlePagination(selectedData?.next || null, selectedSection)}
                                 disabled={!selectedData?.next || isLoading}
                             >
                                 Next
