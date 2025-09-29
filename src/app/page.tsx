@@ -23,7 +23,7 @@ import {
 } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Checkbox } from '@/components/ui/checkbox';
-import { CheckIcon, Loader2 } from 'lucide-react';
+import { CheckIcon, Eye, EyeOff, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import type { Organization, User, Subcontractor } from '@/types';
 import { useForm } from 'react-hook-form';
@@ -45,6 +45,9 @@ export default function RootPage() {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const form = useForm();
+  const [showPassword, setShowPassword] = useState(false);
+  const [showPasswordUp, setShowPasswordUp] = useState(false);
+  const [showConfirmPasswordUp, setShowConfirmPasswordUp] = useState(false);
 
 
   const handleSignIn = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -204,15 +207,26 @@ export default function RootPage() {
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="password-in">Password</Label>
-                      <Input 
-                        id="password-in" 
-                        type="password" 
-                        placeholder="Enter your password"
-                        required 
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        disabled={isLoading}
-                      />
+                      <div className="relative">
+                        <Input 
+                          id="password-in" 
+                          type={showPassword ? 'text' : 'password'} 
+                          placeholder="Enter your password"
+                          required 
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          disabled={isLoading}
+                          className="pr-10"
+                        />
+                         <button
+                          type="button"
+                          className="absolute inset-y-0 right-0 flex items-center pr-3"
+                          onClick={() => setShowPassword(!showPassword)}
+                          disabled={isLoading}
+                        >
+                          {showPassword ? <EyeOff className="h-5 w-5 text-muted-foreground" /> : <Eye className="h-5 w-5 text-muted-foreground" />}
+                        </button>
+                      </div>
                     </div>
                   </CardContent>
                   <CardFooter>
@@ -264,11 +278,29 @@ export default function RootPage() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="password-up">PASSWORD <span className="text-destructive">*</span></Label>
-                    <Input id="password-up" type="password" placeholder="Enter password" required />
+                     <div className="relative">
+                        <Input id="password-up" type={showPasswordUp ? 'text' : 'password'} placeholder="Enter password" required className="pr-10"/>
+                         <button
+                          type="button"
+                          className="absolute inset-y-0 right-0 flex items-center pr-3"
+                          onClick={() => setShowPasswordUp(!showPasswordUp)}
+                        >
+                          {showPasswordUp ? <EyeOff className="h-5 w-5 text-muted-foreground" /> : <Eye className="h-5 w-5 text-muted-foreground" />}
+                        </button>
+                      </div>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="confirm-password-up">CONFIRM PASSWORD <span className="text-destructive">*</span></Label>
-                    <Input id="confirm-password-up" type="password" placeholder="Re-enter password" required />
+                     <div className="relative">
+                        <Input id="confirm-password-up" type={showConfirmPasswordUp ? 'text' : 'password'} placeholder="Re-enter password" required className="pr-10"/>
+                         <button
+                          type="button"
+                          className="absolute inset-y-0 right-0 flex items-center pr-3"
+                          onClick={() => setShowConfirmPasswordUp(!showConfirmPasswordUp)}
+                        >
+                          {showConfirmPasswordUp ? <EyeOff className="h-5 w-5 text-muted-foreground" /> : <Eye className="h-5 w-5 text-muted-foreground" />}
+                        </button>
+                      </div>
                   </div>
                    <div className="flex items-center space-x-2">
                         <Checkbox id="terms" />
