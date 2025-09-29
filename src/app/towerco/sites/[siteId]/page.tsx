@@ -112,13 +112,21 @@ export default function SiteReportPage() {
     }
   }, []);
 
-  const fetchSiteReport = useCallback(async (url: string) => {
-    setIsLoading(true);
+  const fetchSiteReport = useCallback(async (url: string, isFiltering: boolean = false) => {
+    if (isFiltering) {
+      setIsIncidentsLoading(true);
+    } else {
+      setIsLoading(true);
+    }
     const token = localStorage.getItem('token') || undefined;
     try {
         const data = await fetchData<SiteReportData>(url, token);
-        setReportData(data);
-        setPaginatedIncidents(data?.incidents || null);
+        if (isFiltering) {
+            setPaginatedIncidents(data?.incidents || null);
+        } else {
+            setReportData(data);
+            setPaginatedIncidents(data?.incidents || null);
+        }
     } catch (error) {
         console.error("Failed to fetch site report:", error);
         toast({
@@ -127,65 +135,45 @@ export default function SiteReportPage() {
             description: "Could not load site report data.",
         });
     } finally {
-        setIsLoading(false);
+        if (isFiltering) {
+          setIsIncidentsLoading(false);
+        } else {
+          setIsLoading(false);
+        }
     }
   }, [toast]);
   
   useEffect(() => {
     if (loggedInOrg && siteId) {
-      const initialUrl = `/security/api/orgs/${loggedInOrg.code}/site/${siteId}/`;
-      fetchSiteReport(initialUrl);
-    }
-  }, [loggedInOrg, siteId, fetchSiteReport]);
-  
-  const fetchIncidents = useCallback(async (page: number = 1) => {
-    if (!loggedInOrg || !siteId) return;
+      const baseUrl = `/security/api/orgs/${loggedInOrg.code}/site/${siteId}/`;
+      const params = new URLSearchParams();
 
-    setIsIncidentsLoading(true);
-    const token = localStorage.getItem('token') || undefined;
-    
-    const params = new URLSearchParams({
-        page: page.toString()
-    });
-    if (selectedYear !== 'all') params.append('year', selectedYear);
-    if (selectedMonth !== 'all') params.append('month', (parseInt(selectedMonth) + 1).toString());
-    if (selectedStatus !== 'all') {
-      let apiStatus = '';
-      if (selectedStatus === 'under-review') {
-        apiStatus = 'Under Review';
-      } else {
-        apiStatus = selectedStatus.charAt(0).toUpperCase() + selectedStatus.slice(1);
+      if (selectedYear !== 'all') params.append('year', selectedYear);
+      if (selectedMonth !== 'all' && selectedMonth !== 'all') params.append('month', (parseInt(selectedMonth) + 1).toString());
+      if (selectedStatus !== 'all') {
+        let apiStatus = '';
+        if (selectedStatus === 'under-review') {
+          apiStatus = 'Under Review';
+        } else {
+          apiStatus = selectedStatus.charAt(0).toUpperCase() + selectedStatus.slice(1);
+        }
+        params.append('incident_status', apiStatus);
       }
-      params.append('incident_status', apiStatus);
+      
+      const fullUrl = `${baseUrl}?${params.toString()}`;
+      // A change in a filter should fetch the whole report to update incident trend too
+      fetchSiteReport(fullUrl, false); 
     }
+  }, [loggedInOrg, siteId, selectedYear, selectedMonth, selectedStatus, fetchSiteReport]);
 
-    try {
-        const url = `/security/api/orgs/${loggedInOrg.code}/site/${siteId}/incidents/?${params.toString()}`;
-        const data = await fetchData<PaginatedIncidents>(url, token);
-        setPaginatedIncidents(data);
-    } catch (error) {
-        console.error("Failed to fetch incidents:", error);
-        toast({
-            variant: "destructive",
-            title: "Error",
-            description: "Could not load incidents for the selected filters.",
-        });
-    } finally {
-        setIsIncidentsLoading(false);
-    }
-  }, [loggedInOrg, siteId, selectedYear, selectedMonth, selectedStatus, toast]);
-
-  useEffect(() => {
-    fetchIncidents(1);
-  }, [selectedYear, selectedMonth, selectedStatus, fetchIncidents]);
 
   const handleIncidentPagination = useCallback(async (url: string | null) => {
       if (!url) return;
       setIsIncidentsLoading(true);
       const token = localStorage.getItem('token') || undefined;
       try {
-        const data = await fetchData<PaginatedIncidents>(url, token);
-        setPaginatedIncidents(data);
+        const data = await fetchData<SiteReportData>(url, token);
+        setPaginatedIncidents(data?.incidents || null);
       } catch (error) {
         console.error("Failed to fetch paginated incidents:", error);
         toast({ variant: 'destructive', title: 'Error', description: 'Failed to load next page of incidents.' });
@@ -203,7 +191,11 @@ export default function SiteReportPage() {
             years.add(new Date(incident.incident_time).getFullYear().toString())
         );
     }
-    if (years.size > 0) years.add(new Date().getFullYear().toString());
+    if (years.size === 0) {
+      years.add(new Date().getFullYear().toString());
+    } else if (!years.has(new Date().getFullYear().toString())) {
+      years.add(new Date().getFullYear().toString());
+    }
     return Array.from(years).sort((a, b) => parseInt(b) - parseInt(a));
   }, [reportData]);
 
@@ -491,17 +483,17 @@ export default function SiteReportPage() {
               <CardDescription className="font-medium">A log of all emergency incidents reported at this site.</CardDescription>
             </div>
              <div className="flex items-center gap-2 flex-shrink-0">
-               <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-                <SelectTrigger className="w-[180px] font-medium hover:bg-accent hover:text-accent-foreground">
-                    <SelectValue placeholder="Filter by status" />
-                </SelectTrigger>
-                <SelectContent>
-                    <SelectItem value="all" className="font-medium">All Statuses</SelectItem>
-                    <SelectItem value="active" className="font-medium">Active</SelectItem>
-                    <SelectItem value="under-review" className="font-medium">Under Review</SelectItem>
-                    <SelectItem value="resolved" className="font-medium">Resolved</SelectItem>
-                </SelectContent>
-            </Select>
+                <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+                    <SelectTrigger className="w-[180px] font-medium hover:bg-accent hover:text-accent-foreground">
+                        <SelectValue placeholder="Filter by status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all" className="font-medium">All Statuses</SelectItem>
+                        <SelectItem value="active" className="font-medium">Active</SelectItem>
+                        <SelectItem value="under-review" className="font-medium">Under Review</SelectItem>
+                        <SelectItem value="resolved" className="font-medium">Resolved</SelectItem>
+                    </SelectContent>
+                </Select>
               <Select value={selectedYear} onValueChange={setSelectedYear}>
                 <SelectTrigger className="w-[120px] font-medium hover:bg-accent hover:text-accent-foreground">
                   <SelectValue placeholder="Select Year" />
@@ -534,7 +526,7 @@ export default function SiteReportPage() {
         <CardContent>
            {isIncidentsLoading ? (
                <div className="flex items-center justify-center p-10"><Loader2 className="w-8 h-8 animate-spin" /></div>
-           ) : paginatedIncidents && paginatedIncidents.results.length > 0 ? (
+           ) : paginatedIncidents && paginatedIncidents.results && paginatedIncidents.results.length > 0 ? (
             <ScrollArea className="h-[480px]">
               <Table>
                 <TableHeader>
