@@ -968,7 +968,7 @@ export function SitesPageClient() {
                                         type="number"
                                         placeholder="Number of guards"
                                         className="w-[120px]"
-                                        value={assignment[site.id.toString()]?.guards || ''}
+                                        value={assignment[site.id.toString()]?.guards ?? ''}
                                         onChange={(e) => handleAssignmentChange(site.id.toString(), 'guards', e.target.value)}
                                         onClick={(e) => e.stopPropagation()}
                                     />
