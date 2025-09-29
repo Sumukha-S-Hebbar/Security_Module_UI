@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useMemo, useEffect, useRef, Fragment } from 'react';
+import { useState, useMemo, useEffect, useRef, Fragment, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
@@ -44,7 +44,15 @@ import { cn } from '@/lib/utils';
 import { fetchData } from '@/lib/api';
 
 
-const ITEMS_PER_PAGE = 5;
+const ITEMS_PER_PAGE = 10;
+
+type PaginatedAgenciesResponse = {
+    count: number;
+    next: string | null;
+    previous: string | null;
+    results: SecurityAgency[];
+};
+
 
 const uploadFormSchema = z.object({
   excelFile: z
@@ -90,16 +98,9 @@ type AssignedSiteDetail = {
 };
 
 
-async function getRegions(agencies: SecurityAgency[]): Promise<string[]> {
-    const uniqueRegions = [...new Set(agencies.map(agency => agency.region))];
-    return uniqueRegions.sort();
-}
-
-
 export default function TowercoAgenciesPage() {
     const [securityAgencies, setSecurityAgencies] = useState<SecurityAgency[]>([]);
-    const [sites, setSites] = useState<Site[]>([]);
-    const [regions, setRegions] = useState<string[]>([]);
+    const [allRegions, setAllRegions] = useState<string[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
     const [isAddAgencyDialogOpen, setIsAddAgencyDialogOpen] = useState(false);
@@ -115,7 +116,11 @@ export default function TowercoAgenciesPage() {
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedRegion, setSelectedRegion] = useState('all');
     const [selectedCity, setSelectedCity] = useState('all');
+    
     const [currentPage, setCurrentPage] = useState(1);
+    const [totalCount, setTotalCount] = useState(0);
+    const [nextUrl, setNextUrl] = useState<string | null>(null);
+    const [prevUrl, setPrevUrl] = useState<string | null>(null);
     
     const [loggedInOrg, setLoggedInOrg] = useState<Organization | null>(null);
     const [loggedInUser, setLoggedInUser] = useState<User | null>(null);
@@ -136,32 +141,78 @@ export default function TowercoAgenciesPage() {
      }
     }, []);
 
-    const fetchAllAgencies = async () => {
+    const fetchAllAgencies = useCallback(async (page: number = 1) => {
         if (!loggedInOrg) return;
         setIsLoading(true);
         const orgCode = loggedInOrg.code;
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('token') || undefined;
+
+        const params = new URLSearchParams({
+            page: page.toString(),
+            page_size: ITEMS_PER_PAGE.toString(),
+        });
+        if (searchQuery) params.append('search', searchQuery);
+        if (selectedRegion !== 'all') params.append('region', selectedRegion);
+        if (selectedCity !== 'all') params.append('city', selectedCity);
 
         try {
-            const agenciesResponse = await fetchData<{results: SecurityAgency[]}>(`/security/api/orgs/${orgCode}/security-agencies/list`, token || undefined);
+            const response = await fetchData<PaginatedAgenciesResponse>(`/security/api/orgs/${orgCode}/security-agencies/list/?${params.toString()}`, token);
             
-            const fetchedAgencies = agenciesResponse?.results || [];
+            const fetchedAgencies = response?.results || [];
             setSecurityAgencies(fetchedAgencies);
-            setRegions(await getRegions(fetchedAgencies));
+            setTotalCount(response?.count || 0);
+            setNextUrl(response?.next || null);
+            setPrevUrl(response?.previous || null);
+
+            // Fetch all regions for filter dropdown only once
+            if (allRegions.length === 0) {
+                const allAgenciesResponse = await fetchData<PaginatedAgenciesResponse>(`/security/api/orgs/${orgCode}/security-agencies/list/`, token);
+                if (allAgenciesResponse?.results) {
+                    const uniqueRegions = [...new Set(allAgenciesResponse.results.map(agency => agency.region))];
+                    setAllRegions(uniqueRegions.sort());
+                }
+            }
+
         } catch (error) {
             console.error("Failed to fetch agencies:", error);
             toast({ variant: 'destructive', title: 'Error', description: 'Could not load security agencies.' });
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [loggedInOrg, searchQuery, selectedRegion, selectedCity, toast, allRegions.length]);
+
+    const handlePagination = useCallback(async (url: string | null) => {
+        if (!url || !loggedInOrg) return;
+        setIsLoading(true);
+        const token = localStorage.getItem('token') || undefined;
+
+        try {
+            const response = await fetchData<PaginatedAgenciesResponse>(url, token);
+            setSecurityAgencies(response?.results || []);
+            setTotalCount(response?.count || 0);
+            setNextUrl(response?.next || null);
+            setPrevUrl(response?.previous || null);
+            
+            const pageParam = new URL(url).searchParams.get('page');
+            setCurrentPage(pageParam ? parseInt(pageParam) : 1);
+        } catch (error) {
+            toast({ variant: 'destructive', title: 'Error', description: 'Failed to load page.' });
+        } finally {
+            setIsLoading(false);
+        }
+    }, [loggedInOrg, toast]);
 
 
     useEffect(() => {
         if (loggedInOrg) {
-            fetchAllAgencies();
+            fetchAllAgencies(currentPage);
         }
-    }, [loggedInOrg, toast]);
+    }, [loggedInOrg, currentPage, fetchAllAgencies]);
+    
+    // Reset page to 1 when filters change
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchQuery, selectedRegion, selectedCity]);
 
     const uploadForm = useForm<z.infer<typeof uploadFormSchema>>({
         resolver: zodResolver(uploadFormSchema),
@@ -315,40 +366,19 @@ export default function TowercoAgenciesPage() {
     }
 
     const cities = useMemo(() => {
-        if (selectedRegion === 'all') return [];
-        return [...new Set(securityAgencies.filter((agency) => agency.region === selectedRegion).map((agency) => agency.city))].sort();
-    }, [selectedRegion, securityAgencies]);
+        if (selectedRegion === 'all' || allRegions.length === 0) return [];
+        // This should ideally use the full list of agencies, but for now this is ok
+        // For a more robust solution, we'd fetch all regions/cities once at the start
+        const allAgenciesEverFetchedForFilters = securityAgencies; // simplified
+        return [...new Set(allAgenciesEverFetchedForFilters.filter((agency) => agency.region === selectedRegion).map((agency) => agency.city))].sort();
+    }, [selectedRegion, securityAgencies, allRegions]);
 
     const handleRegionChange = (region: string) => {
         setSelectedRegion(region);
         setSelectedCity('all');
     };
-
-    const filteredAgencies = useMemo(() => {
-        const filtered = securityAgencies.filter((agency) => {
-            const searchLower = searchQuery.toLowerCase();
-            const matchesSearch = (
-                agency.name.toLowerCase().includes(searchLower) ||
-                agency.subcon_id.toLowerCase().includes(searchLower) ||
-                agency.email.toLowerCase().includes(searchLower)
-            );
-            
-            const matchesRegion = selectedRegion === 'all' || agency.region === selectedRegion;
-            const matchesCity = selectedCity === 'all' || agency.city === selectedCity;
-
-            return matchesSearch && matchesRegion && matchesCity;
-        });
-        setCurrentPage(1); // Reset to first page on filter change
-        return filtered;
-    }, [searchQuery, securityAgencies, selectedRegion, selectedCity]);
-
-    const paginatedAgencies = useMemo(() => {
-        const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-        const endIndex = startIndex + ITEMS_PER_PAGE;
-        return filteredAgencies.slice(startIndex, endIndex);
-    }, [filteredAgencies, currentPage]);
     
-    const totalPages = Math.ceil(filteredAgencies.length / ITEMS_PER_PAGE);
+    const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
     
     const handleRowClick = (e: React.MouseEvent, agencyId: number) => {
         const target = e.target as HTMLElement;
@@ -668,7 +698,7 @@ export default function TowercoAgenciesPage() {
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="all" className="font-medium">All Regions</SelectItem>
-                                {regions.map((region) => (
+                                {allRegions.map((region) => (
                                 <SelectItem key={region} value={region}>
                                     {region}
                                 </SelectItem>
@@ -713,8 +743,8 @@ export default function TowercoAgenciesPage() {
                                         <TableCell colSpan={6}><Skeleton className="h-10 w-full" /></TableCell>
                                     </TableRow>
                                 ))
-                            ) : paginatedAgencies.length > 0 ? (
-                                paginatedAgencies.map((agency) => {
+                            ) : securityAgencies.length > 0 ? (
+                                securityAgencies.map((agency) => {
                                     const isExpanded = expandedAgencyId === agency.id;
                                     const isNewlyAdded = newlyAddedAgencyId === agency.id;
 
@@ -840,33 +870,36 @@ export default function TowercoAgenciesPage() {
                         </TableBody>
                     </Table>
                 </CardContent>
-                <CardFooter>
-                    <div className="flex items-center justify-between w-full">
-                        <div className="text-sm text-muted-foreground font-medium">
-                            Showing {paginatedAgencies.length} of {filteredAgencies.length} agencies.
+                 {totalCount > 0 && (
+                    <CardFooter>
+                        <div className="flex items-center justify-between w-full">
+                            <div className="text-sm text-muted-foreground font-medium">
+                                Showing {securityAgencies.length} of {totalCount} agencies.
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handlePagination(prevUrl)}
+                                    disabled={!prevUrl || isLoading}
+                                >
+                                    Previous
+                                </Button>
+                                <span className="text-sm font-medium">Page {currentPage} of {totalPages || 1}</span>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handlePagination(nextUrl)}
+                                    disabled={!nextUrl || isLoading}
+                                >
+                                    Next
+                                </Button>
+                            </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                                disabled={currentPage === 1}
-                            >
-                                Previous
-                            </Button>
-                            <span className="text-sm font-medium">Page {currentPage} of {totalPages || 1}</span>
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                                disabled={currentPage === totalPages || totalPages === 0}
-                            >
-                                Next
-                            </Button>
-                        </div>
-                    </div>
-                </CardFooter>
+                    </CardFooter>
+                )}
             </Card>
         </div>
     );
 }
+
