@@ -65,9 +65,9 @@ const addSiteFormSchema = z.object({
     site_address_line3: z.string().optional(),
     region: z.string().min(1, 'Region is required.'),
     city: z.string().min(1, 'City is required.'),
-    site_zip_code: z.string().min(1, 'Zip code is required.'),
-    lat: z.coerce.number(),
-    lng: z.coerce.number(),
+    site_zip_code: z.string().optional(),
+    lat: z.coerce.number({invalid_type_error: 'Required'}),
+    lng: z.coerce.number({invalid_type_error: 'Required'}),
 });
 
 const uploadFormSchema = z.object({
@@ -797,7 +797,7 @@ export function SitesPageClient() {
                     className="cursor-pointer hover:bg-accent hover:text-accent-foreground group"
                   >
                     <TableCell>
-                      <Button asChild variant="link" className="p-0 h-auto font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
+                       <Button asChild variant="link" className="p-0 h-auto font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
                         <Link href={`/towerco/sites/${site.id}`}>{site.tb_site_id}</Link>
                       </Button>
                     </TableCell>
