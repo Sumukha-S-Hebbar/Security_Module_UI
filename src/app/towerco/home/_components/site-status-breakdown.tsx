@@ -39,6 +39,9 @@ export function SiteStatusBreakdown({ siteStatusData }: { siteStatusData: SiteSt
   useEffect(() => {
     setAssignedData(siteStatusData?.assigned_sites || null);
     setUnassignedData(siteStatusData?.unassigned_sites || null);
+    if (siteStatusData) {
+        setSelectedSection('assigned');
+    }
   }, [siteStatusData]);
 
   const { chartData, totalSites } = useMemo(() => {
@@ -169,9 +172,20 @@ export function SiteStatusBreakdown({ siteStatusData }: { siteStatusData: SiteSt
             <div className="md:col-span-2 border-l border-border pl-4 md:pl-8 flex flex-col">
               {selectedSection ? (
                 <>
-                  <div className="flex items-center gap-2 mb-4">
-                     <Building2 className="h-5 w-5" />
-                     <h3 className="text-lg font-semibold">{selectedSection === 'assigned' ? 'Assigned Sites' : 'Unassigned Sites'} ({selectedData?.count || 0})</h3>
+                  <div className="flex items-center justify-between gap-2 mb-4">
+                     <div className='flex items-center gap-2'>
+                        <Building2 className="h-5 w-5" />
+                        <h3 className="text-lg font-semibold">{selectedSection === 'assigned' ? 'Assigned Sites' : 'Unassigned Sites'} ({selectedData?.count || 0})</h3>
+                     </div>
+                     {selectedSection === 'unassigned' && (
+                        <Button
+                            size="sm"
+                            className="bg-[#00B4D8] hover:bg-[#00a2c2] text-white"
+                            onClick={() => router.push(`/towerco/sites`)}
+                        >
+                          Assign Agency
+                        </Button>
+                     )}
                   </div>
                   {isLoading ? (
                      <div className="flex justify-center items-center h-full"><Loader2 className="h-6 w-6 animate-spin"/></div>
@@ -223,7 +237,6 @@ export function SiteStatusBreakdown({ siteStatusData }: { siteStatusData: SiteSt
                               <TableHead className="text-foreground px-2">Site ID</TableHead>
                               <TableHead className="text-foreground px-2">Site Name</TableHead>
                               <TableHead className="text-foreground px-2">Region</TableHead>
-                              <TableHead className="text-right text-foreground px-2">Action</TableHead>
                             </TableRow>
                           </TableHeader>
                           <TableBody>
@@ -231,6 +244,7 @@ export function SiteStatusBreakdown({ siteStatusData }: { siteStatusData: SiteSt
                               <TableRow 
                                 key={site.id} 
                                 className="group hover:bg-[#00B4D8] hover:text-accent-foreground"
+                                onClick={() => router.push(`/towerco/sites/${site.id}`)}
                               >
                                 <TableCell className="group-hover:text-accent-foreground px-2 font-medium">
                                   {site.tb_site_id}
@@ -241,18 +255,6 @@ export function SiteStatusBreakdown({ siteStatusData }: { siteStatusData: SiteSt
                                 </TableCell>
                                 <TableCell className="group-hover:text-accent-foreground px-2">
                                   <Badge variant="outline" className="font-medium group-hover:border-accent-foreground/50 group-hover:text-accent-foreground">{site.region}</Badge>
-                                </TableCell>
-                                <TableCell className="text-right px-2">
-                                  <Button 
-                                    size="sm"
-                                    className="bg-[#00B4D8] hover:bg-[#00a2c2] text-white"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        router.push(`/towerco/sites?focusSite=${site.id}`);
-                                    }}
-                                  >
-                                    Assign Agency
-                                  </Button>
                                 </TableCell>
                               </TableRow>
                             ))}
