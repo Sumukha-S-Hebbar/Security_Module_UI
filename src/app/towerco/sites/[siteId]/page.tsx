@@ -96,6 +96,7 @@ export default function SiteReportPage() {
   const [isIncidentsLoading, setIsIncidentsLoading] = useState(false);
   const [loggedInOrg, setLoggedInOrg] = useState<Organization | null>(null);
   
+  const [selectedStatus, setSelectedStatus] = useState('all');
   const [selectedYear, setSelectedYear] = useState('all');
   const [selectedMonth, setSelectedMonth] = useState('all');
   const incidentsTableRef = useRef<HTMLDivElement>(null);
@@ -148,6 +149,15 @@ export default function SiteReportPage() {
     });
     if (selectedYear !== 'all') params.append('year', selectedYear);
     if (selectedMonth !== 'all') params.append('month', (parseInt(selectedMonth) + 1).toString());
+    if (selectedStatus !== 'all') {
+      let apiStatus = '';
+      if (selectedStatus === 'under-review') {
+        apiStatus = 'Under Review';
+      } else {
+        apiStatus = selectedStatus.charAt(0).toUpperCase() + selectedStatus.slice(1);
+      }
+      params.append('incident_status', apiStatus);
+    }
 
     try {
         const url = `/security/api/orgs/${loggedInOrg.code}/site/${siteId}/incidents/?${params.toString()}`;
@@ -163,11 +173,11 @@ export default function SiteReportPage() {
     } finally {
         setIsIncidentsLoading(false);
     }
-  }, [loggedInOrg, siteId, selectedYear, selectedMonth, toast]);
+  }, [loggedInOrg, siteId, selectedYear, selectedMonth, selectedStatus, toast]);
 
   useEffect(() => {
     fetchIncidents(1);
-  }, [selectedYear, selectedMonth, fetchIncidents]);
+  }, [selectedYear, selectedMonth, selectedStatus, fetchIncidents]);
 
   const handleIncidentPagination = useCallback(async (url: string | null) => {
       if (!url) return;
@@ -188,7 +198,7 @@ export default function SiteReportPage() {
   const availableYears = useMemo(() => {
     if (!reportData) return [];
     const years = new Set<string>();
-    if (reportData.incidents.results) {
+    if (reportData.incidents?.results) {
         reportData.incidents.results.forEach((incident: any) => 
             years.add(new Date(incident.incident_time).getFullYear().toString())
         );
@@ -481,6 +491,17 @@ export default function SiteReportPage() {
               <CardDescription className="font-medium">A log of all emergency incidents reported at this site.</CardDescription>
             </div>
              <div className="flex items-center gap-2 flex-shrink-0">
+               <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+                <SelectTrigger className="w-[180px] font-medium hover:bg-accent hover:text-accent-foreground">
+                    <SelectValue placeholder="Filter by status" />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="all" className="font-medium">All Statuses</SelectItem>
+                    <SelectItem value="active" className="font-medium">Active</SelectItem>
+                    <SelectItem value="under-review" className="font-medium">Under Review</SelectItem>
+                    <SelectItem value="resolved" className="font-medium">Resolved</SelectItem>
+                </SelectContent>
+            </Select>
               <Select value={selectedYear} onValueChange={setSelectedYear}>
                 <SelectTrigger className="w-[120px] font-medium hover:bg-accent hover:text-accent-foreground">
                   <SelectValue placeholder="Select Year" />
@@ -513,7 +534,7 @@ export default function SiteReportPage() {
         <CardContent>
            {isIncidentsLoading ? (
                <div className="flex items-center justify-center p-10"><Loader2 className="w-8 h-8 animate-spin" /></div>
-           ) : paginatedIncidents && paginatedIncidents.results && paginatedIncidents.results.length > 0 ? (
+           ) : paginatedIncidents && paginatedIncidents.results.length > 0 ? (
             <ScrollArea className="h-[480px]">
               <Table>
                 <TableHeader>
@@ -583,3 +604,5 @@ export default function SiteReportPage() {
     </div>
   );
 }
+
+    
