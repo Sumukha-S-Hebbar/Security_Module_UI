@@ -479,7 +479,8 @@ export function SitesPageClient() {
             description: responseData.message,
         });
         
-        fetchSites('Unassigned', unassignedCurrentPage);
+        setActiveTab('unassigned');
+        await fetchSites('Unassigned', 1);
         setIsAddSiteDialogOpen(false);
         addSiteForm.reset();
 
@@ -701,7 +702,7 @@ export function SitesPageClient() {
                                 name="site_zip_code"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Zip Code</FormLabel>
+                                        <FormLabel>Zip Code (Optional)</FormLabel>
                                         <FormControl>
                                             <Input placeholder="Enter number" {...field} />
                                         </FormControl>
