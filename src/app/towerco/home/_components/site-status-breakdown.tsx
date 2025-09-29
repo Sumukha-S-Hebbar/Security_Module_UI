@@ -181,7 +181,7 @@ export function SiteStatusBreakdown({ siteStatusData }: { siteStatusData: SiteSt
                         <Button
                             size="sm"
                             className="bg-[#00B4D8] hover:bg-[#00a2c2] text-white"
-                            onClick={() => router.push(`/towerco/sites`)}
+                            onClick={() => router.push(`/towerco/sites?tab=unassigned`)}
                         >
                           Assign Agency
                         </Button>

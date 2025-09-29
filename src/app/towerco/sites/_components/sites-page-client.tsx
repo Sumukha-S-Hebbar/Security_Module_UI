@@ -96,6 +96,7 @@ export function SitesPageClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const focusSite = searchParams.get('focusSite');
+  const initialTab = searchParams.get('tab') || 'assigned';
 
   const [assignedSites, setAssignedSites] = useState<Site[]>([]);
   const [unassignedSites, setUnassignedSites] = useState<Site[]>([]);
@@ -104,7 +105,7 @@ export function SitesPageClient() {
   const [loggedInOrg, setLoggedInOrg] = useState<Organization | null>(null);
   const [loggedInUser, setLoggedInUser] = useState<User | null>(null);
   
-  const [activeTab, setActiveTab] = useState('assigned');
+  const [activeTab, setActiveTab] = useState(initialTab);
 
   // State for filters
   const [assignedSearchQuery, setAssignedSearchQuery] = useState('');
@@ -758,11 +759,11 @@ export function SitesPageClient() {
       </div>
       
       <Card>
-        <Tabs defaultValue="assigned" onValueChange={setActiveTab}>
+        <Tabs defaultValue={activeTab} onValueChange={setActiveTab}>
           <CardHeader>
             <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="assigned" className="data-[state=active]:bg-[#00B4D8] data-[state=active]:text-white">Assigned</TabsTrigger>
-                <TabsTrigger value="unassigned" className="data-[state=active]:bg-[#00B4D8] data-[state=active]:text-white">Unassigned</TabsTrigger>
+                <TabsTrigger value="assigned">Assigned</TabsTrigger>
+                <TabsTrigger value="unassigned">Unassigned</TabsTrigger>
             </TabsList>
             {activeTab === 'assigned' ? (
                 <div className="flex flex-wrap items-center gap-2 pt-4">
@@ -1032,5 +1033,3 @@ export function SitesPageClient() {
     </div>
   );
 }
-
-    
