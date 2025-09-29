@@ -47,11 +47,18 @@ type IncidentListItem = {
     incident_description: string;
 };
 
+type IncidentCounts = {
+    active_incidents_count: number;
+    under_review_incidents_count: number;
+    resolved_incidents_count: number;
+}
+
 type PaginatedIncidentsResponse = {
     count: number;
     next: string | null;
     previous: string | null;
     results: IncidentListItem[];
+    counts?: IncidentCounts; // Optional at the top level
 };
 
 const ITEMS_PER_PAGE = 10;
@@ -63,6 +70,7 @@ export function IncidentsPageClient() {
   const [incidents, setIncidents] = useState<IncidentListItem[]>([]);
   const [sites, setSites] = useState<Site[]>([]);
   const [allIncidentsForSummary, setAllIncidentsForSummary] = useState<IncidentListItem[]>([]);
+  const [incidentCounts, setIncidentCounts] = useState<IncidentCounts>({ active_incidents_count: 0, under_review_incidents_count: 0, resolved_incidents_count: 0 });
   const [isLoading, setIsLoading] = useState(true);
   const [loggedInOrg, setLoggedInOrg] = useState<Organization | null>(null);
 
@@ -87,32 +95,34 @@ export function IncidentsPageClient() {
   }, []);
 
   const availableYears = useMemo(() => {
-    if (!allIncidentsForSummary || allIncidentsForSummary.length === 0) {
-        const currentYear = new Date().getFullYear();
-        return Array.from({ length: 5 }, (_, i) => (currentYear - i).toString());
+    // Return a default range even if there's no data, to allow filtering for past/future years
+    const currentYear = new Date().getFullYear();
+    const years = new Set<string>();
+    for (let i = 0; i < 5; i++) {
+        years.add((currentYear - i).toString());
     }
-    const years = new Set(
-      allIncidentsForSummary.map((incident) => new Date(incident.incident_time).getFullYear().toString())
-    );
+    
+    if (allIncidentsForSummary.length > 0) {
+        allIncidentsForSummary.forEach((incident) => 
+            years.add(new Date(incident.incident_time).getFullYear().toString())
+        );
+    }
+    
     return Array.from(years).sort((a, b) => parseInt(b) - parseInt(a));
   }, [allIncidentsForSummary]);
 
   useEffect(() => {
     if (!loggedInOrg) return;
 
-    const fetchAllDataForSummary = async () => {
+    const fetchSupportingData = async () => {
         const token = localStorage.getItem('token') || undefined;
-        
-        const summaryIncidentsUrl = `/security/api/orgs/${loggedInOrg.code}/incidents/list/`;
-        const summaryData = await fetchData<PaginatedIncidentsResponse>(summaryIncidentsUrl, token);
-        setAllIncidentsForSummary(summaryData?.results || []);
-
+        // Fetch sites for the filter dropdown
         const sitesUrl = `/security/api/orgs/${loggedInOrg.code}/sites/list/`;
         const sitesData = await fetchData<{results: Site[]}>(sitesUrl, token);
         setSites(sitesData?.results || []);
     };
 
-    fetchAllDataForSummary();
+    fetchSupportingData();
   }, [loggedInOrg]);
   
    useEffect(() => {
@@ -148,6 +158,9 @@ export function IncidentsPageClient() {
         const data = await fetchData<PaginatedIncidentsResponse>(url, token);
         setIncidents(data?.results || []);
         setTotalCount(data?.count || 0);
+        if (data?.counts) {
+            setIncidentCounts(data.counts);
+        }
       } catch (error) {
         console.error("Failed to fetch filtered incidents:", error);
         setIncidents([]);
@@ -236,7 +249,7 @@ export function IncidentsPageClient() {
       </div>
 
       <IncidentStatusSummary 
-        incidents={allIncidentsForSummary} 
+        counts={incidentCounts} 
         onStatusSelect={handleStatusSelectFromSummary}
         selectedStatus={selectedStatus}
       />
