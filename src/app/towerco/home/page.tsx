@@ -19,7 +19,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { AlertTriangle, ChevronDown, Phone, Loader2 } from 'lucide-react';
+import { AlertTriangle, ChevronDown, Phone, Loader2, CheckCircle2 } from 'lucide-react';
 import { TowercoAnalyticsDashboard } from './_components/towerco-analytics-dashboard';
 import {
   DropdownMenu,
@@ -35,6 +35,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { fetchData } from '@/lib/api';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { cn } from '@/lib/utils';
 
 
 export type BasicCounts = {
@@ -208,6 +209,7 @@ function TowercoHomePageContent() {
   
   const portalName = org.role === 'T' ? 'TOWERCO' : 'MNO';
   const activeIncidents = data.active_incidents;
+  const hasActiveIncidents = activeIncidents && activeIncidents.results && activeIncidents.results.length > 0;
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6">
@@ -220,28 +222,39 @@ function TowercoHomePageContent() {
         </div>
       </div>
       
-      <Card className="border-destructive bg-destructive/10">
+      <Card className={cn(
+          hasActiveIncidents ? "border-destructive bg-destructive/10" : "border-chart-2 bg-chart-2/10"
+      )}>
           <CardHeader className="flex flex-row items-center gap-2">
-          <AlertTriangle className="w-6 h-6 text-destructive" />
-          <CardTitle>Active Emergency Incidents ({activeIncidents?.count || 0})</CardTitle>
+            {hasActiveIncidents ? (
+                <AlertTriangle className="w-6 h-6 text-destructive" />
+            ) : (
+                <CheckCircle2 className="w-6 h-6 text-chart-2" />
+            )}
+            <CardTitle className={cn(hasActiveIncidents ? "text-destructive" : "text-chart-2")}>
+              Active Emergency Incidents ({activeIncidents?.count || 0})
+            </CardTitle>
           </CardHeader>
           <CardContent>
           {isIncidentsLoading ? (
              <div className="flex items-center justify-center h-48"><Loader2 className="h-8 w-8 animate-spin" /></div>
-          ) : activeIncidents && activeIncidents.results && activeIncidents.results.length > 0 ? (
+          ) : hasActiveIncidents ? (
               <ScrollArea className="h-72">
                   <Table>
-                      <TableHeader>
-                          <TableRow className="border-destructive/20">
-                          <TableHead>Incident ID</TableHead>
-                          <TableHead>Site Name</TableHead>
-                          <TableHead>Agency</TableHead>
-                          <TableHead>Patrolling Officer</TableHead>
-                          <TableHead>Guard</TableHead>
-                          <TableHead>Incident Time</TableHead>
-                          <TableHead>Contact</TableHead>
-                          </TableRow>
-                      </TableHeader>
+                      {hasActiveIncidents && (
+                        <TableHeader>
+                            <TableRow className="border-destructive/20">
+                            <TableHead>Incident ID</TableHead>
+                            <TableHead>Site Name</TableHead>
+                            <TableHead>Agency</TableHead>
+                            <TableHead>Patrolling Officer</TableHead>
+                            <TableHead>Guard</TableHead>
+                            <TableHead>Incident Date</TableHead>
+                            <TableHead>Incident Time</TableHead>
+                            <TableHead>Contact</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                      )}
                       <TableBody>
                           {activeIncidents.results.map((incident) => {
                             const incidentDate = new Date(incident.incident_time);
@@ -264,6 +277,7 @@ function TowercoHomePageContent() {
                                     {incident.patrol_officer_name}
                                 </TableCell>
                                 <TableCell>{incident.guard_name}</TableCell>
+                                <TableCell>{incidentDate.toLocaleDateString()}</TableCell>
                                 <TableCell>{incidentDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</TableCell>
                                 <TableCell>
                                     <DropdownMenu>
@@ -307,8 +321,8 @@ function TowercoHomePageContent() {
                   </Table>
               </ScrollArea>
           ) : (
-              <p className="text-center py-4 font-medium">
-              No active emergency incidents. All systems are normal.
+              <p className="text-center py-4 font-medium text-chart-2">
+                No active emergency incidents at the moment.
               </p>
           )}
           </CardContent>
@@ -359,3 +373,5 @@ export default function TowercoHomePage() {
         </Suspense>
     )
 }
+
+    
