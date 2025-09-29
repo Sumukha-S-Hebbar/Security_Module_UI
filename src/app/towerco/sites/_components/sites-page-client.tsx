@@ -505,7 +505,6 @@ export function SitesPageClient() {
     uploadForm.reset({ excelFile: undefined });
     const fileInput = document.getElementById('excelFile-site-input') as HTMLInputElement | null;
     if (fileInput) fileInput.value = '';
-    setIsUploading(false);
     setIsUploadDialogOpen(false);
     fetchSites('Unassigned', 1);
   }
@@ -1032,3 +1031,5 @@ export function SitesPageClient() {
     </div>
   );
 }
+
+    
