@@ -760,8 +760,8 @@ export function SitesPageClient() {
         <Tabs defaultValue="assigned" onValueChange={setActiveTab}>
           <CardHeader>
             <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="assigned" className="data-[state=active]:bg-[#00B4D8] data-[state=active]:text-white">Assigned ({assignedSitesCount})</TabsTrigger>
-                <TabsTrigger value="unassigned" className="data-[state=active]:bg-[#00B4D8] data-[state=active]:text-white">Unassigned ({unassignedSitesCount})</TabsTrigger>
+                <TabsTrigger value="assigned" className="data-[state=active]:bg-[#00B4D8] data-[state=active]:text-white">Assigned</TabsTrigger>
+                <TabsTrigger value="unassigned" className="data-[state=active]:bg-[#00B4D8] data-[state=active]:text-white">Unassigned</TabsTrigger>
             </TabsList>
             {activeTab === 'assigned' ? (
                 <div className="flex flex-wrap items-center gap-2 pt-4">
