@@ -139,11 +139,11 @@ export default function RootPage() {
       <div className="flex flex-col md:flex-row w-full max-w-5xl mx-4 my-8 rounded-xl shadow-2xl overflow-hidden">
         
         {/* Left Column */}
-        <div className="w-full md:w-2/5 bg-[#00B4D8] text-white p-8 sm:p-12 flex flex-col justify-center items-center md:items-start text-center md:text-left">
+        <div className="w-full md:w-2/5 bg-header text-header-foreground p-8 sm:p-12 flex flex-col justify-center items-center md:items-start text-center md:text-left">
           <div className="flex items-center gap-3 mb-6">
             <div className="bg-white rounded-full p-2">
                <svg
-                  className="w-10 h-10 text-[#00B4D8]"
+                  className="w-10 h-10 text-header"
                   viewBox="0 0 24 24"
                   fill="currentColor"
                   xmlns="http://www.w3.org/2000/svg"
