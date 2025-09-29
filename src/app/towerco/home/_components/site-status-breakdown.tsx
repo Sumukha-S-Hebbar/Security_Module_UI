@@ -196,11 +196,11 @@ export function SiteStatusBreakdown({ siteStatusData }: { siteStatusData: SiteSt
                         <Table>
                           <TableHeader>
                             <TableRow>
-                              <TableHead className="text-foreground px-2">Towerbuddy ID</TableHead>
-                              <TableHead className="text-foreground px-2">Site ID</TableHead>
-                              <TableHead className="text-foreground px-2">Site Name</TableHead>
-                              <TableHead className="text-foreground px-2">Region</TableHead>
-                              <TableHead className="text-foreground px-2">Agency</TableHead>
+                              <TableHead className="text-foreground px-2 w-[15%]">Towerbuddy ID</TableHead>
+                              <TableHead className="text-foreground px-2 w-[15%]">Site ID</TableHead>
+                              <TableHead className="text-foreground px-2 w-[30%]">Site Name</TableHead>
+                              <TableHead className="text-foreground px-2 w-[20%]">Region</TableHead>
+                              <TableHead className="text-foreground px-2 w-[20%]">Agency</TableHead>
                             </TableRow>
                           </TableHeader>
                           <TableBody>
@@ -219,8 +219,8 @@ export function SiteStatusBreakdown({ siteStatusData }: { siteStatusData: SiteSt
                                 <TableCell className="group-hover:text-accent-foreground px-2 font-medium">
                                   {site.site_name}
                                 </TableCell>
-                                <TableCell className="group-hover:text-accent-foreground px-2">
-                                  <Badge variant="outline" className="font-medium group-hover:border-accent-foreground/50 group-hover:text-accent-foreground">{site.region}</Badge>
+                                <TableCell className="group-hover:text-accent-foreground px-2 font-medium">
+                                    {site.region}
                                 </TableCell>
                                 <TableCell className="font-medium group-hover:text-accent-foreground px-2">
                                     {site.agency_name || 'N/A'}
@@ -233,10 +233,10 @@ export function SiteStatusBreakdown({ siteStatusData }: { siteStatusData: SiteSt
                          <Table>
                           <TableHeader>
                             <TableRow>
-                              <TableHead className="text-foreground px-2">Towerbuddy ID</TableHead>
-                              <TableHead className="text-foreground px-2">Site ID</TableHead>
-                              <TableHead className="text-foreground px-2">Site Name</TableHead>
-                              <TableHead className="text-foreground px-2">Region</TableHead>
+                              <TableHead className="text-foreground px-2 w-[25%]">Towerbuddy ID</TableHead>
+                              <TableHead className="text-foreground px-2 w-[25%]">Site ID</TableHead>
+                              <TableHead className="text-foreground px-2 w-[25%]">Site Name</TableHead>
+                              <TableHead className="text-foreground px-2 w-[25%]">Region</TableHead>
                             </TableRow>
                           </TableHeader>
                           <TableBody>
@@ -253,8 +253,8 @@ export function SiteStatusBreakdown({ siteStatusData }: { siteStatusData: SiteSt
                                 <TableCell className="group-hover:text-accent-foreground px-2 font-medium">
                                   {site.site_name}
                                 </TableCell>
-                                <TableCell className="group-hover:text-accent-foreground px-2">
-                                  <Badge variant="outline" className="font-medium group-hover:border-accent-foreground/50 group-hover:text-accent-foreground">{site.region}</Badge>
+                                <TableCell className="group-hover:text-accent-foreground px-2 font-medium">
+                                  {site.region}
                                 </TableCell>
                               </TableRow>
                             ))}
