@@ -39,10 +39,10 @@ export function SiteStatusBreakdown({ siteStatusData }: { siteStatusData: SiteSt
   useEffect(() => {
     setAssignedData(siteStatusData?.assigned_sites || null);
     setUnassignedData(siteStatusData?.unassigned_sites || null);
-    if (siteStatusData) {
+    if (siteStatusData && !selectedSection) {
         setSelectedSection('assigned');
     }
-  }, [siteStatusData]);
+  }, [siteStatusData, selectedSection]);
 
   const { chartData, totalSites } = useMemo(() => {
     if (!siteStatusData) {
@@ -196,10 +196,10 @@ export function SiteStatusBreakdown({ siteStatusData }: { siteStatusData: SiteSt
                         <Table>
                           <TableHeader>
                             <TableRow>
-                              <TableHead className="text-foreground px-2 w-[15%]">Towerbuddy ID</TableHead>
-                              <TableHead className="text-foreground px-2 w-[15%]">Site ID</TableHead>
-                              <TableHead className="text-foreground px-2 w-[30%]">Site Name</TableHead>
-                              <TableHead className="text-foreground px-2 w-[20%]">Region</TableHead>
+                              <TableHead className="text-foreground px-2 w-[20%]">Towerbuddy ID</TableHead>
+                              <TableHead className="text-foreground px-2 w-[20%]">Site ID</TableHead>
+                              <TableHead className="text-foreground px-2 w-[25%]">Site Name</TableHead>
+                              <TableHead className="text-foreground px-2 w-[15%]">Region</TableHead>
                               <TableHead className="text-foreground px-2 w-[20%]">Agency</TableHead>
                             </TableRow>
                           </TableHeader>
