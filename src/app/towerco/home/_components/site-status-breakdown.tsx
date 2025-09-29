@@ -29,7 +29,7 @@ type PaginatedSites = {
 };
 
 export function SiteStatusBreakdown({ siteStatusData }: { siteStatusData: SiteStatusData | null }) {
-  const [selectedSection, setSelectedSection] = useState<'assigned' | 'unassigned'>('assigned');
+  const [selectedSection, setSelectedSection] = useState<'assigned' | 'unassigned' | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
@@ -46,8 +46,8 @@ export function SiteStatusBreakdown({ siteStatusData }: { siteStatusData: SiteSt
         return { chartData: [], totalSites: 0 };
     }
     const data = [
-      { name: 'Assigned', value: siteStatusData.assigned_sites_count, color: COLORS.assigned, key: 'assigned' },
-      { name: 'Unassigned', value: siteStatusData.unassigned_sites_count, color: COLORS.unassigned, key: 'unassigned' },
+      { name: 'Assigned', value: siteStatusData.assigned_sites_count, color: COLORS.assigned, key: 'assigned' as const },
+      { name: 'Unassigned', value: siteStatusData.unassigned_sites_count, color: COLORS.unassigned, key: 'unassigned' as const },
     ];
     return {
       chartData: data,
@@ -60,16 +60,20 @@ export function SiteStatusBreakdown({ siteStatusData }: { siteStatusData: SiteSt
     setSelectedSection(section);
   };
 
-  const handlePagination = async (url: string | null) => {
+  const handlePagination = async (url: string | null, section: 'assigned' | 'unassigned') => {
     if (!url) return;
     setIsLoading(true);
     try {
         const token = localStorage.getItem('token') || undefined;
-        const data = await fetchData<PaginatedSites>(url, token);
-        if (selectedSection === 'assigned') {
-            setAssignedData(data);
-        } else {
-            setUnassignedData(data);
+        // The paginated URL returns the full dashboard object
+        const paginatedDashboardData = await fetchData<{ site_status: SiteStatusData }>(url, token);
+
+        if (paginatedDashboardData) {
+            if (section === 'assigned') {
+                setAssignedData(paginatedDashboardData.site_status.assigned_sites);
+            } else {
+                setUnassignedData(paginatedDashboardData.site_status.unassigned_sites);
+            }
         }
     } catch (error) {
         console.error("Failed to fetch paginated site data:", error);
@@ -172,91 +176,91 @@ export function SiteStatusBreakdown({ siteStatusData }: { siteStatusData: SiteSt
                   {isLoading ? (
                      <div className="flex justify-center items-center h-full"><Loader2 className="h-6 w-6 animate-spin"/></div>
                   ) : (
-                  <ScrollArea className="h-80 flex-grow">
-                    {selectedSection === 'assigned' ? (
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead className="text-foreground px-2">Towerbuddy ID</TableHead>
-                            <TableHead className="text-foreground px-2">Site ID</TableHead>
-                            <TableHead className="text-foreground px-2">Site Name</TableHead>
-                            <TableHead className="text-foreground px-2">Region</TableHead>
-                            <TableHead className="text-foreground px-2">Agency</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {selectedSites.map(site => (
-                            <TableRow 
-                              key={site.id} 
-                              onClick={() => router.push(`/towerco/sites/${site.id}`)}
-                              className="group cursor-pointer hover:bg-[#00B4D8] hover:text-accent-foreground"
-                            >
-                              <TableCell className="group-hover:text-accent-foreground px-2 font-medium">
-                                <Button asChild variant="link" className="p-0 h-auto font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
-                                      <Link href={`/towerco/sites/${site.id}`}>{site.tb_site_id}</Link>
-                                </Button>
-                              </TableCell>
-                              <TableCell className="group-hover:text-accent-foreground px-2 font-medium">{site.org_site_id}</TableCell>
-                              <TableCell className="group-hover:text-accent-foreground px-2 font-medium">
-                                {site.site_name}
-                              </TableCell>
-                              <TableCell className="group-hover:text-accent-foreground px-2">
-                                <Badge variant="outline" className="font-medium group-hover:border-accent-foreground/50 group-hover:text-accent-foreground">{site.region}</Badge>
-                              </TableCell>
-                              <TableCell className="font-medium group-hover:text-accent-foreground px-2">
-                                  {site.agency_name || 'N/A'}
-                              </TableCell>
+                  <div className="flex flex-col flex-grow">
+                    <ScrollArea className="h-80 flex-grow pr-4">
+                      {selectedSection === 'assigned' ? (
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead className="text-foreground px-2">Towerbuddy ID</TableHead>
+                              <TableHead className="text-foreground px-2">Site ID</TableHead>
+                              <TableHead className="text-foreground px-2">Site Name</TableHead>
+                              <TableHead className="text-foreground px-2">Region</TableHead>
+                              <TableHead className="text-foreground px-2">Agency</TableHead>
                             </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    ) : (
-                       <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead className="text-foreground px-2">Towerbuddy ID</TableHead>
-                            <TableHead className="text-foreground px-2">Site ID</TableHead>
-                            <TableHead className="text-foreground px-2">Site Name</TableHead>
-                            <TableHead className="text-foreground px-2">Region</TableHead>
-                            <TableHead className="text-right text-foreground px-2">Action</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {selectedSites.map((site) => (
-                            <TableRow 
-                              key={site.id} 
-                              className="group hover:bg-[#00B4D8] hover:text-accent-foreground"
-                            >
-                              <TableCell className="group-hover:text-accent-foreground px-2 font-medium">
-                                {site.tb_site_id}
-                              </TableCell>
-                               <TableCell className="group-hover:text-accent-foreground px-2 font-medium">{site.org_site_id}</TableCell>
-                              <TableCell className="group-hover:text-accent-foreground px-2 font-medium">
-                                {site.site_name}
-                              </TableCell>
-                              <TableCell className="group-hover:text-accent-foreground px-2">
-                                <Badge variant="outline" className="font-medium group-hover:border-accent-foreground/50 group-hover:text-accent-foreground">{site.region}</Badge>
-                              </TableCell>
-                              <TableCell className="text-right px-2">
-                                <Button 
-                                  size="sm"
-                                  className="bg-[#00B4D8] hover:bg-[#00a2c2] text-white"
-                                  onClick={(e) => {
-                                      e.stopPropagation();
-                                      router.push(`/towerco/sites?focusSite=${site.id}`);
-                                  }}
-                                >
-                                  Assign Agency
-                                </Button>
-                              </TableCell>
+                          </TableHeader>
+                          <TableBody>
+                            {selectedSites.map(site => (
+                              <TableRow 
+                                key={site.id} 
+                                onClick={() => router.push(`/towerco/sites/${site.id}`)}
+                                className="group cursor-pointer hover:bg-[#00B4D8] hover:text-accent-foreground"
+                              >
+                                <TableCell className="group-hover:text-accent-foreground px-2 font-medium">
+                                  <Button asChild variant="link" className="p-0 h-auto font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
+                                        <Link href={`/towerco/sites/${site.id}`}>{site.tb_site_id}</Link>
+                                  </Button>
+                                </TableCell>
+                                <TableCell className="group-hover:text-accent-foreground px-2 font-medium">{site.org_site_id}</TableCell>
+                                <TableCell className="group-hover:text-accent-foreground px-2 font-medium">
+                                  {site.site_name}
+                                </TableCell>
+                                <TableCell className="group-hover:text-accent-foreground px-2">
+                                  <Badge variant="outline" className="font-medium group-hover:border-accent-foreground/50 group-hover:text-accent-foreground">{site.region}</Badge>
+                                </TableCell>
+                                <TableCell className="font-medium group-hover:text-accent-foreground px-2">
+                                    {site.agency_name || 'N/A'}
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      ) : (
+                         <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead className="text-foreground px-2">Towerbuddy ID</TableHead>
+                              <TableHead className="text-foreground px-2">Site ID</TableHead>
+                              <TableHead className="text-foreground px-2">Site Name</TableHead>
+                              <TableHead className="text-foreground px-2">Region</TableHead>
+                              <TableHead className="text-right text-foreground px-2">Action</TableHead>
                             </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    )}
-                  </ScrollArea>
-                  )}
-                   <div className="flex items-center justify-between w-full pt-4">
+                          </TableHeader>
+                          <TableBody>
+                            {selectedSites.map((site) => (
+                              <TableRow 
+                                key={site.id} 
+                                className="group hover:bg-[#00B4D8] hover:text-accent-foreground"
+                              >
+                                <TableCell className="group-hover:text-accent-foreground px-2 font-medium">
+                                  {site.tb_site_id}
+                                </TableCell>
+                                 <TableCell className="group-hover:text-accent-foreground px-2 font-medium">{site.org_site_id}</TableCell>
+                                <TableCell className="group-hover:text-accent-foreground px-2 font-medium">
+                                  {site.site_name}
+                                </TableCell>
+                                <TableCell className="group-hover:text-accent-foreground px-2">
+                                  <Badge variant="outline" className="font-medium group-hover:border-accent-foreground/50 group-hover:text-accent-foreground">{site.region}</Badge>
+                                </TableCell>
+                                <TableCell className="text-right px-2">
+                                  <Button 
+                                    size="sm"
+                                    className="bg-[#00B4D8] hover:bg-[#00a2c2] text-white"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        router.push(`/towerco/sites?focusSite=${site.id}`);
+                                    }}
+                                  >
+                                    Assign Agency
+                                  </Button>
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      )}
+                    </ScrollArea>
+                    <div className="flex items-center justify-between w-full pt-4">
                         <div className="text-sm text-muted-foreground font-medium">
                             Showing {selectedSites.length} of {selectedData?.count || 0} sites.
                         </div>
@@ -264,7 +268,7 @@ export function SiteStatusBreakdown({ siteStatusData }: { siteStatusData: SiteSt
                             <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => handlePagination(selectedData?.previous || null)}
+                                onClick={() => handlePagination(selectedData?.previous || null, selectedSection)}
                                 disabled={!selectedData?.previous || isLoading}
                             >
                                 Previous
@@ -272,13 +276,15 @@ export function SiteStatusBreakdown({ siteStatusData }: { siteStatusData: SiteSt
                             <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => handlePagination(selectedData?.next || null)}
+                                onClick={() => handlePagination(selectedData?.next || null, selectedSection)}
                                 disabled={!selectedData?.next || isLoading}
                             >
                                 Next
                             </Button>
                         </div>
                     </div>
+                  </div>
+                  )}
                 </>
               ) : (
                 <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground">
