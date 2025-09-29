@@ -29,9 +29,10 @@ import {
   Users,
   Phone,
   Mail,
+  Loader2,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { useMemo, useState, useRef, useEffect } from 'react';
+import { useMemo, useState, useRef, useEffect, useCallback } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from 'recharts';
 import {
   ChartContainer,
@@ -44,6 +45,7 @@ import { fetchData } from '@/lib/api';
 import type { Site, SecurityAgency, Incident, Guard, Organization } from '@/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 const chartConfig = {
   incidents: {
@@ -51,6 +53,13 @@ const chartConfig = {
     color: 'hsl(var(--chart-1))',
   },
 } satisfies ChartConfig;
+
+type PaginatedIncidents = {
+    count: number;
+    next: string | null;
+    previous: string | null;
+    results: any[]; 
+};
 
 type SiteReportData = {
     id: number;
@@ -71,12 +80,7 @@ type SiteReportData = {
     agency_details: (Omit<SecurityAgency, 'agency_id' | 'agency_name' | 'address'> & {logo?: string | null}) | null;
     guard_details: (Partial<Guard> & { id: number, user: string, email: string, first_name: string, last_name: string | null, phone: string, profile_picture?: string })[];
     incident_trend: { month: string; count: number }[];
-    incidents: {
-        count: number;
-        next: string | null;
-        previous: string | null;
-        results: any[]; // Using any to accommodate the new structure for now
-    };
+    incidents: PaginatedIncidents;
 };
 
 
@@ -87,8 +91,11 @@ export default function SiteReportPage() {
   const siteId = params.siteId as string;
   
   const [reportData, setReportData] = useState<SiteReportData | null>(null);
+  const [paginatedIncidents, setPaginatedIncidents] = useState<PaginatedIncidents | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isIncidentsLoading, setIsIncidentsLoading] = useState(false);
   const [loggedInOrg, setLoggedInOrg] = useState<Organization | null>(null);
+  
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [selectedYear, setSelectedYear] = useState('all');
   const [selectedMonth, setSelectedMonth] = useState('all');
@@ -105,36 +112,89 @@ export default function SiteReportPage() {
     }
   }, []);
 
+  const fetchSiteReport = useCallback(async (url: string) => {
+    setIsLoading(true);
+    const token = localStorage.getItem('token') || undefined;
+    try {
+        const data = await fetchData<SiteReportData>(url, token);
+        setReportData(data);
+        setPaginatedIncidents(data?.incidents || null);
+    } catch (error) {
+        console.error("Failed to fetch site report:", error);
+        toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Could not load site report data.",
+        });
+    } finally {
+        setIsLoading(false);
+    }
+  }, [toast]);
+  
   useEffect(() => {
+    if (loggedInOrg && siteId) {
+      const initialUrl = `/security/api/orgs/${loggedInOrg.code}/site/${siteId}/`;
+      fetchSiteReport(initialUrl);
+    }
+  }, [loggedInOrg, siteId, fetchSiteReport]);
+  
+  const fetchIncidents = useCallback(async (page: number = 1) => {
     if (!loggedInOrg || !siteId) return;
 
-    const fetchReportData = async () => {
-        setIsLoading(true);
-        const token = localStorage.getItem('token') || undefined;
-        const url = `/security/api/orgs/${loggedInOrg.code}/site/${siteId}/`;
+    setIsIncidentsLoading(true);
+    const token = localStorage.getItem('token') || undefined;
+    
+    const params = new URLSearchParams({
+        page: page.toString()
+    });
+    if (selectedStatus !== 'all') params.append('incident_status', selectedStatus === 'under-review' ? 'Under Review' : selectedStatus.charAt(0).toUpperCase() + selectedStatus.slice(1));
+    if (selectedYear !== 'all') params.append('year', selectedYear);
+    if (selectedMonth !== 'all') params.append('month', (parseInt(selectedMonth) + 1).toString());
 
-        try {
-            const data = await fetchData<SiteReportData>(url, token);
-            setReportData(data);
-        } catch (error) {
-            console.error("Failed to fetch site report:", error);
-            toast({
-                variant: "destructive",
-                title: "Error",
-                description: "Could not load site report data.",
-            });
-        } finally {
-            setIsLoading(false);
-        }
-    };
-    fetchReportData();
-  }, [loggedInOrg, siteId, toast]);
+    try {
+        const url = `/security/api/orgs/${loggedInOrg.code}/site/${siteId}/incidents/?${params.toString()}`;
+        const data = await fetchData<PaginatedIncidents>(url, token);
+        setPaginatedIncidents(data);
+    } catch (error) {
+        console.error("Failed to fetch incidents:", error);
+        toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Could not load incidents for the selected filters.",
+        });
+    } finally {
+        setIsIncidentsLoading(false);
+    }
+  }, [loggedInOrg, siteId, selectedStatus, selectedYear, selectedMonth, toast]);
+
+  useEffect(() => {
+    fetchIncidents(1);
+  }, [selectedStatus, selectedYear, selectedMonth]);
+
+  const handleIncidentPagination = useCallback(async (url: string | null) => {
+      if (!url) return;
+      setIsIncidentsLoading(true);
+      const token = localStorage.getItem('token') || undefined;
+      try {
+        const data = await fetchData<PaginatedIncidents>(url, token);
+        setPaginatedIncidents(data);
+      } catch (error) {
+        console.error("Failed to fetch paginated incidents:", error);
+        toast({ variant: 'destructive', title: 'Error', description: 'Failed to load next page of incidents.' });
+      } finally {
+        setIsIncidentsLoading(false);
+      }
+  }, [toast]);
+
   
   const availableYears = useMemo(() => {
     if (!reportData) return [];
-    const years = new Set(
-      reportData.incidents.results.map((incident: any) => new Date(incident.incident_time).getFullYear().toString())
-    );
+    const years = new Set<string>();
+    if (reportData.incidents.results) {
+        reportData.incidents.results.forEach((incident: any) => 
+            years.add(new Date(incident.incident_time).getFullYear().toString())
+        );
+    }
     if (years.size > 0) years.add(new Date().getFullYear().toString());
     return Array.from(years).sort((a, b) => parseInt(b) - parseInt(a));
   }, [reportData]);
@@ -160,18 +220,6 @@ export default function SiteReportPage() {
     }));
 
   }, [reportData, selectedChartYear]);
-
-
-  const filteredIncidents = useMemo(() => {
-    if (!reportData) return [];
-    return reportData.incidents.results.filter((incident: any) => {
-      const incidentDate = new Date(incident.incident_time);
-      const yearMatch = selectedYear === 'all' || incidentDate.getFullYear().toString() === selectedYear;
-      const monthMatch = selectedMonth === 'all' || incidentDate.getMonth().toString() === selectedMonth;
-      const statusMatch = selectedStatus === 'all' || incident.incident_status.toLowerCase().replace(' ', '_') === selectedStatus.replace('-', '_');
-      return yearMatch && monthMatch && statusMatch;
-    });
-  }, [reportData, selectedYear, selectedMonth, selectedStatus]);
 
 
   const handleDownloadReport = () => {
@@ -267,7 +315,7 @@ export default function SiteReportPage() {
     );
   }
 
-  const { site_name, org_site_id, site_address_line1, lat, lng, total_incidents_count, agency_details, guard_details, incident_trend, incidents } = reportData;
+  const { site_name, org_site_id, site_address_line1, lat, lng, total_incidents_count, agency_details, guard_details, incident_trend } = reportData;
   const fullAddress = `${site_address_line1}, ${reportData.city}, ${reportData.region}`;
 
 
@@ -476,43 +524,74 @@ export default function SiteReportPage() {
           </div>
         </CardHeader>
         <CardContent>
-          {filteredIncidents.length > 0 ? (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Incident ID</TableHead>
-                  <TableHead>Incident Date</TableHead>
-                  <TableHead>Incident Time</TableHead>
-                  <TableHead>Guard</TableHead>
-                  <TableHead>Status</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredIncidents.map((incident) => {
-                  return (
-                    <TableRow 
-                      key={incident.id}
-                      onClick={() => router.push(`/towerco/incidents/${incident.id}`)}
-                      className="cursor-pointer hover:bg-accent hover:text-accent-foreground group"
-                    >
-                      <TableCell>
-                        <Button asChild variant="link" className="p-0 h-auto font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
-                          <Link href={`/towerco/incidents/${incident.id}`}>{incident.incident_id}</Link>
-                        </Button>
-                      </TableCell>
-                      <TableCell className="font-medium">{new Date(incident.incident_time).toLocaleDateString()}</TableCell>
-                      <TableCell className="font-medium">{new Date(incident.incident_time).toLocaleTimeString()}</TableCell>
-                      <TableCell className="font-medium">{incident.guard_name || 'N/A'}</TableCell>
-                      <TableCell>{getStatusIndicator(incident.incident_status)}</TableCell>
-                    </TableRow>
-                  )
-                })}
-              </TableBody>
-            </Table>
+           {isIncidentsLoading ? (
+               <div className="flex items-center justify-center p-10"><Loader2 className="w-8 h-8 animate-spin" /></div>
+           ) : paginatedIncidents && paginatedIncidents.results.length > 0 ? (
+            <ScrollArea className="h-[480px]">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Incident ID</TableHead>
+                    <TableHead>Incident Date</TableHead>
+                    <TableHead>Incident Time</TableHead>
+                    <TableHead>Guard</TableHead>
+                    <TableHead>Status</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {paginatedIncidents.results.map((incident) => {
+                    return (
+                      <TableRow 
+                        key={incident.id}
+                        onClick={() => router.push(`/towerco/incidents/${incident.id}`)}
+                        className="cursor-pointer hover:bg-accent hover:text-accent-foreground group"
+                      >
+                        <TableCell>
+                          <Button asChild variant="link" className="p-0 h-auto font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
+                            <Link href={`/towerco/incidents/${incident.id}`}>{incident.incident_id}</Link>
+                          </Button>
+                        </TableCell>
+                        <TableCell className="font-medium">{new Date(incident.incident_time).toLocaleDateString()}</TableCell>
+                        <TableCell className="font-medium">{new Date(incident.incident_time).toLocaleTimeString()}</TableCell>
+                        <TableCell className="font-medium">{incident.guard_name || 'N/A'}</TableCell>
+                        <TableCell>{getStatusIndicator(incident.incident_status)}</TableCell>
+                      </TableRow>
+                    )
+                  })}
+                </TableBody>
+              </Table>
+            </ScrollArea>
           ) : (
             <p className="text-muted-foreground text-center py-4 font-medium">No emergency incidents found for the selected filters.</p>
           )}
         </CardContent>
+        {paginatedIncidents && paginatedIncidents.count > 0 && !isIncidentsLoading && (
+          <CardFooter>
+            <div className="flex items-center justify-between w-full">
+              <div className="text-sm text-muted-foreground font-medium">
+                  Showing {paginatedIncidents.results.length} of {paginatedIncidents.count} incidents.
+              </div>
+              <div className="flex items-center gap-2">
+                  <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleIncidentPagination(paginatedIncidents.previous)}
+                      disabled={!paginatedIncidents.previous}
+                  >
+                      Previous
+                  </Button>
+                  <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleIncidentPagination(paginatedIncidents.next)}
+                      disabled={!paginatedIncidents.next}
+                  >
+                      Next
+                  </Button>
+              </div>
+            </div>
+          </CardFooter>
+        )}
       </Card>
     </div>
   );
