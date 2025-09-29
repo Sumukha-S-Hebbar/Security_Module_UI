@@ -214,7 +214,7 @@ export default function AgencyAccountPage() {
 
          <Collapsible open={isPasswordFormVisible} onOpenChange={setIsPasswordFormVisible}>
           <CollapsibleTrigger asChild>
-            <Button className="w-full bg-[#1e90ff] hover:bg-[#1c86ee] text-lg py-6">
+            <Button className="w-full bg-[#00B4D8] hover:bg-[#00B4D8]/90 text-lg py-6 text-white">
                 <KeyRound className="mr-2 h-5 w-5" />
                 Change Password
             </Button>
@@ -268,7 +268,7 @@ export default function AgencyAccountPage() {
                                 )}
                             />
                             <div className="flex justify-end pt-4">
-                                <Button type="submit" disabled={isUpdatingPassword} className="bg-[#1e90ff] hover:bg-[#1c86ee]">
+                                <Button type="submit" disabled={isUpdatingPassword} className="bg-[#00B4D8] hover:bg-[#00B4D8]/90">
                                     {isUpdatingPassword ? (
                                         <>
                                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
