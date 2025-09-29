@@ -359,8 +359,8 @@ function TowercoHomePageContent() {
         counts={data.basic_counts}
       />
       
-      <AgencyPerformance />
       <SiteStatusBreakdown siteStatusData={data.site_status} />
+      <AgencyPerformance />
       <IncidentChart incidentTrend={data.incident_trend} agencies={data.agency_performance} orgCode={org.code.toString()} />
     </div>
   );
@@ -373,5 +373,3 @@ export default function TowercoHomePage() {
         </Suspense>
     )
 }
-
-    
