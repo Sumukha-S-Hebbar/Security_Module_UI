@@ -1,3 +1,4 @@
+
 import type { Metadata } from 'next';
 import { IBM_Plex_Sans } from 'next/font/google';
 import './globals.css';
@@ -10,7 +11,7 @@ const ibmPlexSans = IBM_Plex_Sans({
 });
 
 export const metadata: Metadata = {
-  title: 'GuardLink Patrolling Officer',
+  title: 'Security Module',
   description: 'Patrolling officer dashboard for GuardLink security management.',
 };
 
