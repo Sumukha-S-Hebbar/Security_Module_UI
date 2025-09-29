@@ -169,7 +169,7 @@ export default function SiteReportPage() {
 
   useEffect(() => {
     fetchIncidents(1);
-  }, [selectedStatus, selectedYear, selectedMonth]);
+  }, [selectedStatus, selectedYear, selectedMonth, fetchIncidents]);
 
   const handleIncidentPagination = useCallback(async (url: string | null) => {
       if (!url) return;
@@ -526,7 +526,7 @@ export default function SiteReportPage() {
         <CardContent>
            {isIncidentsLoading ? (
                <div className="flex items-center justify-center p-10"><Loader2 className="w-8 h-8 animate-spin" /></div>
-           ) : paginatedIncidents && paginatedIncidents.results.length > 0 ? (
+           ) : paginatedIncidents && paginatedIncidents.results && paginatedIncidents.results.length > 0 ? (
             <ScrollArea className="h-[480px]">
               <Table>
                 <TableHeader>
