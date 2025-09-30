@@ -29,6 +29,7 @@ import { cn } from '@/lib/utils';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { fetchData } from '@/lib/api';
 import { Skeleton } from '@/components/ui/skeleton';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 type PaginatedIncidents = {
     count: number;
@@ -482,98 +483,100 @@ export default function AgencyPatrollingOfficerReportPage() {
         </CardHeader>
         <CardContent>
           {reportData.assigned_sites.length > 0 ? (
-              <Table>
-                  <TableHeader>
-                      <TableRow>
-                          <TableHead>Site ID</TableHead>
-                          <TableHead>Site Name</TableHead>
-                          <TableHead>Address</TableHead>
-                          <TableHead>Guards</TableHead>
-                          <TableHead>Incidents</TableHead>
-                          <TableHead>Resolved</TableHead>
-                      </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                      {reportData.assigned_sites.map(site => {
-                          const isExpanded = expandedSiteId === site.site_id;
+              <ScrollArea className="h-72">
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>Site ID</TableHead>
+                            <TableHead>Site Name</TableHead>
+                            <TableHead>Address</TableHead>
+                            <TableHead>Guards</TableHead>
+                            <TableHead>Incidents</TableHead>
+                            <TableHead>Resolved</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {reportData.assigned_sites.map(site => {
+                            const isExpanded = expandedSiteId === site.site_id;
 
-                          return (
-                            <Fragment key={site.site_id}>
-                              <TableRow className="hover:bg-accent hover:text-accent-foreground group">
-                                  <TableCell>
-                                      <span className="font-medium">{site.site_id}</span>
-                                  </TableCell>
-                                  <TableCell className="font-medium">{site.site_name}</TableCell>
-                                  <TableCell className="font-medium">{site.address}</TableCell>
-                                  <TableCell>
-                                     <Button
-                                      variant="link"
-                                      className="p-0 h-auto flex items-center gap-2 text-accent group-hover:text-accent-foreground"
-                                      onClick={(e) => handleExpandClick(e, site.site_id)}
-                                      disabled={site.guards_count === 0}
-                                    >
-                                      <Users className="h-4 w-4" />
-                                      {site.guards_count}
-                                      <ChevronDown className={cn("h-4 w-4 transition-transform", isExpanded && "rotate-180")} />
-                                    </Button>
-                                  </TableCell>
-                                  <TableCell>
-                                    <div className="flex items-center gap-2 font-medium">
-                                      <ShieldAlert className="h-4 w-4 text-muted-foreground group-hover:text-accent-foreground" />
-                                      <span>{site.total_incidents}</span>
-                                    </div>
-                                  </TableCell>
-                                  <TableCell>
-                                    <div className="flex items-center gap-2 font-medium">
-                                      <CheckCircle className="h-4 w-4 text-chart-2" />
-                                      <span>{site.resolved_incidents}</span>
-                                    </div>
-                                  </TableCell>
-                              </TableRow>
-                              {isExpanded && (
-                                <TableRow className="bg-muted/50 hover:bg-muted/50">
-                                    <TableCell colSpan={6} className="p-0">
-                                        <div className="p-4">
-                                            <Table>
-                                                <TableHeader>
-                                                    <TableRow className="border-b-primary/20 hover:bg-transparent">
-                                                        <TableHead className="text-foreground">Guard ID</TableHead>
-                                                        <TableHead className="text-foreground">Guard Name</TableHead>
-                                                        <TableHead className="text-foreground">Contact</TableHead>
-                                                    </TableRow>
-                                                </TableHeader>
-                                                <TableBody>
-                                                    {site.guards.map(guard => (
-                                                        <TableRow key={guard.id} className="hover:bg-accent hover:text-accent-foreground group cursor-pointer" onClick={() => router.push(`/agency/guards/${guard.id}`)}>
-                                                            <TableCell>
-                                                                <Button asChild variant="link" className="p-0 h-auto text-sm font-medium text-accent group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
-                                                                  <Link href={`/agency/guards/${guard.id}`}>{guard.employee_id}</Link>
-                                                                </Button>
-                                                            </TableCell>
-                                                            <TableCell>
-                                                                <div className="flex items-center gap-3">
-                                                                    <p className="font-semibold">{`${guard.first_name} ${guard.last_name || ''}`}</p>
-                                                                </div>
-                                                            </TableCell>
-                                                            <TableCell>
-                                                                <div className="flex items-center gap-2">
-                                                                    <Phone className="h-4 w-4" />
-                                                                    <a href={`tel:${guard.phone}`} className="hover:underline font-medium">{guard.phone}</a>
-                                                                </div>
-                                                            </TableCell>
-                                                        </TableRow>
-                                                    ))}
-                                                </TableBody>
-                                            </Table>
-                                        </div>
+                            return (
+                              <Fragment key={site.site_id}>
+                                <TableRow className="hover:bg-accent hover:text-accent-foreground group">
+                                    <TableCell>
+                                        <span className="font-medium">{site.site_id}</span>
+                                    </TableCell>
+                                    <TableCell className="font-medium">{site.site_name}</TableCell>
+                                    <TableCell className="font-medium">{site.address}</TableCell>
+                                    <TableCell>
+                                       <Button
+                                        variant="link"
+                                        className="p-0 h-auto flex items-center gap-2 text-accent group-hover:text-accent-foreground"
+                                        onClick={(e) => handleExpandClick(e, site.site_id)}
+                                        disabled={site.guards_count === 0}
+                                      >
+                                        <Users className="h-4 w-4" />
+                                        {site.guards_count}
+                                        <ChevronDown className={cn("h-4 w-4 transition-transform", isExpanded && "rotate-180")} />
+                                      </Button>
+                                    </TableCell>
+                                    <TableCell>
+                                      <div className="flex items-center gap-2 font-medium">
+                                        <ShieldAlert className="h-4 w-4 text-muted-foreground group-hover:text-accent-foreground" />
+                                        <span>{site.total_incidents}</span>
+                                      </div>
+                                    </TableCell>
+                                    <TableCell>
+                                      <div className="flex items-center gap-2 font-medium">
+                                        <CheckCircle className="h-4 w-4 text-chart-2" />
+                                        <span>{site.resolved_incidents}</span>
+                                      </div>
                                     </TableCell>
                                 </TableRow>
-                              )}
-                            </Fragment>
-                          )
-                      })}
-                  </TableBody>
-              </Table>
+                                {isExpanded && (
+                                  <TableRow className="bg-muted/50 hover:bg-muted/50">
+                                      <TableCell colSpan={6} className="p-0">
+                                          <div className="p-4">
+                                              <Table>
+                                                  <TableHeader>
+                                                      <TableRow className="border-b-primary/20 hover:bg-transparent">
+                                                          <TableHead className="text-foreground">Guard ID</TableHead>
+                                                          <TableHead className="text-foreground">Guard Name</TableHead>
+                                                          <TableHead className="text-foreground">Contact</TableHead>
+                                                      </TableRow>
+                                                  </TableHeader>
+                                                  <TableBody>
+                                                      {site.guards.map(guard => (
+                                                          <TableRow key={guard.id} className="hover:bg-accent hover:text-accent-foreground group cursor-pointer" onClick={() => router.push(`/agency/guards/${guard.id}`)}>
+                                                              <TableCell>
+                                                                  <Button asChild variant="link" className="p-0 h-auto text-sm font-medium text-accent group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
+                                                                    <Link href={`/agency/guards/${guard.id}`}>{guard.employee_id}</Link>
+                                                                  </Button>
+                                                              </TableCell>
+                                                              <TableCell>
+                                                                  <div className="flex items-center gap-3">
+                                                                      <p className="font-semibold">{`${guard.first_name} ${guard.last_name || ''}`}</p>
+                                                                  </div>
+                                                              </TableCell>
+                                                              <TableCell>
+                                                                  <div className="flex items-center gap-2">
+                                                                      <Phone className="h-4 w-4" />
+                                                                      <a href={`tel:${guard.phone}`} className="hover:underline font-medium">{guard.phone}</a>
+                                                                  </div>
+                                                              </TableCell>
+                                                          </TableRow>
+                                                      ))}
+                                                  </TableBody>
+                                              </Table>
+                                          </div>
+                                      </TableCell>
+                                  </TableRow>
+                                )}
+                              </Fragment>
+                            )
+                        })}
+                    </TableBody>
+                </Table>
+              </ScrollArea>
           ) : (
               <p className="text-sm text-muted-foreground text-center py-4 font-medium">No sites are assigned to this patrolling officer.</p>
           )}
@@ -634,40 +637,42 @@ export default function AgencyPatrollingOfficerReportPage() {
            {isIncidentsLoading ? (
             <div className="flex items-center justify-center p-10"><Loader2 className="w-8 h-8 animate-spin" /></div>
           ) : paginatedIncidents && paginatedIncidents.results.length > 0 ? (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Incident ID</TableHead>
-                  <TableHead>Incident Date</TableHead>
-                  <TableHead>Incident Time</TableHead>
-                  <TableHead>Site</TableHead>
-                  <TableHead>Guard</TableHead>
-                  <TableHead>Status</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {paginatedIncidents.results.map((incident) => {
-                    return (
-                        <TableRow 
-                          key={incident.id}
-                          onClick={() => router.push(`/agency/incidents/${incident.id}`)}
-                          className="cursor-pointer hover:bg-accent hover:text-accent-foreground group"
-                        >
-                            <TableCell>
-                              <Button asChild variant="link" className="p-0 h-auto font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
-                                <Link href={`/agency/incidents/${incident.id}`}>{incident.incident_id}</Link>
-                              </Button>
-                            </TableCell>
-                            <TableCell className="font-medium">{new Date(incident.incident_time).toLocaleDateString()}</TableCell>
-                            <TableCell className="font-medium">{new Date(incident.incident_time).toLocaleTimeString()}</TableCell>
-                            <TableCell className="font-medium">{incident.site_name || 'N/A'}</TableCell>
-                            <TableCell className="font-medium">{incident.guard_name || 'N/A'}</TableCell>
-                            <TableCell>{getStatusIndicator(incident.incident_status)}</TableCell>
-                        </TableRow>
-                    )
-                })}
-              </TableBody>
-            </Table>
+            <ScrollArea className="h-72">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Incident ID</TableHead>
+                      <TableHead>Incident Date</TableHead>
+                      <TableHead>Incident Time</TableHead>
+                      <TableHead>Site</TableHead>
+                      <TableHead>Guard</TableHead>
+                      <TableHead>Status</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {paginatedIncidents.results.map((incident) => {
+                        return (
+                            <TableRow 
+                              key={incident.id}
+                              onClick={() => router.push(`/agency/incidents/${incident.id}`)}
+                              className="cursor-pointer hover:bg-accent hover:text-accent-foreground group"
+                            >
+                                <TableCell>
+                                  <Button asChild variant="link" className="p-0 h-auto font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
+                                    <Link href={`/agency/incidents/${incident.id}`}>{incident.incident_id}</Link>
+                                  </Button>
+                                </TableCell>
+                                <TableCell className="font-medium">{new Date(incident.incident_time).toLocaleDateString()}</TableCell>
+                                <TableCell className="font-medium">{new Date(incident.incident_time).toLocaleTimeString()}</TableCell>
+                                <TableCell className="font-medium">{incident.site_name || 'N/A'}</TableCell>
+                                <TableCell className="font-medium">{incident.guard_name || 'N/A'}</TableCell>
+                                <TableCell>{getStatusIndicator(incident.incident_status)}</TableCell>
+                            </TableRow>
+                        )
+                    })}
+                  </TableBody>
+                </Table>
+            </ScrollArea>
           ) : (
             <p className="text-muted-foreground text-center py-4 font-medium">No recent incidents for this patrolling officer's sites {selectedYear !== 'all' || selectedMonth !== 'all' ? 'in the selected period' : ''}.</p>
           )}
