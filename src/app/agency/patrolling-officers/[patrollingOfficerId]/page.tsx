@@ -483,7 +483,7 @@ export default function AgencyPatrollingOfficerReportPage() {
         </CardHeader>
         <CardContent>
           {reportData.assigned_sites.length > 0 ? (
-              <ScrollArea className="h-72">
+              <ScrollArea className="max-h-72">
                 <Table>
                     <TableHeader>
                         <TableRow>
@@ -637,7 +637,7 @@ export default function AgencyPatrollingOfficerReportPage() {
            {isIncidentsLoading ? (
             <div className="flex items-center justify-center p-10"><Loader2 className="w-8 h-8 animate-spin" /></div>
           ) : paginatedIncidents && paginatedIncidents.results.length > 0 ? (
-            <ScrollArea className="h-72">
+            <ScrollArea className="max-h-72">
                 <Table>
                   <TableHeader>
                     <TableRow>
