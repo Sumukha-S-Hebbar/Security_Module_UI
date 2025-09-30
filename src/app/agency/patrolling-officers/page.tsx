@@ -43,6 +43,13 @@ import { fetchData } from '@/lib/api';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
+type PaginatedPatrollingOfficers = {
+    count: number;
+    next: string | null;
+    previous: string | null;
+    results: ApiPatrollingOfficer[];
+};
+
 type ApiPatrollingOfficer = {
     id: number;
     employee_id: string;
@@ -60,6 +67,8 @@ type ApiPatrollingOfficer = {
     incidents_count: number;
     assigned_sites_details?: any[];
 };
+
+const ITEMS_PER_PAGE = 10;
 
 const uploadFormSchema = z.object({
   excelFile: z
@@ -103,6 +112,11 @@ export default function AgencyPatrollingOfficersPage() {
     const [searchQuery, setSearchQuery] = useState('');
     const [expandedOfficerId, setExpandedOfficerId] = useState<number | null>(null);
     const [newlyAddedOfficerId, setNewlyAddedOfficerId] = useState<number | null>(null);
+
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalCount, setTotalCount] = useState(0);
+    const [nextUrl, setNextUrl] = useState<string | null>(null);
+    const [prevUrl, setPrevUrl] = useState<string | null>(null);
     
     const [apiRegions, setApiRegions] = useState<ApiRegion[]>([]);
     const [apiCities, setApiCities] = useState<ApiCity[]>([]);
@@ -122,26 +136,62 @@ export default function AgencyPatrollingOfficersPage() {
         }
     }, []);
 
-    const fetchPatrollingOfficers = useCallback(async () => {
+    const fetchPatrollingOfficers = useCallback(async (page: number = 1) => {
         if (!loggedInOrg) return;
         setIsLoading(true);
         const token = localStorage.getItem('token');
-        const url = `/security/api/agency/${loggedInOrg.code}/patrol_officers/list/`;
+        
+        const params = new URLSearchParams({
+            page: page.toString(),
+            page_size: ITEMS_PER_PAGE.toString(),
+        });
+        if (searchQuery) params.append('search', searchQuery);
+
+        const url = `/security/api/agency/${loggedInOrg.code}/patrol_officers/list/?${params.toString()}`;
+
         try {
-            const data = await fetchData<{ results: ApiPatrollingOfficer[] }>(url, token || undefined);
+            const data = await fetchData<PaginatedPatrollingOfficers>(url, token || undefined);
             setPatrollingOfficers(data?.results || []);
+            setTotalCount(data?.count || 0);
+            setNextUrl(data?.next || null);
+            setPrevUrl(data?.previous || null);
         } catch (error) {
             toast({ variant: 'destructive', title: 'Error', description: 'Failed to load patrolling officers.' });
         } finally {
             setIsLoading(false);
         }
-    }, [loggedInOrg, toast]);
+    }, [loggedInOrg, toast, searchQuery]);
 
     useEffect(() => {
         if(loggedInOrg) {
-            fetchPatrollingOfficers();
+            fetchPatrollingOfficers(currentPage);
         }
-    }, [loggedInOrg, fetchPatrollingOfficers]);
+    }, [loggedInOrg, fetchPatrollingOfficers, currentPage]);
+    
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchQuery]);
+
+    const handlePagination = useCallback(async (url: string | null) => {
+        if (!url || !loggedInOrg) return;
+        setIsLoading(true);
+        const token = localStorage.getItem('token') || undefined;
+
+        try {
+            const data = await fetchData<PaginatedPatrollingOfficers>(url, token);
+            setPatrollingOfficers(data?.results || []);
+            setTotalCount(data?.count || 0);
+            setNextUrl(data?.next || null);
+            setPrevUrl(data?.previous || null);
+            
+            const pageParam = new URL(url).searchParams.get('page');
+            setCurrentPage(pageParam ? parseInt(pageParam) : 1);
+        } catch (error) {
+            toast({ variant: 'destructive', title: 'Error', description: 'Failed to load page.' });
+        } finally {
+            setIsLoading(false);
+        }
+    }, [loggedInOrg, toast]);
 
     const uploadForm = useForm<z.infer<typeof uploadFormSchema>>({
         resolver: zodResolver(uploadFormSchema),
@@ -289,15 +339,6 @@ export default function AgencyPatrollingOfficersPage() {
         });
     }
 
-    const filteredPatrollingOfficers = useMemo(() => {
-        return patrollingOfficers.filter((po) => {
-            const name = `${po.first_name} ${po.last_name || ''}`.trim();
-            return name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            po.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            po.employee_id.includes(searchQuery)
-        });
-    }, [searchQuery, patrollingOfficers]);
-
     const handleRowClick = (officerId: number) => {
         router.push(`/agency/patrolling-officers/${officerId}`);
     };
@@ -306,6 +347,8 @@ export default function AgencyPatrollingOfficersPage() {
         e.stopPropagation();
         setExpandedOfficerId(prevId => (prevId === officerId ? null : officerId));
     };
+
+    const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
 
     return (
       <>
@@ -572,8 +615,8 @@ export default function AgencyPatrollingOfficersPage() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {filteredPatrollingOfficers.length > 0 ? (
-                            filteredPatrollingOfficers.map((patrollingOfficer) => {
+                        {patrollingOfficers.length > 0 ? (
+                            patrollingOfficers.map((patrollingOfficer) => {
                                 const isExpanded = expandedOfficerId === patrollingOfficer.id;
                                 const officerName = `${patrollingOfficer.first_name} ${patrollingOfficer.last_name || ''}`.trim();
                                 const isNewlyAdded = newlyAddedOfficerId === patrollingOfficer.id;
@@ -678,6 +721,34 @@ export default function AgencyPatrollingOfficersPage() {
                   </Table>
                     )}
                 </CardContent>
+                {totalCount > 0 && !isLoading && (
+                <CardFooter>
+                    <div className="flex items-center justify-between w-full">
+                        <div className="text-sm text-muted-foreground font-medium">
+                            Showing {patrollingOfficers.length} of {totalCount} officers.
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handlePagination(prevUrl)}
+                                disabled={!prevUrl || isLoading}
+                            >
+                                Previous
+                            </Button>
+                            <span className="text-sm font-medium">Page {currentPage} of {totalPages || 1}</span>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handlePagination(nextUrl)}
+                                disabled={!nextUrl || isLoading}
+                            >
+                                Next
+                            </Button>
+                        </div>
+                    </div>
+                </CardFooter>
+                )}
             </Card>
         </div>
       </>
