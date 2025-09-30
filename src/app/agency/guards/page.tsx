@@ -645,32 +645,6 @@ export default function AgencyGuardsPage() {
                   className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[320px]"
                   />
               </div>
-              <Select value={selectedSiteFilter} onValueChange={setSelectedSiteFilter}>
-                  <SelectTrigger className="w-full sm:w-[180px] font-medium hover:bg-accent hover:text-accent-foreground">
-                      <SelectValue placeholder="Filter by site" />
-                  </SelectTrigger>
-                  <SelectContent>
-                      <SelectItem value="all" className="font-medium">All Sites</SelectItem>
-                      {sites.map((site) => (
-                          <SelectItem key={site.id} value={site.id.toString()} className="font-medium">
-                              {site.site_name}
-                          </SelectItem>
-                      ))}
-                  </SelectContent>
-              </Select>
-              <Select value={selectedPatrollingOfficerFilter} onValueChange={setSelectedPatrollingOfficerFilter}>
-                  <SelectTrigger className="w-full sm:w-[220px] font-medium hover:bg-accent hover:text-accent-foreground">
-                      <SelectValue placeholder="Filter by Patrolling Officer" />
-                  </SelectTrigger>
-                  <SelectContent>
-                      <SelectItem value="all" className="font-medium">All Patrolling Officers</SelectItem>
-                      {patrollingOfficers.map((po) => (
-                          <SelectItem key={po.id} value={po.id.toString()} className="font-medium">
-                              {po.name}
-                          </SelectItem>
-                      ))}
-                  </SelectContent>
-              </Select>
             </div>
           </CardHeader>
           <CardContent>
@@ -886,9 +860,3 @@ export default function AgencyGuardsPage() {
     </>
   );
 }
-
-    
-
-    
-
-    
