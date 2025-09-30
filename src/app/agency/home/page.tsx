@@ -241,7 +241,7 @@ export default function AgencyHomePage() {
                   <TableHead className="text-foreground">Site Name</TableHead>
                   <TableHead className="text-foreground">Guard</TableHead>
                   <TableHead className="text-foreground">Patrolling Officer</TableHead>
-                  <TableHead className="text-foreground">Date</TableHead>
+                  <TableHead className="text-foreground">Incident Date</TableHead>
                   <TableHead className="text-foreground">Incident Time</TableHead>
                   <TableHead className="text-foreground">Contact</TableHead>
                 </TableRow>
