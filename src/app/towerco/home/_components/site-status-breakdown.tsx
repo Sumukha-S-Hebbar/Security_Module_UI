@@ -198,8 +198,8 @@ export function SiteStatusBreakdown({ siteStatusData }: { siteStatusData: SiteSt
                             <TableRow>
                               <TableHead className="text-foreground px-2 w-[20%]">Towerbuddy ID</TableHead>
                               <TableHead className="text-foreground px-2 w-[20%]">Site ID</TableHead>
-                              <TableHead className="text-foreground px-2 w-[25%]">Site Name</TableHead>
-                              <TableHead className="text-foreground px-2 w-[15%]">Region</TableHead>
+                              <TableHead className="text-foreground px-2 w-[20%]">Site Name</TableHead>
+                              <TableHead className="text-foreground px-2 w-[20%]">Location</TableHead>
                               <TableHead className="text-foreground px-2 w-[20%]">Agency</TableHead>
                             </TableRow>
                           </TableHeader>
@@ -220,7 +220,7 @@ export function SiteStatusBreakdown({ siteStatusData }: { siteStatusData: SiteSt
                                   {site.site_name}
                                 </TableCell>
                                 <TableCell className="group-hover:text-accent-foreground px-2 font-medium">
-                                    {site.region}
+                                    {site.city}, {site.region}
                                 </TableCell>
                                 <TableCell className="font-medium group-hover:text-accent-foreground px-2">
                                     {site.agency_name || 'N/A'}
@@ -236,7 +236,7 @@ export function SiteStatusBreakdown({ siteStatusData }: { siteStatusData: SiteSt
                               <TableHead className="text-foreground px-2 w-[25%]">Towerbuddy ID</TableHead>
                               <TableHead className="text-foreground px-2 w-[25%]">Site ID</TableHead>
                               <TableHead className="text-foreground px-2 w-[25%]">Site Name</TableHead>
-                              <TableHead className="text-foreground px-2 w-[25%]">Region</TableHead>
+                              <TableHead className="text-foreground px-2 w-[25%]">Location</TableHead>
                             </TableRow>
                           </TableHeader>
                           <TableBody>
@@ -254,7 +254,7 @@ export function SiteStatusBreakdown({ siteStatusData }: { siteStatusData: SiteSt
                                   {site.site_name}
                                 </TableCell>
                                 <TableCell className="group-hover:text-accent-foreground px-2 font-medium">
-                                  {site.region}
+                                  {site.city}, {site.region}
                                 </TableCell>
                               </TableRow>
                             ))}
