@@ -11,7 +11,7 @@ const ibmPlexSans = IBM_Plex_Sans({
 });
 
 export const metadata: Metadata = {
-  title: 'Security Module',
+  title: 'Secure Buddy',
   description: 'Patrolling officer dashboard for GuardLink security management.',
 };
 
