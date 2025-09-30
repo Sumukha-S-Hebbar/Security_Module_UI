@@ -538,7 +538,7 @@ export default function AgencyPatrollingOfficerReportPage() {
                                                 <TableHeader>
                                                     <TableRow className="border-b-primary/20 hover:bg-transparent">
                                                         <TableHead className="text-foreground">Guard ID</TableHead>
-                                                        <TableHead className="text-foreground">Guard</TableHead>
+                                                        <TableHead className="text-foreground">Guard Name</TableHead>
                                                         <TableHead className="text-foreground">Contact</TableHead>
                                                     </TableRow>
                                                 </TableHeader>
