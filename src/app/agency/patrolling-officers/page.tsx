@@ -601,11 +601,11 @@ export default function AgencyPatrollingOfficersPage() {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>ID</TableHead>
-                        <TableHead>Name</TableHead>
+                        <TableHead>Patrolling Officer ID</TableHead>
+                        <TableHead>Patrolling Officer Name</TableHead>
                         <TableHead>Contact Info</TableHead>
                         <TableHead>Sites Assigned</TableHead>
-                        <TableHead>Incidents Trend</TableHead>
+                        <TableHead>Incidents</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -706,4 +706,3 @@ export default function AgencyPatrollingOfficersPage() {
       </>
     );
 }
-
