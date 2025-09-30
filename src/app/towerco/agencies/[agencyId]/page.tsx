@@ -205,7 +205,7 @@ export default function AgencyReportPage() {
   }, []);
 
   const fetchIncidents = useCallback(async (url?: string) => {
-    if (!loggedInOrg || !agencyId || !reportData?.name) return;
+    if (!loggedInOrg || !reportData?.name) return;
     setIsIncidentsLoading(true);
     const token = localStorage.getItem('token') || undefined;
     
@@ -238,7 +238,7 @@ export default function AgencyReportPage() {
     } finally {
       setIsIncidentsLoading(false);
     }
-  }, [loggedInOrg, agencyId, toast, incidentsYearFilter, incidentsMonthFilter, incidentsStatusFilter, reportData?.name]);
+  }, [loggedInOrg, toast, incidentsYearFilter, incidentsMonthFilter, incidentsStatusFilter, reportData?.name]);
 
 
   useEffect(() => {
@@ -631,7 +631,7 @@ export default function AgencyReportPage() {
             {isAssignedSitesLoading ? (
                 <div className="flex items-center justify-center h-40"><Loader2 className="h-6 w-6 animate-spin" /></div>
             ) : paginatedAssignedSites && paginatedAssignedSites.results.length > 0 ? (
-                <ScrollArea className="max-h-[22rem] h-auto">
+                <ScrollArea className="h-auto max-h-72">
                     <Table>
                         <TableHeader>
                             <TableRow>
@@ -846,5 +846,3 @@ export default function AgencyReportPage() {
     </div>
   );
 }
-
-    
