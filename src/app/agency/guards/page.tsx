@@ -222,14 +222,16 @@ export default function AgencyGuardsPage() {
   }, [loggedInOrg, fetchSupportingData]);
 
   useEffect(() => {
-    if (loggedInOrg) {
-      if (activeTab === 'checked-in') {
+      if (loggedInOrg && activeTab === 'checked-in') {
         fetchGuards('checked_in', checkedInCurrentPage);
-      } else {
+      }
+  }, [loggedInOrg, fetchGuards, activeTab, checkedInCurrentPage]);
+
+  useEffect(() => {
+      if (loggedInOrg && activeTab === 'checked-out') {
         fetchGuards('checked_out', checkedOutCurrentPage);
       }
-    }
-  }, [loggedInOrg, fetchGuards, activeTab, checkedInCurrentPage, checkedOutCurrentPage]);
+  }, [loggedInOrg, fetchGuards, activeTab, checkedOutCurrentPage]);
   
   useEffect(() => {
       setCheckedInCurrentPage(1);
@@ -884,5 +886,7 @@ export default function AgencyGuardsPage() {
     </>
   );
 }
+
+    
 
     
