@@ -19,7 +19,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { AlertTriangle, ChevronDown, Phone } from 'lucide-react';
+import { AlertTriangle, ChevronDown, Phone, Loader2, CheckCircle2 } from 'lucide-react';
 import { AgencyAnalyticsDashboard } from './_components/agency-analytics-dashboard';
 import {
   DropdownMenu,
@@ -35,8 +35,9 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { fetchData } from '@/lib/api';
+import { cn } from '@/lib/utils';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
-const ACTIVE_INCIDENTS_PER_PAGE = 4;
 
 // Type definitions based on the new API response
 export type BasicCounts = {
@@ -57,6 +58,13 @@ export type ActiveIncident = {
     guard_name: string;
     incident_time: string;
     contact_details: { officer_phone: string | null; guard_phone: string | null };
+};
+
+type PaginatedActiveIncidents = {
+    count: number;
+    next: string | null;
+    previous: string | null;
+    results: ActiveIncident[];
 };
 
 export type GuardPerformanceData = {
@@ -81,23 +89,18 @@ export type IncidentTrendData = {
 
 interface AgencyDashboardData {
     basic_counts: BasicCounts;
-    active_incidents: {
-        count: number;
-        next: string | null;
-        previous: string | null;
-        results: ActiveIncident[];
-    };
+    active_incidents: PaginatedActiveIncidents;
     guard_performance: GuardPerformanceData;
     patrol_officer_performance: PatrollingOfficerPerformanceData;
     incident_trend: IncidentTrendData[];
 }
 
-async function getDashboardData(org: Organization, token?: string): Promise<AgencyDashboardData | null> {
-  let url = `/security/api/agency/${org.code}/agency-dashboard/`;
+async function getDashboardData(org: Organization, token?: string, url?: string): Promise<AgencyDashboardData | null> {
+  const fetchUrl = url || `/security/api/agency/${org.code}/agency-dashboard/`;
   
   try {
       const baseUrl = process.env.NEXT_PUBLIC_DJANGO_API_URL || 'http://are.towerbuddy.tel:8000';
-      const fullUrl = url.startsWith('http') ? url : `${baseUrl}${url}`;
+      const fullUrl = fetchUrl.startsWith('http') ? fetchUrl : `${baseUrl}${fetchUrl}`;
       
       const response = await fetch(fullUrl, {
           headers: {
@@ -125,9 +128,9 @@ async function getDashboardData(org: Organization, token?: string): Promise<Agen
 
 export default function AgencyHomePage() {
   const router = useRouter();
-  const [activeIncidentsCurrentPage, setActiveIncidentsCurrentPage] = useState(1);
   const [data, setData] = useState<AgencyDashboardData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isIncidentsLoading, setIsIncidentsLoading] = useState(false);
   const [org, setOrg] = useState<Organization | null>(null);
 
   useEffect(() => {
@@ -153,6 +156,22 @@ export default function AgencyHomePage() {
         .finally(() => setIsLoading(false));
     }
   }, [org]);
+
+  const handleIncidentPagination = async (url: string | null) => {
+    if (!url || !data || !org) return;
+    setIsIncidentsLoading(true);
+    try {
+        const token = localStorage.getItem('token') || undefined;
+        const paginatedData = await getDashboardData(org, token, url);
+        if (paginatedData) {
+            setData({ ...data, active_incidents: paginatedData.active_incidents });
+        }
+    } catch(error) {
+        console.error("Failed to fetch active incidents", error);
+    } finally {
+        setIsIncidentsLoading(false);
+    }
+  }
 
 
   if (isLoading || !data || !org) {
@@ -183,12 +202,8 @@ export default function AgencyHomePage() {
     );
   }
   
-  const activeEmergencies = data.active_incidents.results;
-  const totalActiveIncidentPages = Math.ceil((data?.active_incidents.count || 0) / ACTIVE_INCIDENTS_PER_PAGE);
-  const paginatedActiveEmergencies = activeEmergencies.slice(
-      (activeIncidentsCurrentPage - 1) * ACTIVE_INCIDENTS_PER_PAGE,
-      activeIncidentsCurrentPage * ACTIVE_INCIDENTS_PER_PAGE
-  );
+  const activeIncidents = data.active_incidents;
+  const hasActiveIncidents = activeIncidents && activeIncidents.results && activeIncidents.results.length > 0;
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6">
@@ -201,13 +216,24 @@ export default function AgencyHomePage() {
         </div>
       </div>
 
-      <Card className="border-destructive bg-destructive/10">
+      <Card className={cn(
+          hasActiveIncidents ? "border-destructive bg-destructive/10" : "border-chart-2 bg-chart-2/10"
+      )}>
         <CardHeader className="flex flex-row items-center gap-2">
-          <AlertTriangle className="w-6 h-6 text-destructive" />
-          <CardTitle>Active Emergency Incidents ({data.active_incidents.count})</CardTitle>
+           {hasActiveIncidents ? (
+              <AlertTriangle className="w-6 h-6 text-destructive" />
+            ) : (
+              <CheckCircle2 className="w-6 h-6 text-chart-2" />
+            )}
+          <CardTitle className={cn(hasActiveIncidents ? "text-destructive" : "text-chart-2")}>
+            Active Emergency Incidents ({data.active_incidents.count})
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          {activeEmergencies.length > 0 ? (
+           {isIncidentsLoading ? (
+             <div className="flex items-center justify-center h-48"><Loader2 className="h-8 w-8 animate-spin" /></div>
+           ) : hasActiveIncidents ? (
+            <ScrollArea className="h-72">
             <Table>
               <TableHeader>
                 <TableRow className="border-destructive/20">
@@ -221,7 +247,7 @@ export default function AgencyHomePage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {paginatedActiveEmergencies.map((incident) => {
+                {activeIncidents.results.map((incident) => {
                   const incidentDate = new Date(incident.incident_time);
                   
                   return (
@@ -276,33 +302,33 @@ export default function AgencyHomePage() {
                 })}
               </TableBody>
             </Table>
+            </ScrollArea>
           ) : (
-            <p className="text-center py-4 font-medium">
+            <p className="text-center py-4 font-medium text-chart-2">
               No active emergency incidents. All systems are normal.
             </p>
           )}
         </CardContent>
-         {activeEmergencies.length > 0 && (
+         {activeIncidents && activeIncidents.count > 0 && (
             <CardFooter>
                  <div className="flex items-center justify-between w-full">
                     <div className="text-sm text-destructive font-medium">
-                        Showing {paginatedActiveEmergencies.length} of {activeEmergencies.length} active incidents.
+                        Showing {activeIncidents.results.length} of {activeIncidents.count} active incidents.
                     </div>
                     <div className="flex items-center gap-2">
                         <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => setActiveIncidentsCurrentPage(prev => Math.max(prev - 1, 1))}
-                            disabled={activeIncidentsCurrentPage === 1}
+                            onClick={() => handleIncidentPagination(activeIncidents.previous)}
+                            disabled={!activeIncidents.previous || isIncidentsLoading}
                         >
                             Previous
                         </Button>
-                        <span className="text-sm font-medium text-destructive">Page {activeIncidentsCurrentPage} of {totalActiveIncidentPages || 1}</span>
                         <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => setActiveIncidentsCurrentPage(prev => Math.min(prev + 1, totalActiveIncidentPages))}
-                            disabled={activeIncidentsCurrentPage === totalActiveIncidentPages || totalActiveIncidentPages === 0}
+                            onClick={() => handleIncidentPagination(activeIncidents.next)}
+                            disabled={!activeIncidents.next || isIncidentsLoading}
                         >
                             Next
                         </Button>
