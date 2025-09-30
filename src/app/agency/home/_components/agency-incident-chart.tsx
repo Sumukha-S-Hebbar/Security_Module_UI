@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
@@ -215,7 +216,7 @@ export function AgencyIncidentChart({
     <Card ref={collapsibleRef}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <div>
-          <CardTitle>Incidents Occurred</CardTitle>
+          <CardTitle>Incidents Trend</CardTitle>
           <CardDescription>
             Total vs. resolved emergency incidents per month. Click a bar to see details.
           </CardDescription>
