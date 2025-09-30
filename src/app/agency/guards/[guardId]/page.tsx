@@ -68,6 +68,7 @@ type GuardReportData = {
     site_details: {
         id: number;
         tb_site_id: string;
+        org_site_id: string;
         site_name: string;
         site_address_line1: string;
         region: string;
@@ -386,6 +387,7 @@ export default function AgencyGuardReportPage() {
               <div>
                 <p className="font-semibold text-xl">{reportData.site_details.site_name}</p>
                 <p className="font-medium">Towerbuddy ID: {reportData.site_details.tb_site_id}</p>
+                <p className="font-medium">Site ID: {reportData.site_details.org_site_id}</p>
               </div>
               <div className="text-sm space-y-3 pt-4 border-t">
                  <div className="flex items-start gap-3">
