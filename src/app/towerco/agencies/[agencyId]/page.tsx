@@ -88,10 +88,7 @@ type IncidentItem = {
     incident_time: string;
     incident_status: "Active" | "Under Review" | "Resolved";
     site_name: string;
-    raised_by_guard_details: {
-        first_name: string;
-        last_name: string | null;
-    } | null;
+    guard_name: string;
     incident_type: string;
     incident_description: string;
 };
@@ -101,7 +98,6 @@ type AssignedSiteItem = {
     tb_site_id: string;
     org_site_id: string;
     site_name: string;
-    registered_address_line1: string;
     city: string;
     region: string;
     assigned_on: string;
@@ -183,9 +179,12 @@ export default function AgencyReportPage() {
 
   const [reportData, setReportData] = useState<AgencyReportData | null>(null);
   const [paginatedAssignedSites, setPaginatedAssignedSites] = useState<PaginatedResponse<AssignedSiteItem> | null>(null);
+  const [paginatedIncidents, setPaginatedIncidents] = useState<PaginatedResponse<IncidentItem> | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isAssignedSitesLoading, setIsAssignedSitesLoading] = useState(false);
+  const [isIncidentsLoading, setIsIncidentsLoading] = useState(false);
   const [loggedInOrg, setLoggedInOrg] = useState<Organization | null>(null);
+
   const [performanceSelectedYear, setPerformanceSelectedYear] = useState<string>('all');
   const [performanceSelectedMonth, setPerformanceSelectedMonth] = useState<string>('all');
   
@@ -204,6 +203,43 @@ export default function AgencyReportPage() {
         }
     }
   }, []);
+
+  const fetchIncidents = useCallback(async (url?: string) => {
+      if (!loggedInOrg || !agencyId) return;
+      setIsIncidentsLoading(true);
+      const token = localStorage.getItem('token') || undefined;
+      
+      let fetchUrl = url || `/security/api/orgs/${loggedInOrg.code}/security-agencies/${agencyId}/incidents/`;
+      const queryParams = new URLSearchParams();
+
+      if (!url) { // only add filters if it's a fresh fetch, not a pagination link click
+        if (incidentsYearFilter !== 'all') queryParams.append('year', incidentsYearFilter);
+        if (incidentsMonthFilter !== 'all') queryParams.append('month', (parseInt(incidentsMonthFilter) + 1).toString());
+        if (incidentsStatusFilter !== 'all') {
+          let apiStatus = '';
+            if (incidentsStatusFilter === 'under-review') {
+              apiStatus = 'Under Review';
+            } else {
+              apiStatus = incidentsStatusFilter.charAt(0).toUpperCase() + incidentsStatusFilter.slice(1);
+            }
+          queryParams.append('incident_status', apiStatus);
+        }
+      }
+
+      if (queryParams.toString() && !url) {
+        fetchUrl += `?${queryParams.toString()}`;
+      }
+
+      try {
+        const response = await fetchData<PaginatedResponse<IncidentItem>>(fetchUrl, token);
+        setPaginatedIncidents(response || null);
+      } catch (error) {
+        toast({ variant: 'destructive', title: 'Error', description: 'Failed to load incidents.'});
+      } finally {
+        setIsIncidentsLoading(false);
+      }
+  }, [loggedInOrg, agencyId, toast, incidentsYearFilter, incidentsMonthFilter, incidentsStatusFilter]);
+
 
   useEffect(() => {
       if (!loggedInOrg || !agencyId) return;
@@ -224,9 +260,10 @@ export default function AgencyReportPage() {
           }
 
           try {
-              const response = await fetchData<{ data: AgencyReportData }>(url, token);
-              setReportData(response?.data || null);
-              setPaginatedAssignedSites(response?.data?.assigned_sites || null);
+              const response = await fetchData<AgencyReportData>(url, token);
+              setReportData(response || null);
+              setPaginatedAssignedSites(response?.assigned_sites || null);
+              setPaginatedIncidents(response?.incidents || null);
           } catch (error) {
               console.error("Failed to fetch agency report:", error);
               toast({
@@ -242,14 +279,18 @@ export default function AgencyReportPage() {
       fetchReportData();
   }, [loggedInOrg, agencyId, toast, performanceSelectedYear, performanceSelectedMonth]);
 
+  useEffect(() => {
+      fetchIncidents();
+  }, [fetchIncidents])
+
   const handleAssignedSitesPagination = useCallback(async (url: string | null) => {
     if (!url) return;
     setIsAssignedSitesLoading(true);
     const token = localStorage.getItem('token');
     try {
-        const response = await fetchData<{ data: { assigned_sites: PaginatedResponse<AssignedSiteItem> } }>(url, token || undefined);
-        if (response?.data.assigned_sites) {
-            setPaginatedAssignedSites(response.data.assigned_sites);
+        const response = await fetchData<{ assigned_sites: PaginatedResponse<AssignedSiteItem> }>(url, token || undefined);
+        if (response?.assigned_sites) {
+            setPaginatedAssignedSites(response.assigned_sites);
         }
     } catch(e) {
         toast({ variant: 'destructive', title: 'Error', description: 'Failed to load next page of sites.'});
@@ -290,28 +331,15 @@ export default function AgencyReportPage() {
   }, [performanceMetrics]);
   
   const incidentAvailableYears = useMemo(() => {
-    if (!reportData?.incidents?.results) return [];
+    if (!paginatedIncidents?.results) return [];
     const years = new Set(
-      reportData.incidents.results.map((incident) => new Date(incident.incident_time).getFullYear().toString())
+      paginatedIncidents.results.map((incident) => new Date(incident.incident_time).getFullYear().toString())
     );
     if (years.size === 0) {
         years.add(new Date().getFullYear().toString());
     }
     return Array.from(years).sort((a, b) => parseInt(b) - parseInt(a));
-  }, [reportData]);
-  
-  const filteredIncidents = useMemo(() => {
-    if (!reportData?.incidents?.results) return [];
-    return reportData.incidents.results.filter(incident => {
-        const incidentDate = new Date(incident.incident_time);
-        
-        const statusMatch = incidentsStatusFilter === 'all' || incident.incident_status.toLowerCase().replace(' ', '_') === incidentsStatusFilter.replace('-', '_');
-        const yearMatch = incidentsYearFilter === 'all' || incidentDate.getFullYear().toString() === incidentsYearFilter;
-        const monthMatch = incidentsMonthFilter === 'all' || incidentDate.getMonth().toString() === incidentsMonthFilter;
-
-        return statusMatch && yearMatch && monthMatch;
-    });
-  }, [reportData, incidentsStatusFilter, incidentsYearFilter, incidentsMonthFilter]);
+  }, [paginatedIncidents]);
 
 
   const getStatusIndicator = (status: "Active" | "Under Review" | "Resolved") => {
@@ -403,8 +431,6 @@ export default function AgencyReportPage() {
     assigned_sites_count,
     total_incidents_count,
     resolved_incidents_count,
-    assigned_sites,
-    incidents,
   } = reportData;
 
   return (
@@ -597,17 +623,17 @@ export default function AgencyReportPage() {
             {isAssignedSitesLoading ? (
                 <div className="flex items-center justify-center h-40"><Loader2 className="h-6 w-6 animate-spin" /></div>
             ) : paginatedAssignedSites && paginatedAssignedSites.results.length > 0 ? (
-                <ScrollArea className="max-h-72">
+                <ScrollArea className="max-h-[22rem]">
                     <Table>
                         <TableHeader>
                             <TableRow>
-                            <TableHead className="text-foreground">Towerbuddy ID</TableHead>
-                            <TableHead className="text-foreground">Site ID</TableHead>
-                            <TableHead className="text-foreground">Site Name</TableHead>
-                            <TableHead className="text-foreground">Location</TableHead>
-                            <TableHead className="text-center text-foreground">Guards Requested</TableHead>
-                            <TableHead className="text-center text-foreground">Incidents</TableHead>
-                            <TableHead className="text-center text-foreground">Resolved</TableHead>
+                              <TableHead className="text-foreground">Towerbuddy ID</TableHead>
+                              <TableHead className="text-foreground">Site ID</TableHead>
+                              <TableHead className="text-foreground">Site Name</TableHead>
+                              <TableHead className="text-foreground">Location</TableHead>
+                              <TableHead className="text-center text-foreground">Guards</TableHead>
+                              <TableHead className="text-center text-foreground">Incidents</TableHead>
+                              <TableHead className="text-center text-foreground">Resolved</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -735,23 +761,22 @@ export default function AgencyReportPage() {
           </div>
         </CardHeader>
         <CardContent>
-          {filteredIncidents.length > 0 ? (
+          {isIncidentsLoading ? (
+            <div className="flex items-center justify-center p-10"><Loader2 className="w-8 h-8 animate-spin" /></div>
+          ) : paginatedIncidents && paginatedIncidents.results.length > 0 ? (
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead className="text-foreground">Incident ID</TableHead>
                   <TableHead className="text-foreground">Incident Date</TableHead>
                   <TableHead className="text-foreground">Incident Time</TableHead>
-                  <TableHead className="text-foreground">Site</TableHead>
+                  <TableHead className="text-foreground">Site Name</TableHead>
                   <TableHead className="text-foreground">Guard</TableHead>
                   <TableHead className="text-foreground">Status</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredIncidents.map((incident) => {
-                  const guardName = incident.raised_by_guard_details
-                    ? `${incident.raised_by_guard_details.first_name} ${incident.raised_by_guard_details.last_name || ''}`.trim()
-                    : 'N/A';
+                {paginatedIncidents.results.map((incident) => {
                   return (
                     <TableRow key={incident.id} onClick={() => router.push(`/towerco/incidents/${incident.id}`)} className="cursor-pointer hover:bg-accent hover:text-accent-foreground group">
                       <TableCell>
@@ -766,7 +791,7 @@ export default function AgencyReportPage() {
                         <ClientDate date={incident.incident_time} format="time" />
                       </TableCell>
                       <TableCell className="font-medium">{incident.site_name}</TableCell>
-                      <TableCell className="font-medium">{guardName}</TableCell>
+                      <TableCell className="font-medium">{incident.guard_name || 'N/A'}</TableCell>
                       <TableCell>{getStatusIndicator(incident.incident_status)}</TableCell>
                     </TableRow>
                   )
@@ -779,7 +804,36 @@ export default function AgencyReportPage() {
             </p>
           )}
         </CardContent>
+         {paginatedIncidents && paginatedIncidents.count > 0 && !isIncidentsLoading && (
+            <CardFooter>
+                <div className="flex items-center justify-between w-full">
+                    <div className="text-sm text-muted-foreground font-medium">
+                        Showing {paginatedIncidents.results.length} of {paginatedIncidents.count} incidents.
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => fetchIncidents(paginatedIncidents.previous)}
+                            disabled={!paginatedIncidents.previous}
+                        >
+                            Previous
+                        </Button>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => fetchIncidents(paginatedIncidents.next)}
+                            disabled={!paginatedIncidents.next}
+                        >
+                            Next
+                        </Button>
+                    </div>
+                </div>
+            </CardFooter>
+        )}
       </Card>
     </div>
   );
 }
+
+    
