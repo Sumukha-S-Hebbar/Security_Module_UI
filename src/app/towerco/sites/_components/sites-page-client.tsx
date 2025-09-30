@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
@@ -109,7 +110,6 @@ export function SitesPageClient() {
 
   // State for filters
   const [assignedSearchQuery, setAssignedSearchQuery] = useState('');
-  const [selectedAgencyFilter, setSelectedAgencyFilter] = useState('all');
   const [assignedSelectedRegion, setAssignedSelectedRegion] = useState('all');
   const [assignedSelectedCity, setAssignedSelectedCity] = useState('all');
   const [unassignedSearchQuery, setUnassignedSearchQuery] = useState('');
@@ -194,7 +194,6 @@ export function SitesPageClient() {
     // Add filters based on status
     if (status === 'Assigned') {
         if (assignedSearchQuery) params.append('search', assignedSearchQuery);
-        if (selectedAgencyFilter !== 'all') params.append('agency_id', selectedAgencyFilter);
         if (assignedSelectedRegion !== 'all') params.append('region', assignedSelectedRegion);
         if (assignedSelectedCity !== 'all') params.append('city', assignedSelectedCity);
     } else {
@@ -225,7 +224,7 @@ export function SitesPageClient() {
     } finally {
         setIsLoading(false);
     }
-  }, [loggedInOrg, toast, assignedSearchQuery, selectedAgencyFilter, assignedSelectedRegion, assignedSelectedCity, unassignedSearchQuery, unassignedSelectedRegion, unassignedSelectedCity]);
+  }, [loggedInOrg, toast, assignedSearchQuery, assignedSelectedRegion, assignedSelectedCity, unassignedSearchQuery, unassignedSelectedRegion, unassignedSelectedCity]);
 
   const handlePagination = useCallback(async (url: string, status: 'Assigned' | 'Unassigned') => {
     if (!loggedInOrg || !url) return;
@@ -278,7 +277,7 @@ export function SitesPageClient() {
   }, [loggedInOrg, activeTab, fetchSites, assignedCurrentPage, unassignedCurrentPage]);
 
   // Reset page number on filter change
-  useEffect(() => setAssignedCurrentPage(1), [assignedSearchQuery, selectedAgencyFilter, assignedSelectedRegion, assignedSelectedCity]);
+  useEffect(() => setAssignedCurrentPage(1), [assignedSearchQuery, assignedSelectedRegion, assignedSelectedCity]);
   useEffect(() => setUnassignedCurrentPage(1), [unassignedSearchQuery, unassignedSelectedRegion, unassignedSelectedCity]);
 
 
@@ -862,7 +861,7 @@ export function SitesPageClient() {
                         <TableHead className="text-foreground">Site ID</TableHead>
                         <TableHead className="text-foreground">Site Name</TableHead>
                         <TableHead className="text-foreground">Location</TableHead>
-                        <TableHead className="text-foreground">Assigned Agency</TableHead>
+                        <TableHead className="text-foreground">Agency</TableHead>
                         <TableHead className="text-foreground">Guards Requested</TableHead>
                         <TableHead className="text-foreground">Incidents</TableHead>
                       </TableRow>
