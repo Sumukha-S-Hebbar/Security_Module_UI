@@ -110,7 +110,6 @@ export default function AgencyPatrollingOfficersPage() {
     const [isUploading, setIsUploading] = useState(false);
     const [isAdding, setIsAdding] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
-    const [expandedOfficerId, setExpandedOfficerId] = useState<number | null>(null);
     const [newlyAddedOfficerId, setNewlyAddedOfficerId] = useState<number | null>(null);
 
     const [currentPage, setCurrentPage] = useState(1);
@@ -341,11 +340,6 @@ export default function AgencyPatrollingOfficersPage() {
 
     const handleRowClick = (officerId: number) => {
         router.push(`/agency/patrolling-officers/${officerId}`);
-    };
-
-    const handleExpandClick = (e: React.MouseEvent, officerId: number) => {
-        e.stopPropagation();
-        setExpandedOfficerId(prevId => (prevId === officerId ? null : officerId));
     };
 
     const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
@@ -617,13 +611,12 @@ export default function AgencyPatrollingOfficersPage() {
                     <TableBody>
                         {patrollingOfficers.length > 0 ? (
                             patrollingOfficers.map((patrollingOfficer) => {
-                                const isExpanded = expandedOfficerId === patrollingOfficer.id;
                                 const officerName = `${patrollingOfficer.first_name} ${patrollingOfficer.last_name || ''}`.trim();
                                 const isNewlyAdded = newlyAddedOfficerId === patrollingOfficer.id;
                                 
                                 return (
-                                <Fragment key={patrollingOfficer.id}>
                                     <TableRow 
+                                    key={patrollingOfficer.id}
                                     onClick={() => handleRowClick(patrollingOfficer.id)}
                                     className={cn(
                                         "cursor-pointer hover:bg-accent hover:text-accent-foreground group",
@@ -655,18 +648,10 @@ export default function AgencyPatrollingOfficersPage() {
                                         </div>
                                     </TableCell>
                                     <TableCell>
-                                      <Button
-                                        variant="link"
-                                        className="p-0 h-auto flex items-center gap-2 text-accent group-hover:text-accent-foreground"
-                                        onClick={(e) => handleExpandClick(e, patrollingOfficer.id)}
-                                        disabled={patrollingOfficer.sites_assigned_count === 0}
-                                        >
+                                        <div className="flex items-center gap-2 font-medium">
                                             <Building2 className="h-4 w-4" />
                                             {patrollingOfficer.sites_assigned_count}
-                                            {patrollingOfficer.sites_assigned_count > 0 && (
-                                                <ChevronDown className={cn("h-4 w-4 transition-transform", isExpanded && "rotate-180")} />
-                                            )}
-                                        </Button>
+                                        </div>
                                     </TableCell>
                                     <TableCell>
                                         <div className="flex items-center gap-2 text-sm">
@@ -675,41 +660,8 @@ export default function AgencyPatrollingOfficersPage() {
                                         </div>
                                     </TableCell>
                                     </TableRow>
-                                    {isExpanded && patrollingOfficer.site_details && (
-                                        <TableRow className="bg-muted/50 hover:bg-muted/50">
-                                            <TableCell colSpan={5} className="p-0">
-                                                <div className="p-4">
-                                                    <h4 className="font-semibold mb-2">Site Assigned to {officerName}</h4>
-                                                    <Table>
-                                                        <TableHeader>
-                                                            <TableRow className="border-b-primary/20 hover:bg-transparent">
-                                                                <TableHead className="text-foreground">Towerbuddy ID</TableHead>
-                                                                <TableHead className="text-foreground">Site ID</TableHead>
-                                                                <TableHead className="text-foreground">Site Name</TableHead>
-                                                            </TableRow>
-                                                        </TableHeader>
-                                                        <TableBody>
-                                                            <TableRow 
-                                                                key={patrollingOfficer.site_details.id} 
-                                                                onClick={() => router.push(`/agency/sites/${patrollingOfficer.site_details!.id}`)}
-                                                                className="cursor-pointer hover:bg-accent hover:text-accent-foreground group"
-                                                            >
-                                                                <TableCell>
-                                                                    <Button asChild variant="link" className="p-0 h-auto font-medium text-accent group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
-                                                                    <Link href={`/agency/sites/${patrollingOfficer.site_details!.id}`}>{patrollingOfficer.site_details.tb_site_id}</Link>
-                                                                    </Button>
-                                                                </TableCell>
-                                                                <TableCell className="font-medium">{patrollingOfficer.site_details.org_site_id}</TableCell>
-                                                                <TableCell>{patrollingOfficer.site_details.site_name}</TableCell>
-                                                            </TableRow>
-                                                        </TableBody>
-                                                    </Table>
-                                                </div>
-                                            </TableCell>
-                                        </TableRow>
-                                    )}
-                                </Fragment>
-                            )})
+                                )
+                            })
                         ) : (
                             <TableRow>
                               <TableCell colSpan={5} className="h-24 text-center text-muted-foreground font-medium">
