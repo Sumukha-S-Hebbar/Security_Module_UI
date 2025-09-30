@@ -311,7 +311,7 @@ export function IncidentsPageClient() {
                   <TableHead className="text-foreground">Incident ID</TableHead>
                   <TableHead className="text-foreground">Incident Date</TableHead>
                   <TableHead className="text-foreground">Incident Time</TableHead>
-                  <TableHead className="text-foreground">Site</TableHead>
+                  <TableHead className="text-foreground">Site Name</TableHead>
                   <TableHead className="text-foreground">Guard</TableHead>
                   <TableHead className="text-foreground">Patrolling Officer</TableHead>
                   <TableHead className="text-foreground">Status</TableHead>
