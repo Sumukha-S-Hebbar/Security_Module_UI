@@ -624,7 +624,7 @@ export default function AgencyReportPage() {
             {isAssignedSitesLoading ? (
                 <div className="flex items-center justify-center h-40"><Loader2 className="h-6 w-6 animate-spin" /></div>
             ) : paginatedAssignedSites && paginatedAssignedSites.results.length > 0 ? (
-                <ScrollArea className="max-h-[22rem]">
+                <ScrollArea className="max-h-[22rem] h-auto">
                     <Table>
                         <TableHeader>
                             <TableRow>
@@ -765,7 +765,7 @@ export default function AgencyReportPage() {
           {isIncidentsLoading ? (
             <div className="flex items-center justify-center p-10"><Loader2 className="w-8 h-8 animate-spin" /></div>
           ) : paginatedIncidents && paginatedIncidents.results.length > 0 ? (
-            <ScrollArea className="max-h-[22rem]">
+            <ScrollArea className="max-h-[22rem] h-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
