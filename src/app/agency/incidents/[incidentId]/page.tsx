@@ -35,10 +35,13 @@ import type { Organization, Incident } from '@/types';
 
 
 const incidentTypes = [
-  'Theft',
-  'Vandalism',
-  'Safety Hazard',
-  'Other',
+    'SOS',
+    'Theft',
+    'Vandalism',
+    'Trespassing',
+    'Suspicious Activity',
+    'Safety Hazard',
+    'Others',
 ] as const;
 
 type IncidentDetails = {
