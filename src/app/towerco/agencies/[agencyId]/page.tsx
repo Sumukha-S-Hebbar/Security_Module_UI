@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
@@ -205,39 +206,40 @@ export default function AgencyReportPage() {
   }, []);
 
   const fetchIncidents = useCallback(async (url?: string) => {
-      if (!loggedInOrg || !agencyId) return;
-      setIsIncidentsLoading(true);
-      const token = localStorage.getItem('token') || undefined;
-      
-      let fetchUrl = url;
-      
-      if (!fetchUrl) {
-          const baseUrl = `/security/api/orgs/${loggedInOrg.code}/security-agencies/${agencyId}/incidents/`;
-          const queryParams = new URLSearchParams();
-          if (incidentsYearFilter !== 'all') queryParams.append('year', incidentsYearFilter);
-          if (incidentsMonthFilter !== 'all') queryParams.append('month', (parseInt(incidentsMonthFilter) + 1).toString());
-          if (incidentsStatusFilter !== 'all') {
-            let apiStatus = '';
-              if (incidentsStatusFilter === 'under-review') {
-                apiStatus = 'Under Review';
-              } else {
-                apiStatus = incidentsStatusFilter.charAt(0).toUpperCase() + incidentsStatusFilter.slice(1);
-              }
-            queryParams.append('incident_status', apiStatus);
-          }
-           fetchUrl = `${baseUrl}?${queryParams.toString()}`;
-      }
-      
+    if (!loggedInOrg || !agencyId || !reportData?.name) return;
+    setIsIncidentsLoading(true);
+    const token = localStorage.getItem('token') || undefined;
+    
+    let fetchUrl = url;
+    
+    if (!fetchUrl) {
+        const baseUrl = `/security/api/orgs/${loggedInOrg.code}/incidents/list/`;
+        const queryParams = new URLSearchParams();
+        queryParams.append('agency_name', reportData.name);
+        if (incidentsYearFilter !== 'all') queryParams.append('year', incidentsYearFilter);
+        if (incidentsMonthFilter !== 'all') queryParams.append('month', (parseInt(incidentsMonthFilter) + 1).toString());
+        if (incidentsStatusFilter !== 'all') {
+          let apiStatus = '';
+            if (incidentsStatusFilter === 'under-review') {
+              apiStatus = 'Under Review';
+            } else {
+              apiStatus = incidentsStatusFilter.charAt(0).toUpperCase() + incidentsStatusFilter.slice(1);
+            }
+          queryParams.append('incident_status', apiStatus);
+        }
+         fetchUrl = `${baseUrl}?${queryParams.toString()}`;
+    }
+    
 
-      try {
-        const response = await fetchData<PaginatedResponse<IncidentItem>>(fetchUrl, token);
-        setPaginatedIncidents(response || null);
-      } catch (error) {
-        toast({ variant: 'destructive', title: 'Error', description: 'Failed to load incidents.'});
-      } finally {
-        setIsIncidentsLoading(false);
-      }
-  }, [loggedInOrg, agencyId, toast, incidentsYearFilter, incidentsMonthFilter, incidentsStatusFilter]);
+    try {
+      const response = await fetchData<PaginatedResponse<IncidentItem>>(fetchUrl, token);
+      setPaginatedIncidents(response || null);
+    } catch (error) {
+      toast({ variant: 'destructive', title: 'Error', description: 'Failed to load incidents.'});
+    } finally {
+      setIsIncidentsLoading(false);
+    }
+  }, [loggedInOrg, agencyId, toast, incidentsYearFilter, incidentsMonthFilter, incidentsStatusFilter, reportData?.name]);
 
 
   useEffect(() => {
@@ -837,5 +839,7 @@ export default function AgencyReportPage() {
     </div>
   );
 }
+
+    
 
     
