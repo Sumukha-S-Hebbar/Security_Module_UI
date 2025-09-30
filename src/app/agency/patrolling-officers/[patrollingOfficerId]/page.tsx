@@ -326,7 +326,7 @@ export default function AgencyPatrollingOfficerReportPage() {
           </Button>
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Patrolling Officer Report</h1>
-            <p className="text-muted-foreground font-medium">Detailed overview for {officerName}.</p>
+            <p className="text-muted-foreground font-medium">Detailed overview for ${officerName}.</p>
           </div>
         </div>
         <Button onClick={handleDownloadReport} className="bg-[#00B4D8] hover:bg-[#00B4D8]/90">
@@ -345,8 +345,8 @@ export default function AgencyPatrollingOfficerReportPage() {
                         <AvatarFallback>{officerName.charAt(0)}</AvatarFallback>
                       </Avatar>
                       <div>
-                        <CardTitle className="text-2xl">{officerName}</CardTitle>
-                        <p className="font-medium text-foreground">ID: {reportData.employee_id}</p>
+                        <CardTitle className="text-2xl">${officerName}</CardTitle>
+                        <p className="font-medium text-foreground">ID: ${reportData.employee_id}</p>
                       </div>
                     </div>
                   </CardHeader>
@@ -478,7 +478,7 @@ export default function AgencyPatrollingOfficerReportPage() {
       <Card ref={assignedSitesTableRef}>
         <CardHeader>
           <CardTitle className="flex items-center gap-2"><MapPin className="h-5 w-5"/>Assigned Sites</CardTitle>
-          <CardDescription className="font-medium">A detailed list of all sites assigned to {officerName}.</CardDescription>
+          <CardDescription className="font-medium">A detailed list of all sites assigned to ${officerName}.</CardDescription>
         </CardHeader>
         <CardContent>
           {reportData.assigned_sites.length > 0 ? (
@@ -584,7 +584,7 @@ export default function AgencyPatrollingOfficerReportPage() {
         <CardHeader className="flex flex-row items-start justify-between gap-4">
           <div className="flex-grow">
             <CardTitle>Incidents Log</CardTitle>
-            <CardDescription className="font-medium">A log of emergency incidents at sites managed by {officerName}.</CardDescription>
+            <CardDescription className="font-medium">A log of emergency incidents at sites managed by ${officerName}.</CardDescription>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
              <Select value={selectedStatus} onValueChange={setSelectedStatus}>
@@ -676,7 +676,7 @@ export default function AgencyPatrollingOfficerReportPage() {
           <CardFooter>
             <div className="flex items-center justify-between w-full">
               <div className="text-sm text-muted-foreground font-medium">
-                  Showing {paginatedIncidents.results.length} of {paginatedIncidents.count} incidents.
+                  Showing ${paginatedIncidents.results.length} of ${paginatedIncidents.count} incidents.
               </div>
               <div className="flex items-center gap-2">
                   <Button
