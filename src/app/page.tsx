@@ -28,6 +28,7 @@ import { useToast } from '@/hooks/use-toast';
 import type { Organization, User, Subcontractor } from '@/types';
 import { useForm } from 'react-hook-form';
 import { Form } from '@/components/ui/form';
+import { cn } from '@/lib/utils';
 
 interface LoginResponse {
   token: string;
@@ -179,8 +180,8 @@ export default function RootPage() {
         <div className="w-full md:w-3/5 bg-card text-card-foreground p-8">
           <Tabs defaultValue="signin" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="signin">SIGN IN</TabsTrigger>
-              <TabsTrigger value="signup">SIGN UP</TabsTrigger>
+              <TabsTrigger value="signin" className="data-[state=active]:bg-header data-[state=active]:text-header-foreground">SIGN IN</TabsTrigger>
+              <TabsTrigger value="signup" className="data-[state=active]:bg-header data-[state=active]:text-header-foreground">SIGN UP</TabsTrigger>
             </TabsList>
             
             <TabsContent value="signin" className="mt-8">
@@ -323,5 +324,3 @@ export default function RootPage() {
     </div>
   );
 }
-
-    
