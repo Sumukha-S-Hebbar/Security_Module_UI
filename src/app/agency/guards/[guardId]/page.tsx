@@ -596,14 +596,14 @@ export default function AgencyGuardReportPage() {
           {isIncidentsLoading ? (
             <div className="flex items-center justify-center p-10"><Loader2 className="w-8 h-8 animate-spin" /></div>
           ) : paginatedIncidents && paginatedIncidents.results.length > 0 ? (
-            <ScrollArea className="h-[480px]">
+            <ScrollArea className="max-h-72">
               <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead>Incident ID</TableHead>
                     <TableHead>Incident Date</TableHead>
                     <TableHead>Incident Time</TableHead>
-                    <TableHead>Site</TableHead>
+                    <TableHead>Site Name</TableHead>
                     <TableHead>Status</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -664,5 +664,3 @@ export default function AgencyGuardReportPage() {
     </div>
   );
 }
-
-    
