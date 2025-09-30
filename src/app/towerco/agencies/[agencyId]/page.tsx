@@ -72,6 +72,28 @@ import { fetchData } from '@/lib/api';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
 
+type PaginatedIncidents = {
+    count: number;
+    next: string | null;
+    previous: string | null;
+    results: {
+        id: number;
+        incident_id: string;
+        tb_site_id: string;
+        incident_time: string;
+        incident_status: "Active" | "Under Review" | "Resolved";
+        site_details: {
+            site_name: string;
+        };
+        raised_by_guard_details: {
+            first_name: string;
+            last_name: string | null;
+        } | null;
+        incident_type: string;
+        incident_description: string;
+    }[];
+};
+
 type AgencyReportData = {
     id: number;
     subcon_id: string;
@@ -105,22 +127,7 @@ type AgencyReportData = {
         total_incidents_count: number;
         resolved_incidents_count: number;
     }[];
-    incidents: {
-        id: number;
-        incident_id: string;
-        tb_site_id: string;
-        incident_time: string;
-        incident_status: "Active" | "Under Review" | "Resolved";
-        site_details: {
-            site_name: string;
-        };
-        raised_by_guard_details: {
-            first_name: string;
-            last_name: string | null;
-        } | null;
-        incident_type: string;
-        incident_description: string;
-    }[];
+    incidents: PaginatedIncidents;
 };
 
 const getPerformanceColor = (value: number) => {
@@ -257,9 +264,9 @@ export default function AgencyReportPage() {
   }, [performanceMetrics]);
   
   const incidentAvailableYears = useMemo(() => {
-    if (!reportData) return [];
+    if (!reportData || !reportData.incidents || !reportData.incidents.results) return [];
     const years = new Set(
-      reportData.incidents.map((incident) => new Date(incident.incident_time).getFullYear().toString())
+      reportData.incidents.results.map((incident) => new Date(incident.incident_time).getFullYear().toString())
     );
     if (years.size === 0) {
         years.add(new Date().getFullYear().toString());
@@ -268,8 +275,8 @@ export default function AgencyReportPage() {
   }, [reportData]);
   
   const filteredIncidents = useMemo(() => {
-    if (!reportData) return [];
-    return reportData.incidents.filter(incident => {
+    if (!reportData || !reportData.incidents || !reportData.incidents.results) return [];
+    return reportData.incidents.results.filter(incident => {
         const incidentDate = new Date(incident.incident_time);
         
         const statusMatch = incidentsStatusFilter === 'all' || incident.incident_status.toLowerCase().replace(' ', '_') === incidentsStatusFilter.replace('-', '_');
