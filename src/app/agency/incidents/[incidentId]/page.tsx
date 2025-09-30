@@ -56,6 +56,8 @@ type IncidentDetails = {
         lat: number;
         lng: number;
         site_address_line1: string;
+        city: string;
+        region: string;
     };
     subcon_details: {
         id: number;
@@ -356,16 +358,19 @@ export default function AgencyIncidentReportPage() {
             <CardContent className="text-sm space-y-3">
                <div>
                   <div className="text-xl font-bold">{site_details.site_name}</div>
-                  <p className="font-medium">ID: {site_details.tb_site_id}</p>
+                  <p className="font-medium">Towerbuddy ID: {site_details.tb_site_id}</p>
+                  <p className="font-medium">Site ID: {site_details.org_site_id}</p>
               </div>
               <div className='font-medium pt-2 border-t'>
-                <p className='flex items-start gap-2'><MapPin className="h-4 w-4 mt-0.5" /><span>{site_details.site_address_line1}</span></p>
+                <p className='font-semibold'>Address</p>
+                <p className='flex items-start gap-2'><MapPin className="h-4 w-4 mt-0.5" /><span>{site_details.site_address_line1}, {site_details.city}, {site_details.region}</span></p>
               </div>
               {site_details.lat && site_details.lng && (
                 <div className='font-medium'>
+                    <p className="font-semibold">Coordinates</p>
                     <p className='flex items-start gap-2'>
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-globe mt-0.5 shrink-0"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
-                        <span>{site_details.lat}, {site_details.lng}</span>
+                        <span>Lat: {site_details.lat.toFixed(4)}, Lng: {site_details.lng.toFixed(4)}</span>
                     </p>
                 </div>
               )}

@@ -374,13 +374,15 @@ export default function IncidentReportPage() {
                 <p className="font-medium">Site ID: {incident.site_details.org_site_id}</p>
               </div>
               <div className='font-medium pt-2 border-t'>
-                <p className='flex items-start gap-2'><MapPin className="h-4 w-4 mt-0.5" /><span>{incident.site_details.site_address_line1}, {incident.site_details.city}</span></p>
+                <p className='font-semibold'>Address</p>
+                <p className='flex items-start gap-2'><MapPin className="h-4 w-4 mt-0.5" /><span>{incident.site_details.site_address_line1}, {incident.site_details.city}, {incident.site_details.region}</span></p>
               </div>
               {incident.site_details.lat && incident.site_details.lng && (
                 <div className='font-medium'>
+                    <p className="font-semibold">Coordinates</p>
                     <p className='flex items-start gap-2'>
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-globe mt-0.5 shrink-0"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
-                        <span>{incident.site_details.lat}, {incident.site_details.lng}</span>
+                        <span>Lat: {incident.site_details.lat.toFixed(4)}, Lng: {incident.site_details.lng.toFixed(4)}</span>
                     </p>
                 </div>
               )}
