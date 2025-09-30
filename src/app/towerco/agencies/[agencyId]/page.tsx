@@ -603,8 +603,8 @@ export default function AgencyReportPage() {
                             <TableRow>
                             <TableHead className="text-foreground">Towerbuddy ID</TableHead>
                             <TableHead className="text-foreground">Site ID</TableHead>
-                            <TableHead className="text-foreground">Site</TableHead>
-                            <TableHead className="text-foreground">Assigned On</TableHead>
+                            <TableHead className="text-foreground">Site Name</TableHead>
+                            <TableHead className="text-foreground">Location</TableHead>
                             <TableHead className="text-center text-foreground">Guards Requested</TableHead>
                             <TableHead className="text-center text-foreground">Incidents</TableHead>
                             <TableHead className="text-center text-foreground">Resolved</TableHead>
@@ -623,15 +623,11 @@ export default function AgencyReportPage() {
                                     </TableCell>
                                 <TableCell>
                                     <div className="font-medium">{site.site_name}</div>
-                                    <div className="text-sm text-muted-foreground flex items-center gap-1 font-medium group-hover:text-accent-foreground">
-                                    <MapPin className="w-3 h-3" />
-                                    {site.registered_address_line1}
-                                    </div>
                                 </TableCell>
                                 <TableCell className="font-medium">
-                                    <ClientDate date={site.assigned_on} format="date" />
+                                  {site.city}, {site.region}
                                 </TableCell>
-                                    <TableCell className="text-center">
+                                <TableCell className="text-center">
                                     <div className="flex items-center justify-center gap-2 font-medium">
                                         <Users className="h-4 w-4 text-muted-foreground group-hover:text-accent-foreground" />
                                         <span>{site.number_of_guards}</span>
