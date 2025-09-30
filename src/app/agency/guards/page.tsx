@@ -187,7 +187,7 @@ export default function AgencyGuardsPage() {
             setCheckedOutCount(response?.count || 0);
         }
     } catch (error) {
-        toast({ variant: 'destructive', title: 'Error', description: `Failed to load ${status.replace('_', ' ')} guards.` });
+        toast({ variant: 'destructive', title: 'Error', description: `Failed to load ${status === 'checked_in' ? 'checked in' : 'checked out'} guards.` });
     } finally {
         setIsLoading(false);
     }
@@ -225,13 +225,13 @@ export default function AgencyGuardsPage() {
       if (loggedInOrg && activeTab === 'checked-in') {
         fetchGuards('checked_in', checkedInCurrentPage);
       }
-  }, [loggedInOrg, fetchGuards, activeTab, checkedInCurrentPage]);
+  }, [loggedInOrg, fetchGuards, activeTab, checkedInCurrentPage, searchQuery, selectedSiteFilter, selectedPatrollingOfficerFilter]);
 
   useEffect(() => {
       if (loggedInOrg && activeTab === 'checked-out') {
         fetchGuards('checked_out', checkedOutCurrentPage);
       }
-  }, [loggedInOrg, fetchGuards, activeTab, checkedOutCurrentPage]);
+  }, [loggedInOrg, fetchGuards, activeTab, checkedOutCurrentPage, searchQuery, selectedSiteFilter, selectedPatrollingOfficerFilter]);
   
   useEffect(() => {
       setCheckedInCurrentPage(1);
@@ -873,7 +873,7 @@ export default function AgencyGuardsPage() {
                             variant="outline"
                             size="sm"
                             onClick={() => handlePagination('next')}
-                            disabled={isLoading || (activeTab === 'checked-in' ? checkedInCurrentPage === totalCheckedInPages : checkedOutCurrentPage === totalCheckedOutPages)}
+                            disabled={isLoading || (activeTab === 'checked-in' ? checkedInCurrentPage >= totalCheckedInPages : checkedOutCurrentPage >= totalCheckedOutPages)}
                         >
                             Next
                         </Button>
