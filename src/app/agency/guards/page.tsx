@@ -133,8 +133,6 @@ export default function AgencyGuardsPage() {
   const [isAdding, setIsAdding] = useState(false);
   
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedSiteFilter, setSelectedSiteFilter] = useState('all');
-  const [selectedPatrollingOfficerFilter, setSelectedPatrollingOfficerFilter] = useState('all');
   const [activeTab, setActiveTab] = useState('checked-in');
 
   const [checkedInCount, setCheckedInCount] = useState(0);
@@ -159,27 +157,25 @@ export default function AgencyGuardsPage() {
     }
   }, []);
 
-  const fetchGuards = useCallback(async (status: 'checked_in' | 'checked_out', page: number) => {
+  const fetchGuards = useCallback(async (status: 'checked-in' | 'checked-out', page: number) => {
     if (!loggedInOrg) return;
     setIsLoading(true);
     const token = localStorage.getItem('token') || undefined;
     const orgCode = loggedInOrg.code;
 
+    const checkInStatus = status === 'checked-in' ? 'checked_in' : 'checked_out';
     const params = new URLSearchParams({
-        check_in_status: status,
         page: page.toString(),
         page_size: ITEMS_PER_PAGE.toString(),
     });
     if (searchQuery) params.append('search', searchQuery);
-    if (selectedSiteFilter !== 'all') params.append('site', selectedSiteFilter);
-    if (selectedPatrollingOfficerFilter !== 'all') params.append('patrol_officer', selectedPatrollingOfficerFilter);
 
     try {
         const response = await fetchData<PaginatedGuardsResponse>(
-            `/security/api/agency/${orgCode}/guards/list/?${params.toString()}`,
+            `/security/api/agency/${orgCode}/guards/list/?check_in_status=${checkInStatus}&${params.toString()}`,
             token
         );
-        if (status === 'checked_in') {
+        if (status === 'checked-in') {
             setCheckedInGuards(response?.results || []);
             setCheckedInCount(response?.count || 0);
         } else {
@@ -187,11 +183,11 @@ export default function AgencyGuardsPage() {
             setCheckedOutCount(response?.count || 0);
         }
     } catch (error) {
-        toast({ variant: 'destructive', title: 'Error', description: `Failed to load ${status === 'checked_in' ? 'checked in' : 'checked out'} guards.` });
+        toast({ variant: 'destructive', title: 'Error', description: `Failed to load ${status === 'checked-in' ? 'checked in' : 'checked out'} guards.` });
     } finally {
         setIsLoading(false);
     }
-  }, [loggedInOrg, toast, searchQuery, selectedSiteFilter, selectedPatrollingOfficerFilter]);
+  }, [loggedInOrg, toast, searchQuery]);
 
   const fetchSupportingData = useCallback(async () => {
     if (!loggedInOrg) return;
@@ -224,17 +220,17 @@ export default function AgencyGuardsPage() {
   useEffect(() => {
     if (loggedInOrg) {
       if (activeTab === 'checked-in') {
-        fetchGuards('checked_in', checkedInCurrentPage);
+        fetchGuards('checked-in', checkedInCurrentPage);
       } else {
-        fetchGuards('checked_out', checkedOutCurrentPage);
+        fetchGuards('checked-out', checkedOutCurrentPage);
       }
     }
-  }, [loggedInOrg, fetchGuards, activeTab, checkedInCurrentPage, checkedOutCurrentPage, searchQuery, selectedSiteFilter, selectedPatrollingOfficerFilter]);
+  }, [loggedInOrg, fetchGuards, activeTab, checkedInCurrentPage, checkedOutCurrentPage, searchQuery]);
   
   useEffect(() => {
       setCheckedInCurrentPage(1);
       setCheckedOutCurrentPage(1);
-  }, [searchQuery, selectedSiteFilter, selectedPatrollingOfficerFilter]);
+  }, [searchQuery]);
 
     const handlePagination = (direction: 'next' | 'prev') => {
         if (activeTab === 'checked-in') {
@@ -373,7 +369,7 @@ export default function AgencyGuardsPage() {
         addGuardForm.reset();
         setIsAdding(false);
         setIsAddDialogOpen(false);
-        await fetchGuards(activeTab as 'checked_in' | 'checked_out', 1);
+        await fetchGuards(activeTab as 'checked-in' | 'checked-out', 1);
 
     } catch(error: any) {
          toast({
@@ -653,7 +649,7 @@ export default function AgencyGuardsPage() {
                     <Skeleton className="h-12 w-full" />
                 </div>
             ) : (
-             <Tabs defaultValue="checked-in" onValueChange={setActiveTab}>
+             <Tabs value={activeTab} onValueChange={setActiveTab}>
                 <TabsList className="grid w-full grid-cols-2">
                     <TabsTrigger value="checked-in">Checked In</TabsTrigger>
                     <TabsTrigger value="checked-out">Checked Out</TabsTrigger>
