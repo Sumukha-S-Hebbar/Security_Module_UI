@@ -605,7 +605,7 @@ export default function AgencyPatrollingOfficersPage() {
                         <TableHead>Name</TableHead>
                         <TableHead>Contact Info</TableHead>
                         <TableHead>Sites Assigned</TableHead>
-                        <TableHead>Incidents Occurred</TableHead>
+                        <TableHead>Incidents Trend</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -706,3 +706,4 @@ export default function AgencyPatrollingOfficersPage() {
       </>
     );
 }
+

@@ -695,7 +695,7 @@ export default function AgencyGuardsPage() {
                         <TableHead>Contact Info</TableHead>
                         <TableHead>Site</TableHead>
                         <TableHead>Patrolling Officer</TableHead>
-                        <TableHead>Incidents Occurred</TableHead>
+                        <TableHead>Incidents Trend</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -776,7 +776,7 @@ export default function AgencyGuardsPage() {
                         <TableHead>Contact Info</TableHead>
                         <TableHead>Site</TableHead>
                         <TableHead>Patrolling Officer</TableHead>
-                        <TableHead>Incidents Occurred</TableHead>
+                        <TableHead>Incidents Trend</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
