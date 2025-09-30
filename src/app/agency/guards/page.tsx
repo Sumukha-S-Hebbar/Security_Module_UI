@@ -691,11 +691,11 @@ export default function AgencyGuardsPage() {
                     <TableHeader>
                       <TableRow>
                         <TableHead>Guard ID</TableHead>
-                        <TableHead>Guard</TableHead>
+                        <TableHead>Guard Name</TableHead>
                         <TableHead>Contact Info</TableHead>
-                        <TableHead>Site</TableHead>
+                        <TableHead>Site Name</TableHead>
                         <TableHead>Patrolling Officer</TableHead>
-                        <TableHead>Incidents Trend</TableHead>
+                        <TableHead>Incidents</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -772,11 +772,11 @@ export default function AgencyGuardsPage() {
                     <TableHeader>
                       <TableRow>
                         <TableHead>Guard ID</TableHead>
-                        <TableHead>Guard</TableHead>
+                        <TableHead>Guard Name</TableHead>
                         <TableHead>Contact Info</TableHead>
-                        <TableHead>Site</TableHead>
+                        <TableHead>Site Name</TableHead>
                         <TableHead>Patrolling Officer</TableHead>
-                        <TableHead>Incidents Trend</TableHead>
+                        <TableHead>Incidents</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -886,6 +886,8 @@ export default function AgencyGuardsPage() {
     </>
   );
 }
+
+    
 
     
 
