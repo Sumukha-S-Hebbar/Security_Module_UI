@@ -220,18 +220,16 @@ export default function AgencyGuardsPage() {
         fetchSupportingData();
     }
   }, [loggedInOrg, fetchSupportingData]);
-
+  
   useEffect(() => {
-      if (loggedInOrg && activeTab === 'checked-in') {
+    if (loggedInOrg) {
+      if (activeTab === 'checked-in') {
         fetchGuards('checked_in', checkedInCurrentPage);
-      }
-  }, [loggedInOrg, fetchGuards, activeTab, checkedInCurrentPage, searchQuery, selectedSiteFilter, selectedPatrollingOfficerFilter]);
-
-  useEffect(() => {
-      if (loggedInOrg && activeTab === 'checked-out') {
+      } else {
         fetchGuards('checked_out', checkedOutCurrentPage);
       }
-  }, [loggedInOrg, fetchGuards, activeTab, checkedOutCurrentPage, searchQuery, selectedSiteFilter, selectedPatrollingOfficerFilter]);
+    }
+  }, [loggedInOrg, fetchGuards, activeTab, checkedInCurrentPage, checkedOutCurrentPage, searchQuery, selectedSiteFilter, selectedPatrollingOfficerFilter]);
   
   useEffect(() => {
       setCheckedInCurrentPage(1);
