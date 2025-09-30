@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
@@ -527,7 +528,7 @@ export default function SiteReportPage() {
            {isIncidentsLoading ? (
                <div className="flex items-center justify-center p-10"><Loader2 className="w-8 h-8 animate-spin" /></div>
            ) : paginatedIncidents && paginatedIncidents.results && paginatedIncidents.results.length > 0 ? (
-            <ScrollArea className="h-72">
+            <ScrollArea className="max-h-72">
               <Table>
                 <TableHeader>
                   <TableRow>

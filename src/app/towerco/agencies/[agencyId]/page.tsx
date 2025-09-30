@@ -632,12 +632,11 @@ export default function AgencyReportPage() {
             {isAssignedSitesLoading ? (
                 <div className="flex items-center justify-center h-40"><Loader2 className="h-6 w-6 animate-spin" /></div>
             ) : paginatedAssignedSites && paginatedAssignedSites.results.length > 0 ? (
-                <ScrollArea className="h-auto max-h-72">
+                <ScrollArea className="max-h-72">
                     <Table>
                         <TableHeader>
                             <TableRow>
                               <TableHead className="text-foreground">Towerbuddy ID</TableHead>
-                              <TableHead className="text-foreground">Site ID</TableHead>
                               <TableHead className="text-foreground">Site Name</TableHead>
                               <TableHead className="text-foreground">Location</TableHead>
                               <TableHead className="text-center text-foreground">Guards</TableHead>
@@ -652,9 +651,6 @@ export default function AgencyReportPage() {
                                     <Button asChild variant="link" className="p-0 h-auto font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
                                         <Link href={`/towerco/sites/${site.id}`}>{site.tb_site_id}</Link>
                                     </Button>
-                                    </TableCell>
-                                    <TableCell className="font-medium">
-                                    {site.org_site_id}
                                     </TableCell>
                                 <TableCell>
                                     <div className="font-medium">{site.site_name}</div>
@@ -773,7 +769,7 @@ export default function AgencyReportPage() {
           {isIncidentsLoading ? (
             <div className="flex items-center justify-center p-10"><Loader2 className="w-8 h-8 animate-spin" /></div>
           ) : paginatedIncidents && paginatedIncidents.results.length > 0 ? (
-            <ScrollArea className="h-72">
+            <ScrollArea className="max-h-72">
               <Table>
                 <TableHeader>
                   <TableRow>
