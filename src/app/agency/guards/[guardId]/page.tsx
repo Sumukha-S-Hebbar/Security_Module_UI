@@ -67,8 +67,13 @@ type GuardReportData = {
     missed_selfies: number;
     site_details: {
         id: number;
+        tb_site_id: string;
         site_name: string;
         site_address_line1: string;
+        region: string;
+        city: string;
+        lat: number;
+        lng: number;
     } | null;
     patrol_officer: {
         id: number;
@@ -379,13 +384,26 @@ export default function AgencyGuardReportPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <p className="font-semibold text-base">{reportData.site_details.site_name}</p>
+                <p className="font-semibold text-xl">{reportData.site_details.site_name}</p>
+                <p className="font-medium">Towerbuddy ID: {reportData.site_details.tb_site_id}</p>
               </div>
-              <div className="text-sm space-y-1 pt-2 border-t">
-                <p className="font-semibold">Address</p>
-                <p className="font-medium text-muted-foreground">
-                  {reportData.site_details.site_address_line1}
-                </p>
+              <div className="text-sm space-y-3 pt-4 border-t">
+                 <div className="flex items-start gap-3">
+                    <MapPin className="h-4 w-4 mt-1 text-primary" />
+                    <div>
+                        <p className="font-semibold">Address</p>
+                        <p className="font-medium text-muted-foreground">
+                        {reportData.site_details.site_address_line1}, {reportData.site_details.city}, {reportData.site_details.region}
+                        </p>
+                    </div>
+                 </div>
+                 <div className="flex items-start gap-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-globe mt-1 shrink-0 text-primary"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+                    <div>
+                        <p className="font-semibold">Coordinates</p>
+                        <p className="font-medium text-muted-foreground">Lat: {reportData.site_details.lat.toFixed(4)}, Lng: {reportData.site_details.lng.toFixed(4)}</p>
+                    </div>
+                </div>
               </div>
               <Button asChild variant="link" className="p-0 h-auto font-medium">
                 <Link href={`/agency/sites/${reportData.site_details.id}`}>
@@ -644,3 +662,5 @@ export default function AgencyGuardReportPage() {
     </div>
   );
 }
+
+    
