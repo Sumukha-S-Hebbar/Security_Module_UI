@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
@@ -217,7 +216,7 @@ export default function AgencyReportPage() {
         const queryParams = new URLSearchParams();
         queryParams.append('agency_name', reportData.name);
         if (incidentsYearFilter !== 'all') queryParams.append('year', incidentsYearFilter);
-        if (incidentsMonthFilter !== 'all') queryParams.append('month', (parseInt(incidentsMonthFilter) + 1).toString());
+        if (incidentsMonthFilter !== 'all') queryParams.append('month', incidentsMonthFilter); // API expects 1-based month
         if (incidentsStatusFilter !== 'all') {
           let apiStatus = '';
             if (incidentsStatusFilter === 'under-review') {
@@ -254,17 +253,23 @@ export default function AgencyReportPage() {
           
           const queryParams = new URLSearchParams();
           if (performanceSelectedYear !== 'all') queryParams.append('year', performanceSelectedYear);
-          if (performanceSelectedMonth !== 'all') queryParams.append('month', (parseInt(performanceSelectedMonth) + 1).toString());
+          if (performanceSelectedMonth !== 'all') queryParams.append('month', (parseInt(performanceSelectedMonth) + 1).toString()); // API expects 1-based month
 
           if (queryParams.toString()) {
             url += `?${queryParams.toString()}`;
           }
 
           try {
-              const response = await fetchData<AgencyReportData>(url, token);
-              setReportData(response || null);
-              setPaginatedAssignedSites(response?.assigned_sites || null);
-              setPaginatedIncidents(response?.incidents || null);
+              const response = await fetchData<{data: AgencyReportData}>(url, token);
+              if (response && response.data) {
+                setReportData(response.data);
+                setPaginatedAssignedSites(response.data.assigned_sites || null);
+                setPaginatedIncidents(response.data.incidents || null);
+              } else {
+                setReportData(null);
+                setPaginatedAssignedSites(null);
+                setPaginatedIncidents(null);
+              }
           } catch (error) {
               console.error("Failed to fetch agency report:", error);
               toast({
@@ -281,8 +286,10 @@ export default function AgencyReportPage() {
   }, [loggedInOrg, agencyId, toast, performanceSelectedYear, performanceSelectedMonth]);
 
   useEffect(() => {
-      fetchIncidents();
-  }, [fetchIncidents])
+      if (reportData) { // only fetch incidents if reportData is loaded
+        fetchIncidents();
+      }
+  }, [fetchIncidents, reportData])
 
   const handleAssignedSitesPagination = useCallback(async (url: string | null) => {
     if (!url) return;
@@ -301,7 +308,7 @@ export default function AgencyReportPage() {
   }, [toast]);
 
   const performanceMetrics = useMemo(() => {
-    if (!reportData) return null;
+    if (!reportData || !reportData.performance) return null;
     const { performance } = reportData;
     return {
       overall: parsePerformanceValue(performance.overall_performance),
@@ -752,7 +759,7 @@ export default function AgencyReportPage() {
                 <SelectContent>
                   <SelectItem value="all" className="font-medium">All Months</SelectItem>
                   {Array.from({ length: 12 }, (_, i) => (
-                    <SelectItem key={i} value={i.toString()} className="font-medium">
+                    <SelectItem key={i} value={(i + 1).toString()} className="font-medium">
                       {new Date(0, i).toLocaleString('default', { month: 'long' })}
                     </SelectItem>
                   ))}
@@ -765,7 +772,7 @@ export default function AgencyReportPage() {
           {isIncidentsLoading ? (
             <div className="flex items-center justify-center p-10"><Loader2 className="w-8 h-8 animate-spin" /></div>
           ) : paginatedIncidents && paginatedIncidents.results.length > 0 ? (
-            <ScrollArea className="max-h-[22rem] h-auto">
+            <ScrollArea className="h-auto max-h-72">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -839,7 +846,5 @@ export default function AgencyReportPage() {
     </div>
   );
 }
-
-    
 
     
