@@ -8,31 +8,27 @@ import { Card, CardContent } from '@/components/ui/card';
 import { ShieldAlert, ShieldQuestion, CheckCircle2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
+
+type IncidentCounts = {
+    active_incidents_count: number;
+    under_review_incidents_count: number;
+    resolved_incidents_count: number;
+}
+
 export function IncidentStatusSummary({ 
-  incidents,
+  counts,
   onStatusSelect,
   selectedStatus,
 }: { 
-  incidents: any[]; // Using any to accept API response structure
+  counts: IncidentCounts;
   onStatusSelect: (status: string) => void;
   selectedStatus: string;
 }) {
-  const summary = useMemo(() => {
-    return incidents.reduce(
-      (acc, incident) => {
-        if (incident.incident_status === 'Active') acc.active++;
-        if (incident.incident_status === 'Under Review') acc.underReview++;
-        if (incident.incident_status === 'Resolved') acc.resolved++;
-        return acc;
-      },
-      { active: 0, underReview: 0, resolved: 0 }
-    );
-  }, [incidents]);
 
   const statusCards = [
     {
       status: 'active',
-      count: summary.active,
+      count: counts.active_incidents_count,
       label: 'Active',
       icon: ShieldAlert,
       color: 'text-destructive',
@@ -41,7 +37,7 @@ export function IncidentStatusSummary({
     },
     {
       status: 'under-review',
-      count: summary.underReview,
+      count: counts.under_review_incidents_count,
       label: 'Under Review',
       icon: ShieldQuestion,
       color: 'text-[#FFC107]',
@@ -50,7 +46,7 @@ export function IncidentStatusSummary({
     },
     {
       status: 'resolved',
-      count: summary.resolved,
+      count: counts.resolved_incidents_count,
       label: 'Resolved',
       icon: CheckCircle2,
       color: 'text-chart-2',

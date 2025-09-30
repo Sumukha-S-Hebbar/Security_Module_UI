@@ -49,11 +49,18 @@ type IncidentListItem = {
     patrol_officer_name: string;
 };
 
+type IncidentCounts = {
+    active_incidents_count: number;
+    under_review_incidents_count: number;
+    resolved_incidents_count: number;
+}
+
 type PaginatedIncidentsResponse = {
     count: number;
     next: string | null;
     previous: string | null;
     results: IncidentListItem[];
+    counts?: IncidentCounts;
 };
 
 const ITEMS_PER_PAGE = 10;
@@ -63,8 +70,8 @@ export function IncidentsPageClient() {
   const searchParams = useSearchParams();
   
   const [incidents, setIncidents] = useState<IncidentListItem[]>([]);
-  const [allIncidentsForSummary, setAllIncidentsForSummary] = useState<IncidentListItem[]>([]);
   const [sites, setSites] = useState<Site[]>([]);
+  const [incidentCounts, setIncidentCounts] = useState<IncidentCounts>({ active_incidents_count: 0, under_review_incidents_count: 0, resolved_incidents_count: 0 });
   const [isLoading, setIsLoading] = useState(true);
   const [loggedInOrg, setLoggedInOrg] = useState<Organization | null>(null);
 
@@ -88,15 +95,13 @@ export function IncidentsPageClient() {
   }, []);
 
   const availableYears = useMemo(() => {
-    if (allIncidentsForSummary.length === 0) {
-        const currentYear = new Date().getFullYear();
-        return Array.from({ length: 5 }, (_, i) => (currentYear - i).toString());
+    const currentYear = new Date().getFullYear();
+    const years = new Set<string>();
+    for (let i = 0; i < 5; i++) {
+        years.add((currentYear - i).toString());
     }
-    const years = new Set(
-      allIncidentsForSummary.map((incident) => new Date(incident.incident_time).getFullYear().toString())
-    );
     return Array.from(years).sort((a, b) => parseInt(b) - parseInt(a));
-  }, [allIncidentsForSummary]);
+  }, []);
 
   useEffect(() => {
     if (!loggedInOrg) return;
@@ -104,12 +109,6 @@ export function IncidentsPageClient() {
     const fetchSupportingData = async () => {
         const token = localStorage.getItem('token') || undefined;
         
-        // Fetch all incidents for the summary cards without pagination
-        const summaryIncidentsUrl = `/security/api/agency/${loggedInOrg.code}/incidents/list/`;
-        const summaryData = await fetchData<PaginatedIncidentsResponse>(summaryIncidentsUrl, token);
-        setAllIncidentsForSummary(summaryData?.results || []);
-
-        // Fetch sites for the filter dropdown
         const sitesUrl = `/security/api/agency/${loggedInOrg.code}/sites/list/`;
         const sitesData = await fetchData<{results: Site[]}>(sitesUrl, token);
         setSites(sitesData?.results || []);
@@ -125,8 +124,10 @@ export function IncidentsPageClient() {
       setIsLoading(true);
       const token = localStorage.getItem('token') || undefined;
       
-      let url = `/security/api/agency/${loggedInOrg.code}/incidents/list/?`;
-      const params = new URLSearchParams();
+      const params = new URLSearchParams({
+        page: currentPage.toString(),
+        page_size: ITEMS_PER_PAGE.toString(),
+      });
       
       if (selectedStatus !== 'all') {
         let apiStatus = '';
@@ -142,15 +143,16 @@ export function IncidentsPageClient() {
       if (selectedSite !== 'all') params.append('site_name', selectedSite);
       if (selectedYear !== 'all') params.append('year', selectedYear);
       if (selectedMonth !== 'all') params.append('month', selectedMonth);
-      params.append('page', currentPage.toString());
-      params.append('page_size', ITEMS_PER_PAGE.toString());
       
-      url += params.toString().replace(/\+/g, '%20');
+      const url = `/security/api/agency/${loggedInOrg.code}/incidents/list/?${params.toString()}`;
 
       try {
         const data = await fetchData<PaginatedIncidentsResponse>(url, token);
         setIncidents(data?.results || []);
         setTotalCount(data?.count || 0);
+        if (data?.counts) {
+            setIncidentCounts(data.counts);
+        }
       } catch (error) {
         console.error("Failed to fetch filtered incidents:", error);
         setIncidents([]);
@@ -235,7 +237,7 @@ export function IncidentsPageClient() {
       </div>
 
       <IncidentStatusSummary 
-        incidents={allIncidentsForSummary} 
+        counts={incidentCounts} 
         onStatusSelect={handleStatusSelectFromSummary}
         selectedStatus={selectedStatus}
       />
