@@ -306,6 +306,7 @@ export default function AgencySiteReportPage() {
 
   const { site_name, org_site_id, site_address_line1, lat, lng, guard_details, incident_trend, incidents } = reportData;
   const patrollingOfficer = reportData.patrol_officer_details?.[0]; // Assuming one PO per site
+  const fullAddress = `${site_address_line1}, ${reportData.city}, ${reportData.region}`;
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6">
@@ -334,6 +335,7 @@ export default function AgencySiteReportPage() {
               <div className="flex flex-wrap justify-between items-start gap-4">
                 <div>
                   <CardTitle className="text-2xl">{site_name}</CardTitle>
+                  <p className="font-medium">Towerbuddy ID: {reportData.tb_site_id}</p>
                   <p className="font-medium">ID: {org_site_id}</p>
                 </div>
               </div>
@@ -344,8 +346,14 @@ export default function AgencySiteReportPage() {
                   <MapPin className="h-5 w-5 mt-0.5 text-primary" />
                   <div>
                     <p className="font-semibold">Address</p>
-                    <p className="font-medium">{site_address_line1}</p>
+                    <p className="font-medium">{fullAddress}</p>
                   </div>
+                </div>
+                <div className='font-medium'>
+                    <p className='flex items-start gap-2'>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-globe mt-0.5 shrink-0"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+                        <span>Lat: {lat.toFixed(4)}, Lng: {lng.toFixed(4)}</span>
+                    </p>
                 </div>
                  <div className="flex items-start gap-3">
                   <Fence className="h-5 w-5 mt-0.5 text-primary" />
