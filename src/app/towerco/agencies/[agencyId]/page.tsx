@@ -209,26 +209,25 @@ export default function AgencyReportPage() {
       setIsIncidentsLoading(true);
       const token = localStorage.getItem('token') || undefined;
       
-      let fetchUrl = url || `/security/api/orgs/${loggedInOrg.code}/security-agencies/${agencyId}/incidents/`;
-      const queryParams = new URLSearchParams();
-
-      if (!url) { // only add filters if it's a fresh fetch, not a pagination link click
-        if (incidentsYearFilter !== 'all') queryParams.append('year', incidentsYearFilter);
-        if (incidentsMonthFilter !== 'all') queryParams.append('month', (parseInt(incidentsMonthFilter) + 1).toString());
-        if (incidentsStatusFilter !== 'all') {
-          let apiStatus = '';
-            if (incidentsStatusFilter === 'under-review') {
-              apiStatus = 'Under Review';
-            } else {
-              apiStatus = incidentsStatusFilter.charAt(0).toUpperCase() + incidentsStatusFilter.slice(1);
-            }
-          queryParams.append('incident_status', apiStatus);
-        }
+      let fetchUrl = url;
+      
+      if (!fetchUrl) {
+          const baseUrl = `/security/api/orgs/${loggedInOrg.code}/security-agencies/${agencyId}/incidents/`;
+          const queryParams = new URLSearchParams();
+          if (incidentsYearFilter !== 'all') queryParams.append('year', incidentsYearFilter);
+          if (incidentsMonthFilter !== 'all') queryParams.append('month', (parseInt(incidentsMonthFilter) + 1).toString());
+          if (incidentsStatusFilter !== 'all') {
+            let apiStatus = '';
+              if (incidentsStatusFilter === 'under-review') {
+                apiStatus = 'Under Review';
+              } else {
+                apiStatus = incidentsStatusFilter.charAt(0).toUpperCase() + incidentsStatusFilter.slice(1);
+              }
+            queryParams.append('incident_status', apiStatus);
+          }
+           fetchUrl = `${baseUrl}?${queryParams.toString()}`;
       }
-
-      if (queryParams.toString() && !url) {
-        fetchUrl += `?${queryParams.toString()}`;
-      }
+      
 
       try {
         const response = await fetchData<PaginatedResponse<IncidentItem>>(fetchUrl, token);
@@ -288,9 +287,9 @@ export default function AgencyReportPage() {
     setIsAssignedSitesLoading(true);
     const token = localStorage.getItem('token');
     try {
-        const response = await fetchData<{ assigned_sites: PaginatedResponse<AssignedSiteItem> }>(url, token || undefined);
-        if (response?.assigned_sites) {
-            setPaginatedAssignedSites(response.assigned_sites);
+        const response = await fetchData<PaginatedResponse<AssignedSiteItem>>(url, token || undefined);
+        if (response) {
+            setPaginatedAssignedSites(response);
         }
     } catch(e) {
         toast({ variant: 'destructive', title: 'Error', description: 'Failed to load next page of sites.'});
@@ -331,15 +330,15 @@ export default function AgencyReportPage() {
   }, [performanceMetrics]);
   
   const incidentAvailableYears = useMemo(() => {
-    if (!paginatedIncidents?.results) return [];
+    if (!reportData?.incidents?.results) return [];
     const years = new Set(
-      paginatedIncidents.results.map((incident) => new Date(incident.incident_time).getFullYear().toString())
+      reportData.incidents.results.map((incident) => new Date(incident.incident_time).getFullYear().toString())
     );
     if (years.size === 0) {
         years.add(new Date().getFullYear().toString());
     }
     return Array.from(years).sort((a, b) => parseInt(b) - parseInt(a));
-  }, [paginatedIncidents]);
+  }, [reportData]);
 
 
   const getStatusIndicator = (status: "Active" | "Under Review" | "Resolved") => {
@@ -764,40 +763,43 @@ export default function AgencyReportPage() {
           {isIncidentsLoading ? (
             <div className="flex items-center justify-center p-10"><Loader2 className="w-8 h-8 animate-spin" /></div>
           ) : paginatedIncidents && paginatedIncidents.results.length > 0 ? (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="text-foreground">Incident ID</TableHead>
-                  <TableHead className="text-foreground">Incident Date</TableHead>
-                  <TableHead className="text-foreground">Incident Time</TableHead>
-                  <TableHead className="text-foreground">Site Name</TableHead>
-                  <TableHead className="text-foreground">Guard</TableHead>
-                  <TableHead className="text-foreground">Status</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {paginatedIncidents.results.map((incident) => {
-                  return (
-                    <TableRow key={incident.id} onClick={() => router.push(`/towerco/incidents/${incident.id}`)} className="cursor-pointer hover:bg-accent hover:text-accent-foreground group">
-                      <TableCell>
-                        <Button asChild variant="link" className="p-0 h-auto font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
-                         <Link href={`/towerco/incidents/${incident.id}`}>{incident.incident_id}</Link>
-                        </Button>
-                      </TableCell>
-                      <TableCell className="font-medium">
-                        <ClientDate date={incident.incident_time} format="date" />
-                      </TableCell>
-                      <TableCell className="font-medium">
-                        <ClientDate date={incident.incident_time} format="time" />
-                      </TableCell>
-                      <TableCell className="font-medium">{incident.site_name}</TableCell>
-                      <TableCell className="font-medium">{incident.guard_name || 'N/A'}</TableCell>
-                      <TableCell>{getStatusIndicator(incident.incident_status)}</TableCell>
-                    </TableRow>
-                  )
-                })}
-              </TableBody>
-            </Table>
+            <ScrollArea className="max-h-[22rem]">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="text-foreground">Incident ID</TableHead>
+                    <TableHead className="text-foreground">Incident Date</TableHead>
+                    <TableHead className="text-foreground">Incident Time</TableHead>
+                    <TableHead className="text-foreground">Site Name</TableHead>
+                    <TableHead className="text-foreground">Guard</TableHead>
+                    <TableHead className="text-foreground">Status</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {paginatedIncidents.results.map((incident) => {
+                    const guardName = incident.guard_name || 'N/A';
+                    return (
+                      <TableRow key={incident.id} onClick={() => router.push(`/towerco/incidents/${incident.id}`)} className="cursor-pointer hover:bg-accent hover:text-accent-foreground group">
+                        <TableCell>
+                          <Button asChild variant="link" className="p-0 h-auto font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
+                          <Link href={`/towerco/incidents/${incident.id}`}>{incident.incident_id}</Link>
+                          </Button>
+                        </TableCell>
+                        <TableCell className="font-medium">
+                          <ClientDate date={incident.incident_time} format="date" />
+                        </TableCell>
+                        <TableCell className="font-medium">
+                          <ClientDate date={incident.incident_time} format="time" />
+                        </TableCell>
+                        <TableCell className="font-medium">{incident.site_name}</TableCell>
+                        <TableCell className="font-medium">{guardName}</TableCell>
+                        <TableCell>{getStatusIndicator(incident.incident_status)}</TableCell>
+                      </TableRow>
+                    )
+                  })}
+                </TableBody>
+              </Table>
+            </ScrollArea>
           ) : (
             <p className="text-muted-foreground text-center py-4 font-medium">
               No incidents found for this agency based on the current filters.
