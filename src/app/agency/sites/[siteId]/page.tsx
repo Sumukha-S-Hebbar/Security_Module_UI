@@ -529,7 +529,7 @@ export default function AgencySiteReportPage() {
           {isIncidentsLoading ? (
             <div className="flex items-center justify-center p-10"><Loader2 className="w-8 h-8 animate-spin" /></div>
           ) : paginatedIncidents && paginatedIncidents.results.length > 0 ? (
-            <ScrollArea className="h-[480px]">
+            <ScrollArea className="max-h-72 h-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -600,5 +600,3 @@ export default function AgencySiteReportPage() {
     </div>
   );
 }
-
-    
