@@ -677,8 +677,8 @@ export default function AgencyGuardsPage() {
             ) : (
              <Tabs defaultValue="checked-in" onValueChange={setActiveTab}>
                 <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="checked-in">Checked In ({checkedInCount})</TabsTrigger>
-                    <TabsTrigger value="checked-out">Checked Out ({checkedOutCount})</TabsTrigger>
+                    <TabsTrigger value="checked-in">Checked In</TabsTrigger>
+                    <TabsTrigger value="checked-out">Checked Out</TabsTrigger>
                 </TabsList>
                 <TabsContent value="checked-in" className="mt-4">
                   <Table>
@@ -880,5 +880,7 @@ export default function AgencyGuardsPage() {
     </>
   );
 }
+
+    
 
     
