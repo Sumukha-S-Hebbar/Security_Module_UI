@@ -738,10 +738,7 @@ export default function TowercoAgenciesPage() {
                                                     </div>
                                                 </TableCell>
                                                 <TableCell>
-                                                    <div className="text-sm">
-                                                        <p className="font-medium">{agency.registered_address_line1}</p>
-                                                        <p className="font-medium text-muted-foreground group-hover:text-accent-foreground">{agency.city}, {agency.region}</p>
-                                                    </div>
+                                                    <p className="font-medium text-muted-foreground group-hover:text-accent-foreground">{agency.city}, {agency.region}</p>
                                                 </TableCell>
                                                 <TableCell>
                                                     <div className="flex items-center gap-2">
