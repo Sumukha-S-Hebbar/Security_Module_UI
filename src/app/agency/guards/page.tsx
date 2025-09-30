@@ -222,10 +222,13 @@ export default function AgencyGuardsPage() {
   }, [loggedInOrg, fetchSupportingData]);
 
   useEffect(() => {
-      if (loggedInOrg) {
-          const currentPage = activeTab === 'checked-in' ? checkedInCurrentPage : checkedOutCurrentPage;
-          fetchGuards(activeTab as 'checked_in' | 'checked_out', currentPage);
+    if (loggedInOrg) {
+      if (activeTab === 'checked-in') {
+        fetchGuards('checked_in', checkedInCurrentPage);
+      } else {
+        fetchGuards('checked_out', checkedOutCurrentPage);
       }
+    }
   }, [loggedInOrg, fetchGuards, activeTab, checkedInCurrentPage, checkedOutCurrentPage]);
   
   useEffect(() => {
@@ -769,8 +772,8 @@ export default function AgencyGuardsPage() {
                         <TableHead>Guard ID</TableHead>
                         <TableHead>Guard</TableHead>
                         <TableHead>Contact Info</TableHead>
-                        <TableHead>Last Site</TableHead>
-                        <TableHead>Last Patrolling Officer</TableHead>
+                        <TableHead>Site</TableHead>
+                        <TableHead>Patrolling Officer</TableHead>
                         <TableHead>Incidents Occurred</TableHead>
                       </TableRow>
                     </TableHeader>
