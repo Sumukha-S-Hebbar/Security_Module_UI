@@ -496,19 +496,6 @@ export default function AgencySitesPage() {
                       className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[320px]"
                     />
                   </div>
-                  <Select value={selectedPatrollingOfficerFilter} onValueChange={setSelectedPatrollingOfficerFilter}>
-                    <SelectTrigger className="w-full sm:w-[220px] font-medium hover:bg-accent hover:text-accent-foreground">
-                      <SelectValue placeholder="Filter by Patrolling Officer" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all" className="font-medium">All Patrolling Officers</SelectItem>
-                      {patrollingOfficers.map((po) => (
-                        <SelectItem key={po.id} value={po.id.toString()} className="font-medium">
-                          {po.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
                   <Select value={assignedSelectedRegion} onValueChange={handleAssignedRegionChange}>
                     <SelectTrigger className="w-full sm:w-[180px] font-medium hover:bg-accent hover:text-accent-foreground">
                       <SelectValue placeholder="Filter by region" />
@@ -720,37 +707,38 @@ export default function AgencySitesPage() {
               )}
             </TabsContent>
           </CardContent>
-          <CardFooter>
-            <div className="flex items-center justify-between w-full">
-                <div className="text-sm text-muted-foreground font-medium">
-                    Showing {activeTab === 'assigned' ? assignedSites.length : unassignedSites.length} of {activeTab === 'assigned' ? assignedSitesCount : unassignedSitesCount} sites.
+          {(activeTab === 'assigned' && assignedSitesCount > 0) || (activeTab === 'unassigned' && unassignedSitesCount > 0) ? (
+            <CardFooter>
+                <div className="flex items-center justify-between w-full">
+                    <div className="text-sm text-muted-foreground font-medium">
+                        Showing {activeTab === 'assigned' ? assignedSites.length : unassignedSites.length} of {activeTab === 'assigned' ? assignedSitesCount : unassignedSitesCount} sites.
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handlePagination('prev', activeTab === 'assigned' ? 'assigned' : 'unassigned')}
+                            disabled={isLoading || (activeTab === 'assigned' ? assignedCurrentPage === 1 : unassignedCurrentPage === 1)}
+                        >
+                            Previous
+                        </Button>
+                        <span className="text-sm font-medium">
+                            Page {activeTab === 'assigned' ? assignedCurrentPage : unassignedCurrentPage} of {activeTab === 'assigned' ? assignedTotalPages : unassignedTotalPages}
+                        </span>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handlePagination('next', activeTab === 'assigned' ? 'assigned' : 'unassigned')}
+                            disabled={isLoading || (activeTab === 'assigned' ? assignedCurrentPage === assignedTotalPages : unassignedCurrentPage === unassignedTotalPages)}
+                        >
+                            Next
+                        </Button>
+                    </div>
                 </div>
-                <div className="flex items-center gap-2">
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handlePagination('prev', activeTab === 'assigned' ? 'assigned' : 'unassigned')}
-                        disabled={isLoading || (activeTab === 'assigned' ? assignedCurrentPage === 1 : unassignedCurrentPage === 1)}
-                    >
-                        Previous
-                    </Button>
-                    <span className="text-sm font-medium">
-                        Page {activeTab === 'assigned' ? assignedCurrentPage : unassignedCurrentPage} of {activeTab === 'assigned' ? assignedTotalPages : unassignedTotalPages}
-                    </span>
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handlePagination('next', activeTab === 'assigned' ? 'assigned' : 'unassigned')}
-                        disabled={isLoading || (activeTab === 'assigned' ? assignedCurrentPage === assignedTotalPages : unassignedCurrentPage === unassignedTotalPages)}
-                    >
-                        Next
-                    </Button>
-                </div>
-            </div>
-          </CardFooter>
+            </CardFooter>
+          ) : null}
         </Tabs>
       </Card>
     </div>
   );
 }
-
