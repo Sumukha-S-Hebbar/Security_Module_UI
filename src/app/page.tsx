@@ -230,7 +230,7 @@ export default function RootPage() {
                     </div>
                   </CardContent>
                   <CardFooter>
-                    <Button type="submit" className="w-full bg-[#00B4D8] hover:bg-[#00B4D8]/90" disabled={isLoading}>
+                    <Button type="submit" className="w-full bg-header hover:bg-header/90" disabled={isLoading}>
                       {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                       Sign In
                     </Button>
@@ -313,7 +313,7 @@ export default function RootPage() {
                     </div>
                 </CardContent>
                 <CardFooter>
-                  <Button className="w-full bg-[#00B4D8] hover:bg-[#00B4D8]/90 text-lg py-6">Create Account &rarr;</Button>
+                  <Button className="w-full bg-header hover:bg-header/90 text-lg py-6">Create Account &rarr;</Button>
                 </CardFooter>
               </Card>
             </TabsContent>
