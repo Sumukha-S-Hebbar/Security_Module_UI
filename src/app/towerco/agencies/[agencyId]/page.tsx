@@ -205,7 +205,7 @@ export default function AgencyReportPage() {
     }
   }, []);
 
- const fetchIncidents = useCallback(async (url?: string) => {
+  const fetchIncidents = useCallback(async (url?: string) => {
     if (!loggedInOrg || !reportData?.name) return;
     setIsIncidentsLoading(true);
     const token = localStorage.getItem('token') || undefined;
@@ -289,16 +289,17 @@ export default function AgencyReportPage() {
       if (reportData) { // only fetch incidents if reportData is loaded
         fetchIncidents();
       }
-  }, [fetchIncidents, reportData])
+  }, [fetchIncidents, reportData, incidentsStatusFilter, incidentsYearFilter, incidentsMonthFilter]);
+
 
   const handleAssignedSitesPagination = useCallback(async (url: string | null) => {
     if (!url) return;
     setIsAssignedSitesLoading(true);
     const token = localStorage.getItem('token');
     try {
-        const response = await fetchData<PaginatedResponse<AssignedSiteItem>>(url, token || undefined);
+        const response = await fetchData<{ assigned_sites: PaginatedResponse<AssignedSiteItem> }>(url, token || undefined);
         if (response) {
-            setPaginatedAssignedSites(response);
+            setPaginatedAssignedSites(response.assigned_sites);
         }
     } catch(e) {
         toast({ variant: 'destructive', title: 'Error', description: 'Failed to load next page of sites.'});
@@ -772,7 +773,7 @@ export default function AgencyReportPage() {
           {isIncidentsLoading ? (
             <div className="flex items-center justify-center p-10"><Loader2 className="w-8 h-8 animate-spin" /></div>
           ) : paginatedIncidents && paginatedIncidents.results.length > 0 ? (
-            <ScrollArea className="h-auto max-h-72">
+            <ScrollArea className="h-72">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -846,4 +847,3 @@ export default function AgencyReportPage() {
     </div>
   );
 }
-
