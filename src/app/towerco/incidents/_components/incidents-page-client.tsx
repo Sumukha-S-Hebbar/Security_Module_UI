@@ -84,6 +84,8 @@ export function IncidentsPageClient() {
   const [selectedMonth, setSelectedMonth] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
+  const [nextUrl, setNextUrl] = useState<string | null>(null);
+  const [prevUrl, setPrevUrl] = useState<string | null>(null);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -132,8 +134,10 @@ export function IncidentsPageClient() {
       setIsLoading(true);
       const token = localStorage.getItem('token') || undefined;
       
-      let url = `/security/api/orgs/${loggedInOrg.code}/incidents/list/?`;
-      const params = new URLSearchParams();
+      const params = new URLSearchParams({
+        page: currentPage.toString(),
+        page_size: ITEMS_PER_PAGE.toString(),
+      });
       
       if (selectedStatus !== 'all') {
         let apiStatus = '';
@@ -149,15 +153,15 @@ export function IncidentsPageClient() {
       if (selectedSite !== 'all') params.append('site_name', selectedSite);
       if (selectedYear !== 'all') params.append('year', selectedYear);
       if (selectedMonth !== 'all') params.append('month', selectedMonth);
-      params.append('page', currentPage.toString());
-      params.append('page_size', ITEMS_PER_PAGE.toString());
       
-      url += params.toString().replace(/\+/g, '%20');
+      const url = `/security/api/orgs/${loggedInOrg.code}/incidents/list/?${params.toString()}`;
 
       try {
         const data = await fetchData<PaginatedIncidentsResponse>(url, token);
         setIncidents(data?.results || []);
         setTotalCount(data?.count || 0);
+        setNextUrl(data?.next || null);
+        setPrevUrl(data?.previous || null);
         if (data?.counts) {
             setIncidentCounts(data.counts);
         }
@@ -172,6 +176,26 @@ export function IncidentsPageClient() {
 
     fetchFilteredIncidents();
   }, [loggedInOrg, selectedStatus, searchQuery, selectedSite, selectedYear, selectedMonth, currentPage]);
+
+  const handlePagination = async (url: string | null) => {
+    if (!url) return;
+    setIsLoading(true);
+    const token = localStorage.getItem('token') || undefined;
+    try {
+      const data = await fetchData<PaginatedIncidentsResponse>(url, token);
+      setIncidents(data?.results || []);
+      setTotalCount(data?.count || 0);
+      setNextUrl(data?.next || null);
+      setPrevUrl(data?.previous || null);
+      
+      const pageParam = new URL(url).searchParams.get('page');
+      setCurrentPage(pageParam ? parseInt(pageParam) : 1);
+    } catch (error) {
+        console.error("Failed to fetch page:", error);
+    } finally {
+        setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
     setCurrentPage(1);
@@ -323,7 +347,7 @@ export function IncidentsPageClient() {
                     <TableHead className="text-foreground">Incident ID</TableHead>
                     <TableHead className="text-foreground">Incident Date</TableHead>
                     <TableHead className="text-foreground">Incident Time</TableHead>
-                    <TableHead className="text-foreground">Site</TableHead>
+                    <TableHead className="text-foreground">Site Name</TableHead>
                     <TableHead className="text-foreground">Guard</TableHead>
                     <TableHead className="text-foreground">Status</TableHead>
                 </TableRow>
@@ -372,8 +396,8 @@ export function IncidentsPageClient() {
                         <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                            disabled={currentPage === 1}
+                            onClick={() => handlePagination(prevUrl)}
+                            disabled={!prevUrl || isLoading}
                         >
                             Previous
                         </Button>
@@ -381,8 +405,8 @@ export function IncidentsPageClient() {
                         <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                            disabled={currentPage === totalPages || totalPages === 0}
+                            onClick={() => handlePagination(nextUrl)}
+                            disabled={!nextUrl || isLoading}
                         >
                             Next
                         </Button>
