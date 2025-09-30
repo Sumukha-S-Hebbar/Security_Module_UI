@@ -777,19 +777,7 @@ export function SitesPageClient() {
                         className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[320px]"
                     />
                     </div>
-                    <Select value={selectedAgencyFilter} onValueChange={setSelectedAgencyFilter}>
-                        <SelectTrigger className="w-full sm:w-[220px] font-medium hover:bg-accent hover:text-accent-foreground">
-                            <SelectValue placeholder="Filter by Agency" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="all" className="font-medium">All Agencies</SelectItem>
-                            {allAgencies.map((agency) => (
-                            <SelectItem key={agency.id} value={agency.id.toString()} className="font-medium">
-                                {agency.name}
-                            </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
+                    
                     <Select value={assignedSelectedRegion} onValueChange={handleAssignedRegionChange}>
                         <SelectTrigger className="w-full sm:w-[180px] font-medium hover:bg-accent hover:text-accent-foreground">
                             <SelectValue placeholder="Filter by region" />
