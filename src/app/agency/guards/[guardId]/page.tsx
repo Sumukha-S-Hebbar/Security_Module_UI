@@ -596,7 +596,7 @@ export default function AgencyGuardReportPage() {
           {isIncidentsLoading ? (
             <div className="flex items-center justify-center p-10"><Loader2 className="w-8 h-8 animate-spin" /></div>
           ) : paginatedIncidents && paginatedIncidents.results.length > 0 ? (
-            <ScrollArea className="max-h-72">
+            <ScrollArea className="h-72">
               <Table>
                 <TableHeader>
                   <TableRow>
