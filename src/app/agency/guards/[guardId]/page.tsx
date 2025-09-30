@@ -10,6 +10,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  CardFooter,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -22,10 +23,10 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { ArrowLeft, FileDown, Phone, MapPin, UserCheck, ShieldCheck, Mail, ShieldAlert } from 'lucide-react';
+import { ArrowLeft, FileDown, Phone, MapPin, UserCheck, ShieldCheck, Mail, ShieldAlert, Loader2 } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { useToast } from '@/hooks/use-toast';
-import { useMemo, useState, useRef, useEffect } from 'react';
+import { useMemo, useState, useRef, useEffect, useCallback } from 'react';
 import {
   Select,
   SelectContent,
@@ -35,6 +36,20 @@ import {
 } from '@/components/ui/select';
 import { fetchData } from '@/lib/api';
 import { Skeleton } from '@/components/ui/skeleton';
+import { ScrollArea } from '@/components/ui/scroll-area';
+
+type PaginatedIncidents = {
+    count: number;
+    next: string | null;
+    previous: string | null;
+    results: {
+        id: number;
+        incident_id: string;
+        incident_time: string;
+        site_name: string;
+        incident_status: "Active" | "Under Review" | "Resolved";
+    }[];
+};
 
 type GuardReportData = {
     id: number;
@@ -62,18 +77,7 @@ type GuardReportData = {
         email: string;
         phone: string;
     } | null;
-    incidents: {
-        count: number;
-        next: string | null;
-        previous: string | null;
-        results: {
-            id: number;
-            incident_id: string;
-            incident_time: string;
-            site_name: string;
-            incident_status: "Active" | "Under Review" | "Resolved";
-        }[];
-    };
+    incidents: PaginatedIncidents;
 };
 
 
@@ -95,7 +99,9 @@ export default function AgencyGuardReportPage() {
   const guardId = params.guardId as string;
   
   const [reportData, setReportData] = useState<GuardReportData | null>(null);
+  const [paginatedIncidents, setPaginatedIncidents] = useState<PaginatedIncidents | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isIncidentsLoading, setIsIncidentsLoading] = useState(false);
   const [loggedInOrg, setLoggedInOrg] = useState<Organization | null>(null);
 
   const [selectedMonth, setSelectedMonth] = useState('all');
@@ -114,32 +120,79 @@ export default function AgencyGuardReportPage() {
     }
   }, []);
 
-  useEffect(() => {
-    if (!loggedInOrg || !guardId) return;
+  const fetchReportData = useCallback(async (url: string, isFiltering: boolean = false) => {
+    if (isFiltering) {
+      setIsIncidentsLoading(true);
+    } else {
+      setIsLoading(true);
+    }
+    const token = localStorage.getItem('token') || undefined;
 
-    const fetchReportData = async () => {
-        setIsLoading(true);
-        const token = localStorage.getItem('token') || undefined;
-        const url = `/security/api/agency/${loggedInOrg.code}/guard/${guardId}/`;
-        try {
-            const data = await fetchData<GuardReportData>(url, token);
+    try {
+        const data = await fetchData<GuardReportData>(url, token);
+        if (isFiltering) {
+            setPaginatedIncidents(data?.incidents || null);
+        } else {
             setReportData(data);
-        } catch (error) {
-            console.error("Failed to fetch guard report:", error);
-            toast({ variant: "destructive", title: "Error", description: "Could not load guard report data."});
-        } finally {
-            setIsLoading(false);
+            setPaginatedIncidents(data?.incidents || null);
         }
-    };
-    fetchReportData();
-  }, [loggedInOrg, guardId, toast]);
+    } catch (error) {
+        console.error("Failed to fetch guard report:", error);
+        toast({ variant: "destructive", title: "Error", description: "Could not load guard report data."});
+    } finally {
+        if (isFiltering) {
+          setIsIncidentsLoading(false);
+        } else {
+          setIsLoading(false);
+        }
+    }
+  }, [toast]);
   
+  useEffect(() => {
+    if (loggedInOrg && guardId) {
+      const baseUrl = `/security/api/agency/${loggedInOrg.code}/guard/${guardId}/`;
+      const params = new URLSearchParams();
+
+      if (selectedYear !== 'all') params.append('year', selectedYear);
+      if (selectedMonth !== 'all' && selectedMonth !== 'all') params.append('month', (parseInt(selectedMonth) + 1).toString());
+      if (selectedStatus !== 'all') {
+        let apiStatus = '';
+        if (selectedStatus === 'under-review') {
+          apiStatus = 'Under Review';
+        } else {
+          apiStatus = selectedStatus.charAt(0).toUpperCase() + selectedStatus.slice(1);
+        }
+        params.append('incident_status', apiStatus);
+      }
+      
+      const fullUrl = `${baseUrl}?${params.toString()}`;
+      fetchReportData(fullUrl, false);
+    }
+  }, [loggedInOrg, guardId, selectedYear, selectedMonth, selectedStatus, fetchReportData]);
+
+  const handleIncidentPagination = useCallback(async (url: string | null) => {
+      if (!url) return;
+      setIsIncidentsLoading(true);
+      const token = localStorage.getItem('token') || undefined;
+      try {
+        const data = await fetchData<{incidents: PaginatedIncidents}>(url, token);
+        setPaginatedIncidents(data?.incidents || null);
+      } catch (error) {
+        console.error("Failed to fetch paginated incidents:", error);
+        toast({ variant: 'destructive', title: 'Error', description: 'Failed to load next page of incidents.' });
+      } finally {
+        setIsIncidentsLoading(false);
+      }
+  }, [toast]);
+
   const availableYears = useMemo(() => {
-    if (!reportData) return [];
+    if (!reportData?.incidents?.results) return [];
     const years = new Set(
       reportData.incidents.results.map((incident) => new Date(incident.incident_time).getFullYear().toString())
     );
-    if (years.size > 0) years.add(new Date().getFullYear().toString());
+    if (years.size > 0 || !years.has(new Date().getFullYear().toString())) {
+        years.add(new Date().getFullYear().toString());
+    }
     return Array.from(years).sort((a, b) => parseInt(b) - parseInt(a));
   }, [reportData]);
   
@@ -147,18 +200,6 @@ export default function AgencyGuardReportPage() {
     const currentYear = new Date().getFullYear();
     return Array.from({ length: 5 }, (_, i) => (currentYear - i).toString());
   }, []);
-
-  const filteredIncidents = useMemo(() => {
-    if (!reportData) return [];
-    return reportData.incidents.results.filter(incident => {
-      const incidentDate = new Date(incident.incident_time);
-      const yearMatch = selectedYear === 'all' || incidentDate.getFullYear().toString() === selectedYear;
-      const monthMatch = selectedMonth === 'all' || incidentDate.getMonth().toString() === selectedMonth;
-      const statusMatch = selectedStatus === 'all' || incident.incident_status.toLowerCase().replace(' ', '-') === selectedStatus;
-      return yearMatch && monthMatch && statusMatch;
-    });
-  }, [reportData, selectedYear, selectedMonth, selectedStatus]);
-
 
   const handleDownloadReport = () => {
     if (!reportData) return;
@@ -532,41 +573,72 @@ export default function AgencyGuardReportPage() {
           </div>
         </CardHeader>
         <CardContent>
-          {filteredIncidents.length > 0 ? (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Incident ID</TableHead>
-                  <TableHead>Incident Date</TableHead>
-                  <TableHead>Incident Time</TableHead>
-                  <TableHead>Site</TableHead>
-                  <TableHead>Status</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredIncidents.map((incident) => (
-                  <TableRow 
-                    key={incident.id}
-                    onClick={() => router.push(`/agency/incidents/${incident.id}`)}
-                    className="cursor-pointer hover:bg-accent hover:text-accent-foreground group"
-                  >
-                    <TableCell>
-                      <Button asChild variant="link" className="p-0 h-auto font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
-                        <Link href={`/agency/incidents/${incident.id}`}>{incident.incident_id}</Link>
-                      </Button>
-                    </TableCell>
-                    <TableCell className="font-medium">{new Date(incident.incident_time).toLocaleDateString()}</TableCell>
-                    <TableCell className="font-medium">{new Date(incident.incident_time).toLocaleTimeString()}</TableCell>
-                    <TableCell className="font-medium">{incident.site_name}</TableCell>
-                    <TableCell>{getStatusIndicator(incident.incident_status)}</TableCell>
+          {isIncidentsLoading ? (
+            <div className="flex items-center justify-center p-10"><Loader2 className="w-8 h-8 animate-spin" /></div>
+          ) : paginatedIncidents && paginatedIncidents.results.length > 0 ? (
+            <ScrollArea className="h-[480px]">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Incident ID</TableHead>
+                    <TableHead>Incident Date</TableHead>
+                    <TableHead>Incident Time</TableHead>
+                    <TableHead>Site</TableHead>
+                    <TableHead>Status</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {paginatedIncidents.results.map((incident) => (
+                    <TableRow 
+                      key={incident.id}
+                      onClick={() => router.push(`/agency/incidents/${incident.id}`)}
+                      className="cursor-pointer hover:bg-accent hover:text-accent-foreground group"
+                    >
+                      <TableCell>
+                        <Button asChild variant="link" className="p-0 h-auto font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
+                          <Link href={`/agency/incidents/${incident.id}`}>{incident.incident_id}</Link>
+                        </Button>
+                      </TableCell>
+                      <TableCell className="font-medium">{new Date(incident.incident_time).toLocaleDateString()}</TableCell>
+                      <TableCell className="font-medium">{new Date(incident.incident_time).toLocaleTimeString()}</TableCell>
+                      <TableCell className="font-medium">{incident.site_name}</TableCell>
+                      <TableCell>{getStatusIndicator(incident.incident_status)}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </ScrollArea>
           ) : (
             <p className="text-muted-foreground text-center py-4 font-medium">No recent emergency incidents for this guard {selectedYear !== 'all' || selectedMonth !== 'all' ? 'in the selected period' : ''}.</p>
           )}
         </CardContent>
+        {paginatedIncidents && paginatedIncidents.count > 0 && !isIncidentsLoading && (
+            <CardFooter>
+                <div className="flex items-center justify-between w-full">
+                <div className="text-sm text-muted-foreground font-medium">
+                    Showing {paginatedIncidents.results.length} of {paginatedIncidents.count} incidents.
+                </div>
+                <div className="flex items-center gap-2">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleIncidentPagination(paginatedIncidents.previous)}
+                        disabled={!paginatedIncidents.previous}
+                    >
+                        Previous
+                    </Button>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleIncidentPagination(paginatedIncidents.next)}
+                        disabled={!paginatedIncidents.next}
+                    >
+                        Next
+                    </Button>
+                </div>
+                </div>
+            </CardFooter>
+        )}
       </Card>
 
     </div>
