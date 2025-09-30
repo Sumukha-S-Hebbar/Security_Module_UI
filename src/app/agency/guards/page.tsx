@@ -223,7 +223,8 @@ export default function AgencyGuardsPage() {
 
   useEffect(() => {
       if (loggedInOrg) {
-          fetchGuards(activeTab as 'checked_in' | 'checked_out', activeTab === 'checked-in' ? checkedInCurrentPage : checkedOutCurrentPage);
+          const currentPage = activeTab === 'checked-in' ? checkedInCurrentPage : checkedOutCurrentPage;
+          fetchGuards(activeTab as 'checked_in' | 'checked_out', currentPage);
       }
   }, [loggedInOrg, fetchGuards, activeTab, checkedInCurrentPage, checkedOutCurrentPage]);
   
@@ -880,7 +881,5 @@ export default function AgencyGuardsPage() {
     </>
   );
 }
-
-    
 
     
