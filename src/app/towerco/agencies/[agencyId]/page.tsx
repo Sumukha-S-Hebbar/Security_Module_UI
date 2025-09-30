@@ -3,7 +3,7 @@
 
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useState, useMemo, useRef, useEffect } from 'react';
+import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import type { Incident, Site, SecurityAgency, Organization } from '@/types';
 import {
   Card,
@@ -28,6 +28,7 @@ import {
   Users,
   ShieldCheck,
   UserCheck,
+  Loader2,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -71,26 +72,44 @@ import { ClientDate } from './_components/client-date';
 import { fetchData } from '@/lib/api';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
-type PaginatedIncidents = {
+type PaginatedResponse<T> = {
     count: number;
     next: string | null;
     previous: string | null;
-    results: {
-        id: number;
-        incident_id: string;
-        tb_site_id: string;
-        incident_time: string;
-        incident_status: "Active" | "Under Review" | "Resolved";
-        site_name: string;
-        raised_by_guard_details: {
-            first_name: string;
-            last_name: string | null;
-        } | null;
-        incident_type: string;
-        incident_description: string;
-    }[];
+    results: T[];
 };
+
+type IncidentItem = {
+    id: number;
+    incident_id: string;
+    tb_site_id: string;
+    incident_time: string;
+    incident_status: "Active" | "Under Review" | "Resolved";
+    site_name: string;
+    raised_by_guard_details: {
+        first_name: string;
+        last_name: string | null;
+    } | null;
+    incident_type: string;
+    incident_description: string;
+};
+
+type AssignedSiteItem = {
+    id: number;
+    tb_site_id: string;
+    org_site_id: string;
+    site_name: string;
+    registered_address_line1: string;
+    city: string;
+    region: string;
+    assigned_on: string;
+    number_of_guards: number;
+    total_incidents_count: number;
+    resolved_incidents_count: number;
+};
+
 
 type AgencyReportData = {
     id: number;
@@ -114,18 +133,8 @@ type AgencyReportData = {
         guard_checkin_accuracy: number;
         selfie_accuracy: number | null;
     };
-    assigned_sites: {
-        id: number;
-        tb_site_id: string;
-        org_site_id: string;
-        site_name: string;
-        registered_address_line1: string;
-        assigned_on: string;
-        number_of_guards: number;
-        total_incidents_count: number;
-        resolved_incidents_count: number;
-    }[];
-    incidents: PaginatedIncidents;
+    assigned_sites: PaginatedResponse<AssignedSiteItem>;
+    incidents: PaginatedResponse<IncidentItem>;
 };
 
 const getPerformanceColor = (value: number) => {
@@ -173,7 +182,9 @@ export default function AgencyReportPage() {
   const agencyId = params.agencyId as string;
 
   const [reportData, setReportData] = useState<AgencyReportData | null>(null);
+  const [paginatedAssignedSites, setPaginatedAssignedSites] = useState<PaginatedResponse<AssignedSiteItem> | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isAssignedSitesLoading, setIsAssignedSitesLoading] = useState(false);
   const [loggedInOrg, setLoggedInOrg] = useState<Organization | null>(null);
   const [performanceSelectedYear, setPerformanceSelectedYear] = useState<string>('all');
   const [performanceSelectedMonth, setPerformanceSelectedMonth] = useState<string>('all');
@@ -215,6 +226,7 @@ export default function AgencyReportPage() {
           try {
               const response = await fetchData<{ data: AgencyReportData }>(url, token);
               setReportData(response?.data || null);
+              setPaginatedAssignedSites(response?.data?.assigned_sites || null);
           } catch (error) {
               console.error("Failed to fetch agency report:", error);
               toast({
@@ -229,6 +241,22 @@ export default function AgencyReportPage() {
 
       fetchReportData();
   }, [loggedInOrg, agencyId, toast, performanceSelectedYear, performanceSelectedMonth]);
+
+  const handleAssignedSitesPagination = useCallback(async (url: string | null) => {
+    if (!url) return;
+    setIsAssignedSitesLoading(true);
+    const token = localStorage.getItem('token');
+    try {
+        const response = await fetchData<{ data: { assigned_sites: PaginatedResponse<AssignedSiteItem> } }>(url, token || undefined);
+        if (response?.data.assigned_sites) {
+            setPaginatedAssignedSites(response.data.assigned_sites);
+        }
+    } catch(e) {
+        toast({ variant: 'destructive', title: 'Error', description: 'Failed to load next page of sites.'});
+    } finally {
+        setIsAssignedSitesLoading(false);
+    }
+  }, [toast]);
 
   const performanceMetrics = useMemo(() => {
     if (!reportData) return null;
@@ -262,7 +290,7 @@ export default function AgencyReportPage() {
   }, [performanceMetrics]);
   
   const incidentAvailableYears = useMemo(() => {
-    if (!reportData || !reportData.incidents || !reportData.incidents.results) return [];
+    if (!reportData?.incidents?.results) return [];
     const years = new Set(
       reportData.incidents.results.map((incident) => new Date(incident.incident_time).getFullYear().toString())
     );
@@ -273,7 +301,7 @@ export default function AgencyReportPage() {
   }, [reportData]);
   
   const filteredIncidents = useMemo(() => {
-    if (!reportData || !reportData.incidents || !reportData.incidents.results) return [];
+    if (!reportData?.incidents?.results) return [];
     return reportData.incidents.results.filter(incident => {
         const incidentDate = new Date(incident.incident_time);
         
@@ -566,68 +594,99 @@ export default function AgencyReportPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {assigned_sites.length > 0 ? (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="text-foreground">Towerbuddy ID</TableHead>
-                  <TableHead className="text-foreground">Site ID</TableHead>
-                  <TableHead className="text-foreground">Site</TableHead>
-                  <TableHead className="text-foreground">Assigned On</TableHead>
-                  <TableHead className="text-center text-foreground">Guards Requested</TableHead>
-                  <TableHead className="text-center text-foreground">Incidents</TableHead>
-                  <TableHead className="text-center text-foreground">Resolved</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {assigned_sites.map((site) => (
-                    <TableRow key={site.id} onClick={() => router.push(`/towerco/sites/${site.id}`)} className="cursor-pointer hover:bg-accent hover:text-accent-foreground group">
-                        <TableCell>
-                          <Button asChild variant="link" className="p-0 h-auto font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
-                            <Link href={`/towerco/sites/${site.id}`}>{site.tb_site_id}</Link>
-                          </Button>
-                        </TableCell>
-                       <TableCell className="font-medium">
-                          {site.org_site_id}
-                        </TableCell>
-                      <TableCell>
-                        <div className="font-medium">{site.site_name}</div>
-                        <div className="text-sm text-muted-foreground flex items-center gap-1 font-medium group-hover:text-accent-foreground">
-                          <MapPin className="w-3 h-3" />
-                          {site.registered_address_line1}
-                        </div>
-                      </TableCell>
-                      <TableCell className="font-medium">
-                        <ClientDate date={site.assigned_on} format="date" />
-                      </TableCell>
-                       <TableCell className="text-center">
-                        <div className="flex items-center justify-center gap-2 font-medium">
-                            <Users className="h-4 w-4 text-muted-foreground group-hover:text-accent-foreground" />
-                            <span>{site.number_of_guards}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <div className="flex items-center justify-center gap-2 font-medium">
-                            <ShieldAlert className="h-4 w-4 text-muted-foreground group-hover:text-accent-foreground" />
-                            <span>{site.total_incidents_count}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <div className="flex items-center justify-center gap-2 font-medium">
-                          <CheckCircle className="h-4 w-4 text-muted-foreground group-hover:text-accent-foreground" />
-                          <span>{site.resolved_incidents_count}</span>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-              </TableBody>
-            </Table>
-          ) : (
-            <p className="text-muted-foreground text-center py-4 font-medium">
-              No sites are currently assigned to this agency.
-            </p>
-          )}
+            {isAssignedSitesLoading ? (
+                <div className="flex items-center justify-center h-40"><Loader2 className="h-6 w-6 animate-spin" /></div>
+            ) : paginatedAssignedSites && paginatedAssignedSites.results.length > 0 ? (
+                <ScrollArea className="h-72">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                            <TableHead className="text-foreground">Towerbuddy ID</TableHead>
+                            <TableHead className="text-foreground">Site ID</TableHead>
+                            <TableHead className="text-foreground">Site</TableHead>
+                            <TableHead className="text-foreground">Assigned On</TableHead>
+                            <TableHead className="text-center text-foreground">Guards Requested</TableHead>
+                            <TableHead className="text-center text-foreground">Incidents</TableHead>
+                            <TableHead className="text-center text-foreground">Resolved</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {paginatedAssignedSites.results.map((site) => (
+                                <TableRow key={site.id} onClick={() => router.push(`/towerco/sites/${site.id}`)} className="cursor-pointer hover:bg-accent hover:text-accent-foreground group">
+                                    <TableCell>
+                                    <Button asChild variant="link" className="p-0 h-auto font-medium group-hover:text-accent-foreground" onClick={(e) => e.stopPropagation()}>
+                                        <Link href={`/towerco/sites/${site.id}`}>{site.tb_site_id}</Link>
+                                    </Button>
+                                    </TableCell>
+                                    <TableCell className="font-medium">
+                                    {site.org_site_id}
+                                    </TableCell>
+                                <TableCell>
+                                    <div className="font-medium">{site.site_name}</div>
+                                    <div className="text-sm text-muted-foreground flex items-center gap-1 font-medium group-hover:text-accent-foreground">
+                                    <MapPin className="w-3 h-3" />
+                                    {site.registered_address_line1}
+                                    </div>
+                                </TableCell>
+                                <TableCell className="font-medium">
+                                    <ClientDate date={site.assigned_on} format="date" />
+                                </TableCell>
+                                    <TableCell className="text-center">
+                                    <div className="flex items-center justify-center gap-2 font-medium">
+                                        <Users className="h-4 w-4 text-muted-foreground group-hover:text-accent-foreground" />
+                                        <span>{site.number_of_guards}</span>
+                                    </div>
+                                </TableCell>
+                                <TableCell className="text-center">
+                                    <div className="flex items-center justify-center gap-2 font-medium">
+                                        <ShieldAlert className="h-4 w-4 text-muted-foreground group-hover:text-accent-foreground" />
+                                        <span>{site.total_incidents_count}</span>
+                                    </div>
+                                </TableCell>
+                                <TableCell className="text-center">
+                                    <div className="flex items-center justify-center gap-2 font-medium">
+                                    <CheckCircle className="h-4 w-4 text-muted-foreground group-hover:text-accent-foreground" />
+                                    <span>{site.resolved_incidents_count}</span>
+                                    </div>
+                                </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </ScrollArea>
+            ) : (
+                <p className="text-muted-foreground text-center py-4 font-medium">
+                No sites are currently assigned to this agency.
+                </p>
+            )}
         </CardContent>
+        {paginatedAssignedSites && paginatedAssignedSites.count > 0 && (
+            <CardFooter>
+                <div className="flex items-center justify-between w-full">
+                <div className="text-sm text-muted-foreground font-medium">
+                    Showing {paginatedAssignedSites.results.length} of {paginatedAssignedSites.count} sites.
+                </div>
+                <div className="flex items-center gap-2">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleAssignedSitesPagination(paginatedAssignedSites.previous)}
+                        disabled={!paginatedAssignedSites.previous || isAssignedSitesLoading}
+                    >
+                        Previous
+                    </Button>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleAssignedSitesPagination(paginatedAssignedSites.next)}
+                        disabled={!paginatedAssignedSites.next || isAssignedSitesLoading}
+                    >
+                        Next
+                    </Button>
+                </div>
+                </div>
+            </CardFooter>
+        )}
       </Card>
       <Card ref={incidentsHistoryRef}>
         <CardHeader>
