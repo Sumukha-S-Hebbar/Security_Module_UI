@@ -282,17 +282,6 @@ export function IncidentsPageClient() {
                 <SelectItem value="resolved" className="font-medium">Resolved</SelectItem>
               </SelectContent>
             </Select>
-            <Select value={selectedSite} onValueChange={setSelectedSite}>
-              <SelectTrigger className="w-full sm:w-[180px] font-medium hover:bg-accent hover:text-accent-foreground">
-                <SelectValue placeholder="Filter by site" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all" className="font-medium">All Sites</SelectItem>
-                {sites.map(site => (
-                  <SelectItem key={site.id} value={site.site_name} className="font-medium">{site.site_name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
             <Select value={selectedYear} onValueChange={setSelectedYear}>
                 <SelectTrigger className="w-full sm:w-[120px] font-medium hover:bg-accent hover:text-accent-foreground">
                     <SelectValue placeholder="Filter by Year" />
