@@ -82,9 +82,7 @@ type PaginatedIncidents = {
         tb_site_id: string;
         incident_time: string;
         incident_status: "Active" | "Under Review" | "Resolved";
-        site_details: {
-            site_name: string;
-        };
+        site_name: string;
         raised_by_guard_details: {
             first_name: string;
             last_name: string | null;
@@ -712,7 +710,7 @@ export default function AgencyReportPage() {
                       <TableCell className="font-medium">
                         <ClientDate date={incident.incident_time} format="time" />
                       </TableCell>
-                      <TableCell className="font-medium">{incident.site_details.site_name}</TableCell>
+                      <TableCell className="font-medium">{incident.site_name}</TableCell>
                       <TableCell className="font-medium">{guardName}</TableCell>
                       <TableCell>{getStatusIndicator(incident.incident_status)}</TableCell>
                     </TableRow>
