@@ -597,7 +597,7 @@ export default function AgencyReportPage() {
             {isAssignedSitesLoading ? (
                 <div className="flex items-center justify-center h-40"><Loader2 className="h-6 w-6 animate-spin" /></div>
             ) : paginatedAssignedSites && paginatedAssignedSites.results.length > 0 ? (
-                <ScrollArea className="h-72">
+                <ScrollArea className="max-h-72">
                     <Table>
                         <TableHeader>
                             <TableRow>
