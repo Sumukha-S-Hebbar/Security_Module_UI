@@ -4,7 +4,7 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import type { Site, PatrollingOfficer, Guard, Organization, PaginatedSitesResponse } from '@/types';
+import type { Site, PatrollingOfficer, Guard, Organization, PaginatedSitesResponse, User } from '@/types';
 import {
   Card,
   CardContent,
@@ -52,6 +52,17 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const ITEMS_PER_PAGE = 10;
 
+type ApiRegion = {
+  id: number;
+  name: string;
+};
+
+type ApiCity = {
+    id: number;
+    name: string;
+}
+
+
 export default function AgencySitesPage() {
   const { toast } = useToast();
   const router = useRouter();
@@ -62,6 +73,7 @@ export default function AgencySitesPage() {
   const [unassignedGuards, setUnassignedGuards] = useState<Guard[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loggedInOrg, setLoggedInOrg] = useState<Organization | null>(null);
+  const [loggedInUser, setLoggedInUser] = useState<User | null>(null);
   
   const [activeTab, setActiveTab] = useState('assigned');
 
@@ -83,11 +95,22 @@ export default function AgencySitesPage() {
   const [assignedCurrentPage, setAssignedCurrentPage] = useState(1);
   const [unassignedCurrentPage, setUnassignedCurrentPage] = useState(1);
 
+  const [filterRegions, setFilterRegions] = useState<ApiRegion[]>([]);
+  const [assignedFilterCities, setAssignedFilterCities] = useState<ApiCity[]>([]);
+  const [unassignedFilterCities, setUnassignedFilterCities] = useState<ApiCity[]>([]);
+  const [isAssignedCitiesLoading, setIsAssignedCitiesLoading] = useState(false);
+  const [isUnassignedCitiesLoading, setIsUnassignedCitiesLoading] = useState(false);
+
+
   useEffect(() => {
     if (typeof window !== 'undefined') {
         const orgData = localStorage.getItem('organization');
+        const userData = localStorage.getItem('user');
         if (orgData) {
             setLoggedInOrg(JSON.parse(orgData));
+        }
+        if (userData) {
+            setLoggedInUser(JSON.parse(userData));
         }
     }
   }, []);
@@ -106,12 +129,24 @@ export default function AgencySitesPage() {
     if (status === 'Assigned') {
         if (assignedSearchQuery) params.append('search', assignedSearchQuery);
         if (selectedPatrollingOfficerFilter !== 'all') params.append('patrol_officer', selectedPatrollingOfficerFilter);
-        if (assignedSelectedRegion !== 'all') params.append('region', assignedSelectedRegion);
-        if (assignedSelectedCity !== 'all') params.append('city', assignedSelectedCity);
+        if (assignedSelectedRegion !== 'all') {
+             const regionName = filterRegions.find(r => r.id.toString() === assignedSelectedRegion)?.name;
+             if(regionName) params.append('region', regionName);
+        }
+        if (assignedSelectedCity !== 'all') {
+            const cityName = assignedFilterCities.find(c => c.id.toString() === assignedSelectedCity)?.name;
+            if(cityName) params.append('city', cityName);
+        }
     } else {
         if (unassignedSearchQuery) params.append('search', unassignedSearchQuery);
-        if (unassignedSelectedRegion !== 'all') params.append('region', unassignedSelectedRegion);
-        if (unassignedSelectedCity !== 'all') params.append('city', unassignedSelectedCity);
+        if (unassignedSelectedRegion !== 'all') {
+            const regionName = filterRegions.find(r => r.id.toString() === unassignedSelectedRegion)?.name;
+            if (regionName) params.append('region', regionName);
+        }
+        if (unassignedSelectedCity !== 'all') {
+            const cityName = unassignedFilterCities.find(c => c.id.toString() === unassignedSelectedCity)?.name;
+            if (cityName) params.append('city', cityName);
+        }
     }
 
     try {
@@ -132,7 +167,7 @@ export default function AgencySitesPage() {
     } finally {
         setIsLoading(false);
     }
-  }, [loggedInOrg, toast, assignedSearchQuery, selectedPatrollingOfficerFilter, assignedSelectedRegion, assignedSelectedCity, unassignedSearchQuery, unassignedSelectedRegion, unassignedSelectedCity]);
+  }, [loggedInOrg, toast, assignedSearchQuery, selectedPatrollingOfficerFilter, assignedSelectedRegion, assignedSelectedCity, unassignedSearchQuery, unassignedSelectedRegion, unassignedSelectedCity, filterRegions, assignedFilterCities, unassignedFilterCities]);
 
 
   const fetchSupportingData = useCallback(async () => {
@@ -222,17 +257,50 @@ export default function AgencySitesPage() {
     return Array.from(officers.values());
   }, [assignedSites]);
   
-  const assignedRegions = useMemo(() => [...new Set(assignedSites.map((site) => site.region))].sort(), [assignedSites]);
-  const assignedCities = useMemo(() => {
-    if (assignedSelectedRegion === 'all') return [];
-    return [...new Set(assignedSites.filter((site) => site.region === assignedSelectedRegion).map((site) => site.city))].sort();
-  }, [assignedSelectedRegion, assignedSites]);
+  useEffect(() => {
+      async function fetchFilterRegions() {
+          if (!loggedInUser || !loggedInUser.country) return;
+          const token = localStorage.getItem('token');
+          const countryId = loggedInUser.country.id;
+          const url = `/security/api/regions/?country=${countryId}`;
+          try {
+              const data = await fetchData<{ regions: ApiRegion[] }>(url, token || undefined);
+              setFilterRegions(data?.regions || []);
+          } catch (error) {
+              console.error("Failed to fetch regions for filters:", error);
+          }
+      }
+      fetchFilterRegions();
+  }, [loggedInUser]);
 
-  const unassignedRegions = useMemo(() => [...new Set(unassignedSites.map((site) => site.region))].sort(), [unassignedSites]);
-  const unassignedCities = useMemo(() => {
-    if (unassignedSelectedRegion === 'all') return [];
-    return [...new Set(unassignedSites.filter((site) => site.region === unassignedSelectedRegion).map((site) => site.city))].sort();
-  }, [unassignedSelectedRegion, unassignedSites]);
+  useEffect(() => {
+      async function fetchCitiesForFilter(regionId: string, setCities: React.Dispatch<React.SetStateAction<ApiCity[]>>, setLoading: React.Dispatch<React.SetStateAction<boolean>>) {
+          if (regionId === 'all' || !loggedInUser || !loggedInUser.country) {
+              setCities([]);
+              return;
+          }
+          setLoading(true);
+          const token = localStorage.getItem('token');
+          const countryId = loggedInUser.country.id;
+          const url = `/security/api/cities/?country=${countryId}&region=${regionId}`;
+          try {
+              const data = await fetchData<{ cities: ApiCity[] }>(url, token || undefined);
+              setCities(data?.cities || []);
+          } catch (error) {
+              console.error("Failed to fetch cities for filters:", error);
+              setCities([]);
+          } finally {
+              setLoading(false);
+          }
+      }
+      
+      if(activeTab === 'assigned') {
+          fetchCitiesForFilter(assignedSelectedRegion, setAssignedFilterCities, setIsAssignedCitiesLoading);
+      } else {
+          fetchCitiesForFilter(unassignedSelectedRegion, setUnassignedFilterCities, setIsUnassignedCitiesLoading);
+      }
+
+  }, [assignedSelectedRegion, unassignedSelectedRegion, activeTab, loggedInUser]);
 
 
   const handleAssignedRegionChange = (region: string) => {
@@ -502,19 +570,19 @@ export default function AgencySitesPage() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all" className="font-medium">All Regions</SelectItem>
-                      {assignedRegions.map((region) => (
-                        <SelectItem key={region} value={region} className="font-medium">{region}</SelectItem>
+                      {filterRegions.map((region) => (
+                        <SelectItem key={region.id} value={region.id.toString()} className="font-medium">{region.name}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
-                  <Select value={assignedSelectedCity} onValueChange={setAssignedSelectedCity} disabled={assignedSelectedRegion === 'all'}>
+                  <Select value={assignedSelectedCity} onValueChange={setAssignedSelectedCity} disabled={assignedSelectedRegion === 'all' || isAssignedCitiesLoading}>
                     <SelectTrigger className="w-full sm:w-[180px] font-medium hover:bg-accent hover:text-accent-foreground">
-                      <SelectValue placeholder="Filter by city" />
+                      <SelectValue placeholder={isAssignedCitiesLoading ? "Loading..." : "Filter by city"} />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all" className="font-medium">All Cities</SelectItem>
-                      {assignedCities.map((city) => (
-                        <SelectItem key={city} value={city} className="font-medium">{city}</SelectItem>
+                      {assignedFilterCities.map((city) => (
+                        <SelectItem key={city.id} value={city.id.toString()} className="font-medium">{city.name}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -543,19 +611,19 @@ export default function AgencySitesPage() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="all" className="font-medium">All Regions</SelectItem>
-                        {unassignedRegions.map((region) => (
-                          <SelectItem key={region} value={region} className="font-medium">{region}</SelectItem>
+                        {filterRegions.map((region) => (
+                          <SelectItem key={region.id} value={region.id.toString()} className="font-medium">{region.name}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
-                    <Select value={unassignedSelectedCity} onValueChange={setUnassignedSelectedCity} disabled={unassignedSelectedRegion === 'all'}>
+                    <Select value={unassignedSelectedCity} onValueChange={setUnassignedSelectedCity} disabled={unassignedSelectedRegion === 'all' || isUnassignedCitiesLoading}>
                       <SelectTrigger className="w-full sm:w-[180px] font-medium hover:bg-accent hover:text-accent-foreground">
-                        <SelectValue placeholder="Filter by city" />
+                        <SelectValue placeholder={isUnassignedCitiesLoading ? "Loading..." : "Filter by city"} />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="all" className="font-medium">All Cities</SelectItem>
-                        {unassignedCities.map((city) => (
-                          <SelectItem key={city} value={city} className="font-medium">{city}</SelectItem>
+                        {unassignedFilterCities.map((city) => (
+                          <SelectItem key={city.id} value={city.id.toString()} className="font-medium">{city.name}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
