@@ -553,7 +553,7 @@ export default function AgencyPatrollingOfficersPage() {
                                         />
                                     </div>
                                     <DialogFooter>
-                                        <Button type="submit" disabled={isAdding} className="bg-[#00B4D8] hover:bg-[#00B4D8]/90">
+                                        <Button type="submit" disabled={isAdding} className="bg-[#00B4D8] hover:bg-[#00B4D8]/90 w-56">
                                         {isAdding ? (
                                             <>
                                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -685,6 +685,7 @@ export default function AgencyPatrollingOfficersPage() {
                                 size="sm"
                                 onClick={() => handlePagination(prevUrl)}
                                 disabled={!prevUrl || isLoading}
+                                className="w-20"
                             >
                                 Previous
                             </Button>
@@ -694,6 +695,7 @@ export default function AgencyPatrollingOfficersPage() {
                                 size="sm"
                                 onClick={() => handlePagination(nextUrl)}
                                 disabled={!nextUrl || isLoading}
+                                className="w-20"
                             >
                                 Next
                             </Button>
@@ -707,6 +709,3 @@ export default function AgencyPatrollingOfficersPage() {
     );
 }
 
-    
-
-    

@@ -20,7 +20,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -219,7 +218,7 @@ export default function TowercoAgenciesPage() {
 
     const handleRegionChange = (regionId: string) => {
         setSelectedRegion(regionId);
-        setSelectedCity('all'); // Reset city when region changes
+        setSelectedCity('all');
     };
 
 
@@ -251,7 +250,6 @@ export default function TowercoAgenciesPage() {
         }
     }, [loggedInOrg, currentPage, fetchAllAgencies]);
     
-    // Reset page to 1 when filters change
     useEffect(() => {
         setCurrentPage(1);
     }, [searchQuery, selectedRegion, selectedCity]);
@@ -831,4 +829,4 @@ export default function TowercoAgenciesPage() {
             </Card>
         </div>
     );
-}
+
