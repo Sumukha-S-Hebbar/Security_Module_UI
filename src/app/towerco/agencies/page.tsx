@@ -153,12 +153,10 @@ export default function TowercoAgenciesPage() {
         });
         if (searchQuery) params.append('search', searchQuery);
         if (selectedRegion !== 'all') {
-             const regionName = filterRegions.find(r => r.id.toString() === selectedRegion)?.name;
-             if(regionName) params.append('region', regionName);
+            params.append('region', selectedRegion);
         }
         if (selectedCity !== 'all') {
-            const cityName = filterCities.find(c => c.id.toString() === selectedCity)?.name;
-            if(cityName) params.append('city', cityName);
+            params.append('city', selectedCity);
         }
 
         try {
@@ -176,7 +174,7 @@ export default function TowercoAgenciesPage() {
         } finally {
             setIsLoading(false);
         }
-    }, [loggedInOrg, searchQuery, selectedRegion, selectedCity, toast, filterRegions, filterCities]);
+    }, [loggedInOrg, searchQuery, selectedRegion, selectedCity, toast]);
     
     useEffect(() => {
       async function fetchFilterRegions() {
