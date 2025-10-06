@@ -335,7 +335,7 @@ export default function SiteReportPage() {
             <p className="text-muted-foreground font-medium">Detailed overview for {site_name}.</p>
           </div>
         </div>
-        <Button onClick={handleDownloadReport} className="bg-[#00B4D8] hover:bg-[#00B4D8]/90">
+        <Button onClick={handleDownloadReport} className="bg-[#00B4D8] hover:bg-[#00B4D8]/90 w-56">
           <FileDown className="mr-2 h-4 w-4" />
           Download Full Report
         </Button>

@@ -352,7 +352,7 @@ export default function IncidentReportPage() {
             <p className="text-muted-foreground">Detailed overview for Incident #{incident.incident_id}.</p>
           </div>
         </div>
-        <Button onClick={handleDownloadReport} className="bg-[#00B4D8] hover:bg-[#00B4D8]/90">
+        <Button onClick={handleDownloadReport} className="bg-[#00B4D8] hover:bg-[#00B4D8]/90 w-56">
           <FileDown className="mr-2 h-4 w-4" />
           Download Full Report
         </Button>
@@ -548,7 +548,7 @@ export default function IncidentReportPage() {
                             </div>
                         </div>
                         <CardFooter className="px-0 pt-6 justify-end">
-                            <Button type="submit" disabled={!resolutionNotes || isResolving} className="bg-[#00B4D8] hover:bg-[#00B4D8]/90">
+                            <Button type="submit" disabled={!resolutionNotes || isResolving} className="bg-[#00B4D8] hover:bg-[#00B4D8]/90 w-56">
                                 {isResolving ? 'Resolving...' : 'Mark as Resolved'}
                             </Button>
                         </CardFooter>
