@@ -164,17 +164,17 @@ export default function AgencyGuardsPage() {
     const orgCode = loggedInOrg.code;
 
     const checkInStatus = status === 'checked-in' ? 'checked_in' : 'checked_out';
+    
     const params = new URLSearchParams({
         page: page.toString(),
         page_size: ITEMS_PER_PAGE.toString(),
     });
     if (searchQuery) params.append('search', searchQuery);
 
+    const url = `/security/api/agency/${orgCode}/guards/list/?check_in_status=${checkInStatus}&${params.toString()}`;
+
     try {
-        const response = await fetchData<PaginatedGuardsResponse>(
-            `/security/api/agency/${orgCode}/guards/list/?check_in_status=${checkInStatus}&${params.toString()}`,
-            token
-        );
+        const response = await fetchData<PaginatedGuardsResponse>(url, token);
         if (status === 'checked-in') {
             setCheckedInGuards(response?.results || []);
             setCheckedInCount(response?.count || 0);
@@ -187,36 +187,9 @@ export default function AgencyGuardsPage() {
     } finally {
         setIsLoading(false);
     }
-  }, [loggedInOrg, toast, searchQuery]);
+}, [loggedInOrg, toast, searchQuery]);
 
-  const fetchSupportingData = useCallback(async () => {
-    if (!loggedInOrg) return;
-    const token = localStorage.getItem('token') || undefined;
-    const orgCode = loggedInOrg.code;
-    try {
-      const [sitesResponse, poResponse] = await Promise.all([
-        fetchData<{ results: Site[] }>(`/security/api/agency/${orgCode}/sites/list/`, token),
-        fetchData<{ results: PatrollingOfficer[] }>(`/security/api/agency/${orgCode}/patrol_officers/list/`, token)
-      ]);
-      
-      setSites(sitesResponse?.results || []);
-      const formattedPOs = poResponse?.results.map(po => ({
-          ...po,
-          id: po.id,
-          name: `${po.first_name} ${po.last_name || ''}`.trim(),
-      })) || [];
-      setPatrollingOfficers(formattedPOs);
-    } catch (error) {
-      toast({ variant: 'destructive', title: 'Error', description: 'Failed to load filters data.' });
-    }
-  }, [loggedInOrg, toast]);
 
-  useEffect(() => {
-    if (loggedInOrg) {
-        fetchSupportingData();
-    }
-  }, [loggedInOrg, fetchSupportingData]);
-  
   useEffect(() => {
     if (loggedInOrg) {
       if (activeTab === 'checked-in') {
@@ -225,12 +198,19 @@ export default function AgencyGuardsPage() {
         fetchGuards('checked-out', checkedOutCurrentPage);
       }
     }
-  }, [loggedInOrg, fetchGuards, activeTab, checkedInCurrentPage, checkedOutCurrentPage, searchQuery]);
+  }, [loggedInOrg, fetchGuards, activeTab, checkedInCurrentPage, checkedOutCurrentPage]);
   
   useEffect(() => {
       setCheckedInCurrentPage(1);
       setCheckedOutCurrentPage(1);
-  }, [searchQuery]);
+      if (loggedInOrg) {
+        if (activeTab === 'checked-in') {
+            fetchGuards('checked-in', 1);
+        } else {
+            fetchGuards('checked-out', 1);
+        }
+      }
+  }, [searchQuery, activeTab, loggedInOrg]);
 
     const handlePagination = (direction: 'next' | 'prev') => {
         if (activeTab === 'checked-in') {
@@ -397,13 +377,13 @@ export default function AgencyGuardsPage() {
               <p className="text-muted-foreground font-medium">Add, view, and manage guard profiles and their assignments.</p>
             </div>
              <div className="flex items-center gap-2">
-                <Button variant="outline" onClick={handleDownloadTemplate} className="bg-[#00B4D8] hover:bg-[#00B4D8]/90 text-white">
+                <Button variant="outline" onClick={handleDownloadTemplate} className="bg-[#00B4D8] hover:bg-[#00B4D8]/90 text-white w-48">
                     <FileDown className="mr-2 h-4 w-4" />
                     Download Excel Template
                 </Button>
                 <Dialog open={isUploadDialogOpen} onOpenChange={setIsUploadDialogOpen}>
                     <DialogTrigger asChild>
-                        <Button className="bg-[#00B4D8] hover:bg-[#00B4D8]/90">
+                        <Button className="bg-[#00B4D8] hover:bg-[#00B4D8]/90 w-48">
                             <Upload className="mr-2 h-4 w-4" />
                             Upload Excel
                         </Button>
@@ -462,7 +442,7 @@ export default function AgencyGuardsPage() {
                 </Dialog>
                 <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
                     <DialogTrigger asChild>
-                        <Button variant="outline" className="bg-[#00B4D8] hover:bg-[#00B4D8]/90 text-white" onClick={handleAddGuardClick}>
+                        <Button variant="outline" className="bg-[#00B4D8] hover:bg-[#00B4D8]/90 text-white w-48" onClick={handleAddGuardClick}>
                             <PlusCircle className="mr-2 h-4 w-4" />
                             Add Guard
                         </Button>
@@ -854,3 +834,5 @@ export default function AgencyGuardsPage() {
     </>
   );
 }
+
+    

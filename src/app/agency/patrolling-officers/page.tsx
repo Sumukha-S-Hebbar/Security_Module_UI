@@ -355,13 +355,13 @@ export default function AgencyPatrollingOfficersPage() {
                     </p>
                 </div>
                  <div className="flex items-center gap-2">
-                     <Button variant="outline" onClick={handleDownloadTemplate} className="bg-[#00B4D8] hover:bg-[#00B4D8]/90 text-white">
+                     <Button variant="outline" onClick={handleDownloadTemplate} className="bg-[#00B4D8] hover:bg-[#00B4D8]/90 text-white w-48">
                         <FileDown className="mr-2 h-4 w-4" />
                         Download Excel Template
                     </Button>
                      <Dialog open={isUploadDialogOpen} onOpenChange={setIsUploadDialogOpen}>
                         <DialogTrigger asChild>
-                            <Button className="bg-[#00B4D8] hover:bg-[#00B4D8]/90">
+                            <Button className="bg-[#00B4D8] hover:bg-[#00B4D8]/90 w-48">
                                 <Upload className="mr-2 h-4 w-4" />
                                 Upload Excel
                             </Button>
@@ -419,7 +419,7 @@ export default function AgencyPatrollingOfficersPage() {
                     </Dialog>
                     <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
                         <DialogTrigger asChild>
-                            <Button variant="outline" className="bg-[#00B4D8] hover:bg-[#00B4D8]/90 text-white" onClick={handleAddPatrollingOfficerClick}>
+                            <Button variant="outline" className="bg-[#00B4D8] hover:bg-[#00B4D8]/90 text-white w-48" onClick={handleAddPatrollingOfficerClick}>
                                 <PlusCircle className="mr-2 h-4 w-4" />
                                 Add Patrolling Officer
                             </Button>
@@ -706,3 +706,5 @@ export default function AgencyPatrollingOfficersPage() {
       </>
     );
 }
+
+    
