@@ -180,7 +180,7 @@ export function SiteStatusBreakdown({ siteStatusData }: { siteStatusData: SiteSt
                      {selectedSection === 'unassigned' && (
                         <Button
                             size="sm"
-                            className="bg-[#00B4D8] hover:bg-[#00a2c2] text-white"
+                            className="bg-[#00B4D8] hover:bg-[#00a2c2] text-white w-56"
                             onClick={() => router.push(`/towerco/sites?tab=unassigned`)}
                         >
                           Assign Agency
