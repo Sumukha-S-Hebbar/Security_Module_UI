@@ -129,24 +129,12 @@ export default function AgencySitesPage() {
     if (status === 'Assigned') {
         if (assignedSearchQuery) params.append('search', assignedSearchQuery);
         if (selectedPatrollingOfficerFilter !== 'all') params.append('patrol_officer', selectedPatrollingOfficerFilter);
-        if (assignedSelectedRegion !== 'all') {
-             const regionName = filterRegions.find(r => r.id.toString() === assignedSelectedRegion)?.name;
-             if(regionName) params.append('region', regionName);
-        }
-        if (assignedSelectedCity !== 'all') {
-            const cityName = assignedFilterCities.find(c => c.id.toString() === assignedSelectedCity)?.name;
-            if(cityName) params.append('city', cityName);
-        }
+        if (assignedSelectedRegion !== 'all') params.append('region', assignedSelectedRegion);
+        if (assignedSelectedCity !== 'all') params.append('city', assignedSelectedCity);
     } else {
         if (unassignedSearchQuery) params.append('search', unassignedSearchQuery);
-        if (unassignedSelectedRegion !== 'all') {
-            const regionName = filterRegions.find(r => r.id.toString() === unassignedSelectedRegion)?.name;
-            if (regionName) params.append('region', regionName);
-        }
-        if (unassignedSelectedCity !== 'all') {
-            const cityName = unassignedFilterCities.find(c => c.id.toString() === unassignedSelectedCity)?.name;
-            if (cityName) params.append('city', cityName);
-        }
+        if (unassignedSelectedRegion !== 'all') params.append('region', unassignedSelectedRegion);
+        if (unassignedSelectedCity !== 'all') params.append('city', unassignedSelectedCity);
     }
 
     try {
@@ -167,7 +155,7 @@ export default function AgencySitesPage() {
     } finally {
         setIsLoading(false);
     }
-  }, [loggedInOrg, toast, assignedSearchQuery, selectedPatrollingOfficerFilter, assignedSelectedRegion, assignedSelectedCity, unassignedSearchQuery, unassignedSelectedRegion, unassignedSelectedCity, filterRegions, assignedFilterCities, unassignedFilterCities]);
+  }, [loggedInOrg, toast, assignedSearchQuery, selectedPatrollingOfficerFilter, assignedSelectedRegion, assignedSelectedCity, unassignedSearchQuery, unassignedSelectedRegion, unassignedSelectedCity]);
 
 
   const fetchSupportingData = useCallback(async () => {
