@@ -398,6 +398,7 @@ export function IncidentsPageClient() {
                             size="sm"
                             onClick={() => handlePagination(prevUrl)}
                             disabled={!prevUrl || isLoading}
+                            className="w-20"
                         >
                             Previous
                         </Button>
@@ -407,6 +408,7 @@ export function IncidentsPageClient() {
                             size="sm"
                             onClick={() => handlePagination(nextUrl)}
                             disabled={!nextUrl || isLoading}
+                            className="w-20"
                         >
                             Next
                         </Button>

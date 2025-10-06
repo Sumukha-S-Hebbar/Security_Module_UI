@@ -739,7 +739,7 @@ export function SitesPageClient() {
                                 />
                             </div>
                             <DialogFooter>
-                                <Button type="submit" disabled={isAddingSite} className="bg-[#00B4D8] hover:bg-[#00B4D8]/90">
+                                <Button type="submit" disabled={isAddingSite} className="bg-[#00B4D8] hover:bg-[#00B4D8]/90 w-56">
                                 {isAddingSite ? (
                                     <>
                                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -997,6 +997,7 @@ export function SitesPageClient() {
                             size="sm"
                             onClick={() => handlePagination(activeTab === 'assigned' ? assignedPrevUrl! : unassignedPrevUrl!, activeTab as 'Assigned' | 'Unassigned')}
                             disabled={isLoading || (activeTab === 'assigned' ? !assignedPrevUrl : !unassignedPrevUrl)}
+                            className="w-20"
                         >
                             Previous
                         </Button>
@@ -1008,6 +1009,7 @@ export function SitesPageClient() {
                             size="sm"
                             onClick={() => handlePagination(activeTab === 'assigned' ? assignedNextUrl! : unassignedNextUrl!, activeTab as 'Assigned' | 'Unassigned')}
                             disabled={isLoading || (activeTab === 'assigned' ? !assignedNextUrl : !unassignedNextUrl)}
+                            className="w-20"
                         >
                             Next
                         </Button>

@@ -644,6 +644,7 @@ export default function AgencyGuardReportPage() {
                         size="sm"
                         onClick={() => handleIncidentPagination(paginatedIncidents.previous)}
                         disabled={!paginatedIncidents.previous}
+                        className="w-20"
                     >
                         Previous
                     </Button>
@@ -652,6 +653,7 @@ export default function AgencyGuardReportPage() {
                         size="sm"
                         onClick={() => handleIncidentPagination(paginatedIncidents.next)}
                         disabled={!paginatedIncidents.next}
+                        className="w-20"
                     >
                         Next
                     </Button>

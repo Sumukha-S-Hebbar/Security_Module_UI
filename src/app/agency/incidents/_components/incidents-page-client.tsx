@@ -366,6 +366,7 @@ export function IncidentsPageClient() {
                             size="sm"
                             onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                             disabled={currentPage === 1}
+                            className="w-20"
                         >
                             Previous
                         </Button>
@@ -375,6 +376,7 @@ export function IncidentsPageClient() {
                             size="sm"
                             onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                             disabled={currentPage === totalPages || totalPages === 0}
+                            className="w-20"
                         >
                             Next
                         </Button>

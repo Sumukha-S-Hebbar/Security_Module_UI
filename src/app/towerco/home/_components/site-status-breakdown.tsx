@@ -272,6 +272,7 @@ export function SiteStatusBreakdown({ siteStatusData }: { siteStatusData: SiteSt
                                 size="sm"
                                 onClick={() => selectedSection && handlePagination(selectedData?.previous || null, selectedSection)}
                                 disabled={!selectedData?.previous || isLoading}
+                                className="w-20"
                             >
                                 Previous
                             </Button>
@@ -280,6 +281,7 @@ export function SiteStatusBreakdown({ siteStatusData }: { siteStatusData: SiteSt
                                 size="sm"
                                 onClick={() => selectedSection && handlePagination(selectedData?.next || null, selectedSection)}
                                 disabled={!selectedData?.next || isLoading}
+                                className="w-20"
                             >
                                 Next
                             </Button>

@@ -321,6 +321,7 @@ export default function AgencyHomePage() {
                             size="sm"
                             onClick={() => handleIncidentPagination(activeIncidents.previous)}
                             disabled={!activeIncidents.previous || isIncidentsLoading}
+                            className="w-20"
                         >
                             Previous
                         </Button>
@@ -329,6 +330,7 @@ export default function AgencyHomePage() {
                             size="sm"
                             onClick={() => handleIncidentPagination(activeIncidents.next)}
                             disabled={!activeIncidents.next || isIncidentsLoading}
+                            className="w-20"
                         >
                             Next
                         </Button>

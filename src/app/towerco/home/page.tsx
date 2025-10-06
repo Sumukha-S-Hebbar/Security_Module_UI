@@ -91,6 +91,7 @@ export type SiteListItem = {
     tb_site_id: string;
     org_site_id: string;
     site_name: string;
+    city: string;
     region: string;
     agency_name?: string;
 };
@@ -338,6 +339,7 @@ function TowercoHomePageContent() {
                             size="sm"
                             onClick={() => handleIncidentPagination(activeIncidents.previous)}
                             disabled={!activeIncidents.previous || isIncidentsLoading}
+                            className="w-20"
                         >
                             Previous
                         </Button>
@@ -346,6 +348,7 @@ function TowercoHomePageContent() {
                             size="sm"
                             onClick={() => handleIncidentPagination(activeIncidents.next)}
                             disabled={!activeIncidents.next || isIncidentsLoading}
+                            className="w-20"
                         >
                             Next
                         </Button>

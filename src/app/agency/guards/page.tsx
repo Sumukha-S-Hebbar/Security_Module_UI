@@ -210,7 +210,7 @@ export default function AgencyGuardsPage() {
             fetchGuards('checked-out', 1);
         }
       }
-  }, [searchQuery, activeTab, loggedInOrg]);
+  }, [searchQuery, activeTab, loggedInOrg, fetchGuards]);
 
     const handlePagination = (direction: 'next' | 'prev') => {
         if (activeTab === 'checked-in') {
@@ -576,7 +576,7 @@ export default function AgencyGuardsPage() {
                                     />
                                 </div>
                                 <DialogFooter>
-                                    <Button type="submit" disabled={isAdding} className="bg-[#00B4D8] hover:bg-[#00B4D8]/90">
+                                    <Button type="submit" disabled={isAdding} className="bg-[#00B4D8] hover:bg-[#00B4D8]/90 w-56">
                                     {isAdding ? (
                                         <>
                                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -811,6 +811,7 @@ export default function AgencyGuardsPage() {
                             size="sm"
                             onClick={() => handlePagination('prev')}
                             disabled={isLoading || (activeTab === 'checked-in' ? checkedInCurrentPage === 1 : checkedOutCurrentPage === 1)}
+                            className="w-20"
                         >
                             Previous
                         </Button>
@@ -822,6 +823,7 @@ export default function AgencyGuardsPage() {
                             size="sm"
                             onClick={() => handlePagination('next')}
                             disabled={isLoading || (activeTab === 'checked-in' ? checkedInCurrentPage >= totalCheckedInPages : checkedOutCurrentPage >= totalCheckedOutPages)}
+                            className="w-20"
                         >
                             Next
                         </Button>
