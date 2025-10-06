@@ -532,7 +532,7 @@ export default function AgencyReportPage() {
               </div>
               <div className="flex items-center gap-2">
                 <Select value={performanceSelectedYear} onValueChange={setPerformanceSelectedYear}>
-                    <SelectTrigger className="w-[120px] font-medium hover:bg-accent hover:text-accent-foreground">
+                    <SelectTrigger className="w-full sm:w-[120px] font-medium hover:bg-accent hover:text-accent-foreground">
                     <SelectValue placeholder="Select Year" />
                     </SelectTrigger>
                     <SelectContent>
@@ -545,7 +545,7 @@ export default function AgencyReportPage() {
                     </SelectContent>
                 </Select>
                 <Select value={performanceSelectedMonth} onValueChange={setPerformanceSelectedMonth}>
-                    <SelectTrigger className="w-[140px] font-medium hover:bg-accent hover:text-accent-foreground">
+                    <SelectTrigger className="w-full sm:w-[140px] font-medium hover:bg-accent hover:text-accent-foreground">
                     <SelectValue placeholder="Select Month" />
                     </SelectTrigger>
                     <SelectContent>
@@ -726,7 +726,7 @@ export default function AgencyReportPage() {
             </div>
             <div className="flex items-center gap-2 flex-shrink-0">
               <Select value={incidentsStatusFilter} onValueChange={setIncidentsStatusFilter}>
-                  <SelectTrigger className="w-[180px] font-medium hover:bg-accent hover:text-accent-foreground">
+                  <SelectTrigger className="w-full sm:w-[180px] font-medium hover:bg-accent hover:text-accent-foreground">
                       <SelectValue placeholder="Filter by status" />
                   </SelectTrigger>
                   <SelectContent>
@@ -737,7 +737,7 @@ export default function AgencyReportPage() {
                   </SelectContent>
               </Select>
               <Select value={incidentsYearFilter} onValueChange={setIncidentsYearFilter}>
-                <SelectTrigger className="w-[120px] font-medium hover:bg-accent hover:text-accent-foreground">
+                <SelectTrigger className="w-full sm:w-[120px] font-medium hover:bg-accent hover:text-accent-foreground">
                   <SelectValue placeholder="Select Year" />
                 </SelectTrigger>
                 <SelectContent>
@@ -750,7 +750,7 @@ export default function AgencyReportPage() {
                 </SelectContent>
               </Select>
               <Select value={incidentsMonthFilter} onValueChange={setIncidentsMonthFilter}>
-                <SelectTrigger className="w-[140px] font-medium hover:bg-accent hover:text-accent-foreground">
+                <SelectTrigger className="w-full sm:w-[140px] font-medium hover:bg-accent hover:text-accent-foreground">
                   <SelectValue placeholder="Select Month" />
                 </SelectTrigger>
                 <SelectContent>

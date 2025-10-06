@@ -997,7 +997,6 @@ export function SitesPageClient() {
                             size="sm"
                             onClick={() => handlePagination(activeTab === 'assigned' ? assignedPrevUrl! : unassignedPrevUrl!, activeTab as 'Assigned' | 'Unassigned')}
                             disabled={isLoading || (activeTab === 'assigned' ? !assignedPrevUrl : !unassignedPrevUrl)}
-                            className="w-20"
                         >
                             Previous
                         </Button>
@@ -1009,7 +1008,6 @@ export function SitesPageClient() {
                             size="sm"
                             onClick={() => handlePagination(activeTab === 'assigned' ? assignedNextUrl! : unassignedNextUrl!, activeTab as 'Assigned' | 'Unassigned')}
                             disabled={isLoading || (activeTab === 'assigned' ? !assignedNextUrl : !unassignedNextUrl)}
-                            className="w-20"
                         >
                             Next
                         </Button>

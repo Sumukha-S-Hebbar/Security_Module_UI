@@ -450,7 +450,7 @@ export default function AgencySiteReportPage() {
                 <CardDescription>A monthly breakdown of incidents reported at {site_name}.</CardDescription>
             </div>
             <Select value={selectedChartYear} onValueChange={setSelectedChartYear}>
-                <SelectTrigger className="w-[120px] font-medium hover:bg-accent hover:text-accent-foreground">
+                <SelectTrigger className="w-full sm:w-[120px] font-medium hover:bg-accent hover:text-accent-foreground">
                     <SelectValue placeholder="Select Year" />
                 </SelectTrigger>
                 <SelectContent>
@@ -485,7 +485,7 @@ export default function AgencySiteReportPage() {
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
             <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-                <SelectTrigger className="w-[180px] font-medium hover:bg-accent hover:text-accent-foreground">
+                <SelectTrigger className="w-full sm:w-[180px] font-medium hover:bg-accent hover:text-accent-foreground">
                     <SelectValue placeholder="Filter by status" />
                 </SelectTrigger>
                 <SelectContent>
@@ -497,7 +497,7 @@ export default function AgencySiteReportPage() {
             </Select>
             {availableYears.length > 0 && (
               <Select value={selectedYear} onValueChange={setSelectedYear}>
-                <SelectTrigger className="w-[120px] font-medium hover:bg-accent hover:text-accent-foreground">
+                <SelectTrigger className="w-full sm:w-[120px] font-medium hover:bg-accent hover:text-accent-foreground">
                   <SelectValue placeholder="Select Year" />
                 </SelectTrigger>
                 <SelectContent>
@@ -511,7 +511,7 @@ export default function AgencySiteReportPage() {
               </Select>
             )}
             <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-              <SelectTrigger className="w-[140px] font-medium hover:bg-accent hover:text-accent-foreground">
+              <SelectTrigger className="w-full sm:w-[140px] font-medium hover:bg-accent hover:text-accent-foreground">
                 <SelectValue placeholder="Select Month" />
               </SelectTrigger>
               <SelectContent>
