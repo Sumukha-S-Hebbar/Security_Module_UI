@@ -100,7 +100,10 @@ type AssignedSiteDetail = {
 
 export default function TowercoAgenciesPage() {
     const [securityAgencies, setSecurityAgencies] = useState<SecurityAgency[]>([]);
-    const [allRegions, setAllRegions] = useState<string[]>([]);
+    const [filterRegions, setFilterRegions] = useState<ApiRegion[]>([]);
+    const [filterCities, setFilterCities] = useState<ApiCity[]>([]);
+    const [isFilterCitiesLoading, setIsFilterCitiesLoading] = useState(false);
+
     const [isLoading, setIsLoading] = useState(true);
     const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
     const [isAddAgencyDialogOpen, setIsAddAgencyDialogOpen] = useState(false);
@@ -149,8 +152,14 @@ export default function TowercoAgenciesPage() {
             page_size: ITEMS_PER_PAGE.toString(),
         });
         if (searchQuery) params.append('search', searchQuery);
-        if (selectedRegion !== 'all') params.append('region', selectedRegion);
-        if (selectedCity !== 'all') params.append('city', selectedCity);
+        if (selectedRegion !== 'all') {
+             const regionName = filterRegions.find(r => r.id.toString() === selectedRegion)?.name;
+             if(regionName) params.append('region', regionName);
+        }
+        if (selectedCity !== 'all') {
+            const cityName = filterCities.find(c => c.id.toString() === selectedCity)?.name;
+            if(cityName) params.append('city', cityName);
+        }
 
         try {
             const response = await fetchData<PaginatedAgenciesResponse>(`/security/api/orgs/${orgCode}/security-agencies/list/?${params.toString()}`, token);
@@ -161,22 +170,58 @@ export default function TowercoAgenciesPage() {
             setNextUrl(response?.next || null);
             setPrevUrl(response?.previous || null);
 
-            // Fetch all regions for filter dropdown only once
-            if (allRegions.length === 0) {
-                const allAgenciesResponse = await fetchData<PaginatedAgenciesResponse>(`/security/api/orgs/${orgCode}/security-agencies/list/`, token);
-                if (allAgenciesResponse?.results) {
-                    const uniqueRegions = [...new Set(allAgenciesResponse.results.map(agency => agency.region))];
-                    setAllRegions(uniqueRegions.sort());
-                }
-            }
-
         } catch (error) {
             console.error("Failed to fetch agencies:", error);
             toast({ variant: 'destructive', title: 'Error', description: 'Could not load security agencies.' });
         } finally {
             setIsLoading(false);
         }
-    }, [loggedInOrg, searchQuery, selectedRegion, selectedCity, toast, allRegions.length]);
+    }, [loggedInOrg, searchQuery, selectedRegion, selectedCity, toast, filterRegions, filterCities]);
+    
+    useEffect(() => {
+      async function fetchFilterRegions() {
+          if (!loggedInUser || !loggedInUser.country) return;
+          const token = localStorage.getItem('token');
+          const countryId = loggedInUser.country.id;
+          const url = `/security/api/regions/?country=${countryId}`;
+          try {
+              const data = await fetchData<{ regions: ApiRegion[] }>(url, token || undefined);
+              setFilterRegions(data?.regions || []);
+          } catch (error) {
+              console.error("Failed to fetch regions for filters:", error);
+          }
+      }
+      fetchFilterRegions();
+    }, [loggedInUser]);
+    
+    useEffect(() => {
+        async function fetchFilterCities() {
+            if (selectedRegion === 'all' || !loggedInUser || !loggedInUser.country) {
+                setFilterCities([]);
+                return;
+            }
+            setIsFilterCitiesLoading(true);
+            const token = localStorage.getItem('token');
+            const countryId = loggedInUser.country.id;
+            const url = `/security/api/cities/?country=${countryId}&region=${selectedRegion}`;
+            try {
+                const data = await fetchData<{ cities: ApiCity[] }>(url, token || undefined);
+                setFilterCities(data?.cities || []);
+            } catch (error) {
+                console.error("Failed to fetch cities for filters:", error);
+                setFilterCities([]);
+            } finally {
+                setIsFilterCitiesLoading(false);
+            }
+        }
+        fetchFilterCities();
+    }, [selectedRegion, loggedInUser]);
+
+    const handleRegionChange = (regionId: string) => {
+        setSelectedRegion(regionId);
+        setSelectedCity('all'); // Reset city when region changes
+    };
+
 
     const handlePagination = useCallback(async (url: string | null) => {
         if (!url || !loggedInOrg) return;
@@ -362,19 +407,6 @@ export default function TowercoAgenciesPage() {
         });
     }
 
-    const cities = useMemo(() => {
-        if (selectedRegion === 'all' || allRegions.length === 0) return [];
-        // This should ideally use the full list of agencies, but for now this is ok
-        // For a more robust solution, we'd fetch all regions/cities once at the start
-        const allAgenciesEverFetchedForFilters = securityAgencies; // simplified
-        return [...new Set(allAgenciesEverFetchedForFilters.filter((agency) => agency.region === selectedRegion).map((agency) => agency.city))].sort();
-    }, [selectedRegion, securityAgencies, allRegions]);
-
-    const handleRegionChange = (region: string) => {
-        setSelectedRegion(region);
-        setSelectedCity('all');
-    };
-    
     const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
     
     const handleRowClick = (e: React.MouseEvent, agencyId: number) => {
@@ -659,9 +691,9 @@ export default function TowercoAgenciesPage() {
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="all" className="font-medium">All Regions</SelectItem>
-                                {allRegions.map((region) => (
-                                <SelectItem key={region} value={region}>
-                                    {region}
+                                {filterRegions.map((region) => (
+                                <SelectItem key={region.id} value={region.id.toString()}>
+                                    {region.name}
                                 </SelectItem>
                                 ))}
                             </SelectContent>
@@ -669,16 +701,16 @@ export default function TowercoAgenciesPage() {
                         <Select
                             value={selectedCity}
                             onValueChange={setSelectedCity}
-                            disabled={selectedRegion === 'all'}
+                            disabled={selectedRegion === 'all' || isFilterCitiesLoading}
                         >
                             <SelectTrigger className="w-full sm:w-[180px] font-medium hover:bg-accent hover:text-accent-foreground">
-                                <SelectValue placeholder="Filter by city" />
+                                <SelectValue placeholder={isFilterCitiesLoading ? 'Loading...' : 'Filter by city'} />
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="all" className="font-medium">All Cities</SelectItem>
-                                {cities.map((city) => (
-                                <SelectItem key={city} value={city}>
-                                    {city}
+                                {filterCities.map((city) => (
+                                <SelectItem key={city.id} value={city.id.toString()}>
+                                    {city.name}
                                 </SelectItem>
                                 ))}
                             </SelectContent>
@@ -800,7 +832,3 @@ export default function TowercoAgenciesPage() {
         </div>
     );
 }
-
-    
-
-    

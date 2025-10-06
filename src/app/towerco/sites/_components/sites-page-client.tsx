@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
@@ -127,6 +126,12 @@ export function SitesPageClient() {
   const [unassignedNextUrl, setUnassignedNextUrl] = useState<string | null>(null);
   const [unassignedPrevUrl, setUnassignedPrevUrl] = useState<string | null>(null);
 
+  const [filterRegions, setFilterRegions] = useState<ApiRegion[]>([]);
+  const [assignedFilterCities, setAssignedFilterCities] = useState<ApiCity[]>([]);
+  const [unassignedFilterCities, setUnassignedFilterCities] = useState<ApiCity[]>([]);
+  const [isAssignedCitiesLoading, setIsAssignedCitiesLoading] = useState(false);
+  const [isUnassignedCitiesLoading, setIsUnassignedCitiesLoading] = useState(false);
+
 
   // State for assignment and dialogs
   const [assignment, setAssignment] = useState<{ [siteId: string]: { agencyId?: string; guards?: string } }>({});
@@ -191,15 +196,26 @@ export function SitesPageClient() {
         page_size: ITEMS_PER_PAGE.toString(),
     });
 
-    // Add filters based on status
     if (status === 'Assigned') {
         if (assignedSearchQuery) params.append('search', assignedSearchQuery);
-        if (assignedSelectedRegion !== 'all') params.append('region', assignedSelectedRegion);
-        if (assignedSelectedCity !== 'all') params.append('city', assignedSelectedCity);
+        if (assignedSelectedRegion !== 'all') {
+            const regionName = filterRegions.find(r => r.id.toString() === assignedSelectedRegion)?.name;
+            if (regionName) params.append('region', regionName);
+        }
+        if (assignedSelectedCity !== 'all') {
+            const cityName = assignedFilterCities.find(c => c.id.toString() === assignedSelectedCity)?.name;
+            if (cityName) params.append('city', cityName);
+        }
     } else {
         if (unassignedSearchQuery) params.append('search', unassignedSearchQuery);
-        if (unassignedSelectedRegion !== 'all') params.append('region', unassignedSelectedRegion);
-        if (unassignedSelectedCity !== 'all') params.append('city', unassignedSelectedCity);
+        if (unassignedSelectedRegion !== 'all') {
+            const regionName = filterRegions.find(r => r.id.toString() === unassignedSelectedRegion)?.name;
+            if (regionName) params.append('region', regionName);
+        }
+        if (unassignedSelectedCity !== 'all') {
+            const cityName = unassignedFilterCities.find(c => c.id.toString() === unassignedSelectedCity)?.name;
+            if (cityName) params.append('city', cityName);
+        }
     }
 
     try {
@@ -224,7 +240,7 @@ export function SitesPageClient() {
     } finally {
         setIsLoading(false);
     }
-  }, [loggedInOrg, toast, assignedSearchQuery, assignedSelectedRegion, assignedSelectedCity, unassignedSearchQuery, unassignedSelectedRegion, unassignedSelectedCity]);
+  }, [loggedInOrg, toast, assignedSearchQuery, assignedSelectedRegion, assignedSelectedCity, unassignedSearchQuery, unassignedSelectedRegion, unassignedSelectedCity, filterRegions, assignedFilterCities, unassignedFilterCities]);
 
   const handlePagination = useCallback(async (url: string, status: 'Assigned' | 'Unassigned') => {
     if (!loggedInOrg || !url) return;
@@ -259,6 +275,51 @@ export function SitesPageClient() {
     }
   }, [loggedInOrg, toast]);
 
+    useEffect(() => {
+        async function fetchFilterRegions() {
+            if (!loggedInUser || !loggedInUser.country) return;
+            const token = localStorage.getItem('token');
+            const countryId = loggedInUser.country.id;
+            const url = `/security/api/regions/?country=${countryId}`;
+            try {
+                const data = await fetchData<{ regions: ApiRegion[] }>(url, token || undefined);
+                setFilterRegions(data?.regions || []);
+            } catch (error) {
+                console.error("Failed to fetch regions for filters:", error);
+            }
+        }
+        fetchFilterRegions();
+    }, [loggedInUser]);
+
+    useEffect(() => {
+        async function fetchCitiesForFilter(regionId: string, setCities: React.Dispatch<React.SetStateAction<ApiCity[]>>, setLoading: React.Dispatch<React.SetStateAction<boolean>>) {
+            if (regionId === 'all' || !loggedInUser || !loggedInUser.country) {
+                setCities([]);
+                return;
+            }
+            setLoading(true);
+            const token = localStorage.getItem('token');
+            const countryId = loggedInUser.country.id;
+            const url = `/security/api/cities/?country=${countryId}&region=${regionId}`;
+            try {
+                const data = await fetchData<{ cities: ApiCity[] }>(url, token || undefined);
+                setCities(data?.cities || []);
+            } catch (error) {
+                console.error("Failed to fetch cities for filters:", error);
+                setCities([]);
+            } finally {
+                setLoading(false);
+            }
+        }
+        
+        if(activeTab === 'assigned') {
+            fetchCitiesForFilter(assignedSelectedRegion, setAssignedFilterCities, setIsAssignedCitiesLoading);
+        } else {
+            fetchCitiesForFilter(unassignedSelectedRegion, setUnassignedFilterCities, setIsUnassignedCitiesLoading);
+        }
+
+    }, [assignedSelectedRegion, unassignedSelectedRegion, activeTab, loggedInUser]);
+
 
   useEffect(() => {
     if (loggedInOrg) {
@@ -276,13 +337,12 @@ export function SitesPageClient() {
     }
   }, [loggedInOrg, activeTab, fetchSites, assignedCurrentPage, unassignedCurrentPage]);
 
-  // Reset page number on filter change
   useEffect(() => setAssignedCurrentPage(1), [assignedSearchQuery, assignedSelectedRegion, assignedSelectedCity]);
   useEffect(() => setUnassignedCurrentPage(1), [unassignedSearchQuery, unassignedSelectedRegion, unassignedSelectedCity]);
 
 
   useEffect(() => {
-      async function fetchRegions() {
+      async function fetchRegionsForForm() {
           if (!loggedInUser || !loggedInUser.country || !isAddSiteDialogOpen) return;
 
           const token = localStorage.getItem('token') || undefined;
@@ -301,11 +361,11 @@ export function SitesPageClient() {
               });
           }
       }
-      fetchRegions();
+      fetchRegionsForForm();
   }, [loggedInUser, isAddSiteDialogOpen, toast]);
 
   useEffect(() => {
-      async function fetchCities() {
+      async function fetchCitiesForForm() {
           if (!watchedRegion || !loggedInUser || !loggedInUser.country) {
               setApiCities([]);
               return;
@@ -334,7 +394,7 @@ export function SitesPageClient() {
 
       addSiteForm.resetField('city');
       if (watchedRegion) {
-        fetchCities();
+        fetchCitiesForForm();
       }
   }, [watchedRegion, loggedInUser, toast, addSiteForm]);
 
@@ -351,19 +411,6 @@ export function SitesPageClient() {
         }
     }
   }, [focusSite, isLoading, activeTab]);
-
-  const assignedRegions = useMemo(() => [...new Set(assignedSites.map((site) => site.region))].sort(), [assignedSites]);
-  const assignedCities = useMemo(() => {
-    if (assignedSelectedRegion === 'all') return [];
-    return [...new Set(assignedSites.filter((site) => site.region === assignedSelectedRegion).map((site) => site.city))].sort();
-  }, [assignedSelectedRegion, assignedSites]);
-
-  const unassignedRegions = useMemo(() => [...new Set(unassignedSites.map((site) => site.region))].sort(), [unassignedSites]);
-  const unassignedCities = useMemo(() => {
-    if (unassignedSelectedRegion === 'all') return [];
-    return [...new Set(unassignedSites.filter((site) => site.region === unassignedSelectedRegion).map((site) => site.city))].sort();
-  }, [unassignedSelectedRegion, unassignedSites]);
-
 
   const handleAssignedRegionChange = (region: string) => {
     setAssignedSelectedRegion(region);
@@ -783,22 +830,22 @@ export function SitesPageClient() {
                         </SelectTrigger>
                         <SelectContent>
                             <SelectItem value="all" className="font-medium">All Regions</SelectItem>
-                            {assignedRegions.map((region) => (
-                            <SelectItem key={region} value={region} className="font-medium">
-                                {region}
+                            {filterRegions.map((region) => (
+                            <SelectItem key={region.id} value={region.id.toString()} className="font-medium">
+                                {region.name}
                             </SelectItem>
                             ))}
                         </SelectContent>
                     </Select>
-                    <Select value={assignedSelectedCity} onValueChange={setAssignedSelectedCity} disabled={assignedSelectedRegion === 'all'}>
+                    <Select value={assignedSelectedCity} onValueChange={setAssignedSelectedCity} disabled={assignedSelectedRegion === 'all' || isAssignedCitiesLoading}>
                         <SelectTrigger className="w-full sm:w-[180px] font-medium hover:bg-accent hover:text-accent-foreground">
-                            <SelectValue placeholder="Filter by city" />
+                            <SelectValue placeholder={isAssignedCitiesLoading ? "Loading..." : "Filter by city"} />
                         </SelectTrigger>
                         <SelectContent>
                             <SelectItem value="all" className="font-medium">All Cities</SelectItem>
-                            {assignedCities.map((city) => (
-                            <SelectItem key={city} value={city} className="font-medium">
-                                {city}
+                            {assignedFilterCities.map((city) => (
+                            <SelectItem key={city.id} value={city.id.toString()} className="font-medium">
+                                {city.name}
                             </SelectItem>
                             ))}
                         </SelectContent>
@@ -817,30 +864,30 @@ export function SitesPageClient() {
                     />
                     </div>
                     <Select value={unassignedSelectedRegion} onValueChange={handleUnassignedRegionChange}>
-                    <SelectTrigger className="w-full sm:w-[180px] font-medium hover:bg-accent hover:text-accent-foreground">
-                        <SelectValue placeholder="Filter by region" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="all" className="font-medium">All Regions</SelectItem>
-                        {unassignedRegions.map((region) => (
-                        <SelectItem key={region} value={region} className="font-medium">
-                            {region}
-                        </SelectItem>
-                        ))}
-                    </SelectContent>
+                        <SelectTrigger className="w-full sm:w-[180px] font-medium hover:bg-accent hover:text-accent-foreground">
+                            <SelectValue placeholder="Filter by region" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all" className="font-medium">All Regions</SelectItem>
+                            {filterRegions.map((region) => (
+                                <SelectItem key={region.id} value={region.id.toString()} className="font-medium">
+                                    {region.name}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
                     </Select>
-                    <Select value={unassignedSelectedCity} onValueChange={setUnassignedSelectedCity} disabled={unassignedSelectedRegion === 'all'}>
-                    <SelectTrigger className="w-full sm:w-[180px] font-medium hover:bg-accent hover:text-accent-foreground">
-                        <SelectValue placeholder="Filter by city" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="all" className="font-medium">All Cities</SelectItem>
-                        {unassignedCities.map((city) => (
-                        <SelectItem key={city} value={city} className="font-medium">
-                            {city}
-                        </SelectItem>
-                        ))}
-                    </SelectContent>
+                    <Select value={unassignedSelectedCity} onValueChange={setUnassignedSelectedCity} disabled={unassignedSelectedRegion === 'all' || isUnassignedCitiesLoading}>
+                        <SelectTrigger className="w-full sm:w-[180px] font-medium hover:bg-accent hover:text-accent-foreground">
+                            <SelectValue placeholder={isUnassignedCitiesLoading ? "Loading..." : "Filter by city"} />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all" className="font-medium">All Cities</SelectItem>
+                            {unassignedFilterCities.map((city) => (
+                                <SelectItem key={city.id} value={city.id.toString()} className="font-medium">
+                                    {city.name}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
                     </Select>
                 </div>
             )}
@@ -997,6 +1044,7 @@ export function SitesPageClient() {
                             size="sm"
                             onClick={() => handlePagination(activeTab === 'assigned' ? assignedPrevUrl! : unassignedPrevUrl!, activeTab as 'Assigned' | 'Unassigned')}
                             disabled={isLoading || (activeTab === 'assigned' ? !assignedPrevUrl : !unassignedPrevUrl)}
+                            className="w-20"
                         >
                             Previous
                         </Button>
@@ -1008,6 +1056,7 @@ export function SitesPageClient() {
                             size="sm"
                             onClick={() => handlePagination(activeTab === 'assigned' ? assignedNextUrl! : unassignedNextUrl!, activeTab as 'Assigned' | 'Unassigned')}
                             disabled={isLoading || (activeTab === 'assigned' ? !assignedNextUrl : !unassignedNextUrl)}
+                            className="w-20"
                         >
                             Next
                         </Button>
@@ -1020,7 +1069,3 @@ export function SitesPageClient() {
     </div>
   );
 }
-
-    
-
-    
