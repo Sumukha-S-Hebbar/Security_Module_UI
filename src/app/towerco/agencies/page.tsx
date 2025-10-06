@@ -252,7 +252,11 @@ export default function TowercoAgenciesPage() {
     
     useEffect(() => {
         setCurrentPage(1);
-    }, [searchQuery, selectedRegion, selectedCity]);
+        if (loggedInOrg) {
+            fetchAllAgencies(1);
+        }
+    }, [searchQuery, selectedRegion, selectedCity, loggedInOrg, fetchAllAgencies]);
+
 
     const uploadForm = useForm<z.infer<typeof uploadFormSchema>>({
         resolver: zodResolver(uploadFormSchema),
@@ -829,4 +833,4 @@ export default function TowercoAgenciesPage() {
             </Card>
         </div>
     );
-
+}
