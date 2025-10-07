@@ -184,11 +184,13 @@ export default function AgencySiteReportPage() {
   }, [toast]);
 
   const availableYears = useMemo(() => {
-    if (!reportData) return [];
+    if (!reportData?.incidents?.results) return [];
     const years = new Set(
       reportData.incidents.results.map((incident: any) => new Date(incident.incident_time).getFullYear().toString())
     );
-    if (years.size > 0) years.add(new Date().getFullYear().toString());
+     if (years.size > 0 || !years.has(new Date().getFullYear().toString())) {
+        years.add(new Date().getFullYear().toString());
+    }
     return Array.from(years).sort((a, b) => parseInt(b) - parseInt(a));
   }, [reportData]);
 
@@ -361,7 +363,7 @@ export default function AgencySiteReportPage() {
                   <Fence className="h-5 w-5 mt-0.5 text-primary" />
                   <div>
                     <p className="font-semibold">Geofence Perimeter</p>
-                    <p className="font-medium">{reportData.geofence_perimeter ? `${reportData.geofence_perimeter} meters` : 'Not set'}</p>
+                    <p className="font-medium">{reportData.geofence_perimeter ? `${reportData.geofence_perimeter.toFixed(0)} meters` : 'Not set'}</p>
                   </div>
                 </div>
                  <div className="flex items-start gap-3">
@@ -582,6 +584,7 @@ export default function AgencySiteReportPage() {
                       size="sm"
                       onClick={() => handleIncidentPagination(paginatedIncidents.previous)}
                       disabled={!paginatedIncidents.previous}
+                      className="w-20"
                   >
                       Previous
                   </Button>
@@ -590,6 +593,7 @@ export default function AgencySiteReportPage() {
                       size="sm"
                       onClick={() => handleIncidentPagination(paginatedIncidents.next)}
                       disabled={!paginatedIncidents.next}
+                      className="w-20"
                   >
                       Next
                   </Button>

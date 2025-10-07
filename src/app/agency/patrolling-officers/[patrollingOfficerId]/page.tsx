@@ -63,6 +63,8 @@ type OfficerReportData = {
     site_visit_accuracy: string;
     assigned_sites: {
         site_id: number;
+        tb_site_id: string;
+        org_site_id: string;
         site_name: string;
         address: string;
         total_incidents: number;
@@ -76,7 +78,7 @@ type OfficerReportData = {
             phone: string;
         }[];
     }[];
-    incidents: PaginatedIncidents;
+    incidents: PaginatedIncidents | null;
 };
 
 
@@ -187,11 +189,13 @@ export default function AgencyPatrollingOfficerReportPage() {
   }, [toast]);
 
   const availableYears = useMemo(() => {
-    if (!reportData) return [];
+    if (!reportData?.incidents?.results) return [];
     const years = new Set(
       reportData.incidents.results.map((incident) => new Date(incident.incident_time).getFullYear().toString())
     );
-    if (years.size > 0) years.add(new Date().getFullYear().toString());
+    if (years.size > 0 || !years.has(new Date().getFullYear().toString())) {
+        years.add(new Date().getFullYear().toString());
+    }
     return Array.from(years).sort((a, b) => parseInt(b) - parseInt(a));
   }, [reportData]);
   
@@ -488,6 +492,7 @@ export default function AgencyPatrollingOfficerReportPage() {
                 <Table>
                     <TableHeader>
                         <TableRow>
+                            <TableHead>Towerbuddy ID</TableHead>
                             <TableHead>Site ID</TableHead>
                             <TableHead>Site Name</TableHead>
                             <TableHead>Address</TableHead>
@@ -504,7 +509,12 @@ export default function AgencyPatrollingOfficerReportPage() {
                               <Fragment key={site.site_id}>
                                 <TableRow className="hover:bg-accent hover:text-accent-foreground group">
                                     <TableCell>
-                                        <span className="font-medium">{site.site_id}</span>
+                                      <Button asChild variant="link" className="p-0 h-auto text-accent font-semibold group-hover:text-accent-foreground hover:underline" onClick={(e) => e.stopPropagation()}>
+                                        <Link href={`/agency/sites/${site.site_id}`}>{site.tb_site_id}</Link>
+                                      </Button>
+                                    </TableCell>
+                                    <TableCell>
+                                        <span className="font-medium">{site.org_site_id}</span>
                                     </TableCell>
                                     <TableCell className="font-medium">{site.site_name}</TableCell>
                                     <TableCell className="font-medium">{site.address}</TableCell>
@@ -535,7 +545,7 @@ export default function AgencyPatrollingOfficerReportPage() {
                                 </TableRow>
                                 {isExpanded && (
                                   <TableRow className="bg-muted/50 hover:bg-muted/50">
-                                      <TableCell colSpan={6} className="p-0">
+                                      <TableCell colSpan={7} className="p-0">
                                           <div className="p-4">
                                               <Table>
                                                   <TableHeader>
@@ -690,6 +700,7 @@ export default function AgencyPatrollingOfficerReportPage() {
                       size="sm"
                       onClick={() => handleIncidentPagination(paginatedIncidents.previous)}
                       disabled={!paginatedIncidents.previous}
+                      className="w-20"
                   >
                       Previous
                   </Button>
@@ -698,6 +709,7 @@ export default function AgencyPatrollingOfficerReportPage() {
                       size="sm"
                       onClick={() => handleIncidentPagination(paginatedIncidents.next)}
                       disabled={!paginatedIncidents.next}
+                      className="w-20"
                   >
                       Next
                   </Button>
