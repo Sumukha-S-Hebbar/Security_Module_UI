@@ -189,7 +189,7 @@ export default function AgencyPatrollingOfficerReportPage() {
   }, [toast]);
 
   const availableYears = useMemo(() => {
-    if (!reportData?.incidents?.results) return [];
+    if (!reportData || !reportData.incidents) return [];
     const years = new Set(
       reportData.incidents.results.map((incident) => new Date(incident.incident_time).getFullYear().toString())
     );
