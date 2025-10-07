@@ -62,7 +62,7 @@ type OfficerReportData = {
     average_response_time: string;
     site_visit_accuracy: string;
     assigned_sites: {
-        site_id: number;
+        id: number;
         tb_site_id: string;
         org_site_id: string;
         site_name: string;
@@ -503,14 +503,14 @@ export default function AgencyPatrollingOfficerReportPage() {
                     </TableHeader>
                     <TableBody>
                         {reportData.assigned_sites.map(site => {
-                            const isExpanded = expandedSiteId === site.site_id;
+                            const isExpanded = expandedSiteId === site.id;
 
                             return (
-                              <Fragment key={site.site_id}>
+                              <Fragment key={site.id}>
                                 <TableRow className="hover:bg-accent hover:text-accent-foreground group">
                                     <TableCell>
                                       <Button asChild variant="link" className="p-0 h-auto text-accent font-semibold group-hover:text-accent-foreground hover:underline" onClick={(e) => e.stopPropagation()}>
-                                        <Link href={`/agency/sites/${site.site_id}`}>{site.tb_site_id}</Link>
+                                        <Link href={`/agency/sites/${site.id}`}>{site.tb_site_id}</Link>
                                       </Button>
                                     </TableCell>
                                     <TableCell>
@@ -522,7 +522,7 @@ export default function AgencyPatrollingOfficerReportPage() {
                                        <Button
                                         variant="link"
                                         className="p-0 h-auto flex items-center gap-2 text-accent group-hover:text-accent-foreground"
-                                        onClick={(e) => handleExpandClick(e, site.site_id)}
+                                        onClick={(e) => handleExpandClick(e, site.id)}
                                         disabled={site.guards_count === 0}
                                       >
                                         <Users className="h-4 w-4" />
@@ -721,3 +721,5 @@ export default function AgencyPatrollingOfficerReportPage() {
     </div>
   );
 }
+
+    
