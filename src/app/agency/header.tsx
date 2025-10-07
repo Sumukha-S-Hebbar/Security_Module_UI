@@ -62,7 +62,7 @@ export default function AgencyHeader() {
         <div className="flex items-center gap-6 flex-1">
           <Link href="/agency/home" className="flex items-center gap-2 text-header-foreground">
             <ShieldCheck className="w-8 h-8" />
-            <span className="text-xl font-bold">GuardLink</span>
+            <span className="text-xl font-bold">Secure Buddy</span>
           </Link>
         </div>
         
@@ -90,7 +90,7 @@ export default function AgencyHeader() {
                      <div className="flex items-center gap-2 p-4 border-b border-white/10">
                         <ShieldCheck className="w-8 h-8" />
                         <div>
-                            <h1 className="text-xl font-bold">GuardLink</h1>
+                            <h1 className="text-xl font-bold">Secure Buddy</h1>
                             <p className="text-xs">Agency Portal</p>
                         </div>
                     </div>

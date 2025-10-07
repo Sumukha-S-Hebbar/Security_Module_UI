@@ -12,7 +12,7 @@ const ibmPlexSans = IBM_Plex_Sans({
 
 export const metadata: Metadata = {
   title: 'Secure Buddy',
-  description: 'Patrolling officer dashboard for GuardLink security management.',
+  description: 'Patrolling officer dashboard for Secure Buddy security management.',
 };
 
 export default function RootLayout({
