@@ -211,7 +211,7 @@ export default function AgencyGuardsPage() {
             fetchGuards('checked-out', 1);
         }
       }
-  }, [searchQuery, activeTab, loggedInOrg, fetchGuards]);
+  }, [searchQuery, activeTab, loggedInOrg]);
 
     const handlePagination = (direction: 'next' | 'prev') => {
         if (activeTab === 'checked-in') {
@@ -616,7 +616,7 @@ export default function AgencyGuardsPage() {
                                                         {apiCities.map(city => (
                                                             <SelectItem key={city.id} value={city.id.toString()}>
                                                                 {city.name}
-                                                            SelectItem>
+                                                            </SelectItem>
                                                         ))}
                                                     </SelectContent>
                                                 </Select>
@@ -886,4 +886,3 @@ export default function AgencyGuardsPage() {
     </>
   );
 }
-
