@@ -131,6 +131,7 @@ export default function AgencyGuardsPage() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
+  const [isRequestingSelfie, setIsRequestingSelfie] = useState(false);
   
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('checked-in');
@@ -368,6 +369,55 @@ export default function AgencyGuardsPage() {
     });
   }
 
+  const handleRequestRandomSelfie = async () => {
+    if (!loggedInOrg) {
+      toast({ variant: 'destructive', title: 'Error', description: 'Organization info not available.' });
+      return;
+    }
+    setIsRequestingSelfie(true);
+    const token = localStorage.getItem('token');
+    const API_URL = `${process.env.NEXT_PUBLIC_DJANGO_API_URL}/security/api/agency/${loggedInOrg.code}/random_selfie/send_to_all/`;
+
+    try {
+      const response = await fetch(API_URL, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Token ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const responseData = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(responseData.detail || 'Failed to send selfie requests.');
+      }
+
+      if (responseData.request_ids && responseData.request_ids.length > 0) {
+        toast({
+          title: 'Success',
+          description: responseData.message,
+        });
+      } else {
+        toast({
+          variant: 'default',
+          title: 'Info',
+          description: responseData.message || "No guards available for selfie requests.",
+        });
+      }
+
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Request Failed',
+        description: error.message || 'An unexpected error occurred.',
+      });
+    } finally {
+      setIsRequestingSelfie(false);
+    }
+  };
+
+
   return (
     <>
       <div className="p-4 sm:p-6 lg:p-8 space-y-6">
@@ -566,7 +616,7 @@ export default function AgencyGuardsPage() {
                                                         {apiCities.map(city => (
                                                             <SelectItem key={city.id} value={city.id.toString()}>
                                                                 {city.name}
-                                                            </SelectItem>
+                                                            SelectItem>
                                                         ))}
                                                     </SelectContent>
                                                 </Select>
@@ -602,9 +652,9 @@ export default function AgencyGuardsPage() {
                 <CardDescription className="font-medium">Filter and view guards based on their check-in status.</CardDescription>
               </div>
                {activeTab === 'checked-in' && (
-                 <Button className="bg-destructive hover:bg-destructive/90">
-                    <Camera className="mr-2 h-4 w-4" />
-                    Request Random Selfie Check-in
+                 <Button className="bg-destructive hover:bg-destructive/90" onClick={handleRequestRandomSelfie} disabled={isRequestingSelfie}>
+                    {isRequestingSelfie ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Camera className="mr-2 h-4 w-4" />}
+                    {isRequestingSelfie ? 'Requesting...' : 'Request Random Selfie Check-in'}
                  </Button>
                )}
             </div>
@@ -836,3 +886,4 @@ export default function AgencyGuardsPage() {
     </>
   );
 }
+
