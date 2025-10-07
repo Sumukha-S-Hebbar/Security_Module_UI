@@ -163,10 +163,6 @@ export default function RootPage() {
           <ul className="space-y-4 text-lg">
             <li className="flex items-center gap-3">
               <CheckIcon className="w-6 h-6" />
-              <span className='font-medium'>It's Secure & Free</span>
-            </li>
-            <li className="flex items-center gap-3">
-              <CheckIcon className="w-6 h-6" />
               <span className='font-medium'>One Platform For Everyone</span>
             </li>
             <li className="flex items-center gap-3">
@@ -309,7 +305,7 @@ export default function RootPage() {
                             htmlFor="terms"
                             className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-blue-600 hover:underline"
                         >
-                            Terms & Conditions
+                            Terms &amp; Conditions
                         </label>
                     </div>
                 </CardContent>
