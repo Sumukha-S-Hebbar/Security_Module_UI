@@ -822,7 +822,11 @@ export default function AgencyReportPage() {
                         <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => fetchIncidents(paginatedIncidents.previous)}
+                            onClick={() => {
+                                if(paginatedIncidents.previous) {
+                                    fetchIncidents(paginatedIncidents.previous)
+                                }
+                            }}
                             disabled={!paginatedIncidents.previous}
                         >
                             Previous
@@ -830,7 +834,11 @@ export default function AgencyReportPage() {
                         <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => fetchIncidents(paginatedIncidents.next)}
+                            onClick={() => {
+                                if(paginatedIncidents.next) {
+                                    fetchIncidents(paginatedIncidents.next)
+                                }
+                            }}
                             disabled={!paginatedIncidents.next}
                         >
                             Next
