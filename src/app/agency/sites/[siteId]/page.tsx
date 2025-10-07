@@ -60,6 +60,7 @@ type SiteReportData = {
     site_zip_code: string;
     region: string;
     city: string;
+    geofence_perimeter: number | null;
     total_incidents_count: number;
     resolved_incidents_count: number;
     guard_details: {
@@ -360,7 +361,7 @@ export default function AgencySiteReportPage() {
                   <Fence className="h-5 w-5 mt-0.5 text-primary" />
                   <div>
                     <p className="font-semibold">Geofence Perimeter</p>
-                    <p className="font-medium">Not set</p>
+                    <p className="font-medium">{reportData.geofence_perimeter ? `${reportData.geofence_perimeter} meters` : 'Not set'}</p>
                   </div>
                 </div>
                  <div className="flex items-start gap-3">
