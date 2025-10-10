@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import {
@@ -49,6 +49,32 @@ export default function RootPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showPasswordUp, setShowPasswordUp] = useState(false);
   const [showConfirmPasswordUp, setShowConfirmPasswordUp] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('token');
+      const userData = localStorage.getItem('user');
+
+      if (token && userData) {
+        try {
+          const user: User = JSON.parse(userData);
+          // Redirect based on the user's role
+          const userRole = user.role;
+          if (userRole === 'T' || userRole === 'O') {
+            router.push('/towerco/home');
+          } else if (userRole === 'SA' || userRole === 'SG') {
+            router.push('/agency/home');
+          }
+        } catch (error) {
+          console.error("Failed to parse user data from localStorage", error);
+          // Clear potentially corrupted data
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          localStorage.removeItem('organization');
+        }
+      }
+    }
+  }, [router]);
 
 
   const handleSignIn = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -161,10 +187,6 @@ export default function RootPage() {
           </div>
           <h2 className="text-2xl font-bold mb-6">WHY SIGN UP?</h2>
           <ul className="space-y-4 text-lg">
-            <li className="flex items-center gap-3">
-              <CheckIcon className="w-6 h-6" />
-              <span className='font-medium'>One Platform For Everyone</span>
-            </li>
             <li className="flex items-center gap-3">
               <CheckIcon className="w-6 h-6" />
               <span className='font-medium'>Centralized Resource Management</span>
