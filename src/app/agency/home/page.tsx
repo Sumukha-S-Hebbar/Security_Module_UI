@@ -96,10 +96,10 @@ interface AgencyDashboardData {
 }
 
 async function getDashboardData(org: Organization, token?: string, url?: string): Promise<AgencyDashboardData | null> {
-  const fetchUrl = url || `/security/api/agency/${org.code}/agency-dashboard/`;
+  const fetchUrl = url || `/agency/${org.code}/agency-dashboard/`;
   
   try {
-      const baseUrl = process.env.NEXT_PUBLIC_DJANGO_API_URL || 'http://are.towerbuddy.tel:8000';
+      const baseUrl = process.env.NEXT_PUBLIC_DJANGO_API_URL || 'http://are.towerbuddy.tel:8000/security/api';
       const fullUrl = fetchUrl.startsWith('http') ? fetchUrl : `${baseUrl}${fetchUrl}`;
       
       const response = await fetch(fullUrl, {

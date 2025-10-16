@@ -170,7 +170,7 @@ function TowercoHomePageContent() {
     if (org) {
       const token = localStorage.getItem('token') || undefined;
       const getDashboardData = async () => {
-        let url = `/security/api/orgs/${org.code}/security-dashboard/`;
+        let url = `/orgs/${org.code}/security-dashboard/`;
         try {
           const dashboardData = await fetchData<DashboardData>(url, token);
           setData(dashboardData);

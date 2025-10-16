@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
@@ -212,7 +211,7 @@ export default function AgencyReportPage() {
 
     let fetchUrl = url;
     if (!fetchUrl) {
-      const baseUrl = `/security/api/orgs/${loggedInOrg.code}/incidents/list/`;
+      const baseUrl = `/orgs/${loggedInOrg.code}/incidents/list/`;
       const queryParams = new URLSearchParams();
       queryParams.append('agency_name', reportData.name);
 
@@ -249,7 +248,7 @@ export default function AgencyReportPage() {
           const token = localStorage.getItem('token') || undefined;
           const orgCode = loggedInOrg.code;
           
-          let url = `/security/api/orgs/${orgCode}/security-agencies/${agencyId}/`;
+          let url = `/orgs/${orgCode}/security-agencies/${agencyId}/`;
           
           const queryParams = new URLSearchParams();
           if (performanceSelectedYear !== 'all') queryParams.append('year', performanceSelectedYear);

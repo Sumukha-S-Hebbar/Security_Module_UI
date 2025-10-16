@@ -87,7 +87,7 @@ type ApiCity = {
 
 async function fetchData<T>(url: string, token: string | undefined): Promise<T | null> {
     try {
-        const baseUrl = process.env.NEXT_PUBLIC_DJANGO_API_URL || 'http://are.towerbuddy.tel:8000';
+        const baseUrl = process.env.NEXT_PUBLIC_DJANGO_API_URL || 'http://are.towerbuddy.tel:8000/security/api';
         const fullUrl = url.startsWith('http') ? url : `${baseUrl}${url}`;
         
         const response = await fetch(fullUrl, {
@@ -172,7 +172,7 @@ export default function AgencyGuardsPage() {
     });
     if (searchQuery) params.append('search', searchQuery);
 
-    const url = `/security/api/agency/${orgCode}/guards/list/?check_in_status=${checkInStatus}&${params.toString()}`;
+    const url = `/agency/${orgCode}/guards/list/?check_in_status=${checkInStatus}&${params.toString()}`;
 
     try {
         const response = await fetchData<PaginatedGuardsResponse>(url, token);
@@ -211,7 +211,7 @@ export default function AgencyGuardsPage() {
             fetchGuards('checked-out', 1);
         }
       }
-  }, [searchQuery, activeTab, loggedInOrg]);
+  }, [searchQuery, activeTab, loggedInOrg, fetchGuards]);
 
     const handlePagination = (direction: 'next' | 'prev') => {
         if (activeTab === 'checked-in') {
@@ -242,7 +242,7 @@ export default function AgencyGuardsPage() {
       }
       const token = localStorage.getItem('token') || undefined;
       const countryId = loggedInUser.country.id;
-      const url = `/security/api/regions/?country=${countryId}`;
+      const url = `/regions/?country=${countryId}`;
       try {
         const data = await fetchData<{ regions: ApiRegion[] }>(url, token);
         setApiRegions(data?.regions || []);
@@ -267,7 +267,7 @@ export default function AgencyGuardsPage() {
           setIsCitiesLoading(true);
           const token = localStorage.getItem('token') || undefined;
           const countryId = loggedInUser.country.id;
-          const url = `/security/api/cities/?country=${countryId}&region=${watchedRegion}`;
+          const url = `/cities/?country=${countryId}&region=${watchedRegion}`;
 
           try {
               const data = await fetchData<{ cities: ApiCity[] }>(url, token);
@@ -317,7 +317,7 @@ export default function AgencyGuardsPage() {
     }
 
     const token = localStorage.getItem('token');
-    const API_URL = `${process.env.NEXT_PUBLIC_DJANGO_API_URL}/security/api/agency/${loggedInOrg.code}/guards/add/`;
+    const API_URL = `${process.env.NEXT_PUBLIC_DJANGO_API_URL}/agency/${loggedInOrg.code}/guards/add/`;
 
     const payload = {
         ...values,
@@ -376,7 +376,7 @@ export default function AgencyGuardsPage() {
     }
     setIsRequestingSelfie(true);
     const token = localStorage.getItem('token');
-    const API_URL = `${process.env.NEXT_PUBLIC_DJANGO_API_URL}/security/api/agency/${loggedInOrg.code}/random_selfie/send_to_all/`;
+    const API_URL = `${process.env.NEXT_PUBLIC_DJANGO_API_URL}/agency/${loggedInOrg.code}/random_selfie/send_to_all/`;
 
     try {
       const response = await fetch(API_URL, {

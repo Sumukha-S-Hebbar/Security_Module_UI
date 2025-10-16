@@ -160,7 +160,7 @@ export default function TowercoAgenciesPage() {
         }
 
         try {
-            const response = await fetchData<PaginatedAgenciesResponse>(`/security/api/orgs/${orgCode}/security-agencies/list/?${params.toString()}`, token);
+            const response = await fetchData<PaginatedAgenciesResponse>(`/orgs/${orgCode}/security-agencies/list/?${params.toString()}`, token);
             
             const fetchedAgencies = response?.results || [];
             setSecurityAgencies(fetchedAgencies);
@@ -181,7 +181,7 @@ export default function TowercoAgenciesPage() {
           if (!loggedInUser || !loggedInUser.country) return;
           const token = localStorage.getItem('token');
           const countryId = loggedInUser.country.id;
-          const url = `/security/api/regions/?country=${countryId}`;
+          const url = `/regions/?country=${countryId}`;
           try {
               const data = await fetchData<{ regions: ApiRegion[] }>(url, token || undefined);
               setFilterRegions(data?.regions || []);
@@ -201,7 +201,7 @@ export default function TowercoAgenciesPage() {
             setIsFilterCitiesLoading(true);
             const token = localStorage.getItem('token');
             const countryId = loggedInUser.country.id;
-            const url = `/security/api/cities/?country=${countryId}&region=${selectedRegion}`;
+            const url = `/cities/?country=${countryId}&region=${selectedRegion}`;
             try {
                 const data = await fetchData<{ cities: ApiCity[] }>(url, token || undefined);
                 setFilterCities(data?.cities || []);
@@ -233,7 +233,8 @@ export default function TowercoAgenciesPage() {
             setNextUrl(response?.next || null);
             setPrevUrl(response?.previous || null);
             
-            const pageParam = new URL(url).searchParams.get('page');
+            const urlObject = new URL(url);
+            const pageParam = urlObject.searchParams.get('page');
             setCurrentPage(pageParam ? parseInt(pageParam) : 1);
         } catch (error) {
             toast({ variant: 'destructive', title: 'Error', description: 'Failed to load page.' });
@@ -254,7 +255,7 @@ export default function TowercoAgenciesPage() {
         if (loggedInOrg) {
             fetchAllAgencies(1);
         }
-    }, [searchQuery, selectedRegion, selectedCity, loggedInOrg, fetchAllAgencies]);
+    }, [searchQuery, selectedRegion, selectedCity, loggedInOrg]);
 
 
     const uploadForm = useForm<z.infer<typeof uploadFormSchema>>({
@@ -284,7 +285,7 @@ export default function TowercoAgenciesPage() {
 
             const token = localStorage.getItem('token');
             const countryId = loggedInUser.country.id;
-            const url = `/security/api/regions/?country=${countryId}`;
+            const url = `/regions/?country=${countryId}`;
             
             try {
                 const data = await fetchData<{ regions: ApiRegion[] }>(url, token || undefined);
@@ -311,7 +312,7 @@ export default function TowercoAgenciesPage() {
             setIsCitiesLoading(true);
             const token = localStorage.getItem('token');
             const countryId = loggedInUser.country.id;
-            const url = `/security/api/cities/?country=${countryId}&region=${watchedRegion}`;
+            const url = `/cities/?country=${countryId}&region=${watchedRegion}`;
 
             try {
                 const data = await fetchData<{ cities: ApiCity[] }>(url, token || undefined);
@@ -359,7 +360,7 @@ export default function TowercoAgenciesPage() {
         const token = localStorage.getItem('token');
 
         try {
-            const API_URL = `${process.env.NEXT_PUBLIC_DJANGO_API_URL}/security/api/orgs/${loggedInOrg.code}/security-agencies/add/`;
+            const API_URL = `${process.env.NEXT_PUBLIC_DJANGO_API_URL}/orgs/${loggedInOrg.code}/security-agencies/add/`;
             const response = await fetch(API_URL, {
                 method: 'POST',
                 headers: {

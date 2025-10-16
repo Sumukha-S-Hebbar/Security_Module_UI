@@ -109,7 +109,7 @@ export function IncidentsPageClient() {
     const fetchSupportingData = async () => {
         const token = localStorage.getItem('token') || undefined;
         
-        const sitesUrl = `/security/api/agency/${loggedInOrg.code}/sites/list/`;
+        const sitesUrl = `/agency/${loggedInOrg.code}/sites/list/`;
         const sitesData = await fetchData<{results: Site[]}>(sitesUrl, token);
         setSites(sitesData?.results || []);
     };
@@ -144,7 +144,7 @@ export function IncidentsPageClient() {
       if (selectedYear !== 'all') params.append('year', selectedYear);
       if (selectedMonth !== 'all') params.append('month', selectedMonth);
       
-      const url = `/security/api/agency/${loggedInOrg.code}/incidents/list/?${params.toString()}`;
+      const url = `/agency/${loggedInOrg.code}/incidents/list/?${params.toString()}`;
 
       try {
         const data = await fetchData<PaginatedIncidentsResponse>(url, token);

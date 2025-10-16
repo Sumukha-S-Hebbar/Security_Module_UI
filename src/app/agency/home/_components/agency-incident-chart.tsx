@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
@@ -137,7 +136,7 @@ export function AgencyIncidentChart({
         month: month.toString(),
     });
     
-    const url = `/security/api/agency/${orgCode}/incidents/list/?${params.toString()}`;
+    const url = `/agency/${orgCode}/incidents/list/?${params.toString()}`;
 
     try {
         const data = await fetchData<PaginatedIncidentsResponse>(url, token);

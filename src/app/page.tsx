@@ -86,7 +86,7 @@ export default function RootPage() {
         throw new Error('Username and password are required.');
       }
 
-      const API_URL = `${process.env.NEXT_PUBLIC_DJANGO_API_URL}/security/api/users/auth/token/`;
+      const API_URL = `${process.env.NEXT_PUBLIC_DJANGO_API_URL}/users/auth/token/`;
 
       const response = await fetch(API_URL, {
         method: 'POST',

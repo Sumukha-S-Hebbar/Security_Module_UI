@@ -173,7 +173,7 @@ export function SitesPageClient() {
     if (!loggedInOrg) return;
     const token = localStorage.getItem('token') || undefined;
     try {
-        const agenciesResponse = await fetchData<{results: SecurityAgency[]}>(`/security/api/orgs/${loggedInOrg.code}/security-agencies/list`, token);
+        const agenciesResponse = await fetchData<{results: SecurityAgency[]}>(`/orgs/${loggedInOrg.code}/security-agencies/list`, token);
         setAllAgencies(agenciesResponse?.results || []);
     } catch (error) {
         toast({
@@ -207,7 +207,7 @@ export function SitesPageClient() {
     }
 
     try {
-        const response = await fetchData<PaginatedSitesResponse>(`/security/api/orgs/${loggedInOrg.code}/sites/list/?${params.toString()}`, token);
+        const response = await fetchData<PaginatedSitesResponse>(`/orgs/${loggedInOrg.code}/sites/list/?${params.toString()}`, token);
         if (status === 'Assigned') {
             setAssignedSites(response?.results || []);
             setAssignedSitesCount(response?.count || 0);
@@ -268,7 +268,7 @@ export function SitesPageClient() {
             if (!loggedInUser || !loggedInUser.country) return;
             const token = localStorage.getItem('token');
             const countryId = loggedInUser.country.id;
-            const url = `/security/api/regions/?country=${countryId}`;
+            const url = `/regions/?country=${countryId}`;
             try {
                 const data = await fetchData<{ regions: ApiRegion[] }>(url, token || undefined);
                 setFilterRegions(data?.regions || []);
@@ -288,7 +288,7 @@ export function SitesPageClient() {
             setLoading(true);
             const token = localStorage.getItem('token');
             const countryId = loggedInUser.country.id;
-            const url = `/security/api/cities/?country=${countryId}&region=${regionId}`;
+            const url = `/cities/?country=${countryId}&region=${regionId}`;
             try {
                 const data = await fetchData<{ cities: ApiCity[] }>(url, token || undefined);
                 setCities(data?.cities || []);
@@ -335,7 +335,7 @@ export function SitesPageClient() {
 
           const token = localStorage.getItem('token') || undefined;
           const countryId = loggedInUser.country.id;
-          const url = `/security/api/regions/?country=${countryId}`;
+          const url = `/regions/?country=${countryId}`;
           
           try {
               const data = await fetchData<{ regions: ApiRegion[] }>(url, token);
@@ -362,7 +362,7 @@ export function SitesPageClient() {
           setIsCitiesLoading(true);
           const token = localStorage.getItem('token') || undefined;
           const countryId = loggedInUser.country.id;
-          const url = `/security/api/cities/?country=${countryId}&region=${watchedRegion}`;
+          const url = `/cities/?country=${countryId}&region=${watchedRegion}`;
 
           try {
               const data = await fetchData<{ cities: ApiCity[] }>(url, token);
@@ -443,7 +443,7 @@ export function SitesPageClient() {
     }
     
     const token = localStorage.getItem('token');
-    const API_URL = `${process.env.NEXT_PUBLIC_DJANGO_API_URL}/security/api/orgs/${loggedInOrg.code}/sites/${siteId}/assign-agency/`;
+    const API_URL = `${process.env.NEXT_PUBLIC_DJANGO_API_URL}/orgs/${loggedInOrg.code}/sites/${siteId}/assign-agency/`;
 
     try {
         const response = await fetch(API_URL, {
@@ -487,7 +487,7 @@ export function SitesPageClient() {
     }
     setIsAddingSite(true);
     const token = localStorage.getItem('token');
-    const API_URL = `${process.env.NEXT_PUBLIC_DJANGO_API_URL}/security/api/orgs/${loggedInOrg.code}/sites/add/`;
+    const API_URL = `${process.env.NEXT_PUBLIC_DJANGO_API_URL}/orgs/${loggedInOrg.code}/sites/add/`;
 
     try {
         const response = await fetch(API_URL, {
@@ -1057,4 +1057,3 @@ export function SitesPageClient() {
     </div>
   );
 }
-

@@ -133,7 +133,7 @@ export function IncidentChart({
       params.append('agency_name', selectedAgency);
     }
     
-    const url = `/security/api/orgs/${orgCode}/incidents/list/?${params.toString()}`;
+    const url = `/orgs/${orgCode}/incidents/list/?${params.toString()}`;
 
     try {
         const data = await fetchData<PaginatedIncidentsResponse>(url, token);

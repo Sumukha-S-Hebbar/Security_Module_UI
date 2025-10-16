@@ -131,7 +131,7 @@ export default function AgencyIncidentReportPage() {
     const fetchIncident = async () => {
         setIsLoading(true);
         const token = localStorage.getItem('token') || undefined;
-        const url = `/security/api/agency/${loggedInOrg.code}/incident/${incidentId}/`;
+        const url = `/agency/${loggedInOrg.code}/incident/${incidentId}/`;
 
         try {
             const response = await fetchData<{data: IncidentDetails}>(url, token);
@@ -215,7 +215,7 @@ export default function AgencyIncidentReportPage() {
         }
     }
     
-    const API_URL = `${process.env.NEXT_PUBLIC_DJANGO_API_URL}/security/api/agency/${loggedInOrg.code}/incident/${incident.id}/`;
+    const API_URL = `${process.env.NEXT_PUBLIC_DJANGO_API_URL}/agency/${loggedInOrg.code}/incident/${incident.id}/`;
 
     try {
         const response = await fetch(API_URL, {

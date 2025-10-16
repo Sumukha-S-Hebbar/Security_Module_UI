@@ -119,7 +119,7 @@ export function IncidentsPageClient() {
     const fetchSupportingData = async () => {
         const token = localStorage.getItem('token') || undefined;
         // Fetch sites for the filter dropdown
-        const sitesUrl = `/security/api/orgs/${loggedInOrg.code}/sites/list/`;
+        const sitesUrl = `/orgs/${loggedInOrg.code}/sites/list/`;
         const sitesData = await fetchData<{results: Site[]}>(sitesUrl, token);
         setSites(sitesData?.results || []);
     };
@@ -154,7 +154,7 @@ export function IncidentsPageClient() {
       if (selectedYear !== 'all') params.append('year', selectedYear);
       if (selectedMonth !== 'all') params.append('month', selectedMonth);
       
-      const url = `/security/api/orgs/${loggedInOrg.code}/incidents/list/?${params.toString()}`;
+      const url = `/orgs/${loggedInOrg.code}/incidents/list/?${params.toString()}`;
 
       try {
         const data = await fetchData<PaginatedIncidentsResponse>(url, token);
@@ -188,7 +188,8 @@ export function IncidentsPageClient() {
       setNextUrl(data?.next || null);
       setPrevUrl(data?.previous || null);
       
-      const pageParam = new URL(url).searchParams.get('page');
+      const urlObject = new URL(url);
+      const pageParam = urlObject.searchParams.get('page');
       setCurrentPage(pageParam ? parseInt(pageParam) : 1);
     } catch (error) {
         console.error("Failed to fetch page:", error);

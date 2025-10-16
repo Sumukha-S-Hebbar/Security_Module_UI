@@ -77,7 +77,7 @@ export default function AgencyAccountPage() {
     const token = localStorage.getItem('token');
     
     try {
-        const API_URL = `${process.env.NEXT_PUBLIC_DJANGO_API_URL}/security/api/users/account/password/change/`;
+        const API_URL = `${process.env.NEXT_PUBLIC_DJANGO_API_URL}/users/account/password/change/`;
         const response = await fetch(API_URL, {
             method: 'POST',
             headers: {
@@ -196,7 +196,7 @@ export default function AgencyAccountPage() {
                 </div>
                 <div className="space-y-1">
                     <p className="text-muted-foreground font-medium">Designation</p>
-                    <p className="font-semibold">{agency.member?.designation || 'N/A'}</p>
+                    <p className="font-semibold">{agency.member?.designation || 'N-A'}</p>
                 </div>
                 <div className="space-y-1">
                     <p className="text-muted-foreground font-medium">Phone</p>

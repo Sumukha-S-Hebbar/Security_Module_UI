@@ -146,7 +146,7 @@ export default function AgencyPatrollingOfficersPage() {
         });
         if (searchQuery) params.append('search', searchQuery);
 
-        const url = `/security/api/agency/${loggedInOrg.code}/patrol_officers/list/?${params.toString()}`;
+        const url = `/agency/${loggedInOrg.code}/patrol_officers/list/?${params.toString()}`;
 
         try {
             const data = await fetchData<PaginatedPatrollingOfficers>(url, token || undefined);
@@ -210,7 +210,7 @@ export default function AgencyPatrollingOfficersPage() {
         }
         const token = localStorage.getItem('token');
         const countryId = loggedInUser.country.id;
-        const url = `/security/api/regions/?country=${countryId}`;
+        const url = `/regions/?country=${countryId}`;
         try {
             const data = await fetchData<{ regions: ApiRegion[] }>(url, token || undefined);
             setApiRegions(data?.regions || []);
@@ -235,7 +235,7 @@ export default function AgencyPatrollingOfficersPage() {
             setIsCitiesLoading(true);
             const token = localStorage.getItem('token');
             const countryId = loggedInUser.country.id;
-            const url = `/security/api/cities/?country=${countryId}&region=${watchedRegion}`;
+            const url = `/cities/?country=${countryId}&region=${watchedRegion}`;
 
             try {
                 const data = await fetchData<{ cities: ApiCity[] }>(url, token || undefined);
@@ -282,7 +282,7 @@ export default function AgencyPatrollingOfficersPage() {
         }
 
         const token = localStorage.getItem('token');
-        const API_URL = `${process.env.NEXT_PUBLIC_DJANGO_API_URL}/security/api/agency/${loggedInOrg.code}/patrol_officers/add/`;
+        const API_URL = `${process.env.NEXT_PUBLIC_DJANGO_API_URL}/agency/${loggedInOrg.code}/patrol_officers/add/`;
         
         const payload = {
             ...values,
@@ -708,4 +708,3 @@ export default function AgencyPatrollingOfficersPage() {
       </>
     );
 }
-
