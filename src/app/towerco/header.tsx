@@ -16,12 +16,13 @@ import {
   SheetClose,
 } from "@/components/ui/sheet";
 import { Button } from '@/components/ui/button';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { ModuleSwitcher } from '@/components/module-switcher';
 
 export default function TowercoHeader() {
   const pathname = usePathname();
+  const router = useRouter();
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
 
@@ -51,6 +52,15 @@ export default function TowercoHeader() {
     };
   }, [lastScrollY]);
 
+  const handleLogout = () => {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      localStorage.removeItem('organization');
+    }
+    router.push('/');
+  };
+
   return (
     <header className={cn(
       "bg-header text-header-foreground sticky top-0 z-50 transition-transform duration-300",
@@ -70,11 +80,9 @@ export default function TowercoHeader() {
         </nav>
 
         <div className="hidden md:flex items-center gap-2 justify-end flex-1">
-           <Button asChild variant="ghost" className="text-base text-header-foreground hover:text-header-foreground hover:bg-header-background/50">
-              <Link href="/">
-                <LogOut className="mr-2 h-5 w-5" />
-                <span>Logout</span>
-              </Link>
+           <Button onClick={handleLogout} variant="ghost" className="text-base text-header-foreground hover:text-header-foreground hover:bg-header-background/50">
+              <LogOut className="mr-2 h-5 w-5" />
+              <span>Logout</span>
             </Button>
         </div>
         
@@ -108,10 +116,10 @@ export default function TowercoHeader() {
                     </nav>
                     <div className="p-4 mt-auto border-t border-white/10">
                         <SheetClose asChild>
-                            <Link href="/" className="flex items-center gap-3 rounded-lg px-3 py-2 text-header-foreground transition-all hover:text-header-foreground/80">
+                            <Button onClick={handleLogout} className="flex items-center gap-3 rounded-lg px-3 py-2 text-header-foreground transition-all hover:text-header-foreground/80 w-full justify-start">
                                 <LogOut className="h-5 w-5" />
                                 Logout
-                            </Link>
+                            </Button>
                         </SheetClose>
                     </div>
                 </SheetContent>
