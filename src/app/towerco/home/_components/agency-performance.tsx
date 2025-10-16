@@ -35,8 +35,6 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import type { AgencyPerformanceData } from '../page';
-import { useDataFetching } from '@/hooks/useDataFetching';
-import type { Organization } from '@/types';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const chartConfig = {
@@ -58,63 +56,19 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-async function getAgencyPerformance(org: Organization | null, year?: string, month?: string): Promise<AgencyPerformanceData[] | null> {
-  if (!org) return null;
-  
-  let url = `${process.env.NEXT_PUBLIC_DJANGO_API_URL}/security/api/orgs/${org.code}/security-dashboard/`;
-  const token = localStorage.getItem('token');
-  
-  const queryParams = new URLSearchParams();
-  if (year && year !== 'all') {
-    queryParams.append('year', year);
-  }
-  if (month && month !== 'all') {
-    queryParams.append('month', month);
-  }
-  
-  const queryString = queryParams.toString();
-  if (queryString) {
-    url += `?${queryString}`;
-  }
 
-  if (!token) {
-    console.error("No auth token found");
-    return null;
-  }
-
-  try {
-    const response = await fetch(url, {
-      headers: { 'Authorization': `Token ${token}` }
-    });
-    if (!response.ok) {
-      throw new Error(`Failed to fetch dashboard data: ${response.statusText}`);
-    }
-    const data = await response.json();
-    return data.agency_performance || [];
-  } catch (error) {
-    console.error('Could not fetch agency performance data:', error);
-    return null;
-  }
-}
-
-export function AgencyPerformance() {
+export function AgencyPerformance({ performanceData }: { performanceData: AgencyPerformanceData[] | null }) {
   const router = useRouter();
-  const [org, setOrg] = useState<Organization | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   
   const [selectedYear, setSelectedYear] = useState<string>('all');
   const [selectedMonth, setSelectedMonth] = useState<string>('all');
 
   useEffect(() => {
-    const orgData = localStorage.getItem('organization');
-    if (orgData) {
-      setOrg(JSON.parse(orgData));
+    if (performanceData) {
+      setIsLoading(false);
     }
-  }, []);
-  
-  const { data: performanceData, isLoading } = useDataFetching<AgencyPerformanceData[] | null>(
-    () => getAgencyPerformance(org, selectedYear, selectedMonth),
-    [org, selectedYear, selectedMonth]
-  );
+  }, [performanceData]);
   
   const chartData = useMemo(() => {
     if (!performanceData) return [];

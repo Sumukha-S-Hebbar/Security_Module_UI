@@ -363,7 +363,7 @@ function TowercoHomePageContent() {
       />
       
       <SiteStatusBreakdown siteStatusData={data.site_status} />
-      <AgencyPerformance />
+      <AgencyPerformance performanceData={data.agency_performance} />
       <IncidentChart incidentTrend={data.incident_trend} agencies={data.agency_performance} orgCode={org.code.toString()} />
     </div>
   );
