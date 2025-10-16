@@ -146,7 +146,7 @@ export default function SiteReportPage() {
   
   useEffect(() => {
     if (loggedInOrg && siteId) {
-      const baseUrl = `/security/api/orgs/${loggedInOrg.code}/site/${siteId}/`;
+      const baseUrl = `/orgs/${loggedInOrg.code}/site/${siteId}/`;
       const params = new URLSearchParams();
 
       if (selectedYear !== 'all') params.append('year', selectedYear);
